@@ -1,0 +1,54 @@
+server:
+  port: 8010
+spring:
+  application:
+    name: apiGateway
+
+  sleuth:
+    sampler:
+      probability: 1.0
+    web:
+      skipPattern: "(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+zuul:
+  routes:
+    dataflow:
+      path: /dataflow/**
+      serviceId: dataflow
+      stripPrefix: false
+    dataset:
+      path: /dataset/**
+      serviceId: dataset
+      stripPrefix: false
+  retryable: true
+
+hystrix:
+  command:
+    service:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 20000
+    circuitBreaker:
+      requestVolumeThreshold: 4
+      errorThresholdPercentage: 50
+
+service:
+  ribbon:
+    ConnectTimeout: 1000
+    ReadTimeout: 2000
+    MaxTotalHttpConnections: 100
+    MaxConnectionsPerHost: 100
+    MaxAutoRetries: 0
+    MaxAutoRetriesNextServer: 2
+    ServerListRefreshInterval: 2000
+    OkToRetryOnAllOperations: true
+    retryableStatusCodes: 500,404

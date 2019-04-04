@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>reportnet</artifactId>
+    <groupId>org.eea</groupId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <properties>
+    <geotools.version>21.0</geotools.version>
+  </properties>
+
+
+  <artifactId>inspire-harvester</artifactId>
+  <version>3.0-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>com.rometools</groupId>
+      <artifactId>rome</artifactId>
+      <version>1.12.0</version>
+    </dependency>
+
+    <!--GEOTOOLS dependencies-->
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-gml</artifactId>
+      <version>2.5.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-main</artifactId>
+      <version>${geotools.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-shapefile</artifactId>
+      <version>${geotools.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools.ogc</groupId>
+      <artifactId>net.opengis.wfs</artifactId>
+      <version>${geotools.version}</version>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>Boundless</id>
+      <url>http://repo.boundlessgeo.com/main/</url>
+    </repository>
+    <repository>
+      <id>OsGeo</id>
+      <url>http://download.osgeo.org/webdav/geotools/</url>
+    </repository>
+  </repositories>
+</project>

@@ -1,0 +1,36 @@
+
+filebeat.inputs:
+
+
+- type: log
+
+ 
+  enabled: true
+
+ 
+  paths:
+    - /var/services/log/*.log
+ 
+filebeat.config.modules:
+ 
+  path: ${path.config}/modules.d/*.yml
+
+ 
+  reload.enabled: false
+
+ 
+
+setup.template.settings:
+  index.number_of_shards: 3
+ 
+setup.kibana:
+
+ 
+output.logstash:
+ 
+  hosts: ["172.30.239.1:5044"]
+
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
