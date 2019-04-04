@@ -13,11 +13,16 @@
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>
+    <!-- Comenetamos Ini -->
+
+<!--
     <dependency>
       <groupId>org.eea</groupId>
       <artifactId>kafka-interface-starter</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
+    
+-->
 
   </dependencies>
 </project>
