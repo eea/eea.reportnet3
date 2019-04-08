@@ -23,7 +23,7 @@ public class RecordStoreControllerImpl implements
   @RequestMapping(value = "/reset", method = RequestMethod.POST)
   public void resteDataSetDataBase() {
     try {
-      recordStoreService.createEmptyDataSet("");
+      recordStoreService.resetDatasetDatabase();
     } catch (DockerAccessException e) {
       e.printStackTrace();
     }
