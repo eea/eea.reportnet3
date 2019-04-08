@@ -2,6 +2,7 @@ package org.eea.recordstore.service;
 
 import com.github.dockerjava.api.model.Container;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -26,17 +27,15 @@ public interface DockerInterfaceService {
   Container createContainer(String containerName, String imageName, String portBinding);
 
 
-  /**
-   * Execute command inside container. Note: the command will be executed as /bin/bash -c
-   *
-   * @param command the command
-   * @param container the container
-   * @param timeToWait the time to wait
-   * @param unit the unit
-   */
-  void executeCommandInsideContainer(String command, Container container, Long timeToWait,
-      TimeUnit unit);
+  byte[] executeCommandInsideContainer(Container container, String... command)
+      throws InterruptedException;
 
+  /**
+   * Gets connection.
+   *
+   * @return the connection
+   */
+  List<String> getConnection();
 
   /**
    * Stop and remove container.

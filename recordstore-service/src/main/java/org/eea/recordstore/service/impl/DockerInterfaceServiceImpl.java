@@ -13,14 +13,20 @@ import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eea.recordstore.service.DockerInterfaceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
@@ -30,10 +36,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class DockerInterfaceServiceImpl implements DockerInterfaceService, Closeable {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DockerInterfaceServiceImpl.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   private final DockerClient dockerClient = DockerClientBuilder
       .getInstance("tcp://localhost:2375")
       .build();
 
+  private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
 
   @Override
   public Container createContainer(String containerName, String imageName, String portBinding) {
@@ -73,25 +83,79 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
 
   @Override
-  public void executeCommandInsideContainer(String command, Container container, Long timeToWait,
-      TimeUnit unit) {
-    ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(container.getId())
-        .withAttachStdout(true)
-        .withCmd(
-            //"export PGPASSWORD=root && psql -h localhost -U root -p 5432 -d datasets -c \"psql -h localhost -U root -p 5432 -d datasets -c \"create table \"dataset_1\".record(    id integer NOT NULL,    name \"char\",    CONSTRAINT record_pkey PRIMARY KEY (id))\"\""
+  public byte[] executeCommandInsideContainer(Container container, String... command)
+      throws InterruptedException {
+    OutputStream output = new ByteArrayOutputStream();
+    OutputStream errorOutput = new ByteArrayOutputStream();
+    /*
+    //"export PGPASSWORD=root && psql -h localhost -U root -p 5432 -d datasets -c \"psql -h localhost -U root -p 5432 -d datasets -c \"create table \"dataset_1\".record(    id integer NOT NULL,    name \"char\",    CONSTRAINT record_pkey PRIMARY KEY (id))\"\""
             "/bin/bash", "-c",
             // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql"
             //&& psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(    id integer NOT NULL,    name "char",    CONSTRAINT record_pkey PRIMARY KEY (id))"
+            command
+     */
+    ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(container.getId())
+        .withAttachStdout(true)
+        .withCmd(
             command)
         .withTty(true)
         .exec();
     ExecStartResultCallback result = null;//Esto sirve para gestión de eventos. Interesante
     result = dockerClient
         .execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
-        .exec(new ExecStartResultCallback(System.out,
-            System.err));//se puede redirigir salida de container al log. Mola
-    result.onComplete();
+        .exec(new ExecStartResultCallback(output, errorOutput)).awaitCompletion();
+    result.awaitCompletion().onComplete();
+    byte[] commandOutcome = ((ByteArrayOutputStream) output).toByteArray();
+    String outcomeOk = new String(commandOutcome);
+    String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
+    LOG.info(outcomeOk);
+    if (!"".equals(outcomeKo)) {
+      LOG_ERROR.error(outcomeKo);
+    }
 
+    return commandOutcome;
+
+  }
+
+  @Deprecated
+  @Override
+  public List<String> getConnection() {
+    Container container = getContainer("crunchy-postgres");
+    List<String> result = new ArrayList<>();
+    OutputStream output = new ByteArrayOutputStream();
+    OutputStream errorOutput = new ByteArrayOutputStream();
+    ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(container.getId())
+        .withAttachStdout(true)
+        .withCmd(
+
+            // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql"
+            //&& psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(    id integer NOT NULL,    name "char",    CONSTRAINT record_pkey PRIMARY KEY (id))"
+            "psql", "-h", "localhost", "-U", "root", "-p", "5432", "-d", "datasets", "-c",
+            "select * from pg_namespace where nspname like 'dataset%'")
+        .withTty(true)
+        .exec();
+    ExecStartResultCallback execResult = null;//Esto sirve para gestión de eventos. Interesante
+    execResult = dockerClient
+        .execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
+        .exec(new ExecStartResultCallback(output,
+            errorOutput));
+    try {
+      execResult.awaitCompletion().onComplete();
+
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    String outcomeOk = new String(((ByteArrayOutputStream) output).toByteArray());
+    String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
+    LOG.info(outcomeOk);
+    if (!"".equals(outcomeKo)) {
+      LOG_ERROR.error(outcomeKo);
+    }
+    Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(outcomeOk);
+    while (dataMatcher.find()) {
+      result.add(dataMatcher.group(0));
+    }
+    return result;
   }
 
   @Override

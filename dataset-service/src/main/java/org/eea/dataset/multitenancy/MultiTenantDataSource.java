@@ -1,0 +1,40 @@
+package org.eea.dataset.multitenancy;
+
+import java.util.Map;
+import javax.sql.DataSource;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+
+public class MultiTenantDataSource extends AbstractRoutingDataSource {
+
+  @Autowired
+  @Qualifier("targetDataSources")
+  private Map<Object, Object> dataSources;
+
+  @Override
+  protected Object determineCurrentLookupKey() {
+    return TenantResolver.getTenantName();
+  }
+
+  public void addDataSource(ConnectionDataVO connectionDataVO) {
+    dataSources.put(connectionDataVO.getSchema(), createDataSource(connectionDataVO));
+    synchronized (this) {
+      setTargetDataSources(dataSources);
+      afterPropertiesSet();
+    }
+  }
+
+  private DataSource createDataSource(ConnectionDataVO connectionDataVO) {
+    DriverManagerDataSource ds = new DriverManagerDataSource();
+    ds.setUrl(connectionDataVO.getConnectionString());
+    ds.setUsername(connectionDataVO.getUser());
+    ds.setPassword(connectionDataVO.getPassword());
+    ds.setDriverClassName("org.postgresql.Driver");
+    ds.setSchema(connectionDataVO.getSchema());
+
+    return ds;
+  }
+}
