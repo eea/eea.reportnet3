@@ -37,6 +37,13 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
+  /**
+   * Error handler data flow vo.
+   *
+   * @param id the id
+   *
+   * @return the data flow vo
+   */
   public DataFlowVO errorHandler(@PathVariable("id") String id) {
     DataFlowVO result = new DataFlowVO();
     result.setId("error");
