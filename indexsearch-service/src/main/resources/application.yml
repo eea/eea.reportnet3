@@ -1,0 +1,37 @@
+server:
+  port: 9030
+spring:
+  application:
+    name: indexsearch-service
+  cloud:
+    consul:
+      discovery:
+        instanceId: ${spring.application.name}:${random.value}
+  sleuth:
+    sampler:
+      probability: 1.0
+    web:
+      skipPattern: "(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        requestVolumeThreshold: 2
+        sleepWindowInMilliseconds: 10000

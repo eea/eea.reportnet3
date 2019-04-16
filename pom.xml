@@ -14,13 +14,16 @@
   <packaging>pom</packaging>
   <version>3.0-SNAPSHOT</version>
   <modules>
- 	<module>dataflow-service</module>
+    <module>dataflow-service</module>
     <module>dataset-service</module>
     <module>api-gateway</module>
     <module>inspire-harvester</module>
     <module>recordstore-service</module>
     <module>validation-service</module>
-    </modules>
+    <module>collaboration-service</module>
+    <module>communication-service</module>
+    <module>indexsearch-service</module>
+  </modules>
   <properties>
     <java.version>1.8</java.version>
     <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
