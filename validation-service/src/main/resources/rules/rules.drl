@@ -1,0 +1,16 @@
+package rules
+
+import org.eea.validation.model.Element
+
+rule "String Length"
+	when 
+		elementObject: Element(type=="texto")
+	then
+		elementObject.setLenght(15);
+	end
+rule "Number Length"
+	when 
+		elementObject: Element(type=="numero")
+	then
+		elementObject.setLenght(25);
+	end
