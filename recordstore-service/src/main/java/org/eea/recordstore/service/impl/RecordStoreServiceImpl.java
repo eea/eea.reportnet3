@@ -34,8 +34,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     //TODO REMOVE THIS PART, THIS IS ONLY FOR TESTING PURPOSES
     Container oldContainer = dockerInterfaceService.getContainer(
         "crunchy-postgres");
-
-    dockerInterfaceService.stopAndRemoveContainer(oldContainer);
+    if(null!=oldContainer) {
+      dockerInterfaceService.stopAndRemoveContainer(oldContainer);
+    }
     //TODO END REMOVE
 
     Container container = dockerInterfaceService

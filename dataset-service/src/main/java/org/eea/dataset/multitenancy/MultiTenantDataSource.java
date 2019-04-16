@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
+/**
+ * The type Multi tenant data source.
+ */
 public class MultiTenantDataSource extends AbstractRoutingDataSource {
 
   @Autowired
@@ -19,6 +22,11 @@ public class MultiTenantDataSource extends AbstractRoutingDataSource {
     return TenantResolver.getTenantName();
   }
 
+  /**
+   * Add data source.
+   *
+   * @param connectionDataVO the connection data vo
+   */
   public void addDataSource(ConnectionDataVO connectionDataVO) {
     dataSources.put(connectionDataVO.getSchema(), createDataSource(connectionDataVO));
     synchronized (this) {

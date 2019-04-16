@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
+import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.multitenancy.MultiTenantDataSource;
 import org.eea.dataset.persistence.domain.Record;
 import org.eea.dataset.persistence.repository.RecordRepository;
@@ -19,7 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+/**
+ * The type Dataset service.
+ */
+@Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -35,7 +39,7 @@ public class DatasetServiceImpl implements DatasetService {
   private DataSource multiTenantDataSource;
 
   @Override
-  public DataSetVO getDatasetById(String datasetId) throws Exception {
+  public DataSetVO getDatasetById(@DatasetId String datasetId)  {
     DataSetVO dataset = new DataSetVO();
     List<RecordVO> recordVOs = new ArrayList<>();
     LOG.info("devolviendo datos chulos {}", dataset);
@@ -59,7 +63,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   @Transactional
-  public void addRecordToDataset(String datasetId, List<RecordVO> records) {
+  public void addRecordToDataset(@DatasetId String datasetId, List<RecordVO> records) {
 
     for (RecordVO recordVO : records) {
       Record r = new Record();
