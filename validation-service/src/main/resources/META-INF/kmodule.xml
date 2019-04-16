@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<kmodule xmlns="http://jboss.org/kie/7.20.0.Final/kmodule">
-   <kbase name="rules">
-        <ksession name="rulesSession"/>
-    </kbase>
+<kmodule
+  xmlns="http://www.drools.org/xsd/kmodule"
+>
+  <kbase name="rules" packages="rules">
+    <ksession name="rulesSession"/>
+  </kbase>
 </kmodule>
