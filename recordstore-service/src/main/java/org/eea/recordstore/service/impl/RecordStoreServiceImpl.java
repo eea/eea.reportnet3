@@ -5,12 +5,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.exception.DockerAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
@@ -29,17 +34,20 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   private DockerInterfaceService dockerInterfaceService;
   private static final String CONTAINER_NAME = "crunchy-postgres";//hardCoded at the moment but it will be necessary to have a way to find it out
 
+  @Autowired
+  private KafkaSender kafkaSender;
+
   @Override
   public void resetDatasetDatabase() throws DockerAccessException {
     //TODO REMOVE THIS PART, THIS IS ONLY FOR TESTING PURPOSES
-    Container oldContainer = dockerInterfaceService.getContainer(
+    final Container oldContainer = dockerInterfaceService.getContainer(
         "crunchy-postgres");
-    if(null!=oldContainer) {
+    if (null != oldContainer) {
       dockerInterfaceService.stopAndRemoveContainer(oldContainer);
     }
     //TODO END REMOVE
 
-    Container container = dockerInterfaceService
+    final Container container = dockerInterfaceService
         .createContainer(CONTAINER_NAME, "crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1",
             "5432:5432");
 
@@ -54,7 +62,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       dockerInterfaceService.executeCommandInsideContainer(
           container, "/bin/bash", "-c",
           "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql ");
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
       throw new DockerAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
@@ -64,21 +72,22 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public ConnectionDataVO createEmptyDataSet(String datasetName) throws DockerAccessException {
+  public void createEmptyDataSet(final String datasetName)
+      throws DockerAccessException {
 //line to run a crunchy container
     //docker run -d -e PG_DATABASE=datasets -e PG_PRIMARY_PORT=5432 -e PG_MODE=primary -e PG_USER=root -e PG_PASSWORD=root -e PG_PRIMARY_USER=root -e PG_PRIMARY_PASSWORD=root
     // -e PG_ROOT_PASSWORD=root -e PGBACKREST=true -p 5432:5432 --name crunchy-postgres
     //crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1
-    Container container = dockerInterfaceService.getContainer(
+    final Container container = dockerInterfaceService.getContainer(
         "crunchy-postgres");
-    String fileName = "C:\\opt\\dump\\datasetInitCommands.txt";
-    List<String> commands = new ArrayList<>();
+    final String fileName = "C:\\opt\\dump\\datasetInitCommands.txt";
+    final List<String> commands = new ArrayList<>();
     //read file into stream, try-with-resources
-    try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+    try (final Stream<String> stream = Files.lines(Paths.get(fileName))) {
 
       stream.forEach(commands::add);
 
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
       throw new DockerAccessException(
           String
@@ -91,7 +100,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         dockerInterfaceService.executeCommandInsideContainer(
             container, "psql", "-h", "localhost", "-U", "root", "-p",
             "5432", "-d", "datasets", "-c", command);
-      } catch (InterruptedException e) {
+      } catch (final InterruptedException e) {
         LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
         throw new DockerAccessException(
             String
@@ -100,23 +109,30 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
       }
     }
-    return createConnectionDataVO(datasetName);
+
+    final EEAEventVO event = new EEAEventVO();
+    event.setEventType(EventType.CONNECTION_CREATED_EVENT);
+    final Map<String, Object> data = new HashMap<>();
+    data.put("connectionDataVO", createConnectionDataVO(datasetName));
+    event.setData(data);
+    kafkaSender.sendMessage(event);
 
   }
 
   @Override
-  public void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName) {
+  public void createDataSetFromOther(final String sourceDatasetName,
+      final String destinationDataSetName) {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
 
 
   }
 
   @Override
-  public ConnectionDataVO getConnectionDataForDataset(String datasetName)
+  public ConnectionDataVO getConnectionDataForDataset(final String datasetName)
       throws DockerAccessException {
-    List<String> datasets = getAllDataSetsName();
+    final List<String> datasets = getAllDataSetsName();
     ConnectionDataVO result = new ConnectionDataVO();
-    for (String dataset : datasets) {
+    for (final String dataset : datasets) {
 
       if (datasetName.equals(dataset)) {
         result = createConnectionDataVO(dataset);
@@ -128,10 +144,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
   @Override
   public List<ConnectionDataVO> getConnectionDataForDataset() throws DockerAccessException {
-    List<String> datasets = getAllDataSetsName();
-    List<ConnectionDataVO> result = new ArrayList<>();
-    for (String dataset : datasets) {
-      ConnectionDataVO connection = createConnectionDataVO(dataset);
+    final List<String> datasets = getAllDataSetsName();
+    final List<ConnectionDataVO> result = new ArrayList<>();
+    for (final String dataset : datasets) {
+      final ConnectionDataVO connection = createConnectionDataVO(dataset);
       result.add(connection);
     }
     return result;
@@ -139,24 +155,24 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   }
 
   private List<String> getAllDataSetsName() throws DockerAccessException {
-    List<String> datasets = new ArrayList<>();
-    Container container = dockerInterfaceService.getContainer(CONTAINER_NAME);
-    ConnectionDataVO connectionDataVO = new ConnectionDataVO();
+    final List<String> datasets = new ArrayList<>();
+    final Container container = dockerInterfaceService.getContainer(CONTAINER_NAME);
+    final ConnectionDataVO connectionDataVO = new ConnectionDataVO();
 
     try {
-      byte[] result = dockerInterfaceService
+      final byte[] result = dockerInterfaceService
           .executeCommandInsideContainer(container, "psql", "-h", "localhost", "-U", "root", "-p",
               "5432", "-d", "datasets", "-c",
               "select * from pg_namespace where nspname like 'dataset%'");
-      String outcome = new String(result);
+      final String outcome = new String(result);
       if (null != result && result.length > 0) {
-        Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(outcome);
+        final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(outcome);
         while (dataMatcher.find()) {
           datasets.add(dataMatcher.group(0));
 
         }
       }
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
       throw new DockerAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
@@ -166,8 +182,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     return datasets;
   }
 
-  private ConnectionDataVO createConnectionDataVO(String datasetName) {
-    ConnectionDataVO result = new ConnectionDataVO();
+  private static ConnectionDataVO createConnectionDataVO(final String datasetName) {
+    final ConnectionDataVO result = new ConnectionDataVO();
 
     result.setConnectionString(
         "jdbc:postgresql://localhost/datasets"); //TODO need to undo this hardcode

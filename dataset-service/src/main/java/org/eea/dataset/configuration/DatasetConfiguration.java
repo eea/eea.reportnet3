@@ -52,7 +52,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Primary
   public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
-    LocalContainerEntityManagerFactoryBean lfb = new LocalContainerEntityManagerFactoryBean();
+    final LocalContainerEntityManagerFactoryBean lfb = new LocalContainerEntityManagerFactoryBean();
     lfb.setDataSource(dataSource());
     lfb.setPackagesToScan("org.eea.dataset.persistence.domain");
     lfb.setJpaProperties(hibernateProps());
@@ -67,9 +67,8 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Bean
   public DataSource dataSource() {
-    AbstractRoutingDataSource ds = new MultiTenantDataSource();
+    final AbstractRoutingDataSource ds = new MultiTenantDataSource();
 
-//    ds.setDefaultTargetDataSource(dataSource("dataset_1"));
     ds.setTargetDataSources(targetDataSources());
     return ds;
   }
@@ -77,17 +76,17 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Qualifier("targetDataSources")
   public Map<Object, Object> targetDataSources() {
-    Map<Object, Object> targetDataSources = new ConcurrentHashMap<>();
+    final Map<Object, Object> targetDataSources = new ConcurrentHashMap<>();
 
-    List<ConnectionDataVO> connections = recordStoreControllerZull.getConnectionToDataset();
-    for (ConnectionDataVO connectionDataVO : connections) {
+    final List<ConnectionDataVO> connections = recordStoreControllerZull.getConnectionToDataset();
+    for (final ConnectionDataVO connectionDataVO : connections) {
       targetDataSources.put(connectionDataVO.getSchema(), dataSource(connectionDataVO));
     }
     return targetDataSources;
   }
 
-  private DataSource dataSource(ConnectionDataVO connectionDataVO) {
-    DriverManagerDataSource ds = new DriverManagerDataSource();
+  private static DataSource dataSource(final ConnectionDataVO connectionDataVO) {
+    final DriverManagerDataSource ds = new DriverManagerDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
     ds.setUsername(connectionDataVO.getUser());
     ds.setPassword(connectionDataVO.getPassword());
@@ -98,7 +97,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
 
   private Properties hibernateProps() {
-    Properties properties = new Properties();
+    final Properties properties = new Properties();
     properties.setProperty(PROPERTY_DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
     properties
         .setProperty("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation", "true");
@@ -123,7 +122,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Bean
   public JpaTransactionManager transactionManager() {
-    JpaTransactionManager transactionManager = new JpaTransactionManager();
+    final JpaTransactionManager transactionManager = new JpaTransactionManager();
     transactionManager.setEntityManagerFactory(entityManagerFactory());
     return transactionManager;
   }

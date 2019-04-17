@@ -7,14 +7,12 @@ import java.util.List;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.multitenancy.MultiTenantDataSource;
 import org.eea.dataset.persistence.domain.Record;
 import org.eea.dataset.persistence.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,17 +37,17 @@ public class DatasetServiceImpl implements DatasetService {
   private DataSource multiTenantDataSource;
 
   @Override
-  public DataSetVO getDatasetById(@DatasetId String datasetId)  {
-    DataSetVO dataset = new DataSetVO();
-    List<RecordVO> recordVOs = new ArrayList<>();
+  public DataSetVO getDatasetById(@DatasetId final String datasetId) {
+    final DataSetVO dataset = new DataSetVO();
+    final List<RecordVO> recordVOs = new ArrayList<>();
     LOG.info("devolviendo datos chulos {}", dataset);
     LOG_ERROR.error("hola  {}", datasetId);
     ConsoleAppender a;
-    Date start = new Date();
-    List<Record> records = recordRepository.specialFind(datasetId);
+    final Date start = new Date();
+    final List<Record> records = recordRepository.specialFind(datasetId);
     if (records.size() > 0) {
-      for (Record record : records) {
-        RecordVO vo = new RecordVO();
+      for (final Record record : records) {
+        final RecordVO vo = new RecordVO();
         vo.setId(record.getId().toString());
         vo.setName(record.getName());
         recordVOs.add(vo);
@@ -63,10 +61,10 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   @Transactional
-  public void addRecordToDataset(@DatasetId String datasetId, List<RecordVO> records) {
+  public void addRecordToDataset(@DatasetId final String datasetId, final List<RecordVO> records) {
 
-    for (RecordVO recordVO : records) {
-      Record r = new Record();
+    for (final RecordVO recordVO : records) {
+      final Record r = new Record();
       r.setId(Integer.valueOf(recordVO.getId()));
       r.setName(recordVO.getName());
       recordRepository.save(r);
@@ -75,9 +73,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
-  public void createEmptyDataset(String datasetName) {
-    ConnectionDataVO connectionDataVO = recordStoreControllerZull.createEmptyDataset(datasetName);
-    ((MultiTenantDataSource) multiTenantDataSource).addDataSource(connectionDataVO);
-
+  public void createEmptyDataset(final String datasetName) {
+    recordStoreControllerZull.createEmptyDataset(datasetName);
   }
 }

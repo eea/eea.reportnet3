@@ -15,6 +15,11 @@
   <dependencies>
     <!-- https://mvnrepository.com/artifact/com.github.docker-java/docker-java -->
     <dependency>
+      <groupId>org.eea</groupId>
+      <artifactId>kafka-interface-starter</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>com.github.docker-java</groupId>
       <artifactId>docker-java</artifactId>
       <version>3.1.1</version>

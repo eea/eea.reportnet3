@@ -24,31 +24,32 @@ public class RecordStoreControllerImpl implements
   public void resteDataSetDataBase() {
     try {
       recordStoreService.resetDatasetDatabase();
-    } catch (DockerAccessException e) {
+    } catch (final DockerAccessException e) {
       e.printStackTrace();
     }
   }
 
   @Override
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
-  public ConnectionDataVO createEmptyDataset(
-      @PathVariable("datasetName") String datasetName) { //TODO neeed to create standar exceptions in commont interfaces
-    ConnectionDataVO connectionDataVO = null;
+  public void createEmptyDataset(
+      @PathVariable("datasetName") final String datasetName) { //TODO neeed to create standar exceptions in commont interfaces
+    final ConnectionDataVO connectionDataVO = null;
     try {
-      connectionDataVO = recordStoreService.createEmptyDataSet(datasetName);
-    } catch (DockerAccessException e) {
+      recordStoreService.createEmptyDataSet(datasetName);
+    } catch (final DockerAccessException e) {
       e.printStackTrace();
+      //TODO Error control
     }
-    return connectionDataVO;
   }
 
   @Override
   @RequestMapping(value = "/connection/{datasetName}", method = RequestMethod.GET)
-  public ConnectionDataVO getConnectionToDataset(@PathVariable("datasetName") String datasetName) {
+  public ConnectionDataVO getConnectionToDataset(
+      @PathVariable("datasetName") final String datasetName) {
     ConnectionDataVO vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
-    } catch (DockerAccessException e) {
+    } catch (final DockerAccessException e) {
       e.printStackTrace();
     }
     return vo;
@@ -60,7 +61,7 @@ public class RecordStoreControllerImpl implements
     List<ConnectionDataVO> vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset();
-    } catch (DockerAccessException e) {
+    } catch (final DockerAccessException e) {
       e.printStackTrace();
     }
     return vo;

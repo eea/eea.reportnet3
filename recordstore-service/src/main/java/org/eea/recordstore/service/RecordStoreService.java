@@ -25,7 +25,7 @@ public interface RecordStoreService {
    *
    * @throws DockerAccessException the docker access exception
    */
-  ConnectionDataVO createEmptyDataSet(String datasetName) throws DockerAccessException;
+  void createEmptyDataSet(String datasetName) throws DockerAccessException;
 
   /**
    * Create data set from other.
