@@ -1,23 +1,21 @@
 package org.eea.dataflow.persistence.domain;
 
-import java.util.List;
-import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
- * The type Dataflow.
+ * The type Submission agreement.
  */
 @Entity
-@Table(name = "DATAFLOW")
-public class Dataflow {
+@Table(name = "SUBMISSION_AGREEMENT")
+public class SubmissionAgreement {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +25,9 @@ public class Dataflow {
   private String name;
   @Column(name = "description")
   private String description;
-  @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-  private SubmissionAgreement submissionAgreement;
-
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL,
-      orphanRemoval = true)
-  private List<Contributor> contributors;
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "dataflow_id", referencedColumnName = "id")
+  private Dataflow dataflow;
 
   /**
    * Gets id.
@@ -89,48 +84,20 @@ public class Dataflow {
   }
 
   /**
-   * Gets contributors.
+   * Gets dataflow.
    *
-   * @return the contributors
+   * @return the dataflow
    */
-  public List<Contributor> getContributors() {
-    return contributors;
+  public Dataflow getDataflow() {
+    return dataflow;
   }
 
   /**
-   * Sets contributors.
+   * Sets dataflow.
    *
-   * @param contributors the contributors
+   * @param dataflow the dataflow
    */
-  public void setContributors(final List<Contributor> contributors) {
-    this.contributors = contributors;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    final Dataflow dataflow = (Dataflow) o;
-    return id.equals(dataflow.id);
-
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name, description, contributors);
-  }
-
-  @Override
-  public String toString() {
-    return "Dataflow{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", description='" + description + '\'' +
-        ", contributors=" + contributors +
-        '}';
+  public void setDataflow(final Dataflow dataflow) {
+    this.dataflow = dataflow;
   }
 }
