@@ -27,11 +27,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand(fallbackMethod = "errorHandler")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataFlowVO findById(@PathVariable("id") String id) {
-    DataFlowVO result = new DataFlowVO();
+  public DataFlowVO findById(@PathVariable("id") final String id) {
+    final DataFlowVO result = new DataFlowVO();
     result.setId("random");
-    List<DataSetVO> datasets = new ArrayList<>();
-    DataSetVO set = datasetController.findById("randomDataSet");
+    final List<DataSetVO> datasets = new ArrayList<>();
+    final DataSetVO set = datasetController.findById("randomDataSet");
     datasets.add(set);
     result.setDatasets(datasets);
     return result;
@@ -44,8 +44,8 @@ public class DataFlowControllerImpl implements DataFlowController {
    *
    * @return the data flow vo
    */
-  public DataFlowVO errorHandler(@PathVariable("id") String id) {
-    DataFlowVO result = new DataFlowVO();
+  public static DataFlowVO errorHandler(@PathVariable("id") final String id) {
+    final DataFlowVO result = new DataFlowVO();
     result.setId("error");
     return result;
   }

@@ -1,42 +1,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.eea</groupId>
-		<artifactId>reportnet</artifactId>
-		<version>3.0-SNAPSHOT</version>
-	</parent>
-	
-	<properties>
-      <droolsVersion>7.20.0.Final</droolsVersion>
-	</properties>
+  <parent>
+    <groupId>org.eea</groupId>
+    <artifactId>reportnet</artifactId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
 
-	<artifactId>validation-service</artifactId>
-	<groupId>org.eea.validation</groupId>
-	<version>1.0-SNAPSHOT</version>
-	
-	<dependencies>
-	 <dependency>
-         <groupId>org.kie</groupId>
-         <artifactId>kie-api</artifactId>
-         <version>${droolsVersion}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.drools</groupId>
-         <artifactId>drools-core</artifactId>
-         <version>${droolsVersion}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.drools</groupId>
-         <artifactId>drools-compiler</artifactId>
-         <version>${droolsVersion}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.kie</groupId>
-         <artifactId>kie-ci</artifactId>
-         <version>${droolsVersion}</version>
-      </dependency>
-	</dependencies>
+  <properties>
+    <droolsVersion>7.20.0.Final</droolsVersion>
+  </properties>
+
+  <artifactId>validation-service</artifactId>
+  <groupId>org.eea.validation</groupId>
+  <version>1.0-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-api</artifactId>
+      <version>${droolsVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-core</artifactId>
+      <version>${droolsVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.drools</groupId>
+      <artifactId>drools-compiler</artifactId>
+      <version>${droolsVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kie</groupId>
+      <artifactId>kie-ci</artifactId>
+      <version>${droolsVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eea.interfaces</groupId>
+      <artifactId>common-interfaces</artifactId>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 </project>

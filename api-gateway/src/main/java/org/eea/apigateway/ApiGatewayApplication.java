@@ -1,6 +1,6 @@
 package org.eea.apigateway;
 
-import org.eea.utils.swagger.EnableEEASwagger;
+import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
@@ -23,7 +23,7 @@ public class ApiGatewayApplication {
    *
    * @param args the input arguments
    */
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     SpringApplication.run(ApiGatewayApplication.class, args);
   }
 }

@@ -1,6 +1,6 @@
 package org.eea.communication;
 
-import org.eea.utils.swagger.EnableEEASwagger;
+import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;

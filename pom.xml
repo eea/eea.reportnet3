@@ -23,6 +23,8 @@
     <module>collaboration-service</module>
     <module>communication-service</module>
     <module>indexsearch-service</module>
+    <module>common-interfaces</module>
+    <module>common-utitlities</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
@@ -156,19 +158,18 @@
     <!--<version>2.9.0</version>-->
     <!--<type>jar</type>-->
     <!--</dependency>-->
-    <!--EEA Dependencies -->
-    <dependency>
-      <groupId>org.eea</groupId>
-      <artifactId>common-interfaces-starter</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
+
 
     <dependency>
-      <groupId>org.eea</groupId>
-      <artifactId>utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <groupId>org.eea.utils</groupId>
+      <artifactId>common-utitlities</artifactId>
+      <version>3.0-SNAPSHOT</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.eea.interfaces</groupId>
+      <artifactId>common-interfaces</artifactId>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>

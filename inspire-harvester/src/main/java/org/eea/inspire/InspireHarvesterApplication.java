@@ -4,7 +4,7 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import java.net.URL;
-import org.eea.utils.swagger.EnableEEASwagger;
+import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
@@ -27,7 +27,7 @@ public class InspireHarvesterApplication {
    *
    * @param args the input arguments
    */
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     SpringApplication.run(InspireHarvesterApplication.class, args);
     testAtom();
   }
@@ -37,15 +37,15 @@ public class InspireHarvesterApplication {
     boolean ok = false;
 
     try {
-      URL feedUrl = new URL("https://www.hoy.es/rss/atom/?section=ultima-hora");
+      final URL feedUrl = new URL("https://www.hoy.es/rss/atom/?section=ultima-hora");
 
-      SyndFeedInput input = new SyndFeedInput();
-      SyndFeed feed = input.build(new XmlReader(feedUrl));
+      final SyndFeedInput input = new SyndFeedInput();
+      final SyndFeed feed = input.build(new XmlReader(feedUrl));
 
       System.out.println(feed);
 
       ok = true;
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       ex.printStackTrace();
       System.out.println("ERROR: " + ex.getMessage());
     }

@@ -12,6 +12,12 @@
   <groupId>org.eea.indexsearc</groupId>
   <artifactId>indexsearch-service</artifactId>
   <version>3.0-SNAPSHOT</version>
-
+  <dependencies>
+    <dependency>
+      <groupId>org.eea.interfaces</groupId>
+      <artifactId>common-interfaces</artifactId>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 
 </project>

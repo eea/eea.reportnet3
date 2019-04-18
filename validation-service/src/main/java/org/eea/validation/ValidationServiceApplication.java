@@ -1,6 +1,6 @@
 package org.eea.validation;
 
-import org.eea.utils.swagger.EnableEEASwagger;
+import org.eea.swagger.EnableEEASwagger;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.springframework.boot.SpringApplication;
@@ -24,13 +24,13 @@ public class ValidationServiceApplication {
    *
    * @param args the input arguments
    */
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     SpringApplication.run(ValidationServiceApplication.class, args);
   }
-  
+
   @Bean
   public KieContainer kieContainer() {
-      return KieServices.Factory.get().getKieClasspathContainer();
+    return KieServices.Factory.get().getKieClasspathContainer();
   }
 
 }

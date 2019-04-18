@@ -2,7 +2,6 @@ package org.eea.dataset.configuration;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.eea.dataset.multitenancy.MultiTenantDataSource;
@@ -32,16 +31,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class DatasetConfiguration implements WebMvcConfigurer {
 
 
-  private final String PROPERTY_DRIVER = "driver";
-  private final String PROPERTY_URL = "url";
-  private final String PROPERTY_USERNAME = "user";
-  private final String PROPERTY_PASSWORD = "password";
-  private final String PROPERTY_SHOW_SQL = "hibernate.show_sql";
-  private final String PROPERTY_DIALECT = "hibernate.dialect";
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
- 
+
   /**
    * Data source data source.
    *
@@ -75,17 +68,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     ds.setDriverClassName("org.postgresql.Driver");
     ds.setSchema(connectionDataVO.getSchema());
     return ds;
-  }
-
-
-  private Properties hibernateProps() {
-    final Properties properties = new Properties();
-    properties.setProperty(PROPERTY_DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
-
-    properties.setProperty("spring.jpa.database", "postgresql");
-    properties.setProperty("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
-        "true");
-    return properties;
   }
 
 
