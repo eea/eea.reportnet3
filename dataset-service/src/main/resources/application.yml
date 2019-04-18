@@ -3,6 +3,18 @@ server:
 spring:
   application:
     name: dataset
+  jpa:
+    hibernate:
+      #use create if you are going to create the schema for the first time
+      ddl-auto: update
+    show-sql: ${SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: ${DATABASE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    database: postgresql
   cloud:
     consul:
       discovery:

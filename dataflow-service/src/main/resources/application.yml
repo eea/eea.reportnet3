@@ -11,6 +11,9 @@ spring:
     properties:
       hibernate:
         dialect: ${DATABASE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        jdbc:
+          lob:
+            non_contextual_creation: true
     database: postgresql
   datasource:
     url: ${METABASE_DATASOURCE_URL:jdbc:postgresql://localhost/metabase}
