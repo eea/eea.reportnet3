@@ -25,6 +25,7 @@
     <module>indexsearch-service</module>
     <module>common-interfaces</module>
     <module>common-utitlities</module>
+    <module>document-container-service</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
@@ -143,7 +144,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>27.0.1-jre</version>
+      <version>27.1-jre</version>
     </dependency>
     <!--Redis-->
     <!--<dependency>-->

@@ -48,6 +48,12 @@
       <scope>test</scope>
     </dependency>
 
+    <!--Servlet config-->
+    <dependency>
+      <groupId>javax.servlet.jsp.jstl</groupId>
+      <artifactId>jstl-api</artifactId>
+      <version>1.2</version>
+    </dependency>
     <!--Swagger-->
 
     <dependency>
