@@ -1,9 +1,10 @@
 package org.eea.document.controller;
 
 import org.eea.document.service.DocumentService;
+import org.eea.interfaces.controller.document.DocumentController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -17,14 +18,19 @@ public class DocumentControllerImpl implements DocumentController {
 	private DocumentService documentService;
 
 	@Override
-	@RequestMapping(value = "/testLog", method = RequestMethod.GET)
+	@GetMapping(value = "/testLog")
 	public void testLogging() throws Exception {
 		documentService.testLogging();
 	}
 
 	@Override
-	@RequestMapping(value = "/create", method = RequestMethod.GET)
+	@GetMapping(value = "/create")
 	public void uploadDocument() throws Exception {
 		documentService.uploadDocument();
+	}
+	
+	@GetMapping
+	public void getDocument() throws Exception {
+		documentService.getDocument();
 	}
 }

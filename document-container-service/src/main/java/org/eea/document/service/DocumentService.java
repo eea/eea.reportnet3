@@ -21,4 +21,6 @@ public interface DocumentService {
  * @throws Exception 
    */
   void uploadDocument() throws Exception;
+
+void getDocument() throws Exception;
 }

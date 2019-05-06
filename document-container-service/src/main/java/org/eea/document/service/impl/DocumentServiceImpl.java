@@ -2,14 +2,14 @@ package org.eea.document.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.UnknownHostException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Date;
 
 import javax.jcr.Binary;
 import javax.jcr.GuestCredentials;
-import javax.jcr.LoginException;
 import javax.jcr.Node;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
@@ -17,6 +17,7 @@ import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 import javax.jcr.version.VersionManager;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.oak.Oak;
@@ -24,6 +25,7 @@ import org.apache.jackrabbit.oak.jcr.Jcr;
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.apache.jackrabbit.oak.plugins.document.mongo.MongoDocumentNodeStoreBuilder;
 import org.eea.document.service.DocumentService;
+import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,18 +34,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The type Document service.
+ *  
+ * @author ruben.lozano
+ *
  */
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
-	private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+	private static final String ADMIN = "admin";
 
+	/**
+	 * test the connection
+	 */
 	@Override
 	public void testLogging() throws Exception {
+		// Obtain the default repository location
 		Repository repository = JcrUtils.getRepository();
+		// login with guest credentials
 		Session session = repository.login(new GuestCredentials());
 		try {
+			// show a log message with the connection data
 			String user = session.getUserID();
 			String name = repository.getDescriptor(Repository.REP_NAME_DESC);
 			String msg = String.format("Logged in as %s to a %s repository.", user, name);
@@ -54,81 +65,143 @@ public class DocumentServiceImpl implements DocumentService {
 
 	}
 
+	/**
+	 * upload a file to the jackrabbit content repository
+	 */
 	@Override
 	@Transactional
 	public void uploadDocument() throws Exception {
 		Session session = null;
 		try {
 			LOG.info("Adding the file...");
+			// Initialize the session
 			session = getSession();
-			addFileNode(session, "/testNode", new File("file.txt"), "admin");
+			// Add a file node with the document (in this demo, hardcoded)
+			addFileNode(session, "/test", new File("src/main/resources/file.txt"), ADMIN);
 
 			LOG.info("Files added...");
 		} catch (RepositoryException | IOException e) {
 			LOG.error(e.getMessage());
-		}finally {
-			cleanUp(session); // do this in finally
+		} finally {
+			cleanUp(session);
 		}
 	}
 
-	public static Repository getRepo(String host, final int port) throws UnknownHostException {
+	/**
+	 * Download the file to the fileSystem
+	 */
+	@Override
+	@Transactional
+	public void getDocument() throws Exception {
+		Session session = null;
+		try (FileOutputStream fos = new FileOutputStream("C:/OutFiles/" + "file.txt")){
+			session = getSession();
+			// Initialize the session
+			LOG.info("Fething the file...");
+			FileResponse fileResponse = getFileContents(session, "/test", "file.txt");
+			byte[] content = fileResponse.getBytes();
+			// downloading the file to the filesystem
+			if (content != null && content.length > 0) {
+				fos.write(content);
+				LOG.info("File fetch complete...");
+			}
+		} catch (RepositoryException | IOException e) {
+			LOG.error(e.getMessage());
+		} finally {
+			cleanUp(session);
+		}
+	}
+
+	/**
+	 * creates a repository in that location
+	 * 
+	 * @param host
+	 * @param port
+	 * @return
+	 */
+	public static Repository getRepo(String host, final int port) {
 		String uri = "mongodb://" + host + ":" + port;
-		System.out.println(uri);
-		System.setProperty("oak.documentMK.disableLeaseCheck", "true");
+		LOG.info(uri);
+		//creates a node with name oak_demo
 		DocumentNodeStore ns = new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak_demo", 16).build();
-		Repository repo = new Jcr(new Oak(ns)).createRepository();
-		System.out
-				.println("oak.documentMK.disableLeaseCheck=" + System.getProperty("oak.documentMK.disableLeaseCheck"));
-		return repo;
+		return new Jcr(new Oak(ns)).createRepository();
 	}
 
-	private Session getSession() throws LoginException, RepositoryException, UnknownHostException {
+	/**
+	 * @return
+	 * @throws RepositoryException
+	 */
+	private Session getSession() throws RepositoryException {
 		Repository repo = getRepo("localhost", 27017);
-		if (repo != null)
-			return repo.login(new SimpleCredentials("admin", "admin".toCharArray()));
-		else
+		if (repo.getDescriptorKeys() != null) {
+			return repo.login(new SimpleCredentials(ADMIN, ADMIN.toCharArray()));
+		} else {
 			throw new NullPointerException("Repository not initialized");
+		}
 	}
 
+	// Add a file node with the document (in this demo, hardcoded)
+	
+	/**
+	 * Adds a file node if it's possible.
+	 * 
+	 * @param session
+	 * @param absPath
+	 * @param file
+	 * @param userName
+	 * 
+	 * @throws RepositoryException
+	 * @throws IOException
+	 */
 	public static void addFileNode(Session session, String absPath, File file, String userName)
 			throws RepositoryException, IOException {
 
 		Node node = createNodes(session, absPath);
 		if (node.hasNode(file.getName())) {
-			System.out.println("File already added.");
+			LOG.info("File already added.");
 			return;
 		}
+		try (FileInputStream is = new FileInputStream(file)){
+			// Created a node with that of file Name
+			Node fileHolder = node.addNode(file.getName()); 
+			fileHolder.addMixin("mix:versionable");
+			fileHolder.setProperty("jcr:createdBy", userName);
+			fileHolder.setProperty("jcr:nodeType", NodeType.FILE.getValue());
+			fileHolder.setProperty("size", file.length());
 
-		Node fileHolder = node.addNode(file.getName()); // Created a node with that of file Name
-		fileHolder.addMixin("mix:versionable");
-		fileHolder.setProperty("jcr:createdBy", userName);
-		fileHolder.setProperty("jcr:nodeType", NodeType.FILE.getValue());
-		fileHolder.setProperty("size", file.length());
+			// create node of type file.
+			Node file1 = fileHolder.addNode("theFile", "nt:file"); 
 
-		Node file1 = fileHolder.addNode("theFile", "nt:file"); // create node of type file.
+			Date now = new Date();
 
-		Date now = new Date();
-		now.toInstant().toString();
+			// creation of file content node.
+			Node content = file1.addNode("jcr:content", "nt:resource");
+			String contentType = Files.probeContentType(file.toPath());
+			content.setProperty("jcr:mimeType", contentType);
+			Binary binary = session.getValueFactory().createBinary(is);
 
-		Node content = file1.addNode("jcr:content", "nt:resource");
-		String contentType = Files.probeContentType(file.toPath());
-		content.setProperty("jcr:mimeType", contentType);
-		FileInputStream is = new FileInputStream(file);
-		Binary binary = session.getValueFactory().createBinary(is);
-
-		content.setProperty("jcr:data", binary);
-		content.setProperty("jcr:lastModified", now.toInstant().toString());
-		session.save();
-		VersionManager vm = session.getWorkspace().getVersionManager();
-		vm.checkin(fileHolder.getPath());
-		is.close();
-
-		System.out.println("File Saved...");
+			content.setProperty("jcr:data", binary);
+			content.setProperty("jcr:lastModified", now.toInstant().toString());
+			session.save();
+			VersionManager vm = session.getWorkspace().getVersionManager();
+			vm.checkin(fileHolder.getPath());
+		}
+		LOG.info("File Saved...");
 	}
 
+	
+	/**
+	 * Creates or retrieves nodes
+	 * 
+	 * @param session
+	 * @param absPath
+	 * @return
+	 * @throws RepositoryException
+	 */
 	public static Node createNodes(Session session, String absPath) throws RepositoryException {
+		// check if the node is already created
 		if (session.itemExists(absPath)) {
-			System.out.println("Nodes already exist!!!");
+			LOG.info("Nodes already exist!");
 			return session.getNode(absPath);
 		}
 		String[] nodeNames = (null != absPath) ? absPath.split("/") : null;
@@ -137,6 +210,14 @@ public class DocumentServiceImpl implements DocumentService {
 		return node;
 	}
 
+	/**
+	 * Creates nodes from a list
+	 * 
+	 * @param session
+	 * @param nodes
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private static Node createNodes(Session session, String[] nodes) throws RepositoryException {
 		Node parentNode = session.getRootNode();
 		for (String childNode : nodes) {
@@ -150,6 +231,14 @@ public class DocumentServiceImpl implements DocumentService {
 
 	}
 
+	/**
+	 * Creates a new child node
+	 * 
+	 * @param parentNode
+	 * @param childNode
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private static boolean addChild(Node parentNode, String childNode) throws RepositoryException {
 		boolean nodeAdded = false;
 		if (!parentNode.isNode()) {
@@ -161,10 +250,40 @@ public class DocumentServiceImpl implements DocumentService {
 		}
 		return nodeAdded;
 	}
-	
+
 	private void cleanUp(Session session) {
-        if (session != null) {
-            session.logout();
-        }
-}
+		if (session != null) {
+			session.logout();
+		}
+	}
+
+	/**
+	 * Reads the file and generate a FileResponse, with the content and the type
+	 * 
+	 * @param session
+	 * @param basePath
+	 * @param fileName
+	 * @return
+	 * @throws RepositoryException
+	 * @throws IOException
+	 */
+	public static FileResponse getFileContents(Session session, String basePath, String fileName)
+			throws RepositoryException, IOException {
+		// Obtains the information from the node,name, content and type.
+		Node node = session.getNode(basePath);
+		Node fileHolder = node.getNode(fileName);
+		Node fileContent = fileHolder.getNode("theFile").getNode("jcr:content");
+		Binary bin = fileContent.getProperty("jcr:data").getBinary();
+		InputStream stream = bin.getStream();
+		byte[] bytes = IOUtils.toByteArray(stream);
+		bin.dispose();
+		stream.close();
+
+		// creates the FileResponse to return it
+		FileResponse fileResponse = new FileResponse();
+		fileResponse.setBytes(bytes);
+		fileResponse.setContentType(fileContent.getProperty("jcr:mimeType").getString());
+		return fileResponse;
+
+	}
 }
