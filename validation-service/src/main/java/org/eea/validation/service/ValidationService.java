@@ -37,6 +37,7 @@ public class ValidationService {
     kieSession.fireAllRules();
     kieSession.dispose();
     return element;
+
   }
 
   public List<Map<String, String>> getRules(Rules rules) {
@@ -51,8 +52,9 @@ public class ValidationService {
     return ruleAttributes;
   }
 
-  public void setNewRules(Map<String, String> requestParam) {
+  public void setNewRules(Rules newRules) {
 
+    rulesRepository.save(newRules);
 
   }
 }

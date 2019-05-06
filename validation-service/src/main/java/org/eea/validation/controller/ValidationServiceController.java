@@ -46,13 +46,21 @@ public class ValidationServiceController {
   }
 
   @RequestMapping(value = "/setRules", method = RequestMethod.GET, produces = "application/json")
-  public void setNewRules(@RequestParam(required = true) Map<String, String> requestParam) {
-    String ruleName = requestParam.get("Nombre de la regla");
-    String ruleAttribute = requestParam.get("Objeto al que afecta la regla");
-    String ruleCondition = requestParam.get("Condicion");
-    String ruleAction = requestParam.get("Accion");
+  public void setNewRules(@RequestParam(required = true) String ruleName,
+      @RequestParam(required = true) String ruleAtrtibute,
+      @RequestParam(required = true) String ruleCondition,
+      @RequestParam(required = true) String ruleAction) {
 
-    validationService.setNewRules(requestParam);
+    Rules rules = new Rules();
+    rules.setRulesBase("KieTest");
+    rules.setRulesSession("TestKieSession");
+    rules.setRulesAgent("TestKieAgent");
+    rules.setName(ruleName);
+    rules.setAttribute(ruleAtrtibute);
+    rules.setConditionalElement(ruleCondition);
+    rules.setAction(ruleAction);
+
+    validationService.setNewRules(rules);
 
 
 
