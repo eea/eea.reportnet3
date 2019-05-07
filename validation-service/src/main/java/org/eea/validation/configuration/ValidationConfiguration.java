@@ -1,28 +1,20 @@
 package org.eea.validation.configuration;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.drools.compiler.reteoo.compiled.ObjectTypeNodeCompiler;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.validation.model.Rules;
 import org.eea.validation.repository.RulesRepository;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
-import org.kie.api.builder.KieBuilder;
-import org.kie.api.builder.KieRepository;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
-import org.kie.api.runtime.KieContainer;
 import org.kie.internal.utils.KieHelper;
-import org.kie.internal.utils.KieTypeResolver;
-import org.kie.scanner.KieRepositoryScannerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +32,6 @@ public class ValidationConfiguration {
   private static final String REGULATION_TEMPLATE_FILE =
       "src/main/resources/ruletemplate/template01.drl";
 
-
   @Autowired
   private RulesRepository rulesRepository;
 
@@ -55,7 +46,7 @@ public class ValidationConfiguration {
     List<Rules> preRepository = Lists.newArrayList(preRepositoryDB);
 
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    
+
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
       rule1.put("ruleid", preRepository.get(i).getName());

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/validation")
 public class ValidationServiceController {
 
+  private static final String REGULATION_TEMPLATE_FILE =
+      "src/main/resources/ruletemplate/template01.drl";
 
   private final ValidationService validationService;
 
@@ -61,9 +63,7 @@ public class ValidationServiceController {
     rules.setAction(ruleAction);
 
     validationService.setNewRules(rules);
-
-
-
+    validationService.loadNewRules(rules);
   }
 
 
