@@ -26,6 +26,7 @@
     <module>common-interfaces</module>
     <module>common-utitlities</module>
     <module>document-container-service</module>
+    <module>frontend-service</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
@@ -220,6 +221,7 @@
           </annotationProcessorPaths>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
