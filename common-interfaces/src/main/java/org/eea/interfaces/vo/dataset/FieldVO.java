@@ -33,9 +33,9 @@ public class FieldVO implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final FieldVO recordVO = (FieldVO) o;
-    return name.equals(recordVO.name) &&
-        id.equals(recordVO.id);
+    final FieldVO fieldVO = (FieldVO) o;
+    return name.equals(fieldVO.name) &&
+        id.equals(fieldVO.id);
   }
 
   @Override
@@ -45,7 +45,7 @@ public class FieldVO implements Serializable {
 
   @Override
   public String toString() {
-    return "RecordVO{" +
+    return "FieldVO{" +
         "name='" + name + '\'' +
         ", id='" + id + '\'' +
         '}';
