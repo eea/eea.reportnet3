@@ -23,5 +23,5 @@ public class DataSetPartition {
 	private Long id;
 	
 	@Column(name = "DATASET_ID")
-	private Dataset dataset;
+	private Long dataset;
 }

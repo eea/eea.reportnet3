@@ -32,6 +32,9 @@ public class Snapshot extends Dataset{
 	@Column(name = "CREATIONDATE")
     private Date creationDate;
 	
+	@Column(name = "DATACOLLECTION_ID")
+    private Long datacollection;
+	
 	
 	@Override
 	public boolean equals(final Object o) {
@@ -48,7 +51,7 @@ public class Snapshot extends Dataset{
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, creationDate);
+		return Objects.hash(id, name, creationDate, datacollection);
 	}
 
 }

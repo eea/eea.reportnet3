@@ -18,7 +18,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "REPORTINGDATASET")
+@Table(name = "REPORTING_DATASET")
 public class ReportingDataset extends Dataset{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -38,7 +38,7 @@ public class DataCollection extends Dataset{
 	@Column(name = "DUEDATE")
     private Date dueDate;
 	
-	@OneToMany(mappedBy = "dataCollection", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "datacollection", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Snapshot> snapshots;
 
 
@@ -59,7 +59,7 @@ public class DataCollection extends Dataset{
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, visible, dueDate);
+		return Objects.hash(id, name, visible, dueDate, snapshots);
 	}
 
 }
