@@ -51,7 +51,7 @@ public class Dataset {
 	@Column(name = "DATAFLOW_ID")
 	private Long dataflowId;
 
-	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = false)
 	private List<DataSetPartition> dataSetPartitions;
 
 	@Override
