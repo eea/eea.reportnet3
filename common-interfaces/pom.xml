@@ -12,6 +12,7 @@
 
   <properties>
     <feign_version>10.1.0</feign_version>
+    <projectlombok.version>1.18.0</projectlombok.version>
   </properties>
   <dependencies>
     <dependency>
@@ -30,7 +31,12 @@
       <artifactId>spring-web</artifactId>
       <version>5.1.5.RELEASE</version>
     </dependency>
-
+	<!-- Lombook -->
+	<dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<version>${projectlombok.version}</version>
+	</dependency>
   </dependencies>
 
   <build>
