@@ -34,31 +34,30 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
   
-  @Value("${dockerContainerName}")
-  private String CONTAINER_NAME = "";
+  @Value("${dockerContainerName:crunchy-postgres}")
+  private String CONTAINER_NAME;
 
   @Value("${ipPostgre}")
   private String IP_POSTGRE_DB = "" ;
  
-  private static String USER_POSTGRE_DB = "";
-  @Value("${userPostgre}")
+  private static String USER_POSTGRE_DB;
+  @Value("${userPostgre:root}")
   public void setUserPostgre(String user) {
     USER_POSTGRE_DB = user;
   }
   
-  private static String PASS_POSTGRE_DB = "";
-  @Value("${passwordPostgre}")
+  private static String PASS_POSTGRE_DB;
+  @Value("${passwordPostgre:root}")
   public void setPassPostgre(String pass) {
     PASS_POSTGRE_DB = pass;
   }
-  @Value("${connStringPostgree}")
-  private static String CONN_STRING_POSTGRE;
   
-  @Value("${connStringPostgree}")
+  private static String CONN_STRING_POSTGRE;
+  @Value("${connStringPostgree:jdbc:postgresql://localhost/datasets}")
   public void setConnStringPostgre(String connString) {
     CONN_STRING_POSTGRE = connString;
   }
-  @Value("${sqlGetAllDatasetsName}")
+  @Value("${sqlGetAllDatasetsName:select * from pg_namespace where nspname like 'dataset%'}")
   private final String SQL_GET_DATASETS_NAME = "";
   
   @Autowired

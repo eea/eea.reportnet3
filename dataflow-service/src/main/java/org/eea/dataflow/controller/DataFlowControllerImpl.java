@@ -44,7 +44,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    *
    * @return the data flow vo
    */
-  public static DataFlowVO errorHandler() {
+  public static DataFlowVO errorHandler(@PathVariable("id") final String id) {
     final DataFlowVO result = new DataFlowVO();
     result.setId("error");
     return result;

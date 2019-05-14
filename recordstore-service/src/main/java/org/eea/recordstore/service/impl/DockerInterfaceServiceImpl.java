@@ -46,11 +46,11 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
   
-  @Value("${dockerVarEnvironments}")
-  private final List<String> ENVS = new ArrayList<>();
+  @Value("${dockerVarEnvironments:null}")
+  private final List<String> ENVS = null;
   
-  @Value("${dockerContainerName}")
-  private String CONTAINER_NAME = "";
+  @Value("${dockerContainerName:crunchy-postgres}")
+  private String CONTAINER_NAME;
   
 
   @Override
