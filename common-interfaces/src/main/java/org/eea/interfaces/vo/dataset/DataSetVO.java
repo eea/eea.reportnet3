@@ -13,8 +13,8 @@ import lombok.ToString;
 public class DataSetVO implements Serializable {
 
   private static final long serialVersionUID = 2680945261242083928L;
+  
   private String id;
-
   private List<RecordVO> records;
 
 

@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,9 +12,11 @@ import lombok.ToString;
 @ToString
 public class RecordVO implements Serializable {
 
-  private static final long serialVersionUID = -5257537261370694057L;
-  private String name;
-  private String id;
+	private static final long serialVersionUID = -5257537261370694057L;
+	
+	private String name;
+	private String id;
+	private List<FieldVO> fields;
 
   @Override
   public boolean equals(final Object o) {
