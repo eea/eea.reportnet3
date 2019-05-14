@@ -40,7 +40,17 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
         loggerLevel: basic
-
+        
+mongodb:
+  hibernate:
+      ddl-auto: create
+  primary:
+    host: localhost
+    port: 27017
+    database: admin
+    username: root
+    password: root
+    
 hystrix:
   command:
     default:
