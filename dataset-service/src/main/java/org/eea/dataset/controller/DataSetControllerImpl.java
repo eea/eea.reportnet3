@@ -1,7 +1,5 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.micrometer.core.annotation.Timed;
 import org.eea.dataset.service.DatasetService;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -15,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.micrometer.core.annotation.Timed;
 
 /**
  * The type Data set controller.
@@ -34,21 +34,23 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @Timed("FIND_BY_ID_TIMER")
   public DataSetVO findById(@PathVariable("id") String datasetId) {
     DataSetVO result = null;
 
 
     result = datasetService.getDatasetById(datasetId);
-    //TenantResolver.clean();
+    // TenantResolver.clean();
     return result;
   }
 
   @Override
-  @RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/update", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
-    datasetService.addRecordToDataset(dataset.getId(),dataset.getRecords());
+    datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
 
     return null;
   }
