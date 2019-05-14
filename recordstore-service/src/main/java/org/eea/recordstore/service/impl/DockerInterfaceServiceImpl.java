@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -44,23 +45,20 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       .build();
 
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
+  
+  @Value("${dockerVarEnvironments:null}")
+  private final List<String> ENVS = null;
+  
+  @Value("${dockerContainerName:crunchy-postgres}")
+  private String CONTAINER_NAME;
+  
 
   @Override
   public Container createContainer(String containerName, String imageName, String portBinding) {
-    List<String> envs = new ArrayList<>();
-    envs.add("PG_DATABASE=datasets");
-    envs.add("PG_PRIMARY_PORT=5432");
-    envs.add("PG_MODE=primary");
-    envs.add("PG_USER=root");
-    envs.add("PG_PASSWORD=root");
-    envs.add("PG_PRIMARY_USER=root");
-    envs.add("PG_PRIMARY_PASSWORD=root");
-    envs.add("PG_ROOT_PASSWORD=root");
-    envs.add("PGBACKREST=true");
-    envs.add("PGPASSWORD=root");
+   
     CreateContainerCmd command = dockerClient
         .createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1")
-        .withEnv(envs).withName(containerName);
+        .withEnv(ENVS).withName(containerName);
     Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));//NO MAPEA... INVESTIGAR
     Binds binds = new Binds();
     HostConfig hostConfig = new HostConfig();
@@ -77,6 +75,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     }
 
     CreateContainerResponse containerResponse = command.withHostConfig(hostConfig).exec();
+
 
     return getContainer(containerName);
   }
@@ -120,7 +119,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   @Deprecated
   @Override
   public List<String> getConnection() {
-    Container container = getContainer("crunchy-postgres");
+    Container container = getContainer(CONTAINER_NAME);
     List<String> result = new ArrayList<>();
     OutputStream output = new ByteArrayOutputStream();
     OutputStream errorOutput = new ByteArrayOutputStream();
@@ -143,7 +142,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       execResult.awaitCompletion().onComplete();
 
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage());
     }
     String outcomeOk = new String(((ByteArrayOutputStream) output).toByteArray());
     String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
@@ -187,7 +186,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   @Override
   public Container getContainer(String containerName) {
     List<String> names = new ArrayList<>();
-    names.add("crunchy-postgres");
+    names.add(containerName);
     List<Container> containers = dockerClient.listContainersCmd()
         .withShowSize(true)
         .withShowAll(true)
