@@ -35,4 +35,13 @@ public interface DatasetService {
    */
   void createEmptyDataset(String datasetName);
 
+
+  /**
+   * Creates the data schema.
+   *
+   * @param datasetName the dataset name
+   */
+  void createDataSchema(String datasetName);
+
+
 }

@@ -61,9 +61,17 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createEmptyDataset(datasetname);
   }
 
+  @Override
+  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
+  public void createDataSchema(String datasetName) {
+    datasetService.createDataSchema(datasetName);
+  }
+
   public DataSetVO errorHandler(@PathVariable("id") String id) {
     DataSetVO dataset = new DataSetVO();
     dataset.setId("ERROR");
     return dataset;
   }
+
+
 }

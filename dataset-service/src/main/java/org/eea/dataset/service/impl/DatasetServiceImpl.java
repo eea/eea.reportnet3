@@ -1,6 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import ch.qos.logback.core.ConsoleAppender;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,6 +8,8 @@ import javax.transaction.Transactional;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.domain.Record;
 import org.eea.dataset.persistence.repository.RecordRepository;
+import org.eea.dataset.schemas.domain.DatasetSchema;
+import org.eea.dataset.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ch.qos.logback.core.ConsoleAppender;
 
 /**
  * The type Dataset service.
@@ -29,6 +31,9 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Autowired
   private RecordRepository recordRepository;
+
+  @Autowired
+  private SchemasRepository schemasRepository;
 
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
@@ -75,5 +80,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void createEmptyDataset(final String datasetName) {
     recordStoreControllerZull.createEmptyDataset(datasetName);
+  }
+
+  @Override
+  public void createDataSchema(String datasetName) {
+
+    DatasetSchema datasetSchema = new DatasetSchema();
+
+    datasetSchema.setId(1L);
+    datasetSchema.setValue("DatasetSchema");
+
+
+    schemasRepository.save(datasetSchema);
+
   }
 }

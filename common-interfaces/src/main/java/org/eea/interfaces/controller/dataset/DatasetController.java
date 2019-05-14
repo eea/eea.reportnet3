@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// TODO: Auto-generated Javadoc
 /**
  * The interface Dataset controller.
  */
@@ -29,7 +30,8 @@ public interface DatasetController {
    *
    * @return the data set vo
    */
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetVO findById(@PathVariable("id") String id);
 
   /**
@@ -39,11 +41,25 @@ public interface DatasetController {
    *
    * @return the data set vo
    */
-  @RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/update", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetVO updateDataset(@RequestBody DataSetVO dataset);
 
+  /**
+   * Creates the empty data set.
+   *
+   * @param datasetName the dataset name
+   */
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
+  /**
+   * Creates the data schema. Only for the demo
+   *
+   * @param datasetName the dataset name
+   */
+  @Deprecated
+  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
+  void createDataSchema(@RequestParam("datasetName") String datasetName);
 
 }
