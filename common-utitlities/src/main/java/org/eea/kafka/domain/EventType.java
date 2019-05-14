@@ -5,7 +5,8 @@ public enum EventType {
   DATASET_CREATED("ReportingTopic"),
   DATACOLLECTION_CREATED("ReportingTopic")*/
   CONNECTION_CREATED_EVENT("Hello-Kafka2","connection_key"),
-  HELLO_KAFKA_EVENT("Hello-Kafka2","hello_kafka_key");
+  HELLO_KAFKA_EVENT("Hello-Kafka2","hello_kafka_key"),
+  DATASET_PARSED_FILE_EVENT("ReportingTopic","ReportingTopic");
 
   private String topic;
 

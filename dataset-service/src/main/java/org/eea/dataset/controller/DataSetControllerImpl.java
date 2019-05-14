@@ -1,7 +1,7 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.micrometer.core.annotation.Timed;
+import java.io.IOException;
+
 import org.eea.dataset.service.DatasetService;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -11,10 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+import io.micrometer.core.annotation.Timed;
 
 /**
  * The type Data set controller.
@@ -63,5 +70,13 @@ public class DataSetControllerImpl implements DatasetController {
     DataSetVO dataset = new DataSetVO();
     dataset.setId("ERROR");
     return dataset;
+  }
+  
+  @PostMapping("/uploadFile")
+  public void loadDatasetData(@RequestParam("file") MultipartFile file) throws Exception {
+	if(file == null) {
+		throw new IOException("File not found");
+	}
+	datasetService.processFile(file);
   }
 }
