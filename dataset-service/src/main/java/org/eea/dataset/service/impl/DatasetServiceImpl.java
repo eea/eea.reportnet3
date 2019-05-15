@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
@@ -51,10 +50,9 @@ public class DatasetServiceImpl implements DatasetService {
     final List<RecordVO> recordVOs = new ArrayList<>();
     LOG.info("devolviendo datos chulos {}", dataset);
     LOG_ERROR.error("hola  {}", datasetId);
-    ConsoleAppender a;
-    final Date start = new Date();
+   
     final List<Record> records = recordRepository.specialFind(datasetId);
-    if (records.size() > 0) {
+    if (!records.isEmpty()) {
       for (final Record record : records) {
         final RecordVO vo = new RecordVO();
         vo.setId(record.getId().toString());
