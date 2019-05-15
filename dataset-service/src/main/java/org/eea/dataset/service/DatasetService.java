@@ -1,8 +1,9 @@
 package org.eea.dataset.service;
 
-import java.io.IOException;
 import java.util.List;
+
 import org.eea.dataset.multitenancy.DatasetId;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,10 +40,12 @@ public interface DatasetService {
 	/**
 	 * Process the file: read, parse and save in the db
 	 * 
-	 * @param file file to process
-	 * @return 
-	 * @throws Exception 
+	 * @param datasetId
+	 * @param file      file to process
+	 * 
+	 * @return
+	 * @throws Exception
 	 */
-	void processFile(MultipartFile file) throws Exception;
+	void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException;
 
 }

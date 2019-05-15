@@ -1,22 +1,22 @@
 package org.eea.dataset.service.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.domain.Record;
+import org.eea.dataset.persistence.repository.DatasetRepository;
 import org.eea.dataset.persistence.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.FileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import ch.qos.logback.core.ConsoleAppender;
 
 /**
  * The type Dataset service.
@@ -44,6 +42,9 @@ public class DatasetServiceImpl implements DatasetService {
 	private RecordRepository recordRepository;
 
 	@Autowired
+	DatasetRepository datasetRepository;
+
+	@Autowired
 	private RecordStoreControllerZull recordStoreControllerZull;
 
 	@Autowired
@@ -56,12 +57,8 @@ public class DatasetServiceImpl implements DatasetService {
 	public DataSetVO getDatasetById(@DatasetId final String datasetId) {
 		final DataSetVO dataset = new DataSetVO();
 		final List<RecordVO> recordVOs = new ArrayList<>();
-		LOG.info("devolviendo datos chulos {}", dataset);
-		LOG_ERROR.error("hola  {}", datasetId);
-		ConsoleAppender a;
-		final Date start = new Date();
 		final List<Record> records = recordRepository.specialFind(datasetId);
-		if (records.size() > 0) {
+		if (!records.isEmpty()) {
 			for (final Record record : records) {
 				final RecordVO vo = new RecordVO();
 				vo.setId(record.getId().toString());
@@ -89,46 +86,71 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	@Transactional
 	public void createEmptyDataset(final String datasetName) {
 		recordStoreControllerZull.createEmptyDataset(datasetName);
 	}
 
 	@Override
-	public void processFile(MultipartFile file) throws Exception {
-		// obtains the file type from the extension
+	@Transactional
+	public void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException {
 		if (file == null) {
-			throw new Exception("Empty file");
+			throw new EEAException("Empty file");
 		}
-		int i = file.getOriginalFilename().lastIndexOf('.');
-		if (i == -1) {
-			throw new Exception("the file needs an extension");
-		}
-		String mimeType = file.getOriginalFilename().substring(i + 1);
-
+		// obtains the file type from the extension
+		String mimeType = getMimetype(file);
 		try (InputStream inputStream = file.getInputStream()) {
 			// create the right file parser for the file type
 			FileParseContext context = fileParserFactory.createContext(mimeType);
 			DataSetVO datasetVO = context.parse(inputStream);
-			// after the dataset has been created, an event is sent to store it
-			sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetVO);
+			// save dataset to the database
+			datasetRepository.save(datasetVO);
+			// after the dataset has been saved, an event is sent to notify it
+			sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+		} catch (IOException e) {
+			LOG_ERROR.error(e.getMessage());
+		} catch (Exception e) {
+			LOG_ERROR.error(e.getMessage());
 		}
 	}
 
 	/**
-	 * send message encapsulates the logic to send the event message to kafka
-	 * 
-	 * @param eventType
-	 * @param data
-	 * @throws Exception
+	 * Gets the mimetype.
+	 *
+	 * @param file the file
+	 * @return the mimetype
 	 */
-	public void sendMessage(EventType eventType, Object data) throws Exception {
-		if (data == null) {
-			throw new Exception("bad request");
+	private String getMimetype(MultipartFile file) {
+		String mimeType = null;
+		try {
+			mimeType = file.getContentType();
+			if (mimeType == null) {
+				int i = file.getOriginalFilename().lastIndexOf('.');
+				if (i == -1) {
+					throw new EEAException("the file needs an extension");
+				}
+				mimeType = file.getOriginalFilename().substring(i + 1);
+			} else {
+				mimeType = mimeType.split("/")[0];
+			}
+		} catch (EEAException e) {
+			LOG.error(e.getMessage());
 		}
+		return mimeType;
+	}
+
+	/**
+	 * send message encapsulates the logic to send an event message to kafka.
+	 *
+	 * @param eventType the event type
+	 * @param datasetId the dataset id
+	 */
+	private void sendMessage(EventType eventType, String datasetId) {
+
 		EEAEventVO event = new EEAEventVO();
 		event.setEventType(eventType);
 		Map<String, Object> dataOutput = new HashMap<>();
-		dataOutput.put("data", data);
+		dataOutput.put("dataset_id", datasetId);
 		event.setData(dataOutput);
 		kafkaSender.sendMessage(event);
 	}
