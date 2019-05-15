@@ -41,8 +41,8 @@ public interface DatasetService {
 	 * 
 	 * @param file file to process
 	 * @return 
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	void processFile(MultipartFile file) throws IOException;
+	void processFile(MultipartFile file) throws Exception;
 
 }

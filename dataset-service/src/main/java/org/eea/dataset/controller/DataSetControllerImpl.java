@@ -74,8 +74,8 @@ public class DataSetControllerImpl implements DatasetController {
   
   @PostMapping("/uploadFile")
   public void loadDatasetData(@RequestParam("file") MultipartFile file) throws Exception {
-	if(file == null) {
-		throw new IOException("File not found");
+	if(file == null || file.isEmpty()) {
+		throw new IOException("File invalid");
 	}
 	datasetService.processFile(file);
   }

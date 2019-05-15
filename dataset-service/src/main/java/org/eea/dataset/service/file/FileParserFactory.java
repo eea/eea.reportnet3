@@ -1,9 +1,10 @@
 package org.eea.dataset.service.file;
 
 import org.eea.dataset.service.file.interfaces.FileParseContext;
+import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 
-public class FileParserFactory {
-  public static FileParseContext createContext(String mimeType) {
+public class FileParserFactory implements IFileParserFactory{
+  public FileParseContext createContext(String mimeType) {
     FileParseContextImpl context = null;
     switch (mimeType) {
       case "csv":
