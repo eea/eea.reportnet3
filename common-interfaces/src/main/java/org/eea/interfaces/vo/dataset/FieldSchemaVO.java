@@ -1,23 +1,22 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Gets the fields.
+ * Gets the name.
  *
- * @return the fields
+ * @return the name
  */
 @Getter
 
 /**
- * Sets the fields.
+ * Sets the name.
  *
- * @param fields the new fields
+ * @param name the new name
  */
 @Setter
 
@@ -27,16 +26,19 @@ import lombok.ToString;
  * @return the java.lang. string
  */
 @ToString
-public class RecordVO implements Serializable {
+public class FieldSchemaVO implements Serializable {
 
   /** The Constant serialVersionUID. */
-  private static final long serialVersionUID = -5257537261370694057L;
+  private static final long serialVersionUID = 2680945261242083928L;
 
   /** The id. */
   private String id;
 
-  /** The fields. */
-  private List<FieldVO> fields;
+  /** The id record. */
+  private String idRecord;
+
+  /** The name. */
+  private String name;
 
   /**
    * Hash code.
@@ -45,7 +47,7 @@ public class RecordVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fields, id);
+    return Objects.hash(id, idRecord, name);
   }
 
   /**
@@ -62,10 +64,10 @@ public class RecordVO implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    RecordVO other = (RecordVO) obj;
-    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id);
+    FieldSchemaVO other = (FieldSchemaVO) obj;
+    return Objects.equals(id, other.id) && Objects.equals(idRecord, other.idRecord)
+        && Objects.equals(name, other.name);
   }
-
 
 
 }
