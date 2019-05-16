@@ -1,8 +1,8 @@
-package org.eea.dataflow.persistence.domain;
+package org.eea.dataset.persistence.domain;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,23 +10,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The type Dataflow.
+ * The type DataCollection.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "DATAFLOW")
-public class Dataflow {
-
+@Table(name = "DATACOLLECTION")
+public class DataCollection extends Dataset{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", columnDefinition = "serial")
@@ -35,17 +32,17 @@ public class Dataflow {
 	@Column(name = "NAME")
 	private String name;
 
-	@Column(name = "DESCRIPTION")
-	private String description;
+	@Column(name = "VISIBLE")
+	private Boolean visible;
+	
+	@Column(name = "DUEDATE")
+    private Date dueDate;
+	
+	@OneToMany(mappedBy = "datacollection", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Snapshot> snapshots;
 
-	@OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-	private SubmissionAgreement submissionAgreement;
 
-	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Contributor> contributors;
 
-	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Document> documents;
 
 	@Override
 	public boolean equals(final Object o) {
@@ -55,14 +52,14 @@ public class Dataflow {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final Dataflow dataflow = (Dataflow) o;
-		return id.equals(dataflow.id);
+		final DataCollection dataCollection = (DataCollection) o;
+		return id.equals(dataCollection.id);
 
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, description, contributors, submissionAgreement, documents);
+		return Objects.hash(id, name, visible, dueDate, snapshots);
 	}
 
 }

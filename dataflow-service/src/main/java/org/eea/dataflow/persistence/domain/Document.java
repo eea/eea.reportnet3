@@ -16,29 +16,27 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The type Contributor.
+ * The type Document.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "CONTRIBUTOR")
-public class Contributor {
+@Table(name = "DOCUMENT")
+public class Document {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "ID", columnDefinition = "serial")
+	private Long id;
+	@Column(name = "NAME")
+	private String name;
+	@Column(name = "LANGUAGE")
+	private String language;
+	@ManyToOne
+	@JoinColumn(name = "DATAFLOW_ID")
+	private Dataflow dataflow;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
-  @Column(name = "EMAIL")
-  private String email;
-  @Column(name = "USER_ID")
-  private Long userId;
-  @ManyToOne
-  @JoinColumn(name = "DATAFLOW_ID")
-  private Dataflow dataflow;
-
-  
-  @Override
+	@Override
 	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
@@ -46,13 +44,13 @@ public class Contributor {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final Contributor contributor = (Contributor) o;
-		return id.equals(contributor.id);
+		final Document document = (Document) o;
+		return id.equals(document.id);
 
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, email, userId, dataflow);
+		return Objects.hash(id, name, language, dataflow);
 	}
 }

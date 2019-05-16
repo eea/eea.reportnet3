@@ -1,8 +1,10 @@
-package org.eea.dataflow.persistence.domain;
+package org.eea.dataset.persistence.domain;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Getter;
@@ -18,15 +19,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The type Dataflow.
+ * The type Dataset.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "DATAFLOW")
-public class Dataflow {
-
+@Table(name = "DATASET")
+public class Dataset {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", columnDefinition = "serial")
@@ -35,17 +35,24 @@ public class Dataflow {
 	@Column(name = "NAME")
 	private String name;
 
-	@Column(name = "DESCRIPTION")
-	private String description;
+	@Column(name = "DATE_CREATION")
+	private Date creationDate;
 
-	@OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-	private SubmissionAgreement submissionAgreement;
+	@Column(name = "VISIBILITY")
+	private String visibility;
 
-	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Contributor> contributors;
+	@Column(name = "URL_CONNECTION")
+	private String urlConnection;
 
-	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Document> documents;
+	@Column(name = "STATUS")
+	private String status;
+
+	@Nonnull
+	@Column(name = "DATAFLOW_ID")
+	private Long dataflowId;
+
+	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL, orphanRemoval = false)
+	private List<DataSetPartition> dataSetPartitions;
 
 	@Override
 	public boolean equals(final Object o) {
@@ -55,14 +62,14 @@ public class Dataflow {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final Dataflow dataflow = (Dataflow) o;
-		return id.equals(dataflow.id);
+		final Dataset dataset = (Dataset) o;
+		return id.equals(dataset.id);
 
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, description, contributors, submissionAgreement, documents);
+		return Objects.hash(id, name, creationDate, visibility, urlConnection, status, dataflowId, dataSetPartitions);
 	}
 
 }
