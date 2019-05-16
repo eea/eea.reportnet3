@@ -64,13 +64,6 @@ public class DatasetServiceTest {
 	}
 
 	@Test
-	public void testProcessFileThrowException3() throws Exception {
-		MockMultipartFile fileNoType = new MockMultipartFile("file", "fileOriginal", null, "content".getBytes());
-
-		datasetService.processFile("1", fileNoType);
-	}
-
-	@Test
 	public void testProcessFileThrowException4() throws Exception {
 		MockMultipartFile fileNoType = new MockMultipartFile("file", "fileOriginal.csv", null, "content".getBytes());
 

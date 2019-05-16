@@ -128,16 +128,11 @@ public class DatasetServiceImpl implements DatasetService {
 	private String getMimetype(MultipartFile file) {
 		String mimeType = null;
 		try {
-			mimeType = file.getContentType();
-			if (mimeType == null) {
-				int i = file.getOriginalFilename().lastIndexOf('.');
-				if (i == -1) {
-					throw new EEAException("the file needs an extension");
-				}
-				mimeType = file.getOriginalFilename().substring(i + 1);
-			} else {
-				mimeType = mimeType.split("/")[0];
+			int i = file.getOriginalFilename().lastIndexOf('.');
+			if (i == -1) {
+				throw new EEAException("the file needs an extension");
 			}
+			mimeType = file.getOriginalFilename().substring(i + 1);
 		} catch (EEAException e) {
 			LOG.error(e.getMessage());
 		}
