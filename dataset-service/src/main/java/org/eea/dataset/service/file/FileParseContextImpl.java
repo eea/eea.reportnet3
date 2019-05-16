@@ -8,13 +8,26 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 
 public class FileParseContextImpl implements IFileParseContext {
 
-	private ReaderStrategy readerStrategy;
+  /** The reader strategy. */
+  private ReaderStrategy readerStrategy;
 
-	public FileParseContextImpl(ReaderStrategy readerStrategy) {
-		this.readerStrategy = readerStrategy;
-	}
+  /**
+   * Instantiates a new file parse context impl.
+   *
+   * @param readerStrategy the reader strategy
+   */
+  public FileParseContextImpl(ReaderStrategy readerStrategy) {
+    this.readerStrategy = readerStrategy;
+  }
 
-	public DataSetVO parse(InputStream inputStream) {
-		return readerStrategy.parseFile(inputStream);
-	}
+  /**
+   * Parses the.
+   *
+   * @param inputStream the input stream
+   * @return the data set VO
+   * @throws InvalidFileException the invalid file exception
+   */
+  public DataSetVO parse(InputStream inputStream) {
+    return readerStrategy.parseFile(inputStream);
+  }
 }

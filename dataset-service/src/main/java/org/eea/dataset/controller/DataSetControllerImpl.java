@@ -1,7 +1,6 @@
 package org.eea.dataset.controller;
 
 import java.io.IOException;
-
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -19,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-
 import io.micrometer.core.annotation.Timed;
 
 /**
@@ -53,7 +50,7 @@ public class DataSetControllerImpl implements DatasetController {
 	@Override
 	@RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
 	public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
-		datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
+//		datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
 
 		return null;
 	}

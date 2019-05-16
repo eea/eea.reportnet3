@@ -61,10 +61,8 @@ public class DatasetServiceImpl implements DatasetService {
 			for (final Record record : records) {
 				final RecordVO vo = new RecordVO();
 				vo.setId(record.getId().toString());
-				vo.setName(record.getName());
 				recordVOs.add(vo);
 			}
-			dataset.setRecords(recordVOs);
 			dataset.setId(datasetId);
 		}
 
@@ -78,7 +76,6 @@ public class DatasetServiceImpl implements DatasetService {
 		for (final RecordVO recordVO : records) {
 			final Record r = new Record();
 			r.setId(Integer.valueOf(recordVO.getId()));
-			r.setName(recordVO.getName());
 			recordRepository.save(r);
 		}
 
