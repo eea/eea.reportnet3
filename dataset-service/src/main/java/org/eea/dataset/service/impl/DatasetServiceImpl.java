@@ -11,10 +11,9 @@ import javax.transaction.Transactional;
 
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.domain.Record;
-import org.eea.dataset.persistence.repository.DatasetRepository;
 import org.eea.dataset.persistence.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.file.interfaces.FileParseContext;
+import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -41,8 +40,8 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private RecordRepository recordRepository;
 
-	@Autowired
-	DatasetRepository datasetRepository;
+//	@Autowired
+//	private DatasetRepository datasetRepository;
 
 	@Autowired
 	private RecordStoreControllerZull recordStoreControllerZull;
@@ -97,14 +96,20 @@ public class DatasetServiceImpl implements DatasetService {
 		if (file == null) {
 			throw new EEAException("Empty file");
 		}
+		if (datasetId == null) {
+			throw new EEAException("Bad Request");
+		}
 		// obtains the file type from the extension
 		String mimeType = getMimetype(file);
 		try (InputStream inputStream = file.getInputStream()) {
 			// create the right file parser for the file type
-			FileParseContext context = fileParserFactory.createContext(mimeType);
+			IFileParseContext context = fileParserFactory.createContext(mimeType);
 			DataSetVO datasetVO = context.parse(inputStream);
+			// move the VO to the entity
+//			mapper.getmap();
+//			Dataset dataset = mapper(datasetVO);
 			// save dataset to the database
-			datasetRepository.save(datasetVO);
+//			 recordRepository.save(dataset);
 			// after the dataset has been saved, an event is sent to notify it
 			sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
 		} catch (IOException e) {

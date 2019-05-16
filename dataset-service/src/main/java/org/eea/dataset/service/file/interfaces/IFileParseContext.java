@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
 
-public interface FileParseContext {
+public interface IFileParseContext {
 
 	public DataSetVO parse(InputStream inputStream);
 }
