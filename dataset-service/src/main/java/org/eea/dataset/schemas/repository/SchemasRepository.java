@@ -3,13 +3,13 @@
  */
 package org.eea.dataset.schemas.repository;
 
-import org.eea.dataset.schemas.domain.DatasetSchema;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.eea.dataset.schemas.domain.DataSetSchema;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  * @author Mario Severa
  *
  */
-public interface SchemasRepository extends MongoRepository<DatasetSchema, String> {
+public interface SchemasRepository extends CrudRepository<DataSetSchema, String> {
 
 }

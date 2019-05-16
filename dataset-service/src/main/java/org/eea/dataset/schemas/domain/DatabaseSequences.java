@@ -1,6 +1,5 @@
 package org.eea.dataset.schemas.domain;
 
-
 import javax.persistence.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
@@ -9,14 +8,13 @@ import lombok.Data;
  * @author Mario Severa
  *
  */
-
-
 @Data
-@Document(collection = "DatasetSchema")
-public class DatasetSchema {
-  @Id
-  private Long id;
+@Document(collection = "DatabaseSequences")
+public class DatabaseSequences {
 
-  private String value;
+  @Id
+  private String id;
+
+  private long seq;
 
 }

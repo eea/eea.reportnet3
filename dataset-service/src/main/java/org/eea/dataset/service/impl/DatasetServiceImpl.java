@@ -1,14 +1,17 @@
 package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.domain.Record;
 import org.eea.dataset.persistence.repository.RecordRepository;
-import org.eea.dataset.schemas.domain.DatasetSchema;
+import org.eea.dataset.schemas.domain.DataSetSchema;
+import org.eea.dataset.schemas.domain.FiledSchema;
+import org.eea.dataset.schemas.domain.HeaderType;
+import org.eea.dataset.schemas.domain.RecordSchema;
+import org.eea.dataset.schemas.domain.TableSchema;
 import org.eea.dataset.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -47,10 +50,9 @@ public class DatasetServiceImpl implements DatasetService {
     final List<RecordVO> recordVOs = new ArrayList<>();
     LOG.info("devolviendo datos chulos {}", dataset);
     LOG_ERROR.error("hola  {}", datasetId);
-    ConsoleAppender a;
-    final Date start = new Date();
+   
     final List<Record> records = recordRepository.specialFind(datasetId);
-    if (records.size() > 0) {
+    if (!records.isEmpty()) {
       for (final Record record : records) {
         final RecordVO vo = new RecordVO();
         vo.setId(record.getId().toString());
@@ -85,13 +87,45 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void createDataSchema(String datasetName) {
 
-    DatasetSchema datasetSchema = new DatasetSchema();
+    HeaderType headerType = HeaderType.BOOLEAN;
 
-    datasetSchema.setId(1L);
-    datasetSchema.setValue("DatasetSchema");
+    DataSetSchema dataSetSchema = new DataSetSchema();
 
 
-    schemasRepository.save(datasetSchema);
+
+    long numeroRegistros = schemasRepository.count();
+    dataSetSchema.setId(numeroRegistros + 1);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    Long dssID = 0L;
+    Long fsID = 0L;
+
+    for (int dss = 1; dss <= 2; dss++) {
+      TableSchema tableSchema = new TableSchema();
+      tableSchema.setId(dssID + dss);
+
+      RecordSchema recordSchema = new RecordSchema();
+      recordSchema.setId(dssID + dss);
+      recordSchema.setIdTable(tableSchema.getId());
+      List<FiledSchema> fieldSchemas = new ArrayList<>();
+
+      for (int fs = 1; fs <= 20; fs++) {
+        FiledSchema fieldSchema = new FiledSchema();
+        fieldSchema = new FiledSchema();
+        fieldSchema.setId(fsID + fs);
+        fieldSchema.setIdRecord(recordSchema.getId());
+        fieldSchema.setHeaderName("Existencia:");
+        fieldSchema.setHeaderType(headerType);
+        fieldSchemas.add(fieldSchema);
+      }
+      recordSchema.setFiledSchemas(fieldSchemas);
+      tableSchema.setRecordSchema(recordSchema);
+      tableSchemas.add(tableSchema);
+    }
+    dataSetSchema.setTableSchemas(tableSchemas);
+    schemasRepository.save(dataSetSchema);
+
+
 
   }
+
 }
