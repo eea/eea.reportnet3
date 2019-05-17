@@ -7,8 +7,25 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Gets the fields.
+ *
+ * @return the fields
+ */
 @Getter
+
+/**
+ * Sets the fields.
+ *
+ * @param fields the new fields
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class RecordVO implements Serializable {
 
