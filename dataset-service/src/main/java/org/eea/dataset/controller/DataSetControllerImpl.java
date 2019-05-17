@@ -28,40 +28,40 @@ import io.micrometer.core.annotation.Timed;
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
-	private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-	@Autowired
-	@Qualifier("proxyDatasetService")
-	private DatasetService datasetService;
+  @Autowired
+  @Qualifier("proxyDatasetService")
+  private DatasetService datasetService;
 
-	@Override
-	@HystrixCommand
+  @Override
+  @HystrixCommand
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-	@Timed("FIND_BY_ID_TIMER")
-	public DataSetVO findById(@PathVariable("id") String datasetId) {
-		DataSetVO result = null;
+  @Timed("FIND_BY_ID_TIMER")
+  public DataSetVO findById(@PathVariable("id") String datasetId) {
+    DataSetVO result = null;
 
-		result = datasetService.getDatasetById(datasetId);
+    result = datasetService.getDatasetById(datasetId);
     // TenantResolver.clean();
-		return result;
-	}
+    return result;
+  }
 
-	@Override
+  @Override
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-	public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
+  public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
     // datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
 
-		return null;
-	}
+    return null;
+  }
 
-	@Override
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public void createEmptyDataSet(String datasetname) {
-		datasetService.createEmptyDataset(datasetname);
-	}
+  @Override
+  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  public void createEmptyDataSet(String datasetname) {
+    datasetService.createEmptyDataset(datasetname);
+  }
 
   @Override
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
@@ -69,10 +69,10 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createDataSchema(datasetName);
   }
 
-	public DataSetVO errorHandler(@PathVariable("id") String id) {
-		DataSetVO dataset = new DataSetVO();
-		dataset.setId("ERROR");
-		return dataset;
+  public DataSetVO errorHandler(@PathVariable("id") String id) {
+    DataSetVO dataset = new DataSetVO();
+    dataset.setId("ERROR");
+    return dataset;
   }
 
   @Override
@@ -90,21 +90,5 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
-	}
-
-	@Override
-	@PostMapping("{id}/uploadFile")
-	public void loadDatasetData(@PathVariable("id") String datasetId, @RequestParam("file") MultipartFile file) {
-		try {
-			if (file == null || file.isEmpty()) {
-				throw new IOException("File invalid");
-			}
-			if (datasetId == null) {
-				throw new EEAException("File invalid");
-			}
-			datasetService.processFile(datasetId, file);
-		} catch (IOException | EEAException e) {
-			LOG_ERROR.error(e.getMessage());
-		}
-	}
+  }
 }
