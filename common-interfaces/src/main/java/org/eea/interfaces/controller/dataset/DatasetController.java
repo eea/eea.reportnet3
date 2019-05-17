@@ -4,10 +4,12 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -53,9 +55,11 @@ public interface DatasetController {
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
+  @PostMapping("{id}/uploadFile")
+  public void loadDatasetData(@PathVariable("id") String datasetId,
+      @RequestParam("file") MultipartFile file);
+
   /**
-   * Creates the data schema. Only for the demo
-   *
    * @param datasetName the dataset name
    */
   @Deprecated

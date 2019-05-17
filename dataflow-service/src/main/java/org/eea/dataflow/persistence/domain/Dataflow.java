@@ -2,6 +2,7 @@ package org.eea.dataflow.persistence.domain;
 
 import java.util.List;
 import java.util.Objects;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,125 +13,56 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * The type Dataflow.
  */
 @Entity
+@Getter
+@Setter
+@ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
-  @Column(name = "name")
-  private String name;
-  @Column(name = "description")
-  private String description;
-  @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
-  private SubmissionAgreement submissionAgreement;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "ID", columnDefinition = "serial")
+	private Long id;
 
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL,
-      orphanRemoval = true)
-  private List<Contributor> contributors;
+	@Column(name = "NAME")
+	private String name;
 
-  /**
-   * Gets id.
-   *
-   * @return the id
-   */
-  public Long getId() {
-    return id;
-  }
+	@Column(name = "DESCRIPTION")
+	private String description;
 
-  /**
-   * Sets id.
-   *
-   * @param id the id
-   */
-  public void setId(final Long id) {
-    this.id = id;
-  }
+	@OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+	private SubmissionAgreement submissionAgreement;
 
-  /**
-   * Gets name.
-   *
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
+	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Contributor> contributors;
 
-  /**
-   * Sets name.
-   *
-   * @param name the name
-   */
-  public void setName(final String name) {
-    this.name = name;
-  }
+	@OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Document> documents;
 
-  /**
-   * Gets description.
-   *
-   * @return the description
-   */
-  public String getDescription() {
-    return description;
-  }
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		final Dataflow dataflow = (Dataflow) o;
+		return id.equals(dataflow.id);
 
-  /**
-   * Sets description.
-   *
-   * @param description the description
-   */
-  public void setDescription(final String description) {
-    this.description = description;
-  }
+	}
 
-  /**
-   * Gets contributors.
-   *
-   * @return the contributors
-   */
-  public List<Contributor> getContributors() {
-    return contributors;
-  }
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, description, contributors, submissionAgreement, documents);
+	}
 
-  /**
-   * Sets contributors.
-   *
-   * @param contributors the contributors
-   */
-  public void setContributors(final List<Contributor> contributors) {
-    this.contributors = contributors;
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    final Dataflow dataflow = (Dataflow) o;
-    return id.equals(dataflow.id);
-
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name, description, contributors);
-  }
-
-  @Override
-  public String toString() {
-    return "Dataflow{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", description='" + description + '\'' +
-        ", contributors=" + contributors +
-        '}';
-  }
 }

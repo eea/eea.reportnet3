@@ -45,11 +45,11 @@ mongodb:
   hibernate:
       ddl-auto: create
   primary:
-    host: localhost
-    port: 27017
-    database: admin
-    username: root
-    password: root
+      host: localhost
+      port: 27017
+      database: admin
+      username: root
+      password: root
     
 hystrix:
   command:
