@@ -37,20 +37,22 @@ public class DataSetControllerImpl implements DatasetController {
 
 	@Override
 	@HystrixCommand
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
 	@Timed("FIND_BY_ID_TIMER")
 	public DataSetVO findById(@PathVariable("id") String datasetId) {
 		DataSetVO result = null;
 
 		result = datasetService.getDatasetById(datasetId);
-		// TenantResolver.clean();
+    // TenantResolver.clean();
 		return result;
 	}
 
 	@Override
-	@RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/update", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
 	public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
-//		datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
+    // datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
 
 		return null;
 	}
@@ -61,10 +63,33 @@ public class DataSetControllerImpl implements DatasetController {
 		datasetService.createEmptyDataset(datasetname);
 	}
 
+  @Override
+  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
+  public void createDataSchema(String datasetName) {
+    datasetService.createDataSchema(datasetName);
+  }
+
 	public DataSetVO errorHandler(@PathVariable("id") String id) {
 		DataSetVO dataset = new DataSetVO();
 		dataset.setId("ERROR");
 		return dataset;
+  }
+
+  @Override
+  @PostMapping("{id}/uploadFile")
+  public void loadDatasetData(@PathVariable("id") String datasetId,
+      @RequestParam("file") MultipartFile file) {
+    try {
+      if (file == null || file.isEmpty()) {
+        throw new IOException("File invalid");
+      }
+      if (datasetId == null) {
+        throw new EEAException("File invalid");
+      }
+      datasetService.processFile(datasetId, file);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
 	}
 
 	@Override
