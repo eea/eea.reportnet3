@@ -1,7 +1,6 @@
 package org.eea.dataset.service.file.interfaces;
 
 import java.io.InputStream;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 
 /**
@@ -13,8 +12,9 @@ public interface ReaderStrategy {
    * Parses the file.
    *
    * @param inputStream the input stream
+   * @param datasetId the dataset id
+   * @param integer the integer
    * @return the data set VO
-   * @throws InvalidFileException the invalid file exception
    */
-  public DataSetVO parseFile(InputStream inputStream);
+  public DataSetVO parseFile(InputStream inputStream, String datasetId, String name);
 }

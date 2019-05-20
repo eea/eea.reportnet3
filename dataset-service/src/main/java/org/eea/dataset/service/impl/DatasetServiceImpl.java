@@ -8,8 +8,13 @@ import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.multitenancy.DatasetId;
+import org.eea.dataset.persistence.domain.Dataset;
 import org.eea.dataset.persistence.domain.Record;
+import org.eea.dataset.persistence.repository.DatasetRepository;
 import org.eea.dataset.persistence.repository.RecordRepository;
 import org.eea.dataset.schemas.domain.DataSetSchema;
 import org.eea.dataset.schemas.domain.FieldSchema;
@@ -19,6 +24,7 @@ import org.eea.dataset.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -43,10 +49,16 @@ public class DatasetServiceImpl implements DatasetService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Autowired
+  private DataSetMapper dataSetMapper;
+
+  @Autowired
   private RecordRepository recordRepository;
 
-  // @Autowired
-  // private DatasetRepository datasetRepository;
+  @Autowired
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+
+  @Autowired
+  private DatasetRepository datasetRepository;
 
   @Autowired
   private SchemasRepository schemasRepository;
@@ -146,32 +158,37 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Process file.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Transactional
-  public void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException {
-    if (file == null) {
-      throw new EEAException("Empty file");
-    }
-    if (datasetId == null) {
-      throw new EEAException("Bad Request");
-    }
+  public void processFile(@DatasetId String datasetId, MultipartFile file)
+      throws EEAException, IOException {
     // obtains the file type from the extension
-    String mimeType = getMimetype(file);
+    String mimeType = getMimetype(file.getOriginalFilename());
     try (InputStream inputStream = file.getInputStream()) {
+      PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+          .findOneByIdDataSetAndUsername(datasetId, "root").orNull();
+
       // create the right file parser for the file type
       IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO = context.parse(inputStream);
+      DataSetVO datasetVO = context.parse(inputStream, datasetId, partition.getUsername());
       // move the VO to the entity
-      // mapper.getmap();
-      // Dataset dataset = mapper(datasetVO);
+      if (datasetVO == null) {
+        throw new IOException();
+      }
+      datasetVO.setId(datasetId);
+      Dataset dataset = dataSetMapper.classToEntity(datasetVO);
       // save dataset to the database
-      // recordRepository.save(dataset);
+      datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
-    } catch (IOException e) {
-      LOG_ERROR.error(e.getMessage());
-    } catch (Exception e) {
-      LOG_ERROR.error(e.getMessage());
     }
   }
 
@@ -180,18 +197,15 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param file the file
    * @return the mimetype
+   * @throws EEAException the EEA exception
    */
-  private String getMimetype(MultipartFile file) {
+  private String getMimetype(String file) throws EEAException {
     String mimeType = null;
-    try {
-      int i = file.getOriginalFilename().lastIndexOf('.');
-      if (i == -1) {
-        throw new EEAException("the file needs an extension");
-      }
-      mimeType = file.getOriginalFilename().substring(i + 1);
-    } catch (EEAException e) {
-      LOG.error(e.getMessage());
+    int location = file.lastIndexOf('.');
+    if (location == -1) {
+      throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
     }
+    mimeType = file.substring(location + 1);
     return mimeType;
   }
 

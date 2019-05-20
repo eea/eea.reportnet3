@@ -55,8 +55,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the data source
    */
-  @Primary
+
   @Bean
+  @Primary
   public DataSource dataSource() {
     final AbstractRoutingDataSource ds = new MultiTenantDataSource();
 
@@ -76,6 +77,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return targetDataSources;
   }
 
+  @Primary
   private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
     final DriverManagerDataSource ds = new DriverManagerDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
@@ -86,14 +88,15 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return ds;
   }
 
-  @Primary
+
   @Bean
   @Autowired
-  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory(
-      DataSource datasource) {
+  @Primary
+  @Qualifier("dataSetsEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
     LocalContainerEntityManagerFactoryBean dataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
-    dataSetsEM.setDataSource(datasource);
+    dataSetsEM.setDataSource(dataSource());
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.domain");
     JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
@@ -109,14 +112,13 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return properties;
   }
 
-  @Primary
   @Bean
   @Autowired
-  public PlatformTransactionManager dataSetsTransactionManager(
-      LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory) {
+  @Primary
+  public PlatformTransactionManager dataSetsTransactionManager() {
 
     JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
-    schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory.getObject());
+    schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
   }
 
