@@ -15,6 +15,15 @@ spring:
           lob:
             non_contextual_creation: true
     database: postgresql
+  datasource:
+    metasource:
+      url: ${METABASE_DATASOURCE_URL:jdbc:postgresql://localhost/metabase}
+      username: ${METABASE_DATASOURCE_USER_NAME:root}
+      password: ${METABASE_DATASOURCE_PASSWORD:root}
+      driver-class-name: ${METABASE_DATASOURCE_DRIVER_CLASS:org.postgresql.Driver}
+      hikari:
+        connection-timeout: ${METABASE_DATABASE_CONNECTION_TIMEOUT:60000}
+        maximum-pool-size: ${METABASE_DATABASE_CONNECTION_MAXIMUM_POOL_SIZE:5}
   cloud:
     consul:
       discovery:
