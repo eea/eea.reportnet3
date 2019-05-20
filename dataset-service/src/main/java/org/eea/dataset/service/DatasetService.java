@@ -6,6 +6,7 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -55,6 +56,11 @@ public interface DatasetService {
    * @param datasetName the dataset name
    */
   void createDataSchema(String datasetName);
-
+  
+  
+  /**
+   * Gets dataschema by id
+   */
+  DataSetSchemaVO getDataSchemaById(String dataschemaId);
 
 }

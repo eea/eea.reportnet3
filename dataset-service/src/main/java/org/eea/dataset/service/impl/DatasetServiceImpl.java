@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.multitenancy.DatasetId;
@@ -24,6 +25,8 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -113,6 +116,7 @@ public class DatasetServiceImpl implements DatasetService {
     for (int dss = 1; dss <= 2; dss++) {
       TableSchema tableSchema = new TableSchema();
       tableSchema.setIdTableSchema(new ObjectId());
+      tableSchema.setNameSchema("tabla_"+dss);
 
       RecordSchema recordSchema = new RecordSchema();
       recordSchema.setIdRecordSchema(new ObjectId());
@@ -175,6 +179,39 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
+  @Override
+  public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
+    
+    //Iterable<DataSetSchema> dataschema1 = schemasRepository.findAll();
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
+    LOG.info("devolviendo dataschema {}", dataschema);
+    
+    final DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
+    if(dataschema.isPresent()) {
+      DataSetSchema datasetSchema = dataschema.get();
+      
+      dataSchemaVO.setIdDataSetSchema(datasetSchema.getIdDataSetSchema());
+      if(!datasetSchema.getTableSchemas().isEmpty()) {
+        List<TableSchemaVO> tableVo = new ArrayList<TableSchemaVO>();
+        for(TableSchema tabla : datasetSchema.getTableSchemas()) {
+          TableSchemaVO table = new TableSchemaVO();
+          table.setIdTableSchema(tabla.getIdTableSchema());
+          table.setNameSchema(tabla.getNameSchema());
+          //table.setRecordSchema(tabla.getRecordSchema());
+          tableVo.add(table);
+         
+        }
+        dataSchemaVO.setTableSchemas(tableVo);
+      }
+      
+    }
+    
+    
+    return dataSchemaVO;
+    
+  }
+  
+  
   /**
    * Gets the mimetype.
    *
@@ -210,4 +247,6 @@ public class DatasetServiceImpl implements DatasetService {
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
   }
+
+  
 }

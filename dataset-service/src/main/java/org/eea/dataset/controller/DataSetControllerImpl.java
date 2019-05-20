@@ -5,6 +5,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,11 @@ public class DataSetControllerImpl implements DatasetController {
     dataset.setId("ERROR");
     return dataset;
   }
+  public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
+    DataSetSchemaVO dataschema = new DataSetSchemaVO();
+  
+    return dataschema;
+  }
 
   @Override
   @PostMapping("{id}/uploadFile")
@@ -90,5 +96,15 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
+  }
+
+  @Override
+  @HystrixCommand(fallbackMethod = "errorHandlerSchema")
+  @RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
+    
+    return datasetService.getDataSchemaById(id);
+    
   }
 }

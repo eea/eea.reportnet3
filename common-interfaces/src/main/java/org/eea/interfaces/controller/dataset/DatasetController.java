@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,5 +66,12 @@ public interface DatasetController {
   @Deprecated
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
   void createDataSchema(@RequestParam("datasetName") String datasetName);
+  
+  /**
+   * @param dataschemaName the dataschema name
+   */
+  @RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
 
 }
