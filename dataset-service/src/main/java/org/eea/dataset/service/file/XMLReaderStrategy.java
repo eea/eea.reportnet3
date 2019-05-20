@@ -23,7 +23,7 @@ public class XMLReaderStrategy implements ReaderStrategy {
    * @return the data set VO
    */
   @Override
-  public DataSetVO parseFile(InputStream inputStream, String datasetId, String username) {
+  public DataSetVO parseFile(InputStream inputStream, String datasetId, Long partitionId) {
     return null;
   }
 

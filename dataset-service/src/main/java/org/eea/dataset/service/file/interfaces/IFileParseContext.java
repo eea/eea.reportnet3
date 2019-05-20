@@ -16,5 +16,5 @@ public interface IFileParseContext {
    * @param integer the integer
    * @return the data set VO
    */
-  public DataSetVO parse(InputStream inputStream, String datasetId, String name);
+  public DataSetVO parse(InputStream inputStream, String datasetId, Long partitionId);
 }

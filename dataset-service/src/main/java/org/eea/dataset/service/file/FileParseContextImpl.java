@@ -28,7 +28,7 @@ public class FileParseContextImpl implements IFileParseContext {
    * @return the data set VO
    */
   @Override
-  public DataSetVO parse(InputStream inputStream, String datasetId, String name) {
-    return readerStrategy.parseFile(inputStream, datasetId, name);
+  public DataSetVO parse(InputStream inputStream, String datasetId, Long partitionId) {
+    return readerStrategy.parseFile(inputStream, datasetId, partitionId);
   }
 }
