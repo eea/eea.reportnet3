@@ -55,8 +55,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the data source
    */
-  @Primary
+
   @Bean
+  @Primary
   public DataSource dataSource() {
     final AbstractRoutingDataSource ds = new MultiTenantDataSource();
 
@@ -76,6 +77,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return targetDataSources;
   }
 
+  @Primary
   private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
     final DriverManagerDataSource ds = new DriverManagerDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
@@ -86,9 +88,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return ds;
   }
 
-  @Primary
+
   @Bean
   @Autowired
+  @Primary
+  @Qualifier("dataSetsEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory(
       DataSource datasource) {
     LocalContainerEntityManagerFactoryBean dataSetsEM =
@@ -109,11 +113,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return properties;
   }
 
-  @Primary
   @Bean
   @Autowired
+  @Primary
   public PlatformTransactionManager dataSetsTransactionManager(
-      LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory) {
+      @Qualifier("dataSetsEntityManagerFactory") LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory) {
 
     JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory.getObject());
