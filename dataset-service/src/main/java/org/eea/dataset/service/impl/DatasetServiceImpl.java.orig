@@ -7,7 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
+<<<<<<< HEAD
 import org.eea.dataset.mapper.DataSetMapper;
+=======
+import org.bson.types.ObjectId;
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.domain.DatasetValue;
 import org.eea.dataset.persistence.domain.Record;
@@ -45,6 +49,7 @@ public class DatasetServiceImpl implements DatasetService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Autowired
+<<<<<<< HEAD
   DataSetMapper dataSetMapper;
 
   @Autowired
@@ -52,9 +57,15 @@ public class DatasetServiceImpl implements DatasetService {
 
   // @Autowired
   // private DatasetMetabaseRepository datasetMetabaseRepository;
+=======
+  private RecordRepository recordRepository;
+
+  // @Autowired
+  // private DatasetRepository datasetRepository;
 
   @Autowired
   private SchemasRepository schemasRepository;
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
 
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
@@ -101,6 +112,11 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
+<<<<<<< HEAD
+  @Transactional
+  public void processFile(@DatasetId String datasetId, MultipartFile file)
+      throws EEAException, IOException {
+=======
   public void createDataSchema(String datasetName) {
 
     TypeData headerType = TypeData.BOOLEAN;
@@ -153,8 +169,14 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   @Transactional
-  public void processFile(@DatasetId String datasetId, MultipartFile file)
-      throws EEAException, IOException {
+  public void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException {
+    if (file == null) {
+      throw new EEAException("Empty file");
+    }
+    if (datasetId == null) {
+      throw new EEAException("Bad Request");
+    }
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
     // obtains the file type from the extension
     String mimeType = getMimetype(file);
     try (InputStream inputStream = file.getInputStream()) {
@@ -162,6 +184,7 @@ public class DatasetServiceImpl implements DatasetService {
       IFileParseContext context = fileParserFactory.createContext(mimeType);
       DataSetVO datasetVO = context.parse(inputStream);
       // move the VO to the entity
+<<<<<<< HEAD
       if (datasetVO == null) {
         throw new IOException();
       }
@@ -171,6 +194,18 @@ public class DatasetServiceImpl implements DatasetService {
       // datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+=======
+      // mapper.getmap();
+      // Dataset dataset = mapper(datasetVO);
+      // save dataset to the database
+      // recordRepository.save(dataset);
+      // after the dataset has been saved, an event is sent to notify it
+      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error(e.getMessage());
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
     }
   }
 
@@ -179,6 +214,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param file the file
    * @return the mimetype
+<<<<<<< HEAD
    * @throws EEAException
    */
   private String getMimetype(MultipartFile file) throws EEAException {
@@ -188,6 +224,20 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
     }
     mimeType = file.getOriginalFilename().substring(i + 1);
+=======
+   */
+  private String getMimetype(MultipartFile file) {
+    String mimeType = null;
+    try {
+      int i = file.getOriginalFilename().lastIndexOf('.');
+      if (i == -1) {
+        throw new EEAException("the file needs an extension");
+      }
+      mimeType = file.getOriginalFilename().substring(i + 1);
+    } catch (EEAException e) {
+      LOG.error(e.getMessage());
+    }
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
     return mimeType;
   }
 

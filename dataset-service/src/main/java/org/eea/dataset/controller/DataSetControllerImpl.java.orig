@@ -65,6 +65,14 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createEmptyDataset(datasetname);
   }
 
+<<<<<<< HEAD
+  public DataSetVO errorHandler(@PathVariable("id") String id) {
+    DataSetVO dataset = new DataSetVO();
+    dataset.setId("ERROR");
+    return dataset;
+  }
+
+=======
   @Override
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
   public void createDataSchema(String datasetName) {
@@ -77,10 +85,12 @@ public class DataSetControllerImpl implements DatasetController {
     return dataset;
   }
 
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
   @Override
   @PostMapping("{id}/uploadFile")
   public void loadDatasetData(@PathVariable("id") String datasetId,
       @RequestParam("file") MultipartFile file) {
+<<<<<<< HEAD
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT,
           new Exception());
@@ -98,6 +108,18 @@ public class DataSetControllerImpl implements DatasetController {
       }
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+=======
+    try {
+      if (file == null || file.isEmpty()) {
+        throw new IOException("File invalid");
+      }
+      if (datasetId == null) {
+        throw new EEAException("File invalid");
+      }
+      datasetService.processFile(datasetId, file);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+>>>>>>> origin/feature/REP-16-be-create-load-service-structure
     }
   }
 }

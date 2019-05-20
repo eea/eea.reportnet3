@@ -50,4 +50,13 @@ public interface DatasetService {
   void processFile(@DatasetId String datasetId, MultipartFile file)
       throws EEAException, IOException;
 
+
+  /**
+   * Creates the data schema.
+   *
+   * @param datasetName the dataset name
+   */
+  void createDataSchema(String datasetName);
+
+
 }
