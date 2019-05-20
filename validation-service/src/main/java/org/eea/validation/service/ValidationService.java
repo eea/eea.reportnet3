@@ -1,112 +1,87 @@
 package org.eea.validation.service;
 
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.drools.template.ObjectDataCompiler;
-import org.eea.validation.model.Element;
-import org.eea.validation.model.Rules;
-import org.eea.validation.repository.RulesRepository;
+import java.util.Optional;
+import org.bson.types.ObjectId;
+import org.eea.validation.model.DataSetSchema;
+import org.eea.validation.model.rules.Rule;
+import org.eea.validation.repository.DataSetSchemaRepository;
 import org.kie.api.KieBase;
-import org.kie.api.KieServices;
-import org.kie.api.io.Resource;
-import org.kie.api.io.ResourceType;
-import org.kie.api.runtime.KieSession;
-import org.kie.internal.utils.KieHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.google.common.collect.Lists;
 
 @Service
 public class ValidationService {
 
-  private static final String REGULATION_TEMPLATE_FILE =
-      "src/main/resources/ruletemplate/template01.drl";
 
   @Autowired
-  private RulesRepository rulesRepository;
+  private DataSetSchemaRepository dataSetSchemaRepository;
 
-  private KieBase kieBase;
+  public void getElementLenght() {
 
-  @Autowired
-  public ValidationService(KieBase kieBase) {
-    this.kieBase = kieBase;
-  }
-
-
-
-  public Element getElementLenght(Element element) {
-    // get the stateful session
-
-    KieSession kieSession = kieBase.newKieSession();
-    kieSession.insert(element);
-    kieSession.fireAllRules();
-    kieSession.dispose();
-    return element;
 
   }
 
-  public List<Map<String, String>> getRules(Rules rules) {
-    Iterable<Rules> preRepositoryDB = rulesRepository.findAll();
-    List<Rules> preRepository = Lists.newArrayList(preRepositoryDB);
-    List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    for (int i = 0; i < preRepository.size(); i++) {
-      Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getName());
-      ruleAttributes.add(rule1);
-    }
-    return ruleAttributes;
+  public List<Map<String, String>> getRules(Rule rules) {
+    return null;
   }
 
-  public void setNewRules(Rules newRules) {
+  public void setNewRules(Rule newRules) {
 
-    rulesRepository.save(newRules);
+    // List<TableSchema> tableSchemaList = new ArrayList();
+    // TableSchema esquema = new TableSchema();
+    // esquema.setIdTableSchema(new ObjectId());
+    // esquema.setNameSchema("nombre probando123");
+    //
+    // RecordSchema recordSchema = new RecordSchema();
+    // recordSchema.setNameSchema("NAME RECORD SCHEMA");
+    // recordSchema.setIdRecordSchema(new ObjectId());
+    //
+    //
+    // DataSetSchema dataSetSchema = new DataSetSchema();
+    //
+    // List<FieldSchema> fieldSchemaList = new ArrayList();
+    // FieldSchema fieldSchema1 = new FieldSchema();
+    // fieldSchema1.setIdFieldSchema(new ObjectId());
+    // fieldSchema1.setType(HeaderType.BOOLEAN);
+    // FieldSchema fieldSchema2 = new FieldSchema();
+    // fieldSchema2.setType(HeaderType.STRING);
+    // fieldSchema2.setIdFieldSchema(new ObjectId());
+    // fieldSchemaList.add(fieldSchema1);
+    // fieldSchemaList.add(fieldSchema2);
+    //
+    // recordSchema.setFieldSchema(fieldSchemaList);
+    // esquema.setRecordSchema(recordSchema);
+    // esquema.setTableRuleList(new ArrayList());
+    // tableSchemaList.add(esquema);
+    // dataSetSchema.setIdDataSetSchema(new ObjectId());
+    // dataSetSchema.setTableSchemas(tableSchemaList);
+    // DataSetSchema test = dataSetSchemaRepository.save(dataSetSchema);
+    // esquema.setNameSchema("nombre probando1234");
+    // recordSchema.setNameSchema("NAME RECORD SCHEMA 2");
+    // esquema.setRecordSchema(recordSchema);
+    // dataSetSchema.setIdDataSetSchema(new ObjectId());
+    // dataSetSchemaRepository.save(dataSetSchema);
+    List<DataSetSchema> listaTabla = dataSetSchemaRepository.findAll();;
+    Optional<DataSetSchema> dato =
+        dataSetSchemaRepository.findById(new ObjectId("34234234234234234234"));
+    DataSetSchema pasar = dato.get();
+    // var objectId = mongoose.Types.ObjectId('569ed8269353e9f4c51617aa');
+    dataSetSchemaRepository.deleteByTableSchemasNameSchema("nombre probando123");
+    // rulesRepository.save(newRules);
 
   }
 
-  public KieBase loadNewRules(Rules rules) {
-
-    Iterable<Rules> preRepositoryDB = rulesRepository.findAll();
-
-    List<Rules> preRepository = Lists.newArrayList(preRepositoryDB);
-
-    List<Map<String, String>> ruleAttributes = new ArrayList<>();
-
-    for (int i = 0; i < preRepository.size(); i++) {
-      Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getName());
-      rule1.put("whencondition",
-          preRepository.get(i).getAttribute() + preRepository.get(i).getConditionalElement());
-      rule1.put("thencondition", preRepository.get(i).getAction());
-      ruleAttributes.add(rule1);
-    }
-
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
-
-    String generatedDRL = null;
-    try {
-      generatedDRL =
-          compiler.compile(ruleAttributes, new FileInputStream(REGULATION_TEMPLATE_FILE));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
-    KieServices kieServices = KieServices.Factory.get();
-
-    KieHelper kieHelper = new KieHelper();
-
-    // multiple such resoures/rules can be added
-    byte[] b1 = generatedDRL.getBytes();
-    Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
-    kieHelper.addResource(resource1, ResourceType.DRL);
-
-    KieBase kieBase2 = kieHelper.build();
-    this.kieBase = kieBase2;
-    return kieBase;
+  // Object convertToObjectId(Object id) {
+  // if (id instanceof String && ObjectId.isValid(id)) {
+  // return new ObjectId(id);
+  // }
+  // return id;
+  // }
+  public KieBase loadNewRules(Rule rules) {
+    return null;
   }
 
 }
