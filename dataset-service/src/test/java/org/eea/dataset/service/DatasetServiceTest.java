@@ -1,11 +1,11 @@
 package org.eea.dataset.service;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-
+import java.io.IOException;
 import java.io.InputStream;
-
+import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.persistence.domain.DatasetValue;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
@@ -25,75 +25,66 @@ import org.springframework.mock.web.MockMultipartFile;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetServiceTest {
 
-	@InjectMocks
-	DatasetServiceImpl datasetService;
+  @InjectMocks
+  DatasetServiceImpl datasetService;
 
-	@Mock
-	IFileParseContext context;
+  @Mock
+  IFileParseContext context;
 
-	@Mock
-	FileParserFactory fileParserFactory;
+  @Mock
+  FileParserFactory fileParserFactory;
 
-//	@Mock
-//	DatasetRepository datasetRepository;
+  @Mock
+  DataSetMapper dataSetMapper;
 
-	@Mock
-	KafkaSender kafkaSender;
+  // @Mock
+  // DatasetRepository datasetRepository;
 
-	@Before
-	public void initMocks() {
-		MockitoAnnotations.initMocks(this);
-	}
+  @Mock
+  KafkaSender kafkaSender;
 
-	@Test(expected = EEAException.class)
-	public void testProcessFileThrowExceptionFileNull() throws Exception {
-		datasetService.processFile("1", null);
-	}
+  @Before
+  public void initMocks() {
+    MockitoAnnotations.initMocks(this);
+  }
 
-	@Test(expected = EEAException.class)
-	public void testProcessFileThrowException() throws Exception {
-		MockMultipartFile fileNoExtension = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-		datasetService.processFile(null, fileNoExtension);
-	}
+  @Test(expected = EEAException.class)
+  public void testProcessFileThrowException() throws Exception {
+    MockMultipartFile fileNoExtension =
+        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    datasetService.processFile(null, fileNoExtension);
+  }
 
-	@Test
-	public void testProcessFileThrowException2() throws Exception {
-		MockMultipartFile fileNoExtension = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+  @Test(expected = EEAException.class)
+  public void testProcessFileThrowException2() throws Exception {
+    MockMultipartFile fileNoExtension =
+        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
 
-		datasetService.processFile("1", fileNoExtension);
-	}
+    datasetService.processFile("1", fileNoExtension);
+  }
 
-	@Test
-	public void testProcessFileThrowException4() throws Exception {
-		MockMultipartFile fileNoType = new MockMultipartFile("file", "fileOriginal.csv", null, "content".getBytes());
+  @Test(expected = IOException.class)
+  public void testProcessFileEmptyDataset() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
+    when(context.parse(Mockito.any(InputStream.class))).thenReturn(null);
 
-		datasetService.processFile("1", fileNoType);
-	}
+    datasetService.processFile("1", file);
+  }
 
-	// @Test
-	public void testProcessFileThrowException5() throws Exception {
-		MockMultipartFile fileNoType = new MockMultipartFile("file", "fileOriginal.csv", null, "content".getBytes());
-		doThrow(new EEAException()).when(context).parse(Mockito.any(InputStream.class));
-		datasetService.processFile("1", fileNoType);
-	}
-
-	@Test
-	public void testProcessFileEmptyDataset() throws Exception {
-		MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-		when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-		when(context.parse(Mockito.any(InputStream.class))).thenReturn(null);
-
-		datasetService.processFile("1", file);
-	}
-
-	@Test
-	public void testProcessFileSuccess() throws Exception {
-		MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-		when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-		when(context.parse(Mockito.any(InputStream.class))).thenReturn(new DataSetVO());
-//		when(datasetRepository.save(Mockito.any())).thenReturn(new DataSetVO());
-		doNothing().when(kafkaSender).sendMessage(Mockito.any());
-		datasetService.processFile("1", file);
-	}
+  @Test
+  public void testProcessFileSuccess() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
+    when(context.parse(Mockito.any(InputStream.class))).thenReturn(new DataSetVO());
+    // when(datasetRepository.save(Mockito.any())).thenReturn(new DataSetVO());
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    DatasetValue entityValue = new DatasetValue();
+    entityValue.setId("dataSet_1");
+    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
+    datasetService.processFile("1", file);
+  }
 
 }

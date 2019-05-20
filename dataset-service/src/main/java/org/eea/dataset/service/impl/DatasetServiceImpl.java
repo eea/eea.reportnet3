@@ -6,15 +6,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.transaction.Transactional;
-
+import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
+import org.eea.dataset.persistence.domain.DatasetValue;
 import org.eea.dataset.persistence.domain.Record;
 import org.eea.dataset.persistence.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -34,121 +35,115 @@ import org.springframework.web.multipart.MultipartFile;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
-	private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-	@Autowired
-	private RecordRepository recordRepository;
+  @Autowired
+  DataSetMapper dataSetMapper;
 
-//	@Autowired
-//	private DatasetRepository datasetRepository;
+  @Autowired
+  private RecordRepository recordRepository;
 
-	@Autowired
-	private RecordStoreControllerZull recordStoreControllerZull;
+  // @Autowired
+  // private DatasetMetabaseRepository datasetMetabaseRepository;
 
-	@Autowired
-	private IFileParserFactory fileParserFactory;
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
 
-	@Autowired
-	private KafkaSender kafkaSender;
+  @Autowired
+  private IFileParserFactory fileParserFactory;
 
-	@Override
-	public DataSetVO getDatasetById(@DatasetId final String datasetId) {
-		final DataSetVO dataset = new DataSetVO();
-		final List<RecordVO> recordVOs = new ArrayList<>();
-		final List<Record> records = recordRepository.specialFind(datasetId);
-		if (!records.isEmpty()) {
-			for (final Record record : records) {
-				final RecordVO vo = new RecordVO();
-				vo.setId(record.getId().toString());
-				recordVOs.add(vo);
-			}
-			dataset.setId(datasetId);
-		}
+  @Autowired
+  private KafkaSender kafkaSender;
 
-		return dataset;
-	}
+  @Override
+  public DataSetVO getDatasetById(@DatasetId final String datasetId) {
+    final DataSetVO dataset = new DataSetVO();
+    final List<RecordVO> recordVOs = new ArrayList<>();
+    final List<Record> records = recordRepository.specialFind(datasetId);
+    if (!records.isEmpty()) {
+      for (final Record record : records) {
+        final RecordVO vo = new RecordVO();
+        vo.setId(record.getId().toString());
+        recordVOs.add(vo);
+      }
+      dataset.setId(datasetId);
+    }
 
-	@Override
-	@Transactional
-	public void addRecordToDataset(@DatasetId final String datasetId, final List<RecordVO> records) {
+    return dataset;
+  }
 
-		for (final RecordVO recordVO : records) {
-			final Record r = new Record();
-			r.setId(Integer.valueOf(recordVO.getId()));
-			recordRepository.save(r);
-		}
+  @Override
+  @Transactional
+  public void addRecordToDataset(@DatasetId final String datasetId, final List<RecordVO> records) {
 
-	}
+    for (final RecordVO recordVO : records) {
+      final Record r = new Record();
+      r.setId(Integer.valueOf(recordVO.getId()));
+      recordRepository.save(r);
+    }
 
-	@Override
-	@Transactional
-	public void createEmptyDataset(final String datasetName) {
-		recordStoreControllerZull.createEmptyDataset(datasetName);
-	}
+  }
 
-	@Override
-	@Transactional
-	public void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException {
-		if (file == null) {
-			throw new EEAException("Empty file");
-		}
-		if (datasetId == null) {
-			throw new EEAException("Bad Request");
-		}
-		// obtains the file type from the extension
-		String mimeType = getMimetype(file);
-		try (InputStream inputStream = file.getInputStream()) {
-			// create the right file parser for the file type
-			IFileParseContext context = fileParserFactory.createContext(mimeType);
-			DataSetVO datasetVO = context.parse(inputStream);
-			// move the VO to the entity
-//			mapper.getmap();
-//			Dataset dataset = mapper(datasetVO);
-			// save dataset to the database
-//			 recordRepository.save(dataset);
-			// after the dataset has been saved, an event is sent to notify it
-			sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
-		} catch (IOException e) {
-			LOG_ERROR.error(e.getMessage());
-		} catch (Exception e) {
-			LOG_ERROR.error(e.getMessage());
-		}
-	}
+  @Override
+  @Transactional
+  public void createEmptyDataset(final String datasetName) {
+    recordStoreControllerZull.createEmptyDataset(datasetName);
+  }
 
-	/**
-	 * Gets the mimetype.
-	 *
-	 * @param file the file
-	 * @return the mimetype
-	 */
-	private String getMimetype(MultipartFile file) {
-		String mimeType = null;
-		try {
-			int i = file.getOriginalFilename().lastIndexOf('.');
-			if (i == -1) {
-				throw new EEAException("the file needs an extension");
-			}
-			mimeType = file.getOriginalFilename().substring(i + 1);
-		} catch (EEAException e) {
-			LOG.error(e.getMessage());
-		}
-		return mimeType;
-	}
+  @Override
+  @Transactional
+  public void processFile(@DatasetId String datasetId, MultipartFile file)
+      throws EEAException, IOException {
+    // obtains the file type from the extension
+    String mimeType = getMimetype(file);
+    try (InputStream inputStream = file.getInputStream()) {
+      // create the right file parser for the file type
+      IFileParseContext context = fileParserFactory.createContext(mimeType);
+      DataSetVO datasetVO = context.parse(inputStream);
+      // move the VO to the entity
+      if (datasetVO == null) {
+        throw new IOException();
+      }
+      datasetVO.setId(datasetId);
+      DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      // save dataset to the database
+      // datasetRepository.save(dataset);
+      // after the dataset has been saved, an event is sent to notify it
+      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    }
+  }
 
-	/**
-	 * send message encapsulates the logic to send an event message to kafka.
-	 *
-	 * @param eventType the event type
-	 * @param datasetId the dataset id
-	 */
-	private void sendMessage(EventType eventType, String datasetId) {
+  /**
+   * Gets the mimetype.
+   *
+   * @param file the file
+   * @return the mimetype
+   * @throws EEAException
+   */
+  private String getMimetype(MultipartFile file) throws EEAException {
+    String mimeType = null;
+    int i = file.getOriginalFilename().lastIndexOf('.');
+    if (i == -1) {
+      throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
+    }
+    mimeType = file.getOriginalFilename().substring(i + 1);
+    return mimeType;
+  }
 
-		EEAEventVO event = new EEAEventVO();
-		event.setEventType(eventType);
-		Map<String, Object> dataOutput = new HashMap<>();
-		dataOutput.put("dataset_id", datasetId);
-		event.setData(dataOutput);
-		kafkaSender.sendMessage(event);
-	}
+  /**
+   * send message encapsulates the logic to send an event message to kafka.
+   *
+   * @param eventType the event type
+   * @param datasetId the dataset id
+   */
+  private void sendMessage(EventType eventType, String datasetId) {
+
+    EEAEventVO event = new EEAEventVO();
+    event.setEventType(eventType);
+    Map<String, Object> dataOutput = new HashMap<>();
+    dataOutput.put("dataset_id", datasetId);
+    event.setData(dataOutput);
+    kafkaSender.sendMessage(event);
+  }
 }
