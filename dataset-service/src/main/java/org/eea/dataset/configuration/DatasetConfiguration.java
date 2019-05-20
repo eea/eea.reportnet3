@@ -93,11 +93,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Autowired
   @Primary
   @Qualifier("dataSetsEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory(
-      DataSource datasource) {
+  public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
     LocalContainerEntityManagerFactoryBean dataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
-    dataSetsEM.setDataSource(datasource);
+    dataSetsEM.setDataSource(dataSource());
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.domain");
     JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
@@ -116,11 +115,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Bean
   @Autowired
   @Primary
-  public PlatformTransactionManager dataSetsTransactionManager(
-      @Qualifier("dataSetsEntityManagerFactory") LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory) {
+  public PlatformTransactionManager dataSetsTransactionManager() {
 
     JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
-    schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory.getObject());
+    schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
   }
 

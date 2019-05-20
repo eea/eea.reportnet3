@@ -22,8 +22,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * @author Mario Severa
+ * The Class DataSetMetabaseConfiguration.
  *
+ * @author Mario Severa
  */
 @Configuration
 @EnableTransactionManagement
@@ -34,18 +35,31 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
 
+  /** The dll. */
   @Value("${spring.jpa.hibernate.ddl-auto}")
   private String dll;
+
+  /** The dialect. */
   @Value("${spring.jpa.properties.hibernate.dialect}")
   private String dialect;
+
+  /** The create clob propertie. */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
+
+  /** The url. */
   @Value("${spring.datasource.metasource.url}")
   private String url;
+
+  /** The username. */
   @Value("${spring.datasource.metasource.username}")
   private String username;
+
+  /** The password. */
   @Value("${spring.datasource.metasource.password}")
   private String password;
+
+  /** The driver. */
   @Value("${spring.datasource.metasource.driver-class-name}")
   private String driver;
 
@@ -66,6 +80,11 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
     return metaDataSource;
   }
 
+  /**
+   * Metadata sets entity manager factory.
+   *
+   * @return the local container entity manager factory bean
+   */
   @Bean
   @Autowired
   @Qualifier("metadataSetsEntityManagerFactory")
@@ -80,6 +99,11 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
     return metadataSetsEM;
   }
 
+  /**
+   * Additional meta properties.
+   *
+   * @return the properties
+   */
   private Properties additionalMetaProperties() {
     Properties metaProperties = new Properties();
     metaProperties.setProperty("hibernate.hbm2ddl.auto", dll);
@@ -88,10 +112,15 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
     return metaProperties;
   }
 
+  /**
+   * Metabase data sets transaction manager.
+   *
+   * @param metadataSetsEntityManagerFactory the metadata sets entity manager factory
+   * @return the platform transaction manager
+   */
   @Bean
   @Autowired
-  public PlatformTransactionManager metabaseDataSetsTransactionManager(
-      @Qualifier("metadataSetsEntityManagerFactory") LocalContainerEntityManagerFactoryBean metadataSetsEntityManagerFactory) {
+  public PlatformTransactionManager metabaseDataSetsTransactionManager() {
 
     JpaTransactionManager metabasetransactionManager = new JpaTransactionManager();
     metabasetransactionManager
