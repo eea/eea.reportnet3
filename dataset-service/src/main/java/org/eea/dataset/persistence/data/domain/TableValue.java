@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.domain;
+package org.eea.dataset.persistence.data.domain;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,18 +18,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "RECORD")
-public class Record {
+@Table(name = "TABLE_VALUE")
+public class TableValue {
 
 	@Id
 	@Column(name = "ID")
 	private Integer id;
 	@Column(name = "NAME")
 	private String name;
-	@Column(name = "ID_TABLE")
-    private Long tableValue;
-	@OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
-    private List<FieldValue> fields;
+	
+	@OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
+    private List<Record> records;
 
 	@Override
 	public boolean equals(Object o) {
@@ -38,13 +38,13 @@ public class Record {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		Record record = (Record) o;
-		return id.equals(record.id) && name.equals(record.name);
+		TableValue table = (TableValue) o;
+		return id.equals(table.id) && name.equals(table.name);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, tableValue);
+		return Objects.hash(id, name, records);
 	}
 
 }
