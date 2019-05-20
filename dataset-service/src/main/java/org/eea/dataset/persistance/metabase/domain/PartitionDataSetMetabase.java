@@ -1,17 +1,16 @@
 /**
  * 
  */
-package org.eea.dataset.metabase.domain;
+package org.eea.dataset.persistance.metabase.domain;
 
-import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,22 +24,23 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "DataSet")
-public class DataSetMetabase {
-
+@Table(name = "PartitionDataSet")
+public class PartitionDataSetMetabase {
   @Id
-  @Column(name = "ID", columnDefinition = "serial")
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id", columnDefinition = "serial")
   private Integer id;
-  @Column(name = "DataSetName")
-  private Integer dataSetName;
 
-  @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
-  private List<PartitionDataSetMetabase> partitions;
+  @ManyToOne
+  @JoinColumn(name = "idDataSet")
+  private DataSetMetabase idDataSet;
+
+  @Column(name = "username")
+  private String username;
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataSetName, id, partitions);
+    return Objects.hash(id, idDataSet, username);
   }
 
   @Override
@@ -51,9 +51,9 @@ public class DataSetMetabase {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    DataSetMetabase other = (DataSetMetabase) obj;
-    return Objects.equals(dataSetName, other.dataSetName) && Objects.equals(id, other.id)
-        && Objects.equals(partitions, other.partitions);
+    PartitionDataSetMetabase other = (PartitionDataSetMetabase) obj;
+    return Objects.equals(id, other.id) && Objects.equals(idDataSet, other.idDataSet)
+        && Objects.equals(username, other.username);
   }
 
 

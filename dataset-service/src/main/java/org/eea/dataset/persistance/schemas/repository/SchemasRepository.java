@@ -1,9 +1,9 @@
 /**
  * 
  */
-package org.eea.dataset.schemas.repository;
+package org.eea.dataset.persistance.schemas.repository;
 
-import org.eea.dataset.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistance.schemas.domain.DataSetSchema;
 import org.springframework.data.repository.CrudRepository;
 
 /**
