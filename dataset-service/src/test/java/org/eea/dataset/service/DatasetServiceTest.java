@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.persistence.domain.Dataset;
+import org.eea.dataset.persistence.data.domain.Dataset;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.impl.DatasetServiceImpl;

@@ -1,6 +1,6 @@
 package org.eea.dataset.service.file;
 
-import org.eea.dataset.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.springframework.beans.factory.annotation.Autowired;

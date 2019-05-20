@@ -1,9 +1,9 @@
 /**
  * 
  */
-package org.eea.dataset.persistance.metabase.repository;
+package org.eea.dataset.persistence.metabase.repository;
 
-import org.eea.dataset.persistance.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.springframework.data.repository.CrudRepository;
 
 /**
