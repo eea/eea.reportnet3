@@ -29,7 +29,7 @@ public class PartitionDataSetMetabase {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "id", columnDefinition = "serial")
-  private Integer id;
+  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "idDataSet")

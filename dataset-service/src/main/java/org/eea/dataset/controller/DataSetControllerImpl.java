@@ -78,7 +78,7 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   @Override
-  @PostMapping("{id}/uploadFile")
+  @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") String datasetId,
       @RequestParam("file") MultipartFile file) {
     if (file == null || file.isEmpty()) {

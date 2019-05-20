@@ -7,10 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.persistence.domain.DatasetValue;
+import org.eea.dataset.persistence.domain.Dataset;
 import org.eea.dataset.persistence.domain.Record;
+import org.eea.dataset.persistence.repository.DatasetRepository;
 import org.eea.dataset.persistence.repository.RecordRepository;
 import org.eea.dataset.schemas.domain.DataSetSchema;
 import org.eea.dataset.schemas.domain.FieldSchema;
@@ -45,13 +49,16 @@ public class DatasetServiceImpl implements DatasetService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Autowired
-  DataSetMapper dataSetMapper;
+  private DataSetMapper dataSetMapper;
 
   @Autowired
   private RecordRepository recordRepository;
 
-  // @Autowired
-  // private DatasetMetabaseRepository datasetMetabaseRepository;
+  @Autowired
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+
+  @Autowired
+  private DatasetRepository datasetRepository;
 
   @Autowired
   private SchemasRepository schemasRepository;
@@ -151,24 +158,35 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Process file.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Transactional
   public void processFile(@DatasetId String datasetId, MultipartFile file)
       throws EEAException, IOException {
     // obtains the file type from the extension
-    String mimeType = getMimetype(file);
+    String mimeType = getMimetype(file.getOriginalFilename());
     try (InputStream inputStream = file.getInputStream()) {
+      PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+          .findOneByIdDataSetAndUsername(datasetId, "root").orNull();
+
       // create the right file parser for the file type
       IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO = context.parse(inputStream);
+      DataSetVO datasetVO = context.parse(inputStream, datasetId, partition.getUsername());
       // move the VO to the entity
       if (datasetVO == null) {
         throw new IOException();
       }
       datasetVO.setId(datasetId);
-      DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      Dataset dataset = dataSetMapper.classToEntity(datasetVO);
       // save dataset to the database
-      // datasetRepository.save(dataset);
+      datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
     }
@@ -179,15 +197,15 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param file the file
    * @return the mimetype
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
-  private String getMimetype(MultipartFile file) throws EEAException {
+  private String getMimetype(String file) throws EEAException {
     String mimeType = null;
-    int i = file.getOriginalFilename().lastIndexOf('.');
-    if (i == -1) {
+    int location = file.lastIndexOf('.');
+    if (location == -1) {
       throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
     }
-    mimeType = file.getOriginalFilename().substring(i + 1);
+    mimeType = file.substring(location + 1);
     return mimeType;
   }
 

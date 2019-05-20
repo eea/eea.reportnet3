@@ -35,6 +35,9 @@ public class DataSetMetabase {
   @Column(name = "DataSetName")
   private Integer dataSetName;
 
+  @Column(name = "id_dataset", columnDefinition = "serial")
+  private String idDataSet;
+
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;
 

@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.eea.dataset.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldSchemaVO;
@@ -38,6 +39,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  private SchemasRepository schemasRepository;
+
+
+  public CSVReaderStrategy(SchemasRepository schemasRepository) {
+    this.schemasRepository = schemasRepository;
+  }
 
   /**
    * Parses the file.
@@ -46,7 +53,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @return the data set VO
    */
   @Override
-  public DataSetVO parseFile(InputStream inputStream) {
+  public DataSetVO parseFile(InputStream inputStream, String datasetId, String username) {
     try (Reader buf = new BufferedReader(new InputStreamReader(inputStream))) {
       return readLines(buf);
     } catch (IOException e) {

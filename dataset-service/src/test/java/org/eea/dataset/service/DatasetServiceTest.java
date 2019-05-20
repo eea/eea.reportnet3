@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.persistence.domain.DatasetValue;
+import org.eea.dataset.persistence.domain.Dataset;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
@@ -68,7 +68,8 @@ public class DatasetServiceTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-    when(context.parse(Mockito.any(InputStream.class))).thenReturn(null);
+    when(context.parse(Mockito.any(InputStream.class), Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(null);
 
     datasetService.processFile("1", file);
   }
@@ -78,11 +79,12 @@ public class DatasetServiceTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-    when(context.parse(Mockito.any(InputStream.class))).thenReturn(new DataSetVO());
+    when(context.parse(Mockito.any(InputStream.class), Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(new DataSetVO());
     // when(datasetRepository.save(Mockito.any())).thenReturn(new DataSetVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    DatasetValue entityValue = new DatasetValue();
-    entityValue.setId("dataSet_1");
+    Dataset entityValue = new Dataset();
+    entityValue.setName("dataSet_1");
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
     datasetService.processFile("1", file);
   }
