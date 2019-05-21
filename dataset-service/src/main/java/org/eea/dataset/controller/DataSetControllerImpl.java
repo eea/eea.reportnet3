@@ -74,7 +74,7 @@ public class DataSetControllerImpl implements DatasetController {
 
   public DataSetVO errorHandler(@PathVariable("id") String id) {
     DataSetVO dataset = new DataSetVO();
-    dataset.setId("ERROR");
+    // dataset.setId("ERROR");
     return dataset;
   }
 

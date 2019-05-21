@@ -9,15 +9,17 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.multitenancy.DatasetId;
+import org.eea.dataset.persistance.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistance.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistance.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistance.schemas.domain.FieldSchema;
 import org.eea.dataset.persistance.schemas.domain.RecordSchema;
 import org.eea.dataset.persistance.schemas.domain.TableSchema;
 import org.eea.dataset.persistance.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.data.domain.Dataset;
 import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -95,7 +97,7 @@ public class DatasetServiceImpl implements DatasetService {
         vo.setId(record.getId().toString());
         recordVOs.add(vo);
       }
-      dataset.setId(datasetId);
+      // dataset.setId(datasetId);
     }
 
     return dataset;
@@ -202,8 +204,9 @@ public class DatasetServiceImpl implements DatasetService {
     // obtains the file type from the extension
     String mimeType = getMimetype(file.getOriginalFilename());
     try (InputStream inputStream = file.getInputStream()) {
-      PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
-          .findOneByIdDataSetAndUsername(datasetId, "root").orNull();
+      // PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+      // .findOneByIdDataSetAndUsername(datasetId, "root").orNull();
+      PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
 
       // create the right file parser for the file type
       IFileParseContext context = fileParserFactory.createContext(mimeType);
@@ -212,7 +215,6 @@ public class DatasetServiceImpl implements DatasetService {
       if (datasetVO == null) {
         throw new IOException();
       }
-      datasetVO.setId(datasetId);
       Dataset dataset = dataSetMapper.classToEntity(datasetVO);
       // save dataset to the database
       datasetRepository.save(dataset);

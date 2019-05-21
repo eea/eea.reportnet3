@@ -1,7 +1,7 @@
 package org.eea.dataset.service.file;
 
 import java.io.InputStream;
-import org.eea.dataset.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistance.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 
