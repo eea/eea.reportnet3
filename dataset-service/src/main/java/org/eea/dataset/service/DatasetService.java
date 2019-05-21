@@ -60,4 +60,10 @@ public interface DatasetService {
   DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
 
 
+  /**
+   * Delete the dataSchema
+   *
+   * @param datasetName for id
+   */
+  void deleteDataSchema(String datasetId);
 }

@@ -102,10 +102,10 @@ public class DatasetServiceImpl implements DatasetService {
     if (!records.isEmpty()) {
       for (final Record record : records) {
         final RecordVO vo = new RecordVO();
-        vo.setId(record.getId().toString());
+        // vo.setId(record.getId().toString());
         recordVOs.add(vo);
       }
-      dataset.setId(datasetId);
+      // dataset.setId(datasetId);
     }
 
     return dataset;
@@ -133,7 +133,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     for (final RecordVO recordVO : records) {
       final Record r = new Record();
-      r.setId(Integer.valueOf(recordVO.getId()));
+      // r.setId(Integer.valueOf(recordVO.getId()));
       recordRepository.save(r);
     }
 
@@ -162,6 +162,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     DataSetSchema dataSetSchema = new DataSetSchema();
 
+    dataSetSchema.setNameDataSetSchema("dataSet_1");
+    dataSetSchema.setIdDataFlow(1L);
 
 
     long numeroRegistros = schemasRepository.count();
@@ -170,10 +172,10 @@ public class DatasetServiceImpl implements DatasetService {
     Long dssID = 0L;
     Long fsID = 0L;
 
-    for (int dss = 1; dss <= 2; dss++) {
+    for (int dss = 1; dss <= 3; dss++) {
       TableSchema tableSchema = new TableSchema();
       tableSchema.setIdTableSchema(new ObjectId());
-
+      tableSchema.setNameTableSchema("tabla" + dss);
       RecordSchema recordSchema = new RecordSchema();
       recordSchema.setIdRecordSchema(new ObjectId());
       recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
@@ -207,12 +209,11 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Process file.
+   * 
    *
-   * @param datasetId the dataset id
-   * @param file the file
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @param datasetId
+   * @param file
+   * @throws EEAException
    */
   @Override
   @Transactional
@@ -235,7 +236,7 @@ public class DatasetServiceImpl implements DatasetService {
       IFileParseContext context = fileParserFactory.createContext(mimeType);
       DataSetVO datasetVO =
           context.parse(inputStream, datasetMetabase.getDataflowId(), partition.getId());
-      // move the VO to the entity
+      // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException();
       }
@@ -245,6 +246,8 @@ public class DatasetServiceImpl implements DatasetService {
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } catch (Exception e) {
+      LOG.info(e.getMessage());
     }
   }
 
@@ -266,6 +269,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * We delete the data imported
+   *
+   * @param datasetName the id of the data
+   */
+  @Override
+  public void deleteDataSchema(String datasetId) {
+    schemasRepository.deleteById(datasetId);
+
+  }
+
+  /**
    * send message encapsulates the logic to send an event message to kafka.
    *
    * @param eventType the event type
@@ -280,4 +294,6 @@ public class DatasetServiceImpl implements DatasetService {
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
   }
+
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -19,6 +20,18 @@ import lombok.ToString;
 
 @Getter
 @Setter
+
+/**
+ * 
+ *
+ * @return
+ */
+
+/**
+ * 
+ *
+ * @return
+ */
 @ToString
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
@@ -29,25 +42,34 @@ public class DataSetSchema {
   @Field(value = "_id")
   private ObjectId idDataSetSchema;
 
+  /** The nameDataSetSchema. */
+  @Field(value = "nameDataSetSchema")
+  private String nameDataSetSchema;
+
+  /** The idDataFlow. */
+  @Field(value = "idDataFlow")
+  @Indexed(unique = true)
+  private Long idDataFlow;
+
   /** The table schemas. */
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
   /**
-   * Hash code.
+   * 
    *
-   * @return the int
+   * @return
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSetSchema, tableSchemas);
+    return Objects.hash(idDataFlow, idDataSetSchema, nameDataSetSchema, tableSchemas);
   }
 
   /**
-   * Equals.
+   * 
    *
-   * @param obj the obj
-   * @return true, if successful
+   * @param obj
+   * @return
    */
   @Override
   public boolean equals(Object obj) {
@@ -58,7 +80,10 @@ public class DataSetSchema {
     if (getClass() != obj.getClass())
       return false;
     DataSetSchema other = (DataSetSchema) obj;
-    return Objects.equals(idDataSetSchema, other.idDataSetSchema)
+    return Objects.equals(idDataFlow, other.idDataFlow)
+        && Objects.equals(idDataSetSchema, other.idDataSetSchema)
+        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas);
   }
+
 }

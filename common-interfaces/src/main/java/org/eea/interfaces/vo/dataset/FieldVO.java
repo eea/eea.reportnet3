@@ -7,6 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class FieldVO.
+ */
 @Getter
 @Setter
 @ToString
@@ -22,7 +25,7 @@ public class FieldVO implements Serializable {
   private String value;
 
   /** The id. */
-  private String id;
+  private Long id;
 
   /** The id header. */
   private String idFieldSchema;

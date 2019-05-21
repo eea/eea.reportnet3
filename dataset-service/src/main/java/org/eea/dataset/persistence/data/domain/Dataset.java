@@ -21,7 +21,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "DATASET")
+@Table(name = "DATASET_VALUE")
 public class Dataset {
 
   /** The id. */
@@ -30,6 +30,14 @@ public class Dataset {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The id mongo. */
+  @Column(name = "ID_MONGO")
+  private String idMongo;
+
+  /** The data set name. */
+  @Column(name = "DATASET_NAME")
+  private String dataSetName;
+
   /** The table values. */
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
@@ -37,18 +45,18 @@ public class Dataset {
   /**
    * Equals.
    *
-   * @param o the o
+   * @param object the object
    * @return true, if successful
    */
   @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
+  public boolean equals(final Object object) {
+    if (this == object) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (object == null || getClass() != object.getClass()) {
       return false;
     }
-    final Dataset dataset = (Dataset) o;
+    final Dataset dataset = (Dataset) object;
     return id.equals(dataset.id);
 
   }
