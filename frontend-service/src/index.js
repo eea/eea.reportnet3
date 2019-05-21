@@ -1,8 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import 'primereact/resources/primereact.min.css';
+import './styles.css';
+import 'primeicons/primeicons.css';
+import './index.css';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
