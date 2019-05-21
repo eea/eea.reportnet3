@@ -10,13 +10,13 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.persistence.domain.Record;
-import org.eea.dataset.persistence.repository.RecordRepository;
-import org.eea.dataset.schemas.domain.DataSetSchema;
-import org.eea.dataset.schemas.domain.FieldSchema;
-import org.eea.dataset.schemas.domain.RecordSchema;
-import org.eea.dataset.schemas.domain.TableSchema;
-import org.eea.dataset.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistance.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistance.schemas.domain.FieldSchema;
+import org.eea.dataset.persistance.schemas.domain.RecordSchema;
+import org.eea.dataset.persistance.schemas.domain.TableSchema;
+import org.eea.dataset.persistance.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
@@ -42,27 +42,41 @@ import org.springframework.web.multipart.MultipartFile;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
+  /**  */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+
+  /**  */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**  */
   @Autowired
   private RecordRepository recordRepository;
 
   // @Autowired
   // private DatasetRepository datasetRepository;
 
+  /**  */
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /**  */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /**  */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  /**  */
   @Autowired
   private KafkaSender kafkaSender;
 
+  /**
+   * 
+   *
+   * @param datasetId
+   * @return
+   */
   @Override
   public DataSetVO getDatasetById(@DatasetId final String datasetId) {
     final DataSetVO dataset = new DataSetVO();
@@ -80,6 +94,12 @@ public class DatasetServiceImpl implements DatasetService {
     return dataset;
   }
 
+  /**
+   * 
+   *
+   * @param datasetId
+   * @param records
+   */
   @Override
   @Transactional
   public void addRecordToDataset(@DatasetId final String datasetId, final List<RecordVO> records) {
@@ -92,12 +112,22 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * 
+   *
+   * @param datasetName
+   */
   @Override
   @Transactional
   public void createEmptyDataset(final String datasetName) {
     recordStoreControllerZull.createEmptyDataset(datasetName);
   }
 
+  /**
+   * 
+   *
+   * @param datasetName
+   */
   @Override
   public void createDataSchema(String datasetName) {
 
@@ -105,6 +135,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     DataSetSchema dataSetSchema = new DataSetSchema();
 
+    dataSetSchema.setNameDataSetSchema("dataSet_1");
+    dataSetSchema.setIdDataFlow(1L);
 
 
     long numeroRegistros = schemasRepository.count();
@@ -116,7 +148,6 @@ public class DatasetServiceImpl implements DatasetService {
     for (int dss = 1; dss <= 2; dss++) {
       TableSchema tableSchema = new TableSchema();
       tableSchema.setIdTableSchema(new ObjectId());
-      tableSchema.setNameSchema("tabla_"+dss);
 
       RecordSchema recordSchema = new RecordSchema();
       recordSchema.setIdRecordSchema(new ObjectId());
@@ -149,36 +180,10 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   }
-
-  @Override
-  @Transactional
-  public void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException {
-    if (file == null) {
-      throw new EEAException("Empty file");
-    }
-    if (datasetId == null) {
-      throw new EEAException("Bad Request");
-    }
-    // obtains the file type from the extension
-    String mimeType = getMimetype(file);
-    try (InputStream inputStream = file.getInputStream()) {
-      // create the right file parser for the file type
-      IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO = context.parse(inputStream);
-      // move the VO to the entity
-      // mapper.getmap();
-      // Dataset dataset = mapper(datasetVO);
-      // save dataset to the database
-      // recordRepository.save(dataset);
-      // after the dataset has been saved, an event is sent to notify it
-      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
-    } catch (IOException e) {
-      LOG_ERROR.error(e.getMessage());
-    } catch (Exception e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-  }
-
+  
+  /**
+   * 
+   */
   @Override
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
     
@@ -211,7 +216,43 @@ public class DatasetServiceImpl implements DatasetService {
     
   }
   
-  
+
+  /**
+   * 
+   *
+   * @param datasetId
+   * @param file
+   * @throws EEAException
+   */
+  @Override
+  @Transactional
+  public void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException {
+    if (file == null) {
+      throw new EEAException("Empty file");
+    }
+    if (datasetId == null) {
+      throw new EEAException("Bad Request");
+    }
+    // obtains the file type from the extension
+    String mimeType = getMimetype(file);
+    try (InputStream inputStream = file.getInputStream()) {
+      // create the right file parser for the file type
+      IFileParseContext context = fileParserFactory.createContext(mimeType);
+      DataSetVO datasetVO = context.parse(inputStream);
+      // move the VO to the entity
+      // mapper.getmap();
+      // Dataset dataset = mapper(datasetVO);
+      // save dataset to the database
+      // recordRepository.save(dataset);
+      // after the dataset has been saved, an event is sent to notify it
+      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+  }
+
   /**
    * Gets the mimetype.
    *
@@ -233,6 +274,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * We delete the data imported
+   *
+   * @param datasetName the id of the data
+   */
+  @Override
+  public void deleteDataSchema(String datasetId) {
+    schemasRepository.deleteById(new ObjectId(datasetId));
+
+  }
+
+  /**
    * send message encapsulates the logic to send an event message to kafka.
    *
    * @param eventType the event type
@@ -248,5 +300,5 @@ public class DatasetServiceImpl implements DatasetService {
     kafkaSender.sendMessage(event);
   }
 
-  
+
 }

@@ -1,7 +1,7 @@
 package org.eea.dataset.controller;
 
-import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.micrometer.core.annotation.Timed;
 
@@ -75,6 +78,7 @@ public class DataSetControllerImpl implements DatasetController {
     dataset.setId("ERROR");
     return dataset;
   }
+  
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
   
@@ -82,22 +86,37 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   @Override
-  @PostMapping("{id}/uploadFile")
+  @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") String datasetId,
       @RequestParam("file") MultipartFile file) {
+    if (file == null || file.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT,
+          new Exception());
+    }
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND,
+          new Exception());
+    }
     try {
-      if (file == null || file.isEmpty()) {
-        throw new IOException("File invalid");
-      }
-      if (datasetId == null) {
-        throw new EEAException("File invalid");
-      }
       datasetService.processFile(datasetId, file);
-    } catch (IOException | EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+    } catch (EEAException e) {
+      if (e.getMessage().equals(EEAErrorMessage.FILE_FORMAT)
+          || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+      }
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
+  @Override
+  @DeleteMapping(value = "/deleteDatasetData")
+  public void deleteImportData(@RequestParam(required = true) String datasetId) {
+
+    datasetService.deleteDataSchema(datasetId);
+
+  }
+  
   @Override
   @HystrixCommand(fallbackMethod = "errorHandlerSchema")
   @RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
@@ -107,4 +126,5 @@ public class DataSetControllerImpl implements DatasetController {
     return datasetService.getDataSchemaById(id);
     
   }
+
 }

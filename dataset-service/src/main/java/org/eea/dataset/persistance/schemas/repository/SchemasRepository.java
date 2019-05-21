@@ -1,12 +1,11 @@
 /**
  * 
  */
-package org.eea.dataset.schemas.repository;
+package org.eea.dataset.persistance.schemas.repository;
 
 import org.bson.types.ObjectId;
-import org.eea.dataset.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistance.schemas.domain.DataSetSchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * @author Mario Severa

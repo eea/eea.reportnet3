@@ -1,5 +1,6 @@
-package org.eea.dataset.persistence.domain;
+package org.eea.dataset.persistence.data.domain;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,20 +13,27 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The type ReportingDataset.
+ * The type Snapshot.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "REPORTING_DATASET")
-public class ReportingDataset extends Dataset{
+@Table(name = "SNAPSHOT")
+public class Snapshot extends Dataset{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", columnDefinition = "serial")
 	private Long id;
 
+	@Column(name = "NAME")
+	private String name;
 	
+	@Column(name = "CREATIONDATE")
+    private Date creationDate;
+	
+	@Column(name = "DATACOLLECTION_ID")
+    private Long datacollection;
 	
 	
 	@Override
@@ -36,14 +44,14 @@ public class ReportingDataset extends Dataset{
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final ReportingDataset reportingDataset = (ReportingDataset) o;
-		return id.equals(reportingDataset.id);
+		final Snapshot snapshot = (Snapshot) o;
+		return id.equals(snapshot.id);
 
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		return Objects.hash(id, name, creationDate, datacollection);
 	}
 
 }

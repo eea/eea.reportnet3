@@ -24,7 +24,7 @@ import com.mongodb.MongoClient;
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
-@EnableMongoRepositories(basePackages = "org.eea.dataset.schemas.repository")
+@EnableMongoRepositories(basePackages = "org.eea.dataset.persistance.schemas.repository")
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
 
