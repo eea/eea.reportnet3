@@ -236,6 +236,8 @@ public class DatasetServiceImpl implements DatasetService {
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } catch (Exception e) {
+      LOG.info(e.getMessage());
     }
   }
 

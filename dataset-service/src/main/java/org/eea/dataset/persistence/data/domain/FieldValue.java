@@ -3,12 +3,17 @@ package org.eea.dataset.persistence.data.domain;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class FieldValue.
+ */
 @Entity
 @Getter
 @Setter
@@ -16,32 +21,55 @@ import lombok.ToString;
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
 
-	@Id
-	@Column(name = "ID")
-	private Integer id;
-	@Column(name = "TYPE")
-	private String type;
-	@Column(name = "VALUE")
-    private String value;
-	@Column(name = "ID_RECORD")
-    private Long record;
-	
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		FieldValue field = (FieldValue) o;
-		return id.equals(field.id) && type.equals(field.type) && value.equals(field.value);
-	}
+  /** The id. */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "ID", columnDefinition = "serial")
+  private Long id;
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, type, value);
-	}
+  /** The type. */
+  @Column(name = "TYPE")
+  private String type;
+
+  /** The value. */
+  @Column(name = "VALUE")
+  private String value;
+
+  /** The id header. */
+  @Column(name = "ID_FIELDSCHEMA")
+  private String idFieldSchema;
+
+  /** The record. */
+  @Column(name = "ID_RECORD")
+  private Long record;
+
+
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    FieldValue field = (FieldValue) o;
+    return id.equals(field.id) && type.equals(field.type) && value.equals(field.value);
+  }
+
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, type, value);
+  }
 
 }

@@ -5,6 +5,8 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -12,6 +14,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class Record.
+ */
 @Entity
 @Getter
 @Setter
@@ -19,23 +24,40 @@ import lombok.ToString;
 @Table(name = "RECORD")
 public class Record {
 
+  /** The id. */
   @Id
-  @Column(name = "ID")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "ID", columnDefinition = "serial")
   private Integer id;
-  @Column(name = "NAME")
-  private String name;
+
+  /** The id mongo. */
+  @Column(name = "ID_MONGO")
+  private String idMongo;
+
+  /** The table value. */
   @Column(name = "ID_TABLE")
   private Long tableValue;
-  @Column(name = "ID_PARTITION")
-  private Long partitionValue;
-  @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
+
+  /** The fields. */
+  @OneToMany(mappedBy = "RECORD", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(fields, id, name, partitionValue, tableValue);
+    return Objects.hash(fields, id, idMongo, tableValue);
   }
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -46,8 +68,7 @@ public class Record {
       return false;
     Record other = (Record) obj;
     return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
-        && Objects.equals(name, other.name) && Objects.equals(partitionValue, other.partitionValue)
-        && Objects.equals(tableValue, other.tableValue);
+        && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
   }
 
 
