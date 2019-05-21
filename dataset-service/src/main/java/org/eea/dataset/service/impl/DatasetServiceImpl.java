@@ -225,7 +225,7 @@ public class DatasetServiceImpl implements DatasetService {
       IFileParseContext context = fileParserFactory.createContext(mimeType);
       DataSetVO datasetVO =
           context.parse(inputStream, datasetMetabase.getDataflowId(), partition.getId());
-      // move the VO to the entity
+      // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException();
       }
