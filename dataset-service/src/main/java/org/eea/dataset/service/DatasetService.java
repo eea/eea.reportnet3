@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
@@ -44,7 +45,7 @@ public interface DatasetService {
    * @param file file to process
    * @throws EEAException
    */
-  void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException;
+  void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException, IOException;
 
 
   /**
@@ -59,6 +60,11 @@ public interface DatasetService {
    * Gets dataschema by id
    */
   DataSetSchemaVO getDataSchemaById(String dataschemaId);
+  
+  /**
+   * Gets dataschema by id
+   */
+  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
 
   /**
    * Delete the dataSchema

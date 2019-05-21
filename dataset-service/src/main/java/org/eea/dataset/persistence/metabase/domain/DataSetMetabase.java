@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eea.dataset.persistance.metabase.domain;
+package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +34,9 @@ public class DataSetMetabase {
   private Integer id;
   @Column(name = "DataSetName")
   private Integer dataSetName;
+
+  @Column(name = "id_dataset", columnDefinition = "serial")
+  private String idDataSet;
 
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;

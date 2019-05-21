@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import java.util.Date;
+import org.bson.types.ObjectId;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -81,7 +83,14 @@ public class DataSetControllerImpl implements DatasetController {
   
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
+    dataschema.setIdDataSetSchema(new ObjectId(new Date(),0));
   
+    return dataschema;
+  }
+  public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
+    DataSetSchemaVO dataschema = new DataSetSchemaVO();
+    dataschema.setIdDataSetSchema(new ObjectId(new Date(),0));
+    
     return dataschema;
   }
 
@@ -124,6 +133,17 @@ public class DataSetControllerImpl implements DatasetController {
   public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
     
     return datasetService.getDataSchemaById(id);
+    
+  }
+  
+  
+  @Override
+  @HystrixCommand(fallbackMethod = "errorHandlerSchemaDataFlow")
+  @RequestMapping(value = "dataschema/dataflow/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
+    
+    return datasetService.getDataSchemaByIdFlow(idFlow);
     
   }
 

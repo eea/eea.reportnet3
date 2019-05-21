@@ -57,7 +57,7 @@ public interface DatasetController {
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
-  @PostMapping("{id}/uploadFile")
+  @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") String datasetId,
       @RequestParam("file") MultipartFile file);
 
@@ -69,16 +69,24 @@ public interface DatasetController {
   void createDataSchema(@RequestParam("datasetName") String datasetName);
   
   /**
-   * @param dataschemaName the dataschema name
+   * @param id the dataschema id
    */
   @RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
+  
+  /**
+   * @param id the idFlow
+   */
+  @RequestMapping(value = "dataschema/dataflow/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
 
   /**
    * @param datasetName the dataset id
    */
   @DeleteMapping(value = "/deleteImportData")
   void deleteImportData(@RequestParam("datasetName") String datasetId);
+
 
 }
