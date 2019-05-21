@@ -212,7 +212,7 @@ public class DatasetServiceImpl implements DatasetService {
     // obtains the file type from the extension
     String mimeType = getMimetype(file.getOriginalFilename());
     try (InputStream inputStream = file.getInputStream()) {
-      // PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+      PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
       if (partition == null) {
         throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);

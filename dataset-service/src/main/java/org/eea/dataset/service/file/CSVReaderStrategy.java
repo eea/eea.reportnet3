@@ -79,10 +79,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @throws InvalidFileException the invalid file exception
    */
   @Override
-  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId) {
+  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException {
     try (Reader buf = new BufferedReader(new InputStreamReader(inputStream))) {
-      return readLines(buf, datasetId, partitionId);
+      return readLines(buf, dataflowId, partitionId);
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(e);
@@ -98,7 +98,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
    */
-  private DataSetVO readLines(Reader buf, String datasetId, Long partitionId)
+  private DataSetVO readLines(Reader buf, Long dataflowId, Long partitionId)
       throws InvalidFileException {
     String[] line;
     TableVO tableVO = new TableVO();
@@ -227,7 +227,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private List<FieldVO> createFieldsVO(List<String> values, Long partitionId,
       String idTablaSchema) {
-  
+
     List<FieldVO> fields = new ArrayList<>();
     values.size();
     int contAux = 0;
@@ -241,12 +241,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
       fields.add(field);
       contAux++;
     }
-  
+
     FieldVO fieldPartition = new FieldVO();
     fieldPartition.setType(TypeData.INTEGER.toString());
     fieldPartition.setValue(null != partitionId ? partitionId.toString() : "");
     fields.add(fieldPartition);
-  
+
     return fields;
   }
 
