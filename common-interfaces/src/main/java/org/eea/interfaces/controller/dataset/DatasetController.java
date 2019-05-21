@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-// TODO: Auto-generated Javadoc
 /**
  * The interface Dataset controller.
  */
@@ -34,7 +33,7 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO findById(@PathVariable("id") String id);
+  DataSetVO findById(@PathVariable("id") Long id);
 
   /**
    * Update dataset data set vo.
@@ -56,7 +55,7 @@ public interface DatasetController {
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
   @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") String datasetId,
+  public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
   /**

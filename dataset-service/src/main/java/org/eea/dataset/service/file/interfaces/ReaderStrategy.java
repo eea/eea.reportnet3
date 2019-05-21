@@ -16,5 +16,5 @@ public interface ReaderStrategy {
    * @param integer the integer
    * @return the data set VO
    */
-  public DataSetVO parseFile(InputStream inputStream, String datasetId, Long partitionId);
+  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId);
 }

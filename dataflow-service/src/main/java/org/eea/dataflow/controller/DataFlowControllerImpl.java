@@ -1,6 +1,5 @@
 package org.eea.dataflow.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data flow controller.
@@ -26,12 +26,13 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   @Override
   @HystrixCommand(fallbackMethod = "errorHandler")
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataFlowVO findById(@PathVariable("id") final String id) {
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataFlowVO findById(@PathVariable("id") final Long id) {
     final DataFlowVO result = new DataFlowVO();
-    result.setId("random");
+    result.setId(1L);
     final List<DataSetVO> datasets = new ArrayList<>();
-    final DataSetVO set = datasetController.findById("randomDataSet");
+    final DataSetVO set = datasetController.findById(1L);
     datasets.add(set);
     result.setDatasets(datasets);
     return result;
@@ -44,9 +45,9 @@ public class DataFlowControllerImpl implements DataFlowController {
    *
    * @return the data flow vo
    */
-  public static DataFlowVO errorHandler(@PathVariable("id") final String id) {
+  public static DataFlowVO errorHandler(@PathVariable("id") final Long id) {
     final DataFlowVO result = new DataFlowVO();
-    result.setId("error");
+    result.setId(-1L);
     return result;
   }
 }

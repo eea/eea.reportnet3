@@ -7,24 +7,39 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 @Getter
 @Setter
 @ToString
 public class DataSetVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 2680945261242083928L;
 
-  private String id;
+  /** The id. */
+  private Long id;
+
+  /** The table VO. */
   private List<TableVO> tableVO;
 
 
-
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id, tableVO);
   }
 
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj)

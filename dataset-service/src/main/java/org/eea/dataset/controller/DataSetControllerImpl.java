@@ -42,7 +42,7 @@ public class DataSetControllerImpl implements DatasetController {
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @Timed("FIND_BY_ID_TIMER")
-  public DataSetVO findById(@PathVariable("id") String datasetId) {
+  public DataSetVO findById(@PathVariable("id") Long datasetId) {
     DataSetVO result = null;
 
     result = datasetService.getDatasetById(datasetId);
@@ -71,15 +71,15 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createDataSchema(datasetName);
   }
 
-  public DataSetVO errorHandler(@PathVariable("id") String id) {
+  public DataSetVO errorHandler(@PathVariable("id") Long id) {
     DataSetVO dataset = new DataSetVO();
-    dataset.setId("ERROR");
+    dataset.setId(null);
     return dataset;
   }
 
   @Override
   @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") String datasetId,
+  public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file) {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT,

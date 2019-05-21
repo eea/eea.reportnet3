@@ -14,7 +14,9 @@ import org.eea.dataset.persistence.data.domain.Dataset;
 import org.eea.dataset.persistence.data.domain.Record;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -45,35 +47,55 @@ import org.springframework.web.multipart.MultipartFile;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
 
+  /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
   @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The partition data set metabase repository. */
+  @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The record store controller zull. */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The file parser factory. */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  /** The kafka sender. */
   @Autowired
   private KafkaSender kafkaSender;
 
+  /**
+   * Gets the dataset by id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset by id
+   */
   @Override
-  public DataSetVO getDatasetById(@DatasetId final String datasetId) {
+  public DataSetVO getDatasetById(@DatasetId final Long datasetId) {
     final DataSetVO dataset = new DataSetVO();
     final List<RecordVO> recordVOs = new ArrayList<>();
     final List<Record> records = recordRepository.specialFind(datasetId);
@@ -89,9 +111,15 @@ public class DatasetServiceImpl implements DatasetService {
     return dataset;
   }
 
+  /**
+   * Adds the record to dataset.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
   @Override
   @Transactional
-  public void addRecordToDataset(@DatasetId final String datasetId, final List<RecordVO> records) {
+  public void addRecordToDataset(@DatasetId final Long datasetId, final List<RecordVO> records) {
 
     for (final RecordVO recordVO : records) {
       final Record r = new Record();
@@ -101,12 +129,22 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Creates the empty dataset.
+   *
+   * @param datasetName the dataset name
+   */
   @Override
   @Transactional
   public void createEmptyDataset(final String datasetName) {
-    recordStoreControllerZull.createEmptyDataset(datasetName);
+    recordStoreControllerZull.createEmptyDataset("dataset_" + datasetName);
   }
 
+  /**
+   * Creates the data schema.
+   *
+   * @param datasetName the dataset name
+   */
   @Override
   public void createDataSchema(String datasetName) {
 
@@ -168,17 +206,25 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void processFile(@DatasetId String datasetId, MultipartFile file)
+  public void processFile(@DatasetId Long datasetId, MultipartFile file)
       throws EEAException, IOException {
     // obtains the file type from the extension
     String mimeType = getMimetype(file.getOriginalFilename());
     try (InputStream inputStream = file.getInputStream()) {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
-          .findOneByIdDataSetAndUsername(datasetId, "root").orNull();
-
+          .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
+      if (partition == null) {
+        throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+      }
+      // We get the dataFlowId from the metabase
+      DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+      if (datasetMetabase == null) {
+        throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+      }
       // create the right file parser for the file type
       IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO = context.parse(inputStream, datasetId, partition.getId());
+      DataSetVO datasetVO =
+          context.parse(inputStream, datasetMetabase.getDataflowId(), partition.getId());
       // move the VO to the entity
       if (datasetVO == null) {
         throw new IOException();
@@ -215,7 +261,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param eventType the event type
    * @param datasetId the dataset id
    */
-  private void sendMessage(EventType eventType, String datasetId) {
+  private void sendMessage(EventType eventType, Long datasetId) {
 
     EEAEventVO event = new EEAEventVO();
     event.setEventType(eventType);

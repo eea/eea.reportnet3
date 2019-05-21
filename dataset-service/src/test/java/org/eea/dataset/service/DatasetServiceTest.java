@@ -60,7 +60,7 @@ public class DatasetServiceTest {
     MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
 
-    datasetService.processFile("1", fileNoExtension);
+    datasetService.processFile(1L, fileNoExtension);
   }
 
   @Test(expected = IOException.class)
@@ -68,10 +68,10 @@ public class DatasetServiceTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-    when(context.parse(Mockito.any(InputStream.class), Mockito.anyString(), Mockito.anyLong()))
+    when(context.parse(Mockito.any(InputStream.class), Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(null);
 
-    datasetService.processFile("1", file);
+    datasetService.processFile(1L, file);
   }
 
   @Test
@@ -79,14 +79,13 @@ public class DatasetServiceTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-    when(context.parse(Mockito.any(InputStream.class), Mockito.anyString(), Mockito.anyLong()))
+    when(context.parse(Mockito.any(InputStream.class), Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(new DataSetVO());
     // when(datasetRepository.save(Mockito.any())).thenReturn(new DataSetVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     Dataset entityValue = new Dataset();
-    entityValue.setName("dataSet_1");
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    datasetService.processFile("1", file);
+    datasetService.processFile(1L, file);
   }
 
 }

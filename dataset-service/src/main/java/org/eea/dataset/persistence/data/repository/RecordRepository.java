@@ -8,5 +8,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface RecordRepository extends CrudRepository<Record, Integer> {
 
   @Query("SELECT r from Record r")
-  List<Record> specialFind(String datasetId);
+  List<Record> specialFind(Long datasetId);
 }

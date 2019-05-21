@@ -53,7 +53,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @return the data set VO
    */
   @Override
-  public DataSetVO parseFile(InputStream inputStream, String datasetId, Long partitionId) {
+  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId) {
     try (Reader buf = new BufferedReader(new InputStreamReader(inputStream))) {
       return readLines(buf);
     } catch (IOException e) {

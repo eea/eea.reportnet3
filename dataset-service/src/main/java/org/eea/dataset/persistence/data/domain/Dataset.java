@@ -1,13 +1,14 @@
 package org.eea.dataset.persistence.data.domain;
 
-import java.util.Date;
+import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,30 +23,23 @@ import lombok.ToString;
 @ToString
 @Table(name = "DATASET")
 public class Dataset {
+
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  @Column(name = "NAME")
-  private String name;
+  /** The table values. */
+  @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<TableValue> tableValues;
 
-  @Column(name = "DATE_CREATION")
-  private Date creationDate;
-
-  @Column(name = "VISIBILITY")
-  private String visibility;
-
-  @Column(name = "URL_CONNECTION")
-  private String urlConnection;
-
-  @Column(name = "STATUS")
-  private String status;
-
-  @Nonnull
-  @Column(name = "DATAFLOW_ID")
-  private Long dataflowId;
-
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -59,9 +53,14 @@ public class Dataset {
 
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, creationDate, visibility, urlConnection, status, dataflowId);
+    return Objects.hash(id, tableValues);
   }
 
 }
