@@ -111,6 +111,16 @@ public class DatasetServiceImpl implements DatasetService {
     return dataset;
   }
 
+  @Override
+  public DataSetVO getDatasetValuesById(@DatasetId final Long datasetId) throws EEAException {
+
+    Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return dataSetMapper.entityToClass(dataset);
+  }
+
   /**
    * Adds the record to dataset.
    *

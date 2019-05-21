@@ -51,6 +51,26 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   @Override
+  @HystrixCommand
+  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetVO findValuesById(@PathVariable("id") Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND,
+          new Exception());
+    }
+    DataSetVO result = null;
+
+    try {
+      result = datasetService.getDatasetValuesById(datasetId);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    return result;
+  }
+
+
+  @Override
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
