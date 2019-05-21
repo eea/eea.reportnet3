@@ -1,29 +1,25 @@
-package org.eea.dataset.persistence.domain;
+package org.eea.dataset.persistence.data.domain;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The type DataCollection.
+ * The type EUDataset.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "DATACOLLECTION")
-public class DataCollection extends Dataset{
+@Table(name = "EUDATASET")
+public class EUDataset extends Dataset{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", columnDefinition = "serial")
@@ -34,13 +30,6 @@ public class DataCollection extends Dataset{
 
 	@Column(name = "VISIBLE")
 	private Boolean visible;
-	
-	@Column(name = "DUEDATE")
-    private Date dueDate;
-	
-	@OneToMany(mappedBy = "datacollection", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Snapshot> snapshots;
-
 
 
 
@@ -52,14 +41,14 @@ public class DataCollection extends Dataset{
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		final DataCollection dataCollection = (DataCollection) o;
-		return id.equals(dataCollection.id);
+		final EUDataset euDataset = (EUDataset) o;
+		return id.equals(euDataset.id);
 
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, visible, dueDate, snapshots);
+		return Objects.hash(id, name, visible);
 	}
 
 }

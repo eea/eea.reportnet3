@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.domain;
+package org.eea.dataset.persistence.data.domain;
 
 import java.util.Objects;
 import javax.persistence.Column;

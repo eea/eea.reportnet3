@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eea.dataset.schemas.domain;
+package org.eea.dataset.persistance.schemas.domain;
 
 import java.util.Objects;
 import org.bson.types.ObjectId;

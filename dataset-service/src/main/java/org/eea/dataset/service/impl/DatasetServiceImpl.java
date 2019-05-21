@@ -12,15 +12,13 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.persistence.domain.Dataset;
-import org.eea.dataset.persistence.domain.Record;
-import org.eea.dataset.persistence.repository.DatasetRepository;
-import org.eea.dataset.persistence.repository.RecordRepository;
-import org.eea.dataset.schemas.domain.DataSetSchema;
-import org.eea.dataset.schemas.domain.FieldSchema;
-import org.eea.dataset.schemas.domain.RecordSchema;
-import org.eea.dataset.schemas.domain.TableSchema;
-import org.eea.dataset.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistance.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistance.schemas.domain.FieldSchema;
+import org.eea.dataset.persistance.schemas.domain.RecordSchema;
+import org.eea.dataset.persistance.schemas.domain.TableSchema;
+import org.eea.dataset.persistance.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
@@ -45,9 +43,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
+  /**  */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+
+  /**  */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**  */
   @Autowired
   private DataSetMapper dataSetMapper;
 
@@ -57,21 +59,31 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /**  */
   @Autowired
   private DatasetRepository datasetRepository;
 
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /**  */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /**  */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  /**  */
   @Autowired
   private KafkaSender kafkaSender;
 
+  /**
+   * 
+   *
+   * @param datasetId
+   * @return
+   */
   @Override
   public DataSetVO getDatasetById(@DatasetId final String datasetId) {
     final DataSetVO dataset = new DataSetVO();
@@ -89,6 +101,12 @@ public class DatasetServiceImpl implements DatasetService {
     return dataset;
   }
 
+  /**
+   * 
+   *
+   * @param datasetId
+   * @param records
+   */
   @Override
   @Transactional
   public void addRecordToDataset(@DatasetId final String datasetId, final List<RecordVO> records) {
@@ -101,12 +119,22 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * 
+   *
+   * @param datasetName
+   */
   @Override
   @Transactional
   public void createEmptyDataset(final String datasetName) {
     recordStoreControllerZull.createEmptyDataset(datasetName);
   }
 
+  /**
+   * 
+   *
+   * @param datasetName
+   */
   @Override
   public void createDataSchema(String datasetName) {
 
@@ -114,6 +142,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     DataSetSchema dataSetSchema = new DataSetSchema();
 
+    dataSetSchema.setNameDataSetSchema("dataSet_1");
+    dataSetSchema.setIdDataFlow(1L);
 
 
     long numeroRegistros = schemasRepository.count();
@@ -159,12 +189,11 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Process file.
+   * 
    *
-   * @param datasetId the dataset id
-   * @param file the file
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @param datasetId
+   * @param file
+   * @throws EEAException
    */
   @Override
   @Transactional
@@ -210,6 +239,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * We delete the data imported
+   *
+   * @param datasetName the id of the data
+   */
+  @Override
+  public void deleteDataSchema(String datasetId) {
+    schemasRepository.deleteById(datasetId);
+
+  }
+
+  /**
    * send message encapsulates the logic to send an event message to kafka.
    *
    * @param eventType the event type
@@ -224,4 +264,6 @@ public class DatasetServiceImpl implements DatasetService {
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
   }
+
+
 }
