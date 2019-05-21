@@ -10,6 +10,8 @@ import org.springframework.data.repository.CrudRepository;
  * @author Mario Severa
  *
  */
-public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Integer> {
+public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabase, Long> {
+
+  Long findDataflowIdById(Long datasetId);
 
 }

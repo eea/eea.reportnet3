@@ -26,6 +26,7 @@ public interface DataFlowController {
    *
    * @return the data flow vo
    */
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataFlowVO findById(@PathVariable("id") String id);
+  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataFlowVO findById(@PathVariable("id") Long id);
 }

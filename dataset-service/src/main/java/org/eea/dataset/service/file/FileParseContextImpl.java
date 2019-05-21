@@ -30,8 +30,7 @@ public class FileParseContextImpl implements IFileParseContext {
    * @throws InvalidFileException
    */
   @Override
-  public DataSetVO parse(InputStream inputStream, String datasetId, Long partitionId)
-      throws InvalidFileException {
-    return readerStrategy.parseFile(inputStream, datasetId, partitionId);
+  public DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId) throws InvalidFileException{
+    return readerStrategy.parseFile(inputStream, dataflowId, partitionId);
   }
 }

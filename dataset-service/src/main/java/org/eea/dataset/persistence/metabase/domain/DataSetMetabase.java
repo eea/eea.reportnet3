@@ -3,6 +3,7 @@
  */
 package org.eea.dataset.persistence.metabase.domain;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -18,9 +19,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @author Mario Severa
+ * The Class DataSetMetabase.
  *
+ * @author Mario Severa
  */
+
+
 @Getter
 @Setter
 @ToString
@@ -28,24 +32,57 @@ import lombok.ToString;
 @Table(name = "DataSet")
 public class DataSetMetabase {
 
+  /** The id. */
   @Id
   @Column(name = "ID", columnDefinition = "serial")
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
+  private Long id;
+
+  /** The data set name. */
   @Column(name = "DataSetName")
-  private Integer dataSetName;
+  private String dataSetName;
 
-  @Column(name = "id_dataset", columnDefinition = "serial")
-  private String idDataSet;
+  /** The dataflow id. */
+  @Column(name = "DataflowId")
+  private Long dataflowId;
 
+  /** The creation date. */
+  @Column(name = "DATE_CREATION")
+  private Date creationDate;
+
+  /** The visibility. */
+  @Column(name = "VISIBILITY")
+  private String visibility;
+
+  /** The url connection. */
+  @Column(name = "URL_CONNECTION")
+  private String urlConnection;
+
+  /** The status. */
+  @Column(name = "STATUS")
+  private String status;
+
+  /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(dataSetName, id, partitions);
+    return Objects.hash(dataSetName, id, creationDate, visibility, urlConnection, status,
+        partitions);
   }
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj)

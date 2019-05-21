@@ -19,33 +19,32 @@ public class ProxyDatasetServiceImpl implements InvocationHandler {
    * @param datasetService the dataset service
    */
   public ProxyDatasetServiceImpl(DatasetService datasetService) {
-    this.datasetService=datasetService;
+    this.datasetService = datasetService;
   }
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-   Annotation[][] annotations=method.getParameterAnnotations();
-   String datasetId="";
+    Annotation[][] annotations = method.getParameterAnnotations();
+    String datasetId = "";
 
-   outerloop:
-   for(int i=0;i<annotations.length;i++){
-      if(annotations[i].length>0){//annotated parameter, search @DatasetId annotated parameter if any
-        for(Annotation annotation : annotations[i] ){
-          if(annotation.annotationType().equals(DatasetId.class)){
+    outerloop: for (int i = 0; i < annotations.length; i++) {
+      if (annotations[i].length > 0) {// annotated parameter, search @DatasetId annotated parameter
+                                      // if any
+        for (Annotation annotation : annotations[i]) {
+          if (annotation.annotationType().equals(DatasetId.class)) {
             datasetId = args[i].toString();
             break outerloop;
           }
         }
       }
-   }
-   if(!"".equals(datasetId)){
-     TenantResolver.setTenantName(
-         datasetId);
-   }
+    }
+    if (!"".equals(datasetId)) {
+      TenantResolver.setTenantName("dataset_" + datasetId);
+    }
     Object result = null;
-    try{
-    result = method.invoke(datasetService,args);
-   }finally {
+    try {
+      result = method.invoke(datasetService, args);
+    } finally {
       TenantResolver.clean();
     }
 

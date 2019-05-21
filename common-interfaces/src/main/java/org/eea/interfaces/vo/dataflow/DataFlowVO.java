@@ -17,7 +17,7 @@ import lombok.ToString;
 public class DataFlowVO implements Serializable {
 
   private static final long serialVersionUID = -8073212422480973637L;
-  private String id;
+  private Long id;
   private List<DataSetVO> datasets;
 
   @Override
