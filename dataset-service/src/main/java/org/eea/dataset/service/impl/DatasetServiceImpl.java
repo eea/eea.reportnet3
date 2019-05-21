@@ -94,7 +94,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (!records.isEmpty()) {
       for (final Record record : records) {
         final RecordVO vo = new RecordVO();
-        vo.setId(record.getId().toString());
+        // vo.setId(record.getId().toString());
         recordVOs.add(vo);
       }
       // dataset.setId(datasetId);
@@ -115,7 +115,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     for (final RecordVO recordVO : records) {
       final Record r = new Record();
-      r.setId(Integer.valueOf(recordVO.getId()));
+      // r.setId(Integer.valueOf(recordVO.getId()));
       recordRepository.save(r);
     }
 
@@ -154,10 +154,10 @@ public class DatasetServiceImpl implements DatasetService {
     Long dssID = 0L;
     Long fsID = 0L;
 
-    for (int dss = 1; dss <= 2; dss++) {
+    for (int dss = 1; dss <= 3; dss++) {
       TableSchema tableSchema = new TableSchema();
       tableSchema.setIdTableSchema(new ObjectId());
-
+      tableSchema.setNameTableSchema("tabla" + dss);
       RecordSchema recordSchema = new RecordSchema();
       recordSchema.setIdRecordSchema(new ObjectId());
       recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());

@@ -3,7 +3,6 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,12 +10,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Document(collection = "DataSetSchema")
 public class DataSetVO implements Serializable {
 
   private static final long serialVersionUID = 2680945261242083928L;
 
   private Long id;
+  private String idMongo;
   private String dataSetName;
   private List<TableVO> tableVO;
 
