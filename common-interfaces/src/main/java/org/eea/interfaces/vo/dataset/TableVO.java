@@ -14,7 +14,8 @@ public class TableVO implements Serializable {
 
   private static final long serialVersionUID = 2680945261242083928L;
 
-  private String id;
+  private Long id;
+  private String idMongo;
   private List<RecordVO> records;
   private List<FieldSchemaVO> headers;
   private String name;

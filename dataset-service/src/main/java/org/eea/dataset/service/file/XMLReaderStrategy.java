@@ -1,6 +1,7 @@
 package org.eea.dataset.service.file;
 
 import java.io.InputStream;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 
@@ -9,6 +10,12 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
  */
 public class XMLReaderStrategy implements ReaderStrategy {
 
+  private SchemasRepository schemasRepository;
+
+  public XMLReaderStrategy(SchemasRepository schemasRepository) {
+    this.schemasRepository = schemasRepository;
+  }
+
   /**
    * Parses the file.
    *
@@ -16,7 +23,7 @@ public class XMLReaderStrategy implements ReaderStrategy {
    * @return the data set VO
    */
   @Override
-  public DataSetVO parseFile(InputStream inputStream) {
+  public DataSetVO parseFile(InputStream inputStream, String datasetId, Long partitionId) {
     return null;
   }
 

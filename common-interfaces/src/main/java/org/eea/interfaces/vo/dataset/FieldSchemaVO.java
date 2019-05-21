@@ -6,25 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Gets the name.
- *
- * @return the name
- */
+
 @Getter
-
-/**
- * Sets the name.
- *
- * @param name the new name
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FieldSchemaVO implements Serializable {
 

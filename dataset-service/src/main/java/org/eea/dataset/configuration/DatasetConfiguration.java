@@ -35,7 +35,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAspectJAutoProxy
 @EnableJpaRepositories(entityManagerFactoryRef = "dataSetsEntityManagerFactory",
     transactionManagerRef = "dataSetsTransactionManager",
-    basePackages = "org.eea.dataset.persistence.repository")
+    basePackages = "org.eea.dataset.persistence.data.repository")
 public class DatasetConfiguration implements WebMvcConfigurer {
 
   @Value("${spring.jpa.hibernate.ddl-auto}")
@@ -97,7 +97,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     LocalContainerEntityManagerFactoryBean dataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
     dataSetsEM.setDataSource(dataSource());
-    dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.domain");
+    dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.data.domain");
     JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
     dataSetsEM.setJpaProperties(additionalProperties());
