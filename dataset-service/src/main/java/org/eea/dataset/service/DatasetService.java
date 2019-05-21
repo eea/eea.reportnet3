@@ -58,4 +58,10 @@ public interface DatasetService {
   void createDataSchema(String datasetName);
 
 
+  /**
+   * Delete the dataSchema
+   *
+   * @param datasetName for id
+   */
+  void deleteDataSchema(String datasetId);
 }

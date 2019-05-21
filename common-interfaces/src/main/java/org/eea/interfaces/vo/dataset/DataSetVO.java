@@ -16,13 +16,12 @@ public class DataSetVO implements Serializable {
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 2680945261242083928L;
 
-  /** The id. */
   private Long id;
+  private String idMongo;
+  private String dataSetName;
 
   /** The table VO. */
   private List<TableVO> tableVO;
-
-
   /**
    * Hash code.
    *
@@ -30,9 +29,8 @@ public class DataSetVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, tableVO);
+    return Objects.hash(dataSetName, id, tableVO);
   }
-
 
   /**
    * Equals.
@@ -49,7 +47,8 @@ public class DataSetVO implements Serializable {
     if (getClass() != obj.getClass())
       return false;
     DataSetVO other = (DataSetVO) obj;
-    return Objects.equals(id, other.id) && Objects.equals(tableVO, other.tableVO);
+    return Objects.equals(dataSetName, other.dataSetName) && Objects.equals(id, other.id)
+        && Objects.equals(tableVO, other.tableVO);
   }
 
 

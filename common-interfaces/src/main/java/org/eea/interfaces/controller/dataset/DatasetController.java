@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataset;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,5 +65,11 @@ public interface DatasetController {
   @Deprecated
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
   void createDataSchema(@RequestParam("datasetName") String datasetName);
+
+  /**
+   * @param datasetName the dataset id
+   */
+  @DeleteMapping(value = "/deleteImportData")
+  void deleteImportData(@RequestParam("datasetName") String datasetId);
 
 }
