@@ -31,7 +31,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAspectJAutoProxy
 @EnableJpaRepositories(entityManagerFactoryRef = "metadataSetsEntityManagerFactory",
     transactionManagerRef = "metabaseDataSetsTransactionManager",
-    basePackages = "org.eea.dataset.persistance.metabase.repository")
+    basePackages = "org.eea.dataset.persistence.metabase.repository")
 
 public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
 
@@ -92,7 +92,7 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
     LocalContainerEntityManagerFactoryBean metadataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
     metadataSetsEM.setDataSource(metaBaseDataSource());
-    metadataSetsEM.setPackagesToScan("org.eea.dataset.persistance.metabase.domain");
+    metadataSetsEM.setPackagesToScan("org.eea.dataset.persistence.metabase.domain");
     JpaVendorAdapter vendorMetabaseAdapter = new HibernateJpaVendorAdapter();
     metadataSetsEM.setJpaVendorAdapter(vendorMetabaseAdapter);
     metadataSetsEM.setJpaProperties(additionalMetaProperties());

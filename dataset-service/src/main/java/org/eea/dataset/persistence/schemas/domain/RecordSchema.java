@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eea.dataset.persistance.schemas.domain;
+package org.eea.dataset.persistence.schemas.domain;
 
 import java.util.List;
 import java.util.Objects;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eea.dataset.persistance.metabase.domain;
+package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.List;
 import java.util.Objects;
