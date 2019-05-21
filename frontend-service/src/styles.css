@@ -1382,6 +1382,10 @@ body .p-splitbutton.p-buttonset .p-menu {
 body .p-splitbutton.p-buttonset .p-splitbutton-menubutton .p-button-icon-left:before {
   content: "";
 }
+/*TODO: Here?*/
+body .warning {
+   color: #DA2131;
+}
 body .p-button.p-button-secondary, body .p-buttonset.p-button-secondary > .p-button {
   color: #404040;
   background-color: #f4f4f4;

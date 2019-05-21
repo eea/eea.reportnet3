@@ -13,27 +13,32 @@ const TabsSchema = (props) => {
           label: "Visibility",
           icon: "6",
           group: "left",
+          disabled: false,
           clickHandler: clickTest
         },
         {
             label: "Filter",
             icon: "7",
             group: "left",
+            disabled: false,
             clickHandler: clickTest
         },
         {
             label: "Group by",
             icon: "8",
             group: "left",
+            disabled: false,
             clickHandler: clickTest
         },
         {
             label: "Sort",
             icon: "9",
             group: "left",
+            disabled: false,
             clickHandler: clickTest
         }
     ];
+
 
     let tabs = 
         props.tables.map((table, i) => {
