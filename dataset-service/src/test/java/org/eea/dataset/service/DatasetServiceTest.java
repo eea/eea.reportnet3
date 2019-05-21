@@ -1,6 +1,9 @@
 package org.eea.dataset.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import java.util.Optional;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -17,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DatasetServiceTest {
@@ -93,7 +97,24 @@ public class DatasetServiceTest {
   public void testFindDataschemaByIdDataflow() throws Exception {
     
     //Se prueba que el dataflow con id 1 tiene dataschema
-    when(schemaRepository.findSchemaByIdFlow(1L)).thenReturn(new DataSetSchema());
+    DataSetSchema data = new DataSetSchema();
+    data.setNameDataSetSchema("test");
+    when(schemaRepository.findSchemaByIdFlow(1L)).thenReturn(data);
+    assertEquals("test",data.getNameDataSetSchema());
+    //when(datasetService.getDataSchemaByIdFlow(1L)).thenReturn(new DataSetSchemaVO());
+    
+  }
+  
+  
+  @Test
+  public void testFindDataschemaById() throws Exception {
+    
+    //Se prueba que se recupera un dataschema con un id
+    DataSetSchema data = new DataSetSchema();
+    data.setNameDataSetSchema("test");
+    when(schemaRepository.findById(new ObjectId("5ce3a7ca3d851f09c42cb152"))).thenReturn(Optional.of(new DataSetSchema()));
+    assertEquals("test",data.getNameDataSetSchema());
+    //when(datasetService.getDataSchemaById("5ce3a7ca3d851f09c42cb152")).thenReturn(new DataSetSchemaVO());
     
   }
 

@@ -175,7 +175,6 @@ public class DatasetServiceImpl implements DatasetService {
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
     
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
-    LOG.info("devolviendo dataschema {}", dataschema);
     
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
     if(dataschema.isPresent()) {
@@ -195,10 +194,8 @@ public class DatasetServiceImpl implements DatasetService {
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
     
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-   
-    final DataSetSchemaVO dataSchemaVO = mapeoDataSchema(dataschema);
     
-    return dataSchemaVO;
+    return mapeoDataSchema(dataschema);
     
   }
   
@@ -294,37 +291,39 @@ public class DatasetServiceImpl implements DatasetService {
   private DataSetSchemaVO mapeoDataSchema(DataSetSchema schema) {
     
     DataSetSchemaVO data = new DataSetSchemaVO();
-    data.setIdDataSetSchema(schema.getIdDataSetSchema());
-    if(!schema.getTableSchemas().isEmpty()) {
-      List<TableSchemaVO> tableVo = new ArrayList<TableSchemaVO>();
-      for(TableSchema tabla : schema.getTableSchemas()) {
-        TableSchemaVO table = new TableSchemaVO();
-        table.setIdTableSchema(tabla.getIdTableSchema());
-        table.setNameSchema(tabla.getNameSchema());
-        if(tabla.getRecordSchema()!=null) {
-          RecordSchemaVO registro = new RecordSchemaVO();
-          registro.setIdRecordSchema(tabla.getRecordSchema().getIdRecordSchema());
-          registro.setNameSchema(tabla.getNameSchema());
-          if(!tabla.getRecordSchema().getFieldSchema().isEmpty()) {
-            List<FieldSchemaVO> listaRegistro = new ArrayList<FieldSchemaVO>();
-            for(FieldSchema field : tabla.getRecordSchema().getFieldSchema()) {
-              FieldSchemaVO campo = new FieldSchemaVO();
-              campo.setId(field.getIdFieldSchema().toString());
-              campo.setIdRecord(field.getIdRecord().toString());
-              campo.setName(field.getHeaderName());
-              campo.setType(field.getType());
-             
-              listaRegistro.add(campo);
+    if(schema!=null) {
+      data.setIdDataSetSchema(schema.getIdDataSetSchema());
+      if(!schema.getTableSchemas().isEmpty()) {
+        List<TableSchemaVO> tableVo = new ArrayList<TableSchemaVO>();
+        for(TableSchema tabla : schema.getTableSchemas()) {
+          TableSchemaVO table = new TableSchemaVO();
+          table.setIdTableSchema(tabla.getIdTableSchema());
+          table.setNameSchema(tabla.getNameSchema());
+          if(tabla.getRecordSchema()!=null) {
+            RecordSchemaVO registro = new RecordSchemaVO();
+            registro.setIdRecordSchema(tabla.getRecordSchema().getIdRecordSchema());
+            registro.setNameSchema(tabla.getNameSchema());
+            if(!tabla.getRecordSchema().getFieldSchema().isEmpty()) {
+              List<FieldSchemaVO> listaRegistro = new ArrayList<FieldSchemaVO>();
+              for(FieldSchema field : tabla.getRecordSchema().getFieldSchema()) {
+                FieldSchemaVO campo = new FieldSchemaVO();
+                campo.setId(field.getIdFieldSchema().toString());
+                campo.setIdRecord(field.getIdRecord().toString());
+                campo.setName(field.getHeaderName());
+                campo.setType(field.getType());
+               
+                listaRegistro.add(campo);
+              }
+              registro.setFieldSchema(listaRegistro);
             }
-            registro.setFieldSchema(listaRegistro);
+            table.setRecordSchema(registro);
           }
-          table.setRecordSchema(registro);
+         
+          tableVo.add(table);
+         
         }
-       
-        tableVo.add(table);
-       
+        data.setTableSchemas(tableVo);
       }
-      data.setTableSchemas(tableVo);
     }
     return data;
   }
