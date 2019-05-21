@@ -1,21 +1,35 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import styles from './ReporterDataSet.module.css';
+import {Dialog} from 'primereact/dialog';
+import {FileUpload} from 'primereact/fileupload';
 
 const ReporterDataSet = () => {
-  
-  const clickTest = () =>{
-    console.log("Click on button");
-  }
+  const [visible, setVisibility] = useState(false);
+    
+    const showFileUploadDialog = () => {
+        console.log('showFileUploadDialog onClick');
+        setVisibility(true);
+    }
+
+    const onUploadFile = () => {
+        console.log('onUploadFile');
+        // setVisibility(true);
+    }
+
+    const onHide = () => {
+        console.log('onCick');
+        setVisibility(false);
+    }
 
   const customButtons = [
     {
       label: "Import",
       icon: "0",
       group: "left",
-      clickHandler: clickTest
+      clickHandler: showFileUploadDialog
     },
     {
       label: "Export",
@@ -56,10 +70,16 @@ const ReporterDataSet = () => {
           <ButtonsBar buttons={customButtons} />
         </div>
         <TabsSchema tables={[
-          { name: "Table 1" }, 
+          { name: "Table 1" },
           { name: "Table 2" },
           { name: "Table 3" },
           { name: "Table 4" }]} />
+          <Dialog header="Upload your Dataset" visible={visible}
+                  className={styles.Dialog} onHide={onHide} >
+              <FileUpload mode="advanced" name="demo[]" url="./upload.php" onUpload={onUploadFile} 
+                          multiple={true} allowTypes="/(\.|\/)(csv|doc)$/" chooseLabel="Select or drag here your dataset (.csv)"
+                          maxFileSize={1000000} fileLimit="0" className={styles.FileUpload} />
+          </Dialog>
       </div>
   );
 }

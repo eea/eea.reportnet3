@@ -1,4 +1,13 @@
 .ButtonsBar {
     margin-bottom: 0.5em;
     padding: .25em;
-  }
+}
+
+.Dialog {
+  width: 55vw;
+}
+
+.FileUpload .span {
+  width: 100%;
+  min-height: 120px;
+}
