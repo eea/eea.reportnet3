@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from 'primereact/button';
+import styles from './CustomButton.module.css';
 
 const CustomButton = (props) => {
     let icons = [
         'pi pi-upload',
         'pi pi-download',
         'pi pi-trash',
-        'pi pi-check-circle',
+        'pi pi-exclamation-triangle',
         'pi pi-clock',
         'pi pi-chart-bar',
         'pi pi-eye',
@@ -14,9 +15,14 @@ const CustomButton = (props) => {
         'pi pi-sitemap',
         'pi pi-sort'];
 
+    let disabledButton = props.disabled?true:false;
+    //let classes = `p-button-rounded p-button-secondary ${(props.ownButtonClasses)?props.ownButtonClasses:""}`;
+    let classes = `p-button-rounded p-button-secondary`;
+    let iconClasses = `${icons[props.icon]} ${(props.iconClasses)?props.iconClasses:""}`;
+
     return (
-        <Button className="p-button-rounded p-button-secondary" icon={icons[props.icon]}
-                label={props.label} style={{marginRight:'.25em'}} onClick={props.handleClick} />
+        <Button className={classes} icon={iconClasses}
+                label={props.label} style={{marginRight:'.25em'}} onClick={props.handleClick} disabled={disabledButton}/>
     );
 }
 

@@ -12,7 +12,8 @@ const DataViewer = (props) => {
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
-    const [sortOrder, setSortOrder] = useState(0);        
+    const [sortOrder, setSortOrder] = useState(0);   
+    const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState([
       {field: 'idInstrumento', header: 'ID'},
@@ -33,7 +34,7 @@ const DataViewer = (props) => {
         setColOptions(colOpt);
   
         console.log('Fetching data...');
-        fetchDataHandler("denominacion", sortOrder, firstRow, numRows);   
+        fetchDataHandler("default", sortOrder, firstRow, numRows);   
       }, []);
   
       useEffect(()=>{ 
@@ -57,7 +58,6 @@ const DataViewer = (props) => {
       
       const onChangePageHandler = (event)=>{     
         console.log('Refetching data...');
-        console.log(sortOrder);
         fetchDataHandler(event.sortField, sortOrder, event.first, event.rows);           
         setNumRows(event.rows);
         setFirstRow(event.first);        
@@ -65,10 +65,9 @@ const DataViewer = (props) => {
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
-        console.log(sortOrder);
         fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);      
-        setSortOrder((sortOrder === 1)?0:1);
-        console.log(sortOrder);
+        setSortField(event.sortField);
+        setSortOrder((sortOrder === 1)?-1:1);        
       }
   
       const onColumnToggleHandler = (event) =>{
@@ -79,25 +78,25 @@ const DataViewer = (props) => {
   
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
-        fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
-        .then(response => response.json())
-        .then(json => {           
-          const rows = json.currentPage.map(item=>{
-            return {
-                    idInstrumento : item["idInstrumento"], 
-                    denominacion : item["denominacion"], 
-                    fechaInicial : item["fechaInicial"], 
-                    tieneDocumentos : item["tieneDocumentos"], 
-                    anulado : item["anulado"]
-                  }
-          }); 
-          setFetchedData(rows);
-          if(json.pagedInfo.totalElements!==totalRecords){
-            setTotalRecords(json.pagedInfo.totalElements);
-          }
-          setLoading(false);
-        })
-        .catch(error => console.log("ERROR!!!!!!! - " + error));
+        // fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
+        // .then(response => response.json())
+        // .then(json => {           
+        //   const rows = json.currentPage.map(item=>{
+        //     return {
+        //             idInstrumento : item["idInstrumento"], 
+        //             denominacion : item["denominacion"], 
+        //             fechaInicial : item["fechaInicial"], 
+        //             tieneDocumentos : item["tieneDocumentos"], 
+        //             anulado : item["anulado"]
+        //           }
+        //   }); 
+        //   setFetchedData(rows);
+        //   if(json.pagedInfo.totalElements!==totalRecords){
+        //     setTotalRecords(json.pagedInfo.totalElements);
+        //   }
+        //   setLoading(false);
+        // })
+        // .catch(error => console.log("ERROR!!!!!!! - " + error));
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
@@ -117,7 +116,7 @@ const DataViewer = (props) => {
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
                        loading={loading} totalRecords={totalRecords} sortable={true}
-                       onSort={onSortHandler} header={header} autoLayout={true}>
+                       onSort={onSortHandler} header={header} sortField={sortField} sortOrder={sortOrder} autoLayout={true}>
                     {columns}
                 </DataTable>
             </div>
