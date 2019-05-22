@@ -34,16 +34,9 @@ public class DatasetValue {
   @Column(name = "ID_MONGO")
   private String idMongo;
 
-  /** The data set name. */
-  @Column(name = "DATASET_NAME")
-  private String dataSetName;
-
   /** The table values. */
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
-
-  // @Column(name = "DATASET_METABASE_ID")
-  // private Long datasetMetabaseId;
 
   /**
    * Hash code.
@@ -52,7 +45,7 @@ public class DatasetValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, tableValues, idMongo, dataSetName);
+    return Objects.hash(id, tableValues, idMongo);
   }
 
   /**
@@ -70,8 +63,8 @@ public class DatasetValue {
       return false;
     }
     final DatasetValue dataset = (DatasetValue) object;
-    return id.equals(dataset.id) && dataSetName.equals(dataset.dataSetName)
-        && idMongo.equals(dataset.idMongo) && tableValues.equals(dataset.tableValues);
+    return id.equals(dataset.id) && idMongo.equals(dataset.idMongo)
+        && tableValues.equals(dataset.tableValues);
   }
 
 }

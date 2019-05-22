@@ -55,15 +55,15 @@ public class DataSetControllerImpl implements DatasetController {
   @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO findValuesById(@PathVariable("id") Long datasetId) {
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND,
-          new Exception());
+    if (datasetId < 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     DataSetVO result = null;
 
     try {
       result = datasetService.getDatasetValuesById(datasetId);
-    } catch (Exception e) {
+    } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     return result;

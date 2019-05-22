@@ -10,6 +10,8 @@ import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.mapper.DataSetNoDataMapper;
+import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -35,6 +37,9 @@ import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,10 +59,17 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetMapper dataSetMapper;
 
+  @Autowired
+  private DataSetNoDataMapper dataSetNoDataMapper;
+
+  @Autowired
+  private RecordMapper recordMapper;
+
   /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
@@ -68,6 +80,8 @@ public class DatasetServiceImpl implements DatasetService {
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
+
+
 
   /** The schemas repository. */
   @Autowired
@@ -101,6 +115,13 @@ public class DatasetServiceImpl implements DatasetService {
     return dataset;
   }
 
+  /**
+   * Gets the dataset values by id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset values by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public DataSetVO getDatasetValuesById(@DatasetId final Long datasetId) throws EEAException {
@@ -109,7 +130,15 @@ public class DatasetServiceImpl implements DatasetService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    return dataSetMapper.entityToClass(dataset);
+    DataSetVO result = dataSetNoDataMapper.entityToClass(dataset);
+    Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
+    // this result has no records since we need'em in a pagination way
+    result.getTableVO().stream().forEach(table -> {
+      table.setRecords(
+          recordMapper.entityListToClass(recordRepository.findByTableValue_Id(table.getId(), p)));
+    });
+
+    return result;
   }
 
   /**
@@ -236,9 +265,9 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * We delete the data imported
+   * We delete the data imported.
    *
-   * @param datasetName the id of the data
+   * @param datasetId the dataset id
    */
   @Override
   public void deleteDataSchema(String datasetId) {
