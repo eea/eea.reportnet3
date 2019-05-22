@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+// TODO: Auto-generated Javadoc
 /**
  * The interface Dataset controller.
  */
@@ -32,6 +33,7 @@ public interface DatasetController {
    *
    * @return the data set vo
    */
+  @Deprecated
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetVO findById(@PathVariable("id") Long id);
@@ -55,21 +57,34 @@ public interface DatasetController {
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
+  /**
+   * Load dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
   @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
   /**
+   * Creates the data schema.
+   *
    * @param datasetName the dataset name
    */
   @Deprecated
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
   void createDataSchema(@RequestParam("datasetName") String datasetName);
 
+
   /**
-   * @param datasetName the dataset id
+   * Find values by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set VO
    */
-  @DeleteMapping(value = "/deleteImportData")
-  void deleteImportData(@RequestParam("datasetName") String datasetId);
+  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetVO findValuesById(Long datasetId);
 
 }

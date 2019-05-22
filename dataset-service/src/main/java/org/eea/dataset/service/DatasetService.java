@@ -57,6 +57,8 @@ public interface DatasetService {
    */
   void createDataSchema(String datasetName);
 
+  DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
+
 
   /**
    * Delete the dataSchema
