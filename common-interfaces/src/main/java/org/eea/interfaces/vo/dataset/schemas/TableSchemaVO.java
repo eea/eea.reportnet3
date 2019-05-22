@@ -16,8 +16,8 @@ public class TableSchemaVO {
   /** The id table schema. */
   private String IdTableSchema;
 
-  /** The name schema. */
-  private String nameSchema;
+  /** The table name schema. */
+  private String nameTableSchema;
 
   /** The record schema. */
   private RecordSchemaVO recordSchema;
@@ -29,7 +29,7 @@ public class TableSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(IdTableSchema, nameSchema, recordSchema);
+    return Objects.hash(IdTableSchema, nameTableSchema, recordSchema);
   }
 
   /**
@@ -48,7 +48,7 @@ public class TableSchemaVO {
       return false;
     TableSchemaVO other = (TableSchemaVO) obj;
     return Objects.equals(IdTableSchema, other.IdTableSchema)
-        && Objects.equals(nameSchema, other.nameSchema)
+        && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema);
   }
 }

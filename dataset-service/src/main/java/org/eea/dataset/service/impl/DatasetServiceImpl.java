@@ -292,38 +292,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
 
-  /**
-   * map DataSchema to DataSchemaVO
-   * 
-   * @param schema the DataSetSchema
-   * @return the dataSchemaVO filled
-   */
-  /*
-   * private DataSetSchemaVO mapeoDataSchema(DataSetSchema schema) {
-   * 
-   * DataSetSchemaVO data = new DataSetSchemaVO(); if(schema!=null) {
-   * data.setIdDataSetSchema(schema.getIdDataSetSchema()); if(!schema.getTableSchemas().isEmpty()) {
-   * List<TableSchemaVO> tableVo = new ArrayList<TableSchemaVO>(); for(TableSchema tabla :
-   * schema.getTableSchemas()) { TableSchemaVO table = new TableSchemaVO();
-   * table.setIdTableSchema(tabla.getIdTableSchema()); table.setNameSchema(tabla.getNameSchema());
-   * if(tabla.getRecordSchema()!=null) { RecordSchemaVO registro = new RecordSchemaVO();
-   * registro.setIdRecordSchema(tabla.getRecordSchema().getIdRecordSchema());
-   * registro.setNameSchema(tabla.getNameSchema());
-   * if(!tabla.getRecordSchema().getFieldSchema().isEmpty()) { List<FieldSchemaVO> listaRegistro =
-   * new ArrayList<FieldSchemaVO>(); for(FieldSchema field :
-   * tabla.getRecordSchema().getFieldSchema()) { FieldSchemaVO campo = new FieldSchemaVO();
-   * campo.setId(field.getIdFieldSchema()); campo.setIdRecord(field.getIdRecord());
-   * campo.setName(field.getHeaderName()); campo.setType(field.getType());
-   * 
-   * listaRegistro.add(campo); } registro.setFieldSchema(listaRegistro); }
-   * table.setRecordSchema(registro); }
-   * 
-   * tableVo.add(table);
-   * 
-   * } data.setTableSchemas(tableVo); } } return data; }
-   */
-
-
+  
   /**
    * Gets the mimetype.
    *

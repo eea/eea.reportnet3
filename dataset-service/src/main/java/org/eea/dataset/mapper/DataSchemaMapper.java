@@ -29,5 +29,7 @@ public abstract class DataSchemaMapper implements IMapper<DataSetSchema, DataSet
   @Mapping(source = "headerName", target = "name")
   @Mapping(source = "idFieldSchema", target = "id")
   public abstract FieldSchemaVO entityToClass(FieldSchema model);
+  
+
 
 }

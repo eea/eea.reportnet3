@@ -29,9 +29,6 @@ public class TableSchema {
   @Field(value = "idDataSet")
   private ObjectId IdDataSet;
 
-  /** The name schema. */
-  @Field(value = "nameSchema")
-  private String nameSchema;
 
   /** The record schema. */
   @Field(value = "recordSchema")
@@ -44,7 +41,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(IdDataSet, IdTableSchema, nameSchema, nameTableSchema, recordSchema);
+    return Objects.hash(IdDataSet, IdTableSchema, nameTableSchema, recordSchema);
   }
 
   /**
@@ -64,7 +61,6 @@ public class TableSchema {
     TableSchema other = (TableSchema) obj;
     return Objects.equals(IdDataSet, other.IdDataSet)
         && Objects.equals(IdTableSchema, other.IdTableSchema)
-        && Objects.equals(nameSchema, other.nameSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema);
   }
