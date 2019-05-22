@@ -65,10 +65,9 @@ public class Record {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null)
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     Record other = (Record) obj;
     return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
         && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);

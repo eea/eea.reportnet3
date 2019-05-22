@@ -31,7 +31,7 @@ public class RecordVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fields, id);
+    return Objects.hash(fields, id, idMongo);
   }
 
   /**
@@ -44,14 +44,12 @@ public class RecordVO implements Serializable {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null)
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     RecordVO other = (RecordVO) obj;
-    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id);
+    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
+        && Objects.equals(idMongo, other.idMongo);
   }
-
-
 
 }

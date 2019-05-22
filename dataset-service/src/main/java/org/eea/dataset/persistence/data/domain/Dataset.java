@@ -43,6 +43,16 @@ public class Dataset {
   private List<TableValue> tableValues;
 
   /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, tableValues, idMongo, dataSetName);
+  }
+
+  /**
    * Equals.
    *
    * @param object the object
@@ -57,18 +67,8 @@ public class Dataset {
       return false;
     }
     final Dataset dataset = (Dataset) object;
-    return id.equals(dataset.id);
-
-  }
-
-  /**
-   * Hash code.
-   *
-   * @return the int
-   */
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, tableValues);
+    return id.equals(dataset.id) && dataSetName.equals(dataset.dataSetName)
+        && idMongo.equals(dataset.idMongo) && tableValues.equals(dataset.tableValues);
   }
 
 }

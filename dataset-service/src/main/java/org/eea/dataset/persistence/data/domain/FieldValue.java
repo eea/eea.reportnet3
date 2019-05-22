@@ -46,6 +46,15 @@ public class FieldValue {
   @JoinColumn(name = "ID_RECORD")
   private Record record;
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, type, value, idFieldSchema, record);
+  }
 
   /**
    * Equals.
@@ -54,25 +63,16 @@ public class FieldValue {
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object o) {
-    if (this == o) {
+  public boolean equals(Object obj) {
+    if (this == obj) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    FieldValue field = (FieldValue) o;
-    return id.equals(field.id) && type.equals(field.type) && value.equals(field.value);
-  }
-
-  /**
-   * Hash code.
-   *
-   * @return the int
-   */
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, type, value);
+    FieldValue field = (FieldValue) obj;
+    return id.equals(field.id) && type.equals(field.type) && value.equals(field.value)
+        && idFieldSchema.equals(field.idFieldSchema) && record.equals(field.record);
   }
 
 }

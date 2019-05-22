@@ -50,31 +50,31 @@ public class TableValue {
   private Dataset datasetId;
 
   /**
-   * Equals.
-   *
-   * @param o the o
-   * @return true, if successful
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    TableValue table = (TableValue) o;
-    return id.equals(table.id) && name.equals(table.name);
-  }
-
-  /**
    * Hash code.
    *
    * @return the int
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records);
+    return Objects.hash(id, name, records, idMongo, datasetId);
+  }
+
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    TableValue table = (TableValue) obj;
+    return id.equals(table.id) && name.equals(table.name);
   }
 
 }
