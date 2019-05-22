@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +25,7 @@ public class FieldValue {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -40,8 +42,9 @@ public class FieldValue {
   private String idFieldSchema;
 
   /** The record. */
-  @Column(name = "ID_RECORD")
-  private Long record;
+  @ManyToOne
+  @JoinColumn(name = "ID_RECORD")
+  private Record record;
 
 
   /**

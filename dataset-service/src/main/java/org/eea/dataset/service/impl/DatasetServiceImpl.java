@@ -12,6 +12,7 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.Dataset;
 import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -242,6 +243,11 @@ public class DatasetServiceImpl implements DatasetService {
       }
       datasetVO.setId(datasetId);
       Dataset dataset = dataSetMapper.classToEntity(datasetVO);
+      dataset.setId(datasetId);
+
+      for (TableValue table : dataset.getTableValues()) {
+        table.setDatasetId(dataset);
+      }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
