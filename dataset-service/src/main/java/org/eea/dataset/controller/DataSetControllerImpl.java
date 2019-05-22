@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -120,14 +119,6 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-  }
-
-  @Override
-  @DeleteMapping(value = "/deleteDatasetData")
-  public void deleteImportData(@RequestParam(required = true) String datasetId) {
-
-    datasetService.deleteDataSchema(datasetId);
-
   }
 
 }
