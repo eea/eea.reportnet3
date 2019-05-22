@@ -38,23 +38,31 @@ public interface DatasetService {
   void createEmptyDataset(String datasetName);
 
   /**
-   * Process the file: read, parse and save in the db
-   * 
-   * @param datasetId
+   * Process the file: read, parse and save in the db.
+   *
+   * @param datasetId the dataset id
    * @param file file to process
-   * 
-   * @return
-   * @throws IOException
-   * @throws Exception
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   void processFile(@DatasetId Long datasetId, MultipartFile file) throws EEAException, IOException;
 
 
+  /**
+   * Gets the dataset values by id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset values by id
+   * @throws EEAException the EEA exception
+   */
+  DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
+
+
 
   /**
-   * Delete the dataSchema
+   * Delete the dataSchema.
    *
-   * @param datasetName for id
+   * @param datasetId the dataset id
    */
   void deleteDataSchema(String datasetId);
 }
