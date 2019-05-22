@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.mapper.DataSetNoDataMapper;
+import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.persistence.data.domain.Dataset;
-import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.FieldSchema;
-import org.eea.dataset.persistence.schemas.domain.RecordSchema;
-import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -31,13 +31,15 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,10 +59,17 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetMapper dataSetMapper;
 
+  @Autowired
+  private DataSetNoDataMapper dataSetNoDataMapper;
+
+  @Autowired
+  private RecordMapper recordMapper;
+
   /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
@@ -71,6 +80,8 @@ public class DatasetServiceImpl implements DatasetService {
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
+
+
 
   /** The schemas repository. */
   @Autowired
@@ -98,17 +109,36 @@ public class DatasetServiceImpl implements DatasetService {
   public DataSetVO getDatasetById(@DatasetId final Long datasetId) {
     final DataSetVO dataset = new DataSetVO();
     final List<RecordVO> recordVOs = new ArrayList<>();
-    final List<Record> records = recordRepository.specialFind(datasetId);
-    if (!records.isEmpty()) {
-      for (final Record record : records) {
-        final RecordVO vo = new RecordVO();
-        // vo.setId(record.getId().toString());
-        recordVOs.add(vo);
-      }
-      // dataset.setId(datasetId);
-    }
+
+
 
     return dataset;
+  }
+
+  /**
+   * Gets the dataset values by id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset values by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataSetVO getDatasetValuesById(@DatasetId final Long datasetId) throws EEAException {
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    DataSetVO result = dataSetNoDataMapper.entityToClass(dataset);
+    Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
+    // this result has no records since we need'em in a pagination way
+    result.getTableVO().stream().forEach(table -> {
+      table.setRecords(
+          recordMapper.entityListToClass(recordRepository.findByTableValue_Id(table.getId(), p)));
+    });
+
+    return result;
   }
 
   /**
@@ -122,7 +152,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void addRecordToDataset(@DatasetId final Long datasetId, final List<RecordVO> records) {
 
     for (final RecordVO recordVO : records) {
-      final Record r = new Record();
+      final RecordValue r = new RecordValue();
       // r.setId(Integer.valueOf(recordVO.getId()));
       recordRepository.save(r);
     }
@@ -140,70 +170,14 @@ public class DatasetServiceImpl implements DatasetService {
     recordStoreControllerZull.createEmptyDataset("dataset_" + datasetName);
   }
 
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetName the dataset name
-   */
-  @Override
-  public void createDataSchema(String datasetName) {
-
-    TypeData headerType = TypeData.BOOLEAN;
-
-    DataSetSchema dataSetSchema = new DataSetSchema();
-
-    dataSetSchema.setNameDataSetSchema("dataSet_1");
-    dataSetSchema.setIdDataFlow(1L);
-
-
-    long numeroRegistros = schemasRepository.count();
-    dataSetSchema.setIdDataSetSchema(new ObjectId());
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    Long dssID = 0L;
-    Long fsID = 0L;
-
-    for (int dss = 1; dss <= 3; dss++) {
-      TableSchema tableSchema = new TableSchema();
-      tableSchema.setIdTableSchema(new ObjectId());
-      tableSchema.setNameTableSchema("tabla" + dss);
-      RecordSchema recordSchema = new RecordSchema();
-      recordSchema.setIdRecordSchema(new ObjectId());
-      recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
-      List<FieldSchema> fieldSchemas = new ArrayList<>();
-
-      for (int fs = 1; fs <= 20; fs++) {
-        FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema = new FieldSchema();
-        fieldSchema.setIdFieldSchema(new ObjectId());
-        fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
-        if (dss / 2 == 1) {
-          int dato = fs + 10;
-          fieldSchema.setHeaderName("campo_" + dato);
-          fieldSchema.setType(TypeData.FLOAT);
-        } else {
-          fieldSchema.setHeaderName("campo_" + fs);
-          fieldSchema.setType(headerType);
-        }
-
-        fieldSchemas.add(fieldSchema);
-      }
-      recordSchema.setFieldSchema(fieldSchemas);
-      tableSchema.setRecordSchema(recordSchema);
-      tableSchemas.add(tableSchema);
-    }
-    dataSetSchema.setTableSchemas(tableSchemas);
-    schemasRepository.save(dataSetSchema);
-
-
-
-  }
 
   /**
    * 
    *
-   * @param datasetId
-   * @param file
-   * @throws EEAException
+   * @param datasetId the dataset id
+   * @param file the file
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
@@ -211,6 +185,8 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException, IOException {
     // obtains the file type from the extension
     String mimeType = getMimetype(file.getOriginalFilename());
+    // validates file types for the data load
+    validateFileType(mimeType);
     try (InputStream inputStream = file.getInputStream()) {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
@@ -231,13 +207,23 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException();
       }
       datasetVO.setId(datasetId);
-      Dataset dataset = dataSetMapper.classToEntity(datasetVO);
+      DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      if (dataset == null) {
+        throw new IOException("Error mapping file");
+      }
+      if (dataset.getTableValues() != null && !dataset.getTableValues().isEmpty()) {
+        for (TableValue table : dataset.getTableValues()) {
+          table.setDatasetId(dataset);
+        }
+      }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
-      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
     }
   }
+
+
 
   /**
    * Gets the mimetype.
@@ -257,13 +243,35 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * We delete the data imported
+   * Validate file type.
    *
-   * @param datasetName the id of the data
+   * @param mimeType the mime type
+   * @throws EEAException the EEA exception
+   */
+  private void validateFileType(String mimeType) throws EEAException {
+    // files that will be accepted: csv, xml, xls, xlsx
+    switch (mimeType) {
+      case "csv":
+        break;
+      case "xml":
+        break;
+      case "xls":
+        break;
+      case "xlsx":
+        break;
+      default:
+        throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
+    }
+  }
+
+  /**
+   * We delete the data imported.
+   *
+   * @param datasetId the dataset id
    */
   @Override
   public void deleteDataSchema(String datasetId) {
-    schemasRepository.deleteById(datasetId);
+    schemasRepository.deleteById(new ObjectId(datasetId));
 
   }
 
@@ -273,7 +281,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param eventType the event type
    * @param datasetId the dataset id
    */
-  private void sendMessage(EventType eventType, Long datasetId) {
+  private void releaseKafkaEvent(EventType eventType, Long datasetId) {
 
     EEAEventVO event = new EEAEventVO();
     event.setEventType(eventType);

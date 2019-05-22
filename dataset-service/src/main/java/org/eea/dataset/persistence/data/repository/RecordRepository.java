@@ -1,12 +1,22 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
-import org.eea.dataset.persistence.data.domain.Record;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface RecordRepository extends CrudRepository<Record, Integer> {
 
-  @Query("SELECT r from Record r")
-  List<Record> specialFind(Long datasetId);
+/**
+ * The Interface RecordRepository.
+ */
+public interface RecordRepository extends PagingAndSortingRepository<RecordValue, Integer> {
+
+  /**
+   * Find by table value id.
+   *
+   * @param tableId the table id
+   * @param pageable the pageable
+   * @return the list
+   */
+  List<RecordValue> findByTableValue_Id(Long tableId, Pageable pageable);
 }

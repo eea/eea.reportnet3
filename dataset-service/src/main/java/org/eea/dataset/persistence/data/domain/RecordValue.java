@@ -17,37 +17,33 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class TableValue.
+ * The Class Record.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "TABLE_VALUE")
-public class TableValue {
+@Table(name = "RECORD_VALUE")
+public class RecordValue {
 
   /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
-  private Long id;
-
-  /** The name. */
-  @Column(name = "NAME")
-  private String name;
+  private Integer id;
 
   /** The id mongo. */
   @Column(name = "ID_MONGO")
   private String idMongo;
 
-  /** The records. */
-  @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
-  private List<RecordValue> records;
-
-  /** The dataset id. */
+  /** The table value. */
   @ManyToOne
-  @JoinColumn(name = "DATASET_ID")
-  private DatasetValue datasetId;
+  @JoinColumn(name = "ID_TABLE")
+  private TableValue tableValue;
+
+  /** The fields. */
+  @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<FieldValue> fields;
 
   /**
    * Hash code.
@@ -56,25 +52,26 @@ public class TableValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records, idMongo, datasetId);
+    return Objects.hash(fields, id, idMongo, tableValue);
   }
 
   /**
    * Equals.
    *
-   * @param o the o
+   * @param obj the obj
    * @return true, if successful
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
+    if (this == obj)
       return true;
-    }
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    TableValue table = (TableValue) obj;
-    return id.equals(table.id) && name.equals(table.name);
+    RecordValue other = (RecordValue) obj;
+    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
+        && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
   }
+
 
 }

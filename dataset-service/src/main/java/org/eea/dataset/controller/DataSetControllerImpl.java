@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +51,26 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   @Override
+  @HystrixCommand
+  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetVO findValuesById(@PathVariable("id") Long datasetId) {
+    if (datasetId < 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    DataSetVO result = null;
+
+    try {
+      result = datasetService.getDatasetValuesById(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    return result;
+  }
+
+
+  @Override
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
@@ -66,17 +85,14 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createEmptyDataset(datasetname);
   }
 
-  @Override
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  public void createDataSchema(String datasetName) {
-    datasetService.createDataSchema(datasetName);
-  }
 
   public DataSetVO errorHandler(@PathVariable("id") Long id) {
     DataSetVO dataset = new DataSetVO();
     dataset.setId(null);
     return dataset;
   }
+
+
 
   @Override
   @PostMapping("{id}/loadDatasetData")
@@ -102,12 +118,5 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-  @Override
-  @DeleteMapping(value = "/deleteDatasetData")
-  public void deleteImportData(@RequestParam(required = true) String datasetId) {
-
-    datasetService.deleteDataSchema(datasetId);
-
-  }
 
 }

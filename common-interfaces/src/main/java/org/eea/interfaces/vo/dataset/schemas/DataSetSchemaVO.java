@@ -3,18 +3,24 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.List;
 import java.util.Objects;
-import org.bson.types.ObjectId;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+
 
 @Getter
 @Setter
 @ToString
 public class DataSetSchemaVO {
 
-  private ObjectId idDataSetSchema;
 
+  /** The id data set schema. */
+  private String idDataSetSchema;
+
+  /** The name data set schema. */
+  private String nameDataSetSchema;
+  
   /** The table schemas. */
   private List<TableSchemaVO> tableSchemas;
 
@@ -25,7 +31,7 @@ public class DataSetSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSetSchema, tableSchemas);
+    return Objects.hash(idDataSetSchema, tableSchemas, nameDataSetSchema);
   }
 
   /**
@@ -44,7 +50,8 @@ public class DataSetSchemaVO {
       return false;
     DataSetSchemaVO other = (DataSetSchemaVO) obj;
     return Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(tableSchemas, other.tableSchemas);
+        && Objects.equals(tableSchemas, other.tableSchemas)
+        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema);
   }
 
 }
