@@ -9,8 +9,8 @@ const rightButtons = [];
 
 const buttons = props.buttons.forEach((b,i) => {
     (b.group==="left")?
-        leftButtons.push(<CustomButton label={b.label} icon={b.icon} key={i} handleClick={b.clickHandler}/>)
-        :rightButtons.push(<CustomButton label={b.label} icon={b.icon} key={i} handleClick={b.clickHandler}/>)
+        leftButtons.push(<CustomButton label={b.label} icon={b.icon} key={i} handleClick={b.clickHandler} disabled={b.disabled} ownButtonClasses={b.ownButtonClasses} iconClasses={b.iconClasses}/>)
+        :rightButtons.push(<CustomButton label={b.label} icon={b.icon} key={i} handleClick={b.clickHandler} disabled={b.disabled} ownButtonClasses={b.ownButtonClasses} iconClasses={b.iconClasses}/>)
 });
 
     return (
