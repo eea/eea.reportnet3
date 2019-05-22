@@ -266,7 +266,7 @@ public class DatasetServiceImpl implements DatasetService {
           context.parse(inputStream, datasetMetabase.getDataflowId(), partition.getId());
       // map the VO to the entity
       if (datasetVO == null) {
-        throw new IOException();
+        throw new IOException("Empty dataset");
       }
       datasetVO.setId(datasetId);
       DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);

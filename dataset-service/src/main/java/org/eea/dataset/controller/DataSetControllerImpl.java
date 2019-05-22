@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -106,8 +107,8 @@ public class DataSetControllerImpl implements DatasetController {
           new Exception());
     }
     if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND,
-          new Exception());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID, new Exception());
     }
     try {
       datasetService.processFile(datasetId, file);
@@ -116,7 +117,7 @@ public class DataSetControllerImpl implements DatasetController {
           || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
         throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
