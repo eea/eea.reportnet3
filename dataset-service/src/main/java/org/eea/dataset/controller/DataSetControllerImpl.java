@@ -91,8 +91,8 @@ public class DataSetControllerImpl implements DatasetController {
     dataset.setId(null);
     return dataset;
   }
-  
- 
+
+
 
   @Override
   @PostMapping("{id}/loadDatasetData")
@@ -119,9 +119,4 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
-    datasetService.deleteDataSchema(datasetId);
-
-  }
-  
-  
 }
