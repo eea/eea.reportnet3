@@ -1,7 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,27 +59,7 @@ public interface DatasetController {
   public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
-  /**
-   * @param datasetName the dataset name
-   */
-  /*@Deprecated
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  void createDataSchema(@RequestParam("datasetName") String datasetName);*/
-  
-  /**
-   * @param id the dataschema id
-   */
-  /*@RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);*/
-  
-  /**
-   * @param id the idFlow
-   */
-  /*@RequestMapping(value = "dataschema/dataflow/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
-  */
+ 
   /**
    * @param datasetName the dataset id
    */
