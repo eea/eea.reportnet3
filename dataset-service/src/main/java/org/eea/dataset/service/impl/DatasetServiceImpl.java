@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.Dataset;
@@ -210,11 +211,12 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * 
+   * Process file.
    *
-   * @param datasetId
-   * @param file
-   * @throws EEAException
+   * @param datasetId the dataset id
+   * @param file the file
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
@@ -222,6 +224,8 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException, IOException {
     // obtains the file type from the extension
     String mimeType = getMimetype(file.getOriginalFilename());
+    // validates file types for the data load
+    validateFileType(mimeType);
     try (InputStream inputStream = file.getInputStream()) {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
@@ -243,17 +247,18 @@ public class DatasetServiceImpl implements DatasetService {
       }
       datasetVO.setId(datasetId);
       Dataset dataset = dataSetMapper.classToEntity(datasetVO);
-      dataset.setId(datasetId);
-
-      for (TableValue table : dataset.getTableValues()) {
-        table.setDatasetId(dataset);
+      if (dataset == null) {
+        throw new IOException("Error mapping file");
+      }
+      if (dataset.getTableValues() != null && !dataset.getTableValues().isEmpty()) {
+        for (TableValue table : dataset.getTableValues()) {
+          table.setDatasetId(dataset);
+        }
       }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
-      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
-    } catch (Exception e) {
-      LOG.info(e.getMessage());
+      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
     }
   }
 
@@ -275,6 +280,28 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Validate file type.
+   *
+   * @param mimeType the mime type
+   * @throws EEAException the EEA exception
+   */
+  private void validateFileType(String mimeType) throws EEAException {
+    // files that will be accepted: csv, xml, xls, xlsx
+    switch (mimeType) {
+      case "csv":
+        break;
+      case "xml":
+        break;
+      case "xls":
+        break;
+      case "xlsx":
+        break;
+      default:
+        throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
+    }
+  }
+
+  /**
    * We delete the data imported
    *
    * @param datasetName the id of the data
@@ -291,7 +318,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param eventType the event type
    * @param datasetId the dataset id
    */
-  private void sendMessage(EventType eventType, Long datasetId) {
+  private void releaseKafkaEvent(EventType eventType, Long datasetId) {
 
     EEAEventVO event = new EEAEventVO();
     event.setEventType(eventType);
