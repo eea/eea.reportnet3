@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
-import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
@@ -63,7 +62,7 @@ public class DatasetServiceTest {
 
   @Mock
   KafkaSender kafkaSender;
-  
+
 
 
   @Before
@@ -168,30 +167,32 @@ public class DatasetServiceTest {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     datasetService.processFile(1L, file);
   }
-  
+
   @Test
   public void testFindDataschemaByIdDataflow() throws Exception {
-    
-    //Se prueba que el dataflow con id 1 tiene dataschema
+
+    // Se prueba que el dataflow con id 1 tiene dataschema
     DataSetSchema data = new DataSetSchema();
-    
-    //when(schemasRepository.findSchemaByIdFlow(1L)).thenReturn(data);
-    assertEquals(null,schemasRepository.findSchemaByIdFlow(1L));
-    //when(datasetService.getDataSchemaByIdFlow(1L)).thenReturn(new DataSetSchemaVO());
-    
+
+    // when(schemasRepository.findSchemaByIdFlow(1L)).thenReturn(data);
+    assertEquals(null, schemasRepository.findSchemaByIdFlow(1L));
+    // when(datasetService.getDataSchemaByIdFlow(1L)).thenReturn(new DataSetSchemaVO());
+
   }
-  
-  
+
+
   @Test
   public void testFindDataschemaById() throws Exception {
-    
-    //Se prueba que se recupera un dataschema con un id
+
+    // Se prueba que se recupera un dataschema con un id
     DataSetSchema data = new DataSetSchema();
     data.setNameDataSetSchema("test");
-    //when(schemasRepository.findById(new ObjectId("5ce3a7ca3d851f09c42cb152"))).thenReturn(Optional.of(new DataSetSchema()));
-    assertEquals("test",data.getNameDataSetSchema());
-    //when(datasetService.getDataSchemaById("5ce3a7ca3d851f09c42cb152")).thenReturn(new DataSetSchemaVO());
-    
+    // when(schemasRepository.findById(new
+    // ObjectId("5ce3a7ca3d851f09c42cb152"))).thenReturn(Optional.of(new DataSetSchema()));
+    assertEquals("test", data.getNameDataSetSchema());
+    // when(datasetService.getDataSchemaById("5ce3a7ca3d851f09c42cb152")).thenReturn(new
+    // DataSetSchemaVO());
+
   }
 
 }
