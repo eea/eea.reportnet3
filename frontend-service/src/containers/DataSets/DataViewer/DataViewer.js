@@ -78,25 +78,25 @@ const DataViewer = (props) => {
   
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
-        // fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
-        // .then(response => response.json())
-        // .then(json => {           
-        //   const rows = json.currentPage.map(item=>{
-        //     return {
-        //             idInstrumento : item["idInstrumento"], 
-        //             denominacion : item["denominacion"], 
-        //             fechaInicial : item["fechaInicial"], 
-        //             tieneDocumentos : item["tieneDocumentos"], 
-        //             anulado : item["anulado"]
-        //           }
-        //   }); 
-        //   setFetchedData(rows);
-        //   if(json.pagedInfo.totalElements!==totalRecords){
-        //     setTotalRecords(json.pagedInfo.totalElements);
-        //   }
-        //   setLoading(false);
-        // })
-        // .catch(error => console.log("ERROR!!!!!!! - " + error));
+        fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
+        .then(response => response.json())
+        .then(json => {           
+          const rows = json.currentPage.map(item=>{
+            return {
+                    idInstrumento : item["idInstrumento"], 
+                    denominacion : item["denominacion"], 
+                    fechaInicial : item["fechaInicial"], 
+                    tieneDocumentos : item["tieneDocumentos"], 
+                    anulado : item["anulado"]
+                  }
+          }); 
+          setFetchedData(rows);
+          if(json.pagedInfo.totalElements!==totalRecords){
+            setTotalRecords(json.pagedInfo.totalElements);
+          }
+          setLoading(false);
+        })
+        .catch(error => console.log("ERROR!!!!!!! - " + error));
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
