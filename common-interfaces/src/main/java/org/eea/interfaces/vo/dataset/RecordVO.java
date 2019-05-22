@@ -24,6 +24,9 @@ public class RecordVO implements Serializable {
   /** The fields. */
   private List<FieldVO> fields;
 
+  /** The id partition. */
+  private Long datasetPartitionId;
+
   /**
    * Hash code.
    *
@@ -31,7 +34,7 @@ public class RecordVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fields, id, idMongo);
+    return Objects.hash(datasetPartitionId, fields, id, idMongo);
   }
 
   /**
@@ -44,12 +47,16 @@ public class RecordVO implements Serializable {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null || getClass() != obj.getClass()) {
+    if (obj == null)
       return false;
-    }
+    if (getClass() != obj.getClass())
+      return false;
     RecordVO other = (RecordVO) obj;
-    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
+    return Objects.equals(datasetPartitionId, other.datasetPartitionId)
+        && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
         && Objects.equals(idMongo, other.idMongo);
   }
+
+
 
 }

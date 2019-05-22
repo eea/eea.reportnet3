@@ -36,6 +36,10 @@ public class RecordValue {
   @Column(name = "ID_MONGO")
   private String idMongo;
 
+  /** The id partition. */
+  @Column(name = "DATASET_PARTITION_ID")
+  private Long datasetPartitionId;
+
   /** The table value. */
   @ManyToOne
   @JoinColumn(name = "ID_TABLE")
@@ -52,7 +56,7 @@ public class RecordValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fields, id, idMongo, tableValue);
+    return Objects.hash(datasetPartitionId, fields, id, idMongo, tableValue);
   }
 
   /**
@@ -65,13 +69,16 @@ public class RecordValue {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null || getClass() != obj.getClass()) {
+    if (obj == null)
       return false;
-    }
+    if (getClass() != obj.getClass())
+      return false;
     RecordValue other = (RecordValue) obj;
-    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
+    return Objects.equals(datasetPartitionId, other.datasetPartitionId)
+        && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
         && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
   }
+
 
 
 }
