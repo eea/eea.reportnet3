@@ -63,24 +63,24 @@ public interface DatasetController {
   /**
    * @param datasetName the dataset name
    */
-  @Deprecated
+  /*@Deprecated
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  void createDataSchema(@RequestParam("datasetName") String datasetName);
+  void createDataSchema(@RequestParam("datasetName") String datasetName);*/
   
   /**
    * @param id the dataschema id
    */
-  @RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
+  /*@RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
+  DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);*/
   
   /**
    * @param id the idFlow
    */
-  @RequestMapping(value = "dataschema/dataflow/{id}", method = RequestMethod.GET,
+  /*@RequestMapping(value = "dataschema/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
-
+  */
   /**
    * @param datasetName the dataset id
    */
