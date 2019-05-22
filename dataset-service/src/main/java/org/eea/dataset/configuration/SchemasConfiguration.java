@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mongodb.MongoClient;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SchemasConfiguration.
  *

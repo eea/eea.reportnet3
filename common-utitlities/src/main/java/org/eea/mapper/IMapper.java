@@ -16,7 +16,7 @@ public interface IMapper<X, T> {
    * @param model the model
    * @return the x
    */
-  X classToEntity(T model);
+  public X classToEntity(T model);
 
   /**
    * Entity to class.
@@ -24,7 +24,7 @@ public interface IMapper<X, T> {
    * @param entity the entity
    * @return the t
    */
-  T entityToClass(X entity);
+  public T entityToClass(X entity);
 
   /**
    * Class list to entity.
@@ -32,7 +32,7 @@ public interface IMapper<X, T> {
    * @param model the model
    * @return the list
    */
-  List<X> classListToEntity(List<T> model);
+  public List<X> classListToEntity(List<T> model);
 
   /**
    * Entity list to class.
@@ -40,5 +40,5 @@ public interface IMapper<X, T> {
    * @param entity the entity
    * @return the list
    */
-  List<T> entityListToClass(List<X> entity);
+  public List<T> entityListToClass(List<X> entity);
 }

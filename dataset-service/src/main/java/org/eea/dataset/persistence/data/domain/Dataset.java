@@ -1,13 +1,14 @@
 package org.eea.dataset.persistence.data.domain;
 
-import java.util.Date;
+import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nonnull;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,48 +21,54 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "DATASET")
+@Table(name = "DATASET_VALUE")
 public class Dataset {
+
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  @Column(name = "NAME")
-  private String name;
+  /** The id mongo. */
+  @Column(name = "ID_MONGO")
+  private String idMongo;
 
-  @Column(name = "DATE_CREATION")
-  private Date creationDate;
+  /** The data set name. */
+  @Column(name = "DATASET_NAME")
+  private String dataSetName;
 
-  @Column(name = "VISIBILITY")
-  private String visibility;
+  /** The table values. */
+  @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<TableValue> tableValues;
 
-  @Column(name = "URL_CONNECTION")
-  private String urlConnection;
-
-  @Column(name = "STATUS")
-  private String status;
-
-  @Nonnull
-  @Column(name = "DATAFLOW_ID")
-  private Long dataflowId;
-
+  /**
+   * Equals.
+   *
+   * @param object the object
+   * @return true, if successful
+   */
   @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
+  public boolean equals(final Object object) {
+    if (this == object) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (object == null || getClass() != object.getClass()) {
       return false;
     }
-    final Dataset dataset = (Dataset) o;
+    final Dataset dataset = (Dataset) object;
     return id.equals(dataset.id);
 
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, creationDate, visibility, urlConnection, status, dataflowId);
+    return Objects.hash(id, tableValues);
   }
 
 }

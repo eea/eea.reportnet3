@@ -21,7 +21,7 @@ public interface DatasetService {
    *
    * @return the dataset by id
    */
-  DataSetVO getDatasetById(@DatasetId String datasetId);
+  DataSetVO getDatasetById(@DatasetId Long datasetId);
 
   /**
    * Add record to dataset.
@@ -29,7 +29,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param record the record
    */
-  void addRecordToDataset(@DatasetId String datasetId, List<RecordVO> record);
+  void addRecordToDataset(@DatasetId Long datasetId, List<RecordVO> record);
 
   /**
    * Create empty dataset.
@@ -38,14 +38,18 @@ public interface DatasetService {
    */
   void createEmptyDataset(String datasetName);
 
-  /**
-   * Process the file: read, parse and save in the db.
-   *
+ /**
+   * Process the file: read, parse and save in the db
+   * 
    * @param datasetId
    * @param file file to process
-   * @throws EEAException
+   * 
+   * @return
+   * @throws IOException
+   * @throws Exception
    */
-  void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException, IOException;
+  void processFile(@DatasetId Long datasetId, MultipartFile file) throws EEAException, IOException;
+
 
 
   /**
