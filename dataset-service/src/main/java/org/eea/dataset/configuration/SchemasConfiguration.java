@@ -44,7 +44,7 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
   private String username;
 
   /** The password. */
-  @Value("${mongodb.primary.username}")
+  @Value("${mongodb.primary.password}")
   private String password;
 
   /**

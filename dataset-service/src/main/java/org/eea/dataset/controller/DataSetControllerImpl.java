@@ -74,17 +74,14 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createEmptyDataset(datasetname);
   }
 
-  @Override
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  public void createDataSchema(String datasetName) {
-    datasetService.createDataSchema(datasetName);
-  }
 
   public DataSetVO errorHandler(@PathVariable("id") Long id) {
     DataSetVO dataset = new DataSetVO();
     dataset.setId(null);
     return dataset;
   }
+
+
 
   @Override
   @PostMapping("{id}/loadDatasetData")
@@ -109,5 +106,6 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
 
 }

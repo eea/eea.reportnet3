@@ -63,15 +63,7 @@ public interface DatasetController {
   public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
-  /**
-   * Creates the data schema.
-   *
-   * @param datasetName the dataset name
-   */
-  @Deprecated
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  void createDataSchema(@RequestParam("datasetName") String datasetName);
-
+ 
 
 
 }

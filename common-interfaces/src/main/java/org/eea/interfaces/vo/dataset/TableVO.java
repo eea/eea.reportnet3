@@ -3,6 +3,7 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
