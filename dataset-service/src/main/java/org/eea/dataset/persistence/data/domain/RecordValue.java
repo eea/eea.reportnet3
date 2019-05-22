@@ -24,7 +24,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "RECORD")
-public class Record {
+public class RecordValue {
 
   /** The id. */
   @Id
@@ -69,7 +69,7 @@ public class Record {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Record other = (Record) obj;
+    RecordValue other = (RecordValue) obj;
     return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
         && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
   }

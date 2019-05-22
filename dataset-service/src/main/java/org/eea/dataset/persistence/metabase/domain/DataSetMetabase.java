@@ -29,7 +29,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "DataSet")
+@Table(name = "DATASET")
 public class DataSetMetabase {
 
   /** The id. */

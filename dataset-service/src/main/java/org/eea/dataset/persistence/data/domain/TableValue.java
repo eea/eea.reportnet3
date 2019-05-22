@@ -42,12 +42,12 @@ public class TableValue {
 
   /** The records. */
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
-  private List<Record> records;
+  private List<RecordValue> records;
 
   /** The dataset id. */
   @ManyToOne
   @JoinColumn(name = "DATASET_ID")
-  private Dataset datasetId;
+  private DatasetValue datasetId;
 
   /**
    * Equals.

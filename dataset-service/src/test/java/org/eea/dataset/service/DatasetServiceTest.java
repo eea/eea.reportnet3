@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Optional;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.persistence.data.domain.Dataset;
+import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -123,9 +123,9 @@ public class DatasetServiceTest {
     DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dataSetVO);
-    Dataset entityValue = new Dataset();
+    DatasetValue entityValue = new DatasetValue();
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(datasetRepository.save(Mockito.any())).thenReturn(new Dataset());
+    when(datasetRepository.save(Mockito.any())).thenReturn(new DatasetValue());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     datasetService.processFile(1L, file);
   }

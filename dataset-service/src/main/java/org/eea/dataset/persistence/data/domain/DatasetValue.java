@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -22,7 +24,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "DATASET_VALUE")
-public class Dataset {
+@Inheritance(strategy = InheritanceType.JOINED)
+public class DatasetValue {
 
   /** The id. */
   @Id
@@ -42,6 +45,9 @@ public class Dataset {
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
 
+  @Column(name = "DATASET_METABASE_ID")
+  private Long datasetMetabaseId;
+
   /**
    * Equals.
    *
@@ -56,7 +62,7 @@ public class Dataset {
     if (object == null || getClass() != object.getClass()) {
       return false;
     }
-    final Dataset dataset = (Dataset) object;
+    final DatasetValue dataset = (DatasetValue) object;
     return id.equals(dataset.id);
 
   }
