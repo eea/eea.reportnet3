@@ -23,7 +23,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "RECORD")
+@Table(name = "RECORD_VALUE")
 public class RecordValue {
 
   /** The id. */
