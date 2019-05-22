@@ -42,30 +42,12 @@ public class TableValue {
 
   /** The records. */
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
-  private List<Record> records;
+  private List<RecordValue> records;
 
   /** The dataset id. */
   @ManyToOne
   @JoinColumn(name = "DATASET_ID")
-  private Dataset datasetId;
-
-  /**
-   * Equals.
-   *
-   * @param o the o
-   * @return true, if successful
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    TableValue table = (TableValue) o;
-    return id.equals(table.id) && name.equals(table.name);
-  }
+  private DatasetValue datasetId;
 
   /**
    * Hash code.
@@ -74,7 +56,25 @@ public class TableValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records);
+    return Objects.hash(id, name, records, idMongo, datasetId);
+  }
+
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    TableValue table = (TableValue) obj;
+    return id.equals(table.id) && name.equals(table.name);
   }
 
 }

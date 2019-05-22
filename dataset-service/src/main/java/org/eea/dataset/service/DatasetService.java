@@ -70,6 +70,9 @@ public interface DatasetService {
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
 
+  DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
+
+
   /**
    * Delete the dataSchema
    *

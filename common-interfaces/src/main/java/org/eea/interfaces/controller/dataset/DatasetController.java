@@ -4,7 +4,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +32,7 @@ public interface DatasetController {
    *
    * @return the data set vo
    */
+  @Deprecated
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetVO findById(@PathVariable("id") Long id);
@@ -56,11 +56,19 @@ public interface DatasetController {
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
+  /**
+   * Load dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
   @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
   /**
+   * Creates the data schema.
+   *
    * @param datasetName the dataset name
    */
   @Deprecated
@@ -81,11 +89,16 @@ public interface DatasetController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
 
+
   /**
-   * @param datasetName the dataset id
+   * Find values by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set VO
    */
-  @DeleteMapping(value = "/deleteImportData")
-  void deleteImportData(@RequestParam("datasetName") String datasetId);
+  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetVO findValuesById(Long datasetId);
 
 
 }

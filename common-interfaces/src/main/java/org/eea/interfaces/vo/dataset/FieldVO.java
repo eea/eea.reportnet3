@@ -30,6 +30,11 @@ public class FieldVO implements Serializable {
   /** The id header. */
   private String idFieldSchema;
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id, idFieldSchema, type, value);
@@ -45,15 +50,12 @@ public class FieldVO implements Serializable {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null)
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     FieldVO other = (FieldVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(idFieldSchema, other.idFieldSchema)
         && Objects.equals(type, other.type) && Objects.equals(value, other.value);
   }
-
-
 
 }

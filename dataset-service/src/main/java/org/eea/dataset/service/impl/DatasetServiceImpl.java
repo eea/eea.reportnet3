@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
-import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.persistence.data.domain.Dataset;
-import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
@@ -106,17 +106,21 @@ public class DatasetServiceImpl implements DatasetService {
   public DataSetVO getDatasetById(@DatasetId final Long datasetId) {
     final DataSetVO dataset = new DataSetVO();
     final List<RecordVO> recordVOs = new ArrayList<>();
-    final List<Record> records = recordRepository.specialFind(datasetId);
-    if (!records.isEmpty()) {
-      for (final Record record : records) {
-        final RecordVO vo = new RecordVO();
-        // vo.setId(record.getId().toString());
-        recordVOs.add(vo);
-      }
-      // dataset.setId(datasetId);
-    }
+
+
 
     return dataset;
+  }
+
+  @Override
+  @Transactional
+  public DataSetVO getDatasetValuesById(@DatasetId final Long datasetId) throws EEAException {
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return dataSetMapper.entityToClass(dataset);
   }
 
   /**
@@ -130,7 +134,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void addRecordToDataset(@DatasetId final Long datasetId, final List<RecordVO> records) {
 
     for (final RecordVO recordVO : records) {
-      final Record r = new Record();
+      final RecordValue r = new RecordValue();
       // r.setId(Integer.valueOf(recordVO.getId()));
       recordRepository.save(r);
     }
@@ -207,11 +211,12 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * 
+   * Process file.
    *
-   * @param datasetId
-   * @param file
-   * @throws EEAException
+   * @param datasetId the dataset id
+   * @param file the file
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
@@ -219,6 +224,8 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException, IOException {
     // obtains the file type from the extension
     String mimeType = getMimetype(file.getOriginalFilename());
+    // validates file types for the data load
+    validateFileType(mimeType);
     try (InputStream inputStream = file.getInputStream()) {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
@@ -239,18 +246,19 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException();
       }
       datasetVO.setId(datasetId);
-      Dataset dataset = dataSetMapper.classToEntity(datasetVO);
-      dataset.setId(datasetId);
-
-      for (TableValue table : dataset.getTableValues()) {
-        table.setDatasetId(dataset);
+      DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      if (dataset == null) {
+        throw new IOException("Error mapping file");
+      }
+      if (dataset.getTableValues() != null && !dataset.getTableValues().isEmpty()) {
+        for (TableValue table : dataset.getTableValues()) {
+          table.setDatasetId(dataset);
+        }
       }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
-      sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
-    } catch (Exception e) {
-      LOG.info(e.getMessage());
+      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
     }
   }
 
@@ -311,6 +319,28 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Validate file type.
+   *
+   * @param mimeType the mime type
+   * @throws EEAException the EEA exception
+   */
+  private void validateFileType(String mimeType) throws EEAException {
+    // files that will be accepted: csv, xml, xls, xlsx
+    switch (mimeType) {
+      case "csv":
+        break;
+      case "xml":
+        break;
+      case "xls":
+        break;
+      case "xlsx":
+        break;
+      default:
+        throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
+    }
+  }
+
+  /**
    * We delete the data imported
    *
    * @param datasetName the id of the data
@@ -327,7 +357,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param eventType the event type
    * @param datasetId the dataset id
    */
-  private void sendMessage(EventType eventType, Long datasetId) {
+  private void releaseKafkaEvent(EventType eventType, Long datasetId) {
 
     EEAEventVO event = new EEAEventVO();
     event.setEventType(eventType);

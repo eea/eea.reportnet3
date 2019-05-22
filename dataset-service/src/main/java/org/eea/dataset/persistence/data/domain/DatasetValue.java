@@ -22,7 +22,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "DATASET_VALUE")
-public class Dataset {
+public class DatasetValue {
 
   /** The id. */
   @Id
@@ -42,6 +42,19 @@ public class Dataset {
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
 
+  // @Column(name = "DATASET_METABASE_ID")
+  // private Long datasetMetabaseId;
+
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, tableValues, idMongo, dataSetName);
+  }
+
   /**
    * Equals.
    *
@@ -56,19 +69,9 @@ public class Dataset {
     if (object == null || getClass() != object.getClass()) {
       return false;
     }
-    final Dataset dataset = (Dataset) object;
-    return id.equals(dataset.id);
-
-  }
-
-  /**
-   * Hash code.
-   *
-   * @return the int
-   */
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, tableValues);
+    final DatasetValue dataset = (DatasetValue) object;
+    return id.equals(dataset.id) && dataSetName.equals(dataset.dataSetName)
+        && idMongo.equals(dataset.idMongo) && tableValues.equals(dataset.tableValues);
   }
 
 }
