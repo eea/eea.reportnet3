@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import styles from './DataViewer.module.css';
 import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
@@ -78,25 +79,25 @@ const DataViewer = (props) => {
   
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
-        // fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
-        // .then(response => response.json())
-        // .then(json => {           
-        //   const rows = json.currentPage.map(item=>{
-        //     return {
-        //             idInstrumento : item["idInstrumento"], 
-        //             denominacion : item["denominacion"], 
-        //             fechaInicial : item["fechaInicial"], 
-        //             tieneDocumentos : item["tieneDocumentos"], 
-        //             anulado : item["anulado"]
-        //           }
-        //   }); 
-        //   setFetchedData(rows);
-        //   if(json.pagedInfo.totalElements!==totalRecords){
-        //     setTotalRecords(json.pagedInfo.totalElements);
-        //   }
-        //   setLoading(false);
-        // })
-        // .catch(error => console.log("ERROR!!!!!!! - " + error));
+        fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
+        .then(response => response.json())
+        .then(json => {           
+          const rows = json.currentPage.map(item=>{
+            return {
+                    idInstrumento : item["idInstrumento"], 
+                    denominacion : item["denominacion"], 
+                    fechaInicial : item["fechaInicial"], 
+                    tieneDocumentos : item["tieneDocumentos"], 
+                    anulado : item["anulado"]
+                  }
+          }); 
+          setFetchedData(rows);
+          if(json.pagedInfo.totalElements!==totalRecords){
+            setTotalRecords(json.pagedInfo.totalElements);
+          }
+          setLoading(false);
+        })
+        .catch(error => console.log("ERROR!!!!!!! - " + error));
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
@@ -116,7 +117,7 @@ const DataViewer = (props) => {
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
                        loading={loading} totalRecords={totalRecords} sortable={true}
-                       onSort={onSortHandler} header={header}>
+                       onSort={onSortHandler} header={header} autoLayout={true}>
                     {columns}
                 </DataTable>
             </div>

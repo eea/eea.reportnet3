@@ -6,7 +6,7 @@ import styles from './ReporterDataSet.module.css';
 
 const ReporterDataSet = () => {
   
-  const clickTest = () =>{
+  const clickTest = () => {
     console.log("Click on button");
   }
 
@@ -51,7 +51,7 @@ const ReporterDataSet = () => {
 
   return (
     <div>
-        <Title title="Data set: Bathing Water" /> 
+        <Title title="Reporting Data Set: R3 Demo Dataflow" /> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
