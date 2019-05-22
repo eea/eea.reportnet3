@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.Dataset;
 import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -32,6 +35,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -56,6 +60,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
+
+  /** The dataschema mapper. */
+  @Autowired
+  private DataSchemaMapper dataSchemaMapper;
 
   /** The record repository. */
   @Autowired
@@ -232,13 +240,59 @@ public class DatasetServiceImpl implements DatasetService {
       }
       datasetVO.setId(datasetId);
       Dataset dataset = dataSetMapper.classToEntity(datasetVO);
+      dataset.setId(datasetId);
+
+      for (TableValue table : dataset.getTableValues()) {
+        table.setDatasetId(dataset);
+      }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       sendMessage(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } catch (Exception e) {
+      LOG.info(e.getMessage());
     }
   }
 
+
+  /**
+   * Find the dataschema per id
+   * 
+   * @param dataschemaId the idDataschema
+   */
+  @Override
+  public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
+
+    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
+
+    DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
+    if (dataschema.isPresent()) {
+      DataSetSchema datasetSchema = dataschema.get();
+
+      dataSchemaVO = dataSchemaMapper.entityToClass(datasetSchema);
+    }
+
+    return dataSchemaVO;
+
+  }
+
+  /**
+   * Find the dataschema per idDataFlow
+   * 
+   * @param idFlow the idDataFlow to look for
+   */
+  @Override
+  public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
+
+    DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
+
+    return dataSchemaMapper.entityToClass(dataschema);
+
+  }
+
+
+
+  
   /**
    * Gets the mimetype.
    *
@@ -263,7 +317,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void deleteDataSchema(String datasetId) {
-    schemasRepository.deleteById(datasetId);
+    schemasRepository.deleteById(new ObjectId(datasetId));
 
   }
 

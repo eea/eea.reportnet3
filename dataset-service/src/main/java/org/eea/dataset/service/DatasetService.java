@@ -6,6 +6,7 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -37,7 +38,7 @@ public interface DatasetService {
    */
   void createEmptyDataset(String datasetName);
 
-  /**
+ /**
    * Process the file: read, parse and save in the db
    * 
    * @param datasetId
@@ -50,13 +51,24 @@ public interface DatasetService {
   void processFile(@DatasetId Long datasetId, MultipartFile file) throws EEAException, IOException;
 
 
+
   /**
    * Creates the data schema.
    *
    * @param datasetName the dataset name
    */
   void createDataSchema(String datasetName);
-
+  
+  
+  /**
+   * Gets dataschema by id
+   */
+  DataSetSchemaVO getDataSchemaById(String dataschemaId);
+  
+  /**
+   * Gets dataschema by id
+   */
+  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
 
   /**
    * Delete the dataSchema

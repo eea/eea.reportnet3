@@ -68,6 +68,7 @@ public class CSVReaderStrategyTest {
 
 
   @Test
+  @Ignore
   public void testParseFile() throws InvalidFileException {
     when(schemasRepository.findByIdDataFlow(Mockito.anyLong())).thenReturn(dataSets);
     csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);

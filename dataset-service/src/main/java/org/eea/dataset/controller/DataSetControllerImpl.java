@@ -1,10 +1,13 @@
 package org.eea.dataset.controller;
 
+import java.util.Date;
+import org.bson.types.ObjectId;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,19 @@ public class DataSetControllerImpl implements DatasetController {
     dataset.setId(null);
     return dataset;
   }
+  
+  public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
+    DataSetSchemaVO dataschema = new DataSetSchemaVO();
+    //dataschema.setIdDataSetSchema(new ObjectId().toString());
+  
+    return dataschema;
+  }
+  public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
+    DataSetSchemaVO dataschema = new DataSetSchemaVO();
+    //dataschema.setIdDataSetSchema(new ObjectId().toString());
+    
+    return dataschema;
+  }
 
   @Override
   @PostMapping("{id}/loadDatasetData")
@@ -108,6 +124,27 @@ public class DataSetControllerImpl implements DatasetController {
 
     datasetService.deleteDataSchema(datasetId);
 
+  }
+  
+  @Override
+  @HystrixCommand(fallbackMethod = "errorHandlerSchema")
+  @RequestMapping(value = "dataschema/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
+    
+    return datasetService.getDataSchemaById(id);
+    
+  }
+  
+  
+  @Override
+  @HystrixCommand(fallbackMethod = "errorHandlerSchemaDataFlow")
+  @RequestMapping(value = "dataschema/dataflow/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
+    
+    return datasetService.getDataSchemaByIdFlow(idFlow);
+    
   }
 
 }

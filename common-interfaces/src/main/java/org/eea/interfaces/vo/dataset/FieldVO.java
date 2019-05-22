@@ -7,6 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class FieldVO.
+ */
 @Getter
 @Setter
 @ToString

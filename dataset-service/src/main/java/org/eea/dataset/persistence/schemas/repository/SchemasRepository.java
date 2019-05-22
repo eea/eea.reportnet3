@@ -3,16 +3,18 @@
  */
 package org.eea.dataset.persistence.schemas.repository;
 
-import java.util.List;
+import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 /**
  * @author Mario Severa
  *
  */
-public interface SchemasRepository extends CrudRepository<DataSetSchema, String> {
+public interface SchemasRepository extends MongoRepository<DataSetSchema, ObjectId> {
 
-  List<DataSetSchema> findByIdDataFlow(Long idDataFlow);
-
+  @Query("{'idDataFlow': ?0}")
+  DataSetSchema findSchemaByIdFlow(Long idFlow);
+  
 }
