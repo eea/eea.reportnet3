@@ -9,20 +9,50 @@ import {FileUpload} from 'primereact/fileupload';
 const ReporterDataSet = () => {
   const [visible, setVisibility] = useState(false);
     
-    const showFileUploadDialog = () => {
-        console.log('showFileUploadDialog onClick');
-        setVisibility(true);
-    }
+  const showFileUploadDialog = () => {
+      console.log('showFileUploadDialog onClick');
+      setVisibility(true);
+  }
 
-    const onUploadFile = () => {
-        console.log('onUploadFile');
-        // setVisibility(true);
-    }
+  const onUploadFile = () => {
+      console.log('onUploadFile');
+      // setVisibility(true);
+  }
 
-    const onHide = () => {
-        console.log('onCick');
-        setVisibility(false);
-    }
+  const onHide = () => {
+      console.log('onCick');
+      setVisibility(false);
+  }
+
+  const onDragOver = (event) => {    
+    //event.preventDefault();
+    console.log("On drag over", event);
+    var files = document.getElementsByClassName("p-fileupload-row");
+    console.log(files);
+    // return;
+
+    if (files.length >= 1)
+      {
+        files[0].remove();
+        return;
+        // console.log("draggable false");
+        // var elem = document.getElementById("root");
+        // console.log(elem);
+        // elem.ondrop(event) = () => {
+        //     event.preventDefault();
+        // }
+      }
+  }
+
+  // const onDrop = (event) => {
+  //   const { completedTasks, draggedTask, todos } = this.state;
+  //   this.setState({
+  //     completedTasks: [...completedTasks, draggedTask],
+  //     todos: todos.filter(task => task.taskID !== draggedTask.taskID),
+  //     draggedTask: {},
+  //   });
+  // }
+
 
   const customButtons = [
     {
@@ -78,7 +108,7 @@ const ReporterDataSet = () => {
                   className={styles.Dialog} onHide={onHide} >
               <FileUpload mode="advanced" name="demo[]" url="./upload.php" onUpload={onUploadFile} 
                           multiple={true} allowTypes="/(\.|\/)(csv|doc)$/" chooseLabel="Select or drag here your dataset (.csv)"
-                          maxFileSize={1000000} fileLimit="0" className={styles.FileUpload} />
+                          maxFileSize={1000000} fileLimit="0" className={styles.FileUpload} onSelect={onDragOver} />
           </Dialog>
       </div>
   );
