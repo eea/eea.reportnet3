@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.Dataset;
 import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -34,9 +36,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -61,6 +60,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
+
+  /** The dataschema mapper. */
+  @Autowired
+  private DataSchemaMapper dataSchemaMapper;
 
   /** The record repository. */
   @Autowired
@@ -237,6 +240,11 @@ public class DatasetServiceImpl implements DatasetService {
       }
       datasetVO.setId(datasetId);
       Dataset dataset = dataSetMapper.classToEntity(datasetVO);
+      dataset.setId(datasetId);
+
+      for (TableValue table : dataset.getTableValues()) {
+        table.setDatasetId(dataset);
+      }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
@@ -245,90 +253,76 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info(e.getMessage());
     }
   }
-  
-  
+
+
   /**
    * Find the dataschema per id
+   * 
    * @param dataschemaId the idDataschema
    */
   @Override
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
-    
+
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
-    
+
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
-    if(dataschema.isPresent()) {
+    if (dataschema.isPresent()) {
       DataSetSchema datasetSchema = dataschema.get();
-      dataSchemaVO = mapeoDataSchema(datasetSchema);
-      
-      DataSetSchemaVO dataSchemaPrueba = dataSetMapper.entityToClass(datasetSchema);
+
+      dataSchemaVO = dataSchemaMapper.entityToClass(datasetSchema);
     }
-    
+
     return dataSchemaVO;
-    
+
   }
-  
+
   /**
    * Find the dataschema per idDataFlow
+   * 
    * @param idFlow the idDataFlow to look for
    */
   @Override
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
-    
+
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-    
-    return mapeoDataSchema(dataschema);
-    
+
+    return dataSchemaMapper.entityToClass(dataschema);
+
   }
-  
-  
-  
+
+
+
   /**
    * map DataSchema to DataSchemaVO
    * 
    * @param schema the DataSetSchema
    * @return the dataSchemaVO filled
    */
-  private DataSetSchemaVO mapeoDataSchema(DataSetSchema schema) {
-    
-    DataSetSchemaVO data = new DataSetSchemaVO();
-    if(schema!=null) {
-      data.setIdDataSetSchema(schema.getIdDataSetSchema());
-      if(!schema.getTableSchemas().isEmpty()) {
-        List<TableSchemaVO> tableVo = new ArrayList<TableSchemaVO>();
-        for(TableSchema tabla : schema.getTableSchemas()) {
-          TableSchemaVO table = new TableSchemaVO();
-          table.setIdTableSchema(tabla.getIdTableSchema());
-          table.setNameSchema(tabla.getNameSchema());
-          if(tabla.getRecordSchema()!=null) {
-            RecordSchemaVO registro = new RecordSchemaVO();
-            registro.setIdRecordSchema(tabla.getRecordSchema().getIdRecordSchema());
-            registro.setNameSchema(tabla.getNameSchema());
-            if(!tabla.getRecordSchema().getFieldSchema().isEmpty()) {
-              List<FieldSchemaVO> listaRegistro = new ArrayList<FieldSchemaVO>();
-              for(FieldSchema field : tabla.getRecordSchema().getFieldSchema()) {
-                FieldSchemaVO campo = new FieldSchemaVO();
-                campo.setId(field.getIdFieldSchema().toString());
-                campo.setIdRecord(field.getIdRecord().toString());
-                campo.setName(field.getHeaderName());
-                campo.setType(field.getType());
-               
-                listaRegistro.add(campo);
-              }
-              registro.setFieldSchema(listaRegistro);
-            }
-            table.setRecordSchema(registro);
-          }
-         
-          tableVo.add(table);
-         
-        }
-        data.setTableSchemas(tableVo);
-      }
-    }
-    return data;
-  }
-  
+  /*
+   * private DataSetSchemaVO mapeoDataSchema(DataSetSchema schema) {
+   * 
+   * DataSetSchemaVO data = new DataSetSchemaVO(); if(schema!=null) {
+   * data.setIdDataSetSchema(schema.getIdDataSetSchema()); if(!schema.getTableSchemas().isEmpty()) {
+   * List<TableSchemaVO> tableVo = new ArrayList<TableSchemaVO>(); for(TableSchema tabla :
+   * schema.getTableSchemas()) { TableSchemaVO table = new TableSchemaVO();
+   * table.setIdTableSchema(tabla.getIdTableSchema()); table.setNameSchema(tabla.getNameSchema());
+   * if(tabla.getRecordSchema()!=null) { RecordSchemaVO registro = new RecordSchemaVO();
+   * registro.setIdRecordSchema(tabla.getRecordSchema().getIdRecordSchema());
+   * registro.setNameSchema(tabla.getNameSchema());
+   * if(!tabla.getRecordSchema().getFieldSchema().isEmpty()) { List<FieldSchemaVO> listaRegistro =
+   * new ArrayList<FieldSchemaVO>(); for(FieldSchema field :
+   * tabla.getRecordSchema().getFieldSchema()) { FieldSchemaVO campo = new FieldSchemaVO();
+   * campo.setId(field.getIdFieldSchema()); campo.setIdRecord(field.getIdRecord());
+   * campo.setName(field.getHeaderName()); campo.setType(field.getType());
+   * 
+   * listaRegistro.add(campo); } registro.setFieldSchema(listaRegistro); }
+   * table.setRecordSchema(registro); }
+   * 
+   * tableVo.add(table);
+   * 
+   * } data.setTableSchemas(tableVo); } } return data; }
+   */
+
 
   /**
    * Gets the mimetype.

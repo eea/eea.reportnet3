@@ -28,7 +28,7 @@ public class TableValue {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -41,7 +41,7 @@ public class TableValue {
   private String idMongo;
 
   /** The records. */
-  @OneToMany(mappedBy = "TABLE_VALUE", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<Record> records;
 
   /** The dataset id. */

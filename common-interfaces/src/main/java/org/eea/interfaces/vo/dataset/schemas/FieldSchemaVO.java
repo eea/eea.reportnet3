@@ -1,7 +1,6 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.Objects;
-import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import lombok.Getter;
 import lombok.Setter;

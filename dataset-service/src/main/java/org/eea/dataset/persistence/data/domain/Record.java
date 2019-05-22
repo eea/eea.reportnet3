@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -26,7 +28,7 @@ public class Record {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
   private Integer id;
 
@@ -35,11 +37,12 @@ public class Record {
   private String idMongo;
 
   /** The table value. */
-  @Column(name = "ID_TABLE")
-  private Long tableValue;
+  @ManyToOne
+  @JoinColumn(name = "ID_TABLE")
+  private TableValue tableValue;
 
   /** The fields. */
-  @OneToMany(mappedBy = "RECORD", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
   /**

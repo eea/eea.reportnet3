@@ -83,13 +83,13 @@ public class DataSetControllerImpl implements DatasetController {
   
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
-    dataschema.setIdDataSetSchema(new ObjectId(new Date(),0));
+    //dataschema.setIdDataSetSchema(new ObjectId().toString());
   
     return dataschema;
   }
   public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
-    dataschema.setIdDataSetSchema(new ObjectId(new Date(),0));
+    //dataschema.setIdDataSetSchema(new ObjectId().toString());
     
     return dataschema;
   }
