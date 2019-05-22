@@ -25,9 +25,6 @@ public class DataSetVO implements Serializable {
   /** The id mongo. */
   private String idMongo;
 
-  /** The data set name. */
-  private String dataSetName;
-
   /** The table VO. */
   private List<TableVO> tableVO;
 
@@ -38,7 +35,7 @@ public class DataSetVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(dataSetName, id, tableVO, idMongo);
+    return Objects.hash(id, tableVO, idMongo);
   }
 
   /**
@@ -55,8 +52,8 @@ public class DataSetVO implements Serializable {
       return false;
     }
     DataSetVO other = (DataSetVO) obj;
-    return Objects.equals(dataSetName, other.dataSetName) && Objects.equals(id, other.id)
-        && Objects.equals(tableVO, other.tableVO) && Objects.equals(idMongo, other.idMongo);
+    return Objects.equals(id, other.id) && Objects.equals(tableVO, other.tableVO)
+        && Objects.equals(idMongo, other.idMongo);
   }
 
 
