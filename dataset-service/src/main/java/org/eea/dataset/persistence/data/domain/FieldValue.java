@@ -44,7 +44,7 @@ public class FieldValue {
   /** The record. */
   @ManyToOne
   @JoinColumn(name = "ID_RECORD")
-  private Record record;
+  private RecordValue record;
 
   /**
    * Hash code.

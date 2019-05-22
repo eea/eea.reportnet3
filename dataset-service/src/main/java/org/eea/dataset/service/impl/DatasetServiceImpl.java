@@ -11,8 +11,8 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.multitenancy.DatasetId;
-import org.eea.dataset.persistence.data.domain.Dataset;
-import org.eea.dataset.persistence.data.domain.Record;
+import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
@@ -100,23 +100,17 @@ public class DatasetServiceImpl implements DatasetService {
   public DataSetVO getDatasetById(@DatasetId final Long datasetId) {
     final DataSetVO dataset = new DataSetVO();
     final List<RecordVO> recordVOs = new ArrayList<>();
-    final List<Record> records = recordRepository.specialFind(datasetId);
-    if (!records.isEmpty()) {
-      for (final Record record : records) {
-        final RecordVO vo = new RecordVO();
-        // vo.setId(record.getId().toString());
-        recordVOs.add(vo);
-      }
-      // dataset.setId(datasetId);
-    }
+
+
 
     return dataset;
   }
 
   @Override
+  @Transactional
   public DataSetVO getDatasetValuesById(@DatasetId final Long datasetId) throws EEAException {
 
-    Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -134,7 +128,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void addRecordToDataset(@DatasetId final Long datasetId, final List<RecordVO> records) {
 
     for (final RecordVO recordVO : records) {
-      final Record r = new Record();
+      final RecordValue r = new RecordValue();
       // r.setId(Integer.valueOf(recordVO.getId()));
       recordRepository.save(r);
     }
@@ -246,7 +240,7 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException();
       }
       datasetVO.setId(datasetId);
-      Dataset dataset = dataSetMapper.classToEntity(datasetVO);
+      DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
       if (dataset == null) {
         throw new IOException("Error mapping file");
       }

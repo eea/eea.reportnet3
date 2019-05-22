@@ -8,8 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -17,33 +15,35 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class Record.
+ * The type Dataset.
  */
 @Entity
 @Getter
 @Setter
 @ToString
-@Table(name = "RECORD")
-public class Record {
+@Table(name = "DATASET_VALUE")
+public class DatasetValue {
 
   /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
-  private Integer id;
+  private Long id;
 
   /** The id mongo. */
   @Column(name = "ID_MONGO")
   private String idMongo;
 
-  /** The table value. */
-  @ManyToOne
-  @JoinColumn(name = "ID_TABLE")
-  private TableValue tableValue;
+  /** The data set name. */
+  @Column(name = "DATASET_NAME")
+  private String dataSetName;
 
-  /** The fields. */
-  @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
-  private List<FieldValue> fields;
+  /** The table values. */
+  @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<TableValue> tableValues;
+
+  // @Column(name = "DATASET_METABASE_ID")
+  // private Long datasetMetabaseId;
 
   /**
    * Hash code.
@@ -52,26 +52,26 @@ public class Record {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fields, id, idMongo, tableValue);
+    return Objects.hash(id, tableValues, idMongo, dataSetName);
   }
 
   /**
    * Equals.
    *
-   * @param obj the obj
+   * @param object the object
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
+  public boolean equals(final Object object) {
+    if (this == object) {
       return true;
-    if (obj == null || getClass() != obj.getClass()) {
+    }
+    if (object == null || getClass() != object.getClass()) {
       return false;
     }
-    Record other = (Record) obj;
-    return Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
-        && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
+    final DatasetValue dataset = (DatasetValue) object;
+    return id.equals(dataset.id) && dataSetName.equals(dataset.dataSetName)
+        && idMongo.equals(dataset.idMongo) && tableValues.equals(dataset.tableValues);
   }
-
 
 }

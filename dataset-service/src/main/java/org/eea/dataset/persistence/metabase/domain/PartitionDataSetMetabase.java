@@ -24,18 +24,18 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "PartitionDataSet")
+@Table(name = "PARTITION_DATASET")
 public class PartitionDataSetMetabase {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "id", columnDefinition = "serial")
+  @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "idDataSet")
+  @JoinColumn(name = "ID_DATASET")
   private DataSetMetabase idDataSet;
 
-  @Column(name = "username")
+  @Column(name = "USER_NAME")
   private String username;
 
   @Override

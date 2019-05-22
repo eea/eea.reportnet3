@@ -1,12 +1,9 @@
 package org.eea.dataset.persistence.data.repository;
 
-import java.util.List;
-import org.eea.dataset.persistence.data.domain.Record;
-import org.springframework.data.jpa.repository.Query;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.repository.CrudRepository;
 
-public interface RecordRepository extends CrudRepository<Record, Integer> {
+public interface RecordRepository extends CrudRepository<RecordValue, Integer> {
 
-  @Query("SELECT r from Record r")
-  List<Record> specialFind(Long datasetId);
+
 }
