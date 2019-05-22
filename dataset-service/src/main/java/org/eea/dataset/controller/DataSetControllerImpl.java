@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.micrometer.core.annotation.Timed;
 
 /**
  * The type Data set controller.
@@ -39,31 +40,19 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @Timed("FIND_BY_ID_TIMER")
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO findById(@PathVariable("id") Long datasetId) {
-    DataSetVO result = null;
-
-    result = datasetService.getDatasetById(datasetId);
-    // TenantResolver.clean();
-    return result;
-  }
-
-  @Override
-  @HystrixCommand
-  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO findValuesById(@PathVariable("id") Long datasetId) {
     if (datasetId < 0) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     DataSetVO result = null;
-
     try {
       result = datasetService.getDatasetValuesById(datasetId);
     } catch (EEAException e) {
+      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
     return result;
@@ -103,8 +92,8 @@ public class DataSetControllerImpl implements DatasetController {
           new Exception());
     }
     if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND,
-          new Exception());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID, new Exception());
     }
     try {
       datasetService.processFile(datasetId, file);
@@ -113,7 +102,7 @@ public class DataSetControllerImpl implements DatasetController {
           || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
         throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

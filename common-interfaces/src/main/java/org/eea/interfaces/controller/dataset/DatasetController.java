@@ -25,16 +25,14 @@ public interface DatasetController {
   }
 
   /**
-   * Find by id data set vo.
+   * Find values by id.
    *
-   * @param id the id
-   *
-   * @return the data set vo
+   * @param datasetId the dataset id
+   * @return the data set VO
    */
-  @Deprecated
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
+  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO findById(@PathVariable("id") Long id);
+  DataSetVO findById(Long datasetId);
 
   /**
    * Update dataset data set vo.
@@ -66,12 +64,6 @@ public interface DatasetController {
       @RequestParam("file") MultipartFile file);
 
  
-  /**
-   * @param datasetName the dataset id
-   */
-  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO findValuesById(Long datasetId);
 
 
 }

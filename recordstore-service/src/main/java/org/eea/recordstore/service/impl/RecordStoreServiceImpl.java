@@ -106,7 +106,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     // crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1
     final Container container = dockerInterfaceService.getContainer(CONTAINER_NAME);
 
-    final File fileInitCommands = new File(("src/datasetInitCommands.txt"));
+    final ClassLoader classLoader = this.getClass().getClassLoader();
+    final File fileInitCommands =
+        new File(classLoader.getResource("datasetInitCommands.txt").getFile());
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
