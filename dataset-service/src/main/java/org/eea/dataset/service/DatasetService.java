@@ -53,27 +53,6 @@ public interface DatasetService {
 
 
   /**
-   * Creates the data schema.
-   *
-   * @param datasetName the dataset name
-   */
-  void createDataSchema(String datasetName);
-  
-  
-  /**
-   * Gets dataschema by id
-   */
-  DataSetSchemaVO getDataSchemaById(String dataschemaId);
-  
-  /**
-   * Gets dataschema by id
-   */
-  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
-
-  DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
-
-
-  /**
    * Delete the dataSchema
    *
    * @param datasetName for id
