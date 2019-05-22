@@ -5,7 +5,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 /**
  * The Interface DataschemaService.
  */
-public interface DataschemaService {
+public interface DatasetSchemaService {
 
   /**
    * Creates the data schema.

@@ -1,6 +1,6 @@
 package org.eea.dataset.service.file;
 
-import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory implements IFileParserFactory {
 
-  /** The schemas repository. */
   @Autowired
-  private SchemasRepository schemasRepository;
+  private DatasetSchemaService dataSetSchemaService;
 
   /**
    * Creates a new FileParser object.
@@ -29,10 +28,10 @@ public class FileParserFactory implements IFileParserFactory {
     mimeType = mimeType.toLowerCase();
     switch (mimeType) {
       case "csv":
-        context = new FileParseContextImpl(new CSVReaderStrategy(schemasRepository));
+        context = new FileParseContextImpl(new CSVReaderStrategy(dataSetSchemaService));
         break;
       case "xml":
-        context = new FileParseContextImpl(new XMLReaderStrategy(schemasRepository));
+        context = new FileParseContextImpl(new XMLReaderStrategy(dataSetSchemaService));
         break;
       default:
         context = null;

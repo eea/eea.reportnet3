@@ -6,7 +6,6 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -38,7 +37,7 @@ public interface DatasetService {
    */
   void createEmptyDataset(String datasetName);
 
- /**
+  /**
    * Process the file: read, parse and save in the db
    * 
    * @param datasetId

@@ -10,14 +10,14 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DataschemaService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("datachemaService")
-public class DataschemaServiceImpl implements DataschemaService{
+public class DataschemaServiceImpl implements DatasetSchemaService{
   
   /** The schemas repository. */
   @Autowired

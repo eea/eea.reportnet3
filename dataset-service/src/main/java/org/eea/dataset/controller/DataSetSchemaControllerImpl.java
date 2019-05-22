@@ -1,6 +1,6 @@
 package org.eea.dataset.controller;
 
-import org.eea.dataset.service.DataschemaService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
   @Autowired
-  private DataschemaService dataschemaService;
+  private DatasetSchemaService dataschemaService;
 
 
   @Override

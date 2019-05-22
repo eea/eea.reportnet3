@@ -118,9 +118,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-  @Override
-  @DeleteMapping(value = "/deleteDatasetData")
-  public void deleteImportData(@RequestParam(required = true) String datasetId) {
 
     datasetService.deleteDataSchema(datasetId);
 

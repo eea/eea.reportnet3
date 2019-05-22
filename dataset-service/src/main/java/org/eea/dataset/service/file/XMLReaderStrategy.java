@@ -1,7 +1,7 @@
 package org.eea.dataset.service.file;
 
 import java.io.InputStream;
-import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 
@@ -10,10 +10,10 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
  */
 public class XMLReaderStrategy implements ReaderStrategy {
 
-  private SchemasRepository schemasRepository;
+  private DatasetSchemaService dataSetSchemaService;
 
-  public XMLReaderStrategy(SchemasRepository schemasRepository) {
-    this.schemasRepository = schemasRepository;
+  public XMLReaderStrategy(DatasetSchemaService dataSetSchemaService) {
+    this.dataSetSchemaService = dataSetSchemaService;
   }
 
   /**

@@ -9,21 +9,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.eea.dataset.exception.InvalidFileException;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.FieldSchema;
-import org.eea.dataset.persistence.schemas.domain.RecordSchema;
-import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -32,7 +30,7 @@ import com.opencsv.CSVReaderBuilder;
 /**
  * The Class CSVReaderStrategy.
  */
-@Component
+
 public class CSVReaderStrategy implements ReaderStrategy {
 
   /** The Constant PIPE_DELIMITER. */
@@ -47,17 +45,16 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The schemas repository. */
-  private SchemasRepository schemasRepository;
+  private DatasetSchemaService datasetSchemaService;
 
   /** The data set schema. */
-  private DataSetSchema dataSetSchema;
+  private DataSetSchemaVO dataSetSchema;
 
   /** The headers. */
   private List<FieldSchemaVO> headers;
 
   /** The tables schema. */
-  private List<TableSchema> tablesSchema;
+  private List<TableSchemaVO> tablesSchema;
 
   private static final String ERROR_MESSAGE = "Invalid Format File";
 
@@ -65,10 +62,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /**
    * Instantiates a new CSV reader strategy.
    *
-   * @param schemasRepository the schemas repository
+   * @param dataSetService the schemas repository
    */
-  public CSVReaderStrategy(SchemasRepository schemasRepository) {
-    this.schemasRepository = schemasRepository;
+  public CSVReaderStrategy(DatasetSchemaService datasetSchemaService) {
+    this.datasetSchemaService = datasetSchemaService;
   }
 
   /**
@@ -245,12 +242,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
     for (String value : values.subList(1, values.size())) {
       FieldVO field = new FieldVO();
       if (idTablaSchema != null) {
-        FieldSchema fieldSchema = findIdFieldSchema(headers.get(contAux).getName(), idTablaSchema);
+        FieldSchemaVO fieldSchema =
+            findIdFieldSchema(headers.get(contAux).getName(), idTablaSchema);
         if (fieldSchema != null) {
-          headers.get(contAux).setId(fieldSchema.getIdFieldSchema().toString());
-          field.setIdFieldSchema(
-              null != fieldSchema.getIdFieldSchema() ? fieldSchema.getIdFieldSchema().toString()
-                  : null);
+          headers.get(contAux).setId(fieldSchema.getId());
+          field.setIdFieldSchema(fieldSchema.getId());
           field.setType(null != fieldSchema.getType() ? fieldSchema.getType().toString() : null);
         }
       }
@@ -275,9 +271,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private void getDataSetSchema(Long dataflowId) {
     if (null != dataflowId) {
-      List<DataSetSchema> dataSetsSchemas = schemasRepository.findByIdDataFlow(dataflowId);
-      if (null != dataSetsSchemas && !dataSetsSchemas.isEmpty()) {
-        dataSetSchema = dataSetsSchemas.get(0);
+      dataSetSchema = datasetSchemaService.getDataSchemaByIdFlow(dataflowId);
+      if (null != dataSetSchema) {
         tablesSchema = dataSetSchema.getTableSchemas();
       }
     }
@@ -293,7 +288,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private String findIdTable(String tableName) {
     String idTable = null;
     if (null != tablesSchema) {
-      for (TableSchema tableSchema : tablesSchema) {
+      for (TableSchemaVO tableSchema : tablesSchema) {
         if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
           idTable =
               null != tableSchema.getIdTableSchema() ? tableSchema.getIdTableSchema().toString()
@@ -312,7 +307,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private String findIdRecord(String idTableMongo) {
     if (null != findTableSchema(idTableMongo)) {
-      TableSchema tableS = findTableSchema(idTableMongo);
+      TableSchemaVO tableS = findTableSchema(idTableMongo);
       return null != tableS ? tableS.getRecordSchema().getIdRecordSchema().toString() : null;
     }
     return null;
@@ -324,8 +319,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTableMongo the id table mongo
    * @return the table schema
    */
-  private TableSchema findTableSchema(String idTableMongo) {
-    for (TableSchema tableSchema : tablesSchema) {
+  private TableSchemaVO findTableSchema(String idTableMongo) {
+    for (TableSchemaVO tableSchema : tablesSchema) {
       if (tableSchema.getIdTableSchema().toString().equalsIgnoreCase(idTableMongo)) {
         return tableSchema;
       }
@@ -342,14 +337,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTablaSchema the id tabla schema
    * @return the field schema
    */
-  private FieldSchema findIdFieldSchema(String nameSchema, String idTablaSchema) {
-    TableSchema recordSchemas = findTableSchema(idTablaSchema);
-    RecordSchema recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
+  private FieldSchemaVO findIdFieldSchema(String nameSchema, String idTablaSchema) {
+    TableSchemaVO recordSchemas = findTableSchema(idTablaSchema);
+    RecordSchemaVO recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
     if (null != recordSchema) {
-      List<FieldSchema> fieldsSchemas = recordSchema.getFieldSchema();
-      for (FieldSchema fieldSchema : fieldsSchemas) {
-        if (null != fieldSchema.getHeaderName()) {
-          if (fieldSchema.getHeaderName().equalsIgnoreCase(nameSchema)) {
+      List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
+      for (FieldSchemaVO fieldSchema : fieldsSchemas) {
+        if (null != fieldSchema.getName()) {
+          if (fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
             return fieldSchema;
           }
         }

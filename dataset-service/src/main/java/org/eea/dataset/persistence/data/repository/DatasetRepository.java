@@ -5,6 +5,4 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface DatasetRepository extends CrudRepository<DatasetValue, Long> {
 
-  DatasetValue findByDatasetMetabaseId(Long datasetMetabaseId);
-
 }
