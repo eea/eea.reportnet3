@@ -67,7 +67,7 @@ public interface DatasetController {
 
 
   /**
-   * Delete iport data
+   * Delete import data
    *
    * @param datasetId the id of dataset
    */
