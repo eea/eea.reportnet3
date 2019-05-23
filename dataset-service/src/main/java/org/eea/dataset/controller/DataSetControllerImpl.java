@@ -1,7 +1,10 @@
 package org.eea.dataset.controller;
 
-import java.io.IOException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -23,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -32,13 +34,19 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
@@ -47,12 +55,13 @@ public class DataSetControllerImpl implements DatasetController {
    * Find by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data set VO
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO findById(@PathVariable("id") Long datasetId) {
+  public DataSetVO findById(@PathVariable("id") final Long datasetId) {
     if (datasetId < 0) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -60,7 +69,7 @@ public class DataSetControllerImpl implements DatasetController {
     DataSetVO result = null;
     try {
       result = datasetService.getDatasetValuesById(datasetId);
-    } catch (EEAException e) {
+    } catch (final EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
@@ -74,12 +83,13 @@ public class DataSetControllerImpl implements DatasetController {
    * Update dataset.
    *
    * @param dataset the dataset
+   *
    * @return the data set VO
    */
   @Override
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO updateDataset(@RequestBody DataSetVO dataset) {
+  public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
     // datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
 
     return null;
@@ -92,7 +102,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @RequestMapping(value = "/create", method = RequestMethod.POST)
-  public void createEmptyDataSet(String datasetname) {
+  public void createEmptyDataSet(final String datasetname) {
     datasetService.createEmptyDataset(datasetname);
   }
 
@@ -101,14 +111,14 @@ public class DataSetControllerImpl implements DatasetController {
    * Error handler.
    *
    * @param id the id
+   *
    * @return the data set VO
    */
-  public DataSetVO errorHandler(@PathVariable("id") Long id) {
-    DataSetVO dataset = new DataSetVO();
+  public static DataSetVO errorHandler(@PathVariable("id") final Long id) {
+    final DataSetVO dataset = new DataSetVO();
     dataset.setId(null);
     return dataset;
   }
-
 
 
   /**
@@ -119,8 +129,8 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file) {
+  public void loadDatasetData(@PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -129,16 +139,14 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    final LoadDataCallable callable = new LoadDataCallable(this.datasetService, datasetId, file);
     try {
-      datasetService.processFile(datasetId, file);
-    } catch (EEAException e) {
-      if (e.getMessage().equals(EEAErrorMessage.FILE_FORMAT)
-          || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
-        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-      }
-    } catch (IOException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      executor.submit(callable);
+    } finally {
+      executor.shutdown();
     }
+
   }
 
   /**
@@ -148,7 +156,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "/deleteImportData")
-  public void deleteImportData(Long dataSetId) {
+  public void deleteImportData(final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
