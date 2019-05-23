@@ -36,6 +36,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
   @Override
   public void createDataSchema(String datasetName) {
 
+    //Todo esto es un dummy para crear el esquema en MongoDB
     TypeData headerType = TypeData.BOOLEAN;
 
     DataSetSchema dataSetSchema = new DataSetSchema();
@@ -88,16 +89,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
   
   
   /**
-   * Find the dataschema per id
-   * 
+   * Find the dataschema per id.
+   *
    * @param dataschemaId the idDataschema
+   * @return the data schema by id
    */
   @Override
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
 
+    //La busqueda utilizando el método directo de MongoDB devuelve un objeto Optional
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
 
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
+    //El isPresent es para comprobar que efectivamente la busqueda ha devuelto resultado
     if (dataschema.isPresent()) {
       DataSetSchema datasetSchema = dataschema.get();
 
@@ -116,9 +120,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
   @Override
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
 
-    DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-
-    return dataSchemaMapper.entityToClass(dataschema);
+    DataSetSchemaVO dataSchemaVo = new DataSetSchemaVO();
+    DataSetSchema dataSchema = schemasRepository.findSchemaByIdFlow(idFlow);
+    if(dataSchema!=null) {
+      //mapeo de entidad a VO
+      dataSchemaVo = dataSchemaMapper.entityToClass(dataSchema);
+    }
+    return dataSchemaVo;
 
   }
   

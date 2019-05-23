@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
+/**
+ * The Class DataSetSchemaControllerImpl.
+ */
 @RestController
 @RequestMapping("/dataschema")
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {

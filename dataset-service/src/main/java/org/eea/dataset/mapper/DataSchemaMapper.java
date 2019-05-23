@@ -19,11 +19,19 @@ public abstract class DataSchemaMapper implements IMapper<DataSetSchema, DataSet
   public abstract DataSetSchemaVO entityToClass(DataSetSchema entity);
   
   
-  String map(ObjectId value) {
-    return value.toString();
-  }
+  
+  
+  /**
+   * Map.
+   *
+   * @param value the value
+   * @return the object id
+   */
   ObjectId map(String value) {
     return new ObjectId(value);
+  }
+  String map(ObjectId value) {
+    return value.toString();
   }
   
   @Mapping(source = "headerName", target = "name")
