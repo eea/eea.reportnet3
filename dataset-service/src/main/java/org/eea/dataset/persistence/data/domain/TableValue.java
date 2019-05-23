@@ -28,7 +28,7 @@ public class TableValue {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -45,8 +45,8 @@ public class TableValue {
   private List<RecordValue> records;
 
   /** The dataset id. */
-  @ManyToOne
-  @JoinColumn(name = "DATASET_ID")
+  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JoinColumn(name = "DATASET_ID", insertable = false, updatable = false)
   private DatasetValue datasetId;
 
   /**
