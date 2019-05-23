@@ -15,7 +15,6 @@ import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -213,11 +212,6 @@ public class DatasetServiceImpl implements DatasetService {
       if (dataset == null) {
         throw new IOException("Error mapping file");
       }
-      if (dataset.getTableValues() != null && !dataset.getTableValues().isEmpty()) {
-        for (TableValue table : dataset.getTableValues()) {
-          table.setDatasetId(dataset);
-        }
-      }
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
@@ -278,13 +272,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * We call jpaRepository and delete
+   * We call jpaRepository and delete.
    *
-   * @param idImported
+   * @param dataSetId the data set id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteImportData(Long idImported) {
-    datasetRepository.deleteById(idImported);
+  public void deleteImportData(Long dataSetId) {
+    datasetRepository.deleteById(dataSetId);
   }
 
   /**

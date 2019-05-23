@@ -121,13 +121,13 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file) {
+    // filter if the file is empty
     if (file == null || file.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT,
-          new Exception());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, new Exception());
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
       datasetService.processFile(datasetId, file);
@@ -146,6 +146,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param dataSetId id import
    */
+  @Override
   @DeleteMapping(value = "/deleteImportData")
   public void deleteImportData(Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {

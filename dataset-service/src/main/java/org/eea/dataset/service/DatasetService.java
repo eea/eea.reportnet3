@@ -66,11 +66,11 @@ public interface DatasetService {
    */
   void deleteDataSchema(String datasetId);
 
+
   /**
-   * Delete the datas imports.
+   * Delete import data.
    *
-   *
-   * @param datasetName the dataset name
+   * @param dataSetId the data set id
    */
-  void deleteImportData(Long idImported);
+  void deleteImportData(Long dataSetId);
 }
