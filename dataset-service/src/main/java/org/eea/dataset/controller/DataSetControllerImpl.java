@@ -1,10 +1,9 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.callable.DeleteDataCallable;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -27,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -143,9 +143,7 @@ public class DataSetControllerImpl implements DatasetController {
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     final LoadDataCallable callable = new LoadDataCallable(this.datasetService, datasetId, file);
     try {
-      executor.submit(callable).get();
-    } catch (final InterruptedException | ExecutionException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
+      executor.submit(callable);
     } finally {
       executor.shutdown();
     }
@@ -164,7 +162,13 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetService.deleteImportData(dataSetId);
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    final DeleteDataCallable callable = new DeleteDataCallable(this.datasetService, dataSetId);
+    try {
+      executor.submit(callable);
+    } finally {
+      executor.shutdown();
+    }
   }
 
 }

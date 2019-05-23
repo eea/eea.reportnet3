@@ -58,11 +58,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /**  */
+  /** The data set no data mapper. */
   @Autowired
   private DataSetNoDataMapper dataSetNoDataMapper;
 
-  /**  */
+  /** The record mapper. */
   @Autowired
   private RecordMapper recordMapper;
 
@@ -173,7 +173,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * 
+   * Process file.
    *
    * @param datasetId the dataset id
    * @param file the file
