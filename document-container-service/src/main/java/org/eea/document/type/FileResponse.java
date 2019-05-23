@@ -3,6 +3,11 @@ package org.eea.document.type;
 /**
  * The Class FileResponse.
  */
+/**
+ * The Class FileResponse.
+ */
+@Getter
+@Setter
 public class FileResponse {
 
   /** The bytes. */
@@ -10,7 +15,6 @@ public class FileResponse {
 
   /** The content type. */
   private String contentType;
-
   /**
    * Gets the bytes.
    *
@@ -28,7 +32,6 @@ public class FileResponse {
   public void setBytes(byte[] bytes) {
     this.bytes = bytes;
   }
-
   /**
    * Gets the content type.
    *
@@ -37,7 +40,6 @@ public class FileResponse {
   public String getContentType() {
     return contentType;
   }
-
   /**
    * Sets the content type.
    *

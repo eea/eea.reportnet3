@@ -24,6 +24,7 @@ public class EEAEventVO implements Serializable {
    *
    * @return the event type
    */
+   */
   public EventType getEventType() {
     return eventType;
   }
