@@ -44,6 +44,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The dataset schema service. */
   private DatasetSchemaService datasetSchemaService;
 
   /** The data set schema. */
@@ -54,8 +55,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
   /** The tables schema. */
   private List<TableSchemaVO> tablesSchema;
-
-  private static final String ERROR_MESSAGE = "Invalid Format File";
 
 
   /**
@@ -120,7 +119,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
             continue;
           } else if (line.length == 1) {
             // Format of file is invalid
-            throw new InvalidFileException(ERROR_MESSAGE);
+            throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
           }
           // know if the row is a header
           if (isHeader(values.get(0))) {
@@ -138,7 +137,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
-      throw new InvalidFileException(ERROR_MESSAGE);
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }
     return dataset;
 
