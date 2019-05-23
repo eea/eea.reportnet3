@@ -15,7 +15,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -220,7 +219,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
     if (null != idTablaSchema) {
       record.setIdMongo(findIdRecord(idTablaSchema));
     }
-    record.setFields(createFieldsVO(values, partitionId, idTablaSchema));
+    record.setFields(createFieldsVO(values, idTablaSchema));
+    record.setDatasetPartitionId(partitionId);
     records.add(record);
     return records;
   }
@@ -233,8 +233,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTablaSchema the id tabla schema
    * @return the list
    */
-  private List<FieldVO> createFieldsVO(List<String> values, Long partitionId,
-      String idTablaSchema) {
+  private List<FieldVO> createFieldsVO(List<String> values, String idTablaSchema) {
 
     List<FieldVO> fields = new ArrayList<>();
     values.size();
@@ -254,11 +253,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
       fields.add(field);
       contAux++;
     }
-
-    FieldVO fieldPartition = new FieldVO();
-    fieldPartition.setType(TypeData.INTEGER.toString());
-    fieldPartition.setValue(null != partitionId ? partitionId.toString() : "");
-    fields.add(fieldPartition);
 
     return fields;
   }
