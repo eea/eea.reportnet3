@@ -5,7 +5,9 @@ import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
+// import {Lightbox} from 'primereact/lightbox';
 
+import jsonData from '../../../assets/jsons/datosDataSchema.json';
 import styles from './ReporterDataSet.module.css';
 
 const ReporterDataSet = () => {
@@ -14,7 +16,11 @@ const ReporterDataSet = () => {
   const [validationError, setValidationError] = useState(true);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
+  const [tableSchema, setTableSchema] = useState();
+  const [tableSchemaColumns, setTableSchemaColumns] = useState();
 
+  console.log('ReporterDataSet Render...');
+  
   const onDashBoardClickHandler = () =>{
     setDashDialogVisible(true);
   } 
@@ -22,6 +28,7 @@ const ReporterDataSet = () => {
     setDashDialogVisible(false);
   } 
 
+  
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
     setCustomButtons([
@@ -68,7 +75,7 @@ const ReporterDataSet = () => {
         group: "right",
         disabled: false,
         clickHandler: onDashBoardClickHandler
-      },
+      }
     ]);
     //TODO:Change + Error/warning treatment
 
@@ -92,57 +99,58 @@ const ReporterDataSet = () => {
               }
             ]});
 
-  setDashBoardOptions({tooltips: {
-    mode: 'index',
-    intersect: false
-},
-responsive: true,
-scales: {
-    xAxes: [{
-        stacked: true,
-    }],
-    yAxes: [{
-        stacked: true
-    }]
-}});
+    setDashBoardOptions({tooltips: {
+      mode: 'index',
+      intersect: false
+      },
+      responsive: true,
+      scales: {
+          xAxes: [{
+              stacked: true,
+          }],
+          yAxes: [{
+              stacked: true
+          }]
+      }});
 
-    // {
-    //   tooltips: {
-    //       // text: '',
-    //       // data: {"Test 1" : 40, "Test 2" : 40, "Test 3" : 20 }, 
-    //       label: {"aaa": 20},
-    //       mode: 'index',
-    //       intersect: false
-    //   },
-    //   // style: 
-    //   // width: 0.5,
-    //   responsive: true,
-    //   position: 'center',
-    //   legend: {
-    //       position: 'bottom'
-    //       },
-    //   scales: {
-    //       xAxes: [{
-    //           stacked: true,
-    //       }],
-    //       yAxes: [{
-    //           type: 'linear',
-    //           display: true,
-    //           position: 'left',
-    //           id: 'y-axis-1',
-    //           stacked: true,
-    //           ticks: {
-    //               min: 0,
-    //               max: 100
-    //           }
-    //       }]
-    //   }
-    // });
-
+    //Fetch data (JSON)
+    //fetchDataHandler(jsonData);
+    setTableSchema(jsonData.tableSchemas.map((item,i)=>{
+        return {
+            id: i,
+            name : item["nameTableSchema"]
+            }
+      })); 
+      setTableSchemaColumns(jsonData.tableSchemas.map((table,i) =>{
+        return table.recordSchema.fieldSchema.map((item,i)=>{
+          return {table: table["nameTableSchema"], field: item["name"], header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`}
+        });        
+      }));
   },[]);
 
-  
-console.log('ReporterDataSet');
+  // const fetchDataHandler = () => {
+  //   // setLoading(true);
+  //   fetch()
+  //   .then(response => response.json())
+  //   .then(json => { 
+  //     console.log(json);          
+  //     // const rows = json.currentPage.map(item=>{
+  //     //   return {
+  //     //           idInstrumento : item["idInstrumento"], 
+  //     //           denominacion : item["denominacion"], 
+  //     //           fechaInicial : item["fechaInicial"], 
+  //     //           tieneDocumentos : item["tieneDocumentos"], 
+  //     //           anulado : item["anulado"]
+  //     //         }
+  //     // }); 
+  //     // setFetchedData(rows);
+  //     // if(json.pagedInfo.totalElements!==totalRecords){
+  //     //   setTotalRecords(json.pagedInfo.totalElements);
+  //     // }
+  //     // setLoading(false);
+  //   })
+  //   .catch(error => console.log("ERROR!!!!!!! - " + error));
+  // }
 
   return (
       <div>
@@ -150,11 +158,8 @@ console.log('ReporterDataSet');
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
-        <TabsSchema tables={[
-          { name: "Table 1" }, 
-          { name: "Table 2" },
-          { name: "Table 3" },
-          { name: "Table 4" }]} />
+        {/*TODO: Loading spinner*/}
+        {(tableSchema)?<TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/> : null}        
         <Dialog visible={dashDialogVisible} onHide={onHideDialogHandler} header="Error/Warning dashboard" maximizable dismissableMask={true} style={{width:'80%'}}>
           <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
         </Dialog>

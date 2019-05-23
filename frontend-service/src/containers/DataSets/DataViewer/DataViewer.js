@@ -15,16 +15,13 @@ const DataViewer = (props) => {
     const [sortOrder, setSortOrder] = useState(0);   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
-    const [cols, setCols] = useState([
-      {field: 'idInstrumento', header: 'ID'},
-      {field: 'denominacion', header: 'Name'},
-      {field: 'fechaInicial', header: 'Initial date'},
-      {field: 'tieneDocumentos', header: 'Has documents'},
-      {field: 'anulado', header: 'Canceled'}
-    ]); 
+    const [cols, setCols] = useState(props.tableSchemaColumns); 
     const [header, setHeader] = useState();
     const [colOptions,setColOptions] = useState([]);    
 
+    //TODO: Render se está ejecutando dos veces. Mirar por qué.
+    console.log("DataViewer Render..." + props.name);
+    
     useEffect(() =>{            
         console.log("Setting column options...");      
         let colOpt = [];
@@ -34,12 +31,10 @@ const DataViewer = (props) => {
         setColOptions(colOpt);
   
         console.log('Fetching data...');
-        fetchDataHandler("default", sortOrder, firstRow, numRows);   
+        //fetchDataHandler("default", sortOrder, firstRow, numRows);   
       }, []);
   
-      useEffect(()=>{ 
-        //TODO: Render se está ejecutando dos veces. Mirar por qué.
-        console.log("Render...");
+      useEffect(()=>{         
         // let visibilityIcon = (<div className="TableDiv">
         //     <span className="pi pi-eye" style={{zoom:2}}></span> 
         //     <span className="my-multiselected-empty-token">Visibility</span>
@@ -58,14 +53,14 @@ const DataViewer = (props) => {
       
       const onChangePageHandler = (event)=>{     
         console.log('Refetching data...');
-        fetchDataHandler(event.sortField, sortOrder, event.first, event.rows);           
+        fetchDataHandler(event.sortField, sortOrder, event.first, event.rows);         
         setNumRows(event.rows);
         setFirstRow(event.first);        
       }
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
-        fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);      
+        fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);     
         setSortField(event.sortField);
         setSortOrder((sortOrder === 1)?-1:1);        
       }

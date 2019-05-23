@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'primereact/button';
-import styles from './CustomButton.module.css';
+// import styles from './CustomButton.module.css';
 
 const CustomButton = (props) => {
     let icons = [
