@@ -65,4 +65,12 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteDataSchema(String datasetId);
+
+  /**
+   * Delete the datas imports.
+   *
+   *
+   * @param datasetName the dataset name
+   */
+  void deleteImportData(Long idImported);
 }

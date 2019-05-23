@@ -59,9 +59,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetMapper dataSetMapper;
 
+  /**  */
   @Autowired
   private DataSetNoDataMapper dataSetNoDataMapper;
 
+  /**  */
   @Autowired
   private RecordMapper recordMapper;
 
@@ -273,6 +275,16 @@ public class DatasetServiceImpl implements DatasetService {
   public void deleteDataSchema(String datasetId) {
     schemasRepository.deleteById(new ObjectId(datasetId));
 
+  }
+
+  /**
+   * We call jpaRepository and delete
+   *
+   * @param idImported
+   */
+  @Override
+  public void deleteImportData(Long idImported) {
+    datasetRepository.deleteById(idImported);
   }
 
   /**

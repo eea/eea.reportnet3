@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,13 +32,23 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /**
+   * Find by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set VO
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -59,6 +70,12 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+  /**
+   * Update dataset.
+   *
+   * @param dataset the dataset
+   * @return the data set VO
+   */
   @Override
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -68,6 +85,11 @@ public class DataSetControllerImpl implements DatasetController {
     return null;
   }
 
+  /**
+   * Creates the empty data set.
+   *
+   * @param datasetname the datasetname
+   */
   @Override
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   public void createEmptyDataSet(String datasetname) {
@@ -75,6 +97,12 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+  /**
+   * Error handler.
+   *
+   * @param id the id
+   * @return the data set VO
+   */
   public DataSetVO errorHandler(@PathVariable("id") Long id) {
     DataSetVO dataset = new DataSetVO();
     dataset.setId(null);
@@ -83,6 +111,12 @@ public class DataSetControllerImpl implements DatasetController {
 
 
 
+  /**
+   * Load dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
   @Override
   @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") Long datasetId,
@@ -107,5 +141,18 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Call services delete.
+   *
+   * @param dataSetId id import
+   */
+  @DeleteMapping(value = "/deleteImportData")
+  public void deleteImportData(Long dataSetId) {
+    if (dataSetId == null || dataSetId < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    datasetService.deleteImportData(dataSetId);
+  }
 
 }
