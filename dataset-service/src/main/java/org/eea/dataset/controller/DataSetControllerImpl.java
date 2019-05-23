@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
@@ -142,7 +143,9 @@ public class DataSetControllerImpl implements DatasetController {
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     final LoadDataCallable callable = new LoadDataCallable(this.datasetService, datasetId, file);
     try {
-      executor.submit(callable);
+      executor.submit(callable).get();
+    } catch (final InterruptedException | ExecutionException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
     } finally {
       executor.shutdown();
     }
