@@ -83,4 +83,21 @@ public class DataSetControllerImplTest {
     doNothing().when(datasetService).processFile(Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetData(1L, file);
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testFeleteImportDataThrowNonProvided() throws Exception {
+    dataSetControllerImpl.deleteImportData(null);
+  }
+
+  @Test(expected = Exception.class)
+  public void testDeleteImportDataThrowInternalServer() throws Exception {
+    doThrow(new Exception()).when(datasetService).deleteImportData(Mockito.any());
+    dataSetControllerImpl.deleteImportData(1L);
+  }
+
+  @Test
+  public void testDeleteImportDataSuccess() throws Exception {
+    doNothing().when(datasetService).deleteImportData(Mockito.any());
+    dataSetControllerImpl.deleteImportData(1L);
+  }
 }

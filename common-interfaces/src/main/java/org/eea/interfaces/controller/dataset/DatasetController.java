@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataset;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,7 +64,16 @@ public interface DatasetController {
   public void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
- 
+
+
+  /**
+   * Delete iport data
+   *
+   * @param datasetId the id of dataset
+   */
+  @DeleteMapping(value = "/deleteImportData")
+  void deleteImportData(@RequestParam("datasetName") Long datasetId);
+
 
 
 }
