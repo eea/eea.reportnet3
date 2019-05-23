@@ -7,7 +7,7 @@ import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
 // import {Lightbox} from 'primereact/lightbox';
 
-import jsonData from '../../../assets/jsons/datosDataSchema.json';
+import jsonDataSchema from '../../../assets/jsons/datosDataSchema.json';
 import styles from './ReporterDataSet.module.css';
 
 const ReporterDataSet = () => {
@@ -114,16 +114,20 @@ const ReporterDataSet = () => {
       }});
 
     //Fetch data (JSON)
-    //fetchDataHandler(jsonData);
-    setTableSchema(jsonData.tableSchemas.map((item,i)=>{
+    //fetchDataHandler(jsonDataSchema);
+    setTableSchema(jsonDataSchema.tableSchemas.map((item,i)=>{
         return {
             id: i,
             name : item["nameTableSchema"]
             }
       })); 
-      setTableSchemaColumns(jsonData.tableSchemas.map((table,i) =>{
+      setTableSchemaColumns(jsonDataSchema.tableSchemas.map((table,i) =>{
         return table.recordSchema.fieldSchema.map((item,i)=>{
-          return {table: table["nameTableSchema"], field: item["name"], header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`}
+          return {
+              table: table["nameTableSchema"], 
+              field: item["id"], 
+              header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+            }
         });        
       }));
   },[]);

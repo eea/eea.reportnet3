@@ -6,6 +6,8 @@ import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
+import jsonData from '../../../assets/jsons/response_dataset_values.json';
+
 const DataViewer = (props) => {
     const [totalRecords, setTotalRecords] = useState(0);
     const [fetchedData, setFetchedData] = useState([]);
@@ -17,11 +19,10 @@ const DataViewer = (props) => {
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState(props.tableSchemaColumns); 
     const [header, setHeader] = useState();
-    const [colOptions,setColOptions] = useState([]);    
+    const [colOptions,setColOptions] = useState([{}]);    
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     console.log("DataViewer Render..." + props.name);
-    
     useEffect(() =>{            
         console.log("Setting column options...");      
         let colOpt = [];
@@ -32,6 +33,12 @@ const DataViewer = (props) => {
   
         console.log('Fetching data...');
         //fetchDataHandler("default", sortOrder, firstRow, numRows);   
+        filterDataResponse(jsonData);
+
+        console.log("Filtering data...");
+        const inmTableSchemaColumns = [...props.tableSchemaColumns];
+        setCols(inmTableSchemaColumns);
+
       }, []);
   
       useEffect(()=>{         
@@ -92,6 +99,15 @@ const DataViewer = (props) => {
           setLoading(false);
         })
         .catch(error => console.log("ERROR!!!!!!! - " + error));
+      }
+
+      const filterDataResponse = (data) =>{
+        console.log(data.tableVO[0].records.map(record => record.fields.map(f =>{
+          return {id: f.idFieldSchema}
+        })));
+        setFetchedData(data.tableVO[0].records.map(record => record.fields.map(f =>{
+          return {id: f.idFieldSchema}
+        })));
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
