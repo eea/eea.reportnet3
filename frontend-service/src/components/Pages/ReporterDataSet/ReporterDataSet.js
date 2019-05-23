@@ -65,8 +65,8 @@ const ReporterDataSet = () => {
       label: "Import",
       icon: "0",
       group: "left",
-      clickHandler: showFileUploadDialog
       disabled: false,
+      clickHandler: showFileUploadDialog
     },
     {
       label: "Export",
