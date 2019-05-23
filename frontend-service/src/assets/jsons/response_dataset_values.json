@@ -1,0 +1,130 @@
+{
+  "id": 1,
+  "idMongo": "5ce40efd1d18ea3494362fb4",
+  "tableVO": [
+    {
+      "id": 2,
+      "idMongo": "5ce40efd1d18ea3494362fb5",
+      "records": [
+        {
+          "idMongo": "5ce40efd1d18ea3494362fb6",
+          "id": 8,
+          "fields": [
+            {
+              "type": "BOOLEAN",
+              "value": "I|I",
+              "id": 9,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb7"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "I",
+              "id": 10,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb8"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "I",
+              "id": 11,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb9"
+            },
+            {
+              "type": "INTEGER",
+              "value": "1",
+              "id": 12,
+              "idFieldSchema": null
+            }
+          ]
+        },
+        {
+          "idMongo": "5ce40efd1d18ea3494362fb6",
+          "id": 3,
+          "fields": [
+            {
+              "type": "BOOLEAN",
+              "value": "B",
+              "id": 4,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb7"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "C",
+              "id": 5,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb8"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "D",
+              "id": 6,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb9"
+            },
+            {
+              "type": "INTEGER",
+              "value": "1",
+              "id": 7,
+              "idFieldSchema": null
+            }
+          ]
+        }
+      ],
+      "headers": null,
+      "name": "TABLA1"
+    },
+    {
+      "id": 13,
+      "idMongo": "5ce40efd1d18ea3494362fe1",
+      "records": [
+        {
+          "idMongo": "5ce40efd1d18ea3494362fe2",
+          "id": 18,
+          "fields": [
+            {
+              "type": "FLOAT",
+              "value": "M",
+              "id": 19,
+              "idFieldSchema": "5ce40efd1d18ea3494362fe3"
+            },
+            {
+              "type": "FLOAT",
+              "value": "N",
+              "id": 20,
+              "idFieldSchema": "5ce40efd1d18ea3494362fe4"
+            },
+            {
+              "type": "INTEGER",
+              "value": "1",
+              "id": 21,
+              "idFieldSchema": null
+            }
+          ]
+        },
+        {
+          "idMongo": "5ce40efd1d18ea3494362fe2",
+          "id": 14,
+          "fields": [
+            {
+              "type": "FLOAT",
+              "value": "J",
+              "id": 15,
+              "idFieldSchema": "5ce40efd1d18ea3494362fe3"
+            },
+            {
+              "type": "FLOAT",
+              "value": "K",
+              "id": 16,
+              "idFieldSchema": "5ce40efd1d18ea3494362fe4"
+            },
+            {
+              "type": "INTEGER",
+              "value": "1",
+              "id": 17,
+              "idFieldSchema": null
+            }
+          ]
+        }
+      ],
+      "headers": null,
+      "name": "TABLA3"
+    }
+  ]
+}
