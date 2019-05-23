@@ -26,21 +26,39 @@ const ReporterDataSet = () => {
 
   const onDragOver = (event) => {    
     //event.preventDefault();
-    console.log("On drag over", event);
-    var files = document.getElementsByClassName("p-fileupload-row");
-    console.log(files);
-    // return;
+    var filesBefore = document.getElementsByClassName("p-fileupload-row");
+    var files = event.files;
 
-    if (files.length >= 1)
+    console.log("Dropped file. Length: " + files.length);
+    console.log(files);
+    console.log(filesBefore);
+    console.log(event);
+
+    if (filesBefore.length >= 1)
       {
-        files[0].remove();
-        return;
-        // console.log("draggable false");
-        // var elem = document.getElementById("root");
-        // console.log(elem);
-        // elem.ondrop(event) = () => {
-        //     event.preventDefault();
-        // }
+        console.log("files.length > 0 (Length = " + files.length + ")");
+        console.log(files);
+
+        var fistFileNameValue = filesBefore[0].childNodes[0].textContent;
+        console.log("First: " + fistFileNameValue);
+
+        var lastFileNameValue = event.files[0].name;
+        console.log("Last: " + lastFileNameValue);
+
+        if (fistFileNameValue === lastFileNameValue) {
+          console.log("Are equals, do not delete");
+          // filesBefore[0].remove();
+        }
+        else {
+          console.log(filesBefore.length);
+          console.log(filesBefore);
+          // console.log(filesBefore);
+
+          console.log("PRE - Delete");
+          files[filesBefore.length -1].remove();
+          // filesBefore[filesBefore.length -1].remove();
+          console.log("POST - Delete");
+        }
       }
   }
 
@@ -121,8 +139,8 @@ const ReporterDataSet = () => {
           <Dialog header="Upload your Dataset" visible={visible}
                   className={styles.Dialog} onHide={onHide} >
               <FileUpload mode="advanced" name="demo[]" url="./upload.php" onUpload={onUploadFile} 
-                          multiple={true} allowTypes="/(\.|\/)(csv|doc)$/" chooseLabel="Select or drag here your dataset (.csv)"
-                          maxFileSize={1000000} fileLimit="0" className={styles.FileUpload} onSelect={onDragOver} />
+                          multiple={false} allowTypes="/(\.|\/)(csv|doc)$/" chooseLabel="Select or drag here your dataset (.csv)"
+                          fileLimit="0" className={styles.FileUpload} onSelect={onDragOver} />
           </Dialog>
       </div>
   );
