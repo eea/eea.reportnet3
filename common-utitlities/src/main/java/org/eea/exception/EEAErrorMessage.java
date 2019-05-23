@@ -20,8 +20,10 @@ public class EEAErrorMessage {
    */
   public static final String DATASET_NOTFOUND = "Dataset not found";
 
+  /**
+   * The constant DATASET_INCORRECT_ID.
+   */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
-
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }
