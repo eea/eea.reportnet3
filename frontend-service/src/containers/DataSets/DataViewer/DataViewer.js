@@ -33,10 +33,11 @@ const DataViewer = (props) => {
   
         console.log('Fetching data...');
         //fetchDataHandler("default", sortOrder, firstRow, numRows);   
-        filterDataResponse(jsonData);
+        filterDataResponse(jsonData.tableVO[0].records);
 
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
+        console.log(inmTableSchemaColumns);
         setCols(inmTableSchemaColumns);
 
       }, []);
@@ -78,6 +79,11 @@ const DataViewer = (props) => {
         setColOptions(colOptions);
       }
   
+useEffect(()=>{
+  console.log("Fetching new data...");
+console.log(fetchedData);
+},[fetchedData]);
+
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
         fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
@@ -102,11 +108,16 @@ const DataViewer = (props) => {
       }
 
       const filterDataResponse = (data) =>{
-        console.log(data.tableVO[0].records.map(record => record.fields.map(f =>{
-          return {id: f.idFieldSchema}
+        console.log("Fields")
+        console.log(data.map(record => record.fields.map(f =>{
+          // console.log(Object.entries(f))
+          // console.log("Fields")
+          // console.log(f)
+          return {[f.idFieldSchema]: f.value,[f.idFieldSchema]:f.value,[f.idFieldSchema]:f.value}
         })));
-        setFetchedData(data.tableVO[0].records.map(record => record.fields.map(f =>{
-          return {id: f.idFieldSchema}
+
+        setFetchedData(data.map(record => record.fields.map(f =>{
+          return {[f.idFieldSchema]: f.value,[f.idFieldSchema]:f.value,[f.idFieldSchema]:f.value}
         })));
       }
 
