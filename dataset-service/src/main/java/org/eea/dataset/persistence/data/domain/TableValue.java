@@ -45,7 +45,7 @@ public class TableValue {
   private List<RecordValue> records;
 
   /** The dataset id. */
-  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name = "DATASET_ID", insertable = false, updatable = false)
   private DatasetValue datasetId;
 
