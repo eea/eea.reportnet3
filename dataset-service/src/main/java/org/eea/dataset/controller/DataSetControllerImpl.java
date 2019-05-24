@@ -96,8 +96,9 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
-      @RequestParam("MongoID") String mongoID, @RequestParam("pageNum") Integer pageNum,
-      @RequestParam("pageSize") Integer pageSize,
+      @RequestParam("MongoID") String mongoID,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", defaultValue = "id", required = false) String fields) {
 
     if (null == mongoID) {
