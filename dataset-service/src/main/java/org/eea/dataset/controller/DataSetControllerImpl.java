@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
@@ -140,10 +142,22 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    // extract the filename
+    String fileName = file.getOriginalFilename();
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    final LoadDataCallable callable = new LoadDataCallable(this.datasetService, datasetId, file);
-    try {
+    LoadDataCallable callable = null;
+    // extract the file content
+    try (InputStream is = file.getInputStream()) {
+      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
+    } catch (Exception e) {// NOPMD this cannot be avoid since Callable throws Exception in
+      if (e.getClass().isInstance(IOException.class)) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      } // the signature
+      if (e.getMessage().equals(EEAErrorMessage.FILE_FORMAT)
+          || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+      }
     } finally {
       executor.shutdown();
     }

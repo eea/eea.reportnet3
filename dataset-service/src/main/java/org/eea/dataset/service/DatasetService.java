@@ -1,12 +1,12 @@
 package org.eea.dataset.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface Dataset service.
@@ -45,7 +45,8 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(@DatasetId Long datasetId, MultipartFile file) throws EEAException, IOException;
+  void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
+      throws EEAException, IOException;
 
 
   /**
@@ -73,4 +74,5 @@ public interface DatasetService {
    * @param dataSetId the data set id
    */
   void deleteImportData(Long dataSetId);
+
 }
