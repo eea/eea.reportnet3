@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
@@ -91,6 +92,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
+   * @param asc the asc
    * @return the data tables values
    */
   @HystrixCommand
@@ -99,14 +101,22 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("MongoID") String mongoID,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", defaultValue = "id", required = false) String fields) {
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
 
     if (null == mongoID) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(fields).descending());
+    Pageable pageable;
+    if (null == fields) {
+      pageable = PageRequest.of(pageNum, pageSize);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize,
+          asc ? Sort.by(fields).ascending() : Sort.by(fields).descending());
+    }
+
     TableVO result = null;
     try {
       result = datasetService.getTableValuesById(mongoID, pageable);
