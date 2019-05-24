@@ -83,6 +83,16 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
+  /**
+   * Gets the data tables values.
+   *
+   * @param datasetId the dataset id
+   * @param mongoID the mongo ID
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @return the data tables values
+   */
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
@@ -94,14 +104,11 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    // Pagination pagination = new Pagination();
 
     Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(fields).descending());
     TableVO result = null;
-    Long resultcount = null;
     try {
       result = datasetService.getTableValuesById(mongoID, pageable);
-      resultcount = datasetService.countTableData(result.getId());
     } catch (EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -109,7 +116,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-    result.setTotalRecords(resultcount);
+
     return result;
   }
 

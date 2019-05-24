@@ -36,4 +36,5 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    * @return the long
    */
   Long countByTableValue_id(Long idTableValue);
+
 }

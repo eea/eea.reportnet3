@@ -84,7 +84,6 @@ public class DatasetServiceImpl implements DatasetService {
   private DatasetRepository datasetRepository;
 
 
-
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
@@ -276,7 +275,6 @@ public class DatasetServiceImpl implements DatasetService {
    * We call jpaRepository and delete.
    *
    * @param dataSetId the data set id
-   * @throws EEAException the EEA exception
    */
   @Override
   public void deleteImportData(Long dataSetId) {
@@ -299,27 +297,41 @@ public class DatasetServiceImpl implements DatasetService {
     kafkaSender.sendMessage(event);
   }
 
+  /**
+   * Gets the table values by id.
+   *
+   * @param MongoID the mongo ID
+   * @param pageable the pageable
+   * @return the table values by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
       throws EEAException {
 
     List<RecordValue> record = recordRepository.findByTableValue_IdMongo(MongoID, pageable);
-    if (record == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
+
+
+    Long resultcount = countTableData(record.get(0).getTableValue().getId());
+
     TableVO result = new TableVO();
     result.setRecords(recordMapper.entityListToClass(record));
 
-    // Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
-    // // this result has no records since we need'em in a pagination way
-
+    result.setTotalRecords(resultcount);
     return result;
   }
 
 
+  /**
+   * Count table data.
+   *
+   * @param tableId the table id
+   * @return the long
+   */
   @Override
   public Long countTableData(Long tableId) {
     return recordRepository.countByTableValue_id(tableId);
   }
+
 }
