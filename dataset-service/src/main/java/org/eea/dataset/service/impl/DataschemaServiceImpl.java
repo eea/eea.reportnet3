@@ -17,16 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("datachemaService")
-public class DataschemaServiceImpl implements DatasetSchemaService{
-  
+public class DataschemaServiceImpl implements DatasetSchemaService {
+
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
-  
+
   /** The dataschema mapper. */
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
-  
+
 
   /**
    * Creates the data schema.
@@ -36,7 +36,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
   @Override
   public void createDataSchema(String datasetName) {
 
-    //Todo esto es un dummy para crear el esquema en MongoDB
+    // This is a dummy to create a dataschema
     TypeData headerType = TypeData.BOOLEAN;
 
     DataSetSchema dataSetSchema = new DataSetSchema();
@@ -86,8 +86,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
 
 
   }
-  
-  
+
+
   /**
    * Find the dataschema per id.
    *
@@ -97,11 +97,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
   @Override
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
 
-    //La busqueda utilizando el método directo de MongoDB devuelve un objeto Optional
+    // The search using the direct method of MongoDB returns an Optional object
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
 
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
-    //El isPresent es para comprobar que efectivamente la busqueda ha devuelto resultado
+
+    // isPresent to check that certainly the search has returned result
     if (dataschema.isPresent()) {
       DataSetSchema datasetSchema = dataschema.get();
 
@@ -122,13 +123,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService{
 
     DataSetSchemaVO dataSchemaVo = new DataSetSchemaVO();
     DataSetSchema dataSchema = schemasRepository.findSchemaByIdFlow(idFlow);
-    if(dataSchema!=null) {
-      //mapeo de entidad a VO
+    if (dataSchema != null) {
+      // mapeo de entidad a VO
       dataSchemaVo = dataSchemaMapper.entityToClass(dataSchema);
     }
     return dataSchemaVo;
 
   }
-  
-  
+
+
 }

@@ -188,9 +188,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       final byte[] result = dockerInterfaceService.executeCommandInsideContainer(container, "psql",
           "-h", IP_POSTGRE_DB, "-U", USER_POSTGRE_DB, "-p", "5432", "-d", "datasets", "-c",
           SQL_GET_DATASETS_NAME);
-      final String outcome = new String(result);
+      //final String outcome = new String(result);
       if (null != result && result.length > 0) {
-        final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(outcome);
+        final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(new String(result));
         while (dataMatcher.find()) {
           datasets.add(dataMatcher.group(0));
 
