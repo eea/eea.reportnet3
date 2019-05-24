@@ -30,6 +30,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -298,5 +299,27 @@ public class DatasetServiceImpl implements DatasetService {
     kafkaSender.sendMessage(event);
   }
 
+  @Override
+  @Transactional
+  public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
+      throws EEAException {
 
+    List<RecordValue> record = recordRepository.findByTableValue_IdMongo(MongoID, pageable);
+    if (record == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    TableVO result = new TableVO();
+    result.setRecords(recordMapper.entityListToClass(record));
+
+    // Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
+    // // this result has no records since we need'em in a pagination way
+
+    return result;
+  }
+
+
+  @Override
+  public Long countTableData(Long tableId) {
+    return recordRepository.countByTableValue_id(tableId);
+  }
 }

@@ -9,10 +9,14 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -76,6 +80,36 @@ public class DataSetControllerImpl implements DatasetController {
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+    return result;
+  }
+
+  @HystrixCommand
+  @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
+      @RequestParam("MongoID") String mongoID, @RequestParam("pageNum") Integer pageNum,
+      @RequestParam("pageSize") Integer pageSize,
+      @RequestParam(value = "fields", defaultValue = "id", required = false) String fields) {
+
+    if (null == mongoID) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    // Pagination pagination = new Pagination();
+
+    Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(fields).descending());
+    TableVO result = null;
+    Long resultcount = null;
+    try {
+      result = datasetService.getTableValuesById(mongoID, pageable);
+      resultcount = datasetService.countTableData(result.getId());
+    } catch (EEAException e) {
+      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
+    result.setTotalRecords(resultcount);
     return result;
   }
 
