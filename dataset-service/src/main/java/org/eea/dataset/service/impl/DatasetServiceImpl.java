@@ -41,7 +41,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The type Dataset service.
@@ -182,13 +181,13 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void processFile(@DatasetId Long datasetId, MultipartFile file)
+  public void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
       throws EEAException, IOException {
     // obtains the file type from the extension
-    String mimeType = getMimetype(file.getOriginalFilename());
+    String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
-    try (InputStream inputStream = file.getInputStream()) {
+    try (InputStream inputStream = is) {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
       if (partition == null) {
@@ -333,5 +332,4 @@ public class DatasetServiceImpl implements DatasetService {
   public Long countTableData(Long tableId) {
     return recordRepository.countByTableValue_id(tableId);
   }
-
 }
