@@ -103,7 +103,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
+      @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
 
     if (null == mongoID) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -198,7 +198,8 @@ public class DataSetControllerImpl implements DatasetController {
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     LoadDataCallable callable = null;
     // extract the file content
-    try (InputStream is = file.getInputStream()) {
+    try {
+      InputStream is = file.getInputStream();
       callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
     } catch (Exception e) {// NOPMD this cannot be avoid since Callable throws Exception in

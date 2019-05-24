@@ -187,7 +187,7 @@ public class DatasetServiceImpl implements DatasetService {
     String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
-    try (InputStream inputStream = is) {
+    try {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
       if (partition == null) {
@@ -200,8 +200,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
       // create the right file parser for the file type
       IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO =
-          context.parse(inputStream, datasetMetabase.getDataflowId(), partition.getId());
+      DataSetVO datasetVO = context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -215,6 +214,8 @@ public class DatasetServiceImpl implements DatasetService {
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } finally {
+      is.close();
     }
   }
 
