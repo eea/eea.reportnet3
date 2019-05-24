@@ -4,12 +4,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.eea</groupId>
-    <artifactId>reportnet</artifactId>
-    <version>3.0-SNAPSHOT</version>
-    <relativePath/> <!-- lookup parent from repository -->
-  </parent>
 
   <groupId>org.eea.utils</groupId>
   <artifactId>common-utitlities</artifactId>
