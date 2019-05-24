@@ -170,13 +170,6 @@
     <!--<type>jar</type>-->
     <!--</dependency>-->
 
-<!--
-    <dependency>
-      <groupId>org.eea.utils</groupId>
-      <artifactId>common-utitlities</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-  -->
     <dependency>
       <groupId>org.eea.interfaces</groupId>
       <artifactId>common-interfaces</artifactId>
