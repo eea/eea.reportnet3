@@ -19,4 +19,22 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    * @return the list
    */
   List<RecordValue> findByTableValue_Id(Long tableId, Pageable pageable);
+
+  /**
+   * Find by table value id mongo.
+   *
+   * @param idMongo the id mongo
+   * @param pageable the pageable
+   * @return the list
+   */
+  List<RecordValue> findByTableValue_IdMongo(String idMongo, Pageable pageable);
+
+  /**
+   * Count by table value id.
+   *
+   * @param idTableValue the id table value
+   * @return the long
+   */
+  Long countByTableValue_id(Long idTableValue);
+
 }

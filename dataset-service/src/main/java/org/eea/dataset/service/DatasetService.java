@@ -7,7 +7,10 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
+import org.springframework.data.domain.Pageable;
 
+// TODO: Auto-generated Javadoc
 /**
  * The interface Dataset service.
  */
@@ -74,5 +77,24 @@ public interface DatasetService {
    * @param dataSetId the data set id
    */
   void deleteImportData(Long dataSetId);
+
+  /**
+   * Gets the table values by id.
+   *
+   * @param MongoID the mongo ID
+   * @param pageable the pageable
+   * @return the table values by id
+   * @throws EEAException the EEA exception
+   */
+  TableVO getTableValuesById(String MongoID, Pageable pageable) throws EEAException;
+
+
+  /**
+   * Count table data.
+   *
+   * @param tableId the table id
+   * @return the long
+   */
+  Long countTableData(Long tableId);
 
 }

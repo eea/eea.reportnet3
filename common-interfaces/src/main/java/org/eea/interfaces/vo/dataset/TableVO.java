@@ -34,6 +34,9 @@ public class TableVO implements Serializable {
   /** The name. */
   private String name;
 
+  /** The total records. */
+  private Long totalRecords;
+
   /**
    * Hash code.
    *

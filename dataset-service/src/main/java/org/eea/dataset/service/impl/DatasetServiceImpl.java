@@ -30,6 +30,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -80,7 +81,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
-
 
 
   /** The schemas repository. */
@@ -274,7 +274,6 @@ public class DatasetServiceImpl implements DatasetService {
    * We call jpaRepository and delete.
    *
    * @param dataSetId the data set id
-   * @throws EEAException the EEA exception
    */
   @Override
   public void deleteImportData(Long dataSetId) {
@@ -297,4 +296,40 @@ public class DatasetServiceImpl implements DatasetService {
     kafkaSender.sendMessage(event);
   }
 
+  /**
+   * Gets the table values by id.
+   *
+   * @param MongoID the mongo ID
+   * @param pageable the pageable
+   * @return the table values by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
+      throws EEAException {
+
+    List<RecordValue> record = recordRepository.findByTableValue_IdMongo(MongoID, pageable);
+
+
+    Long resultcount = countTableData(record.get(0).getTableValue().getId());
+
+    TableVO result = new TableVO();
+    result.setRecords(recordMapper.entityListToClass(record));
+
+    result.setTotalRecords(resultcount);
+    return result;
+  }
+
+
+  /**
+   * Count table data.
+   *
+   * @param tableId the table id
+   * @return the long
+   */
+  @Override
+  public Long countTableData(Long tableId) {
+    return recordRepository.countByTableValue_id(tableId);
+  }
 }
