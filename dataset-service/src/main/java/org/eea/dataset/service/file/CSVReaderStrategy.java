@@ -287,9 +287,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     if (null != tablesSchema) {
       for (TableSchemaVO tableSchema : tablesSchema) {
         if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-          idTable =
-              null != tableSchema.getIdTableSchema() ? tableSchema.getIdTableSchema().toString()
-                  : null;
+          idTable = tableSchema.getIdTableSchema();
         }
       }
     }
@@ -306,7 +304,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     // Find the idrecordSchema of MongoDB
     if (null != findTableSchema(idTableMongo)) {
       TableSchemaVO tableS = findTableSchema(idTableMongo);
-      return null != tableS ? tableS.getRecordSchema().getIdRecordSchema().toString() : null;
+      return null != tableS ? tableS.getRecordSchema().getIdRecordSchema() : null;
     }
     return null;
   }
@@ -320,7 +318,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private TableSchemaVO findTableSchema(String idTableMongo) {
     // Find the tableSchema of MongoDB
     for (TableSchemaVO tableSchema : tablesSchema) {
-      if (tableSchema.getIdTableSchema().toString().equalsIgnoreCase(idTableMongo)) {
+      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
         return tableSchema;
       }
     }
@@ -344,9 +342,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
       for (FieldSchemaVO fieldSchema : fieldsSchemas) {
         if (null != fieldSchema.getName()) {
-          if (fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
-            return fieldSchema;
-          }
+          return fieldSchema.getName().equalsIgnoreCase(nameSchema) ? fieldSchema : null;
         }
       }
     }
