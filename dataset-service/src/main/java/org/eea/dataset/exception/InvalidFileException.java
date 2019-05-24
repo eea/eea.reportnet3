@@ -10,6 +10,9 @@ public class InvalidFileException extends EEAException {
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 1266830579241817268L;
 
+  /** The Constant ERROR_MESSAGE. */
+  public static final String ERROR_MESSAGE = "Invalid Format File";
+
   /**
    * Instantiates a new invalid file exception.
    *

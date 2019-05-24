@@ -44,6 +44,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The dataset schema service. */
   private DatasetSchemaService datasetSchemaService;
 
   /** The data set schema. */
@@ -54,8 +55,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
   /** The tables schema. */
   private List<TableSchemaVO> tablesSchema;
-
-  private static final String ERROR_MESSAGE = "Invalid Format File";
 
 
   /**
@@ -120,7 +119,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
             continue;
           } else if (line.length == 1) {
             // Format of file is invalid
-            throw new InvalidFileException(ERROR_MESSAGE);
+            throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
           }
           // know if the row is a header
           if (isHeader(values.get(0))) {
@@ -138,7 +137,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
-      throw new InvalidFileException(ERROR_MESSAGE);
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }
     return dataset;
 
@@ -288,9 +287,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     if (null != tablesSchema) {
       for (TableSchemaVO tableSchema : tablesSchema) {
         if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-          idTable =
-              null != tableSchema.getIdTableSchema() ? tableSchema.getIdTableSchema().toString()
-                  : null;
+          idTable = tableSchema.getIdTableSchema();
         }
       }
     }
@@ -307,7 +304,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     // Find the idrecordSchema of MongoDB
     if (null != findTableSchema(idTableMongo)) {
       TableSchemaVO tableS = findTableSchema(idTableMongo);
-      return null != tableS ? tableS.getRecordSchema().getIdRecordSchema().toString() : null;
+      return null != tableS ? tableS.getRecordSchema().getIdRecordSchema() : null;
     }
     return null;
   }
@@ -321,7 +318,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private TableSchemaVO findTableSchema(String idTableMongo) {
     // Find the tableSchema of MongoDB
     for (TableSchemaVO tableSchema : tablesSchema) {
-      if (tableSchema.getIdTableSchema().toString().equalsIgnoreCase(idTableMongo)) {
+      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
         return tableSchema;
       }
     }
@@ -345,9 +342,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
       for (FieldSchemaVO fieldSchema : fieldsSchemas) {
         if (null != fieldSchema.getName()) {
-          if (fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
-            return fieldSchema;
-          }
+          return fieldSchema.getName().equalsIgnoreCase(nameSchema) ? fieldSchema : null;
         }
       }
     }
