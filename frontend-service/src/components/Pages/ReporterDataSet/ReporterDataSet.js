@@ -8,7 +8,7 @@ import {FileUpload} from 'primereact/fileupload';
 
 const ReporterDataSet = () => {
   const [visible, setVisibility] = useState(false);
-    
+
   const showFileUploadDialog = () => {
       console.log('showFileUploadDialog onClick');
       setVisibility(true);
@@ -20,57 +20,15 @@ const ReporterDataSet = () => {
   }
 
   const onHide = () => {
-      console.log('onCick');
+      console.log('onClick');
       setVisibility(false);
   }
 
-  const onDragOver = (event) => {    
-    //event.preventDefault();
-    var filesBefore = document.getElementsByClassName("p-fileupload-row");
-    var files = event.files;
-
-    console.log("Dropped file. Length: " + files.length);
-    console.log(files);
-    console.log(filesBefore);
+  const onDrop = (event) => {
+    console.log("onDrop");
     console.log(event);
-
-    if (filesBefore.length >= 1)
-      {
-        console.log("files.length > 0 (Length = " + files.length + ")");
-        console.log(files);
-
-        var fistFileNameValue = filesBefore[0].childNodes[0].textContent;
-        console.log("First: " + fistFileNameValue);
-
-        var lastFileNameValue = event.files[0].name;
-        console.log("Last: " + lastFileNameValue);
-
-        if (fistFileNameValue === lastFileNameValue) {
-          console.log("Are equals, do not delete");
-          // filesBefore[0].remove();
-        }
-        else {
-          console.log(filesBefore.length);
-          console.log(filesBefore);
-          // console.log(filesBefore);
-
-          console.log("PRE - Delete");
-          files[filesBefore.length -1].remove();
-          // filesBefore[filesBefore.length -1].remove();
-          console.log("POST - Delete");
-        }
-      }
-  }
-
-  // const onDrop = (event) => {
-  //   const { completedTasks, draggedTask, todos } = this.state;
-  //   this.setState({
-  //     completedTasks: [...completedTasks, draggedTask],
-  //     todos: todos.filter(task => task.taskID !== draggedTask.taskID),
-  //     draggedTask: {},
-  //   });
-  // }
-
+    event.preventDefault();
+  };
 
   //TODO:Change + Error/warning treatment
   let validationError = true;
@@ -126,7 +84,7 @@ const ReporterDataSet = () => {
   ];
 
   return (
-    <div>
+    <div >
         <Title title="Data set: Bathing Water" /> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
@@ -140,7 +98,7 @@ const ReporterDataSet = () => {
                   className={styles.Dialog} onHide={onHide} >
               <FileUpload mode="advanced" name="demo[]" url="./upload.php" onUpload={onUploadFile} 
                           multiple={false} allowTypes="/(\.|\/)(csv|doc)$/" chooseLabel="Select or drag here your dataset (.csv)"
-                          fileLimit="0" className={styles.FileUpload} onSelect={onDragOver} />
+                          fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>
       </div>
   );
