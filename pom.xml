@@ -176,7 +176,7 @@
       <artifactId>common-utitlities</artifactId>
       <version>3.0-SNAPSHOT</version>
     </dependency>
-  
+
     <dependency>
       <groupId>org.eea.interfaces</groupId>
       <artifactId>common-interfaces</artifactId>
@@ -281,7 +281,7 @@
   <distributionManagement>
     <snapshotRepository>
       <id>nexus-snapshots</id>
-      <url>https://nexus-oami.altia.es/nexus/content/repositories/snapshots</url>
+      <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 
