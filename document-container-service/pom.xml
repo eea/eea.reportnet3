@@ -50,4 +50,11 @@
 			<version>20.0</version>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>https://nexus-oami.altia.es/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
