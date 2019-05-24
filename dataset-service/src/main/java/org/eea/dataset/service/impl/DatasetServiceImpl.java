@@ -15,7 +15,6 @@ import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -31,6 +30,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -59,11 +59,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /**  */
+  /** The data set no data mapper. */
   @Autowired
   private DataSetNoDataMapper dataSetNoDataMapper;
 
-  /**  */
+  /** The record mapper. */
   @Autowired
   private RecordMapper recordMapper;
 
@@ -174,7 +174,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * 
+   * Process file.
    *
    * @param datasetId the dataset id
    * @param file the file
@@ -212,11 +212,6 @@ public class DatasetServiceImpl implements DatasetService {
       DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
       if (dataset == null) {
         throw new IOException("Error mapping file");
-      }
-      if (dataset.getTableValues() != null && !dataset.getTableValues().isEmpty()) {
-        for (TableValue table : dataset.getTableValues()) {
-          table.setDatasetId(dataset);
-        }
       }
       // save dataset to the database
       datasetRepository.save(dataset);
@@ -278,13 +273,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * We call jpaRepository and delete
+   * We call jpaRepository and delete.
    *
-   * @param idImported
+   * @param dataSetId the data set id
+   * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteImportData(Long idImported) {
-    datasetRepository.deleteById(idImported);
+  public void deleteImportData(Long dataSetId) {
+    datasetRepository.deleteById(dataSetId);
   }
 
   /**
@@ -303,5 +299,27 @@ public class DatasetServiceImpl implements DatasetService {
     kafkaSender.sendMessage(event);
   }
 
+  @Override
+  @Transactional
+  public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
+      throws EEAException {
 
+    List<RecordValue> record = recordRepository.findByTableValue_IdMongo(MongoID, pageable);
+    if (record == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    TableVO result = new TableVO();
+    result.setRecords(recordMapper.entityListToClass(record));
+
+    // Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
+    // // this result has no records since we need'em in a pagination way
+
+    return result;
+  }
+
+
+  @Override
+  public Long countTableData(Long tableId) {
+    return recordRepository.countByTableValue_id(tableId);
+  }
 }

@@ -43,7 +43,7 @@ public class FieldValue {
 
   /** The record. */
   @ManyToOne
-  @JoinColumn(name = "ID_RECORD", insertable = false, updatable = false)
+  @JoinColumn(name = "ID_RECORD")
   private RecordValue record;
 
   /**

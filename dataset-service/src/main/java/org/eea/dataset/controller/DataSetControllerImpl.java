@@ -1,19 +1,22 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.callable.DeleteDataCallable;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -76,6 +80,36 @@ public class DataSetControllerImpl implements DatasetController {
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+    return result;
+  }
+
+  @HystrixCommand
+  @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
+      @RequestParam("MongoID") String mongoID, @RequestParam("pageNum") Integer pageNum,
+      @RequestParam("pageSize") Integer pageSize,
+      @RequestParam(value = "fields", defaultValue = "id", required = false) String fields) {
+
+    if (null == mongoID) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    // Pagination pagination = new Pagination();
+
+    Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(fields).descending());
+    TableVO result = null;
+    Long resultcount = null;
+    try {
+      result = datasetService.getTableValuesById(mongoID, pageable);
+      resultcount = datasetService.countTableData(result.getId());
+    } catch (EEAException e) {
+      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
+    result.setTotalRecords(resultcount);
     return result;
   }
 
@@ -132,19 +166,18 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file) {
+    // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, new Exception());
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     final LoadDataCallable callable = new LoadDataCallable(this.datasetService, datasetId, file);
     try {
-      executor.submit(callable).get();
-    } catch (final InterruptedException | ExecutionException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
+      executor.submit(callable);
     } finally {
       executor.shutdown();
     }
@@ -163,7 +196,13 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetService.deleteImportData(dataSetId);
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    final DeleteDataCallable callable = new DeleteDataCallable(this.datasetService, dataSetId);
+    try {
+      executor.submit(callable);
+    } finally {
+      executor.shutdown();
+    }
   }
 
 }

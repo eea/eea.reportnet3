@@ -20,10 +20,10 @@ public class EEAErrorMessage {
    */
   public static final String DATASET_NOTFOUND = "Dataset not found";
 
+  /**
+   * The constant DATASET_INCORRECT_ID.
+   */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
-
-  public static final String EXECUTION_ERROR = "Error during execution of background process";
-
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }
