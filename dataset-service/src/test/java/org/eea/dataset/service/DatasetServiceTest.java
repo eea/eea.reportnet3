@@ -9,6 +9,7 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -17,6 +18,7 @@ import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Before;
@@ -58,7 +60,11 @@ public class DatasetServiceTest {
   @Mock
   KafkaSender kafkaSender;
 
+  @Mock
+  RecordStoreControllerZull recordStoreControllerZull;
 
+  @Mock
+  RecordRepository recordRepository;
 
   @Before
   public void initMocks() {
@@ -166,5 +172,17 @@ public class DatasetServiceTest {
   }
 
   
+
+  @Test
+  public void createEmptyDataset() throws Exception {
+    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any());
+    datasetService.createEmptyDataset("");
+  }
+
+  @Test
+  public void countTableData() {
+    when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
+    assertEquals((Long) 20L, datasetService.countTableData(1L));
+  }
 
 }

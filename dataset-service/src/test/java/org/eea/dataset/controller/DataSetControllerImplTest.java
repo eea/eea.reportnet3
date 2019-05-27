@@ -1,11 +1,13 @@
 package org.eea.dataset.controller;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -126,5 +128,31 @@ public class DataSetControllerImplTest {
   public void createEmptyDataSetTest() throws Exception {
     doNothing().when(datasetService).createEmptyDataset(Mockito.any());
     dataSetControllerImpl.createEmptyDataSet("datasetName");
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findByIdTestExceptionEntry1() throws Exception {
+    dataSetControllerImpl.findById(-2L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findByIdTestExceptionEntry2() throws Exception {
+    when(datasetService.getDatasetValuesById(Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    dataSetControllerImpl.findById(1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findByIdTestExceptionEntry3() throws Exception {
+    when(datasetService.getDatasetValuesById(Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID));
+    dataSetControllerImpl.findById(1L);
+  }
+
+  @Test
+  public void findByIdTestSuccess() throws Exception {
+    when(datasetService.getDatasetValuesById(Mockito.any())).thenReturn(new DataSetVO());
+    dataSetControllerImpl.findById(1L);
+    assertNotNull("null result of the datasetValues", dataSetControllerImpl.findById(1L));
   }
 }
