@@ -44,12 +44,12 @@ public class DataSetSchema {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     DataSetSchema other = (DataSetSchema) obj;
     return Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas);

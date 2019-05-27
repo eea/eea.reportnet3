@@ -45,12 +45,12 @@ public class PartitionDataSetMetabase {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     PartitionDataSetMetabase other = (PartitionDataSetMetabase) obj;
     return Objects.equals(id, other.id) && Objects.equals(idDataSet, other.idDataSet)
         && Objects.equals(username, other.username);

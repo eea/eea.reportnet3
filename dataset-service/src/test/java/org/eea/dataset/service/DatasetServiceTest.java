@@ -73,25 +73,28 @@ public class DatasetServiceTest {
   public void testProcessFileThrowException() throws Exception {
     MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(null, fileNoExtension.getOriginalFilename(),
-        fileNoExtension.getInputStream());
+    datasetService.processFile(null, "fileOriginal", fileNoExtension.getInputStream());
+  }
+
+  @Test(expected = EEAException.class)
+  public void testProcessFilenameNullThrowException() throws Exception {
+    MockMultipartFile fileNoExtension =
+        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    datasetService.processFile(null, null, fileNoExtension.getInputStream());
   }
 
   @Test(expected = EEAException.class)
   public void testProcessFileBadExtensionThrowException() throws Exception {
     MockMultipartFile fileBadExtension =
         new MockMultipartFile("file", "fileOriginal.doc", "doc", "content".getBytes());
-    datasetService.processFile(1L, fileBadExtension.getOriginalFilename(),
-        fileBadExtension.getInputStream());
+    datasetService.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream());
   }
 
   @Test(expected = EEAException.class)
   public void testProcessFileThrowException2() throws Exception {
     MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-
-    datasetService.processFile(1L, fileNoExtension.getOriginalFilename(),
-        fileNoExtension.getInputStream());
+    datasetService.processFile(1L, "fileOriginal", fileNoExtension.getInputStream());
   }
 
   @Test(expected = IOException.class)

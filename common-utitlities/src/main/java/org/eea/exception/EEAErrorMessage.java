@@ -16,6 +16,11 @@ public class EEAErrorMessage {
   public static final String FILE_EXTENSION = "File without extension";
 
   /**
+   * The Constant FILE_EXTENSION.
+   */
+  public static final String FILE_NAME = "Error getting the file name";
+
+  /**
    * The Constant DATASET_NOTFOUND.
    */
   public static final String DATASET_NOTFOUND = "Dataset not found";
@@ -24,6 +29,7 @@ public class EEAErrorMessage {
    * The constant DATASET_INCORRECT_ID.
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
+
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }

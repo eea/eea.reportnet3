@@ -53,12 +53,12 @@ public class TableSchema {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     TableSchema other = (TableSchema) obj;
     return Objects.equals(IdTableSchema, other.IdTableSchema)
         && Objects.equals(nameSchema, other.nameSchema)

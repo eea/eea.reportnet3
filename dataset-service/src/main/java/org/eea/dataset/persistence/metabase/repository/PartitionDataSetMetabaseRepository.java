@@ -15,7 +15,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface PartitionDataSetMetabaseRepository
     extends CrudRepository<PartitionDataSetMetabase, Long> {
   // @Query("SELECT p FROM PartitionDataSetMetabase p WHERE p.idDataSet=?1 AND p.username=?2")
-  public Optional<PartitionDataSetMetabase> findFirstByIdDataSet_idAndUsername(Long idDataset,
+  Optional<PartitionDataSetMetabase> findFirstByIdDataSet_idAndUsername(Long idDataset,
       String username);
 
 }

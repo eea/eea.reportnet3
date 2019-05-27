@@ -50,12 +50,12 @@ public class Rule {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     Rule other = (Rule) obj;
     return Objects.equals(action, other.action) && Objects.equals(attribute, other.attribute)
         && Objects.equals(conditionalElement, other.conditionalElement)

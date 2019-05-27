@@ -21,6 +21,11 @@ public class ConnectionDataVO implements Serializable {
   private String schema;
 
   @Override
+  public int hashCode() {
+    return Objects.hash(connectionString, user, password, schema);
+  }
+
+  @Override
   public boolean equals(final Object o) {
     if (this == o) {
       return true;
@@ -32,10 +37,4 @@ public class ConnectionDataVO implements Serializable {
     return connectionString.equals(that.connectionString) && user.equals(that.user)
         && password.equals(that.password) && schema.equals(that.schema);
   }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(connectionString, user, password, schema);
-  }
-
 }

@@ -184,6 +184,9 @@ public class DatasetServiceImpl implements DatasetService {
   public void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
       throws EEAException, IOException {
     // obtains the file type from the extension
+    if (fileName == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NAME);
+    }
     String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);

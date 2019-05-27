@@ -18,6 +18,6 @@ public interface IFileParseContext {
    * @return the data set VO
    * @throws InvalidFileException
    */
-  public DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId)
+  DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException;
 }
