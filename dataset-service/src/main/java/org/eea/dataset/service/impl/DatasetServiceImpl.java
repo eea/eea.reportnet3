@@ -28,7 +28,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -124,24 +123,6 @@ public class DatasetServiceImpl implements DatasetService {
     });
 
     return result;
-  }
-
-  /**
-   * Adds the record to dataset.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   */
-  @Override
-  @Transactional
-  public void addRecordToDataset(@DatasetId final Long datasetId, final List<RecordVO> records) {
-
-    for (final RecordVO recordVO : records) {
-      final RecordValue r = new RecordValue();
-      // r.setId(Integer.valueOf(recordVO.getId()));
-      recordRepository.save(r);
-    }
-
   }
 
   /**
