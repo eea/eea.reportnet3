@@ -1,4 +1,4 @@
-package org.eea.dataset.dataschema;
+package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +24,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DataSchemaTest {
+public class DatasetSchemaServiceTest {
 
   @InjectMocks
   DataSetSchemaControllerImpl dataSchemaControllerImpl;
@@ -46,14 +46,13 @@ public class DataSchemaTest {
   @Test
   public void testCreateDataSchema() {
     
-    dataSchemaControllerImpl.createDataSchema("test");
+  
     dataSchemaServiceImpl.createDataSchema("test");
   }
   
   @Test
   public void testFindDataSchemaById() {
-    when(dataschemaService.getDataSchemaById(Mockito.any())).thenReturn(new DataSetSchemaVO());
-    dataSchemaControllerImpl.findDataSchemaById(Mockito.any());
+   
     dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73");
     
     assertEquals(null, schemasRepository.findSchemaByIdFlow(1L));
@@ -62,9 +61,7 @@ public class DataSchemaTest {
   
   @Test
   public void testFindDataSchemaByDataFlow() {
-    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(new DataSetSchemaVO());
-    dataSchemaControllerImpl.findDataSchemaByDataflow(Mockito.any());
-    
+       
     dataSchemaServiceImpl.getDataSchemaByIdFlow(Mockito.any());
  
     
