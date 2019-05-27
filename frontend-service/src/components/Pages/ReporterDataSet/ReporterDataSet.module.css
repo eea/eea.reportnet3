@@ -2,3 +2,7 @@
     margin-bottom: 0.5em;
     padding: .25em;
   }
+
+.warning > span {
+    color:red;
+  }

@@ -24,7 +24,7 @@ public interface DatasetSchemaController {
 
   /**
    * Creates the data schema.
-   *
+   * @deprecated
    * @param datasetName the dataset name
    */
   @Deprecated
