@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public class TableSchemaVO {
   /** The id table schema. */
-  private String IdTableSchema;
+  private String idTableSchema;
 
   /** The table name schema. */
   private String nameTableSchema;
@@ -29,7 +29,7 @@ public class TableSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(IdTableSchema, nameTableSchema, recordSchema);
+    return Objects.hash(idTableSchema, nameTableSchema, recordSchema);
   }
 
   /**
@@ -47,7 +47,7 @@ public class TableSchemaVO {
       return false;
     }
     TableSchemaVO other = (TableSchemaVO) obj;
-    return Objects.equals(IdTableSchema, other.IdTableSchema)
+    return Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema);
   }
