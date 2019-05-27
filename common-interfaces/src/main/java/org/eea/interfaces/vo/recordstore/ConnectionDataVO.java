@@ -30,8 +30,18 @@ public class ConnectionDataVO implements Serializable {
 
   /** The schema. */
   private String schema;
-
+  
   /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(connectionString, user, password, schema);
+  }
+
+   /**
    * Equals.
    *
    * @param o the o
@@ -48,16 +58,6 @@ public class ConnectionDataVO implements Serializable {
     final ConnectionDataVO that = (ConnectionDataVO) o;
     return connectionString.equals(that.connectionString) && user.equals(that.user)
         && password.equals(that.password) && schema.equals(that.schema);
-  }
-
-  /**
-   * Hash code.
-   *
-   * @return the int
-   */
-  @Override
-  public int hashCode() {
-    return Objects.hash(connectionString, user, password, schema);
   }
 
 }

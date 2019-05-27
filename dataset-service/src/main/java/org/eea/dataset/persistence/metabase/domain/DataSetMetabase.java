@@ -88,12 +88,12 @@ public class DataSetMetabase {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     DataSetMetabase other = (DataSetMetabase) obj;
     return Objects.equals(dataSetName, other.dataSetName) && Objects.equals(id, other.id)
         && Objects.equals(partitions, other.partitions);

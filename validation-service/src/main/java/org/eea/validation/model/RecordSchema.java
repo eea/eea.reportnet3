@@ -56,12 +56,12 @@ public class RecordSchema {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     RecordSchema other = (RecordSchema) obj;
     return Objects.equals(fieldSchema, other.fieldSchema)
         && Objects.equals(idRecordSchema, other.idRecordSchema)

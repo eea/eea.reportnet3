@@ -234,7 +234,8 @@ public class DocumentServiceImpl implements DocumentService {
       if (StringUtils.isNotBlank(childNode)) {
         addChild(parentNode, childNode);
         parentNode = parentNode.getNode(childNode);
-        parentNode.setProperty("jcr:nodeType", NodeType.FOLDER.getValue()); // set the node type
+        // set the node type
+        parentNode.setProperty("jcr:nodeType", NodeType.FOLDER.getValue());
       }
     }
     return parentNode;
