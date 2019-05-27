@@ -35,6 +35,7 @@ const DataViewer = (props) => {
         //fetchDataHandler("default", sortOrder, firstRow, numRows);   
         filterDataResponse(jsonData.tableVO[0].records);
 
+        setTotalRecords(jsonData.tableVO[0].totalRecords);
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
         console.log(inmTableSchemaColumns);
@@ -107,18 +108,22 @@ console.log(fetchedData);
         .catch(error => console.log("ERROR!!!!!!! - " + error));
       }
 
-      const filterDataResponse = (data) =>{
-        console.log("Fields")
-        console.log(data.map(record => record.fields.map(f =>{
-          // console.log(Object.entries(f))
-          // console.log("Fields")
-          // console.log(f)
-          return {[f.idFieldSchema]: f.value,[f.idFieldSchema]:f.value,[f.idFieldSchema]:f.value}
-        })));
+      const filterDataResponse = (data) =>{        
+        
+        //TODO: Refactorizar
+        const dataFiltered = data.map(record => record.fields.map(f =>{
+          return {[f.idFieldSchema]: f.value}
+        }));
+        console.log(data)
+        let auxFiltered = {}
+        let auxArrayFiltered = [];
+        dataFiltered.forEach(dat => {
+          dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
+          auxArrayFiltered.push(auxFiltered);
+          auxFiltered={};
+        });
 
-        setFetchedData(data.map(record => record.fields.map(f =>{
-          return {[f.idFieldSchema]: f.value,[f.idFieldSchema]:f.value,[f.idFieldSchema]:f.value}
-        })));
+        setFetchedData(auxArrayFiltered);
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;

@@ -56,7 +56,8 @@
         }
       ],
       "headers": null,
-      "name": "TABLA1"
+      "name": "TABLA1",
+      "totalRecords": 15154
     }
   ]
 }

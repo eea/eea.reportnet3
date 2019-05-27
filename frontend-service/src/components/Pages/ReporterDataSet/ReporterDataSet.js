@@ -61,13 +61,22 @@ const ReporterDataSet = () => {
         clickHandler: null
       },
       {
-        label: "Validations",
+        label: "Show Validations",
         icon: "3",
         group: "right",
         disabled: !validationError,
         clickHandler: null,
         ownButtonClasses:null,
         iconClasses:(validationError)?"warning":""
+      },
+      {
+        label: "Validate",
+        icon: "10",
+        group: "right",
+        disabled: !validationError,
+        clickHandler: null,
+        ownButtonClasses:null,
+        iconClasses:null
       },
       {
         label: "Dashboards",
