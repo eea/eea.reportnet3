@@ -155,42 +155,20 @@ function (_Component) {
         }
       }
 
-      console.log("Test");
-      console.log(this.props.fileLimit);
-      console.log(this.state.files);
-      if (this.props.fileLimit >= 1) {
-          console.log("Test 2");
-          console.log(this.state.files.length);
-          console.log(this.state.files);
-          
+      if (this.props.fileLimit >= 1) {          
           if (this.state.files.length > 1) {
-              console.log("Test 3");
               for (i = 0; i < this.state.files.length - this.props.fileLimit; i++) {
-
-                  // const filesStates = [...this.state.files];
-                  // filesStates.shift();
-                  // this.setState({
-                      //   files: filesStates
-                  // });
-                  this.state.files.shift();
-                  console.log(this.state.files);
-                  console.log("Test 4");
+                this.state.files.shift();
+                // const filesStates = [...this.state.files];
+                // console.log(filesStates + " before");
+                // filesStates.shift();
+                // console.log(filesStates + " after");
+                // this.setState({
+                //       files: filesStates
+                // });
               }
             }
         }
-
-        // this.
-        // console.log("Mayor: " + this.state.files.length);
-        // const filesStates = [...this.state.files];
-        // console.log(this.state.files);
-        // console.log(filesStates);
-        // filesStates.shift();
-        // console.log(filesStates);
-        // this.setState({ files: filesStates });
-        // console.log(filesStates);
-        // console.log(this.state.files);
-        // console.log(files);
-        // this.state.files.shift();
                                                                     
       this.setState({
         files: this.files
