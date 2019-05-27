@@ -2,7 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -49,7 +48,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     dataSetSchema.setIdDataSetSchema(new ObjectId());
     List<TableSchema> tableSchemas = new ArrayList<>();
-   
+
 
     for (int dss = 1; dss <= 3; dss++) {
       TableSchema tableSchema = new TableSchema();
@@ -97,13 +96,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
 
     // The search using the direct method of MongoDB returns an Optional object
-    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
+    DataSetSchema dataschema = schemasRepository.findById(new ObjectId(dataschemaId)).orElse(null);
 
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
 
-    // isPresent to check that certainly the search has returned result
-    if (dataschema.isPresent()) {
-      DataSetSchema datasetSchema = dataschema.get();
+    if (dataschema != null) {
+      DataSetSchema datasetSchema = dataschema;
 
       dataSchemaVO = dataSchemaMapper.entityToClass(datasetSchema);
     }

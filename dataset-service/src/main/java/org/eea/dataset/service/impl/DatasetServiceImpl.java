@@ -276,11 +276,13 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
+  public TableVO getTableValuesById(final String mongoID, final Pageable pageable)
       throws EEAException {
 
-    List<RecordValue> record = recordRepository.findByTableValue_idMongo(MongoID, pageable);
-
+    List<RecordValue> record = recordRepository.findByTableValue_idMongo(mongoID, pageable);
+    if (record == null || record.isEmpty()) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
 
     Long resultcount = countTableData(record.get(0).getTableValue().getId());
 
