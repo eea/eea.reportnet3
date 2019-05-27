@@ -11,3 +11,7 @@
   width: 100%;
   min-height: 120px;
 }
+
+.warning > span {
+    color:red;
+  }
