@@ -14,6 +14,12 @@ public abstract class TableNoRecordMapper implements IMapper<TableValue, TableVO
 
 
 
+  /**
+   * Entity to class.
+   *
+   * @param entity the entity
+   * @return the table VO
+   */
   @Mapping(source = "records", target = "records", ignore = true)
   @Override
   public abstract TableVO entityToClass(TableValue entity);

@@ -115,7 +115,6 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
   /**
    * Metabase data sets transaction manager.
    *
-   * @param metadataSetsEntityManagerFactory the metadata sets entity manager factory
    * @return the platform transaction manager
    */
   @Bean

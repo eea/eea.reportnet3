@@ -13,25 +13,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @author Mario Severa
+ * The Class DataSetSchema.
  *
+ * @author Mario Severa
  */
+
 
 
 @Getter
 @Setter
-
-/**
- * 
- *
- * @return
- */
-
-/**
- * 
- *
- * @return
- */
 @ToString
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
@@ -56,9 +46,9 @@ public class DataSetSchema {
   private List<TableSchema> tableSchemas;
 
   /**
-   * 
+   * Hash code.
    *
-   * @return
+   * @return the int
    */
   @Override
   public int hashCode() {
@@ -66,10 +56,10 @@ public class DataSetSchema {
   }
 
   /**
-   * 
+   * Equals.
    *
-   * @param obj
-   * @return
+   * @param obj the obj
+   * @return true, if successful
    */
   @Override
   public boolean equals(Object obj) {

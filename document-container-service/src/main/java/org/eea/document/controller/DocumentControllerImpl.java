@@ -14,23 +14,40 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/document")
 public class DocumentControllerImpl implements DocumentController {
 
-	@Autowired
-	private DocumentService documentService;
+  /** The document service. */
+  @Autowired
+  private DocumentService documentService;
 
-	@Override
-	@GetMapping(value = "/testLog")
-	public void testLogging() throws Exception {
-		documentService.testLogging();
-	}
+  /**
+   * Test logging.
+   *
+   * @throws Exception the exception
+   */
+  @Override
+  @GetMapping(value = "/testLog")
+  public void testLogging() throws Exception {
+    documentService.testLogging();
+  }
 
-	@Override
-	@GetMapping(value = "/create")
-	public void uploadDocument() throws Exception {
-		documentService.uploadDocument();
-	}
-	
-	@GetMapping
-	public void getDocument() throws Exception {
-		documentService.getDocument();
-	}
+  /**
+   * Upload document.
+   *
+   * @throws Exception the exception
+   */
+  @Override
+  @GetMapping(value = "/create")
+  public void uploadDocument() throws Exception {
+    documentService.uploadDocument();
+  }
+
+  /**
+   * Gets the document.
+   *
+   * @return the document
+   * @throws Exception the exception
+   */
+  @GetMapping
+  public void getDocument() throws Exception {
+    documentService.getDocument();
+  }
 }

@@ -12,22 +12,42 @@ import org.kie.api.KieBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class ValidationService.
+ */
 @Service
 public class ValidationService {
 
 
+  /** The data set schema repository. */
   @Autowired
   private DataSetSchemaRepository dataSetSchemaRepository;
 
+  /**
+   * Gets the element lenght.
+   *
+   * @return the element lenght
+   */
   public void getElementLenght() {
 
 
   }
 
+  /**
+   * Gets the rules.
+   *
+   * @param rules the rules
+   * @return the rules
+   */
   public List<Map<String, String>> getRules(Rule rules) {
     return null;
   }
 
+  /**
+   * Sets the new rules.
+   *
+   * @param newRules the new new rules
+   */
   public void setNewRules(Rule newRules) {
 
     // List<TableSchema> tableSchemaList = new ArrayList();
@@ -79,6 +99,12 @@ public class ValidationService {
   // return new ObjectId(id);
   // }
   // return id;
+  /**
+   * Load new rules.
+   *
+   * @param rules the rules
+   * @return the kie base
+   */
   // }
   public KieBase loadNewRules(Rule rules) {
     return null;

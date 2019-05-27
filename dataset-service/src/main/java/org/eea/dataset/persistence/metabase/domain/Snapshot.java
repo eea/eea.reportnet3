@@ -19,21 +19,32 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Snapshot extends DataSetMetabase {
+
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The name. */
   @Column(name = "NAME")
   private String name;
 
+  /** The creation date. */
   @Column(name = "CREATIONDATE")
   private Date creationDate;
 
+  /** The datacollection. */
   @Column(name = "DATACOLLECTION_ID")
   private Long datacollection;
 
 
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -47,6 +58,11 @@ public class Snapshot extends DataSetMetabase {
 
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id, name, creationDate, datacollection);

@@ -1,12 +1,12 @@
 package org.eea.swagger;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.google.common.collect.Lists;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiKey;
@@ -34,22 +34,27 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
   public Docket api() {
     return new Docket(DocumentationType.SWAGGER_2)
         .securityContexts(Lists.newArrayList(securityContext()))
-        .securitySchemes(Lists.newArrayList(apiKey()))
-        .select()
-        .apis(RequestHandlerSelectors.basePackage("org.eea"))
-        .paths(PathSelectors.any())
-        .build();
+        .securitySchemes(Lists.newArrayList(apiKey())).select()
+        .apis(RequestHandlerSelectors.basePackage("org.eea")).paths(PathSelectors.any()).build();
   }
 
+  /**
+   * Api key.
+   *
+   * @return the api key
+   */
   private static ApiKey apiKey() {
     return new ApiKey("JWT", "Authentication", "header");
   }
 
+  /**
+   * Security context.
+   *
+   * @return the security context
+   */
   private SecurityContext securityContext() {
-    return SecurityContext.builder()
-        .securityReferences(defaultAuth())
-        .forPaths(PathSelectors.regex("/.*"))
-        .build();
+    return SecurityContext.builder().securityReferences(defaultAuth())
+        .forPaths(PathSelectors.regex("/.*")).build();
   }
 
   /**
@@ -58,14 +63,18 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
    * @return the list
    */
   List<SecurityReference> defaultAuth() {
-    final AuthorizationScope authorizationScope
-        = new AuthorizationScope("global", "accessEverything");
+    final AuthorizationScope authorizationScope =
+        new AuthorizationScope("global", "accessEverything");
     final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
     authorizationScopes[0] = authorizationScope;
-    return Lists.newArrayList(
-        new SecurityReference("JWT", authorizationScopes));
+    return Lists.newArrayList(new SecurityReference("JWT", authorizationScopes));
   }
 
+  /**
+   * Adds the resource handlers.
+   *
+   * @param registry the registry
+   */
   @Override
   public void addResourceHandlers(final ResourceHandlerRegistry registry) {
     registry.addResourceHandler("swagger-ui.html")
