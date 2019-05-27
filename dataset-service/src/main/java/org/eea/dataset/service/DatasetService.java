@@ -16,15 +16,6 @@ import org.springframework.data.domain.Pageable;
 public interface DatasetService {
 
   /**
-   * Gets dataset by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the dataset by id
-   */
-  DataSetVO getDatasetById(@DatasetId Long datasetId);
-
-  /**
    * Add record to dataset.
    *
    * @param datasetId the dataset id
@@ -85,7 +76,7 @@ public interface DatasetService {
    * @return the table values by id
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(String MongoID, Pageable pageable) throws EEAException;
+  TableVO getTableValuesById(String mongoID, Pageable pageable) throws EEAException;
 
 
   /**
