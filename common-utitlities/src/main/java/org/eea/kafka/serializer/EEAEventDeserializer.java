@@ -6,11 +6,16 @@ import java.io.ObjectInputStream;
 import java.util.Map;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.eea.kafka.domain.EEAEventVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class EEAEventDeserializer.
  */
 public class EEAEventDeserializer implements Deserializer<EEAEventVO> {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(EEAEventDeserializer.class);
 
   /**
    * Configure.
@@ -41,8 +46,9 @@ public class EEAEventDeserializer implements Deserializer<EEAEventVO> {
       inputStream.close();
 
     } catch (final IOException | ClassNotFoundException | ClassCastException e) {
-      e.printStackTrace();
-      System.out.println(event.toString());
+      if (event != null) {
+        LOG.info(event.toString());
+      }
     }
     return (EEAEventVO) event;
   }

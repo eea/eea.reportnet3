@@ -2,11 +2,9 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.springframework.data.domain.Pageable;
 
@@ -14,23 +12,6 @@ import org.springframework.data.domain.Pageable;
  * The interface Dataset service.
  */
 public interface DatasetService {
-
-  /**
-   * Gets dataset by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the dataset by id
-   */
-  DataSetVO getDatasetById(@DatasetId Long datasetId);
-
-  /**
-   * Add record to dataset.
-   *
-   * @param datasetId the dataset id
-   * @param record the record
-   */
-  void addRecordToDataset(@DatasetId Long datasetId, List<RecordVO> record);
 
   /**
    * Create empty dataset.
@@ -85,7 +66,7 @@ public interface DatasetService {
    * @return the table values by id
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(String MongoID, Pageable pageable) throws EEAException;
+  TableVO getTableValuesById(String mongoID, Pageable pageable) throws EEAException;
 
 
   /**

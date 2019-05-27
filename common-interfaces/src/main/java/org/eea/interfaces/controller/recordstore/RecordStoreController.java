@@ -23,6 +23,7 @@ public interface RecordStoreController {
 
   /**
    * Reste data set data base. DO NOT USE IN PRODUCTION. TO BE REMOVED. ONLY FOR TEST PURPOSES
+   * @deprecated
    */
   @Deprecated
   @RequestMapping(value = "/reset", method = RequestMethod.POST)

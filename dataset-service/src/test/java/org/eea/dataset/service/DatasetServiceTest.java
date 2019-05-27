@@ -1,6 +1,5 @@
 package org.eea.dataset.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
@@ -10,16 +9,16 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Before;
@@ -53,8 +52,7 @@ public class DatasetServiceTest {
   @Mock
   DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  @Mock
-  SchemasRepository schemasRepository;
+
 
   @Mock
   DatasetRepository datasetRepository;
@@ -62,7 +60,11 @@ public class DatasetServiceTest {
   @Mock
   KafkaSender kafkaSender;
 
+  @Mock
+  RecordStoreControllerZull recordStoreControllerZull;
 
+  @Mock
+  RecordRepository recordRepository;
 
   @Before
   public void initMocks() {
@@ -169,31 +171,18 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
   }
 
+  
+
   @Test
-  public void testFindDataschemaByIdDataflow() throws Exception {
-
-    // Se prueba que el dataflow con id 1 tiene dataschema
-    DataSetSchema data = new DataSetSchema();
-
-    // when(schemasRepository.findSchemaByIdFlow(1L)).thenReturn(data);
-    assertEquals(null, schemasRepository.findSchemaByIdFlow(1L));
-    // when(datasetService.getDataSchemaByIdFlow(1L)).thenReturn(new DataSetSchemaVO());
-
+  public void createEmptyDataset() throws Exception {
+    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any());
+    datasetService.createEmptyDataset("");
   }
 
-
   @Test
-  public void testFindDataschemaById() throws Exception {
-
-    // Se prueba que se recupera un dataschema con un id
-    DataSetSchema data = new DataSetSchema();
-    data.setNameDataSetSchema("test");
-    // when(schemasRepository.findById(new
-    // ObjectId("5ce3a7ca3d851f09c42cb152"))).thenReturn(Optional.of(new DataSetSchema()));
-    assertEquals("test", data.getNameDataSetSchema());
-    // when(datasetService.getDataSchemaById("5ce3a7ca3d851f09c42cb152")).thenReturn(new
-    // DataSetSchemaVO());
-
+  public void countTableData() {
+    when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
+    assertEquals((Long) 20L, datasetService.countTableData(1L));
   }
 
 }
