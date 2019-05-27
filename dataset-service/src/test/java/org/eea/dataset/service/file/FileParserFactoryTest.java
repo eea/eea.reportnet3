@@ -1,5 +1,6 @@
 package org.eea.dataset.service.file;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import org.junit.Before;
@@ -33,7 +34,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextCsv() {
-    fileParserFactory.createContext("csv");
+    assertNotNull(fileParserFactory.createContext("csv"));
   }
 
   /**
@@ -41,7 +42,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXml() {
-    fileParserFactory.createContext("xml");
+    assertNotNull(fileParserFactory.createContext("xml"));
   }
 
   /**

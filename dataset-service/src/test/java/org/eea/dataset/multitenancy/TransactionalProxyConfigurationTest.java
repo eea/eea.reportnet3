@@ -1,6 +1,8 @@
 package org.eea.dataset.multitenancy;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
+import org.eea.dataset.service.DatasetService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +35,8 @@ public class TransactionalProxyConfigurationTest {
    */
   @Test
   public void testProxyDatasetService() {
-    transactionalProxyConfiguration.proxyDatasetService();
+    DatasetService result = transactionalProxyConfiguration.proxyDatasetService();
+    assertNotNull(result);
   }
 
 }
