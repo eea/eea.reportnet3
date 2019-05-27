@@ -11,14 +11,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The Class RecordStoreControllerImpl.
+ */
 @RestController
 @RequestMapping("/recordstore")
-public class RecordStoreControllerImpl implements
-    RecordStoreController {
+public class RecordStoreControllerImpl implements RecordStoreController {
 
+  /** The record store service. */
   @Autowired
   private RecordStoreService recordStoreService;
 
+  /**
+   * Reste data set data base.
+   */
   @Override
   @RequestMapping(value = "/reset", method = RequestMethod.POST)
   public void resteDataSetDataBase() {
@@ -29,19 +35,37 @@ public class RecordStoreControllerImpl implements
     }
   }
 
+  /**
+   * Creates the empty dataset.
+   *
+   * @param datasetName the dataset name
+   */
   @Override
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
-  public void createEmptyDataset(
-      @PathVariable("datasetName") final String datasetName) { //TODO neeed to create standar exceptions in commont interfaces
+  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName) { // TODO
+                                                                                          // neeed
+                                                                                          // to
+                                                                                          // create
+                                                                                          // standar
+                                                                                          // exceptions
+                                                                                          // in
+                                                                                          // commont
+                                                                                          // interfaces
     final ConnectionDataVO connectionDataVO = null;
     try {
       recordStoreService.createEmptyDataSet(datasetName);
     } catch (final DockerAccessException e) {
       e.printStackTrace();
-      //TODO Error control
+      // TODO Error control
     }
   }
 
+  /**
+   * Gets the connection to dataset.
+   *
+   * @param datasetName the dataset name
+   * @return the connection to dataset
+   */
   @Override
   @RequestMapping(value = "/connection/{datasetName}", method = RequestMethod.GET)
   public ConnectionDataVO getConnectionToDataset(
@@ -55,6 +79,11 @@ public class RecordStoreControllerImpl implements
     return vo;
   }
 
+  /**
+   * Gets the connection to dataset.
+   *
+   * @return the connection to dataset
+   */
   @Override
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
   public List<ConnectionDataVO> getConnectionToDataset() {

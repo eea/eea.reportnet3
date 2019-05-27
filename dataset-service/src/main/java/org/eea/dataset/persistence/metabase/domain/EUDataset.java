@@ -20,19 +20,29 @@ import lombok.ToString;
 @ToString
 @Table(name = "EU_DATASET")
 public class EUDataset extends DataSetMetabase {
+
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The name. */
   @Column(name = "NAME")
   private String name;
 
+  /** The visible. */
   @Column(name = "VISIBLE")
   private Boolean visible;
 
 
 
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -46,6 +56,11 @@ public class EUDataset extends DataSetMetabase {
 
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id, name, visible);
