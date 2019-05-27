@@ -76,9 +76,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
-    DataSetSchemaVO dataschema = new DataSetSchemaVO();
-
-    return dataschema;
+  
+    return  new DataSetSchemaVO();
   }
 
   /**
@@ -88,9 +87,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
-    DataSetSchemaVO dataschema = new DataSetSchemaVO();
-
-    return dataschema;
+   
+    return  new DataSetSchemaVO();
   }
 
 
