@@ -1,26 +1,19 @@
 package org.eea.dataset.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.springframework.web.multipart.MultipartFile;
+import org.eea.interfaces.vo.dataset.TableVO;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface Dataset service.
  */
 public interface DatasetService {
-
-  /**
-   * Gets dataset by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the dataset by id
-   */
-  DataSetVO getDatasetById(@DatasetId Long datasetId);
 
   /**
    * Add record to dataset.
@@ -45,7 +38,8 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(@DatasetId Long datasetId, MultipartFile file) throws EEAException, IOException;
+  void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
+      throws EEAException, IOException;
 
 
   /**
@@ -65,4 +59,32 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteDataSchema(String datasetId);
+
+
+  /**
+   * Delete import data.
+   *
+   * @param dataSetId the data set id
+   */
+  void deleteImportData(Long dataSetId);
+
+  /**
+   * Gets the table values by id.
+   *
+   * @param MongoID the mongo ID
+   * @param pageable the pageable
+   * @return the table values by id
+   * @throws EEAException the EEA exception
+   */
+  TableVO getTableValuesById(String mongoID, Pageable pageable) throws EEAException;
+
+
+  /**
+   * Count table data.
+   *
+   * @param tableId the table id
+   * @return the long
+   */
+  Long countTableData(Long tableId);
+
 }

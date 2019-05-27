@@ -10,8 +10,14 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
  */
 public class XMLReaderStrategy implements ReaderStrategy {
 
+  /** The data set schema service. */
   private DatasetSchemaService dataSetSchemaService;
 
+  /**
+   * Instantiates a new XML reader strategy.
+   *
+   * @param dataSetSchemaService the data set schema service
+   */
   public XMLReaderStrategy(DatasetSchemaService dataSetSchemaService) {
     this.dataSetSchemaService = dataSetSchemaService;
   }
@@ -20,6 +26,8 @@ public class XMLReaderStrategy implements ReaderStrategy {
    * Parses the file.
    *
    * @param inputStream the input stream
+   * @param dataflowId the dataflow id
+   * @param partitionId the partition id
    * @return the data set VO
    */
   @Override

@@ -1,7 +1,5 @@
 package org.eea.document.service;
 
-import java.io.File;
-
 /**
  * The interface Dataset service.
  */
@@ -9,18 +7,23 @@ public interface DocumentService {
 
   /**
    * testLogging.
-   * @throws Exception 
    *
+   * @throws Exception the exception
    */
   void testLogging() throws Exception;
 
   /**
    * Upload a document.
    *
-   * @param fileName the file name
- * @throws Exception 
+   * @throws Exception the exception
    */
   void uploadDocument() throws Exception;
 
-void getDocument() throws Exception;
+  /**
+   * Gets the document.
+   *
+   * @return the document
+   * @throws Exception the exception
+   */
+  void getDocument() throws Exception;
 }

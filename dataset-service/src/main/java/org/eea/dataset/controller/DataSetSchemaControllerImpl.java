@@ -19,10 +19,16 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataschema")
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
 
+  /**
+   * Creates the data schema.
+   *
+   * @param datasetName the dataset name
+   */
   @Override
   @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
   public void createDataSchema(String datasetName) {
@@ -47,6 +53,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
 
+  /**
+   * Find data schema by dataflow.
+   *
+   * @param idFlow the id flow
+   * @return the data set schema VO
+   */
   @Override
   @HystrixCommand(fallbackMethod = "errorHandlerSchemaDataFlow")
   @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
@@ -57,12 +69,24 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
   }
 
+  /**
+   * Error handler schema.
+   *
+   * @param id the id
+   * @return the data set schema VO
+   */
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
 
     return dataschema;
   }
 
+  /**
+   * Error handler schema data flow.
+   *
+   * @param id the id
+   * @return the data set schema VO
+   */
   public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
     DataSetSchemaVO dataschema = new DataSetSchemaVO();
 

@@ -35,76 +35,99 @@ import com.github.dockerjava.core.command.ExecStartResultCallback;
 @Service
 public class DockerInterfaceServiceImpl implements DockerInterfaceService, Closeable {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DockerInterfaceServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /*private final DockerClient dockerClient = DockerClientBuilder
-      .getInstance("tcp://localhost:2375")
-      .build();*/
-  
+
+  /** The docker client. */
   @Autowired
   private DockerClientBuilderBean dockerClient;
-  
-  
 
+
+  /** The Constant DATASET_NAME_PATTERN. */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
-  
+
+  /** The envs. */
   @Value("${dockerVarEnvironments:null}")
   private List<String> envs = null;
   
   @Value("${dockerContainerName:crunchy-postgres}")
   private String containerName;
-  
 
+
+  /** The container name. */
+  @Value("${dockerContainerName:crunchy-postgres}")
+  private String CONTAINER_NAME;
+
+
+
+  /**
+   * Creates the container.
+   *
+   * @param containerName the container name
+   * @param imageName the image name
+   * @param portBinding the port binding
+   * @return the container
+   */
   @Override
   public Container createContainer(String containerName, String imageName, String portBinding) {
-   
-    CreateContainerCmd command = dockerClient.dockerClient()
-        .createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1")
-        .withEnv(envs).withName(containerName);
-    //Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));//NO MAPEA... INVESTIGAR
-    Binds binds = new Binds();
-    HostConfig hostConfig = new HostConfig();
-    hostConfig.withBinds(binds);
-    if (null != portBinding && !portBinding.isEmpty()) {
-      String[] ports = portBinding.split(":");
-      Integer hostPort = Integer.valueOf(ports[0]);
-      Integer containerPort = Integer.valueOf(ports[1]);
-      Ports portBindings = new Ports();
-      ExposedPort tcp5432 = ExposedPort.tcp(containerPort);
-      portBindings.bind(tcp5432, Ports.Binding.bindPort(hostPort));
-      command.withExposedPorts(tcp5432);
-      hostConfig.withPortBindings(portBindings);
-    }
 
-    CreateContainerResponse containerResponse = command.withHostConfig(hostConfig).exec();
-
+ 
+      CreateContainerCmd command =
+          dockerClient.dockerClient().createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1")
+              .withEnv(envs).withName(containerName);
+      //Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));// NO MAPEA... INVESTIGAR
+  
+      Binds binds = new Binds();
+      HostConfig hostConfig = new HostConfig();
+      hostConfig.withBinds(binds);
+      if (null != portBinding && !portBinding.isEmpty()) {
+        String[] ports = portBinding.split(":");
+        Integer hostPort = Integer.valueOf(ports[0]);
+        Integer containerPort = Integer.valueOf(ports[1]);
+        Ports portBindings = new Ports();
+        ExposedPort tcp5432 = ExposedPort.tcp(containerPort);
+        portBindings.bind(tcp5432, Ports.Binding.bindPort(hostPort));
+        command.withExposedPorts(tcp5432);
+        hostConfig.withPortBindings(portBindings);
+      }
+  
+      command.withHostConfig(hostConfig).exec();
+      command.close();
 
     return getContainer(containerName);
   }
 
 
+  /**
+   * Execute command inside container.
+   *
+   * @param container the container
+   * @param command the command
+   * @return the byte[]
+   * @throws InterruptedException the interrupted exception
+   */
   @Override
   public byte[] executeCommandInsideContainer(Container container, String... command)
       throws InterruptedException {
     OutputStream output = new ByteArrayOutputStream();
     OutputStream errorOutput = new ByteArrayOutputStream();
     /*
-    //"export PGPASSWORD=root && psql -h localhost -U root -p 5432 -d datasets -c \"psql -h localhost -U root -p 5432 -d datasets -c \"create table \"dataset_1\".record(    id integer NOT NULL,    name \"char\",    CONSTRAINT record_pkey PRIMARY KEY (id))\"\""
-            "/bin/bash", "-c",
-            // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql"
-            //&& psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(    id integer NOT NULL,    name "char",    CONSTRAINT record_pkey PRIMARY KEY (id))"
-            command
+     * //"export PGPASSWORD=root && psql -h localhost -U root -p 5432 -d datasets -c \"psql -h localhost -U root -p 5432 -d datasets -c \"create table \"dataset_1\".record(    id integer NOT NULL,    name \"char\",    CONSTRAINT record_pkey PRIMARY KEY (id))\"\""
+     * "/bin/bash", "-c", // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql" //&&
+     * psql -h localhost -U root -p 5432 -d datasets -c
+     * "create table "dataset_1".record(    id integer NOT NULL,    name "
+     * char",    CONSTRAINT record_pkey PRIMARY KEY (id))" command
      */
+
     ExecCreateCmdResponse execCreateCmdResponse = dockerClient.dockerClient().execCreateCmd(container.getId())
-        .withAttachStdout(true)
-        .withCmd(
-            command)
-        .withTty(true)
-        .exec();
-    ExecStartResultCallback result = null;//Esto sirve para gestión de eventos. Interesante
-    result = dockerClient.dockerClient()
-        .execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
+        .withAttachStdout(true).withCmd(command).withTty(true).exec();
+    ExecStartResultCallback result = null;// Esto sirve para gestión de eventos. Interesante
+    result = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
+
         .exec(new ExecStartResultCallback(output, errorOutput)).awaitCompletion();
     result.awaitCompletion().onComplete();
     byte[] commandOutcome = ((ByteArrayOutputStream) output).toByteArray();
@@ -119,6 +142,11 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   }
 
+  /**
+   * Gets the connection.
+   *
+   * @return the connection
+   */
   @Deprecated
   @Override
   public List<String> getConnection() {
@@ -126,21 +154,21 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     List<String> result = new ArrayList<>();
     OutputStream output = new ByteArrayOutputStream();
     OutputStream errorOutput = new ByteArrayOutputStream();
+
     ExecCreateCmdResponse execCreateCmdResponse = dockerClient.dockerClient().execCreateCmd(container.getId())
-        .withAttachStdout(true)
-        .withCmd(
+        .withAttachStdout(true).withCmd(
+
 
             // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql"
-            //&& psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(    id integer NOT NULL,    name "char",    CONSTRAINT record_pkey PRIMARY KEY (id))"
+            // && psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(
+            // id integer NOT NULL, name "char", CONSTRAINT record_pkey PRIMARY KEY (id))"
             "psql", "-h", "localhost", "-U", "root", "-p", "5432", "-d", "datasets", "-c",
             "select * from pg_namespace where nspname like 'dataset%'")
-        .withTty(true)
-        .exec();
-    ExecStartResultCallback execResult = null;//Esto sirve para gestión de eventos. Interesante
-    execResult = dockerClient.dockerClient()
-        .execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
-        .exec(new ExecStartResultCallback(output,
-            errorOutput));
+        .withTty(true).exec();
+    ExecStartResultCallback execResult = null;// Esto sirve para gestión de eventos. Interesante
+    execResult = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
+        .exec(new ExecStartResultCallback(output, errorOutput));
+
     try {
       execResult.awaitCompletion().onComplete();
 
@@ -160,61 +188,103 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     return result;
   }
 
+  /**
+   * Stop and remove container.
+   *
+   * @param container the container
+   */
   @Override
   public void stopAndRemoveContainer(Container container) {
     dockerClient.dockerClient().stopContainerCmd(container.getId()).exec();
     dockerClient.dockerClient().removeContainerCmd(container.getId()).exec();
   }
 
+  /**
+   * Stop container.
+   *
+   * @param container the container
+   */
   @Override
   public void stopContainer(Container container) {
     dockerClient.dockerClient().stopContainerCmd(container.getId()).exec();
 
   }
 
+  /**
+   * Start container.
+   *
+   * @param container the container
+   * @param timeToWait the time to wait
+   * @param unit the unit
+   */
   @Override
-  public void startContainer(Container container, Long timeToWait,
-      TimeUnit unit) {
+  public void startContainer(Container container, Long timeToWait, TimeUnit unit) {
     dockerClient.dockerClient().startContainerCmd(container.getId()).exec();
+
     CountDownLatch completed = new CountDownLatch(1);
     try {
-      completed.await(timeToWait,
-          TimeUnit.SECONDS);//wait timeToWait seconds for the database to start
+      completed.await(timeToWait, TimeUnit.SECONDS);// wait timeToWait seconds for the database to
+                                                    // start
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
   }
 
 
+  /**
+   * Gets the container.
+   *
+   * @param containerName the container name
+   * @return the container
+   */
   @Override
   public Container getContainer(String containerName) {
     List<String> names = new ArrayList<>();
     names.add(containerName);
-    List<Container> containers = dockerClient.dockerClient().listContainersCmd()
-        .withShowSize(true)
-        .withShowAll(true)
-        .withNameFilter(names).exec();
+
+    List<Container> containers = dockerClient.dockerClient().listContainersCmd().withShowSize(true)
+        .withShowAll(true).withNameFilter(names).exec();
+
     return null != containers && !containers.isEmpty() ? containers.get(0) : null;
   }
 
+  /**
+   * Copy file from host to container.
+   *
+   * @param containerName the container name
+   * @param filePath the file path
+   * @param destinationPath the destination path
+   */
   @Override
   public void copyFileFromHostToContainer(String containerName, String filePath,
       String destinationPath) {
-    dockerClient.dockerClient().copyArchiveToContainerCmd(containerName)
-        .withHostResource(filePath)
+
+    dockerClient.dockerClient().copyArchiveToContainerCmd(containerName).withHostResource(filePath)
         .withRemotePath(destinationPath).exec();
   }
 
+  /**
+   * Copy file from container to host.
+   *
+   * @param containerName the container name
+   * @param filePath the file path
+   * @param destinationPath the destination path
+   * @return the input stream
+   */   
   @Override
   public InputStream copyFileFromContainerToHost(String containerName, String filePath,
       String destinationPath) {
 
     return dockerClient.dockerClient().copyArchiveFromContainerCmd(containerName, filePath)
-        .withHostPath(destinationPath)
-        .exec();
+        .withHostPath(destinationPath).exec();
   }
 
 
+  /**
+   * Close.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   public void close() throws IOException {
     if (null != dockerClient) {

@@ -15,8 +15,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mongodb.MongoClient;
 
 /**
- * @author Mario Severa
+ * The Class SchemasConfiguration.
  *
+ * @author Mario Severa
  */
 
 @Configuration
@@ -26,27 +27,52 @@ import com.mongodb.MongoClient;
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
 
+  /** The dll. */
   @Value("${mongodb.hibernate.ddl-auto}")
   private String dll;
+
+  /** The host. */
   @Value("${mongodb.primary.host}")
   private String host;
+
+  /** The port. */
   @Value("${mongodb.primary.port}")
   private Integer port;
+
+  /** The username. */
   @Value("${mongodb.primary.username}")
   private String username;
+
+  /** The password. */
   @Value("${mongodb.primary.username}")
   private String password;
 
+  /**
+   * Schemas transaction manager.
+   *
+   * @param dbFactory the db factory
+   * @return the mongo transaction manager
+   */
   @Bean
   public MongoTransactionManager schemasTransactionManager(MongoDbFactory dbFactory) {
     return new MongoTransactionManager(dbFactory);
   }
 
+  /**
+   * Gets the database name.
+   *
+   * @return the database name
+   */
   @Override
   protected String getDatabaseName() {
     return "dataset_schema";
   }
 
+  /**
+   * Mongo client.
+   *
+   * @return the mongo client
+   */
   @Override
   public MongoClient mongoClient() {
     return new MongoClient(host, 27017);

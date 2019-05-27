@@ -14,13 +14,27 @@ import org.mapstruct.Mapping;
  */
 @Mapper(componentModel = "spring")
 public abstract class DataSchemaMapper implements IMapper<DataSetSchema, DataSetSchemaVO> {
-  
 
+
+  /**
+   * Entity to class.
+   *
+   * @param entity the entity
+   * @return the data set schema VO
+   */
   public abstract DataSetSchemaVO entityToClass(DataSetSchema entity);
-  
-  
-  
-  
+
+
+  /**
+   * Map.
+   *
+   * @param value the value
+   * @return the string
+   */
+  String map(ObjectId value) {
+    return value.toString();
+  }
+
   /**
    * Map.
    *
@@ -30,14 +44,17 @@ public abstract class DataSchemaMapper implements IMapper<DataSetSchema, DataSet
   ObjectId map(String value) {
     return new ObjectId(value);
   }
-  String map(ObjectId value) {
-    return value.toString();
-  }
-  
+
+  /**
+   * Entity to class.
+   *
+   * @param model the model
+   * @return the field schema VO
+   */
   @Mapping(source = "headerName", target = "name")
   @Mapping(source = "idFieldSchema", target = "id")
   public abstract FieldSchemaVO entityToClass(FieldSchema model);
-  
+
 
 
 }

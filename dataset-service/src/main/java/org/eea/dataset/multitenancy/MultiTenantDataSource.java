@@ -13,10 +13,16 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
  */
 public class MultiTenantDataSource extends AbstractRoutingDataSource {
 
+  /** The data sources. */
   @Autowired
   @Qualifier("targetDataSources")
   private Map<Object, Object> dataSources;
 
+  /**
+   * Determine current lookup key.
+   *
+   * @return the object
+   */
   @Override
   protected Object determineCurrentLookupKey() {
     return TenantResolver.getTenantName();
@@ -35,6 +41,12 @@ public class MultiTenantDataSource extends AbstractRoutingDataSource {
     }
   }
 
+  /**
+   * Creates the data source.
+   *
+   * @param connectionDataVO the connection data VO
+   * @return the data source
+   */
   private DataSource createDataSource(ConnectionDataVO connectionDataVO) {
     DriverManagerDataSource ds = new DriverManagerDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());

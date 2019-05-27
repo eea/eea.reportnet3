@@ -25,38 +25,60 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.github.dockerjava.api.model.Container;
 
+/**
+ * The Class RecordStoreServiceImpl.
+ */
 @Service
 public class RecordStoreServiceImpl implements RecordStoreService {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant DATASET_NAME_PATTERN. */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
+
+  /** The docker interface service. */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
 
+  /** The container name. */
   @Value("${dockerContainerName:crunchy-postgres}")
   private String CONTAINER_NAME;
 
+  /** The ip postgre db. */
   @Value("${ipPostgre:localhost}")
   private String IP_POSTGRE_DB;
 
+  /** The user postgre db. */
   @Value("${userPostgre:root}")
   private String USER_POSTGRE_DB;
 
+  /** The pass postgre db. */
   @Value("${passwordPostgre:root}")
   private String PASS_POSTGRE_DB;
 
+  /** The conn string postgre. */
   @Value("${connStringPostgree:jdbc:postgresql://localhost/datasets}")
   private String CONN_STRING_POSTGRE;
 
+  /** The sql get datasets name. */
   @Value("${sqlGetAllDatasetsName:select * from pg_namespace where nspname like 'dataset%'}")
   private String SQL_GET_DATASETS_NAME;
 
 
 
+  /** The kafka sender. */
   @Autowired
   private KafkaSender kafkaSender;
 
+  /**
+   * Reset dataset database.
+   *
+   * @throws DockerAccessException the docker access exception
+   */
   @Override
   public void resetDatasetDatabase() throws DockerAccessException {
     // TODO REMOVE THIS PART, THIS IS ONLY FOR TESTING PURPOSES
@@ -96,6 +118,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Creates the empty data set.
+   *
+   * @param datasetName the dataset name
+   * @throws DockerAccessException the docker access exception
+   */
   @Override
   public void createEmptyDataSet(final String datasetName) throws DockerAccessException {
     // line to run a crunchy container
@@ -144,6 +172,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
   }
 
+  /**
+   * Creates the data set from other.
+   *
+   * @param sourceDatasetName the source dataset name
+   * @param destinationDataSetName the destination data set name
+   */
   @Override
   public void createDataSetFromOther(final String sourceDatasetName,
       final String destinationDataSetName) {
@@ -152,6 +186,13 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
   }
 
+  /**
+   * Gets the connection data for dataset.
+   *
+   * @param datasetName the dataset name
+   * @return the connection data for dataset
+   * @throws DockerAccessException the docker access exception
+   */
   @Override
   public ConnectionDataVO getConnectionDataForDataset(final String datasetName)
       throws DockerAccessException {
@@ -167,6 +208,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     return result;
   }
 
+  /**
+   * Gets the connection data for dataset.
+   *
+   * @return the connection data for dataset
+   * @throws DockerAccessException the docker access exception
+   */
   @Override
   public List<ConnectionDataVO> getConnectionDataForDataset() throws DockerAccessException {
     final List<String> datasets = getAllDataSetsName();
@@ -179,6 +226,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
   }
 
+  /**
+   * Gets the all data sets name.
+   *
+   * @return the all data sets name
+   * @throws DockerAccessException the docker access exception
+   */
   private List<String> getAllDataSetsName() throws DockerAccessException {
     final List<String> datasets = new ArrayList<>();
     final Container container = dockerInterfaceService.getContainer(CONTAINER_NAME);
@@ -206,6 +259,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     return datasets;
   }
 
+  /**
+   * Creates the connection data VO.
+   *
+   * @param datasetName the dataset name
+   * @return the connection data VO
+   */
   private ConnectionDataVO createConnectionDataVO(final String datasetName) {
     final ConnectionDataVO result = new ConnectionDataVO();
 

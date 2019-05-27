@@ -23,34 +23,52 @@ import lombok.ToString;
 @Table(name = "WEBLINK")
 public class Weblink {
 
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
+
+  /** The name. */
   @Column(name = "NAME")
   private String name;
+
+  /** The url. */
   @Column(name = "URL")
   private String url;
+
+  /** The dataflow. */
   @ManyToOne
   @JoinColumn(name = "DATAFLOW_ID")
   private Dataflow dataflow;
 
-  
+
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
   @Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		final Weblink contributor = (Weblink) o;
-		return id.equals(contributor.id);
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final Weblink contributor = (Weblink) o;
+    return id.equals(contributor.id);
 
-	}
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, name, url, dataflow);
-	}
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, url, dataflow);
+  }
 }

@@ -5,17 +5,30 @@ package org.eea.exception;
  */
 public class EEAErrorMessage {
 
-  /** The Constant DB_FILEFORMAT. */
+  /**
+   * The Constant DB_FILEFORMAT.
+   */
   public static final String FILE_FORMAT = "Invalid file format";
 
-  /** The Constant FILE_EXTENSION. */
+  /**
+   * The Constant FILE_EXTENSION.
+   */
   public static final String FILE_EXTENSION = "File without extension";
 
-  /** The Constant DATASET_NOTFOUND. */
+  /**
+   * The Constant FILE_EXTENSION.
+   */
+  public static final String FILE_NAME = "Error getting the file name";
+
+  /**
+   * The Constant DATASET_NOTFOUND.
+   */
   public static final String DATASET_NOTFOUND = "Dataset not found";
 
+  /**
+   * The constant DATASET_INCORRECT_ID.
+   */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
-
 
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");

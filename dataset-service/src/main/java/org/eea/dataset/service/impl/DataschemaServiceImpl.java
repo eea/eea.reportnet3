@@ -16,6 +16,9 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class DataschemaServiceImpl.
+ */
 @Service("datachemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
 
@@ -110,9 +113,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Find the dataschema per idDataFlow
-   * 
+   * Find the dataschema per idDataFlow.
+   *
    * @param idFlow the idDataFlow to look for
+   * @return the data schema by id flow
    */
   @Override
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {

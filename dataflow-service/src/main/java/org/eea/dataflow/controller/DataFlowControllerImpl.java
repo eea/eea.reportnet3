@@ -21,9 +21,16 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/dataflow")
 public class DataFlowControllerImpl implements DataFlowController {
 
+  /** The dataset controller. */
   @Autowired
   private DataSetControllerZuul datasetController;
 
+  /**
+   * Find by id.
+   *
+   * @param id the id
+   * @return the data flow VO
+   */
   @Override
   @HystrixCommand(fallbackMethod = "errorHandler")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,

@@ -9,12 +9,19 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 /**
- * @author Mario Severa
+ * The Interface SchemasRepository.
  *
+ * @author Mario Severa
  */
 public interface SchemasRepository extends MongoRepository<DataSetSchema, ObjectId> {
 
+  /**
+   * Find schema by id flow.
+   *
+   * @param idFlow the id flow
+   * @return the data set schema
+   */
   @Query("{'idDataFlow': ?0}")
   DataSetSchema findSchemaByIdFlow(Long idFlow);
-  
+
 }
