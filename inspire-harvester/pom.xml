@@ -61,4 +61,11 @@
       <url>http://download.osgeo.org/webdav/geotools/</url>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

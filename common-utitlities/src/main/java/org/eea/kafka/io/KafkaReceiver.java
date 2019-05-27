@@ -15,9 +15,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaReceiver {
 
+  /** The handler. */
   @Autowired(required = false)
   private EEAEventHandler handler;
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(KafkaReceiver.class);
 
 

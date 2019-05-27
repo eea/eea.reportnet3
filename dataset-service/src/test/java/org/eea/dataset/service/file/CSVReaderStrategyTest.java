@@ -20,20 +20,32 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 
+/**
+ * The Class CSVReaderStrategyTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class CSVReaderStrategyTest {
 
+  /** The csv reader strategy. */
   @InjectMocks
-  CSVReaderStrategy csvReaderStrategy;
+  private CSVReaderStrategy csvReaderStrategy;
 
-  InputStream input;
+  /** The input. */
+  private InputStream input;
 
+  /** The dataset schema service. */
   @Mock
-  DatasetSchemaService datasetSchemaService;
+  private DatasetSchemaService datasetSchemaService;
 
 
-  DataSetSchemaVO dataSet;
+  /** The data set. */
+  private DataSetSchemaVO dataSet;
 
+  /**
+   * Inits the mocks.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
@@ -64,12 +76,22 @@ public class CSVReaderStrategyTest {
   }
 
 
+  /**
+   * Test parse file.
+   *
+   * @throws InvalidFileException the invalid file exception
+   */
   @Test
   public void testParseFile() throws InvalidFileException {
     when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
   }
 
+  /**
+   * Test parse file table null.
+   *
+   * @throws InvalidFileException the invalid file exception
+   */
   @Test
   public void testParseFileTableNull() throws InvalidFileException {
     dataSet.setTableSchemas(null);
@@ -78,6 +100,12 @@ public class CSVReaderStrategyTest {
   }
 
 
+  /**
+   * Test parse exception.
+   *
+   * @throws InvalidFileException the invalid file exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = InvalidFileException.class)
   public void testParseException() throws InvalidFileException, IOException {
     String csv = "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";

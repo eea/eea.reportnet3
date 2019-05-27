@@ -13,7 +13,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
 /**
- * The type Data set Schema controller.
+ * The Class DataSetSchemaControllerImpl.
  */
 @RestController
 @RequestMapping("/dataschema")

@@ -39,11 +39,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
+
+  /** The Constant ADMIN. */
   private static final String ADMIN = "admin";
 
   /**
-   * test the connection
+   * test the connection.
+   *
+   * @throws Exception the exception
    */
   @Override
   public void testLogging() throws Exception {
@@ -64,7 +69,9 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * upload a file to the jackrabbit content repository
+   * upload a file to the jackrabbit content repository.
+   *
+   * @throws Exception the exception
    */
   @Override
   @Transactional
@@ -86,7 +93,10 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * Download the file to the fileSystem
+   * Download the file to the fileSystem.
+   *
+   * @return the document
+   * @throws Exception the exception
    */
   @Override
   @Transactional
@@ -111,11 +121,11 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * creates a repository in that location
-   * 
-   * @param host
-   * @param port
-   * @return
+   * creates a repository in that location.
+   *
+   * @param host the host
+   * @param port the port
+   * @return the repo
    */
   public static Repository getRepo(String host, final int port) {
     String uri = "mongodb://" + host + ":" + port;
@@ -127,8 +137,10 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * @return
-   * @throws RepositoryException
+   * Gets the session.
+   *
+   * @return the session
+   * @throws RepositoryException the repository exception
    */
   private Session getSession() throws RepositoryException {
     Repository repo = getRepo("localhost", 27017);
@@ -143,14 +155,13 @@ public class DocumentServiceImpl implements DocumentService {
 
   /**
    * Adds a file node if it's possible.
-   * 
-   * @param session
-   * @param absPath
-   * @param file
-   * @param userName
-   * 
-   * @throws RepositoryException
-   * @throws IOException
+   *
+   * @param session the session
+   * @param absPath the abs path
+   * @param file the file
+   * @param userName the user name
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   public static void addFileNode(Session session, String absPath, File file, String userName)
       throws RepositoryException, IOException {
@@ -190,12 +201,12 @@ public class DocumentServiceImpl implements DocumentService {
 
 
   /**
-   * Creates or retrieves nodes
-   * 
-   * @param session
-   * @param absPath
-   * @return
-   * @throws RepositoryException
+   * Creates or retrieves nodes.
+   *
+   * @param session the session
+   * @param absPath the abs path
+   * @return the node
+   * @throws RepositoryException the repository exception
    */
   public static Node createNodes(Session session, String absPath) throws RepositoryException {
     // check if the node is already created
@@ -210,12 +221,12 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * Creates nodes from a list
-   * 
-   * @param session
-   * @param nodes
-   * @return
-   * @throws RepositoryException
+   * Creates nodes from a list.
+   *
+   * @param session the session
+   * @param nodes the nodes
+   * @return the node
+   * @throws RepositoryException the repository exception
    */
   private static Node createNodes(Session session, String[] nodes) throws RepositoryException {
     Node parentNode = session.getRootNode();
@@ -232,12 +243,12 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * Creates a new child node
-   * 
-   * @param parentNode
-   * @param childNode
-   * @return
-   * @throws RepositoryException
+   * Creates a new child node.
+   *
+   * @param parentNode the parent node
+   * @param childNode the child node
+   * @return true, if successful
+   * @throws RepositoryException the repository exception
    */
   private static boolean addChild(Node parentNode, String childNode) throws RepositoryException {
     boolean nodeAdded = false;
@@ -251,6 +262,11 @@ public class DocumentServiceImpl implements DocumentService {
     return nodeAdded;
   }
 
+  /**
+   * Clean up.
+   *
+   * @param session the session
+   */
   private void cleanUp(Session session) {
     if (session != null) {
       session.logout();
@@ -258,14 +274,14 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * Reads the file and generate a FileResponse, with the content and the type
-   * 
-   * @param session
-   * @param basePath
-   * @param fileName
-   * @return
-   * @throws RepositoryException
-   * @throws IOException
+   * Reads the file and generate a FileResponse, with the content and the type.
+   *
+   * @param session the session
+   * @param basePath the base path
+   * @param fileName the file name
+   * @return the file contents
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   public static FileResponse getFileContents(Session session, String basePath, String fileName)
       throws RepositoryException, IOException {

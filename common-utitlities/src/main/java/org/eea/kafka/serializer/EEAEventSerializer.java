@@ -11,11 +11,24 @@ import org.apache.kafka.common.serialization.Serializer;
  */
 public class EEAEventSerializer implements Serializer {
 
+  /**
+   * Configure.
+   *
+   * @param map the map
+   * @param b the b
+   */
   @Override
   public void configure(Map map, boolean b) {
 
   }
 
+  /**
+   * Serialize.
+   *
+   * @param topic the topic
+   * @param o the o
+   * @return the byte[]
+   */
   @Override
   public byte[] serialize(String topic, Object o) {
     try {
@@ -30,6 +43,9 @@ public class EEAEventSerializer implements Serializer {
     }
   }
 
+  /**
+   * Close.
+   */
   @Override
   public void close() {
 

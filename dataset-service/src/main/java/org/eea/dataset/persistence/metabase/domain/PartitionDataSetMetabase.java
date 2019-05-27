@@ -26,23 +26,38 @@ import lombok.ToString;
 @Entity
 @Table(name = "PARTITION_DATASET")
 public class PartitionDataSetMetabase {
+
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The id data set. */
   @ManyToOne
   @JoinColumn(name = "ID_DATASET")
   private DataSetMetabase idDataSet;
 
+  /** The username. */
   @Column(name = "USER_NAME")
   private String username;
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id, idDataSet, username);
   }
 
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {

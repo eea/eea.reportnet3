@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory implements IFileParserFactory {
 
+  /** The data set schema service. */
   @Autowired
   private DatasetSchemaService dataSetSchemaService;
 
