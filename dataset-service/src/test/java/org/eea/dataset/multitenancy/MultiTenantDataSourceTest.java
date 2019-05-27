@@ -11,25 +11,41 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class MultiTenantDataSourceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class MultiTenantDataSourceTest {
 
+  /** The multi tenant data source. */
   @InjectMocks
-  MultiTenantDataSource multiTenantDataSource;
+  private MultiTenantDataSource multiTenantDataSource;
 
+  /** The data sources. */
   @Mock
-  Map<Object, Object> dataSources;
+  private Map<Object, Object> dataSources;
 
+  /**
+   * Inits the mocks.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Test determine current lookup key.
+   */
   @Test
   public void testDetermineCurrentLookupKey() {
     multiTenantDataSource.determineCurrentLookupKey();
   }
 
+  /**
+   * Test add data source.
+   */
   @Test
   public void testAddDataSource() {
     multiTenantDataSource.addDataSource(new ConnectionDataVO());
