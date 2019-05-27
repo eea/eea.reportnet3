@@ -4,7 +4,7 @@ import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import styles from './ReporterDataSet.module.css';
 import {Dialog} from 'primereact/dialog';
-import {FileUpload} from 'primereact/fileupload';
+import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 
 const ReporterDataSet = () => {
   const [visible, setVisibility] = useState(false);
@@ -16,19 +16,12 @@ const ReporterDataSet = () => {
 
   const onUploadFile = () => {
       console.log('onUploadFile');
-      // setVisibility(true);
   }
 
   const onHide = () => {
       console.log('onClick');
       setVisibility(false);
   }
-
-  const onDrop = (event) => {
-    console.log("onDrop");
-    console.log(event);
-    event.preventDefault();
-  };
 
   //TODO:Change + Error/warning treatment
   let validationError = true;
@@ -84,7 +77,7 @@ const ReporterDataSet = () => {
   ];
 
   return (
-    <div >
+    <div>
         <Title title="Data set: Bathing Water" /> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
@@ -95,9 +88,9 @@ const ReporterDataSet = () => {
           { name: "Table 3" },
           { name: "Table 4" }]} />
           <Dialog header="Upload your Dataset" visible={visible}
-                  className={styles.Dialog} onHide={onHide} >
-              <FileUpload mode="advanced" name="demo[]" url="./upload.php" onUpload={onUploadFile} 
-                          multiple={false} allowTypes="/(\.|\/)(csv|doc)$/" chooseLabel="Select or drag here your dataset (.csv)"
+                  className={styles.Dialog} dismissableMask="false" onHide={onHide} >
+              <CustomFileUpload mode="advanced" name="demo[]" url="." onUpload={onUploadFile} 
+                          multiple={false} chooseLabel="Select or drag here your dataset (.csv)" //allowTypes="/(\.|\/)(csv|doc)$/"
                           fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>
       </div>
