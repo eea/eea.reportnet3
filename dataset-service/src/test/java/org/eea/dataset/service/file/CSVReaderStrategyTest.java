@@ -1,11 +1,13 @@
 package org.eea.dataset.service.file;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -84,7 +86,8 @@ public class CSVReaderStrategyTest {
   @Test
   public void testParseFile() throws InvalidFileException {
     when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    assertNotNull(result);
   }
 
   /**
@@ -96,7 +99,8 @@ public class CSVReaderStrategyTest {
   public void testParseFileTableNull() throws InvalidFileException {
     dataSet.setTableSchemas(null);
     when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    assertNotNull(result);
   }
 
 
