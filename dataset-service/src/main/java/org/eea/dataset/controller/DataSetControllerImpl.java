@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eea.dataset.service.DatasetService;
@@ -83,25 +85,42 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
+  /**
+   * Gets the data tables values.
+   *
+   * @param datasetId the dataset id
+   * @param mongoID the mongo ID
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   * @return the data tables values
+   */
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
-      @RequestParam("MongoID") String mongoID, @RequestParam("pageNum") Integer pageNum,
-      @RequestParam("pageSize") Integer pageSize,
-      @RequestParam(value = "fields", defaultValue = "id", required = false) String fields) {
+      @RequestParam("MongoID") String mongoID,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
 
     if (null == mongoID) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    // Pagination pagination = new Pagination();
 
-    Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(fields).descending());
+    Pageable pageable;
+    if (null == fields) {
+      pageable = PageRequest.of(pageNum, pageSize);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize,
+          asc ? Sort.by(fields).ascending() : Sort.by(fields).descending());
+    }
+
     TableVO result = null;
-    Long resultcount = null;
     try {
       result = datasetService.getTableValuesById(mongoID, pageable);
-      resultcount = datasetService.countTableData(result.getId());
     } catch (EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -109,7 +128,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
-    result.setTotalRecords(resultcount);
+
     return result;
   }
 
@@ -174,10 +193,23 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    // extract the filename
+    String fileName = file.getOriginalFilename();
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    final LoadDataCallable callable = new LoadDataCallable(this.datasetService, datasetId, file);
+    LoadDataCallable callable = null;
+    // extract the file content
     try {
+      InputStream is = file.getInputStream();
+      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
+    } catch (Exception e) {// NOPMD this cannot be avoid since Callable throws Exception in
+      if (e.getClass().isInstance(IOException.class)) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      } // the signature
+      if (e.getMessage().equals(EEAErrorMessage.FILE_FORMAT)
+          || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+      }
     } finally {
       executor.shutdown();
     }

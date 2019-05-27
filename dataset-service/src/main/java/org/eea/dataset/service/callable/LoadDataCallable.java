@@ -1,13 +1,8 @@
 package org.eea.dataset.service.callable;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.Callable;
 import org.eea.dataset.service.DatasetService;
-import org.eea.exception.EEAErrorMessage;
-import org.eea.exception.EEAException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The type Load data callable.
@@ -15,36 +10,28 @@ import org.springframework.web.server.ResponseStatusException;
 public class LoadDataCallable implements Callable<Void> {
 
   private final DatasetService datasetService;
-  private final MultipartFile file;
+  private final String fileName;
   private final Long datasetId;
+  private final InputStream is;
 
   /**
    * Instantiates a new Load data callable.
    *
    * @param datasetService the dataset service
    * @param dataSetId the data set id
-   * @param file the file
+   * @param fileName the file
    */
   public LoadDataCallable(final DatasetService datasetService, final Long dataSetId,
-      final MultipartFile file) {
+      final String fileName, InputStream is) {
     this.datasetService = datasetService;
-    this.file = file;
+    this.fileName = fileName;
     this.datasetId = dataSetId;
+    this.is = is;
   }
 
   @Override
   public Void call() throws Exception {
-    try {
-      datasetService.processFile(datasetId, file);
-    } catch (final EEAException e) {
-      if (e.getMessage().equals(EEAErrorMessage.FILE_FORMAT)
-          || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
-        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-      }
-    } catch (final IOException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-
+    datasetService.processFile(datasetId, fileName, is);
     return null;
   }
 }

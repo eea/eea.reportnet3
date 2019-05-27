@@ -41,7 +41,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The type Dataset service.
@@ -82,7 +81,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
-
 
 
   /** The schemas repository. */
@@ -183,13 +181,13 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void processFile(@DatasetId Long datasetId, MultipartFile file)
+  public void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
       throws EEAException, IOException {
     // obtains the file type from the extension
-    String mimeType = getMimetype(file.getOriginalFilename());
+    String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
-    try (InputStream inputStream = file.getInputStream()) {
+    try {
       PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
       if (partition == null) {
@@ -202,8 +200,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
       // create the right file parser for the file type
       IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO =
-          context.parse(inputStream, datasetMetabase.getDataflowId(), partition.getId());
+      DataSetVO datasetVO = context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -217,6 +214,8 @@ public class DatasetServiceImpl implements DatasetService {
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+    } finally {
+      is.close();
     }
   }
 
@@ -276,7 +275,6 @@ public class DatasetServiceImpl implements DatasetService {
    * We call jpaRepository and delete.
    *
    * @param dataSetId the data set id
-   * @throws EEAException the EEA exception
    */
   @Override
   public void deleteImportData(Long dataSetId) {
@@ -299,25 +297,38 @@ public class DatasetServiceImpl implements DatasetService {
     kafkaSender.sendMessage(event);
   }
 
+  /**
+   * Gets the table values by id.
+   *
+   * @param MongoID the mongo ID
+   * @param pageable the pageable
+   * @return the table values by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
       throws EEAException {
 
     List<RecordValue> record = recordRepository.findByTableValue_IdMongo(MongoID, pageable);
-    if (record == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
+
+
+    Long resultcount = countTableData(record.get(0).getTableValue().getId());
+
     TableVO result = new TableVO();
     result.setRecords(recordMapper.entityListToClass(record));
 
-    // Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
-    // // this result has no records since we need'em in a pagination way
-
+    result.setTotalRecords(resultcount);
     return result;
   }
 
 
+  /**
+   * Count table data.
+   *
+   * @param tableId the table id
+   * @return the long
+   */
   @Override
   public Long countTableData(Long tableId) {
     return recordRepository.countByTableValue_id(tableId);

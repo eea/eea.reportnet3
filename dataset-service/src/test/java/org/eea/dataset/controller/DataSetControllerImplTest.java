@@ -3,6 +3,9 @@ package org.eea.dataset.controller;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -51,36 +54,33 @@ public class DataSetControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
+  public void testLoadDatasetDataThrowException5() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    doThrow(new IOException()).when(datasetService).processFile(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.loadDatasetData(1L, file);
+
+  }
+
+  @Test
   public void testLoadDatasetDataThrowException4() throws Exception {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
-        .processFile(Mockito.any(), Mockito.any());
+        .processFile(Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetData(1L, file);
-  }
 
-  @Test(expected = ResponseStatusException.class)
-  public void testLoadDatasetDataThrowException5() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    doThrow(new EEAException(EEAErrorMessage.FILE_EXTENSION)).when(datasetService)
-        .processFile(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadDatasetData(1L, file);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void testLoadDatasetDataThrowException6() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    doThrow(new IOException()).when(datasetService).processFile(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadDatasetData(1L, file);
   }
 
   @Test
   public void testLoadDatasetDataSuccess() throws Exception {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    doNothing().when(datasetService).processFile(Mockito.any(), Mockito.any());
+    ThreadPoolExecutor threadPoolExecutor =
+        (ThreadPoolExecutor) Mockito.spy(Executors.newFixedThreadPool(1));
+    doThrow(RuntimeException.class).when(threadPoolExecutor)
+        .submit(Mockito.any(LoadDataCallable.class));
     dataSetControllerImpl.loadDatasetData(1L, file);
   }
 
