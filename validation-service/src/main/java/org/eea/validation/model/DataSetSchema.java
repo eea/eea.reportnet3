@@ -11,6 +11,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class DataSetSchema.
+ */
 @Getter
 @Setter
 @ToString

@@ -12,6 +12,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class FieldSchema.
+ */
 @Getter
 @Setter
 @ToString
@@ -35,9 +38,9 @@ public class FieldSchema {
   private List<FieldRule> fieldRuleList;
 
   /**
-   * 
+   * Hash code.
    *
-   * @return
+   * @return the int
    */
   @Override
   public int hashCode() {
@@ -45,10 +48,10 @@ public class FieldSchema {
   }
 
   /**
-   * 
+   * Equals.
    *
-   * @param obj
-   * @return
+   * @param obj the obj
+   * @return true, if successful
    */
   @Override
   public boolean equals(Object obj) {
