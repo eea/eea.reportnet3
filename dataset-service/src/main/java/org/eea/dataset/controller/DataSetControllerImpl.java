@@ -79,6 +79,7 @@ public class DataSetControllerImpl implements DatasetController {
       result = datasetService.getDatasetValuesById(datasetId);
     } catch (final EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        LOG.info(e.getMessage());
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -106,12 +107,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
 
-    if (null == datasetId) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
-    if (null == mongoID) {
+    if (null == datasetId || null == mongoID) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }

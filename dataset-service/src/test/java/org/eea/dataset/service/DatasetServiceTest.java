@@ -27,6 +27,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,6 +89,9 @@ public class DatasetServiceTest {
   private TableValue tableValue;
   private ArrayList<TableValue> tableValues;
   private DatasetValue datasetValue;
+  private DataSetVO dataSetVO;
+  private ArrayList<TableVO> tableVOs;
+  private TableVO tableVO;
 
   @Before
   public void initMocks() {
@@ -101,6 +105,11 @@ public class DatasetServiceTest {
     tableValues = new ArrayList<>();
     tableValues.add(tableValue);
     datasetValue.setTableValues(tableValues);
+    tableVOs = new ArrayList<>();
+    tableVO = new TableVO();
+    tableVOs.add(tableVO);
+    dataSetVO = new DataSetVO();
+    dataSetVO.setTableVO(tableVOs);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -266,6 +275,10 @@ public class DatasetServiceTest {
   @Test
   public void getDatasetValuesByIdTest() throws Exception {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(dataSetNoDataMapper.entityToClass(Mockito.any())).thenReturn(dataSetVO);
+    when(recordRepository.findByTableValue_id(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<RecordVO>());
     datasetService.getDatasetValuesById(1L);
   }
 
