@@ -28,6 +28,8 @@ spring:
     consul:
       discovery:
         instanceId: ${spring.application.name}:${random.value}
+      config:
+        name: dataset
   sleuth:
     sampler:
       probability: 1.0
