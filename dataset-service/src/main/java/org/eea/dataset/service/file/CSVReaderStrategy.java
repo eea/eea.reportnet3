@@ -343,7 +343,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
       for (FieldSchemaVO fieldSchema : fieldsSchemas) {
         if (null != fieldSchema.getName()) {
-          return fieldSchema.getName().equalsIgnoreCase(nameSchema) ? fieldSchema : null;
+          if (fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
+            return fieldSchema;
+          }
         }
       }
     }

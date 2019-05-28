@@ -6,6 +6,7 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabese.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -24,7 +25,8 @@ public interface DatasetService {
    * Process the file: read, parse and save in the db.
    *
    * @param datasetId the dataset id
-   * @param file file to process
+   * @param fileName the file name
+   * @param is the is
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -76,5 +78,21 @@ public interface DatasetService {
    * @return the long
    */
   Long countTableData(Long tableId);
+
+
+
+  /**
+   * Sets the mongo tables.
+   *
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   * @param tableName the table name
+   * @param Headers the headers
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+
+  void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
+      TableCollectionVO tableCollections) throws EEAException, IOException;
 
 }
