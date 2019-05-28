@@ -1,27 +1,47 @@
 package org.eea.kafka.domain;
 
+/**
+ * The Enum EventType.
+ */
 public enum EventType {
-  /*DATAFLOW_CREATED("ReportingTopic"),
-  DATASET_CREATED("ReportingTopic"),
-  DATACOLLECTION_CREATED("ReportingTopic")*/
-  CONNECTION_CREATED_EVENT("Hello-Kafka2","connection_key"),
-  HELLO_KAFKA_EVENT("Hello-Kafka2","hello_kafka_key"),
-  DATASET_PARSED_FILE_EVENT("ReportingTopic","ReportingTopic");
 
+  /** The connection created event. */
+  /*
+   * DATAFLOW_CREATED("ReportingTopic"), DATASET_CREATED("ReportingTopic"),
+   * DATACOLLECTION_CREATED("ReportingTopic")
+   */
+  CONNECTION_CREATED_EVENT("Hello-Kafka2", "connection_key"),
+
+  /** The hello kafka event. */
+  HELLO_KAFKA_EVENT("Hello-Kafka2", "hello_kafka_key"),
+
+  /** The dataset parsed file event. */
+  DATASET_PARSED_FILE_EVENT("ReportingTopic", "ReportingTopic");
+
+  /** The topic. */
   private String topic;
 
 
+  /** The key. */
   private String key;
 
-  EventType(String topic, String key){
-    this.topic=topic;
-    this.key=key;
+  /**
+   * Instantiates a new event type.
+   *
+   * @param topic the topic
+   * @param key the key
+   */
+  EventType(String topic, String key) {
+    this.topic = topic;
+    this.key = key;
   }
 
   public String getTopic() {
     return this.topic;
   }
 
-  public String getKey() {  return key;  }
+  public String getKey() {
+    return key;
+  }
 
 }

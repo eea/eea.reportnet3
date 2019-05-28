@@ -201,6 +201,11 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws RepositoryException
    */
   public static Node createNodes(Session session, String absPath) throws RepositoryException {
+    // check if the value session is null
+
+    if (session == null) {
+      throw new NullPointerException("Session doesn't exist");
+    }
     // check if the node is already created
     if (session.itemExists(absPath)) {
       LOG.info("Nodes already exist!");
