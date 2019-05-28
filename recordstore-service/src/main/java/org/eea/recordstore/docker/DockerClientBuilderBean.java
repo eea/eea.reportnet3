@@ -12,12 +12,10 @@ import com.github.dockerjava.core.DockerClientBuilder;
 @ComponentScan("org.eea.recordstore.docker")
 public class DockerClientBuilderBean {
 
- 
+
   @Bean
-  public DockerClient dockerClient() { 
-    return DockerClientBuilder
-      .getInstance("tcp://localhost:2375")
-      .build();
+  public DockerClient dockerClient() {
+    return DockerClientBuilder.getInstance("tcp://localhost:2375").build();
   }
-  
+
 }
