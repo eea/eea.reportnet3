@@ -48,7 +48,7 @@ public class DatasetSchemaServiceTest {
   public void testCreateDataSchema() {
 
 
-    dataSchemaServiceImpl.createDataSchema("test");
+    dataSchemaServiceImpl.createDataSchema(1L);
   }
 
   @Test
@@ -92,11 +92,11 @@ public class DatasetSchemaServiceTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType(TypeData.STRING);
+    field.setType("String");
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType(TypeData.STRING);
+    field2.setType("String");
 
     assertTrue(field.equals(field2));
 
