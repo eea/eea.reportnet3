@@ -6,7 +6,8 @@ pipeline {
         stage('Preparation') {
             steps {
                 sh 'echo "Starting CI/CD Pipeline"'
-                sh 'ls -la /home/jenkins/.m2'                
+                sh 'ls -la /home/jenkins/.m2'
+                echo ${env.BRANCH_NAME}                
             }
         }
         stage('Compile') {
