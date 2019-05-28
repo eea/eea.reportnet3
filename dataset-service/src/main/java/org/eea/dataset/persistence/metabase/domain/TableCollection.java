@@ -72,12 +72,15 @@ public class TableCollection {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }  
     TableCollection other = (TableCollection) obj;
     return Objects.equals(dataSetId, other.dataSetId)
         && Objects.equals(dataFlowId, other.dataFlowId) && Objects.equals(id, other.id)

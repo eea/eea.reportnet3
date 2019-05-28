@@ -17,14 +17,18 @@ import lombok.Setter;
 @Setter
 public class DockerClientBuilderBean {
 
+  /** The docker server url. */
   @Value("${dockerServerUrl:tcp://localhost:2375}")
   private String dockerServerUrl;
- 
+
+  /**
+   * Docker client.
+   *
+   * @return the docker client
+   */
   @Bean
-  public DockerClient dockerClient() { 
-    return DockerClientBuilder
-      .getInstance(dockerServerUrl)
-      .build();
+  public DockerClient dockerClient() {
+    return DockerClientBuilder.getInstance(dockerServerUrl).build();
   }
-  
+
 }

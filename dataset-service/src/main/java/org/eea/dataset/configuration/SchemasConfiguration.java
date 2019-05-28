@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.eea.dataset.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +16,6 @@ import com.mongodb.MongoClient;
  *
  * @author Mario Severa
  */
-
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy

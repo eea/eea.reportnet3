@@ -61,12 +61,15 @@ public class TableHeadersCollection {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     TableHeadersCollection other = (TableHeadersCollection) obj;
     return Objects.equals(id, other.id) && Objects.equals(headerName, other.headerName)
         && Objects.equals(headerType, other.headerType) && Objects.equals(tableId, other.tableId);

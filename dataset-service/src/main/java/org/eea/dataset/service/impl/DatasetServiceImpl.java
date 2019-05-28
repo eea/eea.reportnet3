@@ -324,24 +324,17 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
-   * @param tableName the table name
-   * @param Headers the headers
+   * @param tableCollectionVO the table collection VO
    * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
   public void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollectionVO) throws EEAException, IOException {
-
+      TableCollectionVO tableCollectionVO) throws EEAException {
     TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
-
     tableCollection.setDataSetId(datasetId);
     tableCollection.setDataFlowId(dataFlowId);
 
     dataSetMetabaseTableCollection.save(tableCollection);
-
-    System.out.println("guardado");
-
   }
 }
