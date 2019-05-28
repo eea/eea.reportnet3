@@ -1,4 +1,4 @@
-package org.eea.interfaces.vo.metabese;
+package org.eea.interfaces.vo.metabase;
 
 import java.io.Serializable;
 import java.util.List;
@@ -44,12 +44,12 @@ public class TableCollectionVO implements Serializable {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     TableCollectionVO other = (TableCollectionVO) obj;
     return Objects.equals(tableHeadersCollections, other.tableHeadersCollections)
         && Objects.equals(tableName, other.tableName);

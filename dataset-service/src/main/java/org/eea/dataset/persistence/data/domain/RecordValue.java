@@ -67,12 +67,12 @@ public class RecordValue {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
+    if (this == obj)
       return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
+    if (obj == null)
       return false;
-    }
+    if (getClass() != obj.getClass())
+      return false;
     RecordValue other = (RecordValue) obj;
     return Objects.equals(datasetPartitionId, other.datasetPartitionId)
         && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)

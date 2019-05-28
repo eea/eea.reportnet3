@@ -42,8 +42,7 @@ public class DataSetSchemaControllerImplTest {
   @InjectMocks
   DataschemaServiceImpl dataSchemaServiceImpl;
 
-
-  // @Test
+  @Test
   public void testCreateDataSchema() {
 
     dataSchemaControllerImpl.createDataSchema(1L);
@@ -74,11 +73,11 @@ public class DataSetSchemaControllerImplTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType("String");
+    field.setType("string");
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType("String");
+    field2.setType("string");
 
     assertTrue("fail", field.equals(field2));
 

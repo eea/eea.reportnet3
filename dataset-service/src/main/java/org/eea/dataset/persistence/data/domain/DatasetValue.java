@@ -36,8 +36,7 @@ public class DatasetValue {
   private List<TableValue> tableValues;
 
   /**
-    return Objects.hash(id, tableValues, idMongo);
-   * Equals.
+   * return Objects.hash(id, tableValues, idMongo); Equals.
    *
    * @param object the object
    * @return true, if successful
