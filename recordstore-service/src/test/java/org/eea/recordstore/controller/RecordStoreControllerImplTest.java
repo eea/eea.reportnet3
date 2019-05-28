@@ -62,7 +62,7 @@ public class RecordStoreControllerImplTest {
   private DockerClient docker;
 
   /** The Constant TEST. */
-  public static final String TEST = "test";
+  private static final String TEST = "test";
 
   /**
    * Inits the mocks.
