@@ -251,11 +251,10 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.setMongoTables(datasetId, dataFlowId, tableCollections);
     } catch (EEAException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage());
+     
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage());
     }
 
 
