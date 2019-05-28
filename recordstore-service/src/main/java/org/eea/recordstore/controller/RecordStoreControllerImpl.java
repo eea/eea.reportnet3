@@ -5,6 +5,8 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.DockerAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   private RecordStoreService recordStoreService;
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
+  /**
    * Reste data set data base.
    */
   @Override
@@ -31,7 +39,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try {
       recordStoreService.resetDatasetDatabase();
     } catch (final DockerAccessException e) {
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage(), e);
     }
   }
 
@@ -47,15 +55,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
                                                                                           // to
                                                                                           // create
                                                                                           // standar
-                                                                                          // exceptions
-                                                                                          // in
-                                                                                          // commont
-                                                                                          // interfaces
     final ConnectionDataVO connectionDataVO = null;
     try {
       recordStoreService.createEmptyDataSet(datasetName);
     } catch (final DockerAccessException e) {
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage(), e);
       // TODO Error control
     }
   }
@@ -74,7 +78,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
     } catch (final DockerAccessException e) {
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
   }
@@ -86,12 +90,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
-  public List<ConnectionDataVO> getConnectionToDataset() {
+  public List<ConnectionDataVO> getDataSetConnections() {
     List<ConnectionDataVO> vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset();
     } catch (final DockerAccessException e) {
-      e.printStackTrace();
+      LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
   }
