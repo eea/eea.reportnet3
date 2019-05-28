@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.eea.interfaces.vo.metabase;
 
 import java.io.Serializable;
@@ -15,7 +12,6 @@ import lombok.ToString;
  *
  * @author Mario Severa
  */
-
 @Getter
 @Setter
 @ToString
@@ -51,10 +47,7 @@ public class TableCollectionVO implements Serializable {
     if (this == obj) {
       return true;
     }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
     TableCollectionVO other = (TableCollectionVO) obj;

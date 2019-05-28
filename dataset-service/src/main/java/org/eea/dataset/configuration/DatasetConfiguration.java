@@ -81,7 +81,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   public Map<Object, Object> targetDataSources() {
     final Map<Object, Object> targetDataSources = new ConcurrentHashMap<>();
 
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getConnectionToDataset();
+    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
     for (final ConnectionDataVO connectionDataVO : connections) {
       targetDataSources.put(connectionDataVO.getSchema(), dataSetsDataSource(connectionDataVO));
     }

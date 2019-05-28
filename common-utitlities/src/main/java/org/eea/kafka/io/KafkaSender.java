@@ -32,7 +32,6 @@ public class KafkaSender {
   @Autowired
   private KafkaTemplate<String, EEAEventVO> kafkaTemplate;
 
-
   /**
    * Send message.
    *
