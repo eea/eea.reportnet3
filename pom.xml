@@ -249,6 +249,19 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.2</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>sonar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
     </plugins>
   </build>
@@ -284,5 +297,21 @@
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
+
+  <profile>
+    <id>sonar</id>
+    <properties>
+      <sonar.projectKey>org.eea:reportnet:test-module</sonar.projectKey>
+      <sonar.projectName>${project.artifactId}:test-module</sonar.projectName>
+    </properties>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
 
 </project>

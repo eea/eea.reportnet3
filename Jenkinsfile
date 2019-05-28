@@ -25,7 +25,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -Dsonar.projectKey=org.eea:reportnet:' + env.BRANCH_NAME.replace('/', '_') + ' -Dsonar.projectName=<artifactId>:' + env.BRANCH_NAME.replace('/', '_')
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar
                 }
                 slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - check quality here https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
             }
