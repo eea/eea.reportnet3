@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -67,7 +68,7 @@ public interface DatasetController {
 
 
   /**
-   * Delete import data
+   * Delete import data.
    *
    * @param datasetId the id of dataset
    */
@@ -75,5 +76,17 @@ public interface DatasetController {
   void deleteImportData(@RequestParam("datasetName") Long datasetId);
 
 
+
+  /**
+   * Load schema mongo.
+   *
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   * @param tableName the table name
+   * @param Headers the headers
+   */
+  @RequestMapping("{id}/loadDatasetData")
+  void loadSchemaMongo(@PathVariable("id") Long datasetId,
+      @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
 
 }

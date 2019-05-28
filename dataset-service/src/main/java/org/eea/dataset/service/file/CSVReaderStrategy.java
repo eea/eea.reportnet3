@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /**
    * Instantiates a new CSV reader strategy.
    *
-   * @param dataSetService the schemas repository
+   * @param datasetSchemaService the dataset schema service
    */
   public CSVReaderStrategy(DatasetSchemaService datasetSchemaService) {
     this.datasetSchemaService = datasetSchemaService;
@@ -70,7 +71,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Parses the file.
    *
    * @param inputStream the input stream
-   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
@@ -78,7 +79,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException {
-    try (Reader buf = new BufferedReader(new InputStreamReader(inputStream))) {
+    try (Reader buf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
       return readLines(buf, dataflowId, partitionId);
     } catch (IOException e) {
       throw new InvalidFileException(e);
@@ -89,7 +90,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Read lines.
    *
    * @param buf the reader
-   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
@@ -186,24 +187,25 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private TableVO createTableVO(TableVO tableVO, List<TableVO> tables, List<String> values,
       Long partitionId) throws InvalidFileException {
+    TableVO tableVOAux = tableVO;
     // Create object Table and setter the attributes
     if (headers.isEmpty()) {
       throw new InvalidFileException();
     }
     if (!values.get(0).equals(tableVO.getName())) {
-      tableVO = new TableVO();
-      tableVO.setHeaders(headers);
-      tableVO.setName(values.get(0));
+      tableVOAux = new TableVO();
+      tableVOAux.setHeaders(headers);
+      tableVOAux.setName(values.get(0));
       if (null != dataSetSchema) {
-        tableVO.setIdMongo(findIdTable(tableVO.getName()));
+        tableVOAux.setIdMongo(findIdTable(tableVO.getName()));
       }
-      tableVO.setRecords(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
-      tables.add(tableVO);
+      tableVOAux.setRecords(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
+      tables.add(tableVOAux);
 
     } else {
-      tableVO.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
+      tableVOAux.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
     }
-    return tableVO;
+    return tableVOAux;
   }
 
   /**
@@ -231,7 +233,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Creates the fields VO.
    *
    * @param values the values
-   * @param partitionId the partition id
    * @param idTablaSchema the id tabla schema
    * @return the list
    */
@@ -257,12 +258,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
     return fields;
   }
-
+  
   /**
    * Gets the data set schema.
    *
+   * @param dataflowId the dataflow id
    * @return the data set schema
-   * @throws InvalidFileException
    */
   private void getDataSetSchema(Long dataflowId) {
     // get data set schema of mongo DB
@@ -342,7 +343,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
       for (FieldSchemaVO fieldSchema : fieldsSchemas) {
         if (null != fieldSchema.getName()) {
-          return fieldSchema.getName().equalsIgnoreCase(nameSchema) ? fieldSchema : null;
+          if (fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
+            return fieldSchema;
+          }
         }
       }
     }

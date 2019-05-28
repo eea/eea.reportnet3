@@ -3,6 +3,8 @@ package org.eea.kafka.io;
 import java.util.List;
 import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -18,6 +20,13 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
  */
 @Component
 public class KafkaSender {
+  
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(KafkaSender.class);
+  
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /** The kafka template. */
   @Autowired
@@ -50,9 +59,11 @@ public class KafkaSender {
        */
       @Override
       public void onSuccess(SendResult<String, EEAEventVO> result) {
-        System.out.println(
-            "Sent message=[" + event + "] with offset=[" + result.getRecordMetadata().offset()
-                + "] and partition [" + result.getRecordMetadata().partition() + "]");
+        if(result!=null && result.getRecordMetadata()!=null) {
+          LOG.info(
+              "Sent message=[" + event + "] with offset=[" + result.getRecordMetadata().offset()
+                  + "] and partition [" + result.getRecordMetadata().partition() + "]");
+        }
       }
 
       /**
@@ -62,7 +73,7 @@ public class KafkaSender {
        */
       @Override
       public void onFailure(Throwable ex) {
-        System.out.println("Unable to send message=[" + event + "] due to : " + ex.getMessage());
+        LOG_ERROR.error("Unable to send message=[" + event + "] due to : " + ex.getMessage());
       }
     });
   }

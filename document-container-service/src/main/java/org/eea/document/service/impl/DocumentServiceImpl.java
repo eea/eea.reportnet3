@@ -25,6 +25,7 @@ import org.apache.jackrabbit.oak.plugins.document.mongo.MongoDocumentNodeStoreBu
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
+import org.eea.exception.EEAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -47,11 +48,11 @@ public class DocumentServiceImpl implements DocumentService {
 
   /**
    * test the connection.
-   *
-   * @throws Exception the exception
+   * 
+   * @throws RepositoryException
    */
   @Override
-  public void testLogging() throws Exception {
+  public void testLogging() throws EEAException, RepositoryException {
     // Obtain the default repository location
     Repository repository = JcrUtils.getRepository();
     // login with guest credentials
@@ -75,14 +76,15 @@ public class DocumentServiceImpl implements DocumentService {
    */
   @Override
   @Transactional
-  public void uploadDocument() throws Exception {
+  public void uploadDocument() throws EEAException {
     Session session = null;
     try {
       LOG.info("Adding the file...");
       // Initialize the session
       session = getSession();
       // Add a file node with the document (in this demo, hardcoded)
-      addFileNode(session, "/test", new File("src/main/resources/file.txt"), ADMIN);
+      File fichero = new File(getClass().getClassLoader().getResource("file.txt").getFile());
+      addFileNode(session, "/test", fichero, ADMIN);
 
       LOG.info("Files added...");
     } catch (RepositoryException | IOException e) {
@@ -100,7 +102,7 @@ public class DocumentServiceImpl implements DocumentService {
    */
   @Override
   @Transactional
-  public void getDocument() throws Exception {
+  public void getDocument() throws EEAException {
     Session session = null;
     try (FileOutputStream fos = new FileOutputStream("C:/OutFiles/" + "file.txt")) {
       session = getSession();
@@ -121,7 +123,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * creates a repository in that location.
+	 * creates a repository in that location
    *
    * @param host the host
    * @param port the port
@@ -209,12 +211,17 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws RepositoryException the repository exception
    */
   public static Node createNodes(Session session, String absPath) throws RepositoryException {
+    // check if the value session is null
+
+    if (session == null) {
+      throw new NullPointerException("Session doesn't exist");
+    }
     // check if the node is already created
     if (session.itemExists(absPath)) {
       LOG.info("Nodes already exist!");
       return session.getNode(absPath);
     }
-    String[] nodeNames = (null != absPath) ? absPath.split("/") : null;
+    String[] nodeNames = (null != absPath) ? absPath.split("/") : new String[1];
     Node node = createNodes(session, nodeNames);
     session.save();
     return node;
@@ -223,10 +230,10 @@ public class DocumentServiceImpl implements DocumentService {
   /**
    * Creates nodes from a list.
    *
-   * @param session the session
-   * @param nodes the nodes
-   * @return the node
-   * @throws RepositoryException the repository exception
+   * @param session
+   * @param nodes
+   * @return
+   * @throws RepositoryException
    */
   private static Node createNodes(Session session, String[] nodes) throws RepositoryException {
     Node parentNode = session.getRootNode();
@@ -274,7 +281,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * Reads the file and generate a FileResponse, with the content and the type.
+	 * Reads the file and generate a FileResponse, with the content and the type
    *
    * @param session the session
    * @param basePath the base path

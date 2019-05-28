@@ -12,9 +12,9 @@ public interface DatasetSchemaService {
    *
    * @param datasetName the dataset name
    */
-  void createDataSchema(String datasetName);
-  
-  
+  void createDataSchema(Long datasetId);
+
+
   /**
    * Gets dataschema by id.
    *
@@ -22,7 +22,7 @@ public interface DatasetSchemaService {
    * @return the data schema by id
    */
   DataSetSchemaVO getDataSchemaById(String dataschemaId);
-  
+
   /**
    * Gets dataschema by id.
    *
@@ -30,6 +30,5 @@ public interface DatasetSchemaService {
    * @return the data schema by id flow
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
-  
-  
+
 }

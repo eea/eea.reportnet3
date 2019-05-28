@@ -48,7 +48,6 @@ public enum NodeType {
    * @param values the values
    * @return the node type
    */
-  // FIXME make it a generic utility method
   private static NodeType valueOf(String nodeType, NodeType[] values) {
     NodeType type = null;
     for (int i = 0; i < values.length && type == null; i++) {
