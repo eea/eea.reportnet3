@@ -297,21 +297,21 @@
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
-  <profile>
-    <id>sonar</id>
-    <properties>
-      <sonar.projectKey>org.eea:reportnet:test-module</sonar.projectKey>
-      <sonar.projectName>${project.artifactId}:test-module</sonar.projectName>
-    </properties>
-    <build>
-      <plugins>
-        <plugin>
-          <groupId>org.sonarsource.scanner.maven</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-        </plugin>
-      </plugins>
-    </build>
-  </profile>
-
+  <profiles>
+    <profile>
+      <id>sonar</id>
+      <properties>
+        <sonar.projectKey>org.eea:reportnet:test-module</sonar.projectKey>
+        <sonar.projectName>${project.artifactId}:test-module</sonar.projectName>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
