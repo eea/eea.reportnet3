@@ -2,7 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -39,6 +38,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void createDataSchema(String datasetName) {
 
+    // This is a dummy to create a dataschema
     TypeData headerType = TypeData.BOOLEAN;
 
     DataSetSchema dataSetSchema = new DataSetSchema();
@@ -46,12 +46,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setNameDataSetSchema("dataSet_1");
     dataSetSchema.setIdDataFlow(1L);
 
-
-    long numeroRegistros = schemasRepository.count();
     dataSetSchema.setIdDataSetSchema(new ObjectId());
     List<TableSchema> tableSchemas = new ArrayList<>();
-    Long dssID = 0L;
-    Long fsID = 0L;
+
 
     for (int dss = 1; dss <= 3; dss++) {
       TableSchema tableSchema = new TableSchema();
@@ -64,7 +61,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       for (int fs = 1; fs <= 20; fs++) {
         FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema = new FieldSchema();
         fieldSchema.setIdFieldSchema(new ObjectId());
         fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
         if (dss / 2 == 1) {
@@ -99,11 +95,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
 
-    Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
+    // The search using the direct method of MongoDB returns an Optional object
+    DataSetSchema dataschema = schemasRepository.findById(new ObjectId(dataschemaId)).orElse(null);
 
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
-    if (dataschema.isPresent()) {
-      DataSetSchema datasetSchema = dataschema.get();
+
+    if (dataschema != null) {
+      DataSetSchema datasetSchema = dataschema;
 
       dataSchemaVO = dataSchemaMapper.entityToClass(datasetSchema);
     }
@@ -121,9 +119,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
 
-    DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-
-    return dataSchemaMapper.entityToClass(dataschema);
+    DataSetSchemaVO dataSchemaVo = new DataSetSchemaVO();
+    DataSetSchema dataSchema = schemasRepository.findSchemaByIdFlow(idFlow);
+    if (dataSchema != null) {
+      // map from entity to vo
+      dataSchemaVo = dataSchemaMapper.entityToClass(dataSchema);
+    }
+    return dataSchemaVo;
 
   }
 

@@ -41,8 +41,8 @@ public class ProxyDatasetServiceImplTest {
    */
   @Test
   public void testInvoke() throws Throwable {
-    Mockito.when(datasetService.getDatasetById(1L)).thenReturn(new DataSetVO());
-    Method method = DatasetService.class.getMethod("getDatasetById", Long.class);
+    Mockito.when(datasetService.getDatasetValuesById(1L)).thenReturn(new DataSetVO());
+    Method method = DatasetService.class.getMethod("getDatasetValuesById", Long.class);
     ProxyDatasetServiceImpl proxy = new ProxyDatasetServiceImpl(datasetService);
     Object result = proxy.invoke(datasetService, method, new Long[] {1l});
     assertNotNull(result);

@@ -20,8 +20,6 @@ public class RecordSchemaVO {
   /** The id record schema. */
   private String idRecordSchema;
 
-  /** The name schema. */
-  // private String nameSchema;
 
   /** The field schema. */
   private List<FieldSchemaVO> fieldSchema;

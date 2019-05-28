@@ -1,5 +1,6 @@
 package org.eea.dataset.service.file;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
@@ -48,7 +49,8 @@ public class FileParseContextImplTest {
   public void testParse() throws InvalidFileException {
     Mockito.when(readerStrategy.parseFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetVO());
-    fileParseContext.parse(Mockito.any(), Mockito.any(), Mockito.any());
+    DataSetVO result = fileParseContext.parse(Mockito.any(), Mockito.any(), Mockito.any());
+    assertNotNull(result);
   }
 
 }

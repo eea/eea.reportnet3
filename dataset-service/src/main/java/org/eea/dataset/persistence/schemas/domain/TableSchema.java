@@ -19,7 +19,7 @@ public class TableSchema {
   /** The id table schema. */
   @Id
   @Field(value = "_id")
-  private ObjectId IdTableSchema;
+  private ObjectId idTableSchema;
 
   /** The name table schema. */
   @Field(value = "nameTableSchema")
@@ -27,7 +27,7 @@ public class TableSchema {
 
   /** The Id data set. */
   @Field(value = "idDataSet")
-  private ObjectId IdDataSet;
+  private ObjectId idDataSet;
 
 
   /** The record schema. */
@@ -41,7 +41,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(IdDataSet, IdTableSchema, nameTableSchema, recordSchema);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema);
   }
 
   /**
@@ -59,8 +59,8 @@ public class TableSchema {
       return false;
     }
     TableSchema other = (TableSchema) obj;
-    return Objects.equals(IdDataSet, other.IdDataSet)
-        && Objects.equals(IdTableSchema, other.IdTableSchema)
+    return Objects.equals(idDataSet, other.idDataSet)
+        && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema);
   }

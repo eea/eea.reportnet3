@@ -1,5 +1,6 @@
 package org.eea.dataset.multitenancy;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Map;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -40,7 +41,8 @@ public class MultiTenantDataSourceTest {
    */
   @Test
   public void testDetermineCurrentLookupKey() {
-    multiTenantDataSource.determineCurrentLookupKey();
+    Object result = multiTenantDataSource.determineCurrentLookupKey();
+    assertNotNull(result);
   }
 
   /**
