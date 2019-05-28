@@ -6,7 +6,7 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.metabese.TableCollectionVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
 
 /**

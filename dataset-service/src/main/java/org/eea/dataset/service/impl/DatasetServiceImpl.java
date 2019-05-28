@@ -32,7 +32,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.metabese.TableCollectionVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;

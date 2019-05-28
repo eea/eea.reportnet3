@@ -1,7 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.metabese.TableCollectionVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
