@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * The interface Contributor repository.
  */
-public interface ContributorRepository extends CrudRepository<Contributor, Integer> {
+public interface ContributorRepository extends CrudRepository<Contributor, Long> {
 
 }

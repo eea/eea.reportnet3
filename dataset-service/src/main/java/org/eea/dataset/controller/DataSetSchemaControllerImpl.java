@@ -30,9 +30,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param datasetName the dataset name
    */
   @Override
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  public void createDataSchema(String datasetName) {
-    dataschemaService.createDataSchema(datasetName);
+  @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
+  public void createDataSchema(@PathVariable("id") final Long datasetId) {
+    dataschemaService.createDataSchema(datasetId);
   }
 
 
@@ -76,9 +76,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
-    DataSetSchemaVO dataschema = new DataSetSchemaVO();
-
-    return dataschema;
+  
+    return  new DataSetSchemaVO();
   }
 
   /**
@@ -88,10 +87,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
-    DataSetSchemaVO dataschema = new DataSetSchemaVO();
-
-    return dataschema;
+   
+    return  new DataSetSchemaVO();
   }
+
 
 
 }

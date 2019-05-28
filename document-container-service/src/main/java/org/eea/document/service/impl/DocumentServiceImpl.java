@@ -83,7 +83,8 @@ public class DocumentServiceImpl implements DocumentService {
       // Initialize the session
       session = getSession();
       // Add a file node with the document (in this demo, hardcoded)
-      addFileNode(session, "/test", new File("src/main/resources/file.txt"), ADMIN);
+      File fichero = new File(getClass().getClassLoader().getResource("file.txt").getFile());
+      addFileNode(session, "/test", fichero, ADMIN);
 
       LOG.info("Files added...");
     } catch (RepositoryException | IOException e) {
@@ -220,7 +221,7 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Nodes already exist!");
       return session.getNode(absPath);
     }
-    String[] nodeNames = (null != absPath) ? absPath.split("/") : null;
+    String[] nodeNames = (null != absPath) ? absPath.split("/") : new String[1];
     Node node = createNodes(session, nodeNames);
     session.save();
     return node;

@@ -20,6 +20,13 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
  */
 @Component
 public class KafkaSender {
+  
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(KafkaSender.class);
+  
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /** The kafka template. */
   @Autowired
@@ -55,8 +62,11 @@ public class KafkaSender {
        */
       @Override
       public void onSuccess(SendResult<String, EEAEventVO> result) {
-        LOG.info("Sent message=[" + event + "] with offset=[" + result.getRecordMetadata().offset()
-            + "] and partition [" + result.getRecordMetadata().partition() + "]");
+        if(result!=null && result.getRecordMetadata()!=null) {
+          LOG.info(
+              "Sent message=[" + event + "] with offset=[" + result.getRecordMetadata().offset()
+                  + "] and partition [" + result.getRecordMetadata().partition() + "]");
+        }
       }
 
       /**
@@ -66,7 +76,7 @@ public class KafkaSender {
        */
       @Override
       public void onFailure(Throwable ex) {
-        LOG.error("Unable to send message=[" + event + "] due to : " + ex.getMessage());
+        LOG_ERROR.error("Unable to send message=[" + event + "] due to : " + ex.getMessage());
       }
     });
   }

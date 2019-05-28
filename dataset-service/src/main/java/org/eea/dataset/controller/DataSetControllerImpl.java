@@ -13,6 +13,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,4 +243,20 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  @Override
+  @PostMapping("{id}/loadSchemaMongo")
+  public void loadSchemaMongo(@PathVariable("id") final Long datasetId, Long dataFlowId,
+      TableCollectionVO tableCollections) {
+
+    try {
+      datasetService.setMongoTables(datasetId, dataFlowId, tableCollections);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+     
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+
+  }
 }
