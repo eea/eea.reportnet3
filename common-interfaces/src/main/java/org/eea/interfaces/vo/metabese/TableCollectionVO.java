@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.eea.interfaces.vo.metabese;
 
 import java.io.Serializable;
@@ -15,7 +12,6 @@ import lombok.ToString;
  *
  * @author Mario Severa
  */
-
 @Getter
 @Setter
 @ToString
