@@ -32,6 +32,9 @@ public class KafkaSender {
   @Autowired
   private KafkaTemplate<String, EEAEventVO> kafkaTemplate;
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(KafkaSender.class);
+
   /**
    * Send message.
    *
