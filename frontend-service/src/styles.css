@@ -1059,19 +1059,48 @@ body .p-fileupload .p-fileupload-buttonbar .p-button.p-fileupload-choose.p-focus
   box-shadow: 0 0 0 0.2em #004494;
 }
 body .p-fileupload .p-fileupload-content {
-  background-color: #ffffff;
-  padding: 0.571em 1em;
+  background-color: #f9f9f9;
+  padding: 0.9em 1em;
   border: 1px solid #c8c8c8;
   color: #404040;
+  min-height: 160px;
+  display: table;
+  width: 100%;
   -moz-border-radius-bottomleft: 3px;
   -webkit-border-bottom-left-radius: 3px;
   border-bottom-left-radius: 3px;
   -moz-border-radius-bottomright: 3px;
   -webkit-border-bottom-right-radius: 3px;
   border-bottom-right-radius: 3px;
+  outline: 2px dashed #aaa;
+  outline-offset: -15px;
+  /* import-icon */
+  /* background-image: url('./assets/images/import-icon.jpg');
+  background-position: center;
+  background-repeat: no-repeat; */
+  /* content: "\e956"; */
 }
+body .p-fileupload .p-fileupload-highlight {
+  background-color: rgba(150, 190, 255, 0.12);
+  /* border-radius: 5px; */
+  outline-offset: -15px;
+  outline: 2px dashed #aaa;
+  /* -moz-outline-radius: 5px; */
+
+  /* box-shadow: 0pt 0pt 0pt 1pt #004494; */
+}
+body .p-fileupload-files {
+  display: table-row;
+  width: 100%;
+  font-size: 1.5em;
+  text-align: center;
+}
+/* body .p-fileupload-row {
+  display: table-row;  
+} */
 body .p-fileupload .p-progressbar {
   top: 0;
+  background-color: #f4f4f4;
 }
 body .p-fileupload-choose:not(.p-disabled):hover {
   background-color: #116fbf;
@@ -1382,10 +1411,14 @@ body .p-splitbutton.p-buttonset .p-menu {
 body .p-splitbutton.p-buttonset .p-splitbutton-menubutton .p-button-icon-left:before {
   content: "";
 }
+/*TODO: Here?*/
+body .warning {
+   color: #DA2131;
+}
 body .p-button.p-button-secondary, body .p-buttonset.p-button-secondary > .p-button {
   color: #404040;
-  background-color: #f4f4f4;
-  border: 1px solid #f4f4f4;
+  background-color: #BFD0E4;
+  border: 1px solid #BFD0E4;
 }
 body .p-button.p-button-secondary:enabled:hover, body .p-buttonset.p-button-secondary > .p-button:enabled:hover {
   background-color: #c8c8c8;
@@ -1701,7 +1734,7 @@ body .p-tabview.p-tabview-top .p-tabview-nav, body .p-tabview.p-tabview-bottom .
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li a, body .p-tabview.p-tabview-bottom .p-tabview-nav li a, body .p-tabview.p-tabview-left .p-tabview-nav li a, body .p-tabview.p-tabview-right .p-tabview-nav li a {
   border: 1px solid #c8c8c8;
-  background-color: #f4f4f4;
+  background-color: #BFD0E4;
   float: none;
   display: inline-block;
   color: #404040;
@@ -1821,7 +1854,7 @@ body .p-tabview .p-tabview-panels .p-tabview-panel {
   padding: 0;
 }
 body .p-toolbar {
-  background-color: #f4f4f4;
+  background-color: #BFD0E4;
   border: 1px solid #c8c8c8;
   padding: 0.571em 1em;
   -moz-border-radius: 3px;

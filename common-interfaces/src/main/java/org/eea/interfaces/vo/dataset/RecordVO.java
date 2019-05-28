@@ -45,12 +45,12 @@ public class RecordVO implements Serializable {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     RecordVO other = (RecordVO) obj;
     return Objects.equals(datasetPartitionId, other.datasetPartitionId)
         && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)

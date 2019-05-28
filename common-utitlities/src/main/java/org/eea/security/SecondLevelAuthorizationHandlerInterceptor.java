@@ -7,14 +7,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+/**
+ * The Class SecondLevelAuthorizationHandlerInterceptor.
+ */
 public class SecondLevelAuthorizationHandlerInterceptor extends HandlerInterceptorAdapter {
 
-  private static final Logger LOG = LoggerFactory
-      .getLogger(SecondLevelAuthorizationHandlerInterceptor.class);
+  /** The Constant LOG. */
+  private static final Logger LOG =
+      LoggerFactory.getLogger(SecondLevelAuthorizationHandlerInterceptor.class);
 
+  /**
+   * Pre handle.
+   *
+   * @param request the request
+   * @param response the response
+   * @param handler the handler
+   * @return true, if successful
+   * @throws Exception the exception
+   */
   @Override
-  public boolean preHandle(final HttpServletRequest request,
-      final HttpServletResponse response, final Object handler) throws Exception {
+  public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response,
+      final Object handler) throws Exception {
     final Principal principal = request.getUserPrincipal();
     if (null != principal) {
       LOG.info("Retrieved user {}", principal.getName());

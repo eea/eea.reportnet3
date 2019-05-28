@@ -38,14 +38,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     basePackages = "org.eea.dataset.persistence.data.repository")
 public class DatasetConfiguration implements WebMvcConfigurer {
 
+  /** The dll. */
   @Value("${spring.jpa.hibernate.ddl-auto}")
   private String dll;
+
+  /** The dialect. */
   @Value("${spring.jpa.properties.hibernate.dialect}")
   private String dialect;
+
+  /** The create clob propertie. */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
 
+  /** The record store controller zull. */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
@@ -65,6 +71,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return ds;
   }
 
+  /**
+   * Target data sources.
+   *
+   * @return the map
+   */
   @Bean
   @Qualifier("targetDataSources")
   public Map<Object, Object> targetDataSources() {
@@ -77,6 +88,12 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return targetDataSources;
   }
 
+  /**
+   * Data sets data source.
+   *
+   * @param connectionDataVO the connection data VO
+   * @return the data source
+   */
   @Primary
   private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
     final DriverManagerDataSource ds = new DriverManagerDataSource();
@@ -89,6 +106,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   }
 
 
+  /**
+   * Data sets entity manager factory.
+   *
+   * @return the local container entity manager factory bean
+   */
   @Bean
   @Autowired
   @Primary
@@ -104,6 +126,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return dataSetsEM;
   }
 
+  /**
+   * Additional properties.
+   *
+   * @return the properties
+   */
   Properties additionalProperties() {
     Properties properties = new Properties();
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
@@ -113,6 +140,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return properties;
   }
 
+  /**
+   * Data sets transaction manager.
+   *
+   * @return the platform transaction manager
+   */
   @Bean
   @Autowired
   @Primary

@@ -9,17 +9,29 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class XMLReaderStrategyTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class XMLReaderStrategyTest {
 
+  /** The xml reader strategy. */
   @InjectMocks
-  XMLReaderStrategy xmlReaderStrategy;
+  private XMLReaderStrategy xmlReaderStrategy;
 
+  /**
+   * Inits the mocks.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Test parse file.
+   */
   @Test
   public void testParseFile() {
     assertNull(xmlReaderStrategy.parseFile(null, null, null));

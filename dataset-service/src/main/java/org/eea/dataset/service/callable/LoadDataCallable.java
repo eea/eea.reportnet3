@@ -9,9 +9,16 @@ import org.eea.dataset.service.DatasetService;
  */
 public class LoadDataCallable implements Callable<Void> {
 
+  /** The dataset service. */
   private final DatasetService datasetService;
+
+  /** The file name. */
   private final String fileName;
+
+  /** The dataset id. */
   private final Long datasetId;
+
+  /** The is. */
   private final InputStream is;
 
   /**
@@ -20,6 +27,7 @@ public class LoadDataCallable implements Callable<Void> {
    * @param datasetService the dataset service
    * @param dataSetId the data set id
    * @param fileName the file
+   * @param is the is
    */
   public LoadDataCallable(final DatasetService datasetService, final Long dataSetId,
       final String fileName, InputStream is) {
@@ -29,6 +37,12 @@ public class LoadDataCallable implements Callable<Void> {
     this.is = is;
   }
 
+  /**
+   * Call.
+   *
+   * @return the void
+   * @throws Exception the exception
+   */
   @Override
   public Void call() throws Exception {
     datasetService.processFile(datasetId, fileName, is);

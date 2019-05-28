@@ -23,7 +23,7 @@ public interface DatasetSchemaController {
 
   /**
    * Creates the data schema.
-   *
+   * @deprecated
    * @param datasetName the dataset name
    */
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)

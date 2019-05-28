@@ -20,25 +20,61 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> {
 
+  /**
+   * Map.
+   *
+   * @param value the value
+   * @return the string
+   */
   String map(ObjectId value) {
     return value.toString();
   }
 
+  /**
+   * Entity to class.
+   *
+   * @param entity the entity
+   * @return the data set schema VO
+   */
   public abstract DataSetSchemaVO entityToClass(DataSetSchema entity);
 
+  /**
+   * Class to entity.
+   *
+   * @param model the model
+   * @return the dataset value
+   */
   @Mapping(source = "tableVO", target = "tableValues")
   @Override
   public abstract DatasetValue classToEntity(DataSetVO model);
 
 
+  /**
+   * Entity to class.
+   *
+   * @param entity the entity
+   * @return the data set VO
+   */
   @Mapping(source = "tableValues", target = "tableVO")
   @Override
   public abstract DataSetVO entityToClass(DatasetValue entity);
 
+  /**
+   * Class to entity.
+   *
+   * @param model the model
+   * @return the table value
+   */
   public abstract TableValue classToEntity(TableVO model);
 
 
 
+  /**
+   * Fill ids.
+   *
+   * @param dataSetVO the data set VO
+   * @param dataset the dataset
+   */
   @AfterMapping
   public void fillIds(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
     List<TableValue> tableValues = dataset.getTableValues();

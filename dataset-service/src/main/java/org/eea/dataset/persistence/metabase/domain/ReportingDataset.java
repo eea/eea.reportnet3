@@ -18,6 +18,8 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ReportingDataset extends DataSetMetabase {
+
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
@@ -25,6 +27,12 @@ public class ReportingDataset extends DataSetMetabase {
 
 
 
+  /**
+   * Equals.
+   *
+   * @param o the o
+   * @return true, if successful
+   */
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -38,6 +46,11 @@ public class ReportingDataset extends DataSetMetabase {
 
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
     return Objects.hash(id);

@@ -6,10 +6,11 @@ import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 
 
+/**
+ * The Class RecordMapper.
+ */
 @Mapper(componentModel = "spring")
-public abstract class RecordMapper implements IMapper<RecordValue, RecordVO> {
-
-
+public interface RecordMapper extends IMapper<RecordValue, RecordVO> {
 
 }
 

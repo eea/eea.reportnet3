@@ -29,92 +29,109 @@ import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
+/**
+ * The Class KafkaConfiguration.
+ */
 @Configuration
 @EnableKafka
 @ComponentScan("org.eea.kafka")
 public class KafkaConfiguration {
 
+  /** The bootstrap address. */
   @Value(value = "${kafka.bootstrapAddress:localhost:9092}")
   private String bootstrapAddress;
 
+  /** The group id. */
   @Value(value = "${spring.application.name:test-consumer-group}")
   private String groupId;
 
+  /** The admin. */
   @Autowired
   private KafkaAdmin admin;
 
+  /**
+   * Kafka admin client.
+   *
+   * @return the admin client
+   */
   @Bean
   public AdminClient kafkaAdminClient() {
     return AdminClient.create(admin.getConfig());
   }
 
+  /**
+   * Producer factory.
+   *
+   * @return the producer factory
+   */
   @Bean
   public ProducerFactory<String, EEAEventVO> producerFactory() {
     final Map<String, Object> configProps = new HashMap<>();
-    configProps.put(
-        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-        bootstrapAddress);
-    configProps.put(
-        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-        StringSerializer.class);
-    configProps.put(
-        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-        EEAEventSerializer.class);
+    configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+    configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EEAEventSerializer.class);
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
+  /**
+   * Kafka template.
+   *
+   * @return the kafka template
+   */
   @Bean
   public KafkaTemplate<String, EEAEventVO> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
   }
 
+  /**
+   * Consumer factory.
+   *
+   * @return the consumer factory
+   */
   @Bean
   public ConsumerFactory<String, EEAEventVO> consumerFactory() {
     final Map<String, Object> props = new HashMap<>();
-    props.put(
-        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-        bootstrapAddress);
-    props.put(
-        ConsumerConfig.GROUP_ID_CONFIG,
-        groupId);
-    props.put(
-        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-        StringDeserializer.class);
-    props.put(
-        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-        EEAEventDeserializer.class);
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
     return new DefaultKafkaConsumerFactory<>(props);
   }
 
+  /**
+   * Kafka listener container factory.
+   *
+   * @return the concurrent kafka listener container factory
+   */
   @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, EEAEventVO>
-  kafkaListenerContainerFactory() {
+  public ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> kafkaListenerContainerFactory() {
 
-    final ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> factory
-        = new ConcurrentKafkaListenerContainerFactory<>();
+    final ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> factory =
+        new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(consumerFactory());
     return factory;
   }
 
+  /**
+   * Kafka health indicator.
+   *
+   * @return the health indicator
+   */
   @Bean
   public HealthIndicator kafkaHealthIndicator() {
-    final DescribeClusterOptions describeClusterOptions = new DescribeClusterOptions()
-        .timeoutMs(1000);
+    final DescribeClusterOptions describeClusterOptions =
+        new DescribeClusterOptions().timeoutMs(1000);
     final AdminClient adminClient = kafkaAdminClient();
     return () -> {
-      final DescribeClusterResult describeCluster = adminClient
-          .describeCluster(describeClusterOptions);
+      final DescribeClusterResult describeCluster =
+          adminClient.describeCluster(describeClusterOptions);
       try {
         final String clusterId = describeCluster.clusterId().get();
         final int nodeCount = describeCluster.nodes().get().size();
-        return Health.up()
-            .withDetail("clusterId", clusterId)
-            .withDetail("nodeCount", nodeCount)
+        return Health.up().withDetail("clusterId", clusterId).withDetail("nodeCount", nodeCount)
             .build();
       } catch (final InterruptedException | ExecutionException e) {
-        return Health.down()
-            .withException(e)
-            .build();
+        return Health.down().withException(e).build();
       }
     };
 

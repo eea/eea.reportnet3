@@ -11,6 +11,7 @@ import org.eea.dataset.service.DatasetService;
  */
 public class ProxyDatasetServiceImpl implements InvocationHandler {
 
+  /** The dataset service. */
   private DatasetService datasetService;
 
   /**
@@ -22,6 +23,15 @@ public class ProxyDatasetServiceImpl implements InvocationHandler {
     this.datasetService = datasetService;
   }
 
+  /**
+   * Invoke.
+   *
+   * @param proxy the proxy
+   * @param method the method
+   * @param args the args
+   * @return the object
+   * @throws Throwable the throwable
+   */
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     Annotation[][] annotations = method.getParameterAnnotations();

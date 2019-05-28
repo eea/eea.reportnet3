@@ -32,7 +32,7 @@ public class RecordSchema {
 
   /** The field TableSchema. */
   @Field(value = "idTableSchema")
-  private ObjectId IdTableSchema;
+  private ObjectId idTableSchema;
 
   /** The field schema. */
   @Field(value = "fieldSchemas")
@@ -45,7 +45,7 @@ public class RecordSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(IdTableSchema, fieldSchema, idRecordSchema, nameSchema);
+    return Objects.hash(idTableSchema, fieldSchema, idRecordSchema, nameSchema);
   }
 
   /**
@@ -56,14 +56,14 @@ public class RecordSchema {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     RecordSchema other = (RecordSchema) obj;
-    return Objects.equals(IdTableSchema, other.IdTableSchema)
+    return Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(fieldSchema, other.fieldSchema)
         && Objects.equals(idRecordSchema, other.idRecordSchema)
         && Objects.equals(nameSchema, other.nameSchema);

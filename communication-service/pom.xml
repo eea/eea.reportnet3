@@ -13,5 +13,12 @@
   <artifactId>communication-service</artifactId>
   <version>3.0-SNAPSHOT</version>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
 
 </project>

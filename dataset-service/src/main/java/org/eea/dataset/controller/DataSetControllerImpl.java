@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.DeleteDataCallable;
 import org.eea.dataset.service.callable.LoadDataCallable;
@@ -26,9 +27,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,6 +80,7 @@ public class DataSetControllerImpl implements DatasetController {
       result = datasetService.getDatasetValuesById(datasetId);
     } catch (final EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        LOG.info(e.getMessage());
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -106,7 +108,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
 
-    if (null == mongoID) {
+    if (null == datasetId || null == mongoID) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
@@ -142,8 +144,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the data set VO
    */
   @Override
-  @RequestMapping(value = "/update", method = RequestMethod.PUT,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
     // datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
 
@@ -156,8 +157,12 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetname the datasetname
    */
   @Override
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
+  @PostMapping(value = "/create")
   public void createEmptyDataSet(final String datasetname) {
+    if (StringUtils.isBlank(datasetname)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
     datasetService.createEmptyDataset(datasetname);
   }
 

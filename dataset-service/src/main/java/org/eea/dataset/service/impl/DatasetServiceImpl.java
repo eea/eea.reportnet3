@@ -2,7 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabese.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -110,21 +108,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private KafkaSender kafkaSender;
 
-  /**
-   * Gets the dataset by id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset by id
-   */
-  @Override
-  public DataSetVO getDatasetById(@DatasetId final Long datasetId) {
-    final DataSetVO dataset = new DataSetVO();
-    final List<RecordVO> recordVOs = new ArrayList<>();
 
-
-
-    return dataset;
-  }
 
   /**
    * Gets the dataset values by id.
@@ -146,28 +130,10 @@ public class DatasetServiceImpl implements DatasetService {
     // this result has no records since we need'em in a pagination way
     result.getTableVO().stream().forEach(table -> {
       table.setRecords(
-          recordMapper.entityListToClass(recordRepository.findByTableValue_Id(table.getId(), p)));
+          recordMapper.entityListToClass(recordRepository.findByTableValue_id(table.getId(), p)));
     });
 
     return result;
-  }
-
-  /**
-   * Adds the record to dataset.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   */
-  @Override
-  @Transactional
-  public void addRecordToDataset(@DatasetId final Long datasetId, final List<RecordVO> records) {
-
-    for (final RecordVO recordVO : records) {
-      final RecordValue r = new RecordValue();
-      // r.setId(Integer.valueOf(recordVO.getId()));
-      recordRepository.save(r);
-    }
-
   }
 
   /**
@@ -196,6 +162,9 @@ public class DatasetServiceImpl implements DatasetService {
   public void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
       throws EEAException, IOException {
     // obtains the file type from the extension
+    if (fileName == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NAME);
+    }
     String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
@@ -319,11 +288,13 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public TableVO getTableValuesById(final String MongoID, final Pageable pageable)
+  public TableVO getTableValuesById(final String mongoID, final Pageable pageable)
       throws EEAException {
 
-    List<RecordValue> record = recordRepository.findByTableValue_IdMongo(MongoID, pageable);
-
+    List<RecordValue> record = recordRepository.findByTableValue_idMongo(mongoID, pageable);
+    if (record == null || record.isEmpty()) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
 
     Long resultcount = countTableData(record.get(0).getTableValue().getId());
 

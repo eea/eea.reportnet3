@@ -14,6 +14,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class TableSchema.
+ */
 @Getter
 @Setter
 @ToString
@@ -21,7 +24,7 @@ public class TableSchema {
   /** The id table schema. */
   @Id
   @Field(value = "_id")
-  private ObjectId IdTableSchema;
+  private ObjectId idTableSchema;
 
   /** The name schema. */
   @Field(value = "nameSchema")
@@ -42,7 +45,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(IdTableSchema, nameSchema, recordSchema, tableRuleList);
+    return Objects.hash(idTableSchema, nameSchema, recordSchema, tableRuleList);
   }
 
   /**
@@ -53,14 +56,14 @@ public class TableSchema {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     TableSchema other = (TableSchema) obj;
-    return Objects.equals(IdTableSchema, other.IdTableSchema)
+    return Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameSchema, other.nameSchema)
         && Objects.equals(recordSchema, other.recordSchema)
         && Objects.equals(tableRuleList, other.tableRuleList);

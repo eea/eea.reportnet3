@@ -1,24 +1,64 @@
 package org.eea.document.type;
 
+import java.util.Arrays;
+import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+/**
+ * The Class FileResponse.
+ */
+@Getter
+@Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+@ToString
 public class FileResponse {
 
-    private byte[] bytes;
-    private String contentType;
+  /** The bytes. */
+  private byte[] bytes;
 
-    public byte[] getBytes() {
-        return bytes;
-    }
+  /** The content type. */
+  private String contentType;
 
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
-    }
 
-    public String getContentType() {
-        return contentType;
-    }
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + Arrays.hashCode(bytes);
+    result = prime * result + Objects.hash(contentType);
+    return result;
+  }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    FileResponse other = (FileResponse) obj;
+    return Arrays.equals(bytes, other.bytes) && Objects.equals(contentType, other.contentType);
+  }
+
+
 
 }

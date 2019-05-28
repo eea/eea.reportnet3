@@ -12,18 +12,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
+/**
+ * The Class ValidationServiceController.
+ */
 @RestController
 @RequestMapping(value = "/validation")
 public class ValidationServiceController {
 
+  /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE =
       "src/main/resources/ruletemplate/template01.drl";
 
+  /** The validation service. */
   @Autowired
   private ValidationService validationService;
 
 
 
+  /**
+   * Gets the questions.
+   *
+   * @param type the type
+   * @return the questions
+   */
   @RequestMapping(value = "/getLenght", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void getQuestions(@RequestParam(required = true) String type) {
@@ -33,6 +44,11 @@ public class ValidationServiceController {
   }
 
 
+  /**
+   * Gets the all rules.
+   *
+   * @return the all rules
+   */
   @RequestMapping(value = "/getRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<Map<String, String>> getAllRules() {
@@ -43,6 +59,14 @@ public class ValidationServiceController {
     return ruleAttributes;
   }
 
+  /**
+   * Sets the new rules.
+   *
+   * @param ruleName the rule name
+   * @param ruleAtrtibute the rule atrtibute
+   * @param ruleCondition the rule condition
+   * @param ruleAction the rule action
+   */
   @RequestMapping(value = "/setRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void setNewRules(@RequestParam(required = true) String ruleName,

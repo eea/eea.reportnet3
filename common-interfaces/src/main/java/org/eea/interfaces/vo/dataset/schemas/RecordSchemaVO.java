@@ -20,8 +20,6 @@ public class RecordSchemaVO {
   /** The id record schema. */
   private String idRecordSchema;
 
-  /** The name schema. */
-  //private String nameSchema;
 
   /** The field schema. */
   private List<FieldSchemaVO> fieldSchema;
@@ -45,16 +43,15 @@ public class RecordSchemaVO {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     RecordSchemaVO other = (RecordSchemaVO) obj;
     return Objects.equals(fieldSchema, other.fieldSchema)
-        && Objects.equals(idRecordSchema, other.idRecordSchema)
-       ;
+        && Objects.equals(idRecordSchema, other.idRecordSchema);
   }
 
 
