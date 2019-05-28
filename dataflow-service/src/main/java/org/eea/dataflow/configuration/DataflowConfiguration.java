@@ -14,5 +14,4 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EntityScan(basePackages = "org.eea.dataflow.persistence.domain")
 public class DataflowConfiguration {
 
-
 }

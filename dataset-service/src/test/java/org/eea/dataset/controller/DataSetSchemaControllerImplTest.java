@@ -1,6 +1,6 @@
 package org.eea.dataset.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -29,100 +29,99 @@ public class DataSetSchemaControllerImplTest {
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
   }
-  
-  
+
+
   @InjectMocks
   DataSetSchemaControllerImpl dataSchemaControllerImpl;
 
   @Mock
   DataschemaServiceImpl dataschemaService;
-  
+
   @Mock
   SchemasRepository schemasRepository;
-  
+
   @InjectMocks
   DataschemaServiceImpl dataSchemaServiceImpl;
 
- 
+
   @Test
   public void testCreateDataSchema() {
-    
-    dataSchemaControllerImpl.createDataSchema(1L);
-    
+
+    dataSchemaControllerImpl.createDataSchema("test");
+
   }
-  
+
   @Test
   public void testFindDataSchemaById() {
     when(dataschemaService.getDataSchemaById(Mockito.any())).thenReturn(new DataSetSchemaVO());
     dataSchemaControllerImpl.findDataSchemaById(Mockito.any());
-  
-    
-    assertEquals(null, schemasRepository.findSchemaByIdFlow(1L));
-    
+
+
+    assertNull("failed", schemasRepository.findSchemaByIdFlow(1L));
+
   }
-  
+
   @Test
   public void testFindDataSchemaByDataFlow() {
     when(dataschemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(new DataSetSchemaVO());
     dataSchemaControllerImpl.findDataSchemaByDataflow(Mockito.any());
-    
-  
- 
-    
+
+
+
   }
-  
+
   @Test
   public void testSchemaModels() {
-    
+
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType("String");
-    
+    field.setType(TypeData.STRING);
+
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType("String");
-  
-    assertTrue(field.equals(field2));
-    
+    field2.setType(TypeData.STRING);
+
+    assertTrue("fail", field.equals(field2));
+
     RecordSchema record = new RecordSchema();
     record.setNameSchema("test");
     List<FieldSchema> listaFields = new ArrayList<FieldSchema>();
     listaFields.add(field);
     record.setFieldSchema(listaFields);
-    
+
     RecordSchema record2 = new RecordSchema();
     record2.setNameSchema("test");
     record2.setFieldSchema(listaFields);
-  
-    assertTrue(record.equals(record2));
-    
+
+    assertTrue("fail", record.equals(record2));
+
     TableSchema table = new TableSchema();
     table.setNameTableSchema("test");
     table.setRecordSchema(record);
-   
+
     TableSchema table2 = new TableSchema();
     table2.setNameTableSchema("test");
     table2.setRecordSchema(record2);
-  
-    assertTrue(table.equals(table2));
-    
+
+    assertTrue("fail", table.equals(table2));
+
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<TableSchema>();
     listaTables.add(table);
     schema.setTableSchemas(listaTables);
-   
-    
+
+
     DataSetSchema schema2 = new DataSetSchema();
     schema2.setNameDataSetSchema("test");
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
-  
-    assertTrue(schema.equals(schema2));
-    
+
+    assertTrue("fail", schema.equals(schema2));
+
 
   }
-  
-  
+
+
 }

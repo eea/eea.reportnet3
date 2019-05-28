@@ -1,12 +1,9 @@
 package org.eea.dataflow.controller;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +18,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/dataflow")
 public class DataFlowControllerImpl implements DataFlowController {
 
-  /** The dataset controller. */
-  @Autowired
-  private DataSetControllerZuul datasetController;
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Find by id.
@@ -37,11 +35,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {
     final DataFlowVO result = new DataFlowVO();
-    result.setId(1L);
-    final List<DataSetVO> datasets = new ArrayList<>();
-    final DataSetVO set = datasetController.findById(1L);
-    datasets.add(set);
-    result.setDatasets(datasets);
+    result.setId(id);
     return result;
   }
 
@@ -53,8 +47,10 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the data flow vo
    */
   public static DataFlowVO errorHandler(@PathVariable("id") final Long id) {
+    final String errorMessage = String.format("Dataflow with id: %d has a problem", id);
     final DataFlowVO result = new DataFlowVO();
     result.setId(-1L);
+    LOG_ERROR.error(errorMessage);
     return result;
   }
 }
