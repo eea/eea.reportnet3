@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
@@ -51,14 +52,16 @@ const ReporterDataSet = () => {
       clickHandler: null
     },
     {
-      label: "Events",
+      //label: "Events",
+      title: "Events",
       icon: "4",
       group: "right",
       disabled: false,
       clickHandler: null
     },
     {
-      label: "Validations",
+      //label: "Validations",
+      title: "Validations",
       icon: "3",
       group: "right",
       disabled: !validationError,
@@ -67,17 +70,25 @@ const ReporterDataSet = () => {
       iconClasses:iconClasses
     },
     {
-      label: "Dashboards",
+      //label: "Dashboards",
+      title: "Dashboards",
       icon: "5",
       group: "right",
       disabled: false,
       clickHandler: null
     },
   ];
+  const items = [
+      {label:'New Dataset', url: '#'},
+      {label:'Edit data', url: '#'}
+  ];
 
+  const home = {icon: 'pi pi-home', url: '#'};
   return (
-    <div>
-        <Title title="Reporting Data Set: R3 Demo Dataflow" /> 
+    <div className="titleDiv">
+
+        <BreadCrumb model={items} home={home}/>
+        <Title title="Data Set: R3 Demo Dataflow"/> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
