@@ -6,13 +6,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface DatasetSchemaController.
  */
 public interface DatasetSchemaController {
-  
+
   /**
    * The interface Data set controller zuul.
    */
@@ -20,17 +19,16 @@ public interface DatasetSchemaController {
   interface DataSetControllerZuul extends DatasetSchemaController {
 
   }
-  
+
 
   /**
    * Creates the data schema.
    *
    * @param datasetName the dataset name
    */
-  @Deprecated
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  void createDataSchema(@RequestParam("datasetName") String datasetName);
-  
+  @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
+  void createDataSchema(@PathVariable("id") final Long datasetId);
+
   /**
    * Find data schema by id.
    *
@@ -40,7 +38,7 @@ public interface DatasetSchemaController {
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
-  
+
   /**
    * Find data schema by dataflow.
    *
@@ -50,6 +48,5 @@ public interface DatasetSchemaController {
   @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
-  
-  
+
 }

@@ -21,9 +21,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
 
   @Override
-  @RequestMapping(value = "/createDataSchema", method = RequestMethod.POST)
-  public void createDataSchema(String datasetName) {
-    dataschemaService.createDataSchema(datasetName);
+  @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
+  public void createDataSchema(@PathVariable("id") final Long datasetId) {
+    dataschemaService.createDataSchema(datasetId);
   }
 
 
@@ -65,6 +65,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
     return dataschema;
   }
+
 
 
 }

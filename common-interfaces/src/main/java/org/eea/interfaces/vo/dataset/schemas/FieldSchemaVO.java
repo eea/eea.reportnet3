@@ -1,7 +1,6 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class FieldSchemaVO {
-  
+
   /** The id. */
   private String id;
 
@@ -22,7 +21,7 @@ public class FieldSchemaVO {
   private String name;
 
   /** The type */
-  private TypeData type;
+  private String type;
 
 
   /**

@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetNoDataMapper;
+import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -19,7 +20,9 @@ import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableCollection;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
@@ -31,6 +34,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabese.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -62,6 +66,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetNoDataMapper dataSetNoDataMapper;
 
+  /** The data set tables mapper. */
+  @Autowired
+  private DataSetTablesMapper dataSetTablesMapper;
+
   /** The record mapper. */
   @Autowired
   private RecordMapper recordMapper;
@@ -82,6 +90,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DatasetRepository datasetRepository;
 
+  /** The data set metabase table collection. */
+  @Autowired
+  private DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
 
   /** The schemas repository. */
   @Autowired
@@ -175,7 +186,8 @@ public class DatasetServiceImpl implements DatasetService {
    * Process file.
    *
    * @param datasetId the dataset id
-   * @param file the file
+   * @param fileName the file name
+   * @param is the is
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -332,5 +344,33 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public Long countTableData(Long tableId) {
     return recordRepository.countByTableValue_id(tableId);
+  }
+
+
+
+  /**
+   * Sets the mongo tables.
+   *
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   * @param tableName the table name
+   * @param Headers the headers
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  @Transactional
+  public void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
+      TableCollectionVO tableCollectionVO) throws EEAException, IOException {
+
+    TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
+
+    tableCollection.setDataSetId(datasetId);
+    tableCollection.setDataFlowId(dataFlowId);
+
+    dataSetMetabaseTableCollection.save(tableCollection);
+
+    System.out.println("guardado");
+
   }
 }
