@@ -17,17 +17,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class EventHandler implements EEAEventHandler {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(EventHandler.class);
 
+  /** The data source. */
   @Autowired
   private DataSource dataSource;
 
+  /**
+   * Gets the type.
+   *
+   * @return the type
+   */
   @Override
   public Class<EEAEventVO> getType() {
     return EEAEventVO.class;
   }
 
 
+  /**
+   * Process message.
+   *
+   * @param eeaEventVO the eea event VO
+   */
   @Override
   public void processMessage(final EEAEventVO eeaEventVO) {
     LOG.info("Data set has received this message from Kafka {}", eeaEventVO);

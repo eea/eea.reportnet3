@@ -17,7 +17,9 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
  * The type Kafka sender.
  */
 @Component
-public  class KafkaSender {
+public class KafkaSender {
+
+  /** The kafka template. */
   @Autowired
   private KafkaTemplate<String, EEAEventVO> kafkaTemplate;
 
@@ -26,29 +28,41 @@ public  class KafkaSender {
    *
    * @param event the event
    */
-  public void sendMessage(EEAEventVO event)  {
-    List<PartitionInfo> partitions=kafkaTemplate.partitionsFor(event.getEventType().getTopic());
-    //partition = hash(message_key)%number_of_partitions
-    Integer partitionId = event.getEventType().getKey().hashCode()%partitions.size();
+  public void sendMessage(EEAEventVO event) {
+    List<PartitionInfo> partitions = kafkaTemplate.partitionsFor(event.getEventType().getTopic());
+    // partition = hash(message_key)%number_of_partitions
+    Integer partitionId = event.getEventType().getKey().hashCode() % partitions.size();
 
 
-    Message<EEAEventVO> message = MessageBuilder.withPayload(event)
-        .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
-        .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey()).setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
+    Message<EEAEventVO> message =
+        MessageBuilder.withPayload(event).setHeader(KafkaHeaders.PARTITION_ID, partitionId)
+            .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
+            .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
 
     ListenableFuture<SendResult<String, EEAEventVO>> future = kafkaTemplate.send(message);
 
     future.addCallback(new ListenableFutureCallback<SendResult<String, EEAEventVO>>() {
 
+      /**
+       * On success.
+       *
+       * @param result the result
+       */
       @Override
       public void onSuccess(SendResult<String, EEAEventVO> result) {
-        System.out.println("Sent message=[" + event +
-            "] with offset=[" + result.getRecordMetadata().offset() + "] and partition ["+result.getRecordMetadata().partition()+"]");
+        System.out.println(
+            "Sent message=[" + event + "] with offset=[" + result.getRecordMetadata().offset()
+                + "] and partition [" + result.getRecordMetadata().partition() + "]");
       }
+
+      /**
+       * On failure.
+       *
+       * @param ex the ex
+       */
       @Override
       public void onFailure(Throwable ex) {
-        System.out.println("Unable to send message=["
-            + event + "] due to : " + ex.getMessage());
+        System.out.println("Unable to send message=[" + event + "] due to : " + ex.getMessage());
       }
     });
   }

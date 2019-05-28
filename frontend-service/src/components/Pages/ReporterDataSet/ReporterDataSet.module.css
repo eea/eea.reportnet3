@@ -1,7 +1,22 @@
+body {
+   -webkit-user-drag: none;
+   -khtml-user-drag: none;
+   -moz-user-drag: none;
+   -o-user-drag: none;
+}
 .ButtonsBar {
     margin-bottom: 0.5em;
     padding: .25em;
-  }
+}
+
+.Dialog {
+  width: 55vw;
+}
+
+.FileUpload .span {
+  width: 100%;
+  min-height: 120px;
+}
 
 .warning > span {
     color:red;

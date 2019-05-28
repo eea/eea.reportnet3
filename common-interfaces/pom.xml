@@ -31,7 +31,11 @@
       <artifactId>spring-web</artifactId>
       <version>5.1.5.RELEASE</version>
     </dependency>
-    
+    <dependency>
+    <groupId>org.mongodb</groupId>
+    <artifactId>bson</artifactId>
+    <version>3.10.2</version>
+</dependency>
     	<!-- Lombook -->
 	<dependency>
 		<groupId>org.projectlombok</groupId>
@@ -60,4 +64,10 @@
       </plugin>
     </plugins>
   </build>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

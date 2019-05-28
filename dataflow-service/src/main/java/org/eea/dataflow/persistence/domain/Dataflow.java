@@ -11,101 +11,52 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * The type Dataflow.
  */
 @Entity
+@Getter
+@Setter
+@ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
 
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
-  @Column(name = "name")
+
+  /** The name. */
+  @Column(name = "NAME")
   private String name;
-  @Column(name = "description")
+
+  /** The description. */
+  @Column(name = "DESCRIPTION")
   private String description;
+
+  /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
   private SubmissionAgreement submissionAgreement;
 
-  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL,
-      orphanRemoval = true)
+  /** The contributors. */
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Contributor> contributors;
 
-  /**
-   * Gets id.
-   *
-   * @return the id
-   */
-  public Long getId() {
-    return id;
-  }
+  /** The documents. */
+  @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Document> documents;
 
   /**
-   * Sets id.
+   * Equals.
    *
-   * @param id the id
+   * @param o the o
+   * @return true, if successful
    */
-  public void setId(final Long id) {
-    this.id = id;
-  }
-
-  /**
-   * Gets name.
-   *
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets name.
-   *
-   * @param name the name
-   */
-  public void setName(final String name) {
-    this.name = name;
-  }
-
-  /**
-   * Gets description.
-   *
-   * @return the description
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * Sets description.
-   *
-   * @param description the description
-   */
-  public void setDescription(final String description) {
-    this.description = description;
-  }
-
-  /**
-   * Gets contributors.
-   *
-   * @return the contributors
-   */
-  public List<Contributor> getContributors() {
-    return contributors;
-  }
-
-  /**
-   * Sets contributors.
-   *
-   * @param contributors the contributors
-   */
-  public void setContributors(final List<Contributor> contributors) {
-    this.contributors = contributors;
-  }
-
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -119,18 +70,14 @@ public class Dataflow {
 
   }
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, contributors);
+    return Objects.hash(id, name, description, contributors, submissionAgreement, documents);
   }
 
-  @Override
-  public String toString() {
-    return "Dataflow{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", description='" + description + '\'' +
-        ", contributors=" + contributors +
-        '}';
-  }
 }

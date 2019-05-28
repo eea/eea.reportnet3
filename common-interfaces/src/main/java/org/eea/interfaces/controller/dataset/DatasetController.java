@@ -3,11 +3,14 @@ package org.eea.interfaces.controller.dataset;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface Dataset controller.
@@ -23,14 +26,14 @@ public interface DatasetController {
   }
 
   /**
-   * Find by id data set vo.
+   * Find values by id.
    *
-   * @param id the id
-   *
-   * @return the data set vo
+   * @param datasetId the dataset id
+   * @return the data set VO
    */
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO findById(@PathVariable("id") String id);
+  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetVO findById(Long datasetId);
 
   /**
    * Update dataset data set vo.
@@ -39,11 +42,38 @@ public interface DatasetController {
    *
    * @return the data set vo
    */
-  @RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(value = "/update", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetVO updateDataset(@RequestBody DataSetVO dataset);
 
+  /**
+   * Creates the empty data set.
+   *
+   * @param datasetName the dataset name
+   */
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
+
+  /**
+   * Load dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param file the file
+   */
+  @PostMapping("{id}/loadDatasetData")
+  public void loadDatasetData(@PathVariable("id") Long datasetId,
+      @RequestParam("file") MultipartFile file);
+
+
+
+  /**
+   * Delete import data
+   *
+   * @param datasetId the id of dataset
+   */
+  @DeleteMapping(value = "/deleteImportData")
+  void deleteImportData(@RequestParam("datasetName") Long datasetId);
+
 
 
 }

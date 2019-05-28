@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.domain;
 
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,95 +10,66 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * The type Submission agreement.
  */
 @Entity
+@Getter
+@Setter
+@ToString
 @Table(name = "SUBMISSION_AGREEMENT")
 public class SubmissionAgreement {
 
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
-  @Column(name = "name")
+
+  /** The name. */
+  @Column(name = "NAME")
   private String name;
-  @Column(name = "description")
+
+  /** The description. */
+  @Column(name = "DESCRIPTION")
   private String description;
+
+  /** The dataflow. */
   @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "dataflow_id", referencedColumnName = "id")
+  @JoinColumn(name = "DATAFLOW_ID", referencedColumnName = "ID")
   private Dataflow dataflow;
 
   /**
-   * Gets id.
+   * Equals.
    *
-   * @return the id
+   * @param o the o
+   * @return true, if successful
    */
-  public Long getId() {
-    return id;
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final SubmissionAgreement submissionAgreement = (SubmissionAgreement) o;
+    return id.equals(submissionAgreement.id);
+
   }
 
   /**
-   * Sets id.
+   * Hash code.
    *
-   * @param id the id
+   * @return the int
    */
-  public void setId(final Long id) {
-    this.id = id;
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, description, dataflow);
   }
 
-  /**
-   * Gets name.
-   *
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets name.
-   *
-   * @param name the name
-   */
-  public void setName(final String name) {
-    this.name = name;
-  }
-
-  /**
-   * Gets description.
-   *
-   * @return the description
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * Sets description.
-   *
-   * @param description the description
-   */
-  public void setDescription(final String description) {
-    this.description = description;
-  }
-
-  /**
-   * Gets dataflow.
-   *
-   * @return the dataflow
-   */
-  public Dataflow getDataflow() {
-    return dataflow;
-  }
-
-  /**
-   * Sets dataflow.
-   *
-   * @param dataflow the dataflow
-   */
-  public void setDataflow(final Dataflow dataflow) {
-    this.dataflow = dataflow;
-  }
 }
