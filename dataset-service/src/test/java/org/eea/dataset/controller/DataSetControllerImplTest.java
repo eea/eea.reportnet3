@@ -9,6 +9,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -154,5 +155,33 @@ public class DataSetControllerImplTest {
     when(datasetService.getDatasetValuesById(Mockito.any())).thenReturn(new DataSetVO());
     dataSetControllerImpl.findById(1L);
     assertNotNull("null result of the datasetValues", dataSetControllerImpl.findById(1L));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void loadSchemaMongoException() throws Exception {
+    dataSetControllerImpl.loadSchemaMongo(null, 1L, new TableCollectionVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void loadSchemaMongoException2() throws Exception {
+    dataSetControllerImpl.loadSchemaMongo(1L, null, new TableCollectionVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void loadSchemaMongoException3() throws Exception {
+    dataSetControllerImpl.loadSchemaMongo(1L, 1L, null);
+  }
+
+  @Test
+  public void loadSchemaMongoEEAException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).setMongoTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.loadSchemaMongo(1L, 1L, new TableCollectionVO());
+  }
+
+  @Test
+  public void loadSchemaMongoSuccess() throws Exception {
+    doNothing().when(datasetService).setMongoTables(Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.loadSchemaMongo(1L, 1L, new TableCollectionVO());
   }
 }
