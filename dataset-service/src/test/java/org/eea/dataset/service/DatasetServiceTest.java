@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetNoDataMapper;
+import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -17,7 +18,9 @@ import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableCollection;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
@@ -28,6 +31,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +87,12 @@ public class DatasetServiceTest {
 
   @Mock
   Pageable pageable;
+
+  @Mock
+  DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
+
+  @Mock
+  DataSetTablesMapper dataSetTablesMapper;
 
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -296,5 +306,12 @@ public class DatasetServiceTest {
     when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<RecordVO>());
     datasetService.getTableValuesById("mongoId", pageable);
+  }
+
+  @Test
+  public void setMongoTablesTest() throws Exception {
+    when(dataSetTablesMapper.classToEntity(Mockito.any())).thenReturn(new TableCollection());
+    when(dataSetMetabaseTableCollection.save(Mockito.any())).thenReturn(new TableCollection());
+    datasetService.setMongoTables(1L, 1L, new TableCollectionVO());
   }
 }
