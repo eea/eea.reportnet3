@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eea.interfaces.vo.metabese;
+package org.eea.interfaces.vo.metabase;
 
 import java.io.Serializable;
 import java.util.Objects;

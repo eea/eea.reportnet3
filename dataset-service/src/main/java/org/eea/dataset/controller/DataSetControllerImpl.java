@@ -13,7 +13,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.metabese.TableCollectionVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
