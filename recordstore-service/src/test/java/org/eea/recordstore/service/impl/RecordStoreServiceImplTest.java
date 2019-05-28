@@ -74,13 +74,13 @@ public class RecordStoreServiceImplTest {
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
 
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "CONTAINER_NAME", "crunchy-postgres");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "IP_POSTGRE_DB", "localhost");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "USER_POSTGRE_DB", "root");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "PASS_POSTGRE_DB", "root");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "CONN_STRING_POSTGRE",
+    ReflectionTestUtils.setField(recordStoreServiceImpl, "containerName", "crunchy-postgres");
+    ReflectionTestUtils.setField(recordStoreServiceImpl, "ipPostgreDb", "localhost");
+    ReflectionTestUtils.setField(recordStoreServiceImpl, "userPostgreDb", "root");
+    ReflectionTestUtils.setField(recordStoreServiceImpl, "passPostgreDb", "root");
+    ReflectionTestUtils.setField(recordStoreServiceImpl, "connStringPostgre",
         "jdbc:postgresql://localhost/datasets");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "SQL_GET_DATASETS_NAME",
+    ReflectionTestUtils.setField(recordStoreServiceImpl, "sqlGetDatasetsName",
         "select * from pg_namespace where nspname like 'dataset%'");
 
   }
