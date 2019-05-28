@@ -12,4 +12,10 @@ public class DocumentConfiguration {
     System.setProperty("oak.documentMK.disableLeaseCheck", "true");
     System.setProperty("oak.documentMK.leaseDurationSeconds", "5");
   }
+
+  /**
+   * Instantiates a new document configuration.
+   */
+  private DocumentConfiguration() {}
+
 }

@@ -1,5 +1,7 @@
 package org.eea.document.service;
 
+import javax.jcr.RepositoryException;
+import org.eea.exception.EEAException;
 /**
  * The interface Dataset service.
  */
@@ -7,17 +9,21 @@ public interface DocumentService {
 
   /**
    * testLogging.
+   * 
+   * @throws RepositoryException
+   * 
+   * @throws Exception
    *
    * @throws Exception the exception
    */
-  void testLogging() throws Exception;
+  void testLogging() throws EEAException, RepositoryException;
 
   /**
    * Upload a document.
    *
    * @throws Exception the exception
    */
-  void uploadDocument() throws Exception;
+  void uploadDocument() throws EEAException;
 
   /**
    * Gets the document.

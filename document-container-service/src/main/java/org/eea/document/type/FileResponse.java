@@ -1,8 +1,23 @@
 package org.eea.document.type;
 
+import java.util.Arrays;
+import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * The Class FileResponse.
  */
+@Getter
+@Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+@ToString
 public class FileResponse {
 
   /** The bytes. */
@@ -11,40 +26,39 @@ public class FileResponse {
   /** The content type. */
   private String contentType;
 
+
   /**
-   * Gets the bytes.
+   * Hash code.
    *
-   * @return the bytes
+   * @return the int
    */
-  public byte[] getBytes() {
-    return bytes;
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + Arrays.hashCode(bytes);
+    result = prime * result + Objects.hash(contentType);
+    return result;
   }
 
   /**
-   * Sets the bytes.
+   * Equals.
    *
-   * @param bytes the new bytes
+   * @param obj the obj
+   * @return true, if successful
    */
-  public void setBytes(byte[] bytes) {
-    this.bytes = bytes;
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    FileResponse other = (FileResponse) obj;
+    return Arrays.equals(bytes, other.bytes) && Objects.equals(contentType, other.contentType);
   }
 
-  /**
-   * Gets the content type.
-   *
-   * @return the content type
-   */
-  public String getContentType() {
-    return contentType;
-  }
 
-  /**
-   * Sets the content type.
-   *
-   * @param contentType the new content type
-   */
-  public void setContentType(String contentType) {
-    this.contentType = contentType;
-  }
 
 }
