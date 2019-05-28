@@ -32,6 +32,9 @@ pipeline {
         }
         
         stage('Install in Nexus') {
+            when {
+                branch 'develop' 
+            }
             steps {
                 sh '''
                     mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
