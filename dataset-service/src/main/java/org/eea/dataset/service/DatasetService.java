@@ -93,6 +93,6 @@ public interface DatasetService {
    */
 
   void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollections) throws EEAException, IOException;
+      TableCollectionVO tableCollections) throws EEAException;
 
 }

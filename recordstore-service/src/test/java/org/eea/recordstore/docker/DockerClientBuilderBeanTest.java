@@ -9,12 +9,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 
+/**
+ * The Class DockerClientBuilderBeanTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DockerClientBuilderBeanTest {
 
+  /** The docker client builder bean. */
   @InjectMocks
-  DockerClientBuilderBean dockerClientBuilderBean;
+  private DockerClientBuilderBean dockerClientBuilderBean;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -22,6 +29,9 @@ public class DockerClientBuilderBeanTest {
         "tcp://localhost:2375");
   }
 
+  /**
+   * Test docker client.
+   */
   @Test
   public void testDockerClient() {
     dockerClientBuilderBean.dockerClient();
