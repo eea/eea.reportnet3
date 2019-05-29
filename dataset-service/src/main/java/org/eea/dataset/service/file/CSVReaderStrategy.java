@@ -79,7 +79,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException {
-    try (Reader buf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+    try (Reader buf =
+        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
       return readLines(buf, dataflowId, partitionId);
     } catch (IOException e) {
       throw new InvalidFileException(e);
@@ -138,7 +139,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
-      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
     return dataset;
 
@@ -248,7 +249,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
         if (fieldSchema != null) {
           headers.get(contAux).setId(fieldSchema.getId());
           field.setIdFieldSchema(fieldSchema.getId());
-          field.setType(null != fieldSchema.getType() ? fieldSchema.getType().toString() : null);
+          field.setType(fieldSchema.getType());
         }
       }
       field.setValue(value);
@@ -258,7 +259,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
     return fields;
   }
-  
+
   /**
    * Gets the data set schema.
    *
@@ -342,10 +343,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
     if (null != recordSchema) {
       List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
       for (FieldSchemaVO fieldSchema : fieldsSchemas) {
-        if (null != fieldSchema.getName()) {
-          if (fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
-            return fieldSchema;
-          }
+        if (null != fieldSchema.getName() && fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
+          return fieldSchema;
         }
       }
     }

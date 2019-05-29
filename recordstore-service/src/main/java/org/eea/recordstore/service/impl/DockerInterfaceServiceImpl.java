@@ -1,13 +1,5 @@
 package org.eea.recordstore.service.impl;
 
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.model.Binds;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.core.command.ExecStartResultCallback;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 import org.eea.recordstore.docker.DockerClientBuilderBean;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.slf4j.Logger;
@@ -26,6 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.model.Binds;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
 
 
 /**
@@ -87,11 +88,10 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   public Container createContainer(final String containerName, final String imageName,
       final String portBinding) {
 
-    try (final CreateContainerCmd command =
-        dockerClient.dockerClient()
-            .createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1")
-            .withEnv(envs).withName(containerName)) {
-      //Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));// NO MAPEA... INVESTIGAR
+    try (final CreateContainerCmd command = dockerClient.dockerClient()
+        .createContainerCmd("crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1").withEnv(envs)
+        .withName(containerName)) {
+      // Bind bind = new Bind("c:/opt/dump", new Volume("/pgwal"));// NO MAPEA... INVESTIGAR
 
       final Binds binds = new Binds();
       final HostConfig hostConfig = new HostConfig();
@@ -136,20 +136,20 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
      * char",    CONSTRAINT record_pkey PRIMARY KEY (id))" command
      */
 
-    final ExecCreateCmdResponse execCreateCmdResponse = dockerClient.dockerClient()
-        .execCreateCmd(container.getId())
-        .withAttachStdout(true).withCmd(command).withTty(true).exec();
+    final ExecCreateCmdResponse execCreateCmdResponse =
+        dockerClient.dockerClient().execCreateCmd(container.getId()).withAttachStdout(true)
+            .withCmd(command).withTty(true).exec();
     ExecStartResultCallback result = null;// Esto sirve para gestión de eventos. Interesante
-    result = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId())
-        .withDetach(false)
+    result =
+        dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId()).withDetach(false)
 
-        .exec(new ExecStartResultCallback(output, errorOutput)).awaitCompletion();
+            .exec(new ExecStartResultCallback(output, errorOutput)).awaitCompletion();
     result.awaitCompletion().onComplete();
     final byte[] commandOutcome = ((ByteArrayOutputStream) output).toByteArray();
     final String outcomeOk = new String(commandOutcome);
     final String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
     LOG.info(outcomeOk);
-    if (!"".equals(outcomeKo)) {
+    if (StringUtils.isNotBlank(outcomeKo)) {
       LOG_ERROR.error(outcomeKo);
     }
 
@@ -171,8 +171,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     final OutputStream errorOutput = new ByteArrayOutputStream();
 
     final ExecCreateCmdResponse execCreateCmdResponse = dockerClient.dockerClient()
-        .execCreateCmd(container.getId())
-        .withAttachStdout(true).withCmd(
+        .execCreateCmd(container.getId()).withAttachStdout(true).withCmd(
 
             // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql"
             // && psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(
@@ -182,8 +181,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
         .withTty(true).exec();
     ExecStartResultCallback execResult = null;// Esto sirve para gestión de eventos. Interesante
     execResult = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId())
-        .withDetach(false)
-        .exec(new ExecStartResultCallback(output, errorOutput));
+        .withDetach(false).exec(new ExecStartResultCallback(output, errorOutput));
 
     try {
       execResult.awaitCompletion().onComplete();
@@ -264,8 +262,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     names.add(containerName);
 
     final List<Container> containers = dockerClient.dockerClient().listContainersCmd()
-        .withShowSize(true)
-        .withShowAll(true).withNameFilter(names).exec();
+        .withShowSize(true).withShowAll(true).withNameFilter(names).exec();
 
     return null != containers && !containers.isEmpty() ? containers.get(0) : null;
   }

@@ -1,14 +1,13 @@
 package org.eea.recordstore.controller;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.kafka.io.KafkaSender;
-import org.eea.recordstore.docker.DockerClientBuilderBean;
 import org.eea.recordstore.exception.DockerAccessException;
-import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.recordstore.service.impl.RecordStoreServiceImpl;
 import org.junit.Before;
@@ -16,11 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
 
 /**
  * The Class RecordStoreControllerImplTest.
@@ -41,25 +39,6 @@ public class RecordStoreControllerImplTest {
   @Mock
   private RecordStoreService recordStoreService;
 
-  /** The docker interface service. */
-  @Mock
-  private DockerInterfaceService dockerInterfaceService;
-
-  /** The kafka sender. */
-  @Mock
-  private KafkaSender kafkaSender;
-
-  /** The docker client. */
-  @Mock
-  private DockerClientBuilderBean dockerClient;
-
-  /** The command. */
-  @Mock
-  private CreateContainerCmd command;
-
-  /** The docker. */
-  @Mock
-  private DockerClient docker;
 
   /** The Constant TEST. */
   private static final String TEST = "test";
@@ -90,7 +69,7 @@ public class RecordStoreControllerImplTest {
   @Test
   public void testCreateEmptyDataSet() throws DockerAccessException {
     recordStoreControllerImpl.createEmptyDataset(TEST);
-
+    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any());
   }
 
   /**
@@ -102,6 +81,7 @@ public class RecordStoreControllerImplTest {
   public void testCreateEmptyDataSetException() throws DockerAccessException {
     doThrow(new DockerAccessException()).when(recordStoreService).createEmptyDataSet(TEST);
     recordStoreControllerImpl.createEmptyDataset(TEST);
+    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any());
   }
 
   /**
@@ -112,6 +92,7 @@ public class RecordStoreControllerImplTest {
   @Test
   public void resteDataSetDataBaseTest() throws DockerAccessException {
     recordStoreControllerImpl.resteDataSetDataBase();
+    Mockito.verify(recordStoreService, times(1)).resetDatasetDatabase();
   }
 
   /**
@@ -123,6 +104,7 @@ public class RecordStoreControllerImplTest {
   public void resteDataSetDataBaseTestException() throws DockerAccessException {
     doThrow(new DockerAccessException()).when(recordStoreService).resetDatasetDatabase();
     recordStoreControllerImpl.resteDataSetDataBase();
+    Mockito.verify(recordStoreService, times(1)).resetDatasetDatabase();
   }
 
   /**
@@ -133,7 +115,10 @@ public class RecordStoreControllerImplTest {
    */
   @Test
   public void getConnectionToDatasetTest() throws DockerAccessException {
+    ConnectionDataVO expectedResult = new ConnectionDataVO();
+    Mockito.when(recordStoreService.getConnectionDataForDataset(TEST)).thenReturn(expectedResult);
     ConnectionDataVO result = recordStoreControllerImpl.getConnectionToDataset(TEST);
+    assertEquals(expectedResult, result);
   }
 
   /**
@@ -158,8 +143,11 @@ public class RecordStoreControllerImplTest {
    */
   @Test
   public void getDataSetConnectionsTest() throws DockerAccessException {
+    List<ConnectionDataVO> expectedResult = new ArrayList<>();
+    expectedResult.add(new ConnectionDataVO());
+    Mockito.when(recordStoreService.getConnectionDataForDataset()).thenReturn(expectedResult);
     List<ConnectionDataVO> result = recordStoreControllerImpl.getDataSetConnections();
-    assertNotNull(result);
+    assertEquals(expectedResult, result);
   }
 
   /**
