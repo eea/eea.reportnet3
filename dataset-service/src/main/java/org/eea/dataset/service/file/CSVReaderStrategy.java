@@ -20,7 +20,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -50,7 +49,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The headers. */
   private List<FieldSchemaVO> headers;
 
-  @Autowired
+  /** The parse common. */
   private ParseCommon parseCommon;
 
 
@@ -59,9 +58,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Instantiates a new CSV reader strategy.
    *
    * @param datasetSchemaService the dataset schema service
+   * @param parseCommon the parse common
    */
-  public CSVReaderStrategy(DatasetSchemaService datasetSchemaService) {
+  public CSVReaderStrategy(DatasetSchemaService datasetSchemaService, ParseCommon parseCommon) {
     this.datasetSchemaService = datasetSchemaService;
+    this.parseCommon = parseCommon;
   }
 
   /**
@@ -76,12 +77,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException {
-    try (Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-      return readLines(buf, dataflowId, partitionId);
-    } catch (IOException e) {
-      throw new InvalidFileException(e);
-    }
+    Reader buf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    return readLines(buf, dataflowId, partitionId);
+
   }
 
   /**
@@ -128,8 +126,19 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
   }
 
-  private TableVO sanitizeAndCreateDataSet(Long partitionId, String[] line, TableVO tableVO, List<TableVO> tables,
-      List<String> values) throws InvalidFileException {
+  /**
+   * Sanitize and create data set.
+   *
+   * @param partitionId the partition id
+   * @param line the line
+   * @param tableVO the table VO
+   * @param tables the tables
+   * @param values the values
+   * @return the table VO
+   * @throws InvalidFileException the invalid file exception
+   */
+  private TableVO sanitizeAndCreateDataSet(Long partitionId, String[] line, TableVO tableVO,
+      List<TableVO> tables, List<String> values) throws InvalidFileException {
     if (null != values && !values.isEmpty()) {
       // if the line is white then skipped
       if (line.length == 1 && line[0].isEmpty()) {
