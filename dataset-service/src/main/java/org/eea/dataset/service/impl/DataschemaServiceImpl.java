@@ -69,7 +69,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       for (int j = 1; j <= headersSize; j++) {
         TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
         FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema = new FieldSchema();
         fieldSchema.setIdFieldSchema(new ObjectId());
         fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
         fieldSchema.setHeaderName(header.getHeaderName());
