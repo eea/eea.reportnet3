@@ -115,6 +115,9 @@ public class DockerInterfaceServiceImplTest {
   @Mock
   private CopyArchiveFromContainerCmd copyArchiveFromContainerCmd;
 
+  /** The Constant FAILED. */
+  private static final String FAILED = "failed";
+
   /**
    * Inits the mocks.
    */
@@ -157,7 +160,7 @@ public class DockerInterfaceServiceImplTest {
     when(listcontainer.withNameFilter(Mockito.any())).thenReturn(listcontainer);
     when(listcontainer.exec()).thenReturn(listContainers);
     Container result = dockerInterfaceServiceImpl.createContainer("test", "test", "00:00");
-    assertEquals(listContainers.get(0), result);;
+    assertEquals(FAILED, listContainers.get(0), result);;
   }
 
 
@@ -181,7 +184,7 @@ public class DockerInterfaceServiceImplTest {
     when(execStartCmd.withDetach(Mockito.any())).thenReturn(execStartCmd);
     when(execStartCmd.exec(Mockito.any())).thenReturn(execStartResultCallback);
     when(execStartResultCallback.awaitCompletion()).thenReturn(execStartResultCallback);
-    assertNotNull(
+    assertNotNull(FAILED,
         dockerInterfaceServiceImpl.executeCommandInsideContainer(new Container(), "test"));
   }
 
@@ -197,7 +200,7 @@ public class DockerInterfaceServiceImplTest {
     List<String> resultExpected = new ArrayList<>();
     commonWhens();
     when(execStartResultCallback.awaitCompletion()).thenReturn(execStartResultCallback);
-    assertEquals(resultExpected, dockerInterfaceServiceImpl.getConnection());;
+    assertEquals(FAILED, resultExpected, dockerInterfaceServiceImpl.getConnection());;
   }
 
   /**
@@ -211,7 +214,7 @@ public class DockerInterfaceServiceImplTest {
     List<String> resultExpected = new ArrayList<>();
     commonWhens();
     doThrow(new InterruptedException()).when(execStartResultCallback).awaitCompletion();
-    assertEquals(resultExpected, dockerInterfaceServiceImpl.getConnection());
+    assertEquals(FAILED, resultExpected, dockerInterfaceServiceImpl.getConnection());
   }
 
   /**
