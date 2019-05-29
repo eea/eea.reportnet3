@@ -30,6 +30,9 @@ public class EEAErrorMessage {
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
+  /** The Constant EXECUTION_ERROR. */
+  public static final String EXECUTION_ERROR = "Runtime error";
+
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }
