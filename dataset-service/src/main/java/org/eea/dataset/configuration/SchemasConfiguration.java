@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mongodb.MongoClient;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SchemasConfiguration.
  *
@@ -24,7 +23,7 @@ import com.mongodb.MongoClient;
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
-@EnableMongoRepositories(basePackages = "org.eea.dataset.schemas.repository")
+@EnableMongoRepositories(basePackages = "org.eea.dataset.persistence.schemas.repository")
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
 
@@ -45,7 +44,7 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
   private String username;
 
   /** The password. */
-  @Value("${mongodb.primary.username}")
+  @Value("${mongodb.primary.password}")
   private String password;
 
   /**

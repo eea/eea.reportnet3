@@ -1,18 +1,28 @@
 package org.eea.dataset.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-
-import java.io.InputStream;
-
+import java.io.IOException;
+import java.util.Optional;
+import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.persistence.data.domain.Dataset;
+import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
-import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,75 +35,134 @@ import org.springframework.mock.web.MockMultipartFile;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetServiceTest {
 
-	@InjectMocks
-	DatasetServiceImpl datasetService;
+  @InjectMocks
+  DatasetServiceImpl datasetService;
 
-	@Mock
-	IFileParseContext context;
+  @Mock
+  FileParseContextImpl context;
 
-	@Mock
-	FileParserFactory fileParserFactory;
+  @Mock
+  FileParserFactory fileParserFactory;
 
-//	@Mock
-//	DatasetRepository datasetRepository;
+  @Mock
+  DataSetMapper dataSetMapper;
 
-	@Mock
-	KafkaSender kafkaSender;
+  @Mock
+  PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-	@Before
-	public void initMocks() {
-		MockitoAnnotations.initMocks(this);
-	}
+  @Mock
+  DataSetMetabaseRepository dataSetMetabaseRepository;
 
-	@Test(expected = EEAException.class)
-	public void testProcessFileThrowExceptionFileNull() throws Exception {
-		datasetService.processFile("1", null);
-	}
+  @Mock
+  SchemasRepository schemasRepository;
 
-	@Test(expected = EEAException.class)
-	public void testProcessFileThrowException() throws Exception {
-		MockMultipartFile fileNoExtension = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-		datasetService.processFile(null, fileNoExtension);
-	}
+  @Mock
+  DatasetRepository datasetRepository;
 
-	@Test
-	public void testProcessFileThrowException2() throws Exception {
-		MockMultipartFile fileNoExtension = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+  @Mock
+  KafkaSender kafkaSender;
+  
 
-		datasetService.processFile("1", fileNoExtension);
-	}
 
-	@Test
-	public void testProcessFileThrowException4() throws Exception {
-		MockMultipartFile fileNoType = new MockMultipartFile("file", "fileOriginal.csv", null, "content".getBytes());
+  @Before
+  public void initMocks() {
+    MockitoAnnotations.initMocks(this);
+  }
 
-		datasetService.processFile("1", fileNoType);
-	}
+  @Test(expected = EEAException.class)
+  public void testProcessFileThrowException() throws Exception {
+    MockMultipartFile fileNoExtension =
+        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    datasetService.processFile(null, fileNoExtension);
+  }
 
-	// @Test
-	public void testProcessFileThrowException5() throws Exception {
-		MockMultipartFile fileNoType = new MockMultipartFile("file", "fileOriginal.csv", null, "content".getBytes());
-		doThrow(new EEAException()).when(context).parse(Mockito.any(InputStream.class));
-		datasetService.processFile("1", fileNoType);
-	}
+  @Test(expected = EEAException.class)
+  public void testProcessFileThrowException2() throws Exception {
+    MockMultipartFile fileNoExtension =
+        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
 
-	@Test
-	public void testProcessFileEmptyDataset() throws Exception {
-		MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-		when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-		when(context.parse(Mockito.any(InputStream.class))).thenReturn(null);
+    datasetService.processFile(1L, fileNoExtension);
+  }
 
-		datasetService.processFile("1", file);
-	}
+  @Ignore
+  @Test(expected = IOException.class)
+  public void testProcessFileEmptyDataset() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(fileParserFactory.createContext("csv")).thenReturn(context);
+    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
 
-	@Test
-	public void testProcessFileSuccess() throws Exception {
-		MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-		when(fileParserFactory.createContext(Mockito.anyString())).thenReturn(context);
-		when(context.parse(Mockito.any(InputStream.class))).thenReturn(new DataSetVO());
-//		when(datasetRepository.save(Mockito.any())).thenReturn(new DataSetVO());
-		doNothing().when(kafkaSender).sendMessage(Mockito.any());
-		datasetService.processFile("1", file);
-	}
+    datasetService.processFile(1L, file);
+  }
+
+  @Ignore
+  @Test(expected = EEAException.class)
+  public void testProcessFileEmptyPartitionMetabase() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.empty());
+    datasetService.processFile(1L, file);
+  }
+
+  @Ignore
+  @Test(expected = EEAException.class)
+  public void testProcessFileEmptyMetabase() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    datasetService.processFile(1L, file);
+  }
+
+  @Test
+  @Ignore
+  public void testProcessFileSuccess() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(fileParserFactory.createContext("csv")).thenReturn(context);
+    DataSetVO dataSetVO = new DataSetVO();
+    dataSetVO.setId(1L);
+    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dataSetVO);
+    Dataset entityValue = new Dataset();
+    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
+    when(datasetRepository.save(Mockito.any())).thenReturn(new Dataset());
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    datasetService.processFile(1L, file);
+  }
+  
+  @Test
+  public void testFindDataschemaByIdDataflow() throws Exception {
+    
+    //Se prueba que el dataflow con id 1 tiene dataschema
+    DataSetSchema data = new DataSetSchema();
+    
+    //when(schemasRepository.findSchemaByIdFlow(1L)).thenReturn(data);
+    assertEquals(null,schemasRepository.findSchemaByIdFlow(1L));
+    //when(datasetService.getDataSchemaByIdFlow(1L)).thenReturn(new DataSetSchemaVO());
+    
+  }
+  
+  
+  @Test
+  public void testFindDataschemaById() throws Exception {
+    
+    //Se prueba que se recupera un dataschema con un id
+    DataSetSchema data = new DataSetSchema();
+    data.setNameDataSetSchema("test");
+    //when(schemasRepository.findById(new ObjectId("5ce3a7ca3d851f09c42cb152"))).thenReturn(Optional.of(new DataSetSchema()));
+    assertEquals("test",data.getNameDataSetSchema());
+    //when(datasetService.getDataSchemaById("5ce3a7ca3d851f09c42cb152")).thenReturn(new DataSetSchemaVO());
+    
+  }
 
 }

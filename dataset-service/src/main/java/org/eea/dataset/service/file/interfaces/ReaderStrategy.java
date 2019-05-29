@@ -13,8 +13,11 @@ public interface ReaderStrategy {
    * Parses the file.
    *
    * @param inputStream the input stream
+   * @param datasetId the dataset id
+   * @param integer the integer
    * @return the data set VO
-   * @throws InvalidFileException the invalid file exception
+   * @throws InvalidFileException
    */
-  public DataSetVO parseFile(InputStream inputStream);
+  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
+      throws InvalidFileException;
 }

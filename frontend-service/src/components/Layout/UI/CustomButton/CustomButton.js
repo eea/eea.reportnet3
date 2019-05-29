@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'primereact/button';
-/*import Tooltip from '@material-ui/core/Tooltip';*/
+// import styles from './CustomButton.module.css';
 
 const CustomButton = (props) => {
     let icons = [
@@ -13,7 +13,8 @@ const CustomButton = (props) => {
         'pi pi-eye',
         'pi pi-filter',
         'pi pi-sitemap',
-        'pi pi-sort'];
+        'pi pi-sort',
+        'pi pi-check-circle'];
 
     let disabledButton = props.disabled?true:false;
     //let classes = `p-button-rounded p-button-secondary ${(props.ownButtonClasses)?props.ownButtonClasses:""}`;

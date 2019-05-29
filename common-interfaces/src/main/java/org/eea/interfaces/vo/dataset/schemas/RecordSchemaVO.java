@@ -5,7 +5,6 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.List;
 import java.util.Objects;
-import org.bson.types.ObjectId;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,10 +18,10 @@ import lombok.ToString;
 public class RecordSchemaVO {
 
   /** The id record schema. */
-  private ObjectId idRecordSchema;
+  private String idRecordSchema;
 
   /** The name schema. */
-  private String nameSchema;
+  //private String nameSchema;
 
   /** The field schema. */
   private List<FieldSchemaVO> fieldSchema;
@@ -35,7 +34,7 @@ public class RecordSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fieldSchema, idRecordSchema, nameSchema);
+    return Objects.hash(fieldSchema, idRecordSchema);
   }
 
   /**
@@ -55,7 +54,7 @@ public class RecordSchemaVO {
     RecordSchemaVO other = (RecordSchemaVO) obj;
     return Objects.equals(fieldSchema, other.fieldSchema)
         && Objects.equals(idRecordSchema, other.idRecordSchema)
-        && Objects.equals(nameSchema, other.nameSchema);
+       ;
   }
 
 

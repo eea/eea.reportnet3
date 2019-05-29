@@ -1,11 +1,12 @@
 package org.eea.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
-
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,40 +14,42 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface DatasetService {
 
-	/**
-	 * Gets dataset by id.
-	 *
-	 * @param datasetId the dataset id
-	 *
-	 * @return the dataset by id
-	 */
-	DataSetVO getDatasetById(@DatasetId String datasetId);
+  /**
+   * Gets dataset by id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the dataset by id
+   */
+  DataSetVO getDatasetById(@DatasetId Long datasetId);
 
-	/**
-	 * Add record to dataset.
-	 *
-	 * @param datasetId the dataset id
-	 * @param record    the record
-	 */
-	void addRecordToDataset(@DatasetId String datasetId, List<RecordVO> record);
+  /**
+   * Add record to dataset.
+   *
+   * @param datasetId the dataset id
+   * @param record the record
+   */
+  void addRecordToDataset(@DatasetId Long datasetId, List<RecordVO> record);
 
-	/**
-	 * Create empty dataset.
-	 *
-	 * @param datasetName the dataset name
-	 */
-	void createEmptyDataset(String datasetName);
+  /**
+   * Create empty dataset.
+   *
+   * @param datasetName the dataset name
+   */
+  void createEmptyDataset(String datasetName);
 
-	/**
-	 * Process the file: read, parse and save in the db
-	 * 
-	 * @param datasetId
-	 * @param file      file to process
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	void processFile(@DatasetId String datasetId, MultipartFile file) throws EEAException;
+ /**
+   * Process the file: read, parse and save in the db
+   * 
+   * @param datasetId
+   * @param file file to process
+   * 
+   * @return
+   * @throws IOException
+   * @throws Exception
+   */
+  void processFile(@DatasetId Long datasetId, MultipartFile file) throws EEAException, IOException;
+
 
 
   /**
@@ -55,6 +58,22 @@ public interface DatasetService {
    * @param datasetName the dataset name
    */
   void createDataSchema(String datasetName);
+  
+  
+  /**
+   * Gets dataschema by id
+   */
+  DataSetSchemaVO getDataSchemaById(String dataschemaId);
+  
+  /**
+   * Gets dataschema by id
+   */
+  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
 
-
+  /**
+   * Delete the dataSchema
+   *
+   * @param datasetName for id
+   */
+  void deleteDataSchema(String datasetId);
 }

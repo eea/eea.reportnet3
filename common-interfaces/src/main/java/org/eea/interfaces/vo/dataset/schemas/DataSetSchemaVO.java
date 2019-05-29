@@ -3,7 +3,6 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.List;
 import java.util.Objects;
-import org.bson.types.ObjectId;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,7 +12,8 @@ import lombok.ToString;
 @ToString
 public class DataSetSchemaVO {
 
-  private ObjectId idDataSetSchema;
+  private String idDataSetSchema;
+
 
   /** The table schemas. */
   private List<TableSchemaVO> tableSchemas;

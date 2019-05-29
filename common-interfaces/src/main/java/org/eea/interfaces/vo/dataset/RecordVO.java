@@ -7,33 +7,19 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Gets the fields.
- *
- * @return the fields
- */
 @Getter
-
-/**
- * Sets the fields.
- *
- * @param fields the new fields
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class RecordVO implements Serializable {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -5257537261370694057L;
 
+  /** The id mongo. */
+  private String idMongo;
+
   /** The id. */
-  private String id;
+  private Long id;
 
   /** The fields. */
   private List<FieldVO> fields;
