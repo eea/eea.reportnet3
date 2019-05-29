@@ -35,31 +35,30 @@ const DataViewer = (props) => {
         console.log('Fetching data...');
         //fetchDataHandler("default", sortOrder, firstRow, numRows);   
         
-        // const dataPromise = HTTPRequesterAPI.get(
-        //   {
-        //     url:'/dataset/TableValueDataset/1',
-        //     queryString: {
-        //       MongoID: "prueba",
-        //       asc:true,
-        //       fields:"id",
-        //       pageNum:0,
-        //       pageSize:20
-        //     }
-        //   }
-        // );
+        const dataPromise = HTTPRequesterAPI.get(
+          {
+            url:'/dataset/TableValueDataset/1',
+            queryString: {
+              MongoID: "prueba",
+              asc:true,
+              fields:"id",
+              pageNum:0,
+              pageSize:20
+            }
+          }
+        );
 
-        // dataPromise.then(response =>{
-        //   console.log(response.data);
-        //   filterDataResponse(response.data.tableVO[0].records);
-        // })
-        // .catch(error => {
-        //   console.log(error);
-        //   return error;
-        // });
+        dataPromise.then(response =>{
+          console.log(response.data);
+          filterDataResponse(response.data.tableVO[0].records);
+          setTotalRecords(response.data.tableVO[0].totalRecords);
+        })
+        .catch(error => {
+          console.log(error);
+          return error;
+        });
 
-        filterDataResponse(jsonData.tableVO[0].records);
-
-        setTotalRecords(jsonData.tableVO[0].totalRecords);
+        //filterDataResponse(jsonData.tableVO[0].records);        
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
         console.log(inmTableSchemaColumns);
