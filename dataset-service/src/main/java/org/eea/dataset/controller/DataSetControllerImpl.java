@@ -61,34 +61,6 @@ public class DataSetControllerImpl implements DatasetController {
   private DatasetService datasetService;
 
   /**
-   * Find by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the data set VO
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO findById(@PathVariable("id") final Long datasetId) {
-    if (datasetId < 0) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    DataSetVO result = null;
-    try {
-      result = datasetService.getDatasetValuesById(datasetId);
-    } catch (final EEAException e) {
-      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
-        LOG.info(e.getMessage());
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-      }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-    return result;
-  }
-
-  /**
    * Gets the data tables values.
    *
    * @param datasetId the dataset id
@@ -258,4 +230,5 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
   }
+
 }

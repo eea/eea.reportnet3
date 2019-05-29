@@ -4,10 +4,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -26,17 +23,10 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
    * @param value the value
    * @return the string
    */
-  String map(ObjectId value) {
+  public String map(ObjectId value) {
     return value.toString();
   }
 
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the data set schema VO
-   */
-  public abstract DataSetSchemaVO entityToClass(DataSetSchema entity);
 
   /**
    * Class to entity.
@@ -58,14 +48,6 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
   @Mapping(source = "tableValues", target = "tableVO")
   @Override
   public abstract DataSetVO entityToClass(DatasetValue entity);
-
-  /**
-   * Class to entity.
-   *
-   * @param model the model
-   * @return the table value
-   */
-  public abstract TableValue classToEntity(TableVO model);
 
 
 
