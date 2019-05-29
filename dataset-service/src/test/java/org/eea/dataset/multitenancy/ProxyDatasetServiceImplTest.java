@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import org.eea.dataset.service.DatasetService;
-import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,8 +41,9 @@ public class ProxyDatasetServiceImplTest {
    */
   @Test
   public void testInvoke() throws Throwable {
-    Mockito.when(datasetService.getDatasetValuesById(1L)).thenReturn(new DataSetVO());
-    Method method = DatasetService.class.getMethod("getDatasetValuesById", Long.class);
+    Mockito.when(datasetService.getTableValuesById(Mockito.any(), Mockito.any()))
+        .thenReturn(new TableVO());
+    Method method = DatasetService.class.getMethod("getTableValuesById", Long.class);
     ProxyDatasetServiceImpl proxy = new ProxyDatasetServiceImpl(datasetService);
     Object result = proxy.invoke(datasetService, method, new Long[] {1l});
     assertNotNull(result);
@@ -56,7 +57,7 @@ public class ProxyDatasetServiceImplTest {
   @Test(expected = Throwable.class)
   public void testInvokeException() throws Throwable {
     Method method = DatasetService.class.getMethod("getDatasetById", Long.class);
-    Mockito.when(method.invoke(datasetService, new Long[] {1l})).thenThrow(Throwable.class);
+    Mockito.when(method.invoke(datasetService, Mockito.any())).thenThrow(Throwable.class);
     ProxyDatasetServiceImpl proxy = new ProxyDatasetServiceImpl(datasetService);
     proxy.invoke(datasetService, method, new Long[] {1l});
   }

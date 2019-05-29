@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.DataSetNoDataMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -48,51 +47,49 @@ import org.springframework.mock.web.MockMultipartFile;
 public class DatasetServiceTest {
 
   @InjectMocks
-  DatasetServiceImpl datasetService;
+  private DatasetServiceImpl datasetService;
 
   @Mock
-  FileParseContextImpl context;
+  private FileParseContextImpl context;
 
   @Mock
-  FileParserFactory fileParserFactory;
+  private FileParserFactory fileParserFactory;
 
   @Mock
-  DataSetMapper dataSetMapper;
-  @Mock
-  DataSetNoDataMapper dataSetNoDataMapper;
+  private DataSetMapper dataSetMapper;
 
   @Mock
-  PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
   @Mock
-  DataSetMetabaseRepository dataSetMetabaseRepository;
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   @Mock
-  SchemasRepository schemasRepository;
+  private SchemasRepository schemasRepository;
 
   @Mock
-  DatasetRepository datasetRepository;
+  private DatasetRepository datasetRepository;
 
   @Mock
-  KafkaSender kafkaSender;
+  private KafkaSender kafkaSender;
 
   @Mock
-  RecordStoreControllerZull recordStoreControllerZull;
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   @Mock
-  RecordRepository recordRepository;
+  private RecordRepository recordRepository;
 
   @Mock
-  RecordMapper recordMapper;
+  private RecordMapper recordMapper;
 
   @Mock
-  Pageable pageable;
+  private Pageable pageable;
 
   @Mock
-  DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
+  private DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
 
   @Mock
-  DataSetTablesMapper dataSetTablesMapper;
+  private DataSetTablesMapper dataSetTablesMapper;
 
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -274,22 +271,6 @@ public class DatasetServiceTest {
   public void deleteDataSchema() throws Exception {
     doNothing().when(schemasRepository).deleteById(Mockito.any());
     datasetService.deleteDataSchema(new ObjectId().toString());
-  }
-
-  @Test(expected = EEAException.class)
-  public void getDatasetValuesByIdNotFoundTest() throws Exception {
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    datasetService.getDatasetValuesById(1L);
-  }
-
-  @Test
-  public void getDatasetValuesByIdTest() throws Exception {
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(dataSetNoDataMapper.entityToClass(Mockito.any())).thenReturn(dataSetVO);
-    when(recordRepository.findByTableValue_id(Mockito.any(), Mockito.any()))
-        .thenReturn(recordValues);
-    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<RecordVO>());
-    datasetService.getDatasetValuesById(1L);
   }
 
   @Test(expected = EEAException.class)
