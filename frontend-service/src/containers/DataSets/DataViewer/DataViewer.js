@@ -7,6 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
 import jsonData from '../../../assets/jsons/response_dataset_values.json';
+import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
     const [totalRecords, setTotalRecords] = useState(0);
@@ -33,7 +34,30 @@ const DataViewer = (props) => {
   
         console.log('Fetching data...');
         //fetchDataHandler("default", sortOrder, firstRow, numRows);   
-        filterDataResponse(jsonData.tableVO[0].records);
+        
+        const dataPromise = HTTPRequesterAPI.get(
+          {
+            url:'/dataset/TableValueDataset/1',
+            queryString: {
+              MongoID: "prueba",
+              asc:true,
+              fields:"id",
+              pageNum:0,
+              pageSize:20
+            }
+          }
+        );
+
+        dataPromise.then(response =>{
+          console.log(response.data);
+          filterDataResponse(response.data.tableVO[0].records);
+        })
+        .catch(error => {
+          console.log(error);
+          return error;
+        });
+
+        //filterDataResponse(jsonData.tableVO[0].records);
 
         setTotalRecords(jsonData.tableVO[0].totalRecords);
         console.log("Filtering data...");
@@ -80,10 +104,10 @@ const DataViewer = (props) => {
         setColOptions(colOptions);
       }
   
-useEffect(()=>{
-  console.log("Fetching new data...");
-console.log(fetchedData);
-},[fetchedData]);
+      useEffect(()=>{
+        console.log("Fetching new data...");
+      console.log(fetchedData);
+      },[fetchedData]);
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);

@@ -8,6 +8,7 @@ import {Chart} from 'primereact/chart';
 // import {Lightbox} from 'primereact/lightbox';
 
 import jsonDataSchema from '../../../assets/jsons/datosDataSchema.json';
+import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 
 const ReporterDataSet = () => {
@@ -124,13 +125,22 @@ const ReporterDataSet = () => {
 
     //Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
-    setTableSchema(jsonDataSchema.tableSchemas.map((item,i)=>{
+    const dataPromise = HTTPRequesterAPI.get(
+      {
+        url:'/dataSchema/1',
+        queryString: {}
+      }
+    );
+
+    dataPromise.then(response =>{
+      console.log(response.data);
+      setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
             id: i,
             name : item["nameTableSchema"]
             }
       })); 
-      setTableSchemaColumns(jsonDataSchema.tableSchemas.map((table,i) =>{
+      setTableSchemaColumns(response.data.tableSchemas.map(table =>{
         return table.recordSchema.fieldSchema.map((item,i)=>{
           return {
               table: table["nameTableSchema"], 
@@ -139,6 +149,13 @@ const ReporterDataSet = () => {
             }
         });        
       }));
+    })
+    .catch(error => {
+      console.log(error);
+      return error;
+    });
+
+    
   },[]);
 
   // const fetchDataHandler = () => {
