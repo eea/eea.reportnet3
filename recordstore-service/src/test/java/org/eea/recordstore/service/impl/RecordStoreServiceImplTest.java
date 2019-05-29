@@ -1,7 +1,11 @@
 package org.eea.recordstore.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import java.util.List;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.controller.RecordStoreControllerImpl;
 import org.eea.recordstore.docker.DockerClientBuilderBean;
@@ -66,6 +70,9 @@ public class RecordStoreServiceImplTest {
   /** The Constant DATASET. */
   private static final String DATASET = "dataset_1";
 
+  /** The Constant FAILED. */
+  private static final String FAILED = "failed";
+
 
   /**
    * Inits the mocks.
@@ -95,6 +102,7 @@ public class RecordStoreServiceImplTest {
   public void testCreateDataset() throws DockerAccessException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     recordStoreServiceImpl.createEmptyDataSet(DATASET);
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
 
@@ -119,9 +127,9 @@ public class RecordStoreServiceImplTest {
    */
   @Test
   public void testResetDatasetDatabase() throws DockerAccessException {
-
     Mockito.when(dockerInterfaceService.getContainer(Mockito.any())).thenReturn(new Container());
     recordStoreServiceImpl.resetDatasetDatabase();
+    Mockito.verify(dockerInterfaceService, times(1)).getContainer(Mockito.any());
   }
 
   /**
@@ -146,13 +154,14 @@ public class RecordStoreServiceImplTest {
    */
   @Test
   public void testConnectionData() throws DockerAccessException, InterruptedException {
-    byte[] result = DATASET.getBytes();
+    byte[] input = DATASET.getBytes();
     Mockito
         .when(dockerInterfaceService.executeCommandInsideContainer(Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(result);
-    recordStoreServiceImpl.getConnectionDataForDataset(DATASET);
+        .thenReturn(input);
+    ConnectionDataVO result = recordStoreServiceImpl.getConnectionDataForDataset(DATASET);
+    assertEquals(FAILED, DATASET, result.getSchema());
   }
 
 
@@ -179,14 +188,14 @@ public class RecordStoreServiceImplTest {
    */
   @Test
   public void testConnectionData2() throws DockerAccessException, InterruptedException {
-    byte[] result = DATASET.getBytes();
+    byte[] input = DATASET.getBytes();
     Mockito
         .when(dockerInterfaceService.executeCommandInsideContainer(Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(result);
-    recordStoreServiceImpl.getConnectionDataForDataset();
-
+        .thenReturn(input);
+    List<ConnectionDataVO> result = recordStoreServiceImpl.getConnectionDataForDataset();
+    assertEquals(FAILED, DATASET, result.get(0).getSchema());
   }
 
   /**
@@ -196,9 +205,7 @@ public class RecordStoreServiceImplTest {
    */
   @Test(expected = UnsupportedOperationException.class)
   public void testCreateDataSetFromAnother() throws DockerAccessException {
-
     recordStoreServiceImpl.createDataSetFromOther(DATASET, DATASET);
-
   }
 
 

@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -245,6 +246,7 @@ public class DatasetServiceTest {
     when(datasetRepository.save(Mockito.any())).thenReturn(new DatasetValue());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
 
@@ -253,6 +255,7 @@ public class DatasetServiceTest {
   public void createEmptyDataset() throws Exception {
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any());
     datasetService.createEmptyDataset("");
+    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any());
   }
 
   @Test
@@ -265,12 +268,14 @@ public class DatasetServiceTest {
   public void deleteImportData() throws Exception {
     doNothing().when(datasetRepository).deleteById(Mockito.any());
     datasetService.deleteImportData(1L);
+    Mockito.verify(datasetRepository, times(1)).deleteById(Mockito.any());
   }
 
   @Test
   public void deleteDataSchema() throws Exception {
     doNothing().when(schemasRepository).deleteById(Mockito.any());
     datasetService.deleteDataSchema(new ObjectId().toString());
+    Mockito.verify(schemasRepository, times(1)).deleteById(Mockito.any());
   }
 
   @Test(expected = EEAException.class)
@@ -287,6 +292,7 @@ public class DatasetServiceTest {
     when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<RecordVO>());
     datasetService.getTableValuesById("mongoId", pageable);
+    Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
   }
 
   @Test
@@ -294,5 +300,6 @@ public class DatasetServiceTest {
     when(dataSetTablesMapper.classToEntity(Mockito.any())).thenReturn(new TableCollection());
     when(dataSetMetabaseTableCollection.save(Mockito.any())).thenReturn(new TableCollection());
     datasetService.setMongoTables(1L, 1L, new TableCollectionVO());
+    Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
 }

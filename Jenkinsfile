@@ -52,7 +52,10 @@ pipeline {
         stage('Push to EEA GitHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop')
+                    sh('git config --global user.email "jorge.saenz@altia.es"')
+                    sh('git config --global user.name "Jorge Sáenz (ALTIA)"')
+                    sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop --allow-unrelated-histories')
+                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:develop')
                 }
             }
         }

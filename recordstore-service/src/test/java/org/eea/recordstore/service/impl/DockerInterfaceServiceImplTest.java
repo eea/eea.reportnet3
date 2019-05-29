@@ -1,6 +1,9 @@
 package org.eea.recordstore.service.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,6 +115,9 @@ public class DockerInterfaceServiceImplTest {
   @Mock
   private CopyArchiveFromContainerCmd copyArchiveFromContainerCmd;
 
+  /** The Constant FAILED. */
+  private static final String FAILED = "failed";
+
   /**
    * Inits the mocks.
    */
@@ -139,6 +145,8 @@ public class DockerInterfaceServiceImplTest {
    */
   @Test
   public void testCreateContainer() throws DockerAccessException {
+    List<Container> listContainers = new ArrayList<>();
+    listContainers.add(new Container());
     when(dockerClient.dockerClient()).thenReturn(docker);
     when(docker.createContainerCmd(Mockito.any())).thenReturn(command);
     when(command.withEnv((List<String>) Mockito.any())).thenReturn(command);
@@ -150,7 +158,9 @@ public class DockerInterfaceServiceImplTest {
     when(listcontainer.withShowSize(Mockito.any())).thenReturn(listcontainer);
     when(listcontainer.withShowAll(Mockito.any())).thenReturn(listcontainer);
     when(listcontainer.withNameFilter(Mockito.any())).thenReturn(listcontainer);
-    dockerInterfaceServiceImpl.createContainer("test", "test", "00:00");
+    when(listcontainer.exec()).thenReturn(listContainers);
+    Container result = dockerInterfaceServiceImpl.createContainer("test", "test", "00:00");
+    assertEquals(FAILED, listContainers.get(0), result);;
   }
 
 
@@ -174,7 +184,8 @@ public class DockerInterfaceServiceImplTest {
     when(execStartCmd.withDetach(Mockito.any())).thenReturn(execStartCmd);
     when(execStartCmd.exec(Mockito.any())).thenReturn(execStartResultCallback);
     when(execStartResultCallback.awaitCompletion()).thenReturn(execStartResultCallback);
-    dockerInterfaceServiceImpl.executeCommandInsideContainer(new Container(), "test");
+    assertNotNull(FAILED,
+        dockerInterfaceServiceImpl.executeCommandInsideContainer(new Container(), "test"));
   }
 
 
@@ -186,9 +197,10 @@ public class DockerInterfaceServiceImplTest {
    */
   @Test
   public void testGetConnection() throws DockerAccessException, InterruptedException {
+    List<String> resultExpected = new ArrayList<>();
     commonWhens();
     when(execStartResultCallback.awaitCompletion()).thenReturn(execStartResultCallback);
-    dockerInterfaceServiceImpl.getConnection();
+    assertEquals(FAILED, resultExpected, dockerInterfaceServiceImpl.getConnection());;
   }
 
   /**
@@ -199,9 +211,10 @@ public class DockerInterfaceServiceImplTest {
    */
   @Test
   public void testGetConnectionException() throws DockerAccessException, InterruptedException {
+    List<String> resultExpected = new ArrayList<>();
     commonWhens();
     doThrow(new InterruptedException()).when(execStartResultCallback).awaitCompletion();
-    dockerInterfaceServiceImpl.getConnection();
+    assertEquals(FAILED, resultExpected, dockerInterfaceServiceImpl.getConnection());
   }
 
   /**
@@ -243,6 +256,9 @@ public class DockerInterfaceServiceImplTest {
     when(dockerClient.dockerClient()).thenReturn(docker);
     when(docker.removeContainerCmd(Mockito.any())).thenReturn(removeContainerCmd);
     dockerInterfaceServiceImpl.stopAndRemoveContainer(new Container());
+    Mockito.verify(dockerClient, times(2)).dockerClient();
+    Mockito.verify(docker, times(1)).stopContainerCmd(Mockito.any());
+    Mockito.verify(docker, times(1)).removeContainerCmd(Mockito.any());
   }
 
   /**
@@ -253,6 +269,8 @@ public class DockerInterfaceServiceImplTest {
     when(dockerClient.dockerClient()).thenReturn(docker);
     when(docker.stopContainerCmd(Mockito.any())).thenReturn(stopContainerCmd);
     dockerInterfaceServiceImpl.stopContainer(new Container());
+    Mockito.verify(dockerClient, times(1)).dockerClient();
+    Mockito.verify(docker, times(1)).stopContainerCmd(Mockito.any());
   }
 
   /**
@@ -263,6 +281,8 @@ public class DockerInterfaceServiceImplTest {
     when(dockerClient.dockerClient()).thenReturn(docker);
     when(docker.startContainerCmd(Mockito.any())).thenReturn(startContainerCmd);
     dockerInterfaceServiceImpl.startContainer(new Container(), 1L, TimeUnit.DAYS);
+    Mockito.verify(dockerClient, times(1)).dockerClient();
+    Mockito.verify(docker, times(1)).startContainerCmd(Mockito.any());
   }
 
   /**
@@ -277,6 +297,9 @@ public class DockerInterfaceServiceImplTest {
     when(copyArchiveToContainerCmd.withRemotePath(Mockito.any()))
         .thenReturn(copyArchiveToContainerCmd);
     dockerInterfaceServiceImpl.copyFileFromHostToContainer("test", "test", "test");
+    Mockito.verify(dockerClient, times(1)).dockerClient();
+    Mockito.verify(docker, times(1)).copyArchiveToContainerCmd(Mockito.any());
+    Mockito.verify(copyArchiveToContainerCmd, times(1)).withHostResource(Mockito.any());
   }
 
   /**
@@ -290,6 +313,9 @@ public class DockerInterfaceServiceImplTest {
     when(copyArchiveFromContainerCmd.withHostPath(Mockito.any()))
         .thenReturn(copyArchiveFromContainerCmd);
     dockerInterfaceServiceImpl.copyFileFromContainerToHost("test", "test", "test");
+    Mockito.verify(dockerClient, times(1)).dockerClient();
+    Mockito.verify(docker, times(1)).copyArchiveFromContainerCmd(Mockito.any(), Mockito.any());
+    Mockito.verify(copyArchiveFromContainerCmd, times(1)).withHostPath(Mockito.any());
   }
 
   /**
@@ -301,6 +327,7 @@ public class DockerInterfaceServiceImplTest {
   public void testClose() throws IOException {
     when(dockerClient.dockerClient()).thenReturn(docker);
     dockerInterfaceServiceImpl.close();
+    Mockito.verify(dockerClient, times(1)).dockerClient();
   }
 
 }
