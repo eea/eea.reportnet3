@@ -194,7 +194,7 @@ const ReporterDataSet = () => {
         {/*TODO: Loading spinner*/}
         {(tableSchema)?<TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/> : null}
           <Dialog header="Upload your Dataset" visible={visible}
-                  className={styles.Dialog} dismissableMask="false" onHide={onHide} >
+                  className={styles.Dialog} dismissableMask={false} onHide={onHide} >
               <CustomFileUpload mode="advanced" name="demo[]" url="." onUpload={onUploadFile} 
                           multiple={false} chooseLabel="Select or drag here your dataset (.csv)" //allowTypes="/(\.|\/)(csv|doc)$/"
                           fileLimit={1} className={styles.FileUpload}  /> 
