@@ -312,8 +312,8 @@
     <profile>
       <id>sonar</id>
       <properties>
-        <sonar.projectKey>${project.groupId}:${project.artifactId}:test-module</sonar.projectKey>
-        <sonar.projectName>${project.artifactId}:test-module</sonar.projectName>
+        <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}</sonar.projectKey>
+        <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
       </properties>
       <build>
         <plugins>

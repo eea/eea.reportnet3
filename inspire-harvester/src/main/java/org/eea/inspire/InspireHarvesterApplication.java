@@ -57,12 +57,11 @@ public class InspireHarvesterApplication {
       final SyndFeedInput input = new SyndFeedInput();
       final SyndFeed feed = input.build(new XmlReader(feedUrl));
 
-      System.out.println(feed);
+      LOG.info(feed.toString());
 
       ok = true;
     } catch (final Exception ex) {
-      ex.printStackTrace();
-      LOG.info("ERROR: " + ex.getMessage());
+      LOG_ERROR.error("ERROR: {}", ex.getMessage(), ex);
     }
     if (!ok) {
 
