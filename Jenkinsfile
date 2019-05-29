@@ -1,4 +1,11 @@
+String cron_working_branch = BRANCH_NAME != "develop" ? "@hourly" : ""
+
 pipeline {
+
+    triggers {
+        cron(cron_working_branch)
+    }
+    
     agent {
         label 'java8'
     }
