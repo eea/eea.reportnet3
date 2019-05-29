@@ -9,9 +9,18 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
+/**
+ * The Class DataSetTablesMapper.
+ */
 @Mapper(componentModel = "spring")
 public abstract class DataSetTablesMapper implements IMapper<TableCollection, TableCollectionVO> {
 
+  /**
+   * Fill ids.
+   *
+   * @param tableCollectionVO the table collection VO
+   * @param tableCollection the table collection
+   */
   @AfterMapping
   public void fillIds(TableCollectionVO tableCollectionVO,
       @MappingTarget TableCollection tableCollection) {

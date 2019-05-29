@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
@@ -32,17 +31,6 @@ public interface DatasetService {
    */
   void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
       throws EEAException, IOException;
-
-
-  /**
-   * Gets the dataset values by id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset values by id
-   * @throws EEAException the EEA exception
-   */
-  DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
-
 
 
   /**

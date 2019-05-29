@@ -49,6 +49,9 @@ public class DataSetSchemaControllerImplTest {
 
   }
 
+  /**
+   * Test find data schema by id.
+   */
   @Test
   public void testFindDataSchemaById() {
     when(dataschemaService.getDataSchemaById(Mockito.any())).thenReturn(new DataSetSchemaVO());
