@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 
+/**
+ * The type Dataschema service.
+ */
 @Service("datachemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
 
@@ -38,7 +41,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Creates the data schema.
    *
-   * @param datasetName the dataset name
+   * @param datasetId the dataset id
    */
   @Override
   public void createDataSchema(Long datasetId) {

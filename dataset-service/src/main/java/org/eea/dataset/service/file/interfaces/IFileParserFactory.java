@@ -3,6 +3,7 @@ package org.eea.dataset.service.file.interfaces;
 /**
  * A factory for creating IFileParser objects.
  */
+@FunctionalInterface 
 public interface IFileParserFactory {
 
   /**

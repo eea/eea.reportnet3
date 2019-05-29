@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSchemaServiceTest {
@@ -74,11 +75,10 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testCreateDataSchema() {
 
-
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables);;
-
-
     dataSchemaServiceImpl.createDataSchema(1L);
+    dataschemaService.createDataSchema(1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
   }
 
 
@@ -95,6 +95,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testFindDataSchemaByDataFlow() {
     dataSchemaServiceImpl.getDataSchemaByIdFlow(Mockito.any());
+    dataschemaService.getDataSchemaByIdFlow(1L);
+    Mockito.verify(dataschemaService, times(1)).getDataSchemaByIdFlow(Mockito.any());
 
   }
 
@@ -115,6 +117,8 @@ public class DatasetSchemaServiceTest {
     when(dataSchemaMapper.entityToClass((DataSetSchema) Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
     dataSchemaServiceImpl.getDataSchemaByIdFlow(Mockito.any());
+    dataschemaService.getDataSchemaByIdFlow(1L);
+    Mockito.verify(dataschemaService, times(1)).getDataSchemaByIdFlow(Mockito.any());
 
   }
 
