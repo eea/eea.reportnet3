@@ -35,8 +35,6 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,12 +44,6 @@ import org.springframework.stereotype.Service;
  */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
-
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The data set mapper. */
   @Autowired

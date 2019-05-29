@@ -16,10 +16,6 @@ import org.springframework.stereotype.Service;
 public class ValidationService {
 
 
-  /** The data set schema repository. */
-  @Autowired
-  private DataSetSchemaRepository dataSetSchemaRepository;
-
   /**
    * Gets the element lenght.
    *

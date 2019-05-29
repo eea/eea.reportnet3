@@ -55,7 +55,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
                                                                                           // to
                                                                                           // create
                                                                                           // standar
-    final ConnectionDataVO connectionDataVO = null;
     try {
       recordStoreService.createEmptyDataSet(datasetName);
     } catch (final DockerAccessException e) {

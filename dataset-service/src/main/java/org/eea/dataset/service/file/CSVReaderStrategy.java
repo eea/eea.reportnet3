@@ -39,8 +39,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant TABLE_HEADER. */
   private static final String TABLE_HEADER = "_TABLE";
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");

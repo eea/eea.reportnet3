@@ -31,9 +31,6 @@ import com.github.dockerjava.api.model.Container;
 @Service
 public class RecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
-
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -238,10 +235,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
 
     try {
-      final byte[] result = dockerInterfaceService.executeCommandInsideContainer(container, "psql",
-          "-h", ipPostgreDb, "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c",
-          sqlGetDatasetsName);
-      
+      final byte[] result =
+          dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
+              "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", sqlGetDatasetsName);
+
       if (null != result && result.length > 0) {
         final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(new String(result));
         while (dataMatcher.find()) {

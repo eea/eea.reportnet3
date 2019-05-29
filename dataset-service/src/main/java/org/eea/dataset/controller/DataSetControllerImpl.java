@@ -43,10 +43,6 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
 
   /**
    * The Constant LOG_ERROR.
