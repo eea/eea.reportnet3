@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +40,9 @@ public class DataSetSchemaControllerImplTest {
 
   @Mock
   SchemasRepository schemasRepository;
+  
+  @Mock
+  DatasetSchemaController dataSchemaController;
 
   @InjectMocks
   DataschemaServiceImpl dataSchemaServiceImpl;
@@ -46,6 +51,8 @@ public class DataSetSchemaControllerImplTest {
   public void testCreateDataSchema() {
 
     dataSchemaControllerImpl.createDataSchema(1L);
+    dataSchemaController.createDataSchema(1L);
+    Mockito.verify(dataSchemaController, times(1)).createDataSchema(Mockito.any());
 
   }
 
@@ -64,11 +71,11 @@ public class DataSetSchemaControllerImplTest {
 
   @Test
   public void testFindDataSchemaByDataFlow() {
-    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(new DataSetSchemaVO());
+    
+    when(dataSchemaController.findDataSchemaByDataflow(Mockito.any())).thenReturn(new DataSetSchemaVO());
     dataSchemaControllerImpl.findDataSchemaByDataflow(Mockito.any());
-
-
-
+    dataSchemaController.findDataSchemaByDataflow(1L);
+    Mockito.verify(dataSchemaController, times(1)).findDataSchemaByDataflow(Mockito.any());
   }
 
   @Test

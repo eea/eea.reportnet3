@@ -20,7 +20,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
@@ -75,7 +75,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The data set metabase table collection. */
   @Autowired
-  private DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
+  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /** The schemas repository. */
   @Autowired

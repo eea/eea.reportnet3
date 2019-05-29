@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 /**
  * The Interface IFileParseContext.
  */
+@FunctionalInterface 
 public interface IFileParseContext {
 
   /**

@@ -86,7 +86,7 @@ public class CSVReaderStrategyTest {
   @Test
   public void testParseFile() throws InvalidFileException {
     when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, null);
     assertNotNull(result);
   }
 
@@ -99,7 +99,7 @@ public class CSVReaderStrategyTest {
   public void testParseFileTableNull() throws InvalidFileException {
     dataSet.setTableSchemas(null);
     when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, null);
     assertNotNull(result);
   }
 
@@ -116,7 +116,34 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    csvReaderStrategy.parseFile(input, 1L, null);
+  }
+
+  /**
+   * Test parse exception 2.
+   *
+   * @throws InvalidFileException the invalid file exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = InvalidFileException.class)
+  public void testParseException2() throws InvalidFileException, IOException {
+    String csv = "\n  \n \t \n ";
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
+    input = file.getInputStream();
+    csvReaderStrategy.parseFile(input, 1L, null);
+  }
+
+  /**
+   * Test parse file table id null.
+   *
+   * @throws InvalidFileException the invalid file exception
+   */
+  @Test
+  public void testParseFileTableIdNull() throws InvalidFileException {
+    dataSet.setTableSchemas(null);
+    DataSetVO result = csvReaderStrategy.parseFile(input, null, null);
+    assertNotNull(result);
   }
 
 
