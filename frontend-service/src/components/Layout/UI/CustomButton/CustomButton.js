@@ -22,9 +22,17 @@ const CustomButton = (props) => {
     let iconClasses = `${icons[props.icon]} ${(props.iconClasses)?props.iconClasses:""}`;
 
     return (
+        /*
+        <Tooltip title={props.title}>
+            <span>
+                <Button className={classes} icon={iconClasses}
+                label={props.label} style={{marginRight:'.25em'}} onClick={props.handleClick} disabled={disabledButton}/>
+            </span>
+        </Tooltip>*/
         <Button className={classes} icon={iconClasses}
                 label={props.label} style={{marginRight:'.25em'}} onClick={props.handleClick} disabled={disabledButton}/>
-    );
+    
+                );
 }
 
 export default CustomButton;

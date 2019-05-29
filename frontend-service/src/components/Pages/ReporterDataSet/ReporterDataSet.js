@@ -1,15 +1,17 @@
 import React, {useState, useEffect} from 'react';
-
+import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
+import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 // import {Lightbox} from 'primereact/lightbox';
 
 import jsonDataSchema from '../../../assets/jsons/datosDataSchema.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
+
 
 const ReporterDataSet = () => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
@@ -19,6 +21,7 @@ const ReporterDataSet = () => {
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [visible, setVisibility] = useState(false);
 
   console.log('ReporterDataSet Render...');
   
@@ -28,8 +31,24 @@ const ReporterDataSet = () => {
   const onHideDialogHandler = () =>{
     setDashDialogVisible(false);
   } 
+ 
 
-  
+  const showFileUploadDialog = () => {
+      console.log('showFileUploadDialog onClick');
+      setVisibility(true);
+  }
+
+  const onUploadFile = () => {
+      console.log('onUploadFile');
+  }
+
+  const onHide = () => {
+      console.log('onClick');
+      setVisibility(false);
+  }
+
+  //TODO:Change + Error/warning treatment
+    
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
     setCustomButtons([
@@ -38,7 +57,7 @@ const ReporterDataSet = () => {
         icon: "0",
         group: "left",
         disabled: false,
-        clickHandler: null
+        clickHandler: showFileUploadDialog
       },
       {
         label: "Export",
@@ -62,15 +81,6 @@ const ReporterDataSet = () => {
         clickHandler: null
       },
       {
-        label: "Show Validations",
-        icon: "3",
-        group: "right",
-        disabled: !validationError,
-        clickHandler: null,
-        ownButtonClasses:null,
-        iconClasses:(validationError)?"warning":""
-      },
-      {
         label: "Validate",
         icon: "10",
         group: "right",
@@ -80,6 +90,16 @@ const ReporterDataSet = () => {
         iconClasses:null
       },
       {
+        label: "Show Validations",
+        icon: "3",
+        group: "right",
+        disabled: !validationError,
+        clickHandler: null,
+        ownButtonClasses:null,
+        iconClasses:(validationError)?"warning":""
+      },
+      {
+        //title: "Dashboards",
         label: "Dashboards",
         icon: "5",
         group: "right",
@@ -123,7 +143,7 @@ const ReporterDataSet = () => {
           }]
       }});
 
-    //Fetch data (JSON)
+//Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
     const dataPromise = HTTPRequesterAPI.get(
       {
@@ -158,38 +178,27 @@ const ReporterDataSet = () => {
     
   },[]);
 
-  // const fetchDataHandler = () => {
-  //   // setLoading(true);
-  //   fetch()
-  //   .then(response => response.json())
-  //   .then(json => { 
-  //     console.log(json);          
-  //     // const rows = json.currentPage.map(item=>{
-  //     //   return {
-  //     //           idInstrumento : item["idInstrumento"], 
-  //     //           denominacion : item["denominacion"], 
-  //     //           fechaInicial : item["fechaInicial"], 
-  //     //           tieneDocumentos : item["tieneDocumentos"], 
-  //     //           anulado : item["anulado"]
-  //     //         }
-  //     // }); 
-  //     // setFetchedData(rows);
-  //     // if(json.pagedInfo.totalElements!==totalRecords){
-  //     //   setTotalRecords(json.pagedInfo.totalElements);
-  //     // }
-  //     // setLoading(false);
-  //   })
-  //   .catch(error => console.log("ERROR!!!!!!! - " + error));
-  // }
-
+  const items = [
+    {label:'New Dataset', url: '#'},
+    {label:'Edit data', url: '#'}
+  ];
+  const home = {icon: 'pi pi-home', url: '#'};
   return (
-      <div>
-        <Title title="Reporting Data Set: R3 Demo Dataflow" /> 
+    <div className="titleDiv">
+
+        <BreadCrumb model={items} home={home}/>
+        <Title title="Data Set: R3 Demo Dataflow"/> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner*/}
-        {(tableSchema)?<TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/> : null}        
+        {(tableSchema)?<TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/> : null}
+          <Dialog header="Upload your Dataset" visible={visible}
+                  className={styles.Dialog} dismissableMask="false" onHide={onHide} >
+              <CustomFileUpload mode="advanced" name="demo[]" url="." onUpload={onUploadFile} 
+                          multiple={false} chooseLabel="Select or drag here your dataset (.csv)" //allowTypes="/(\.|\/)(csv|doc)$/"
+                          fileLimit={1} className={styles.FileUpload}  /> 
+          </Dialog>                
         <Dialog visible={dashDialogVisible} onHide={onHideDialogHandler} header="Error/Warning dashboard" maximizable dismissableMask={true} style={{width:'80%'}}>
           <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
         </Dialog>

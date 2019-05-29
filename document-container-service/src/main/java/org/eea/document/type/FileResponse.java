@@ -1,24 +1,19 @@
 package org.eea.document.type;
 
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * The Class FileResponse.
+ */
+@Getter
+@Setter
 public class FileResponse {
 
-    private byte[] bytes;
-    private String contentType;
+  /** The bytes. */
+  private byte[] bytes;
 
-    public byte[] getBytes() {
-        return bytes;
-    }
-
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
+  /** The content type. */
+  private String contentType;
 
 }
