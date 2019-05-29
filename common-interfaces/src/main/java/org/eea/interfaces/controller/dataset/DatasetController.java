@@ -27,16 +27,6 @@ public interface DatasetController {
   }
 
   /**
-   * Find values by id.
-   *
-   * @param datasetId the dataset id
-   * @return the data set VO
-   */
-  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO findById(Long datasetId);
-
-  /**
    * Update dataset data set vo.
    *
    * @param dataset the dataset

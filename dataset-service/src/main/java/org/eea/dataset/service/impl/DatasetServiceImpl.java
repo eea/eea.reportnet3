@@ -9,7 +9,6 @@ import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.DataSetNoDataMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
@@ -39,9 +38,7 @@ import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -59,10 +56,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
-
-  /** The data set no data mapper. */
-  @Autowired
-  private DataSetNoDataMapper dataSetNoDataMapper;
 
   /** The data set tables mapper. */
   @Autowired
@@ -108,33 +101,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private KafkaSender kafkaSender;
 
-
-
-  /**
-   * Gets the dataset values by id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset values by id
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public DataSetVO getDatasetValuesById(@DatasetId final Long datasetId) throws EEAException {
-
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
-    if (dataset == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    DataSetVO result = dataSetNoDataMapper.entityToClass(dataset);
-    Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
-    // this result has no records since we need'em in a pagination way
-    result.getTableVO().stream().forEach(table -> {
-      table.setRecords(
-          recordMapper.entityListToClass(recordRepository.findByTableValue_id(table.getId(), p)));
-    });
-
-    return result;
-  }
 
   /**
    * Creates the empty dataset.

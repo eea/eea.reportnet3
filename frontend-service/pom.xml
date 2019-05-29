@@ -67,6 +67,12 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.2</version>
+      </plugin>
     </plugins>
   </build>
 
@@ -76,6 +82,24 @@
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
+
+  <profiles>
+      <profile>
+        <id>sonar</id>
+        <properties>
+          <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}</sonar.projectKey>
+          <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
+        </properties>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.sonarsource.scanner.maven</groupId>
+              <artifactId>sonar-maven-plugin</artifactId>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+  </profiles>
 
 
 </project>

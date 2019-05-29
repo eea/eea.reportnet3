@@ -45,7 +45,8 @@ public class KafkaSender {
    * @param event the event
    */
   public void sendMessage(final EEAEventVO event) {
-    final List<PartitionInfo> partitions = kafkaTemplate.partitionsFor(event.getEventType().getTopic());
+    final List<PartitionInfo> partitions = kafkaTemplate
+        .partitionsFor(event.getEventType().getTopic());
     // partition = hash(message_key)%number_of_partitions
     final Integer partitionId = event.getEventType().getKey().hashCode() % partitions.size();
 
@@ -67,8 +68,8 @@ public class KafkaSender {
       public void onSuccess(final SendResult<String, EEAEventVO> result) {
         if (result != null && result.getRecordMetadata() != null) {
           LOG.info(
-              "Sent message=[" + event + "] with offset=[" + result.getRecordMetadata().offset()
-                  + "] and partition [" + result.getRecordMetadata().partition() + "]");
+              "Sent message=[ {} ] with offset=[ {} ] and partition [ {} ]", event,
+              result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
         }
       }
 
@@ -79,7 +80,7 @@ public class KafkaSender {
        */
       @Override
       public void onFailure(final Throwable ex) {
-        LOG_ERROR.error("Unable to send message=[" + event + "] due to : " + ex.getMessage());
+        LOG_ERROR.error("Unable to send message=[ {} ] due to: {} ", event, ex.getMessage());
       }
     });
   }
