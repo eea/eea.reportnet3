@@ -104,8 +104,8 @@ public class DocumentServiceImpl implements DocumentService {
   @Transactional
   public void getDocument() throws EEAException {
     Session session = null;
-    String dataPass = "C:/OutFiles/" + "file.txt";
-    try (FileOutputStream fos = new FileOutputStream(dataPass)) {
+    File file = new File("C:/OutFiles/file.txt");
+    try (FileOutputStream fos = new FileOutputStream(file)) {
       session = getSession();
       // Initialize the session
       LOG.info("Fething the file...");
