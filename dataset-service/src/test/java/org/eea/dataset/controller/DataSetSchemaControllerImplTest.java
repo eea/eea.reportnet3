@@ -51,6 +51,8 @@ public class DataSetSchemaControllerImplTest {
   public void testCreateDataSchema() {
 
     dataSchemaControllerImpl.createDataSchema(1L);
+    dataSchemaController.createDataSchema(1L);
+    Mockito.verify(dataSchemaController, times(1)).createDataSchema(Mockito.any());
 
   }
 
