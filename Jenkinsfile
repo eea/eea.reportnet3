@@ -5,7 +5,7 @@ pipeline {
     triggers {
         cron(cron_working_branch)
     }
-    
+
     agent {
         label 'java8'
     }
@@ -46,6 +46,14 @@ pipeline {
                 sh '''
                     mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
                 '''
+            }
+        }
+
+        stage('Push to EEA GitHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop')
+                }
             }
         }
         

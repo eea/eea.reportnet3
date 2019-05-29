@@ -26,16 +26,15 @@ public class FileParserFactory implements IFileParserFactory {
   @Override
   public IFileParseContext createContext(String mimeType) {
     FileParseContextImpl context = null;
-   
+
     switch (mimeType.toLowerCase()) {
       case "csv":
         context = new FileParseContextImpl(new CSVReaderStrategy(dataSetSchemaService));
         break;
       case "xml":
-        context = new FileParseContextImpl(new XMLReaderStrategy(dataSetSchemaService));
+        // Fill it with the xml strategy
         break;
       default:
-        context = null;
         break;
     }
     return context;

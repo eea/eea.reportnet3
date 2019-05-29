@@ -28,6 +28,7 @@ import org.eea.document.type.NodeType;
 import org.eea.exception.EEAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,10 +47,14 @@ public class DocumentServiceImpl implements DocumentService {
   /** The Constant ADMIN. */
   private static final String ADMIN = "admin";
 
+  @Value(value = "C:/OutFiles/file.txt")
+  private String demoExitLocation;
+
   /**
    * test the connection.
-   * 
-   * @throws RepositoryException
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
    */
   @Override
   public void testLogging() throws EEAException, RepositoryException {
@@ -104,7 +109,7 @@ public class DocumentServiceImpl implements DocumentService {
   @Transactional
   public void getDocument() throws EEAException {
     Session session = null;
-    try (FileOutputStream fos = new FileOutputStream("C:/OutFiles/" + "file.txt")) {
+    try (FileOutputStream fos = new FileOutputStream(demoExitLocation)) {
       session = getSession();
       // Initialize the session
       LOG.info("Fething the file...");
@@ -123,7 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-	 * creates a repository in that location
+   * creates a repository in that location
    *
    * @param host the host
    * @param port the port
@@ -281,7 +286,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-	 * Reads the file and generate a FileResponse, with the content and the type
+   * Reads the file and generate a FileResponse, with the content and the type
    *
    * @param session the session
    * @param basePath the base path
