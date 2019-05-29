@@ -70,6 +70,9 @@ public class RecordStoreServiceImplTest {
   /** The Constant DATASET. */
   private static final String DATASET = "dataset_1";
 
+  /** The Constant FAILED. */
+  private static final String FAILED = "failed";
+
 
   /**
    * Inits the mocks.
@@ -158,7 +161,7 @@ public class RecordStoreServiceImplTest {
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(input);
     ConnectionDataVO result = recordStoreServiceImpl.getConnectionDataForDataset(DATASET);
-    assertEquals(DATASET, result.getSchema());
+    assertEquals(FAILED, DATASET, result.getSchema());
   }
 
 
@@ -192,7 +195,7 @@ public class RecordStoreServiceImplTest {
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(input);
     List<ConnectionDataVO> result = recordStoreServiceImpl.getConnectionDataForDataset();
-    assertEquals(DATASET, result.get(0).getSchema());
+    assertEquals(FAILED, DATASET, result.get(0).getSchema());
   }
 
   /**
@@ -202,9 +205,7 @@ public class RecordStoreServiceImplTest {
    */
   @Test(expected = UnsupportedOperationException.class)
   public void testCreateDataSetFromAnother() throws DockerAccessException {
-
     recordStoreServiceImpl.createDataSetFromOther(DATASET, DATASET);
-
   }
 
 

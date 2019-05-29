@@ -43,6 +43,9 @@ public class RecordStoreControllerImplTest {
   /** The Constant TEST. */
   private static final String TEST = "test";
 
+  /** The Constant FAILED. */
+  private static final String FAILED = "failed";
+
   /**
    * Inits the mocks.
    */
@@ -118,7 +121,7 @@ public class RecordStoreControllerImplTest {
     ConnectionDataVO expectedResult = new ConnectionDataVO();
     Mockito.when(recordStoreService.getConnectionDataForDataset(TEST)).thenReturn(expectedResult);
     ConnectionDataVO result = recordStoreControllerImpl.getConnectionToDataset(TEST);
-    assertEquals(expectedResult, result);
+    assertEquals(FAILED, expectedResult, result);
   }
 
   /**
@@ -131,7 +134,7 @@ public class RecordStoreControllerImplTest {
   public void getConnectionToDatasetTestException() throws DockerAccessException {
     doThrow(new DockerAccessException()).when(recordStoreService).getConnectionDataForDataset(TEST);
     ConnectionDataVO result = recordStoreControllerImpl.getConnectionToDataset(TEST);
-    assertNull(result);
+    assertNull(FAILED, result);
   }
 
 
@@ -147,7 +150,7 @@ public class RecordStoreControllerImplTest {
     expectedResult.add(new ConnectionDataVO());
     Mockito.when(recordStoreService.getConnectionDataForDataset()).thenReturn(expectedResult);
     List<ConnectionDataVO> result = recordStoreControllerImpl.getDataSetConnections();
-    assertEquals(expectedResult, result);
+    assertEquals(FAILED, expectedResult, result);
   }
 
   /**
@@ -160,7 +163,7 @@ public class RecordStoreControllerImplTest {
   public void getDataSetConnectionsTestException() throws DockerAccessException {
     doThrow(new DockerAccessException()).when(recordStoreService).getConnectionDataForDataset();
     List<ConnectionDataVO> result = recordStoreControllerImpl.getDataSetConnections();
-    assertNull(result);
+    assertNull(FAILED, result);
   }
 
 
