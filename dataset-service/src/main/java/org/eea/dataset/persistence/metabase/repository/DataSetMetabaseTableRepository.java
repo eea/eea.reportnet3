@@ -11,7 +11,7 @@ import org.springframework.data.repository.CrudRepository;
  * @author Mario Severa
  *
  */
-public interface DataSetMetabaseTableCollection extends CrudRepository<TableCollection, Long> {
+public interface DataSetMetabaseTableRepository extends CrudRepository<TableCollection, Long> {
 
 
   Iterable<TableCollection> findAllByDataSetId(Long datasetId);

@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -36,7 +36,7 @@ public class DatasetSchemaServiceTest {
   SchemasRepository schemasRepository;
 
   @Mock
-  DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
+  DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   @InjectMocks
   DataschemaServiceImpl dataSchemaServiceImpl;

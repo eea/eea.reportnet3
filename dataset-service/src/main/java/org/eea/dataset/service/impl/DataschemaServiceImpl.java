@@ -7,7 +7,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -28,7 +28,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   /** The data set metabase table collection. */
   @Autowired
-  private DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
+  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /** The dataschema mapper. */
   @Autowired
