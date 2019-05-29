@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
@@ -26,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSchemaServiceTest {
@@ -45,53 +43,42 @@ public class DatasetSchemaServiceTest {
 
   @Mock
   DataSchemaMapper dataSchemaMapper;
+  private List<TableCollection> tables;
+  DataSetSchema dataSetSchema;
 
   @Before
   public void initMocks() {
+    tables = new ArrayList<>();
+    dataSetSchema = new DataSetSchema();
+
+    TableCollection table = new TableCollection();
+    TableHeadersCollection header = new TableHeadersCollection();
+    List<TableHeadersCollection> headers = new ArrayList<>();
+
+    header.setHeaderName("test");
+    header.setId(1L);
+    // header.setTableId(1L);
+    header.setHeaderType("String");
+    headers.add(header);
+
+    table.setId(1L);
+    table.setDataFlowId(1L);
+    table.setDataSetId(1L);
+    table.setTableName("test");
+    table.setTableHeadersCollections(headers);
+    tables.add(table);
+
     MockitoAnnotations.initMocks(this);
   }
 
   @Test
   public void testCreateDataSchema() {
 
-    DataSetSchema dataSetSchema = new DataSetSchema();
+
+    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables);;
+
+
     dataSchemaServiceImpl.createDataSchema(1L);
-    Iterable<TableCollection> tables = dataSetMetabaseTableCollection.findAllByDataSetId(1L);
-    ArrayList<TableCollection> values = Lists.newArrayList(tables);
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    dataSetSchema.setNameDataSetSchema("dataSet_" + 1);
-    dataSetSchema.setIdDataFlow(1L);
-    for (int i = 1; i <= values.size(); i++) {
-      TableCollection table = values.get(i - 1);
-      TableSchema tableSchema = new TableSchema();
-      tableSchema.setIdTableSchema(new ObjectId());
-
-      tableSchema.setNameTableSchema(table.getTableName());
-
-      RecordSchema recordSchema = new RecordSchema();
-      recordSchema.setIdRecordSchema(new ObjectId());
-      recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
-
-      List<FieldSchema> fieldSchemas = new ArrayList<>();
-
-      int headersSize = table.getTableHeadersCollections().size();
-      for (int j = 1; j <= headersSize; j++) {
-        TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
-        FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema = new FieldSchema();
-        fieldSchema.setIdFieldSchema(new ObjectId());
-        fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
-        fieldSchema.setHeaderName(header.getHeaderName());
-        fieldSchema.setType(header.getHeaderType());
-        fieldSchemas.add(fieldSchema);
-      }
-      recordSchema.setFieldSchema(fieldSchemas);
-      tableSchema.setRecordSchema(recordSchema);
-      tableSchemas.add(tableSchema);
-    }
-    dataSetSchema.setTableSchemas(tableSchemas);
-    schemasRepository.save(dataSetSchema);
-
   }
 
 

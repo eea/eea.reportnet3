@@ -137,13 +137,13 @@
       <version>1.7.22</version>
     </dependency>
 
-	<!-- Lombook -->
-	<dependency>
-		<groupId>org.projectlombok</groupId>
-		<artifactId>lombok</artifactId>
-		<version>${projectlombok.version}</version>
+    <!-- Lombook -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${projectlombok.version}</version>
 
-	</dependency>
+    </dependency>
 
     <!-- Side libraries -->
     <dependency>
@@ -183,11 +183,11 @@
       <version>3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-	    <groupId>org.mockito</groupId>
-	    <artifactId>mockito-core</artifactId>
-	    <version>${mockito.version}</version>
-	    <scope>test</scope>
-	</dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
@@ -233,11 +233,27 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.4</version>
+        <configuration>
+          <excludes>
+            <exclude>
+              org.eea.*.persistence.domain
+            </exclude>
+            <exclude>
+              org.eea.*.configuration
+            </exclude>
+            <exclude>
+              org.eea.*.service.vo
+            </exclude>
+            <exclude>
+              org.eea.interfaces.*
+            </exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>prepare-agent</goal>
-            </goals>            
+            </goals>
           </execution>
           <!-- attached to Maven test phase -->
           <execution>
@@ -245,9 +261,17 @@
             <phase>test</phase>
             <goals>
               <goal>report</goal>
-            </goals>            
+            </goals>
+
           </execution>
+
         </executions>
+
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.2</version>
       </plugin>
 
     </plugins>
@@ -284,5 +308,21 @@
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
+  <profiles>
+    <profile>
+      <id>sonar</id>
+      <properties>
+        <sonar.projectKey>${project.groupId}:${project.artifactId}:test-module</sonar.projectKey>
+        <sonar.projectName>${project.artifactId}:test-module</sonar.projectName>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
