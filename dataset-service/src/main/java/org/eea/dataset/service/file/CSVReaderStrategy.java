@@ -200,25 +200,24 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private TableVO createTableVO(TableVO tableVO, List<TableVO> tables, List<String> values,
       Long partitionId) throws InvalidFileException {
-    TableVO tableVOAux = tableVO;
     // Create object Table and setter the attributes
     if (headers.isEmpty()) {
       throw new InvalidFileException();
     }
     if (!values.get(0).equals(tableVO.getName())) {
-      tableVOAux = new TableVO();
-      tableVOAux.setHeaders(headers);
-      tableVOAux.setName(values.get(0));
+      tableVO = new TableVO();
+      tableVO.setHeaders(headers);
+      tableVO.setName(values.get(0));
       if (null != dataSetSchema) {
-        tableVOAux.setIdMongo(parseCommon.findIdTable(tableVO.getName()));
+        tableVO.setIdMongo(parseCommon.findIdTable(tableVO.getName()));
       }
-      tableVOAux.setRecords(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
-      tables.add(tableVOAux);
+      tableVO.setRecords(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
+      tables.add(tableVO);
 
     } else {
-      tableVOAux.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
+      tableVO.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
     }
-    return tableVOAux;
+    return tableVO;
   }
 
   /**
