@@ -1,4 +1,4 @@
-String cron_working_branch = BRANCH_NAME != "develop" ? "@hourly" : ""
+String cron_working_branch = BRANCH_NAME != "develop" ? "@daily" : ""
 
 pipeline {
 
@@ -50,6 +50,9 @@ pipeline {
         }
 
         stage('Push to EEA GitHub') {
+            when {
+                branch 'develop' 
+            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh('git config --global user.email "jorge.saenz@altia.es"')
