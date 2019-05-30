@@ -1,9 +1,5 @@
 package org.eea.dataset.service.file;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +20,10 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 /**
  * The Class CSVReaderStrategy.
@@ -59,7 +59,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /**
    * The parse common.
    */
-  private final ParseCommon parseCommon;
+  private ParseCommon parseCommon;
 
 
   /**
@@ -87,10 +87,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   @Override
   public DataSetVO parseFile(final InputStream inputStream, final Long dataflowId,
-      final Long partitionId)
-      throws InvalidFileException {
-    final Reader buf = new BufferedReader(
-        new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+      final Long partitionId) throws InvalidFileException {
+    final Reader buf =
+        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     return readLines(buf, dataflowId, partitionId);
 
   }
@@ -155,8 +154,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @throws InvalidFileException the invalid file exception
    */
   private TableVO sanitizeAndCreateDataSet(final Long partitionId, final String[] line,
-      TableVO tableVO,
-      final List<TableVO> tables, final List<String> values) throws InvalidFileException {
+      TableVO tableVO, final List<TableVO> tables, final List<String> values)
+      throws InvalidFileException {
     if (null != values && !values.isEmpty()) {
       // if the line is white then skipped
       if (line.length == 1 && line[0].isEmpty()) {
@@ -221,8 +220,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @throws InvalidFileException the invalid file exception
    */
   private TableVO createTableVO(TableVO tableVO, final List<TableVO> tables,
-      final List<String> values,
-      final Long partitionId) throws InvalidFileException {
+      final List<String> values, final Long partitionId) throws InvalidFileException {
     // Create object Table and setter the attributes
     if (headers.isEmpty()) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
