@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
@@ -30,6 +31,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -268,9 +271,11 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Gets the table values by id.
+   * Gets the table values by id. It additionally can page the results and sort them
    *
-   * @param MongoID the mongo ID
+   * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
+   *
+   * @param mongoID the mongo ID
    * @param pageable the pageable
    *
    * @return the table values by id
@@ -279,7 +284,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public TableVO getTableValuesById(final String mongoID, final Pageable pageable)
+  public TableVO getTableValuesById(final String mongoID, final Pageable pageable,
+      final String idFieldSchema, final Boolean asc)
       throws EEAException {
 
     final List<RecordValue> record = recordRepository
@@ -292,6 +298,17 @@ public class DatasetServiceImpl implements DatasetService {
 
     final TableVO result = new TableVO();
     result.setRecords(recordMapper.entityListToClass(record));
+    Optional.ofNullable(idFieldSchema)
+        .ifPresent(field -> {
+          result.getRecords().sort((RecordVO v1, RecordVO v2) -> {
+            final FieldVO val1 = v1.getFields().stream()
+                .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
+            final FieldVO val2 = v2.getFields().stream()
+                .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
+            return asc ? val1.getValue().compareTo(val2.getValue())
+                : val1.getValue().compareTo(val2.getValue()) * -1;
+          });
+        });
 
     result.setTotalRecords(resultcount);
     return result;

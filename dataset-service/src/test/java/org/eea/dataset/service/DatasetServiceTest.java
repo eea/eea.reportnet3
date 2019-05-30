@@ -30,7 +30,6 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
@@ -282,7 +281,7 @@ public class DatasetServiceTest {
   public void getTableValuesByIdTestEmpty() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<>());
-    datasetService.getTableValuesById("mongoId", pageable);
+    datasetService.getTableValuesById("mongoId", pageable, null, true);
   }
 
   @Test
@@ -291,7 +290,7 @@ public class DatasetServiceTest {
         .thenReturn(recordValues);
     when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    datasetService.getTableValuesById("mongoId", pageable);
+    datasetService.getTableValuesById("mongoId", pageable, null, true);
     Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
   }
 

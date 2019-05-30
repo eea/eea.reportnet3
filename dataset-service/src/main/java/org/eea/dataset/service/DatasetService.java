@@ -26,6 +26,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -51,22 +52,25 @@ public interface DatasetService {
   /**
    * Gets the table values by id.
    *
-   * @param MongoID the mongo ID
+   * @param mongoID the mongo ID
    * @param pageable the pageable
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(String mongoID, Pageable pageable) throws EEAException;
+  TableVO getTableValuesById(String mongoID, Pageable pageable, String idFieldSchema, Boolean asc)
+      throws EEAException;
 
 
   /**
    * Count table data.
    *
    * @param tableId the table id
+   *
    * @return the long
    */
   Long countTableData(Long tableId);
-
 
 
   /**
@@ -76,6 +80,7 @@ public interface DatasetService {
    * @param dataFlowId the data flow id
    * @param tableName the table name
    * @param Headers the headers
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */

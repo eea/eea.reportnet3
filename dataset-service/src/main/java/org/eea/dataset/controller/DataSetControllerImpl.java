@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -64,41 +63,49 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param asc the asc
+   *
    * @return the data tables values
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+<<<<<<< Updated upstream
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
+=======
+  public TableVO getDataTablesValues(@PathVariable("id") final Long datasetId,
+      @RequestParam("MongoID") final String mongoID,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) final Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) final Integer pageSize,
+      @RequestParam(value = "fields", required = false) final String fields,
+      @RequestParam(value = "asc", defaultValue = "true") final Boolean asc) {
+>>>>>>> Stashed changes
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    Pageable pageable;
-    if (null == fields) {
-      pageable = PageRequest.of(pageNum, pageSize);
-    } else {
-      pageable = PageRequest.of(pageNum, pageSize,
-          asc ? Sort.by(fields).ascending() : Sort.by(fields).descending());
-    }
+    final Pageable pageable = PageRequest.of(pageNum, pageSize);
 
     TableVO result = null;
     try {
+<<<<<<< Updated upstream
       result = datasetService.getTableValuesById(idTableSchema, pageable);
     } catch (EEAException e) {
+=======
+      result = datasetService.getTableValuesById(mongoID, pageable, fields, asc);
+    } catch (final EEAException e) {
+>>>>>>> Stashed changes
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
 
     return result;
   }
@@ -153,16 +160,16 @@ public class DataSetControllerImpl implements DatasetController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     // extract the filename
-    String fileName = file.getOriginalFilename();
+    final String fileName = file.getOriginalFilename();
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     LoadDataCallable callable = null;
     // extract the file content
     try {
-      InputStream is = file.getInputStream();
+      final InputStream is = file.getInputStream();
       callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     } finally {
       executor.shutdown();
@@ -187,15 +194,15 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @PostMapping("{id}/loadSchemaMongo")
-  public void loadSchemaMongo(@PathVariable("id") final Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollection) {
+  public void loadSchemaMongo(@PathVariable("id") final Long datasetId, final Long dataFlowId,
+      final TableCollectionVO tableCollection) {
     if (datasetId == null || dataFlowId == null || tableCollection == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
       datasetService.setMongoTables(datasetId, dataFlowId, tableCollection);
-    } catch (EEAException e) {
+    } catch (final EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
 
