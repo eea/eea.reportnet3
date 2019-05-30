@@ -36,7 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
 
   /** The dll. */
-  @Value("${spring.jpa.hibernate.ddl-auto}")
+  @Value("${spring.jpa.hibernate.metabase.ddl-auto}")
   private String dll;
 
   /** The dialect. */

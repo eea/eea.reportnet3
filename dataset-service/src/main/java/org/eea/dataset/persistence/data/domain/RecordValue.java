@@ -32,7 +32,7 @@ public class RecordValue {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
-  private Integer id;
+  private Long id;
 
   /**
    * The id mongo.

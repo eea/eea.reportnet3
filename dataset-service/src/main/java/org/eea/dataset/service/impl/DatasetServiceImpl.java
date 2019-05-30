@@ -241,13 +241,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * We call jpaRepository and delete.
+   * Delete import data.
    *
    * @param dataSetId the data set id
    */
   @Override
-  public void deleteImportData(final Long dataSetId) {
-    datasetRepository.deleteById(dataSetId);
+  @Transactional
+  public void deleteImportData(Long dataSetId) {
+    datasetRepository.empty(dataSetId);
   }
 
   /**
