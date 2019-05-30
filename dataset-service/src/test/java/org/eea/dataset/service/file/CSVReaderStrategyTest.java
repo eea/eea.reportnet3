@@ -90,7 +90,6 @@ public class CSVReaderStrategyTest {
   public void testParseFile() throws InvalidFileException {
 
     when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
-    // when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
     when(parseCommon.findIdTable(Mockito.any())).thenReturn("111");
     when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
@@ -98,5 +97,42 @@ public class CSVReaderStrategyTest {
     DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L);
     assertNotNull(result);
   }
+
+
+  /**
+   * Test parse exception.
+   *
+   * @throws InvalidFileException the invalid file exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = InvalidFileException.class)
+  public void testParseException() throws InvalidFileException, IOException {
+    String csv = "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
+    input = file.getInputStream();
+    when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    csvReaderStrategy.parseFile(input, 1L, null);
+  }
+
+
+
+  /**
+   * Test parse exception.
+   *
+   * @throws InvalidFileException the invalid file exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = InvalidFileException.class)
+  public void testParseException2() throws InvalidFileException, IOException {
+    String csv = "TABLA1\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
+    input = file.getInputStream();
+    when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    csvReaderStrategy.parseFile(input, 1L, null);
+  }
+
+
 
 }
