@@ -47,6 +47,12 @@ const ReporterDataSet = () => {
       setVisibility(false);
   }
 
+  const items = [
+    {label:'New Dataset', url: '#'},
+    {label:'Edit data', url: '#'}
+  ];
+  const home = {icon: 'pi pi-home', url: '#'};
+
   //TODO:Change + Error/warning treatment
     
   useEffect(()=>{
@@ -111,27 +117,34 @@ const ReporterDataSet = () => {
 
     setDashBoardData({
       labels: ['Table 1', 'Table 2', 'Table 3', 'Table 4'],
-            datasets: [
-                {
-                    label: 'Info',
-                    backgroundColor: '#004494',
-                    data: [65, 50, 80, 11]
-                },
-                {
-                    label: 'Warning',
-                    backgroundColor: '#ffd617',
-                    data: [15, 48, 5, 19]
-                },
-                {
-                  label: 'Error',
-                  backgroundColor: '#DA2131',
-                  data: [10, 2, 15, 70]
-              }
-            ]});
+      datasets: [
+          {
+              label: 'Info',
+              backgroundColor: '#004494',
+              data: getPercentage([105, 50, 80, 11])
+          },
+          {
+              label: 'Warning',
+              backgroundColor: '#ffd617',
+              data: getPercentage([15, 48, 58, 19])
+          },
+          {
+            label: 'Error',
+            backgroundColor: '#DA2131',
+            data: getPercentage([10, 2, 15, 85])
+        }
+      ]});
 
-    setDashBoardOptions({tooltips: {
-      mode: 'index',
-      intersect: false
+    setDashBoardOptions({
+      tooltips: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+            label: function(tooltipItems, data) { 
+              console.log(data);
+                return `(${tooltipItems.yLabel} %)`;
+            }
+        }
       },
       responsive: true,
       scales: {
@@ -139,11 +152,21 @@ const ReporterDataSet = () => {
               stacked: true,
           }],
           yAxes: [{
-              stacked: true
+              stacked: true,
+              scaleLabel: {
+								display: true
+								//labelString: 'Value'
+              },
+              ticks: {
+                // Include a % sign in the ticks
+                callback: function(value, index, values) {
+                    return value +' %';
+                }
+            }
           }]
       }});
 
-//Fetch data (JSON)
+    //Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
     const dataPromise = HTTPRequesterAPI.get(
       {
@@ -173,26 +196,28 @@ const ReporterDataSet = () => {
     .catch(error => {
       console.log(error);
       return error;
-    });
-
-    
+    });    
   },[]);
 
-  const items = [
-    {label:'New Dataset', url: '#'},
-    {label:'Edit data', url: '#'}
-  ];
-  const home = {icon: 'pi pi-home', url: '#'};
+
+  const getPercentage = (tableValues) =>{
+     let valArr = [[105, 50, 80, 11],[15, 48, 58, 19],[10, 2, 15, 85]];
+     let total = valArr.reduce((arr1, arr2) =>
+          arr1.map((v, i) => v + arr2[i]));
+      
+
+    return tableValues.map((v,i)=>((v/total[i])*100).toFixed(2));
+  }
+
   return (
     <div className="titleDiv">
-
         <BreadCrumb model={items} home={home}/>
         <Title title="Data Set: R3 Demo Dataflow"/> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner*/}
-        {(tableSchema)?<TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/> : null}
+        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/>
           <Dialog header="Upload your Dataset" visible={visible}
                   className={styles.Dialog} dismissableMask={false} onHide={onHide} >
               <CustomFileUpload mode="advanced" name="demo[]" url="." onUpload={onUploadFile} 

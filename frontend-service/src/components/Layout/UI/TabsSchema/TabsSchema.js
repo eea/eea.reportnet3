@@ -42,7 +42,7 @@ const TabsSchema = (props) => {
     
 
 
-    let tabs = 
+    let tabs = (props.tables && props.tableSchemaColumns)?
         props.tables.map((table, i) => {
             return (
                 <TabPanel header={table.name} key={table.name} rightIcon="pi pi-exclamation-triangle">
@@ -51,7 +51,8 @@ const TabsSchema = (props) => {
                     </div>
                 </TabPanel>
             );
-        });
+        })
+        : null;
     return (
         <TabView>
             {tabs}
