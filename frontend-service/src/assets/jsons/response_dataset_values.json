@@ -1,0 +1,63 @@
+{
+  "id": 1,
+  "idMongo": "5ce40efd1d18ea3494362fb4",
+  "tableVO": [
+    {
+      "id": 2,
+      "idMongo": "5ce40efd1d18ea3494362fb5",
+      "records": [
+        {
+          "idMongo": "5ce40efd1d18ea3494362fb6",
+          "id": 8,
+          "fields": [
+            {
+              "type": "BOOLEAN",
+              "value": "I|I",
+              "id": 9,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb7"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "I",
+              "id": 10,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb8"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "I",
+              "id": 11,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb9"
+            }
+          ]
+        },
+        {
+          "idMongo": "5ce40efd1d18ea3494362fb6",
+          "id": 3,
+          "fields": [
+            {
+              "type": "BOOLEAN",
+              "value": "B",
+              "id": 4,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb7"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "C",
+              "id": 5,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb8"
+            },
+            {
+              "type": "BOOLEAN",
+              "value": "D",
+              "id": 6,
+              "idFieldSchema": "5ce40efd1d18ea3494362fb9"
+            }
+          ]
+        }
+      ],
+      "headers": null,
+      "name": "TABLA1",
+      "totalRecords": 15154
+    }
+  ]
+}

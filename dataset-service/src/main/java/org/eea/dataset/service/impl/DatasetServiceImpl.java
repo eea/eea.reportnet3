@@ -45,51 +45,75 @@ import org.springframework.stereotype.Service;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /** The data set tables mapper. */
+  /**
+   * The data set tables mapper.
+   */
   @Autowired
   private DataSetTablesMapper dataSetTablesMapper;
 
-  /** The record mapper. */
+  /**
+   * The record mapper.
+   */
   @Autowired
   private RecordMapper recordMapper;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Autowired
   private RecordRepository recordRepository;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The partition data set metabase repository. */
+  /**
+   * The partition data set metabase repository.
+   */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /** The data set metabase table collection. */
+  /**
+   * The data set metabase table collection.
+   */
   @Autowired
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The record store controller zull. */
+  /**
+   * The record store controller zull.
+   */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
-  /** The file parser factory. */
+  /**
+   * The file parser factory.
+   */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Autowired
   private KafkaSender kafkaSender;
 
@@ -112,40 +136,44 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
-  public void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
+  public void processFile(@DatasetId final Long datasetId, final String fileName,
+      final InputStream is)
       throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
     }
-    String mimeType = getMimetype(fileName);
+    final String mimeType = getMimetype(fileName);
     // validates file types for the data load
     validateFileType(mimeType);
     try {
-      PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+      final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
           .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
       if (partition == null) {
         throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
       }
       // We get the dataFlowId from the metabase
-      DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+      final DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId)
+          .orElse(null);
       if (datasetMetabase == null) {
         throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
       }
       // create the right file parser for the file type
-      IFileParseContext context = fileParserFactory.createContext(mimeType);
-      DataSetVO datasetVO = context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
+      final IFileParseContext context = fileParserFactory.createContext(mimeType);
+      final DataSetVO datasetVO = context
+          .parse(is, datasetMetabase.getDataflowId(), partition.getId());
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
       }
       datasetVO.setId(datasetId);
-      DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
       if (dataset == null) {
         throw new IOException("Error mapping file");
       }
@@ -159,17 +187,18 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-
   /**
    * Gets the mimetype.
    *
    * @param file the file
+   *
    * @return the mimetype
+   *
    * @throws EEAException the EEA exception
    */
-  private String getMimetype(String file) throws EEAException {
+  private static String getMimetype(final String file) throws EEAException {
     String mimeType = null;
-    int location = file.lastIndexOf('.');
+    final int location = file.lastIndexOf('.');
     if (location == -1) {
       throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
     }
@@ -181,9 +210,10 @@ public class DatasetServiceImpl implements DatasetService {
    * Validate file type.
    *
    * @param mimeType the mime type
+   *
    * @throws EEAException the EEA exception
    */
-  private void validateFileType(String mimeType) throws EEAException {
+  private static void validateFileType(final String mimeType) throws EEAException {
     // files that will be accepted: csv, xml, xls, xlsx
     switch (mimeType) {
       case "csv":
@@ -205,7 +235,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    */
   @Override
-  public void deleteDataSchema(String datasetId) {
+  public void deleteDataSchema(final String datasetId) {
     schemasRepository.deleteById(new ObjectId(datasetId));
 
   }
@@ -216,7 +246,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataSetId the data set id
    */
   @Override
-  public void deleteImportData(Long dataSetId) {
+  public void deleteImportData(final Long dataSetId) {
     datasetRepository.deleteById(dataSetId);
   }
 
@@ -226,11 +256,11 @@ public class DatasetServiceImpl implements DatasetService {
    * @param eventType the event type
    * @param datasetId the dataset id
    */
-  private void releaseKafkaEvent(EventType eventType, Long datasetId) {
+  private void releaseKafkaEvent(final EventType eventType, final Long datasetId) {
 
-    EEAEventVO event = new EEAEventVO();
+    final EEAEventVO event = new EEAEventVO();
     event.setEventType(eventType);
-    Map<String, Object> dataOutput = new HashMap<>();
+    final Map<String, Object> dataOutput = new HashMap<>();
     dataOutput.put("dataset_id", datasetId);
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
@@ -241,7 +271,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param MongoID the mongo ID
    * @param pageable the pageable
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -249,14 +281,15 @@ public class DatasetServiceImpl implements DatasetService {
   public TableVO getTableValuesById(final String mongoID, final Pageable pageable)
       throws EEAException {
 
-    List<RecordValue> record = recordRepository.findByTableValue_idMongo(mongoID, pageable);
+    final List<RecordValue> record = recordRepository
+        .findByTableValue_IdTableSchema(mongoID, pageable);
     if (record == null || record.isEmpty()) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
 
-    Long resultcount = countTableData(record.get(0).getTableValue().getId());
+    final Long resultcount = countTableData(record.get(0).getTableValue().getId());
 
-    TableVO result = new TableVO();
+    final TableVO result = new TableVO();
     result.setRecords(recordMapper.entityListToClass(record));
 
     result.setTotalRecords(resultcount);
@@ -268,13 +301,13 @@ public class DatasetServiceImpl implements DatasetService {
    * Count table data.
    *
    * @param tableId the table id
+   *
    * @return the long
    */
   @Override
-  public Long countTableData(Long tableId) {
+  public Long countTableData(final Long tableId) {
     return recordRepository.countByTableValue_id(tableId);
   }
-
 
 
   /**
@@ -283,13 +316,14 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
    * @param tableCollectionVO the table collection VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollectionVO) throws EEAException {
-    TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
+  public void setMongoTables(@DatasetId final Long datasetId, final Long dataFlowId,
+      final TableCollectionVO tableCollectionVO) throws EEAException {
+    final TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
     tableCollection.setDataSetId(datasetId);
     tableCollection.setDataFlowId(dataFlowId);
 

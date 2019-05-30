@@ -147,13 +147,13 @@
   top: -0.5em;
 }
 .bootstrap a {
-  color: #004494;
+  color: #404040;
   text-decoration: none;
   background-color: transparent;
   -webkit-text-decoration-skip: objects;
 }
 .bootstrap a:hover {
-  color: #0056b3;
+  color: var(--bluebg-color);
   text-decoration: underline;
 }
 .bootstrap a:not([href]):not([tabindex]) {
@@ -5603,7 +5603,7 @@
   background-color: #bd2130 !important;
 }
 .bootstrap .bg-light {
-  background-color: #f8f9fa !important;
+  background-color: #f5f5f5 !important;
 }
 .bootstrap a.bg-light:hover,
 .bootstrap a.bg-light:focus,

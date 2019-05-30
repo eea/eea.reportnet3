@@ -39,18 +39,20 @@ const TabsSchema = (props) => {
         }
     ];
 
+    
 
-    let tabs = 
+
+    let tabs = (props.tables && props.tableSchemaColumns)?
         props.tables.map((table, i) => {
             return (
                 <TabPanel header={table.name} key={table.name} rightIcon="pi pi-exclamation-triangle">
                     <div className={styles.TabsSchema}>
-                        <DataViewer name={table.name} data={table.data} customButtons={customButtons}/>
+                        <DataViewer key={i} name={table.name} customButtons={customButtons} tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}/>
                     </div>
                 </TabPanel>
             );
-        });
-    
+        })
+        : null;
     return (
         <TabView>
             {tabs}
