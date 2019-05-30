@@ -178,7 +178,7 @@ const ReporterDataSet = () => {
     //fetchDataHandler(jsonDataSchema);
     const dataPromise = HTTPRequesterAPI.get(
       {
-        url:'/dataSchema/1',
+        url:'/dataSchema/dataflow/1',
         queryString: {}
       }
     );
