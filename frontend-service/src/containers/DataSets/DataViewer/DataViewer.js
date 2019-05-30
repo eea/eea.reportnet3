@@ -39,7 +39,7 @@ const DataViewer = (props) => {
           {
             url:'/dataset/TableValueDataset/1',
             queryString: {
-            idTableSchema: props.id,
+              idTableSchema: props.id,
               asc:sortOrder,
               fields:sortField,
               pageNum:firstRow,
