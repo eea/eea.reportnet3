@@ -37,6 +37,7 @@ public interface DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param asc the asc
+   *
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,7 +78,6 @@ public interface DatasetController {
       @RequestParam("file") MultipartFile file);
 
 
-
   /**
    * Delete import data.
    *
@@ -87,14 +87,12 @@ public interface DatasetController {
   void deleteImportData(@RequestParam("datasetName") Long datasetId);
 
 
-
   /**
    * Load schema mongo.
    *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
-   * @param tableName the table name
-   * @param Headers the headers
+   * @param tableCollections the table collections
    */
   @RequestMapping("{id}/loadDatasetData")
   void loadSchemaMongo(@PathVariable("id") Long datasetId,

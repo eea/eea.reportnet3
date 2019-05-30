@@ -58,7 +58,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the data tables values.
    *
    * @param datasetId the dataset id
-   * @param mongoID the mongo ID
+   * @param idTableSchema the mongo ID
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
@@ -69,38 +69,24 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-<<<<<<< Updated upstream
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
-=======
-  public TableVO getDataTablesValues(@PathVariable("id") final Long datasetId,
-      @RequestParam("MongoID") final String mongoID,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) final Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) final Integer pageSize,
-      @RequestParam(value = "fields", required = false) final String fields,
-      @RequestParam(value = "asc", defaultValue = "true") final Boolean asc) {
->>>>>>> Stashed changes
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    final Pageable pageable = PageRequest.of(pageNum, pageSize);
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
 
     TableVO result = null;
     try {
-<<<<<<< Updated upstream
-      result = datasetService.getTableValuesById(idTableSchema, pageable);
+      result = datasetService.getTableValuesById(idTableSchema, pageable, fields, asc);
     } catch (EEAException e) {
-=======
-      result = datasetService.getTableValuesById(mongoID, pageable, fields, asc);
-    } catch (final EEAException e) {
->>>>>>> Stashed changes
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
@@ -160,16 +146,16 @@ public class DataSetControllerImpl implements DatasetController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     // extract the filename
-    final String fileName = file.getOriginalFilename();
+    String fileName = file.getOriginalFilename();
     final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     LoadDataCallable callable = null;
     // extract the file content
     try {
-      final InputStream is = file.getInputStream();
+      InputStream is = file.getInputStream();
       callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
-    } catch (final IOException e) {
+    } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     } finally {
       executor.shutdown();
@@ -194,15 +180,15 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @PostMapping("{id}/loadSchemaMongo")
-  public void loadSchemaMongo(@PathVariable("id") final Long datasetId, final Long dataFlowId,
-      final TableCollectionVO tableCollection) {
+  public void loadSchemaMongo(@PathVariable("id") final Long datasetId, Long dataFlowId,
+      TableCollectionVO tableCollection) {
     if (datasetId == null || dataFlowId == null || tableCollection == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
       datasetService.setMongoTables(datasetId, dataFlowId, tableCollection);
-    } catch (final EEAException e) {
+    } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
 
