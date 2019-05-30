@@ -6,7 +6,7 @@ import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-import jsonData from '../../../assets/jsons/response_dataset_values.json';
+//import jsonData from '../../../assets/jsons/response_dataset_values2.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
@@ -39,26 +39,25 @@ const DataViewer = (props) => {
           {
             url:'/dataset/TableValueDataset/1',
             queryString: {
-              MongoID: "prueba",
-              asc:true,
-              fields:"id",
-              pageNum:0,
-              pageSize:20
+              MongoID: props.id,
+              asc:sortOrder,
+              fields:sortField,
+              pageNum:firstRow,
+              pageSize:numRows
             }
           }
         );
 
         dataPromise.then(response =>{
           console.log(response.data);
-          filterDataResponse(response.data.tableVO[0].records);
-          setTotalRecords(response.data.tableVO[0].totalRecords);
+          filterDataResponse(response.data.records);
+          setTotalRecords(response.data.totalRecords);
         })
         .catch(error => {
           console.log(error);
           return error;
         });
-
-        //filterDataResponse(jsonData.tableVO[0].records);        
+     
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
         console.log(inmTableSchemaColumns);
@@ -72,11 +71,11 @@ const DataViewer = (props) => {
         //     <span className="my-multiselected-empty-token">Visibility</span>
         //   </div>
         // );
-        let headerArr = <div className="TableDiv">
-            <i className="pi pi-eye"></i>
-            <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder="Visibility" filter={true} fixedPlaceholder={true}/>
-        </div>;
-        setHeader(headerArr);
+        // let headerArr = <div className="TableDiv">
+        //     <i className="pi pi-eye"></i>
+        //     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
+        // </div>;
+        // setHeader(headerArr);
         
         let columnsArr = cols.map(col => <Column sortable={true} key={col.field} field={col.field} header={col.header} />);
         setColumns(columnsArr); 
@@ -97,16 +96,16 @@ const DataViewer = (props) => {
         setSortOrder((sortOrder === 1)?-1:1);        
       }
   
-      const onColumnToggleHandler = (event) =>{
-        console.log("OnColumnToggle...");
-        setCols(event.value);
-        setColOptions(colOptions);
-      }
+      // const onColumnToggleHandler = (event) =>{
+      //   console.log("OnColumnToggle...");
+      //   setCols(event.value);
+      //   setColOptions(colOptions);
+      // }
   
-      useEffect(()=>{
-        console.log("Fetching new data...");
-      console.log(fetchedData);
-      },[fetchedData]);
+      // useEffect(()=>{
+      //   console.log("Fetching new data...");
+      // console.log(fetchedData);
+      // },[fetchedData]);
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
@@ -145,7 +144,6 @@ const DataViewer = (props) => {
           auxArrayFiltered.push(auxFiltered);
           auxFiltered={};
         });
-
         setFetchedData(auxArrayFiltered);
       }
 
