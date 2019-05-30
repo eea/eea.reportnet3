@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 public class ParseCommon {
 
   /** The data set schema. */
-  private DataSetSchemaVO dataSetSchema;
+  private static DataSetSchemaVO dataSetSchema;
 
   /** The tables schema. */
-  private List<TableSchemaVO> tablesSchema;
+  private static List<TableSchemaVO> tablesSchema;
 
   /** The Constant TABLE_HEADER. */
   private static final String TABLE_HEADER = "_TABLE";
@@ -48,9 +48,9 @@ public class ParseCommon {
    */
   public String findIdRecord(String idTableMongo) {
     // Find the idrecordSchema of MongoDB
-    if (null != findTableSchema(idTableMongo)) {
-      TableSchemaVO tableS = findTableSchema(idTableMongo);
-      return null != tableS ? tableS.getRecordSchema().getIdRecordSchema() : null;
+    TableSchemaVO tableS = findTableSchema(idTableMongo);
+    if (null != tableS) {
+      return null != tableS.getRecordSchema() ? tableS.getRecordSchema().getIdRecordSchema() : null;
     }
     return null;
   }
@@ -84,9 +84,8 @@ public class ParseCommon {
     // Find the idFieldSchema of MongoDB
     TableSchemaVO recordSchemas = findTableSchema(idTablaSchema);
     RecordSchemaVO recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
-    if (null != recordSchema) {
-      List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
-      for (FieldSchemaVO fieldSchema : fieldsSchemas) {
+    if (null != recordSchema && null != recordSchema.getFieldSchema()) {
+      for (FieldSchemaVO fieldSchema : recordSchema.getFieldSchema()) {
         if (null != fieldSchema.getName() && fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
           return fieldSchema;
         }

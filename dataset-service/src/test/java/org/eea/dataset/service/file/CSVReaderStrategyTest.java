@@ -32,6 +32,9 @@ public class CSVReaderStrategyTest {
   @InjectMocks
   private CSVReaderStrategy csvReaderStrategy;
 
+  @Mock
+  private ParseCommon parseCommon;
+
   /** The input. */
   private InputStream input;
 
@@ -85,39 +88,15 @@ public class CSVReaderStrategyTest {
    */
   @Test
   public void testParseFile() throws InvalidFileException {
-    when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+
+    when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    // when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
+    when(parseCommon.findIdTable(Mockito.any())).thenReturn("111");
+    when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new FieldSchemaVO());
+    when(parseCommon.isHeader("_table")).thenReturn(true);
+    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L);
     assertNotNull(result);
   }
-
-  /**
-   * Test parse file table null.
-   *
-   * @throws InvalidFileException the invalid file exception
-   */
-  @Test
-  public void testParseFileTableNull() throws InvalidFileException {
-    dataSet.setTableSchemas(null);
-    when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
-    assertNotNull(result);
-  }
-
-
-  /**
-   * Test parse exception.
-   *
-   * @throws InvalidFileException the invalid file exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test(expected = InvalidFileException.class)
-  public void testParseException() throws InvalidFileException, IOException {
-    String csv = "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
-    MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
-    input = file.getInputStream();
-    csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
-  }
-
 
 }

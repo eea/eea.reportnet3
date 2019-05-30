@@ -202,7 +202,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       Long partitionId) throws InvalidFileException {
     // Create object Table and setter the attributes
     if (headers.isEmpty()) {
-      throw new InvalidFileException();
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }
     if (!values.get(0).equals(tableVO.getName())) {
       tableVO = new TableVO();
