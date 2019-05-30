@@ -1,10 +1,10 @@
 CREATE schema %dataset_name% AUTHORIZATION root;
 
-CREATE TABLE %dataset_name%.DATASET_VALUE (ID integer, ID_MONGO text)  TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.TABLE_VALUE (ID integer, NAME text, ID_MONGO text, DATASET_ID integer) TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.RECORD_VALUE(ID integer, ID_MONGO text, ID_TABLE integer, DATASET_PARTITION_ID integer) TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.FIELD_VALUE (ID integer, TYPE text, VALUE text, ID_FIELDSCHEMA text, ID_RECORD integer) TABLESPACE pg_default;
-CREATE TABLE %dataset_name%.RULES_RESULT(ID integer, NAME text) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.DATASET_VALUE (ID integer, ID_DATASET_SCHEMA text, PRIMARY key (ID))  TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.TABLE_VALUE (ID integer, NAME text, ID_TABLE_SCHEMA text, DATASET_ID integer,PRIMARY key (ID)) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.RECORD_VALUE(ID integer, ID_RECORD_SCHEMA text, ID_TABLE integer, DATASET_PARTITION_ID integer,PRIMARY key (ID)) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.FIELD_VALUE (ID integer, TYPE text, VALUE text, ID_FIELD_SCHEMA text, ID_RECORD integer,PRIMARY key (ID)) TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.RULES_RESULT(ID integer, NAME text,PRIMARY key (ID)) TABLESPACE pg_default;
 
 ALTER TABLE %dataset_name%.DATASET_VALUE  OWNER to root;
 ALTER TABLE %dataset_name%.TABLE_VALUE  OWNER to root;
