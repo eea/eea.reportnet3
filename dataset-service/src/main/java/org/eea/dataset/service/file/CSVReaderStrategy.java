@@ -18,8 +18,6 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.opencsv.CSVParser;
@@ -39,6 +37,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant TABLE_HEADER. */
   private static final String TABLE_HEADER = "_TABLE";
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -52,17 +52,20 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The headers. */
   private List<FieldSchemaVO> headers;
 
-  /** The tables schema. */
-  private List<TableSchemaVO> tablesSchema;
+  /** The parse common. */
+  private ParseCommon parseCommon;
+
 
 
   /**
    * Instantiates a new CSV reader strategy.
    *
    * @param datasetSchemaService the dataset schema service
+   * @param parseCommon the parse common
    */
-  public CSVReaderStrategy(DatasetSchemaService datasetSchemaService) {
+  public CSVReaderStrategy(DatasetSchemaService datasetSchemaService, ParseCommon parseCommon) {
     this.datasetSchemaService = datasetSchemaService;
+    this.parseCommon = parseCommon;
   }
 
   /**
@@ -77,12 +80,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException {
-    try (Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-      return readLines(buf, dataflowId, partitionId);
-    } catch (IOException e) {
-      throw new InvalidFileException(e);
-    }
+    Reader buf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    return readLines(buf, dataflowId, partitionId);
+
   }
 
   /**
@@ -104,7 +104,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     DataSetVO dataset = new DataSetVO();
 
     // Get DataSetSchema
-    getDataSetSchema(dataflowId);
+    dataSetSchema = parseCommon.getDataSetSchema(dataflowId, datasetSchemaService);
 
     // Init de library of reader file
     CSVReader reader = initReader(buf);
@@ -113,21 +113,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // through the file
       while ((line = reader.readNext()) != null) {
         List<String> values = Arrays.asList(line);
-        if (null != values && !values.isEmpty()) {
-          // if the line is white then skipped
-          if (line.length == 1 && line[0].isEmpty()) {
-            continue;
-          } else if (line.length == 1) {
-            // Format of file is invalid
-            throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-          }
-          // know if the row is a header
-          if (isHeader(values.get(0))) {
-            headers = setHeaders(values);
-          } else {
-            tableVO = createTableVO(tableVO, tables, values, partitionId);
-          }
-        }
+        tableVO = sanitizeAndCreateDataSet(partitionId, line, tableVO, tables, values);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -141,6 +127,37 @@ public class CSVReaderStrategy implements ReaderStrategy {
     }
     return dataset;
 
+  }
+
+  /**
+   * Sanitize and create data set.
+   *
+   * @param partitionId the partition id
+   * @param line the line
+   * @param tableVO the table VO
+   * @param tables the tables
+   * @param values the values
+   * @return the table VO
+   * @throws InvalidFileException the invalid file exception
+   */
+  private TableVO sanitizeAndCreateDataSet(Long partitionId, String[] line, TableVO tableVO,
+      List<TableVO> tables, List<String> values) throws InvalidFileException {
+    if (null != values && !values.isEmpty()) {
+      // if the line is white then skipped
+      if (line.length == 1 && line[0].isEmpty()) {
+        return tableVO;
+      } else if (line.length == 1) {
+        // Format of file is invalid
+        throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
+      }
+      // know if the row is a header
+      if (parseCommon.isHeader(values.get(0))) {
+        headers = setHeaders(values);
+      } else {
+        tableVO = createTableVO(tableVO, tables, values, partitionId);
+      }
+    }
+    return tableVO;
   }
 
   /**
@@ -165,7 +182,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     headers = new ArrayList<>();
 
     for (String value : values) {
-      if (!isHeader(value)) {
+      if (!parseCommon.isHeader(value)) {
         FieldSchemaVO header = new FieldSchemaVO();
         header.setName(value);
         headers.add(header);
@@ -186,25 +203,24 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private TableVO createTableVO(TableVO tableVO, List<TableVO> tables, List<String> values,
       Long partitionId) throws InvalidFileException {
-    TableVO tableVOAux = tableVO;
     // Create object Table and setter the attributes
     if (headers.isEmpty()) {
-      throw new InvalidFileException();
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }
     if (!values.get(0).equals(tableVO.getName())) {
-      tableVOAux = new TableVO();
-      tableVOAux.setHeaders(headers);
-      tableVOAux.setName(values.get(0));
+      tableVO = new TableVO();
+      tableVO.setHeaders(headers);
+      tableVO.setName(values.get(0));
       if (null != dataSetSchema) {
-        tableVOAux.setIdMongo(findIdTable(tableVO.getName()));
+        tableVO.setIdMongo(parseCommon.findIdTable(tableVO.getName()));
       }
-      tableVOAux.setRecords(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
-      tables.add(tableVOAux);
+      tableVO.setRecords(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
+      tables.add(tableVO);
 
     } else {
-      tableVOAux.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
+      tableVO.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdMongo()));
     }
-    return tableVOAux;
+    return tableVO;
   }
 
   /**
@@ -220,7 +236,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     List<RecordVO> records = new ArrayList<>();
     RecordVO record = new RecordVO();
     if (null != idTablaSchema) {
-      record.setIdMongo(findIdRecord(idTablaSchema));
+      record.setIdMongo(parseCommon.findIdRecord(idTablaSchema));
     }
     record.setFields(createFieldsVO(values, idTablaSchema));
     record.setDatasetPartitionId(partitionId);
@@ -243,7 +259,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       FieldVO field = new FieldVO();
       if (idTablaSchema != null) {
         FieldSchemaVO fieldSchema =
-            findIdFieldSchema(headers.get(contAux).getName(), idTablaSchema);
+            parseCommon.findIdFieldSchema(headers.get(contAux).getName(), idTablaSchema);
         if (fieldSchema != null) {
           headers.get(contAux).setId(fieldSchema.getId());
           field.setIdFieldSchema(fieldSchema.getId());
@@ -258,106 +274,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
     return fields;
   }
 
-  /**
-   * Gets the data set schema.
-   *
-   * @param dataflowId the dataflow id
-   * @return the data set schema
-   */
-  private void getDataSetSchema(Long dataflowId) {
-    // get data set schema of mongo DB
-    if (null != dataflowId) {
-      dataSetSchema = datasetSchemaService.getDataSchemaByIdFlow(dataflowId);
-      if (null != dataSetSchema) {
-        tablesSchema = dataSetSchema.getTableSchemas();
-      }
-    }
-  }
-
-
-  /**
-   * Find id table.
-   *
-   * @param tableName the table name
-   * @return the string
-   */
-  private String findIdTable(String tableName) {
-    // Find the Id of tableSchema in MongoDB
-    String idTable = null;
-    if (null != tablesSchema) {
-      for (TableSchemaVO tableSchema : tablesSchema) {
-        if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-          idTable = tableSchema.getIdTableSchema();
-        }
-      }
-    }
-    return idTable;
-  }
-
-  /**
-   * Find id record.
-   *
-   * @param idTableMongo the id table mongo
-   * @return the string
-   */
-  private String findIdRecord(String idTableMongo) {
-    // Find the idrecordSchema of MongoDB
-    if (null != findTableSchema(idTableMongo)) {
-      TableSchemaVO tableS = findTableSchema(idTableMongo);
-      return null != tableS ? tableS.getRecordSchema().getIdRecordSchema() : null;
-    }
-    return null;
-  }
-
-  /**
-   * Find table schema.
-   *
-   * @param idTableMongo the id table mongo
-   * @return the table schema
-   */
-  private TableSchemaVO findTableSchema(String idTableMongo) {
-    // Find the tableSchema of MongoDB
-    for (TableSchemaVO tableSchema : tablesSchema) {
-      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
-        return tableSchema;
-      }
-    }
-    return null;
-  }
-
-
-
-  /**
-   * Find id field schema.
-   *
-   * @param nameSchema the name schema
-   * @param idTablaSchema the id tabla schema
-   * @return the field schema
-   */
-  private FieldSchemaVO findIdFieldSchema(String nameSchema, String idTablaSchema) {
-    // Find the idFieldSchema of MongoDB
-    TableSchemaVO recordSchemas = findTableSchema(idTablaSchema);
-    RecordSchemaVO recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
-    if (null != recordSchema) {
-      List<FieldSchemaVO> fieldsSchemas = recordSchema.getFieldSchema();
-      for (FieldSchemaVO fieldSchema : fieldsSchemas) {
-        if (null != fieldSchema.getName() && fieldSchema.getName().equalsIgnoreCase(nameSchema)) {
-          return fieldSchema;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Checks if is header.
-   *
-   * @param value the value
-   * @return the boolean
-   */
-  private Boolean isHeader(String value) {
-    return TABLE_HEADER.equalsIgnoreCase(value.trim());
-  }
 
 
 }
