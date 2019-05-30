@@ -17,6 +17,9 @@ public class FileParserFactory implements IFileParserFactory {
   @Autowired
   private DatasetSchemaService dataSetSchemaService;
 
+  @Autowired
+  private ParseCommon parseCommon;
+
   /**
    * Creates a new FileParser object.
    *
@@ -29,7 +32,8 @@ public class FileParserFactory implements IFileParserFactory {
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileParseContextImpl(new CSVReaderStrategy(dataSetSchemaService));
+        context =
+            new FileParseContextImpl(new CSVReaderStrategy(dataSetSchemaService, parseCommon));
         break;
       case "xml":
         // Fill it with the xml strategy

@@ -83,7 +83,6 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataSuccess() throws Exception {
-    byte[] nullContent = null;
     EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
     dataSetControllerImpl.loadDatasetData(1L, file);
