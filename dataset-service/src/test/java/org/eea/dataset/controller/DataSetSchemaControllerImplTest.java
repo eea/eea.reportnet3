@@ -33,19 +33,19 @@ public class DataSetSchemaControllerImplTest {
 
 
   @InjectMocks
-  DataSetSchemaControllerImpl dataSchemaControllerImpl;
+  private DataSetSchemaControllerImpl dataSchemaControllerImpl;
 
   @Mock
-  DataschemaServiceImpl dataschemaService;
+  private DataschemaServiceImpl dataschemaService;
 
   @Mock
-  SchemasRepository schemasRepository;
+  private SchemasRepository schemasRepository;
   
   @Mock
-  DatasetSchemaController dataSchemaController;
+  private DatasetSchemaController dataSchemaController;
 
   @InjectMocks
-  DataschemaServiceImpl dataSchemaServiceImpl;
+  private DataschemaServiceImpl dataSchemaServiceImpl;
 
   @Test
   public void testCreateDataSchema() {

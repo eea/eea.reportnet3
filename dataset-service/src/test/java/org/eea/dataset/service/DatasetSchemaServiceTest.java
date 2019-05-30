@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,28 +26,42 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.mockito.Mockito.times;
 
+/**
+ * The Class DatasetSchemaServiceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSchemaServiceTest {
 
+  /** The dataschema service. */
   @Mock
-  DataschemaServiceImpl dataschemaService;
+  private DataschemaServiceImpl dataschemaService;
 
+  /** The schemas repository. */
   @Mock
-  SchemasRepository schemasRepository;
+  private SchemasRepository schemasRepository;
 
+  /** The data set metabase table collection. */
   @Mock
-  DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
+  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
+  /** The data schema service impl. */
   @InjectMocks
-  DataschemaServiceImpl dataSchemaServiceImpl;
+  private DataschemaServiceImpl dataSchemaServiceImpl;
 
+  /** The data schema mapper. */
   @Mock
-  DataSchemaMapper dataSchemaMapper;
-  private List<TableCollection> tables;
-  DataSetSchema dataSetSchema;
+  private DataSchemaMapper dataSchemaMapper;
 
+  /** The tables. */
+  private List<TableCollection> tables;
+
+  /** The data set schema. */
+  private DataSetSchema dataSetSchema;
+
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     tables = new ArrayList<>();
@@ -72,6 +87,9 @@ public class DatasetSchemaServiceTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Test create data schema.
+   */
   @Test
   public void testCreateDataSchema() {
 
@@ -83,6 +101,9 @@ public class DatasetSchemaServiceTest {
 
 
 
+  /**
+   * Test find data schema by id.
+   */
   @Test
   public void testFindDataSchemaById() {
 
@@ -92,6 +113,9 @@ public class DatasetSchemaServiceTest {
 
   }
 
+  /**
+   * Test find data schema by data flow.
+   */
   @Test
   public void testFindDataSchemaByDataFlow() {
     dataSchemaServiceImpl.getDataSchemaByIdFlow(Mockito.any());
@@ -100,6 +124,9 @@ public class DatasetSchemaServiceTest {
 
   }
 
+  /**
+   * Test find data schema not null by id.
+   */
   @Test
   public void testFindDataSchemaNotNullById() {
     when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(new DataSetSchema()));
@@ -111,6 +138,9 @@ public class DatasetSchemaServiceTest {
 
   }
 
+  /**
+   * Test find data schema not null by data flow.
+   */
   @Test
   public void testFindDataSchemaNotNullByDataFlow() {
     when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(new DataSetSchema());
@@ -123,6 +153,9 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  /**
+   * Test schema models.
+   */
   @Test
   public void testSchemaModels() {
 

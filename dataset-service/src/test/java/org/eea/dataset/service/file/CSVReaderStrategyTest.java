@@ -32,6 +32,7 @@ public class CSVReaderStrategyTest {
   @InjectMocks
   private CSVReaderStrategy csvReaderStrategy;
 
+  /** The parse common. */
   @Mock
   private ParseCommon parseCommon;
 
