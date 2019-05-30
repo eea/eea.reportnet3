@@ -14,7 +14,8 @@ const CustomButton = (props) => {
         'pi pi-filter',
         'pi pi-sitemap',
         'pi pi-sort',
-        'pi pi-check-circle'];
+        'pi pi-check-circle',
+        'pi pi-refresh'];
 
     let disabledButton = props.disabled?true:false;
     //let classes = `p-button-rounded p-button-secondary ${(props.ownButtonClasses)?props.ownButtonClasses:""}`;

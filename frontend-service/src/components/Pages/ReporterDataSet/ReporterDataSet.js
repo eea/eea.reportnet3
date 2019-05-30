@@ -8,7 +8,7 @@ import {Chart} from 'primereact/chart';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 // import {Lightbox} from 'primereact/lightbox';
 
-import jsonDataSchema from '../../../assets/jsons/datosDataSchema.json';
+//import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 
@@ -22,6 +22,7 @@ const ReporterDataSet = () => {
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [visible, setVisibility] = useState(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   console.log('ReporterDataSet Render...');
   
@@ -47,6 +48,11 @@ const ReporterDataSet = () => {
       console.log('onClick');
       setVisibility(false);
   }
+
+  const onDeleteBoardClickHandler = () =>{
+    setDeleteDialogVisible(true);
+  } 
+
 
   const items = [
     {label:'New Dataset', url: '#'},
@@ -78,7 +84,7 @@ const ReporterDataSet = () => {
         icon: "2",
         group: "left",
         disabled: false,
-        clickHandler: null
+        clickHandler: onDeleteBoardClickHandler
       },
       {
         label: "Events",
@@ -111,7 +117,8 @@ const ReporterDataSet = () => {
         icon: "5",
         group: "right",
         disabled: false,
-        clickHandler: onDashBoardClickHandler
+        clickHandler: null
+        //onDashBoardClickHandler
       }
     ]);
     //TODO:Change + Error/warning treatment
@@ -180,7 +187,7 @@ const ReporterDataSet = () => {
       console.log(response.data);
       setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
-            id: i,
+            id: item["idTableSchema"],
             name : item["nameTableSchema"]
             }
       })); 
@@ -200,6 +207,9 @@ const ReporterDataSet = () => {
     });    
   },[]);
 
+  const onRefreshClickHandler = () => {
+    console.log("Refresh Clicked!");
+  }
 
   const getPercentage = (tableValues) =>{
      let valArr = [[105, 50, 80, 11],[15, 48, 58, 19],[10, 2, 15, 85]];
@@ -218,7 +228,7 @@ const ReporterDataSet = () => {
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner*/}
-        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/>
+        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
           <Dialog header="Upload your Dataset" visible={visible}
                   className={styles.Dialog} dismissableMask={false} onHide={onHide} >
               <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" onUpload={onUploadFile} 
