@@ -15,7 +15,7 @@ import org.mapstruct.MappingTarget;
  * The Interface DataSetMapper.
  */
 @Mapper(componentModel = "spring")
-public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> {
+public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
 
   /**
    * Map.
@@ -23,7 +23,7 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
    * @param value the value
    * @return the string
    */
-  public String map(ObjectId value) {
+  default String map(ObjectId value) {
     return value.toString();
   }
 
@@ -36,7 +36,7 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
    */
   @Mapping(source = "tableVO", target = "tableValues")
   @Override
-  public abstract DatasetValue classToEntity(DataSetVO model);
+  DatasetValue classToEntity(DataSetVO model);
 
 
   /**
@@ -47,7 +47,7 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
    */
   @Mapping(source = "tableValues", target = "tableVO")
   @Override
-  public abstract DataSetVO entityToClass(DatasetValue entity);
+  DataSetVO entityToClass(DatasetValue entity);
 
 
 
@@ -58,7 +58,7 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
    * @param dataset the dataset
    */
   @AfterMapping
-  public void fillIds(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
+  default void fillIds(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
     List<TableValue> tableValues = dataset.getTableValues();
     tableValues.stream().forEach(tableValue -> {
       tableValue.setDatasetId(dataset);
