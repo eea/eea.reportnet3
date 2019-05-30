@@ -40,6 +40,7 @@ const ReporterDataSet = () => {
 
   const onUploadFile = () => {
       console.log('onUploadFile');
+      setVisibility(false);
   }
 
   const onHide = () => {
@@ -220,7 +221,7 @@ const ReporterDataSet = () => {
         <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns}/>
           <Dialog header="Upload your Dataset" visible={visible}
                   className={styles.Dialog} dismissableMask={false} onHide={onHide} >
-              <CustomFileUpload mode="advanced" name="demo[]" url="." onUpload={onUploadFile} 
+              <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" onUpload={onUploadFile} 
                           multiple={false} chooseLabel="Select or drag here your dataset (.csv)" //allowTypes="/(\.|\/)(csv|doc)$/"
                           fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>                
