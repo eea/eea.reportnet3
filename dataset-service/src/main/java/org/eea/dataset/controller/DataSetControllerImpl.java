@@ -66,16 +66,17 @@ public class DataSetControllerImpl implements DatasetController {
    * @param asc the asc
    * @return the data tables values
    */
+  @Override
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
-      @RequestParam("MongoID") String mongoID,
+      @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
 
-    if (null == datasetId || null == mongoID) {
+    if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
@@ -90,7 +91,7 @@ public class DataSetControllerImpl implements DatasetController {
 
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesById(mongoID, pageable);
+      result = datasetService.getTableValuesById(idTableSchema, pageable);
     } catch (EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
