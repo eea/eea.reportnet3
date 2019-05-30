@@ -1,4 +1,4 @@
-String cron_working_branch = BRANCH_NAME != "develop" ? "@hourly" : ""
+String cron_working_branch = BRANCH_NAME != "develop" ? "@daily" : ""
 
 pipeline {
 
@@ -50,12 +50,14 @@ pipeline {
         }
 
         stage('Push to EEA GitHub') {
+            when {
+                branch 'develop' 
+            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh('git config --global user.email "jorge.saenz@altia.es"')
                     sh('git config --global user.name "Jorge Sáenz (ALTIA)"')
                     sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop --allow-unrelated-histories')
-                    sh('git commit https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git')
                     sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:develop')
                 }
             }

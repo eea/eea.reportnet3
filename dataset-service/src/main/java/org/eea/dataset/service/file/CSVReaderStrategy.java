@@ -34,6 +34,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /** The Constant PIPE_DELIMITER. */
   private static final char PIPE_DELIMITER = '|';
 
+  /** The Constant TABLE_HEADER. */
+  private static final String TABLE_HEADER = "_TABLE";
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 

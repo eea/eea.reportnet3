@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
 /**
- * The Class DataSetTablesMapper.
+ * The interface DataSetTablesMapper.
  */
 @Mapper(componentModel = "spring")
 public interface DataSetTablesMapper extends IMapper<TableCollection, TableCollectionVO> {
@@ -22,7 +22,7 @@ public interface DataSetTablesMapper extends IMapper<TableCollection, TableColle
    * @param tableCollection the table collection
    */
   @AfterMapping
-  public default void fillIds(TableCollectionVO tableCollectionVO,
+  default void fillIds(TableCollectionVO tableCollectionVO,
       @MappingTarget TableCollection tableCollection) {
     List<TableHeadersCollection> tableCollectionValues =
         tableCollection.getTableHeadersCollections();

@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.callable.DeleteDataCallable;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -43,10 +42,6 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataset")
 public class DataSetControllerImpl implements DatasetController {
 
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
 
   /**
    * The Constant LOG_ERROR.
@@ -138,21 +133,6 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.createEmptyDataset(datasetname);
   }
 
-
-  /**
-   * Error handler.
-   *
-   * @param id the id
-   *
-   * @return the data set VO
-   */
-  public static DataSetVO errorHandler(@PathVariable("id") final Long id) {
-    final DataSetVO dataset = new DataSetVO();
-    dataset.setId(null);
-    return dataset;
-  }
-
-
   /**
    * Load dataset data.
    *
@@ -180,14 +160,9 @@ public class DataSetControllerImpl implements DatasetController {
       InputStream is = file.getInputStream();
       callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
-    } catch (Exception e) {// NOPMD this cannot be avoid since Callable throws Exception in
-      if (e.getClass().isInstance(IOException.class)) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-      } // the signature
-      if (e.getMessage().equals(EEAErrorMessage.FILE_FORMAT)
-          || e.getMessage().equals(EEAErrorMessage.FILE_EXTENSION)) {
-        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
-      }
+      // NOPMD this cannot be avoid since Callable throws Exception in
+    } catch (IOException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     } finally {
       executor.shutdown();
     }
@@ -206,13 +181,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    final DeleteDataCallable callable = new DeleteDataCallable(this.datasetService, dataSetId);
-    try {
-      executor.submit(callable);
-    } finally {
-      executor.shutdown();
-    }
+    datasetService.deleteImportData(dataSetId);
   }
 
   @Override

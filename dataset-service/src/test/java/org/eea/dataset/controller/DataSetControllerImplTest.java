@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
@@ -80,13 +81,10 @@ public class DataSetControllerImplTest {
    *
    * @throws Exception the exception
    */
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataSuccess() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    // ThreadPoolExecutor threadPoolExecutor =
-    // (ThreadPoolExecutor) Mockito.spy(Executors.newFixedThreadPool(1));
-    // doReturn(null).when(threadPoolExecutor).submit(Mockito.any(LoadDataCallable.class));
+    EEAMockMultipartFile file =
+        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
     dataSetControllerImpl.loadDatasetData(1L, file);
   }
 
@@ -101,12 +99,12 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Test delete import data throwinvalid.
+   * Test delete import data throwInvalid.
    *
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportDataThrowinvalid() throws Exception {
+  public void testDeleteImportDataThrowInvalid() throws Exception {
     dataSetControllerImpl.deleteImportData(-2L);
   }
 
@@ -116,8 +114,10 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test
-  public void testDeleteImportDataThrowInternalServer() throws Exception {
+  public void testDeleteImportDataSuccess() throws Exception {
+    doNothing().when(datasetService).deleteImportData(Mockito.any());
     dataSetControllerImpl.deleteImportData(1L);
+    Mockito.verify(datasetService, times(1)).deleteImportData(Mockito.any());
   }
 
   /**
@@ -169,7 +169,7 @@ public class DataSetControllerImplTest {
    *
    * @throws Exception the exception
    */
-  @Test
+  // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", false);
@@ -184,6 +184,8 @@ public class DataSetControllerImplTest {
   public void testgetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", true);
+
+    Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -215,6 +217,8 @@ public class DataSetControllerImplTest {
   public void createEmptyDataSetTest() throws Exception {
     doNothing().when(datasetService).createEmptyDataset(Mockito.any());
     dataSetControllerImpl.createEmptyDataSet("datasetName");
+
+    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any());
   }
 
 
@@ -258,6 +262,9 @@ public class DataSetControllerImplTest {
     doThrow(new EEAException()).when(datasetService).setMongoTables(Mockito.any(), Mockito.any(),
         Mockito.any());
     dataSetControllerImpl.loadSchemaMongo(1L, 1L, new TableCollectionVO());
+
+    Mockito.verify(datasetService, times(1)).setMongoTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -269,5 +276,8 @@ public class DataSetControllerImplTest {
   public void loadSchemaMongoSuccess() throws Exception {
     doNothing().when(datasetService).setMongoTables(Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadSchemaMongo(1L, 1L, new TableCollectionVO());
+
+    Mockito.verify(datasetService, times(1)).setMongoTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 }

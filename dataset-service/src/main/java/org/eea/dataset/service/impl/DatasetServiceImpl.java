@@ -20,7 +20,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
@@ -35,8 +35,6 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,12 +44,6 @@ import org.springframework.stereotype.Service;
  */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
-
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The data set mapper. */
   @Autowired
@@ -83,7 +75,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The data set metabase table collection. */
   @Autowired
-  private DataSetMetabaseTableCollection dataSetMetabaseTableCollection;
+  private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /** The schemas repository. */
   @Autowired
