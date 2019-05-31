@@ -68,8 +68,6 @@ const DataViewer = (props) => {
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
-        console.log("Sort field: " + event.sortField);
-        console.log("Sort order: " + event.sortOrder);
         setSortOrder(event.sortOrder);  
         setSortField(event.sortField);    
         fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
@@ -97,7 +95,6 @@ const DataViewer = (props) => {
 
         if (sField !== undefined && sField !== null) {
           queryString.fields = sField;
-          console.log('Llega: ' + sOrder)
           queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
