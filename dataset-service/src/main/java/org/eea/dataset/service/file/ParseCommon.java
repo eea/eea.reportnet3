@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 public class ParseCommon {
 
   /** The data set schema. */
-  private static DataSetSchemaVO dataSetSchema;
+  private DataSetSchemaVO dataSetSchema;
 
   /** The tables schema. */
-  private static List<TableSchemaVO> tablesSchema;
+  private List<TableSchemaVO> tablesSchema;
 
   /** The Constant TABLE_HEADER. */
   private static final String TABLE_HEADER = "_TABLE";
