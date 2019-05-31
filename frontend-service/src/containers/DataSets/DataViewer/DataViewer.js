@@ -70,7 +70,7 @@ const DataViewer = (props) => {
         console.log("Sorting...");
         fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);     
         setSortField(event.sortField);
-        setSortOrder((sortOrder === 1) ? 0 : 1);        
+        setSortOrder((sortOrder === 1)?-1:1);        
       }
   
       // const onColumnToggleHandler = (event) =>{
@@ -95,7 +95,7 @@ const DataViewer = (props) => {
 
         if (sField !== undefined && sField !== null) {
           queryString.fields = sField;
-          queryString.asc = sOrder;
+          queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
         const dataPromise = HTTPRequesterAPI.get(
