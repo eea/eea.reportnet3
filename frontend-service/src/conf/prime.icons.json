@@ -1,0 +1,11 @@
+{
+    "icons": {
+        "check": "pi pi-check",
+        "cancel": "pi pi-times",
+        "export": "pi pi-upload",
+        "home": "pi pi-home",
+        "import": "pi pi-download",
+        "info": "pi pi-info",
+        "user": "pi pi-user"
+    }
+}
