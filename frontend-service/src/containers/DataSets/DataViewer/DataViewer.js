@@ -15,7 +15,7 @@ const DataViewer = (props) => {
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
-    const [sortOrder, setSortOrder] = useState(0);   
+    const [sortOrder, setSortOrder] = useState();   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState(props.tableSchemaColumns); 
@@ -68,9 +68,11 @@ const DataViewer = (props) => {
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
-        setSortOrder((sortOrder === 1)?-1:1); 
-        fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);     
-        setSortField(event.sortField);       
+        console.log("Sort field: " + event.sortField);
+        console.log("Sort order: " + event.sortOrder);
+        setSortOrder(event.sortOrder);  
+        setSortField(event.sortField);    
+        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
       }
   
       // const onColumnToggleHandler = (event) =>{
@@ -95,6 +97,7 @@ const DataViewer = (props) => {
 
         if (sField !== undefined && sField !== null) {
           queryString.fields = sField;
+          console.log('Llega: ' + sOrder)
           queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
