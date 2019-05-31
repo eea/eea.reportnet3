@@ -18,6 +18,7 @@ import LangContext from '../../Context/LanguageContext';
 const ReporterDataSet = () => {
   const messages = useContext(LangContext);  
   const [customButtons, setCustomButtons] = useState([]);
+  const [breadCrumbItems,setBreadCrumbItems] = useState([]);
   const [validationError, setValidationError] = useState(true);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
@@ -29,10 +30,6 @@ const ReporterDataSet = () => {
 
   console.log('ReporterDataSet Render...');   
 
-  const items = [
-    {label: messages["newDataset"], url: '#'},
-    {label: messages["editData"], url: '#'}
-  ];
   const home = {icon: 'pi pi-home', url: '#'};
 
   //TODO:Change + Error/warning treatment
@@ -96,6 +93,12 @@ const ReporterDataSet = () => {
         //() => setVisibleHandler(setDashDialogVisible, true)
       }
     ]);
+
+    setBreadCrumbItems( [
+      {label: messages["newDataset"], url: '#'},
+      {label: messages["editData"], url: '#'}
+    ]);
+
     //TODO:Change + Error/warning treatment
 
     setDashBoardData({
@@ -123,9 +126,7 @@ const ReporterDataSet = () => {
         mode: 'index',
         intersect: false,
         callbacks: {
-            label: function(tooltipItems, data) { 
-                return `(${tooltipItems.yLabel} %)`;
-            }
+            label: (tooltipItems, data) => `(${tooltipItems.yLabel} %)`
         }
       },
       responsive: true,
@@ -211,7 +212,7 @@ const ReporterDataSet = () => {
 
   return (
     <div className="titleDiv">
-        <BreadCrumb model={items} home={home}/>
+        <BreadCrumb model={breadCrumbItems} home={home}/>
         <Title title={messages["titleDataset"]}/> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
