@@ -8,6 +8,9 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class ParseCommon.
+ */
 @Component
 public class ParseCommon {
 
@@ -94,12 +97,11 @@ public class ParseCommon {
     return null;
   }
 
-
   /**
    * Gets the data set schema.
    *
    * @param dataflowId the dataflow id
-   * @return
+   * @param datasetSchemaService the dataset schema service
    * @return the data set schema
    */
   public DataSetSchemaVO getDataSetSchema(Long dataflowId,

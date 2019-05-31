@@ -113,8 +113,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
-    // datasetService.addRecordToDataset(dataset.getId(), dataset.getRecords());
-
     return null;
   }
 

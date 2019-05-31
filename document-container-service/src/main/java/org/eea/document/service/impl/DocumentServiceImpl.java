@@ -41,6 +41,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
+  /** The Constant CACHE_SIZE. */
+  private static final int CACHE_SIZE = 16;
+
+  /** The Constant PORT. */
+  private static final int PORT = 27017;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
@@ -139,7 +145,7 @@ public class DocumentServiceImpl implements DocumentService {
     LOG.info(uri);
     // creates a node with name oak_demo
     DocumentNodeStore ns =
-        new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak_demo", 16).build();
+        new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak_demo", CACHE_SIZE).build();
     return new Jcr(new Oak(ns)).createRepository();
   }
 
@@ -150,7 +156,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws RepositoryException the repository exception
    */
   private Session getSession() throws RepositoryException {
-    Repository repo = getRepo("localhost", 27017);
+    Repository repo = getRepo("localhost", PORT);
     if (repo.getDescriptorKeys() != null) {
       return repo.login(new SimpleCredentials(ADMIN, ADMIN.toCharArray()));
     } else {

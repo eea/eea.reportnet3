@@ -7,10 +7,11 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
  */
 public interface DatasetSchemaService {
 
+
   /**
    * Creates the data schema.
    *
-   * @param datasetName the dataset name
+   * @param datasetId the dataset id
    */
   void createDataSchema(Long datasetId);
 

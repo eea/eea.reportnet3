@@ -10,6 +10,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class TableHeadersCollectionVO.
+ */
 @Getter
 @Setter
 @ToString
@@ -44,12 +47,12 @@ public class TableHeadersCollectionVO implements Serializable {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     TableHeadersCollectionVO other = (TableHeadersCollectionVO) obj;
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(headerType, other.headerType);

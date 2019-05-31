@@ -23,6 +23,9 @@ import com.mongodb.MongoClient;
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
 
+  /** The Constant PORT. */
+  private static final int PORT = 27017;
+
   /** The dll. */
   @Value("${mongodb.hibernate.ddl-auto}")
   private String dll;
@@ -42,6 +45,8 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
   /** The password. */
   @Value("${mongodb.primary.password}")
   private String password;
+
+
 
   /**
    * Schemas transaction manager.
@@ -71,7 +76,7 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   public MongoClient mongoClient() {
-    return new MongoClient(host, 27017);
+    return new MongoClient(host, PORT);
   }
 
 }

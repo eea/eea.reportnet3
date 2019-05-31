@@ -23,10 +23,4 @@ public class DocumentConfiguration implements WebMvcConfigurer {
     System.setProperty("oak.documentMK.leaseDurationSeconds", "5");
   }
 
-  /**
-   * Instantiates a new document configuration.
-   */
-  private DocumentConfiguration() {
-  }
-
 }

@@ -7,17 +7,17 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 /**
  * The Interface ReaderStrategy.
  */
-@FunctionalInterface 
+@FunctionalInterface
 public interface ReaderStrategy {
 
   /**
    * Parses the file.
    *
    * @param inputStream the input stream
-   * @param datasetId the dataset id
-   * @param integer the integer
+   * @param dataflowId the dataflow id
+   * @param partitionId the partition id
    * @return the data set VO
-   * @throws InvalidFileException
+   * @throws InvalidFileException the invalid file exception
    */
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException;
