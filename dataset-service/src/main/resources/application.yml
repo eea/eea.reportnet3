@@ -73,4 +73,4 @@ hystrix:
             timeoutInMilliseconds: 10000
       circuitBreaker:
         requestVolumeThreshold: 2
-        sleepWindowInMilliseconds: 100000
+        sleepWindowInMilliseconds: 1000

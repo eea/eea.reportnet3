@@ -40,6 +40,8 @@ public class RecordVO implements Serializable {
    */
   private Long datasetPartitionId;
 
+  private String sortCriteria;
+
   /**
    * Hash code.
    *
@@ -47,7 +49,7 @@ public class RecordVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(datasetPartitionId, fields, id, idRecordSchema);
+    return Objects.hash(datasetPartitionId, fields, id, idRecordSchema, sortCriteria);
   }
 
   /**

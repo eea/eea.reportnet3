@@ -14,6 +14,7 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
@@ -32,7 +33,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -288,6 +288,7 @@ public class DatasetServiceImpl implements DatasetService {
       final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
 
     final TableVO result = new TableVO();
+    Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
     final List<RecordValue> record =
         recordRepository.findByTableValue_IdTableSchema(mongoID, pageable);
     if (record == null) {
@@ -304,12 +305,9 @@ public class DatasetServiceImpl implements DatasetService {
     result.setRecords(recordMapper.entityListToClass(record));
     Optional.ofNullable(idFieldSchema).ifPresent(field -> {
       result.getRecords().sort((RecordVO v1, RecordVO v2) -> {
-        final FieldVO val1 = v1.getFields().stream()
-            .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
-        final FieldVO val2 = v2.getFields().stream()
-            .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
-        return asc ? val1.getValue().compareTo(val2.getValue())
-            : val1.getValue().compareTo(val2.getValue()) * -1;
+
+        return asc ? v1.getSortCriteria().compareTo(v2.getSortCriteria())
+            : v1.getSortCriteria().compareTo(v2.getSortCriteria()) * -1;
       });
     });
 

@@ -11,10 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
 
 /**
  * The Class Record.
@@ -25,6 +28,16 @@ import lombok.ToString;
 @ToString
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
+
+  @PostLoad
+  public void initSortFields() {
+    String sortingField = SortFieldsHelper.getSortingField();
+    if (sortingField != null && !sortingField.isEmpty()) {
+      this.sortCriteria = fields.stream()
+          .filter(field -> field.getIdFieldSchema().equals(sortingField)).findFirst().get()
+          .getValue();
+    }
+  }
 
   /**
    * The id.
@@ -58,6 +71,9 @@ public class RecordValue {
    */
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
+
+  @Transient
+  private String sortCriteria;
 
   /**
    * Hash code.
