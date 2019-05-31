@@ -9,6 +9,12 @@ import org.springframework.data.repository.CrudRepository;
  * The Interface DatasetRepository.
  */
 public interface DatasetRepository extends CrudRepository<DatasetValue, Long> {
+
+  /**
+   * Empties the dataset.
+   *
+   * @param dataSetId the data set id
+   */
   @Modifying
   @Query(nativeQuery = true, value = "delete from dataset_value")
   void empty(Long dataSetId);

@@ -137,8 +137,9 @@ public class KafkaConfiguration {
         return Health.up().withDetail("clusterId", clusterId).withDetail("nodeCount", nodeCount)
             .build();
       } catch (final InterruptedException | ExecutionException e) {
-        return Health.down().withException(e)
-            .build();//NOPMD false positive, I really need the thread to go on since this is a healtchecker. Exception is managed by Spring Actuator
+        // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
+        // Exception is managed by Spring Actuator
+        return Health.down().withException(e).build();
       }
     };
 

@@ -50,11 +50,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
-  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName) { // TODO
-                                                                                          // neeed
-                                                                                          // to
-                                                                                          // create
-                                                                                          // standar
+  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName) {
+    // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName);
     } catch (final DockerAccessException e) {

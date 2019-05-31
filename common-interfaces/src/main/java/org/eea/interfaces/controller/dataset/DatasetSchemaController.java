@@ -23,7 +23,8 @@ public interface DatasetSchemaController {
 
   /**
    * Creates the data schema.
-   * @param datasetName the dataset name
+   *
+   * @param datasetId the dataset id
    */
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
   void createDataSchema(@PathVariable("id") final Long datasetId);

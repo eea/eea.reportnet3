@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -276,11 +278,13 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).deleteById(Mockito.any());
   }
 
-  @Test(expected = EEAException.class)
+  @Test
   public void getTableValuesByIdTestEmpty() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<>());
-    datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
+    TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
+    Assert.assertNotNull("result null", result);
+    Assert.assertEquals("wrong number of records", Long.valueOf(0), result.getTotalRecords());
   }
 
   @Test

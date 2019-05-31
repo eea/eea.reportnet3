@@ -43,6 +43,7 @@ public class ParseCommonTest {
   /** The field schema. */
   private static FieldSchemaVO fieldSchema;
 
+  /** The dataset. */
   private static DataSetSchemaVO dataset;
 
   /**
@@ -77,7 +78,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdTable() {
-    assertEquals(ID, parseCommon.findIdTable(ID));
+    assertEquals("fail", ID, parseCommon.findIdTable(ID));
   }
 
   /**
@@ -85,12 +86,12 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdRecord() {
-    assertEquals(ID, parseCommon.findIdRecord(ID));
+    assertEquals("fail", ID, parseCommon.findIdRecord(ID));
   }
 
   @Test
   public void testFindIdRecordNull() {
-    assertNull(parseCommon.findIdRecord(null));
+    assertNull("fail", parseCommon.findIdRecord(null));
   }
 
   /**
@@ -98,12 +99,12 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdFieldSchema() {
-    assertEquals(fieldSchema, parseCommon.findIdFieldSchema(ID, ID));
+    assertEquals("fail", fieldSchema, parseCommon.findIdFieldSchema(ID, ID));
   }
 
   @Test
   public void testFindIdFieldSchemaNull() {
-    assertNull(parseCommon.findIdFieldSchema(null, null));
+    assertNull("fail", parseCommon.findIdFieldSchema(null, null));
   }
 
   /**
@@ -112,7 +113,7 @@ public class ParseCommonTest {
   @Test
   public void testGetDataSetSchema() {
     when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(dataset);
-    assertEquals(dataset, parseCommon.getDataSetSchema(1L, dataSetSchemaService));
+    assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L, dataSetSchemaService));
   }
 
   /**
@@ -120,7 +121,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testIsHeaderTrue() {
-    assertTrue(parseCommon.isHeader("_table"));
+    assertTrue("fail", parseCommon.isHeader("_table"));
   }
 
   /**
@@ -128,7 +129,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testIsHeaderFalse() {
-    assertFalse(parseCommon.isHeader(ID));
+    assertFalse("fail", parseCommon.isHeader(ID));
   }
 
 }

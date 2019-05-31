@@ -10,6 +10,9 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * The Class DockerClientBuilderBean.
+ */
 @Configuration
 @Component
 @ComponentScan("org.eea.recordstore.docker")
