@@ -46,7 +46,7 @@ public interface DatasetService {
    *
    * @param dataSetId the data set id
    */
-  void deleteImportData(Long dataSetId);
+  void deleteImportData(@DatasetId Long dataSetId);
 
   /**
    * Gets the table values by id.

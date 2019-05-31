@@ -52,7 +52,7 @@ public interface DatasetController {
    * @param file the file
    */
   @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") Long datasetId,
+  void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
 
