@@ -68,9 +68,9 @@ const DataViewer = (props) => {
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
+        setSortOrder((sortOrder === 1)?-1:1); 
         fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);     
-        setSortField(event.sortField);
-        setSortOrder((sortOrder === 1)?-1:1);        
+        setSortField(event.sortField);       
       }
   
       // const onColumnToggleHandler = (event) =>{
