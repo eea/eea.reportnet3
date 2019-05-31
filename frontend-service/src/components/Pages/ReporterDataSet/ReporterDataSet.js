@@ -24,7 +24,7 @@ const ReporterDataSet = () => {
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [importDialogvisible, setImportDialogVisible] = useState(false);
+  const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
@@ -219,10 +219,10 @@ const ReporterDataSet = () => {
         </div>
         {/*TODO: Loading spinner*/}
         <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
-          <Dialog header={messages["uploadDataset"]} visible={importDialogvisible}
+          <Dialog header={messages["uploadDataset"]} visible={importDialogVisible}
                   className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
               <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
-                                onUpload={() => setVisibleHandler(setImportDialogVisible,true)} 
+                                onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
                                 multiple={false} chooseLabel={messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                 fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>                
