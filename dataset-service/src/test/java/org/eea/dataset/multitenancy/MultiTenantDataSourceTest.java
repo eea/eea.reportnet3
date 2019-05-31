@@ -1,6 +1,7 @@
 package org.eea.dataset.multitenancy;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.Map;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -51,6 +53,7 @@ public class MultiTenantDataSourceTest {
   @Test
   public void testAddDataSource() {
     multiTenantDataSource.addDataSource(new ConnectionDataVO());
+    Mockito.verify(dataSources, times(1)).put(Mockito.any(), Mockito.any());
   }
 
 }
