@@ -89,8 +89,8 @@ const DataViewer = (props) => {
 
         let queryString = {
           idTableSchema: props.id,
-          pageNum:fRow,
-          pageSize:nRows
+          pageNum: fRow / nRows,
+          pageSize: nRows
         }
 
         if (sField !== undefined && sField !== null) {

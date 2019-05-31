@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -286,15 +287,21 @@ public class DatasetServiceImpl implements DatasetService {
   public TableVO getTableValuesById(final Long datasetId, final String mongoID,
       final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
 
+    final TableVO result = new TableVO();
     final List<RecordValue> record =
         recordRepository.findByTableValue_IdTableSchema(mongoID, pageable);
-    if (record == null || record.isEmpty()) {
+    if (record == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    if (record.isEmpty()) {
+      result.setTotalRecords(0L);
+      result.setRecords(new ArrayList<>());
+      return result;
     }
 
     final Long resultcount = countTableData(record.get(0).getTableValue().getId());
 
-    final TableVO result = new TableVO();
+   
     result.setRecords(recordMapper.entityListToClass(record));
     Optional.ofNullable(idFieldSchema).ifPresent(field -> {
       result.getRecords().sort((RecordVO v1, RecordVO v2) -> {

@@ -6,6 +6,7 @@ import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
+import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
 //import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
@@ -15,46 +16,18 @@ import LangContext from '../../Context/LanguageContext';
 
 
 const ReporterDataSet = () => {
-  const messages = useContext(LangContext);
-  const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const messages = useContext(LangContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [validationError, setValidationError] = useState(true);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [importDialogvisible, setVisibility] = useState(false);
+  const [importDialogvisible, setImportDialogVisible] = useState(false);
+  const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
-  console.log('ReporterDataSet Render...');
-  
-  const onDashBoardClickHandler = () =>{
-    setDashDialogVisible(true);
-  } 
-  const onHideDialogHandler = () =>{
-    setDashDialogVisible(false);
-  } 
- 
-
-  const showFileUploadDialog = () => {
-      console.log('showFileUploadDialog onClick');
-      setVisibility(true);
-  }
-
-  const onUploadFile = () => {
-      console.log('onUploadFile');
-      setVisibility(false);
-  }
-
-  const onHide = () => {
-      console.log('onClick');
-      setVisibility(false);
-  }
-
-  const onDeleteBoardClickHandler = () =>{
-    setDeleteDialogVisible(true);
-  } 
-
+  console.log('ReporterDataSet Render...');   
 
   const items = [
     {label: messages["newDataset"], url: '#'},
@@ -72,7 +45,7 @@ const ReporterDataSet = () => {
         icon: "0",
         group: "left",
         disabled: false,
-        clickHandler: showFileUploadDialog
+        clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
       },
       {
         label: messages["export"],
@@ -86,7 +59,7 @@ const ReporterDataSet = () => {
         icon: "2",
         group: "left",
         disabled: false,
-        clickHandler: onDeleteBoardClickHandler
+        clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
       },
       {
         label: messages["events"],
@@ -120,7 +93,7 @@ const ReporterDataSet = () => {
         group: "right",
         disabled: false,
         clickHandler: null
-        //onDashBoardClickHandler
+        //() => setVisibleHandler(setDashDialogVisible, true)
       }
     ]);
     //TODO:Change + Error/warning treatment
@@ -151,7 +124,6 @@ const ReporterDataSet = () => {
         intersect: false,
         callbacks: {
             label: function(tooltipItems, data) { 
-              console.log(data);
                 return `(${tooltipItems.yLabel} %)`;
             }
         }
@@ -209,8 +181,24 @@ const ReporterDataSet = () => {
     });    
   },[]);
 
+  const setVisibleHandler = (fnUseState, visible) =>{
+    fnUseState(visible);
+  }
+  
   const onRefreshClickHandler = () => {
     console.log("Refresh Clicked!");
+  }
+
+  const onConfirmDeleteHandler = () =>{
+    console.log("Data deleted!");
+    setDeleteDialogVisible(false);
+    /*TODO: API Call delete
+    HTTPRequesterAPI.delete(
+      {
+        url:'/dataset/deleteImportData/1',
+        queryString: {}
+      }
+    );*/
   }
 
   const getPercentage = (tableValues) =>{
@@ -218,7 +206,6 @@ const ReporterDataSet = () => {
      let total = valArr.reduce((arr1, arr2) =>
           arr1.map((v, i) => v + arr2[i]));
       
-
     return tableValues.map((v,i)=>((v/total[i])*100).toFixed(2));
   }
 
@@ -232,14 +219,18 @@ const ReporterDataSet = () => {
         {/*TODO: Loading spinner*/}
         <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
           <Dialog header={messages["uploadDataset"]} visible={importDialogvisible}
-                  className={styles.Dialog} dismissableMask={false} onHide={onHide} >
-              <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" onUpload={onUploadFile} 
-                          multiple={false} chooseLabel={messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
-                          fileLimit={1} className={styles.FileUpload}  /> 
+                  className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
+              <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
+                                onUpload={() => setVisibleHandler(setImportDialogVisible,true)} 
+                                multiple={false} chooseLabel={messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
+                                fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>                
-        <Dialog visible={dashDialogVisible} onHide={onHideDialogHandler} header={messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
+        <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} header={messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
           <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
         </Dialog>
+        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={messages["yes"]}  labelCancel={messages["no"]}>
+          {messages["deleteDatasetConfirm"]}
+        </ConfirmDialog>
       </div>
   );
 }
