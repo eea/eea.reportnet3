@@ -15,7 +15,7 @@ const DataViewer = (props) => {
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
-    const [sortOrder, setSortOrder] = useState(0);   
+    const [sortOrder, setSortOrder] = useState();   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState(props.tableSchemaColumns); 
@@ -68,9 +68,9 @@ const DataViewer = (props) => {
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
-        fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);     
-        setSortField(event.sortField);
-        setSortOrder((sortOrder === 1)?-1:1);        
+        setSortOrder(event.sortOrder);  
+        setSortField(event.sortField);    
+        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
       }
   
       // const onColumnToggleHandler = (event) =>{
