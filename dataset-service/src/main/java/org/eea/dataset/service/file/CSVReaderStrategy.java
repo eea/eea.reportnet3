@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,7 +89,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   public DataSetVO parseFile(final InputStream inputStream, final Long dataflowId,
       final Long partitionId) throws InvalidFileException {
     final Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        new BufferedReader(new InputStreamReader(inputStream, Charset.forName("ISO-8859-15")));
     return readLines(buf, dataflowId, partitionId);
 
   }
