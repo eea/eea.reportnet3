@@ -1,6 +1,6 @@
 .Footer {
   text-align: center;
-  background-color: #004494;
+  background-color: var(--bluebg-color);
   color: white;
   padding: 1rem 0;
   width: 100%;
@@ -11,6 +11,7 @@
   color: white;
   margin: 0.5rem;
   font-weight: 300;
+  font-size: 0.9rem;
 }
 
 .Footer a:hover { 

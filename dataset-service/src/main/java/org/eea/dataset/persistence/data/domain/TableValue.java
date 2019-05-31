@@ -26,25 +26,35 @@ import lombok.ToString;
 @Table(name = "TABLE_VALUE")
 public class TableValue {
 
-  /** The id. */
+  /**
+   * The id.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The name. */
+  /**
+   * The name.
+   */
   @Column(name = "NAME")
   private String name;
 
-  /** The id mongo. */
-  @Column(name = "ID_MONGO")
-  private String idMongo;
+  /**
+   * The id mongo.
+   */
+  @Column(name = "ID_TABLE_SCHEMA")
+  private String idTableSchema;
 
-  /** The records. */
+  /**
+   * The records.
+   */
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValue> records;
 
-  /** The dataset id. */
+  /**
+   * The dataset id.
+   */
   @ManyToOne
   @JoinColumn(name = "DATASET_ID")
   private DatasetValue datasetId;
@@ -56,24 +66,25 @@ public class TableValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records, idMongo, datasetId);
+    return Objects.hash(id, name, records, idTableSchema, datasetId);
   }
 
   /**
    * Equals.
    *
    * @param o the o
+   *
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
     }
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    TableValue table = (TableValue) obj;
+    final TableValue table = (TableValue) obj;
     return id.equals(table.id) && name.equals(table.name);
   }
 

@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,45 +58,40 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the data tables values.
    *
    * @param datasetId the dataset id
-   * @param mongoID the mongo ID
+   * @param idTableSchema the mongo ID
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
    * @param asc the asc
+   *
    * @return the data tables values
    */
+  @Override
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
-      @RequestParam("MongoID") String mongoID,
+      @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
 
-    if (null == datasetId || null == mongoID) {
+    if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    Pageable pageable;
-    if (null == fields) {
-      pageable = PageRequest.of(pageNum, pageSize);
-    } else {
-      pageable = PageRequest.of(pageNum, pageSize,
-          asc ? Sort.by(fields).ascending() : Sort.by(fields).descending());
-    }
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
 
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesById(mongoID, pageable);
+      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields, asc);
     } catch (EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
 
     return result;
   }

@@ -26,26 +26,36 @@ import lombok.ToString;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
-  /** The id. */
+  /**
+   * The id.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The id mongo. */
-  @Column(name = "ID_MONGO")
-  private String idMongo;
+  /**
+   * The id mongo.
+   */
+  @Column(name = "ID_RECORD_SCHEMA")
+  private String idRecordSchema;
 
-  /** The id partition. */
+  /**
+   * The id partition.
+   */
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
 
-  /** The table value. */
+  /**
+   * The table value.
+   */
   @ManyToOne
   @JoinColumn(name = "ID_TABLE")
   private TableValue tableValue;
 
-  /** The fields. */
+  /**
+   * The fields.
+   */
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
@@ -56,17 +66,18 @@ public class RecordValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(datasetPartitionId, fields, id, idMongo, tableValue);
+    return Objects.hash(datasetPartitionId, fields, id, idRecordSchema, tableValue);
   }
 
   /**
    * Equals.
    *
    * @param obj the obj
+   *
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
     }
@@ -76,12 +87,12 @@ public class RecordValue {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    RecordValue other = (RecordValue) obj;
+    final RecordValue other = (RecordValue) obj;
     return Objects.equals(datasetPartitionId, other.datasetPartitionId)
         && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
-        && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
+        && Objects.equals(idRecordSchema, other.idRecordSchema) && Objects
+        .equals(tableValue, other.tableValue);
   }
-
 
 
 }
