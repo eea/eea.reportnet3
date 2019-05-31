@@ -22,9 +22,8 @@ import com.mongodb.MongoClient;
 @EnableMongoRepositories(basePackages = "org.eea.dataset.persistence.schemas.repository")
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
-
-  /** The Constant PORT. */
-  private static final int PORT = 27017;
+  /** The Constant DEFAULT_PORT. */
+  private static final int DEFAULT_PORT = 27017;
 
   /** The dll. */
   @Value("${mongodb.hibernate.ddl-auto}")
@@ -76,7 +75,7 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   public MongoClient mongoClient() {
-    return new MongoClient(host, PORT);
+    return new MongoClient(host, DEFAULT_PORT);
   }
 
 }
