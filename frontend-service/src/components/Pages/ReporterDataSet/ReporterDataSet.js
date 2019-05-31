@@ -14,7 +14,6 @@ import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import LangContext from '../../Context/LanguageContext';
 
-
 const ReporterDataSet = () => {
   const messages = useContext(LangContext);  
   const [customButtons, setCustomButtons] = useState([]);
@@ -32,8 +31,6 @@ const ReporterDataSet = () => {
 
   const home = {icon: 'pi pi-home', url: '#'};
 
-  //TODO:Change + Error/warning treatment
-    
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
     setCustomButtons([
@@ -100,7 +97,6 @@ const ReporterDataSet = () => {
     ]);
 
     //TODO:Change + Error/warning treatment
-
     setDashBoardData({
       labels: ['Table 1', 'Table 2', 'Table 3', 'Table 4'],
       datasets: [
@@ -142,9 +138,7 @@ const ReporterDataSet = () => {
               },
               ticks: {
                 // Include a % sign in the ticks
-                callback: function(value, index, values) {
-                    return value +' %';
-                }
+                callback: (value, index, values) => `${value} %`
             }
           }]
       }});
@@ -180,7 +174,7 @@ const ReporterDataSet = () => {
       console.log(error);
       return error;
     });    
-  },[]);
+  }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
     fnUseState(visible);
