@@ -33,31 +33,8 @@ const DataViewer = (props) => {
         setColOptions(colOpt);
   
         console.log('Fetching data...');
-        //fetchDataHandler("default", sortOrder, firstRow, numRows);   
+        fetchDataHandler(null, sortOrder, firstRow, numRows);   
         
-        const dataPromise = HTTPRequesterAPI.get(
-          {
-            url:'/dataset/TableValueDataset/1',
-            queryString: {
-              idTableSchema: props.id,
-              asc:sortOrder,
-              fields:sortField,
-              pageNum:firstRow,
-              pageSize:numRows
-            }
-          }
-        );
-
-        dataPromise.then(response =>{
-          console.log(response.data);
-          filterDataResponse(response.data.records);
-          setTotalRecords(response.data.totalRecords);
-        })
-        .catch(error => {
-          console.log(error);
-          return error;
-        });
-     
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
         console.log(inmTableSchemaColumns);
@@ -109,25 +86,38 @@ const DataViewer = (props) => {
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
-        fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
-        .then(response => response.json())
-        .then(json => {           
-          const rows = json.currentPage.map(item=>{
-            return {
-                    idInstrumento : item["idInstrumento"], 
-                    denominacion : item["denominacion"], 
-                    fechaInicial : item["fechaInicial"], 
-                    tieneDocumentos : item["tieneDocumentos"], 
-                    anulado : item["anulado"]
-                  }
-          }); 
-          setFetchedData(rows);
-          if(json.pagedInfo.totalElements!==totalRecords){
-            setTotalRecords(json.pagedInfo.totalElements);
+
+        let queryString = {
+          idTableSchema: props.id,
+          pageNum:fRow,
+          pageSize:nRows
+        }
+
+        if (sField !== undefined && sField !== null) {
+          queryString.fields = sField;
+          queryString.asc = sOrder;
+        }
+
+        const dataPromise = HTTPRequesterAPI.get(
+          {
+            url:'/dataset/TableValueDataset/1',
+            queryString: queryString
           }
+        );
+
+        dataPromise.then(response =>{
+          console.log(response.data);
+          filterDataResponse(response.data.records);
+          if(response.data.totalRecords!==totalRecords){
+            setTotalRecords(response.data.totalRecords);
+          }
+        
           setLoading(false);
         })
-        .catch(error => console.log("ERROR!!!!!!! - " + error));
+        .catch(error => {
+          console.log(error);
+          return error;
+        });
       }
 
       const filterDataResponse = (data) =>{        
