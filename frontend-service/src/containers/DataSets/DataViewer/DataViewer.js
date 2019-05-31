@@ -60,10 +60,10 @@ const DataViewer = (props) => {
       }, [cols, colOptions]);
       
       const onChangePageHandler = (event)=>{     
-        console.log('Refetching data...');
-        fetchDataHandler(event.sortField, sortOrder, event.first, event.rows);         
+        console.log('Refetching data...');                
         setNumRows(event.rows);
         setFirstRow(event.first);        
+        fetchDataHandler(sortField, sortOrder, event.first, event.rows); 
       }
   
       const onSortHandler = (event)=>{      
@@ -89,8 +89,8 @@ const DataViewer = (props) => {
 
         let queryString = {
           idTableSchema: props.id,
-          pageNum:fRow,
-          pageSize:nRows
+          pageNum: Math.floor(fRow / nRows),
+          pageSize: nRows
         }
 
         if (sField !== undefined && sField !== null) {
