@@ -70,7 +70,7 @@ const DataViewer = (props) => {
         console.log("Sorting...");
         fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);     
         setSortField(event.sortField);
-        setSortOrder((sortOrder === 1)?-1:1);        
+        setSortOrder((sortOrder === 1) ? 0 : 1);        
       }
   
       // const onColumnToggleHandler = (event) =>{
