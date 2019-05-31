@@ -4,7 +4,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -153,7 +152,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testgetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
   }
 
@@ -164,8 +164,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testgetDataTablesValuesExceptionEntry4() throws Exception {
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
   }
 
@@ -176,9 +176,8 @@ public class DataSetControllerImplTest {
    */
   // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
-    when(datasetService
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new TableVO());
+    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", false);
   }
 
@@ -189,13 +188,12 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void testgetDataTablesValuesSuccess() throws Exception {
-    when(datasetService
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new TableVO());
+    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", true);
 
-    Mockito.verify(datasetService, times(1))
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**

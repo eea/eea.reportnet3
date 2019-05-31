@@ -59,8 +59,8 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(String mongoID, Pageable pageable, String idFieldSchema, Boolean asc)
-      throws EEAException;
+  TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
+      String idFieldSchema, Boolean asc) throws EEAException;
 
 
   /**

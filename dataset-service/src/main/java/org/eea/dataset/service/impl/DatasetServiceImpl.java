@@ -146,8 +146,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is)
-      throws EEAException, IOException {
+      final InputStream is) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -162,15 +161,15 @@ public class DatasetServiceImpl implements DatasetService {
         throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
       }
       // We get the dataFlowId from the metabase
-      final DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId)
-          .orElse(null);
+      final DataSetMetabase datasetMetabase =
+          dataSetMetabaseRepository.findById(datasetId).orElse(null);
       if (datasetMetabase == null) {
         throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
       }
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
-      final DataSetVO datasetVO = context
-          .parse(is, datasetMetabase.getDataflowId(), partition.getId());
+      final DataSetVO datasetVO =
+          context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -284,12 +283,11 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public TableVO getTableValuesById(final String mongoID, final Pageable pageable,
-      final String idFieldSchema, final Boolean asc)
-      throws EEAException {
+  public TableVO getTableValuesById(final Long datasetId, final String mongoID,
+      final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
 
-    final List<RecordValue> record = recordRepository
-        .findByTableValue_IdTableSchema(mongoID, pageable);
+    final List<RecordValue> record =
+        recordRepository.findByTableValue_IdTableSchema(mongoID, pageable);
     if (record == null || record.isEmpty()) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -298,17 +296,16 @@ public class DatasetServiceImpl implements DatasetService {
 
     final TableVO result = new TableVO();
     result.setRecords(recordMapper.entityListToClass(record));
-    Optional.ofNullable(idFieldSchema)
-        .ifPresent(field -> {
-          result.getRecords().sort((RecordVO v1, RecordVO v2) -> {
-            final FieldVO val1 = v1.getFields().stream()
-                .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
-            final FieldVO val2 = v2.getFields().stream()
-                .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
-            return asc ? val1.getValue().compareTo(val2.getValue())
-                : val1.getValue().compareTo(val2.getValue()) * -1;
-          });
-        });
+    Optional.ofNullable(idFieldSchema).ifPresent(field -> {
+      result.getRecords().sort((RecordVO v1, RecordVO v2) -> {
+        final FieldVO val1 = v1.getFields().stream()
+            .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
+        final FieldVO val2 = v2.getFields().stream()
+            .filter(value -> value.getIdFieldSchema().equals(field)).findFirst().get();
+        return asc ? val1.getValue().compareTo(val2.getValue())
+            : val1.getValue().compareTo(val2.getValue()) * -1;
+      });
+    });
 
     result.setTotalRecords(resultcount);
     return result;
