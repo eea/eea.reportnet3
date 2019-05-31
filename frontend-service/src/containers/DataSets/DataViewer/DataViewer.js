@@ -35,16 +35,21 @@ const DataViewer = (props) => {
         console.log('Fetching data...');
         //fetchDataHandler("default", sortOrder, firstRow, numRows);   
         
+        let queryString = {
+          idTableSchema: props.id,
+          pageNum:firstRow,
+          pageSize:numRows
+        }
+
+        if (sortField !== undefined && sortField !== null) {
+          queryString.fields = sortField;
+          queryString.asc = sortOrder;
+        }
+
         const dataPromise = HTTPRequesterAPI.get(
           {
             url:'/dataset/TableValueDataset/1',
-            queryString: {
-              idTableSchema: props.id,
-              asc:sortOrder,
-              fields:sortField,
-              pageNum:firstRow,
-              pageSize:numRows
-            }
+            queryString: queryString
           }
         );
 
