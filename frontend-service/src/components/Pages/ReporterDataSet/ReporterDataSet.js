@@ -12,11 +12,10 @@ import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 //import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
-import LangContext from '../../Context/LanguageContext';
-
+import ResourcesContext from '../../Context/ResourcesContext';
 
 const ReporterDataSet = () => {
-  const messages = useContext(LangContext);  
+  const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
   const [validationError, setValidationError] = useState(true);
@@ -30,43 +29,41 @@ const ReporterDataSet = () => {
 
   console.log('ReporterDataSet Render...');   
 
-  const home = {icon: 'pi pi-home', url: '#'};
+  const home = {icon: resources.icons["home"], url: '#'};
 
-  //TODO:Change + Error/warning treatment
-    
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
     setCustomButtons([
       {
-        label: messages["import"],
+        label: resources.messages["import"],
         icon: "0",
         group: "left",
         disabled: false,
         clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
       },
       {
-        label: messages["export"],
+        label: resources.messages["export"],
         icon: "1",
         group: "left",
         disabled: false,
         clickHandler: null
       },
       {
-        label: messages["delete"],
+        label: resources.messages["delete"],
         icon: "2",
         group: "left",
         disabled: false,
         clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
       },
       {
-        label: messages["events"],
+        label: resources.messages["events"],
         icon: "4",
         group: "right",
         disabled: false,
         clickHandler: null
       },
       {
-        label: messages["validate"],
+        label: resources.messages["validate"],
         icon: "10",
         group: "right",
         disabled: !validationError,
@@ -75,7 +72,7 @@ const ReporterDataSet = () => {
         iconClasses:null
       },
       {
-        label: messages["showValidations"],
+        label: resources.messages["showValidations"],
         icon: "3",
         group: "right",
         disabled: !validationError,
@@ -85,7 +82,7 @@ const ReporterDataSet = () => {
       },
       {
         //title: "Dashboards",
-        label: messages["dashboards"],
+        label: resources.messages["dashboards"],
         icon: "5",
         group: "right",
         disabled: false,
@@ -95,12 +92,11 @@ const ReporterDataSet = () => {
     ]);
 
     setBreadCrumbItems( [
-      {label: messages["newDataset"], url: '#'},
-      {label: messages["editData"], url: '#'}
+      {label: resources.messages["newDataset"], url: '#'},
+      {label: resources.messages["editData"], url: '#'}
     ]);
 
     //TODO:Change + Error/warning treatment
-
     setDashBoardData({
       labels: ['Table 1', 'Table 2', 'Table 3', 'Table 4'],
       datasets: [
@@ -142,9 +138,7 @@ const ReporterDataSet = () => {
               },
               ticks: {
                 // Include a % sign in the ticks
-                callback: function(value, index, values) {
-                    return value +' %';
-                }
+                callback: (value, index, values) => `${value} %`
             }
           }]
       }});
@@ -180,7 +174,7 @@ const ReporterDataSet = () => {
       console.log(error);
       return error;
     });    
-  },[]);
+  }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
     fnUseState(visible);
@@ -213,24 +207,24 @@ const ReporterDataSet = () => {
   return (
     <div className="titleDiv">
         <BreadCrumb model={breadCrumbItems} home={home}/>
-        <Title title={messages["titleDataset"]}/> 
+        <Title title={resources.messages["titleDataset"]}/> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner*/}
         <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
-          <Dialog header={messages["uploadDataset"]} visible={importDialogVisible}
+          <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
                   className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
               <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
                                 onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
-                                multiple={false} chooseLabel={messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
+                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                 fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>                
-        <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} header={messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
+        <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
           <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
         </Dialog>
-        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={messages["yes"]}  labelCancel={messages["no"]}>
-          {messages["deleteDatasetConfirm"]}
+        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+          {resources.messages["deleteDatasetConfirm"]}
         </ConfirmDialog>
       </div>
   );

@@ -3,18 +3,19 @@ import styles from './App.module.css';
 import Navigation from './components/Navigation/Navigation';
 import Footer from './components/Layout/Footer/Footer';
 import ReporterDataSet from './components/Pages/ReporterDataSet/ReporterDataSet';
-import LangContext from './components/Context/LanguageContext';
+import ResourcesContext from './components/Context/ResourcesContext';
 import langResources from './conf/messages.en.json';
+import iconsResources from './conf/prime.icons.json';
 
 const App = () => {
-  const [langMessages, setLangMessages] = useState(langResources);
+  const [resources, setLangMessages] = useState({...langResources, ...iconsResources});
   return (
     <div className={styles.App}>
-    <LangContext.Provider value={langMessages}>
+    <ResourcesContext.Provider value={resources}>
       <Navigation />
       <ReporterDataSet />
       <Footer />
-      </LangContext.Provider>
+      </ResourcesContext.Provider>
     </div>
   );
 }
