@@ -3,6 +3,7 @@ package org.eea.dataset.service.file.interfaces;
 /**
  * A factory for creating IFileParser objects.
  */
+@FunctionalInterface 
 public interface IFileParserFactory {
 
   /**
@@ -11,5 +12,5 @@ public interface IFileParserFactory {
    * @param mimeType the mime type
    * @return the i file parse context
    */
-  public IFileParseContext createContext(String mimeType);
+  IFileParseContext createContext(String mimeType);
 }

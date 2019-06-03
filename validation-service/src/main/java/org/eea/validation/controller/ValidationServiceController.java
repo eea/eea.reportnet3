@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ValidationServiceController {
 
   /** The Constant REGULATION_TEMPLATE_FILE. */
-  private static final String REGULATION_TEMPLATE_FILE =
-      "src/main/resources/ruletemplate/template01.drl";
+//  private static final String REGULATION_TEMPLATE_FILE =
+//      "src/main/resources/ruletemplate/template01.drl";
 
   /** The validation service. */
   @Autowired

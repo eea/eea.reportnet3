@@ -1,14 +1,14 @@
 package org.eea.dataset.controller;
 
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,139 +20,272 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The Class DataSetControllerImplTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DataSetControllerImplTest {
 
+  /**
+   * The data set controller impl.
+   */
   @InjectMocks
   DataSetControllerImpl dataSetControllerImpl;
 
+  /**
+   * The dataset service.
+   */
   @Mock
   DatasetServiceImpl datasetService;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Test load dataset data throw exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException() throws Exception {
-    MockMultipartFile fileNoExtension =
+    final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
   }
 
+  /**
+   * Test load dataset data throw exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException2() throws Exception {
-    MockMultipartFile fileNoExtension =
+    final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
     dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
   }
 
+  /**
+   * Test load dataset data throw exception 3.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException3() throws Exception {
     dataSetControllerImpl.loadDatasetData(1L, null);
   }
 
-  @Test
+  /**
+   * Test load dataset data success.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataSuccess() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    // ThreadPoolExecutor threadPoolExecutor =
-    // (ThreadPoolExecutor) Mockito.spy(Executors.newFixedThreadPool(1));
-    // doReturn(null).when(threadPoolExecutor).submit(Mockito.any(LoadDataCallable.class));
+    final EEAMockMultipartFile file =
+        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
     dataSetControllerImpl.loadDatasetData(1L, file);
   }
 
+  /**
+   * Test delete import data throw non provided.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportDataThrowNonProvided() throws Exception {
     dataSetControllerImpl.deleteImportData(null);
   }
 
+  /**
+   * Test delete import data throwInvalid.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportDataThrowinvalid() throws Exception {
+  public void testDeleteImportDataThrowInvalid() throws Exception {
     dataSetControllerImpl.deleteImportData(-2L);
   }
 
+  /**
+   * Test delete import data throw internal server.
+   *
+   * @throws Exception the exception
+   */
   @Test
-  public void testDeleteImportDataThrowInternalServer() throws Exception {
+  public void testDeleteImportDataSuccess() throws Exception {
+    doNothing().when(datasetService).deleteImportData(Mockito.any());
     dataSetControllerImpl.deleteImportData(1L);
+    Mockito.verify(datasetService, times(1)).deleteImportData(Mockito.any());
   }
 
+  /**
+   * Testget data tables values exception entry 1.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry1() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry1() throws Exception {
     dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, "field", true);
   }
 
+  /**
+   * Testget data tables values exception entry 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry2() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry2() throws Exception {
     dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, "field", true);
   }
 
+  /**
+   * Testget data tables values exception entry 3.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry3() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any());
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
   }
 
+  /**
+   * Testget data tables values exception entry 4.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry4() throws Exception {
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any());
+  public void testGetDataTablesValuesExceptionEntry4() throws Exception {
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
   }
 
-  @Test
+  /**
+   * Testget data tables values exception entry 5.
+   *
+   * @throws Exception the exception
+   */
+  // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
-    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any())).thenReturn(new TableVO());
+    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", false);
   }
 
+  /**
+   * Testget data tables values success.
+   *
+   * @throws Exception the exception
+   */
   @Test
-  public void testgetDataTablesValuesSuccess() throws Exception {
-    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any())).thenReturn(new TableVO());
+  public void testGetDataTablesValuesSuccess() throws Exception {
+    when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", true);
+
+    Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Creates the empty data set test exception entry 1.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry1() throws Exception {
     dataSetControllerImpl.createEmptyDataSet(null);
   }
 
+  /**
+   * Creates the empty data set test exception entry 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry2() throws Exception {
     dataSetControllerImpl.createEmptyDataSet("");
   }
 
+  /**
+   * Creates the empty data set test.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void createEmptyDataSetTest() throws Exception {
     doNothing().when(datasetService).createEmptyDataset(Mockito.any());
     dataSetControllerImpl.createEmptyDataSet("datasetName");
+
+    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any());
   }
 
+
+  /**
+   * Load schema mongo exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void findByIdTestExceptionEntry1() throws Exception {
-    dataSetControllerImpl.findById(-2L);
+  public void loadDatasetSchemaException() throws Exception {
+    dataSetControllerImpl.loadDatasetSchema(null, 1L, new TableCollectionVO());
   }
 
+  /**
+   * Load schema mongo exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void findByIdTestExceptionEntry2() throws Exception {
-    when(datasetService.getDatasetValuesById(Mockito.any()))
-        .thenThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
-    dataSetControllerImpl.findById(1L);
+  public void loadDatasetSchemaException2() throws Exception {
+    dataSetControllerImpl.loadDatasetSchema(1L, null, new TableCollectionVO());
   }
 
+  /**
+   * Load schema mongo exception 3.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
-  public void findByIdTestExceptionEntry3() throws Exception {
-    when(datasetService.getDatasetValuesById(Mockito.any()))
-        .thenThrow(new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID));
-    dataSetControllerImpl.findById(1L);
+  public void loadDatasetSchemaException3() throws Exception {
+    dataSetControllerImpl.loadDatasetSchema(1L, 1L, null);
   }
 
+  /**
+   * Load schema mongo EEA exception.
+   *
+   * @throws Exception the exception
+   */
   @Test
-  public void findByIdTestSuccess() throws Exception {
-    when(datasetService.getDatasetValuesById(Mockito.any())).thenReturn(new DataSetVO());
-    dataSetControllerImpl.findById(1L);
-    assertNotNull("null result of the datasetValues", dataSetControllerImpl.findById(1L));
+  public void loadDatasetSchemaEEAException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
+
+    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Load schema mongo success.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void loadDatasetSchemaSuccess() throws Exception {
+    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
+
+    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 }

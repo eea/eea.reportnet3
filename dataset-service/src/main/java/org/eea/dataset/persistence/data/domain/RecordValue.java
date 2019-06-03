@@ -11,10 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
 
 /**
  * The Class Record.
@@ -26,28 +29,62 @@ import lombok.ToString;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
-  /** The id. */
+  /**
+   * Inits the sort fields.
+   */
+  @PostLoad
+  public void initSortFields() {
+    String sortingField = SortFieldsHelper.getSortingField();
+    if (sortingField != null && !sortingField.isEmpty()) {
+      //it could happen that the value could not have been set a idFieldSchema
+      //in this case sortCriteria will be set to Null
+      this.sortCriteria = null;
+      if (fields.size() > 0) {
+        for (FieldValue fv : fields) {
+          if (sortingField.equals(fv.getIdFieldSchema())) {
+            this.sortCriteria = fv.getValue();
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * The id.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
-  private Integer id;
+  private Long id;
 
-  /** The id mongo. */
-  @Column(name = "ID_MONGO")
-  private String idMongo;
+  /**
+   * The id mongo.
+   */
+  @Column(name = "ID_RECORD_SCHEMA")
+  private String idRecordSchema;
 
-  /** The id partition. */
+  /**
+   * The id partition.
+   */
   @Column(name = "DATASET_PARTITION_ID")
   private Long datasetPartitionId;
 
-  /** The table value. */
+  /**
+   * The table value.
+   */
   @ManyToOne
   @JoinColumn(name = "ID_TABLE")
   private TableValue tableValue;
 
-  /** The fields. */
+  /**
+   * The fields.
+   */
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
+
+  @Transient
+  private String sortCriteria;
 
   /**
    * Hash code.
@@ -56,29 +93,33 @@ public class RecordValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(datasetPartitionId, fields, id, idMongo, tableValue);
+    return Objects.hash(datasetPartitionId, fields, id, idRecordSchema, tableValue);
   }
 
   /**
    * Equals.
    *
    * @param obj the obj
+   *
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
     }
-    if (obj == null || getClass() != obj.getClass()) {
+    if (obj == null) {
       return false;
     }
-    RecordValue other = (RecordValue) obj;
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final RecordValue other = (RecordValue) obj;
     return Objects.equals(datasetPartitionId, other.datasetPartitionId)
         && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
-        && Objects.equals(idMongo, other.idMongo) && Objects.equals(tableValue, other.tableValue);
+        && Objects.equals(idRecordSchema, other.idRecordSchema)
+        && Objects.equals(tableValue, other.tableValue);
   }
-
 
 
 }

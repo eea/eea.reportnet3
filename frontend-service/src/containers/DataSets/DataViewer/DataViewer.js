@@ -2,9 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import styles from './DataViewer.module.css';
 import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
-import { MultiSelect } from 'primereact/multiselect';
+// import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+
+//import jsonData from '../../../assets/jsons/response_dataset_values2.json';
+import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
     const [totalRecords, setTotalRecords] = useState(0);
@@ -12,19 +15,15 @@ const DataViewer = (props) => {
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
-    const [sortOrder, setSortOrder] = useState(0);   
+    const [sortOrder, setSortOrder] = useState();   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
-    const [cols, setCols] = useState([
-      {field: 'idInstrumento', header: 'ID'},
-      {field: 'denominacion', header: 'Name'},
-      {field: 'fechaInicial', header: 'Initial date'},
-      {field: 'tieneDocumentos', header: 'Has documents'},
-      {field: 'anulado', header: 'Canceled'}
-    ]); 
-    const [header, setHeader] = useState();
-    const [colOptions,setColOptions] = useState([]);    
+    const [cols, setCols] = useState(props.tableSchemaColumns); 
+    const [header] = useState();
+    const [colOptions,setColOptions] = useState([{}]);    
 
+    //TODO: Render se está ejecutando dos veces. Mirar por qué.
+    console.log("DataViewer Render..." + props.name);
     useEffect(() =>{            
         console.log("Setting column options...");      
         let colOpt = [];
@@ -34,22 +33,26 @@ const DataViewer = (props) => {
         setColOptions(colOpt);
   
         console.log('Fetching data...');
-        fetchDataHandler("default", sortOrder, firstRow, numRows);   
+        fetchDataHandler(null, sortOrder, firstRow, numRows);   
+        
+        console.log("Filtering data...");
+        const inmTableSchemaColumns = [...props.tableSchemaColumns];
+        console.log(inmTableSchemaColumns);
+        setCols(inmTableSchemaColumns);
+
       }, []);
   
-      useEffect(()=>{ 
-        //TODO: Render se está ejecutando dos veces. Mirar por qué.
-        console.log("Render...");
+      useEffect(()=>{         
         // let visibilityIcon = (<div className="TableDiv">
         //     <span className="pi pi-eye" style={{zoom:2}}></span> 
         //     <span className="my-multiselected-empty-token">Visibility</span>
         //   </div>
         // );
-        let headerArr = <div className="TableDiv">
-            <i className="pi pi-eye"></i>
-            <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder="Visibility" filter={true} fixedPlaceholder={true}/>
-        </div>;
-        setHeader(headerArr);
+        // let headerArr = <div className="TableDiv">
+        //     <i className="pi pi-eye"></i>
+        //     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
+        // </div>;
+        // setHeader(headerArr);
         
         let columnsArr = cols.map(col => <Column sortable={true} key={col.field} field={col.field} header={col.header} />);
         setColumns(columnsArr); 
@@ -57,46 +60,81 @@ const DataViewer = (props) => {
       }, [cols, colOptions]);
       
       const onChangePageHandler = (event)=>{     
-        console.log('Refetching data...');
-        fetchDataHandler(event.sortField, sortOrder, event.first, event.rows);           
+        console.log('Refetching data...');                
         setNumRows(event.rows);
         setFirstRow(event.first);        
+        fetchDataHandler(sortField, sortOrder, event.first, event.rows); 
       }
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
-        fetchDataHandler(event.sortField, sortOrder, firstRow, numRows);      
-        setSortField(event.sortField);
-        setSortOrder((sortOrder === 1)?-1:1);        
+        setSortOrder(event.sortOrder);  
+        setSortField(event.sortField);    
+        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
       }
   
-      const onColumnToggleHandler = (event) =>{
-        console.log("OnColumnToggle...");
-        setCols(event.value);
-        setColOptions(colOptions);
-      }
+      // const onColumnToggleHandler = (event) =>{
+      //   console.log("OnColumnToggle...");
+      //   setCols(event.value);
+      //   setColOptions(colOptions);
+      // }
   
+      // useEffect(()=>{
+      //   console.log("Fetching new data...");
+      // console.log(fetchedData);
+      // },[fetchedData]);
+
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
-        // fetch(`http://pmpwvsig69.tcsa.local/Dev/ProduccionSIUN/api/Instrumentos/${sField}/${sOrder === 1}/${fRow}/${nRows}`)
-        // .then(response => response.json())
-        // .then(json => {           
-        //   const rows = json.currentPage.map(item=>{
-        //     return {
-        //             idInstrumento : item["idInstrumento"], 
-        //             denominacion : item["denominacion"], 
-        //             fechaInicial : item["fechaInicial"], 
-        //             tieneDocumentos : item["tieneDocumentos"], 
-        //             anulado : item["anulado"]
-        //           }
-        //   }); 
-        //   setFetchedData(rows);
-        //   if(json.pagedInfo.totalElements!==totalRecords){
-        //     setTotalRecords(json.pagedInfo.totalElements);
-        //   }
-        //   setLoading(false);
-        // })
-        // .catch(error => console.log("ERROR!!!!!!! - " + error));
+
+        let queryString = {
+          idTableSchema: props.id,
+          pageNum: Math.floor(fRow / nRows),
+          pageSize: nRows
+        }
+
+        if (sField !== undefined && sField !== null) {
+          queryString.fields = sField;
+          queryString.asc = sOrder === -1 ? 0 : 1;
+        }
+
+        const dataPromise = HTTPRequesterAPI.get(
+          {
+            url:'/dataset/TableValueDataset/1',
+            queryString: queryString
+          }
+        );
+
+        dataPromise.then(response =>{
+          console.log(response.data);
+          filterDataResponse(response.data.records);
+          if(response.data.totalRecords!==totalRecords){
+            setTotalRecords(response.data.totalRecords);
+          }
+        
+          setLoading(false);
+        })
+        .catch(error => {
+          console.log(error);
+          return error;
+        });
+      }
+
+      const filterDataResponse = (data) =>{        
+        
+        //TODO: Refactorizar
+        const dataFiltered = data.map(record => record.fields.map(f =>{
+          return {[f.idFieldSchema]: f.value}
+        }));
+        console.log(data)
+        let auxFiltered = {}
+        let auxArrayFiltered = [];
+        dataFiltered.forEach(dat => {
+          dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
+          auxArrayFiltered.push(auxFiltered);
+          auxFiltered={};
+        });
+        setFetchedData(auxArrayFiltered);
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;

@@ -1,12 +1,14 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.TypeData;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class FieldSchemaVO.
+ */
 @Getter
 @Setter
 @ToString
@@ -22,7 +24,7 @@ public class FieldSchemaVO {
   private String name;
 
   /** The type */
-  private TypeData type;
+  private String type;
 
 
   /**

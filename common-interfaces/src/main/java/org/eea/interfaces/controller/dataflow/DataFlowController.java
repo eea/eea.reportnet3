@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * The interface Data flow controller.
  */
-
 public interface DataFlowController {
 
+  /**
+   * The Interface DataFlowControllerZuul.
+   */
   @FeignClient(value = "dataflow", path = "/dataflow")
   public interface DataFlowControllerZuul extends DataFlowController {
 
@@ -28,5 +30,5 @@ public interface DataFlowController {
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataFlowVO findById(@PathVariable("id") Long id);
+  DataFlowVO findById(@PathVariable("id") Long id);
 }

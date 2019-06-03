@@ -1,0 +1,291 @@
+{
+  "idDataSetSchema": "5ce524fad31fc52540abae73",
+  "nameDataSetSchema": "dataSet_1",
+  "tableSchemas": [
+    {
+      "nameTableSchema": "tabla1",
+      "recordSchema": {
+        "idRecordSchema": "5ce524fad31fc52540abae75",
+        "fieldSchema": [
+          {
+            "id": "5ce40efd1d18ea3494362fb7",
+            "idRecord": "5ce524fad31fc52540abae75",
+            "name": "campo_1",
+            "type": "BOOLEAN"
+          },
+          {
+            "id": "5ce40efd1d18ea3494362fb8",
+            "idRecord": "5ce524fad31fc52540abae75",
+            "name": "campo_2",
+            "type": "BOOLEAN"
+          },
+          {
+            "id": "5ce40efd1d18ea3494362fb9",
+            "idRecord": "5ce524fad31fc52540abae75",
+            "name": "campo_3",
+            "type": "BOOLEAN"
+          }
+        ]
+      },
+      "idTableSchema": "5ce524fad31fc52540abae74"
+    },
+    {
+      "nameTableSchema": "tabla2",
+      "recordSchema": {
+        "idRecordSchema": "5ce524fad31fc52540abae8b",
+        "fieldSchema": [
+          {
+            "id": "5ce524fad31fc52540abae8c",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_11",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae8d",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_12",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae8e",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_13",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae8f",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_14",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae90",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_15",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae91",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_16",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae92",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_17",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae93",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_18",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae94",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_19",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae95",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_20",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae96",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_21",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae97",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_22",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae98",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_23",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae99",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_24",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae9a",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_25",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae9b",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_26",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae9c",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_27",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae9d",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_28",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae9e",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_29",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abae9f",
+            "idRecord": "5ce524fad31fc52540abae8b",
+            "name": "campo_30",
+            "type": "FLOAT"
+          }
+        ]
+      },
+      "idTableSchema": "5ce524fad31fc52540abae8a"
+    },
+    {
+      "nameTableSchema": "tabla3",
+      "recordSchema": {
+        "idRecordSchema": "5ce524fad31fc52540abaea1",
+        "fieldSchema": [
+          {
+            "id": "5ce524fad31fc52540abaea2",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_31",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea3",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_32",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea4",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_33",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea5",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_34",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea6",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_35",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea7",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_36",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea8",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_37",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaea9",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_38",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeaa",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_39",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeab",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_40",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeac",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_41",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaead",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_42",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeae",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_43",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeaf",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_44",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeb0",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_45",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeb1",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_46",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeb2",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_47",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeb3",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_48",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeb4",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_49",
+            "type": "FLOAT"
+          },
+          {
+            "id": "5ce524fad31fc52540abaeb5",
+            "idRecord": "5ce524fad31fc52540abaea1",
+            "name": "campo_50",
+            "type": "FLOAT"
+          }
+        ]
+      },
+      "idTableSchema": "5ce524fad31fc52540abaea0"
+    }
+  ]
+}

@@ -3,7 +3,9 @@ package org.eea.dataset.persistence.data.repository;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 
 /**
@@ -16,6 +18,7 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    *
    * @param tableId the table id
    * @param pageable the pageable
+   *
    * @return the list
    */
   List<RecordValue> findByTableValue_id(Long tableId, Pageable pageable);
@@ -25,16 +28,19 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    *
    * @param idMongo the id mongo
    * @param pageable the pageable
+   *
    * @return the list
    */
-  List<RecordValue> findByTableValue_idMongo(String idMongo, Pageable pageable);
+  List<RecordValue> findByTableValue_IdTableSchema(String idMongo, Pageable pageable);
 
   /**
-   * Count by table value id.
+   * Find by table value id mongo. No sorting nor paging is performed
    *
-   * @param idTableValue the id table value
-   * @return the long
+   * @param idTableSchema the id table schema
+   *
+   * @return the list
    */
-  Long countByTableValue_id(Long idTableValue);
+  @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields WHERE tv.idTableSchema = :idTableSchema")
+  List<RecordValue> findByTableValue_IdTableSchema(@Param("idTableSchema") String idTableSchema);
 
 }

@@ -8,37 +8,37 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 public interface DocumentController {
 
-	/**
-	 * The interface Document controller zuul.
-	 */
-	@FeignClient(value = "document", path = "/document")
-	interface DocumentControllerZuul extends DocumentController {
+  /**
+   * The interface Document controller zuul.
+   */
+  @FeignClient(value = "document", path = "/document")
+  interface DocumentControllerZuul extends DocumentController {
 
-	}
+  }
 
-	/**
-	 * log into jackrabbit.
-	 * 
-	 * @throws Exception
-	 *
-	 */
-	@GetMapping(value = "/testLog")
-	void testLogging() throws Exception;
+  /**
+   * log into jackrabbit.
+   *
+   * @throws Exception the exception
+   */
+  @GetMapping(value = "/testLog")
+  void testLogging() throws Exception;
 
-	/**
-	 * Upload document .
-	 *
-	 * @throws Exception
-	 */
-	@GetMapping(value = "/create")
-	void uploadDocument() throws Exception;
+  /**
+   * Upload document .
+   *
+   * @throws Exception the exception
+   */
+  @GetMapping(value = "/create")
+  void uploadDocument() throws Exception;
 
-	/**
-	 * Download document .
-	 *
-	 * @throws Exception
-	 */
-	@GetMapping
-	public void getDocument() throws Exception;
+  /**
+   * Download document .
+   *
+   * @return the document
+   * @throws Exception the exception
+   */
+  @GetMapping
+  void getDocument() throws Exception;
 
 }

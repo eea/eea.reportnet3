@@ -6,28 +6,32 @@ spring:
   jpa:
     hibernate:
       #use create if you are going to create the schema for the first time
-      ddl-auto: update
-    show-sql: ${SHOW_SQL:true}
+      ddl-auto: validate
+      metabase:
+        ddl-auto: update
+      show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
-        dialect: ${DATABASE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           lob:
             non_contextual_creation: true
     database: postgresql
   datasource:
     metasource:
-      url: ${METABASE_DATASOURCE_URL:jdbc:postgresql://localhost/metabase}
-      username: ${METABASE_DATASOURCE_USER_NAME:root}
-      password: ${METABASE_DATASOURCE_PASSWORD:root}
-      driver-class-name: ${METABASE_DATASOURCE_DRIVER_CLASS:org.postgresql.Driver}
+      url: jdbc:postgresql://localhost/metabase
+      username: root
+      password: root
+      driver-class-name: org.postgresql.Driver
       hikari:
-        connection-timeout: ${METABASE_DATABASE_CONNECTION_TIMEOUT:60000}
-        maximum-pool-size: ${METABASE_DATABASE_CONNECTION_MAXIMUM_POOL_SIZE:5}
+        connection-timeout: 60000
+        maximum-pool-size: 5
   cloud:
     consul:
       discovery:
         instanceId: ${spring.application.name}:${random.value}
+      config:
+        name: dataset
   sleuth:
     sampler:
       probability: 1.0
@@ -49,20 +53,24 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
         loggerLevel: basic
-        
+
 mongodb:
   hibernate:
-      ddl-auto: create
+    ddl-auto: create
   primary:
-      host: localhost
-      port: 27017
-      database: admin
-      username: root
-      password: root
-    
+    host: localhost
+    port: 27017
+    database: admin
+    username: root
+    password: root
+
 hystrix:
   command:
     default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
       circuitBreaker:
         requestVolumeThreshold: 2
-        sleepWindowInMilliseconds: 10000
+        sleepWindowInMilliseconds: 1000

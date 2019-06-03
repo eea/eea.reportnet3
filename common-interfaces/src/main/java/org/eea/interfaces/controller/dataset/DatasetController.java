@@ -1,9 +1,12 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,14 +29,24 @@ public interface DatasetController {
   }
 
   /**
-   * Find values by id.
+   * Gets the data tables values.
    *
    * @param datasetId the dataset id
-   * @return the data set VO
+   * @param idTableSchema the id table schema
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   *
+   * @return the data tables values
    */
-  @RequestMapping(value = "/getDatasetValues/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO findById(Long datasetId);
+  @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
+      @RequestParam("idTableSchema") String idTableSchema,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
 
   /**
    * Update dataset data set vo.
@@ -61,13 +74,12 @@ public interface DatasetController {
    * @param file the file
    */
   @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") Long datasetId,
+  void loadDatasetData(@PathVariable("id") Long datasetId,
       @RequestParam("file") MultipartFile file);
 
 
-
   /**
-   * Delete import data
+   * Delete import data.
    *
    * @param datasetId the id of dataset
    */
@@ -75,5 +87,15 @@ public interface DatasetController {
   void deleteImportData(@RequestParam("datasetName") Long datasetId);
 
 
+  /**
+   * Load dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   * @param tableCollections the table collections
+   */
+  @RequestMapping("{id}/loadDatasetSchema")
+  void loadDatasetSchema(@PathVariable("id") Long datasetId,
+      @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
 
 }

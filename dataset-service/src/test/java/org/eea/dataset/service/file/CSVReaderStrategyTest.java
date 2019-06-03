@@ -21,16 +21,21 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
-/**
- * The Class CSVReaderStrategyTest.
- */
+/*** The Class CSVReaderStrategyTest. */
+
 @RunWith(MockitoJUnitRunner.class)
 public class CSVReaderStrategyTest {
 
   /** The csv reader strategy. */
   @InjectMocks
   private CSVReaderStrategy csvReaderStrategy;
+
+  /** The parse common. */
+  @Mock
+  private ParseCommon parseCommon;
+
 
   /** The input. */
   private InputStream input;
@@ -51,6 +56,7 @@ public class CSVReaderStrategyTest {
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
+    ReflectionTestUtils.setField(csvReaderStrategy, "delimiter", '|');
     String csv =
         "\n_table|campo_1|campo_2|campo_3\r\n" + "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n"
             + "_table|campo_11|campo_12\r\n" + "TABLA3|J|K\r\n" + "TABLA3|M|N";
@@ -85,21 +91,13 @@ public class CSVReaderStrategyTest {
    */
   @Test
   public void testParseFile() throws InvalidFileException {
-    when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
-    assertNotNull(result);
-  }
 
-  /**
-   * Test parse file table null.
-   *
-   * @throws InvalidFileException the invalid file exception
-   */
-  @Test
-  public void testParseFileTableNull() throws InvalidFileException {
-    dataSet.setTableSchemas(null);
-    when(datasetSchemaService.getDataSchemaByIdFlow(Mockito.anyLong())).thenReturn(dataSet);
-    DataSetVO result = csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    when(parseCommon.findIdTable(Mockito.any(), Mockito.any())).thenReturn("111");
+    when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new FieldSchemaVO());
+    when(parseCommon.isHeader("_table")).thenReturn(true);
+    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L);
     assertNotNull(result);
   }
 
@@ -116,8 +114,28 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    csvReaderStrategy.parseFile(input, Mockito.anyLong(), null);
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    csvReaderStrategy.parseFile(input, 1L, null);
   }
+
+
+
+  /**
+   * Test parse exception.
+   *
+   * @throws InvalidFileException the invalid file exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = InvalidFileException.class)
+  public void testParseException2() throws InvalidFileException, IOException {
+    String csv = "TABLA1\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
+    input = file.getInputStream();
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    csvReaderStrategy.parseFile(input, 1L, null);
+  }
+
 
 
 }

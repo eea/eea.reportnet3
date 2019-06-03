@@ -1,9 +1,9 @@
 package org.eea.dataset.service.file;
 
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -13,29 +13,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory implements IFileParserFactory {
 
-  /** The data set schema service. */
+  /** The parse common. */
   @Autowired
-  private DatasetSchemaService dataSetSchemaService;
+  private ParseCommon parseCommon;
+
+  @Value("${dataset.loadDataDelimiter:|}")
+  private char delimiter;
 
   /**
    * Creates a new FileParser object.
    *
    * @param mimeType the mime type
-   * @return the i file parse context
+   * @return the i file parse contextd
    */
   @Override
   public IFileParseContext createContext(String mimeType) {
     FileParseContextImpl context = null;
-    mimeType = mimeType.toLowerCase();
-    switch (mimeType) {
+
+    switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileParseContextImpl(new CSVReaderStrategy(dataSetSchemaService));
+        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, parseCommon));
         break;
       case "xml":
-        context = new FileParseContextImpl(new XMLReaderStrategy(dataSetSchemaService));
+        // Fill it with the xml strategy
         break;
       default:
-        context = null;
         break;
     }
     return context;

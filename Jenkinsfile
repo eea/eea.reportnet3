@@ -1,4 +1,11 @@
+String cron_working_branch = BRANCH_NAME != "develop" ? "@daily" : ""
+
 pipeline {
+
+    triggers {
+        cron(cron_working_branch)
+    }
+
     agent {
         label 'java8'
     }
@@ -25,17 +32,34 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -Dsonar.projectKey=org.eea:reportnet:' + env.BRANCH_NAME.replace('/', '_') + ' -Dsonar.projectName=ReportNet3-' + env.BRANCH_NAME
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
                 }
-                slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - check quality here https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - check quality here https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
             }
         }
         
         stage('Install in Nexus') {
+            when {
+                branch 'develop' 
+            }
             steps {
                 sh '''
                     mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
                 '''
+            }
+        }
+
+        stage('Push to EEA GitHub') {
+            when {
+                branch 'develop' 
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh('git config --global user.email "jorge.saenz@altia.es"')
+                    sh('git config --global user.name "Jorge Sáenz (ALTIA)"')
+                    sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop --allow-unrelated-histories')
+                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:develop')
+                }
             }
         }
         
