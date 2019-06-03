@@ -7,7 +7,7 @@ import LangContext from './components/Context/LanguageContext';
 import langResources from './conf/messages.en.json';
 
 const App = () => {
-  const [langMessages, setLangMessages] = useState(langResources);
+  const [langMessages] = useState(langResources);
   return (
     <div className={styles.App}>
     <LangContext.Provider value={langMessages}>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {useState, useEffect, useContext} from 'react';
 import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
@@ -18,7 +19,7 @@ const ReporterDataSet = () => {
   const messages = useContext(LangContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError, setValidationError] = useState(false);
+  const [validationError] = useState(false);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
