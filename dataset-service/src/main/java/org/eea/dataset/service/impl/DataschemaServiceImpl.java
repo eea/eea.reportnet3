@@ -15,6 +15,8 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
@@ -37,6 +39,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
   /**
    * Creates the data schema.
@@ -89,9 +95,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
 
   /**
-   * Find the dataschema per id
-   * 
+   * Find the dataschema per id.
+   *
    * @param dataschemaId the idDataschema
+   * @return the data schema by id
    */
   @Override
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
@@ -117,7 +124,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
 
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-
+    LOG.info("Schema retrived by idFlow {}",idFlow);
     return dataSchemaMapper.entityToClass(dataschema);
 
   }
