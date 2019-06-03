@@ -292,7 +292,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteImportData(Long dataSetId) {
     datasetRepository.empty(dataSetId);
-    LOG.info("Data value deleted");
+    LOG.info("All data value deleted from dataSetId {}",dataSetId);
   }
 
   /**
