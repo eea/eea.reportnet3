@@ -24,4 +24,8 @@ public class SortFieldsHelper {
   public static String getSortingField() {
     return helper.get();
   }
+
+  public static void cleanSortingField() {
+    helper.remove();
+  }
 }

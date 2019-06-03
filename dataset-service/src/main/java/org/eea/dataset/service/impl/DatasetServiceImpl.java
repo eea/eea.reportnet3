@@ -299,7 +299,7 @@ public class DatasetServiceImpl implements DatasetService {
       result.setRecords(new ArrayList<>());
       return result;
     }
-
+    SortFieldsHelper.cleanSortingField();
     final Long resultcount = countTableData(record.get(0).getTableValue().getId());
 
     result.setRecords(recordMapper.entityListToClass(record));
