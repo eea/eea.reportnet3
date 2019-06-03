@@ -21,10 +21,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
-/**
- * The Class CSVReaderStrategyTest.
- */
+/*** The Class CSVReaderStrategyTest. */
+
 @RunWith(MockitoJUnitRunner.class)
 public class CSVReaderStrategyTest {
 
@@ -35,6 +35,7 @@ public class CSVReaderStrategyTest {
   /** The parse common. */
   @Mock
   private ParseCommon parseCommon;
+
 
   /** The input. */
   private InputStream input;
@@ -55,6 +56,7 @@ public class CSVReaderStrategyTest {
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
+    ReflectionTestUtils.setField(csvReaderStrategy, "delimiter", '|');
     String csv =
         "\n_table|campo_1|campo_2|campo_3\r\n" + "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n"
             + "_table|campo_11|campo_12\r\n" + "TABLA3|J|K\r\n" + "TABLA3|M|N";
@@ -90,9 +92,9 @@ public class CSVReaderStrategyTest {
   @Test
   public void testParseFile() throws InvalidFileException {
 
-    when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
-    when(parseCommon.findIdTable(Mockito.any())).thenReturn("111");
-    when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any()))
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    when(parseCommon.findIdTable(Mockito.any(), Mockito.any())).thenReturn("111");
+    when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
     when(parseCommon.isHeader("_table")).thenReturn(true);
     DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L);
@@ -112,7 +114,7 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, 1L, null);
   }
 
@@ -130,7 +132,7 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    when(parseCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, 1L, null);
   }
 

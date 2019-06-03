@@ -9,5 +9,11 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ValidationService {
 
+  /**
+   * Validate data set data.
+   *
+   * @param datasetId the dataset id
+   */
+  void validateDataSetData(Long datasetId);
 
 }

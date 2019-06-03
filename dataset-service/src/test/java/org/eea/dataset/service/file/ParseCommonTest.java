@@ -21,11 +21,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
-/**
- * The Class ParseCommonTest.
- */
+/*** The Class ParseCommonTest. */
+
 @RunWith(MockitoJUnitRunner.class)
 public class ParseCommonTest {
 
@@ -69,7 +67,6 @@ public class ParseCommonTest {
     tableSchema.setRecordSchema(recordSchema);
     tableSchemas.add(tableSchema);
     dataset.setTableSchemas(tableSchemas);
-    ReflectionTestUtils.setField(parseCommon, "tablesSchema", tableSchemas);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -78,7 +75,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdTable() {
-    assertEquals("fail", ID, parseCommon.findIdTable(ID));
+    assertEquals("fail", ID, parseCommon.findIdTable(ID, dataset));
   }
 
   /**
@@ -86,12 +83,15 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdRecord() {
-    assertEquals("fail", ID, parseCommon.findIdRecord(ID));
+    assertEquals("fail", ID, parseCommon.findIdRecord(ID, dataset));
   }
 
+  /**
+   * Test find id record null.
+   */
   @Test
   public void testFindIdRecordNull() {
-    assertNull("fail", parseCommon.findIdRecord(null));
+    assertNull("fail", parseCommon.findIdRecord(null, dataset));
   }
 
   /**
@@ -99,12 +99,15 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdFieldSchema() {
-    assertEquals("fail", fieldSchema, parseCommon.findIdFieldSchema(ID, ID));
+    assertEquals("fail", fieldSchema, parseCommon.findIdFieldSchema(ID, ID, dataset));
   }
 
+  /**
+   * Test find id field schema null.
+   */
   @Test
   public void testFindIdFieldSchemaNull() {
-    assertNull("fail", parseCommon.findIdFieldSchema(null, null));
+    assertNull("fail", parseCommon.findIdFieldSchema(null, null, dataset));
   }
 
   /**
@@ -113,7 +116,7 @@ public class ParseCommonTest {
   @Test
   public void testGetDataSetSchema() {
     when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(dataset);
-    assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L, dataSetSchemaService));
+    assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L));
   }
 
   /**

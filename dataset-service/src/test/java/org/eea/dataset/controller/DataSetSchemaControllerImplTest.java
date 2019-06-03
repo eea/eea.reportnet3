@@ -1,7 +1,7 @@
 package org.eea.dataset.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -89,7 +89,8 @@ public class DataSetSchemaControllerImplTest {
     field2.setHeaderName("test");
     field2.setType("string");
 
-    assertTrue("fail", field.equals(field2));
+    assertEquals("error, not equals",field,field2);
+  
 
     RecordSchema record = new RecordSchema();
     record.setNameSchema("test");
@@ -101,7 +102,7 @@ public class DataSetSchemaControllerImplTest {
     record2.setNameSchema("test");
     record2.setFieldSchema(listaFields);
 
-    assertTrue("fail", record.equals(record2));
+    assertEquals("error, not equals",record,record2);
 
     TableSchema table = new TableSchema();
     table.setNameTableSchema("test");
@@ -111,7 +112,7 @@ public class DataSetSchemaControllerImplTest {
     table2.setNameTableSchema("test");
     table2.setRecordSchema(record2);
 
-    assertTrue("fail", table.equals(table2));
+    assertEquals("error, not equals",table,table2);
 
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
@@ -126,7 +127,7 @@ public class DataSetSchemaControllerImplTest {
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
-    assertTrue("fail", schema.equals(schema2));
+    assertEquals("error, not equals",schema,schema2);
 
 
   }

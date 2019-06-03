@@ -101,7 +101,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetSchemaVO dataSchemaVO = new DataSetSchemaVO();
     if (dataschema.isPresent()) {
       DataSetSchema datasetSchema = dataschema.get();
-
       dataSchemaVO = dataSchemaMapper.entityToClass(datasetSchema);
     }
 
