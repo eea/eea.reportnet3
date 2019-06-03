@@ -18,7 +18,7 @@ const ReporterDataSet = () => {
   const messages = useContext(LangContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError, setValidationError] = useState(true);
+  const [validationError, setValidationError] = useState(false);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
@@ -53,7 +53,8 @@ const ReporterDataSet = () => {
         icon: "2",
         group: "left",
         disabled: false,
-        clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+        clickHandler: null
+        //() => setVisibleHandler(setDeleteDialogVisible, true)
       },
       {
         label: messages["events"],
@@ -66,7 +67,8 @@ const ReporterDataSet = () => {
         label: messages["validate"],
         icon: "10",
         group: "right",
-        disabled: !validationError,
+        disabled: false,
+        //!validationError,
         clickHandler: null,
         ownButtonClasses:null,
         iconClasses:null
