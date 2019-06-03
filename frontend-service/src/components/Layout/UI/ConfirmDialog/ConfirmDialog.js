@@ -12,8 +12,9 @@ const ConfirmDialog = (props) =>{
     );
 
     return(
-        <Dialog header={props.header} visible={props.visible} style={(props.dialogStyle) ? props.dialogStyle : {width: '50vw'}} footer={footer} onHide={props.onHide} maximizable={props.maximizable}>                        
-            {props.children}
+        <Dialog header={props.header} visible={props.visible} style={(props.dialogStyle) ? props.dialogStyle : {width: '50vw'}} 
+                footer={footer} onHide={props.onHide} maximizable={props.maximizable}>
+                {props.children}
         </Dialog>
     );
 }

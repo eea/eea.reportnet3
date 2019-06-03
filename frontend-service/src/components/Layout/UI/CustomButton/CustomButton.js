@@ -1,21 +1,24 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button } from 'primereact/button';
+import ResourcesContext from '../../../Context/ResourcesContext';
 // import styles from './CustomButton.module.css';
 
 const CustomButton = (props) => {
+    const resources = useContext(ResourcesContext);
     let icons = [
-        'pi pi-upload',
-        'pi pi-download',
-        'pi pi-trash',
-        'pi pi-exclamation-triangle',
-        'pi pi-clock',
-        'pi pi-chart-bar',
-        'pi pi-eye',
-        'pi pi-filter',
-        'pi pi-sitemap',
-        'pi pi-sort',
-        'pi pi-check-circle',
-        'pi pi-refresh'];
+        resources.icons["import"],
+        resources.icons["export"],
+        resources.icons["trash"],
+        resources.icons["warning"],
+        resources.icons["clock"],
+        resources.icons["dashboard"],
+        resources.icons["eye"],
+        resources.icons["filter"],
+        resources.icons["group-by"],
+        resources.icons["sort"],
+        resources.icons["validate"],
+        resources.icons["refresh"]
+    ];
 
     let disabledButton = props.disabled?true:false;
     //let classes = `p-button-rounded p-button-secondary ${(props.ownButtonClasses)?props.ownButtonClasses:""}`;

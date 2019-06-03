@@ -2,10 +2,21 @@
     "icons": {
         "check": "pi pi-check",
         "cancel": "pi pi-times",
-        "export": "pi pi-upload",
+        "clock": "pi pi-clock",
+        "dashboard": "pi pi-chart-bar",
+        "export": "pi pi-download",
+        "eye": "pi pi-eye",
+        "filter": "pi pi-filter",
+        "gropu-by": "pi pi-sitemap",
         "home": "pi pi-home",
-        "import": "pi pi-download",
+        "import": "pi pi-upload",
         "info": "pi pi-info",
-        "user": "pi pi-user"
+        "logout": "pi pi-power-off",
+        "refresh": "pi pi-refresh",
+        "sort": "pi pi-sort",
+        "trash": "pi pi-trash",
+        "user": "pi pi-user",
+        "validate": "pi pi-check-circle",
+        "warning": "pi pi-exclamation-triangle"
     }
 }
