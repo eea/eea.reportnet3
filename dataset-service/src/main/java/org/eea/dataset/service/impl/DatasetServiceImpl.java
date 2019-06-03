@@ -399,7 +399,6 @@ public class DatasetServiceImpl implements DatasetService {
    * This method ensures that Sorting Field Criteria is cleaned after every invocation
    */
   private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
-    final TableVO result = new TableVO();
     Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
     List<RecordValue> records = null;
     try {
