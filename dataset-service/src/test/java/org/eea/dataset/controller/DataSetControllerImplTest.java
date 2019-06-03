@@ -130,7 +130,7 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry1() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry1() throws Exception {
     dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, "field", true);
   }
 
@@ -140,7 +140,7 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry2() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry2() throws Exception {
     dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, "field", true);
   }
 
@@ -150,7 +150,7 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry3() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
         .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any());
@@ -163,7 +163,7 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testgetDataTablesValuesExceptionEntry4() throws Exception {
+  public void testGetDataTablesValuesExceptionEntry4() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
@@ -187,7 +187,7 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test
-  public void testgetDataTablesValuesSuccess() throws Exception {
+  public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", true);
@@ -236,8 +236,8 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void loadSchemaMongoException() throws Exception {
-    dataSetControllerImpl.loadSchemaMongo(null, 1L, new TableCollectionVO());
+  public void loadDatasetSchemaException() throws Exception {
+    dataSetControllerImpl.loadDatasetSchema(null, 1L, new TableCollectionVO());
   }
 
   /**
@@ -246,8 +246,8 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void loadSchemaMongoException2() throws Exception {
-    dataSetControllerImpl.loadSchemaMongo(1L, null, new TableCollectionVO());
+  public void loadDatasetSchemaException2() throws Exception {
+    dataSetControllerImpl.loadDatasetSchema(1L, null, new TableCollectionVO());
   }
 
   /**
@@ -256,8 +256,8 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void loadSchemaMongoException3() throws Exception {
-    dataSetControllerImpl.loadSchemaMongo(1L, 1L, null);
+  public void loadDatasetSchemaException3() throws Exception {
+    dataSetControllerImpl.loadDatasetSchema(1L, 1L, null);
   }
 
   /**
@@ -266,12 +266,12 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test
-  public void loadSchemaMongoEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setMongoTables(Mockito.any(), Mockito.any(),
+  public void loadDatasetSchemaEEAException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
         Mockito.any());
-    dataSetControllerImpl.loadSchemaMongo(1L, 1L, new TableCollectionVO());
+    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
-    Mockito.verify(datasetService, times(1)).setMongoTables(Mockito.any(), Mockito.any(),
+    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
@@ -281,11 +281,11 @@ public class DataSetControllerImplTest {
    * @throws Exception the exception
    */
   @Test
-  public void loadSchemaMongoSuccess() throws Exception {
-    doNothing().when(datasetService).setMongoTables(Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.loadSchemaMongo(1L, 1L, new TableCollectionVO());
+  public void loadDatasetSchemaSuccess() throws Exception {
+    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
-    Mockito.verify(datasetService, times(1)).setMongoTables(Mockito.any(), Mockito.any(),
+    Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 }
