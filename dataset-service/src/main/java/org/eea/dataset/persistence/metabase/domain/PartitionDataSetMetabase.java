@@ -17,8 +17,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @author Mario Severa
+ * The Class PartitionDataSetMetabase.
  *
+ * @author Mario Severa
  */
 @Getter
 @Setter
