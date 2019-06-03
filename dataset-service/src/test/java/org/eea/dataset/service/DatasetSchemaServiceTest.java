@@ -1,7 +1,7 @@
 package org.eea.dataset.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -167,7 +167,7 @@ public class DatasetSchemaServiceTest {
     field2.setHeaderName("test");
     field2.setType("String");
 
-    assertTrue("fail", field.equals(field2));
+    assertEquals("Not equals", field, field2);
 
     RecordSchema record = new RecordSchema();
     record.setNameSchema("test");
@@ -179,7 +179,7 @@ public class DatasetSchemaServiceTest {
     record2.setNameSchema("test");
     record2.setFieldSchema(listaFields);
 
-    assertTrue("fail", record.equals(record2));
+    assertEquals("Not equals", record, record2);
 
     TableSchema table = new TableSchema();
     table.setNameTableSchema("test");
@@ -189,7 +189,7 @@ public class DatasetSchemaServiceTest {
     table2.setNameTableSchema("test");
     table2.setRecordSchema(record2);
 
-    assertTrue("fail", table.equals(table2));
+    assertEquals("Not equals", table, table2);
 
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
@@ -204,7 +204,7 @@ public class DatasetSchemaServiceTest {
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
-    assertTrue("fail", schema.equals(schema2));
+    assertEquals("Not equals", schema, schema2);
 
 
   }
