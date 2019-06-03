@@ -64,6 +64,12 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
+  
+  /**
+   * The show sql propertie
+   */
+  @Value("${spring.jpa.hibernate.show-sql:false}")
+  private String showSql;
 
 
   /**
@@ -154,7 +160,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
     properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
-    properties.setProperty("hibernate.show_sql", "true");
+    properties.setProperty("hibernate.show_sql", showSql);
     return properties;
   }
 
