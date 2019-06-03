@@ -52,11 +52,12 @@ public interface DatasetService {
   /**
    * Gets the table values by id.
    *
+   * @param datasetId the dataset id
    * @param mongoID the mongo ID
    * @param pageable the pageable
-   *
+   * @param idFieldSchema the id field schema
+   * @param asc the asc
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
@@ -74,18 +75,15 @@ public interface DatasetService {
 
 
   /**
-   * Sets the mongo tables.
+   * Sets the dataschema tables.
    *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
-   * @param tableName the table name
-   * @param Headers the headers
-   *
+   * @param tableCollections the table collections
    * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
 
-  void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
+  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
 
 }

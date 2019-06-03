@@ -252,34 +252,34 @@ public class DatasetServiceTest {
 
 
   @Test
-  public void createEmptyDataset() throws Exception {
+  public void testCreateEmptyDataset() throws Exception {
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any());
     datasetService.createEmptyDataset("");
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any());
   }
 
   @Test
-  public void countTableData() throws Exception {
+  public void testCountTableData() throws Exception {
     when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
     assertEquals((Long) 20L, datasetService.countTableData(1L));
   }
 
   @Test
-  public void deleteImportData() throws Exception {
+  public void testDeleteImportData() throws Exception {
     doNothing().when(datasetRepository).empty(Mockito.any());
     datasetService.deleteImportData(1L);
     Mockito.verify(datasetRepository, times(1)).empty(Mockito.any());
   }
 
   @Test
-  public void deleteDataSchema() throws Exception {
+  public void testDeleteDataSchema() throws Exception {
     doNothing().when(schemasRepository).deleteById(Mockito.any());
     datasetService.deleteDataSchema(new ObjectId().toString());
     Mockito.verify(schemasRepository, times(1)).deleteById(Mockito.any());
   }
 
   @Test
-  public void getTableValuesByIdTestEmpty() throws Exception {
+  public void testGetTableValuesByIdEmpty() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<>());
     TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
@@ -288,7 +288,7 @@ public class DatasetServiceTest {
   }
 
   @Test
-  public void getTableValuesByIdTest() throws Exception {
+  public void testGetTableValuesById() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
@@ -298,10 +298,10 @@ public class DatasetServiceTest {
   }
 
   @Test
-  public void setMongoTablesTest() throws Exception {
+  public void testSetDataschemaTables() throws Exception {
     when(dataSetTablesMapper.classToEntity(Mockito.any())).thenReturn(new TableCollection());
     when(dataSetMetabaseTableCollection.save(Mockito.any())).thenReturn(new TableCollection());
-    datasetService.setMongoTables(1L, 1L, new TableCollectionVO());
+    datasetService.setDataschemaTables(1L, 1L, new TableCollectionVO());
     Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
 }
