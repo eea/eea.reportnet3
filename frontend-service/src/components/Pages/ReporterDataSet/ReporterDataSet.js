@@ -14,7 +14,6 @@ import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
 
-
 const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
@@ -24,7 +23,7 @@ const ReporterDataSet = () => {
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [importDialogvisible, setImportDialogVisible] = useState(false);
+  const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
@@ -32,8 +31,6 @@ const ReporterDataSet = () => {
 
   const home = {icon: resources.icons["home"], url: '#'};
 
-  //TODO:Change + Error/warning treatment
-    
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
     setCustomButtons([
@@ -100,7 +97,6 @@ const ReporterDataSet = () => {
     ]);
 
     //TODO:Change + Error/warning treatment
-
     setDashBoardData({
       labels: ['Table 1', 'Table 2', 'Table 3', 'Table 4'],
       datasets: [
@@ -142,9 +138,7 @@ const ReporterDataSet = () => {
               },
               ticks: {
                 // Include a % sign in the ticks
-                callback: function(value, index, values) {
-                    return value +' %';
-                }
+                callback: (value, index, values) => `${value} %`
             }
           }]
       }});
@@ -180,7 +174,7 @@ const ReporterDataSet = () => {
       console.log(error);
       return error;
     });    
-  },[]);
+  }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
     fnUseState(visible);
@@ -219,10 +213,10 @@ const ReporterDataSet = () => {
         </div>
         {/*TODO: Loading spinner*/}
         <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
-          <Dialog header={resources.messages["uploadDataset"]} visible={importDialogvisible}
+          <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
                   className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
               <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
-                                onUpload={() => setVisibleHandler(setImportDialogVisible,true)} 
+                                onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                 fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>                
