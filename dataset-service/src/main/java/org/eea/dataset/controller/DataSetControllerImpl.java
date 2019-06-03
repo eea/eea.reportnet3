@@ -177,15 +177,15 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   @Override
-  @PostMapping("{id}/loadSchemaMongo")
-  public void loadSchemaMongo(@PathVariable("id") final Long datasetId, Long dataFlowId,
+  @PostMapping("{id}/loadDatasetSchema")
+  public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollection) {
     if (datasetId == null || dataFlowId == null || tableCollection == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetService.setMongoTables(datasetId, dataFlowId, tableCollection);
+      datasetService.setDataschemaTables(datasetId, dataFlowId, tableCollection);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

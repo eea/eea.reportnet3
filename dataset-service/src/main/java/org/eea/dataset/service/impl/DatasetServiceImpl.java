@@ -361,7 +361,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Sets the mongo tables.
+   * Sets the dataschema tables.
    *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
@@ -371,7 +371,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void setMongoTables(@DatasetId final Long datasetId, final Long dataFlowId,
+  public void setDataschemaTables(@DatasetId final Long datasetId, final Long dataFlowId,
       final TableCollectionVO tableCollectionVO) throws EEAException {
     final TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
     tableCollection.setDataSetId(datasetId);
