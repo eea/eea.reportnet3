@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {useState, useEffect, useContext} from 'react';
 import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
@@ -18,7 +19,7 @@ const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError, setValidationError] = useState(true);
+  const [validationError] = useState(false);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
@@ -53,7 +54,8 @@ const ReporterDataSet = () => {
         icon: "2",
         group: "left",
         disabled: false,
-        clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+        clickHandler: null
+        //() => setVisibleHandler(setDeleteDialogVisible, true)
       },
       {
         label: resources.messages["events"],
@@ -66,7 +68,8 @@ const ReporterDataSet = () => {
         label: resources.messages["validate"],
         icon: "10",
         group: "right",
-        disabled: !validationError,
+        disabled: false,
+        //!validationError,
         clickHandler: null,
         ownButtonClasses:null,
         iconClasses:null
