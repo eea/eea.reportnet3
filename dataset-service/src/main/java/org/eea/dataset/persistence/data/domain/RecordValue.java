@@ -14,10 +14,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
 
 /**
  * The Class Record.
@@ -29,13 +29,16 @@ import org.eea.dataset.persistence.data.SortFieldsHelper;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
+  /**
+   * Inits the sort fields.
+   */
   @PostLoad
   public void initSortFields() {
     String sortingField = SortFieldsHelper.getSortingField();
     if (sortingField != null && !sortingField.isEmpty()) {
-      this.sortCriteria = fields.stream()
-          .filter(field -> field.getIdFieldSchema().equals(sortingField)).findFirst().get()
-          .getValue();
+      this.sortCriteria =
+          fields.stream().filter(field -> field.getIdFieldSchema().equals(sortingField)).findFirst()
+              .get().getValue();
     }
   }
 
@@ -106,8 +109,8 @@ public class RecordValue {
     final RecordValue other = (RecordValue) obj;
     return Objects.equals(datasetPartitionId, other.datasetPartitionId)
         && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
-        && Objects.equals(idRecordSchema, other.idRecordSchema) && Objects
-        .equals(tableValue, other.tableValue);
+        && Objects.equals(idRecordSchema, other.idRecordSchema)
+        && Objects.equals(tableValue, other.tableValue);
   }
 
 

@@ -1,5 +1,9 @@
 package org.eea.dataset.service.file;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +24,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 
 /**
  * The Class CSVReaderStrategy.
@@ -157,14 +157,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
       TableVO tableVO, final List<TableVO> tables, final List<String> values)
       throws InvalidFileException {
     if (null != values && !values.isEmpty()) {
-      // if the line is white then skipped
+      // if the line is white then skip it
       if (line.length == 1 && line[0].isEmpty()) {
         return tableVO;
       } else if (line.length == 1) {
-        // Format of file is invalid
+        // File format is invalid
         throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
       }
-      // know if the row is a header
+      // determine whether the row is a header
       if (parseCommon.isHeader(values.get(0))) {
         headers = setHeaders(values);
       } else {
@@ -221,7 +221,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private TableVO createTableVO(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId) throws InvalidFileException {
-    // Create object Table and setter the attributes
+    // Create object Table and set he attributes
     if (headers.isEmpty()) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }

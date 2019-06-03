@@ -1,13 +1,13 @@
-import React, { useContext} from 'react';
+import React, { useContext } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
-
+import ResourcesContext from '../../../Context/ResourcesContext';
 const ConfirmDialog = (props) =>{
-
+    const resources = useContext(ResourcesContext);
     const footer = (
         <div>
-            <Button label={props.labelConfirm} icon={(props.iconConfirm) ? props.iconConfirm : "pi pi-check"} onClick={props.onConfirm} />
-            <Button label={props.labelCancel} icon={(props.iconCancel) ? props.iconCancel : "pi pi-times"} onClick={props.onHide} className="p-button-secondary" />
+            <Button label={props.labelConfirm} icon={(props.iconConfirm) ? props.iconConfirm : resources.icons["check"] } onClick={props.onConfirm} />
+            <Button label={props.labelCancel} icon={(props.iconCancel) ? props.iconCancel : resources.icons["cancel"] } onClick={props.onHide} className="p-button-secondary" />
         </div>
     );
 
