@@ -223,10 +223,13 @@ const ReporterDataSet = () => {
                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                 fileLimit={1} className={styles.FileUpload}  /> 
           </Dialog>                
-        <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
+        <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
+                header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
           <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
         </Dialog>
-        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
+                       visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
+                       labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
           {resources.messages["deleteDatasetConfirm"]}
         </ConfirmDialog>
       </div>
