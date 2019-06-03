@@ -6,6 +6,9 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,14 +17,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParseCommon {
 
-  /** The data set schema. */
-  private DataSetSchemaVO dataSetSchema;
-
-  /** The tables schema. */
-  private List<TableSchemaVO> tablesSchema;
 
   /** The Constant TABLE_HEADER. */
   private static final String TABLE_HEADER = "_TABLE";
+
+  /** The data set schema service. */
+  @Autowired
+  private DatasetSchemaService dataSetSchemaService;
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ParseCommon.class);
 
 
   /**
@@ -30,9 +35,13 @@ public class ParseCommon {
    * @param tableName the table name
    * @return the string
    */
-  public String findIdTable(String tableName) {
+  public String findIdTable(String tableName, DataSetSchemaVO dataSetSchema) {
     // Find the Id of tableSchema in MongoDB
     String idTable = null;
+    List<TableSchemaVO> tablesSchema = null;
+    if (null != dataSetSchema) {
+      tablesSchema = dataSetSchema.getTableSchemas();
+    }
     if (null != tablesSchema) {
       for (TableSchemaVO tableSchema : tablesSchema) {
         if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
@@ -49,9 +58,9 @@ public class ParseCommon {
    * @param idTableMongo the id table mongo
    * @return the string
    */
-  public String findIdRecord(String idTableMongo) {
+  public String findIdRecord(String idTableMongo, DataSetSchemaVO dataSetSchema) {
     // Find the idrecordSchema of MongoDB
-    TableSchemaVO tableS = findTableSchema(idTableMongo);
+    TableSchemaVO tableS = findTableSchema(idTableMongo, dataSetSchema);
     if (null != tableS) {
       return null != tableS.getRecordSchema() ? tableS.getRecordSchema().getIdRecordSchema() : null;
     }
@@ -64,8 +73,12 @@ public class ParseCommon {
    * @param idTableMongo the id table mongo
    * @return the table schema
    */
-  private TableSchemaVO findTableSchema(String idTableMongo) {
+  private TableSchemaVO findTableSchema(String idTableMongo, DataSetSchemaVO dataSetSchema) {
     // Find the tableSchema of MongoDB
+    List<TableSchemaVO> tablesSchema = null;
+    if (null != dataSetSchema) {
+      tablesSchema = dataSetSchema.getTableSchemas();
+    }
     for (TableSchemaVO tableSchema : tablesSchema) {
       if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
         return tableSchema;
@@ -83,9 +96,10 @@ public class ParseCommon {
    * @param idTablaSchema the id tabla schema
    * @return the field schema
    */
-  public FieldSchemaVO findIdFieldSchema(String nameSchema, String idTablaSchema) {
+  public FieldSchemaVO findIdFieldSchema(String nameSchema, String idTablaSchema,
+      DataSetSchemaVO dataSetSchema) {
     // Find the idFieldSchema of MongoDB
-    TableSchemaVO recordSchemas = findTableSchema(idTablaSchema);
+    TableSchemaVO recordSchemas = findTableSchema(idTablaSchema, dataSetSchema);
     RecordSchemaVO recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
     if (null != recordSchema && null != recordSchema.getFieldSchema()) {
       for (FieldSchemaVO fieldSchema : recordSchema.getFieldSchema()) {
@@ -104,14 +118,12 @@ public class ParseCommon {
    * @param datasetSchemaService the dataset schema service
    * @return the data set schema
    */
-  public DataSetSchemaVO getDataSetSchema(Long dataflowId,
-      DatasetSchemaService datasetSchemaService) {
+  public DataSetSchemaVO getDataSetSchema(Long dataflowId) {
+    LOG.info("Getting DataSchema from Mongo DB");
+    DataSetSchemaVO dataSetSchema = null;
     // get data set schema of mongo DB
     if (null != dataflowId) {
-      dataSetSchema = datasetSchemaService.getDataSchemaByIdFlow(dataflowId);
-      if (null != dataSetSchema) {
-        tablesSchema = dataSetSchema.getTableSchemas();
-      }
+      dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId);
     }
     return dataSetSchema;
   }
