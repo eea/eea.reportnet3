@@ -29,6 +29,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(RecordStoreControllerImpl.class);
 
   /**
    * Reste data set data base.
@@ -54,6 +58,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName);
+      LOG.info("Dataset with name {} created",datasetName);
     } catch (final DockerAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       // TODO Error control

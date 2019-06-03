@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
@@ -186,7 +187,7 @@ public class DatasetServiceImpl implements DatasetService {
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
-      LOG.info("File processed");
+      LOG.info("File processed and saved into DB");
     } finally {
       is.close();
     }
@@ -312,14 +313,15 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Gets the table values by id. It additionally can page the results and sort them
-   *
+   * 
    * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
    *
+   * @param datasetId the dataset id
    * @param mongoID the mongo ID
    * @param pageable the pageable
-   *
+   * @param idFieldSchema the id field schema
+   * @param asc the asc
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -337,6 +339,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (record.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
+      LOG.info("No records founded in datasetId {}",datasetId);
       return result;
     }
     SortFieldsHelper.cleanSortingField();
@@ -350,7 +353,11 @@ public class DatasetServiceImpl implements DatasetService {
             : v1.getSortCriteria().compareTo(v2.getSortCriteria()) * -1;
       });
     });
-
+    LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page", 
+        datasetId, resultcount, pageable.getPageNumber(), pageable.getPageSize());
+    if(StringUtils.isNotBlank(idFieldSchema)) {
+      LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
+    }
     result.setTotalRecords(resultcount);
     return result;
   }
