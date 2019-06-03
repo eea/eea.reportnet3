@@ -155,6 +155,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   /**
    * Gets the connection.
+   * 
    * @deprecated (not used)
    * @return the connection
    */
