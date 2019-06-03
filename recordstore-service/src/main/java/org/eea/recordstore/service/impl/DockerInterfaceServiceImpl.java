@@ -61,7 +61,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   /**
    * The envs.
    */
-  @Value("${dockerVarEnvironments:null}")
+  @Value("${doc kerVarEnvironments:null}")
   private final List<String> envs = null;
 
   @Value("${dockerContainerName:crunchy-postgres}")
