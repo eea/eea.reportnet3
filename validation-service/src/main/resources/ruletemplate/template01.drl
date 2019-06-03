@@ -9,7 +9,7 @@ import org.eea.validation.model.*
 
 template "tmp1"
 
-rule "@{ruleid}"
+rule "@{ruleid}" salience 1
   dialect "mvel"
   when
     @{whencondition}

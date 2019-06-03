@@ -178,7 +178,7 @@ public class DatasetServiceImpl implements DatasetService {
       // save dataset to the database
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
-      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+      releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
     } finally {
       is.close();
     }
