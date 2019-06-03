@@ -12,7 +12,7 @@ public interface RecordStoreService {
 
   /**
    * Reset dataset database. TO BE REMOVED. ONLY FOR TEST PURPOSES
-   *
+   * @deprecated
    * @throws DockerAccessException the docker access exception
    */
   @Deprecated

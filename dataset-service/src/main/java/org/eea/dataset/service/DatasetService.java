@@ -75,14 +75,15 @@ public interface DatasetService {
 
 
   /**
-   * Sets the mongo tables.
+   * Sets the dataschema tables.
    *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
    * @param tableCollections the table collections
    * @throws EEAException the EEA exception
    */
-  void setMongoTables(@DatasetId Long datasetId, Long dataFlowId,
+
+  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
 
 }

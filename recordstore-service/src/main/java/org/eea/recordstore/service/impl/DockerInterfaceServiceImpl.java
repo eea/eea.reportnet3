@@ -64,15 +64,11 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   @Value("${doc kerVarEnvironments:null}")
   private final List<String> envs = null;
 
-  @Value("${dockerContainerName:crunchy-postgres}")
-  private String containerName;
-
-
   /**
    * The container name.
    */
   @Value("${dockerContainerName:crunchy-postgres}")
-  private String CONTAINER_NAME;
+  private String containerName;
 
 
   /**
@@ -159,7 +155,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   /**
    * Gets the connection.
-   *
+   * @deprecated (not used)
    * @return the connection
    */
   @Deprecated
@@ -173,9 +169,6 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     final ExecCreateCmdResponse execCreateCmdResponse = dockerClient.dockerClient()
         .execCreateCmd(container.getId()).withAttachStdout(true).withCmd(
 
-            // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql"
-            // && psql -h localhost -U root -p 5432 -d datasets -c "create table "dataset_1".record(
-            // id integer NOT NULL, name "char", CONSTRAINT record_pkey PRIMARY KEY (id))"
             "psql", "-h", "localhost", "-U", "root", "-p", "5432", "-d", "datasets", "-c",
             "select * from pg_namespace where nspname like 'dataset%'")
         .withTty(true).exec();

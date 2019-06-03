@@ -88,14 +88,14 @@ public interface DatasetController {
 
 
   /**
-   * Load schema mongo.
+   * Load dataset schema.
    *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
    * @param tableCollections the table collections
    */
-  @RequestMapping("{id}/loadDatasetData")
-  void loadSchemaMongo(@PathVariable("id") Long datasetId,
+  @RequestMapping("{id}/loadDatasetSchema")
+  void loadDatasetSchema(@PathVariable("id") Long datasetId,
       @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
 
 }
