@@ -287,7 +287,7 @@ public class DatasetServiceTest {
   }
 
   @Test(expected = EEAException.class)
-  public void getTableValuesByIdTestNull() throws Exception {
+  public void testGetTableValuesByIdNull() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
