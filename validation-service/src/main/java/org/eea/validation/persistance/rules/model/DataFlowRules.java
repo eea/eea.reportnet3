@@ -1,8 +1,7 @@
-package org.eea.validation.model.rules;
+package org.eea.validation.persistance.rules.model;
 
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.validation.persistance.rules.model.RulesModel;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -15,15 +14,18 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Document(collection = "DataSet_Rule_Collection")
-public class DataSetRule extends RulesModel {
+@Document(collection = "DataFlow_Rule_Collection")
+public class DataFlowRules {
 
   @Id
   @Field(value = "_id")
-  private ObjectId id_TableRules;
+  private ObjectId id_Rules;
 
   @Field(value = "id_DataFlow")
   private Long id_DataFlow;
+
+  @Field(value = "rulesScope")
+  private Enum rulesScope;
 
   @Field(value = "ruleName")
   private String ruleName;
