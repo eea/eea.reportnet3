@@ -49,6 +49,8 @@ import org.springframework.stereotype.Service;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
+  private static final String ROOT = "root";
+
   /**
    * The data set mapper.
    */
@@ -156,17 +158,10 @@ public class DatasetServiceImpl implements DatasetService {
     // validates file types for the data load
     validateFileType(mimeType);
     try {
-      final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
-          .findFirstByIdDataSet_idAndUsername(datasetId, "root").orElse(null);
-      if (partition == null) {
-        throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-      }
-      // We get the dataFlowId from the metabase
-      final DataSetMetabase datasetMetabase =
-          dataSetMetabaseRepository.findById(datasetId).orElse(null);
-      if (datasetMetabase == null) {
-        throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-      }
+      // Get the partition for the partiton id
+      final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+      // Get the dataFlowId from the metabase
+      final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
@@ -187,6 +182,42 @@ public class DatasetServiceImpl implements DatasetService {
     } finally {
       is.close();
     }
+  }
+
+
+  /**
+   * Obtain dataset metabase.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase
+   * @throws EEAException the EEA exception
+   */
+  private DataSetMetabase obtainDatasetMetabase(final Long datasetId) throws EEAException {
+    final DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    if (datasetMetabase == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return datasetMetabase;
+  }
+
+
+  /**
+   * Obtain partition id.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
+  private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
+      throws EEAException {
+    final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
+    if (partition == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return partition;
   }
 
 

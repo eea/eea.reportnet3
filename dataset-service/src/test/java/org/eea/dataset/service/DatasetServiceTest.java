@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -285,6 +284,13 @@ public class DatasetServiceTest {
     TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
     Assert.assertNotNull("result null", result);
     Assert.assertEquals("wrong number of records", Long.valueOf(0), result.getTotalRecords());
+  }
+
+  @Test(expected = EEAException.class)
+  public void getTableValuesByIdTestNull() throws Exception {
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(null);
+    datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
