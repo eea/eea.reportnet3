@@ -39,6 +39,8 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -49,7 +51,12 @@ import org.springframework.stereotype.Service;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
+  /** The Constant ROOT. */
   private static final String ROOT = "root";
+  
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+
 
   /**
    * The data set mapper.
@@ -179,6 +186,7 @@ public class DatasetServiceImpl implements DatasetService {
       datasetRepository.save(dataset);
       // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+      LOG.info("File processed");
     } finally {
       is.close();
     }
@@ -283,6 +291,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteImportData(Long dataSetId) {
     datasetRepository.empty(dataSetId);
+    LOG.info("Data value deleted");
   }
 
   /**
