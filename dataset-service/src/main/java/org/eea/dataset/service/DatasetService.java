@@ -57,21 +57,13 @@ public interface DatasetService {
    * @param pageable the pageable
    * @param idFieldSchema the id field schema
    * @param asc the asc
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
       String idFieldSchema, Boolean asc) throws EEAException;
-
-
-  /**
-   * Count table data.
-   *
-   * @param tableId the table id
-   *
-   * @return the long
-   */
-  Long countTableData(Long tableId);
 
 
   /**
@@ -80,6 +72,7 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
    * @param tableCollections the table collections
+   *
    * @throws EEAException the EEA exception
    */
 

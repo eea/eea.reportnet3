@@ -9,7 +9,7 @@ spring:
       ddl-auto: validate
       metabase:
         ddl-auto: update
-      show-sql: false
+      show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

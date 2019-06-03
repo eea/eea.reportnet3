@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -52,10 +54,14 @@ import org.springframework.stereotype.Service;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /** The Constant ROOT. */
+  /**
+   * The Constant ROOT.
+   */
   private static final String ROOT = "root";
-  
-  /** The Constant LOG. */
+
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 
@@ -198,7 +204,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Obtain dataset metabase.
    *
    * @param datasetId the dataset id
+   *
    * @return the data set metabase
+   *
    * @throws EEAException the EEA exception
    */
   private DataSetMetabase obtainDatasetMetabase(final Long datasetId) throws EEAException {
@@ -216,7 +224,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param user the user
+   *
    * @return the partition data set metabase
+   *
    * @throws EEAException the EEA exception
    */
   private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
@@ -292,7 +302,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteImportData(Long dataSetId) {
     datasetRepository.empty(dataSetId);
-    LOG.info("All data value deleted from dataSetId {}",dataSetId);
+    LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 
   /**
@@ -313,7 +323,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Gets the table values by id. It additionally can page the results and sort them
-   * 
+   *
    * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
    *
    * @param datasetId the dataset id
@@ -321,60 +331,102 @@ public class DatasetServiceImpl implements DatasetService {
    * @param pageable the pageable
    * @param idFieldSchema the id field schema
    * @param asc the asc
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String mongoID,
       final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
-
-    final TableVO result = new TableVO();
-    Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
-    final List<RecordValue> record =
-        recordRepository.findByTableValue_IdTableSchema(mongoID, pageable);
-    if (record == null) {
+    List<RecordValue> records = retrieveRecordValue(mongoID, idFieldSchema);
+    if (records == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    if (record.isEmpty()) {
+    TableVO result = new TableVO();
+    if (records.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}",datasetId);
-      return result;
-    }
-    SortFieldsHelper.cleanSortingField();
-    final Long resultcount = countTableData(record.get(0).getTableValue().getId());
+      LOG.info("No records founded in datasetId {}", datasetId);
 
-    result.setRecords(recordMapper.entityListToClass(record));
-    Optional.ofNullable(idFieldSchema).ifPresent(field -> {
-      result.getRecords().sort((RecordVO v1, RecordVO v2) -> {
+    } else {
+      records = this.sanitizeRecords(records);
 
-        return asc ? v1.getSortCriteria().compareTo(v2.getSortCriteria())
-            : v1.getSortCriteria().compareTo(v2.getSortCriteria()) * -1;
+      List<RecordVO> recordVOs = recordMapper.entityListToClass(records);
+      Optional.ofNullable(idFieldSchema).ifPresent(field -> {
+        recordVOs.sort((RecordVO v1, RecordVO v2) -> {
+          String sortCriteria1 = v1.getSortCriteria();
+          String sortCriteria2 = v2.getSortCriteria();
+          //process the sort criteria
+          //it could happen that some values has no sortCriteria due to a matching error
+          //during the load process. If this is the case we need to ensure that sort logic does not fail
+          int sort = 0;
+          if (null == sortCriteria1) {
+            if (null != sortCriteria2) {
+              sort = -1;
+            }
+          } else {
+            if (null != sortCriteria2) {
+              sort = asc ? sortCriteria1.compareTo(sortCriteria2)
+                  : sortCriteria1.compareTo(sortCriteria2) * -1;
+            } else {
+              sort = 1;
+            }
+          }
+          return sort;
+        });
       });
-    });
-    LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page", 
-        datasetId, resultcount, pageable.getPageNumber(), pageable.getPageSize());
-    if(StringUtils.isNotBlank(idFieldSchema)) {
-      LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
+      int initIndex = pageable.getPageNumber() * pageable.getPageSize();
+      int endIndex =
+          (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size() ? recordVOs
+              .size() : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      result.setRecords(recordVOs.subList(initIndex, endIndex));
+      result.setTotalRecords(Long.valueOf(recordVOs.size()));
+      LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",
+          datasetId, recordVOs.size(), pageable.getPageNumber(), pageable.getPageSize());
+      if (StringUtils.isNotBlank(idFieldSchema)) {
+        LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
+      }
     }
-    result.setTotalRecords(resultcount);
     return result;
   }
 
 
   /**
-   * Count table data.
+   * Retrieves in a controlled way the data from database
    *
-   * @param tableId the table id
-   *
-   * @return the long
+   * This method ensures that Sorting Field Criteria is cleaned after every invocation
    */
-  @Override
-  public Long countTableData(final Long tableId) {
-    return recordRepository.countByTableValue_id(tableId);
+  private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
+    final TableVO result = new TableVO();
+    Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
+    List<RecordValue> records = null;
+    try {
+      records = recordRepository.findByTableValue_IdTableSchema(idTableSchema);
+    } finally {
+      SortFieldsHelper.cleanSortingField();
+    }
+
+    return records;
   }
 
+  /**
+   * Removes duplicated records in the query.
+   */
+  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
+    List<RecordValue> sanitizedRecords = new ArrayList<>();
+    Set<Long> processedRecords = new HashSet<>();
+    for (RecordValue recordValue : records) {
+      if (!processedRecords.contains(recordValue.getId())) {
+        processedRecords.add(recordValue.getId());
+        sanitizedRecords.add(recordValue);
+      }
+
+    }
+    return sanitizedRecords;
+
+  }
 
   /**
    * Sets the dataschema tables.

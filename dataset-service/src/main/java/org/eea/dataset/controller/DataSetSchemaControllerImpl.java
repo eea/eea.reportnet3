@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
 /**
@@ -19,7 +19,9 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataschema")
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
@@ -27,7 +29,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the data schema.
    *
-   * @param datasetName the dataset name
+   * @param datasetId the dataset id
    */
   @Override
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
@@ -40,6 +42,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by id.
    *
    * @param id the id
+   *
    * @return the data set schema VO
    */
   @Override
@@ -57,6 +60,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by dataflow.
    *
    * @param idFlow the id flow
+   *
    * @return the data set schema VO
    */
   @Override
@@ -73,24 +77,25 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Error handler schema.
    *
    * @param id the id
+   *
    * @return the data set schema VO
    */
   public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
-  
-    return  new DataSetSchemaVO();
+
+    return new DataSetSchemaVO();
   }
 
   /**
    * Error handler schema data flow.
    *
    * @param id the id
+   *
    * @return the data set schema VO
    */
   public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
-   
-    return  new DataSetSchemaVO();
-  }
 
+    return new DataSetSchemaVO();
+  }
 
 
 }

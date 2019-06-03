@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -176,6 +176,10 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.deleteImportData(dataSetId);
   }
 
+  /**
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
   public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
