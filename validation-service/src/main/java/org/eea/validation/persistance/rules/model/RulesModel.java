@@ -1,4 +1,4 @@
-package org.eea.validation.model.rules;
+package org.eea.validation.persistance.rules.model;
 
 import java.util.Objects;
 import javax.persistence.Id;
@@ -12,11 +12,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Rule {
+public class RulesModel {
 
   /** The id rule. */
   @Id
-  private Integer idRule;
+  private Long idRule;
 
   /** The rules base. */
   private String rulesBase;
@@ -59,7 +59,7 @@ public class Rule {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    Rule other = (Rule) obj;
+    RulesModel other = (RulesModel) obj;
     return Objects.equals(action, other.action) && Objects.equals(attribute, other.attribute)
         && Objects.equals(conditionalElement, other.conditionalElement)
         && Objects.equals(idRule, other.idRule) && Objects.equals(name, other.name)
