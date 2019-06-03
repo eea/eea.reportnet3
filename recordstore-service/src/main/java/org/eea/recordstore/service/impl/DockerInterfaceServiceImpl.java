@@ -61,7 +61,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   /**
    * The envs.
    */
-  @Value("${doc kerVarEnvironments:null}")
+  @Value("${dockerVarEnvironments:null}")
   private final List<String> envs = null;
 
   /**
@@ -155,6 +155,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   /**
    * Gets the connection.
+   * 
    * @deprecated (not used)
    * @return the connection
    */
