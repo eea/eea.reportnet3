@@ -19,6 +19,6 @@ public interface ReaderStrategy {
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
    */
-  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
+  DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId)
       throws InvalidFileException;
 }
