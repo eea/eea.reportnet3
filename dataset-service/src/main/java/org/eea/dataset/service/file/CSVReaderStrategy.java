@@ -44,7 +44,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
   /** The delimiter. */
-  private static char delimiter;
+  private char delimiter;
 
   /**
    * The parse common.

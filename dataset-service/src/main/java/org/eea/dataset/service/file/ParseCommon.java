@@ -79,9 +79,11 @@ public class ParseCommon {
     if (null != dataSetSchema) {
       tablesSchema = dataSetSchema.getTableSchemas();
     }
-    for (TableSchemaVO tableSchema : tablesSchema) {
-      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
-        return tableSchema;
+    if (null != tablesSchema) {
+      for (TableSchemaVO tableSchema : tablesSchema) {
+        if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
+          return tableSchema;
+        }
       }
     }
     return null;
