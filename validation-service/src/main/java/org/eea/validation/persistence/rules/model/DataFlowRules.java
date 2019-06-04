@@ -1,4 +1,4 @@
-package org.eea.validation.persistance.rules.model;
+package org.eea.validation.persistence.rules.model;
 
 import javax.persistence.Id;
 import org.bson.types.ObjectId;

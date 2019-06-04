@@ -49,8 +49,8 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
    * @return the mongo transaction manager
    */
   @Bean
-  public MongoTransactionManager schemasTransactionManager(MongoDbFactory dbRulesFactory) {
-    return new MongoTransactionManager(dbRulesFactory);
+  public MongoTransactionManager schemasTransactionManager(MongoDbFactory dbFactory) {
+    return new MongoTransactionManager(dbFactory);
   }
 
   /**
