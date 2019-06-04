@@ -409,4 +409,10 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetValue result = datasetRepository.save(datasetValue);
     return dataSetMapper.entityToClass(result);
   }
+
+
+  @Override
+  public Long getDataFlowIdById(Long datasetId) throws EEAException {
+    return dataSetMetabaseRepository.findDataflowIdById(datasetId);
+  }
 }

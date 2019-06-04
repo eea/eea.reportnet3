@@ -107,4 +107,14 @@ public interface DatasetController {
    */
   @RequestMapping(value = "{id}", method = RequestMethod.GET)
   DataSetVO getById(@PathVariable("id") Long datasetId);
+
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   */
+  @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
+  Long getDataFlowIdById(@PathVariable("id") Long datasetId);
 }

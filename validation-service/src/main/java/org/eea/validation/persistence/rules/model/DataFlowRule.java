@@ -1,4 +1,4 @@
-package org.eea.validation.persistance.rules.model;
+package org.eea.validation.persistence.rules.model;
 
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
@@ -15,24 +15,30 @@ import lombok.ToString;
 @Setter
 @ToString
 @Document(collection = "DataFlow_Rule_Collection")
-public class DataFlowRules {
+public class DataFlowRule {
 
+  /** The id rules. */
   @Id
   @Field(value = "_id")
-  private ObjectId id_Rules;
+  private ObjectId ruleId;
 
+  /** The id data flow. */
   @Field(value = "id_DataFlow")
-  private Long id_DataFlow;
+  private Long dataFlowId;
 
+  /** The rules scope. */
   @Field(value = "rulesScope")
-  private Enum rulesScope;
+  private RuleScope ruleScope;
 
+  /** The rule name. */
   @Field(value = "ruleName")
   private String ruleName;
 
+  /** The when condition. */
   @Field(value = "whenCondition")
   private String whenCondition;
 
+  /** The then condition. */
   @Field(value = "thenCondition")
   private String thenCondition;
 

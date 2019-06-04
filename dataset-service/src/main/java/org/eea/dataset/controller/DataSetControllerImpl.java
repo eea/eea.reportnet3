@@ -230,4 +230,26 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
+
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   */
+  @Override
+  public Long getDataFlowIdById(Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    Long result = null;
+    try {
+      result = datasetService.getDataFlowIdById(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
 }
