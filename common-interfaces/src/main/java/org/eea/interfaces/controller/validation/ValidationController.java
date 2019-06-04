@@ -1,6 +1,3 @@
-/*
- * 
- */
 package org.eea.interfaces.controller.validation;
 
 import java.util.List;
@@ -16,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public interface ValidationController {
 
+  /**
+   * The Interface ValidationControllerZuul.
+   */
   @FeignClient(value = "validation", path = "/validation")
-  interface DataSetControllerZuul extends ValidationController {
+  interface ValidationControllerZuul extends ValidationController {
 
   }
 
@@ -53,6 +53,6 @@ public interface ValidationController {
    */
   @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void validateDataSetData(Long datasetId);
+  void validateDataSetData(@RequestParam("id") Long datasetId);
 
 }
