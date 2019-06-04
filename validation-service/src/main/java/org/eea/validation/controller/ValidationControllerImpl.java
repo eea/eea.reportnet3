@@ -2,8 +2,10 @@ package org.eea.validation.controller;
 
 import java.util.List;
 import java.util.Map;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.interfaces.vo.validation.RuleScopeVo;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,13 +52,16 @@ public class ValidationControllerImpl implements ValidationController {
    * @param ruleAction the rule action
    */
   @Override
-  @RequestMapping(value = "/setRules", method = RequestMethod.GET,
+  @RequestMapping(value = "/setNewRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void setNewRules(@RequestParam(required = true) String ruleName,
-      @RequestParam(required = true) String ruleAtrtibute,
-      @RequestParam(required = true) String ruleCondition,
-      @RequestParam(required = true) String ruleAction) {
-    validationService.saveRule(new DataFlowRule());
+  public void setNewRules(@RequestParam(required = true) RuleScopeVo ruleScope,
+      @RequestParam(required = true) String ruleName,
+      @RequestParam(required = true) String whenCondition,
+      @RequestParam(required = true) String thenCondition) {
+
+    DataFlowRule dataFlowRule =
+        new DataFlowRule(new ObjectId(), 1L, ruleScope, ruleName, whenCondition, thenCondition);
+    validationService.saveRule(dataFlowRule);
 
   }
 

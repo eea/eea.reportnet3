@@ -5,6 +5,7 @@ package org.eea.interfaces.controller.validation;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.vo.validation.RuleScopeVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,12 +39,12 @@ public interface ValidationController {
    * @param ruleCondition the rule condition
    * @param ruleAction the rule action
    */
-  @RequestMapping(value = "/setRules", method = RequestMethod.GET,
+  @RequestMapping(value = "/setNewRule", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void setNewRules(@RequestParam(required = true) String ruleName,
-      @RequestParam(required = true) String ruleAtrtibute,
-      @RequestParam(required = true) String ruleCondition,
-      @RequestParam(required = true) String ruleAction);
+  void setNewRules(@RequestParam(required = true) RuleScopeVo ruleScope,
+      @RequestParam(required = true) String ruleName,
+      @RequestParam(required = true) String whenCondition,
+      @RequestParam(required = true) String thenCondition);
 
   /**
    * Validate data set data.

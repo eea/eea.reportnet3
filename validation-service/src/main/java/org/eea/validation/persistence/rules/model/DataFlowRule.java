@@ -2,9 +2,12 @@ package org.eea.validation.persistence.rules.model;
 
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.validation.RuleScopeVo;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -14,6 +17,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "DataFlow_Rule_Collection")
 public class DataFlowRule {
 
@@ -28,7 +33,7 @@ public class DataFlowRule {
 
   /** The rules scope. */
   @Field(value = "rulesScope")
-  private RuleScope ruleScope;
+  private RuleScopeVo ruleScope;
 
   /** The rule name. */
   @Field(value = "ruleName")

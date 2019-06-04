@@ -1,9 +1,9 @@
-package org.eea.validation.persistence.rules.model;
+package org.eea.interfaces.vo.validation;
 
 /**
  * The Enum RuleScope.
  */
-public enum RuleScope {
+public enum RuleScopeVo {
 
   /** The dataset. */
   DATASET,

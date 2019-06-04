@@ -38,7 +38,8 @@ public class KieBaseManager {
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
 
-    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+    Iterable<DataFlowRule> preRepositoryDB =
+        dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
 

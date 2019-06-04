@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -14,7 +13,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.configuration.KieBaseManager;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
-import org.eea.validation.persistence.rules.model.RuleScope;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.eea.validation.service.ValidationService;
 import org.kie.api.runtime.KieSession;
@@ -127,12 +125,6 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void saveRule(DataFlowRule dataFlowRules) {
-    dataFlowRules.setDataFlowId(1L);
-    dataFlowRules.setRuleId(new ObjectId());
-    dataFlowRules.setRuleName("nombre regla");
-    dataFlowRules.setRuleScope(RuleScope.DATASET);
-    dataFlowRules.setThenCondition("thencondition");
-    dataFlowRules.setWhenCondition("whencondition");
     dataFlowRulesRepository.save(dataFlowRules);
   }
 
