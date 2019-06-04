@@ -1,7 +1,7 @@
 {
     "messages" : {
         "newDataset": "New Dataset",
-        "editData": "Edit data",
+        "viewData": "View data",
         "import": "Import",
         "export": "Export",
         "create": "Create",
