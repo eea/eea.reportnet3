@@ -6,6 +6,7 @@ import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
+import {Card} from 'primereact/card';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
@@ -15,17 +16,20 @@ import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
 
+import validationImage from '../../../assets/images/dataset_icon.png';
+
 const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError] = useState(false);
+  const [validationError] = useState(true);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [validationsVisible, setValidationsVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   console.log('ReporterDataSet Render...');   
@@ -79,7 +83,7 @@ const ReporterDataSet = () => {
         icon: "3",
         group: "right",
         disabled: !validationError,
-        clickHandler: null,
+        clickHandler: () => setVisibleHandler(setValidationsVisible, true),
         ownButtonClasses:null,
         iconClasses:(validationError)?"warning":""
       },
@@ -88,9 +92,8 @@ const ReporterDataSet = () => {
         label: resources.messages["dashboards"],
         icon: "5",
         group: "right",
-        disabled: true,
-        clickHandler: null
-        //() => setVisibleHandler(setDashDialogVisible, true)
+        disabled: false,
+        clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
       }
     ]);
 
@@ -225,7 +228,16 @@ const ReporterDataSet = () => {
           </Dialog>                
         <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
                 header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
+          <h1>US-STP6-DSM-VIS-01-List of Visualizations (next sprint)</h1>
           <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
+        </Dialog>             
+        <Dialog visible={validationsVisible} onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
+                header={resources.messages["titleValidations"]} maximizable dismissableMask={true} style={{width:'80%'}}>
+          <Card title="US-STP6-DSM-QC-01-List of Validations (next sprint)">
+            <div style={{textAlign: 'center'}}>
+              <img alt="Validations" src={validationImage} />;
+            </div>
+          </Card>
         </Dialog>
         <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
                        visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
