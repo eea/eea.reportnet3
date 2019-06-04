@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
-import org.eea.validation.persistence.rules.model.DataFlowRules;
+import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -15,7 +15,6 @@ import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
@@ -37,16 +36,15 @@ public class KieBaseManager {
    * @return Kiebase session object
    * @throws FileNotFoundException the file not found exception
    */
-  @Bean
-  public KieBase reloadRules() throws FileNotFoundException {
+  public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
 
-    Iterable<DataFlowRules> preRepositoryDB = dataFlowRulesRepository.findAll();
-    List<DataFlowRules> preRepository = Lists.newArrayList(preRepositoryDB);
+    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+    List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
 
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getId_Rules().toString());
+      rule1.put("ruleid", preRepository.get(i).getRuleId().toString());
       rule1.put("whencondition", preRepository.get(i).getWhenCondition());
       rule1.put("thencondition", preRepository.get(i).getThenCondition());
       ruleAttributes.add(rule1);

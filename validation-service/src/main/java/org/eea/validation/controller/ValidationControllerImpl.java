@@ -3,7 +3,7 @@ package org.eea.validation.controller;
 import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.controller.validation.ValidationController;
-import org.eea.validation.persistence.rules.model.DataFlowRules;
+import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -34,7 +34,7 @@ public class ValidationControllerImpl implements ValidationController {
   @RequestMapping(value = "/getDataFlowRule", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void getDataFlowRule(@RequestParam(required = true) String type) {
-    DataFlowRules rule = new DataFlowRules();
+    DataFlowRule rule = new DataFlowRule();
     validationService.getDataFlowRule(rule);
   }
 
@@ -64,7 +64,7 @@ public class ValidationControllerImpl implements ValidationController {
       @RequestParam(required = true) String ruleAtrtibute,
       @RequestParam(required = true) String ruleCondition,
       @RequestParam(required = true) String ruleAction) {
-    validationService.saveRule(new DataFlowRules());
+    validationService.saveRule(new DataFlowRule());
 
   }
 

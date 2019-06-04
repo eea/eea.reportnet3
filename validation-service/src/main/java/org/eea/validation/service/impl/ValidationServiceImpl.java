@@ -11,7 +11,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.configuration.KieBaseManager;
-import org.eea.validation.persistence.rules.model.DataFlowRules;
+import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.model.RuleScope;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.eea.validation.service.ValidationService;
@@ -26,12 +26,15 @@ import com.google.common.collect.Lists;
 @Service
 public class ValidationServiceImpl implements ValidationService {
 
+  /** The kafka sender. */
   @Autowired
   private KafkaSender kafkaSender;
 
+  /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
 
+  /** The data flow rules repository. */
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
@@ -42,10 +45,10 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  public DataFlowRules getDataFlowRule(DataFlowRules dataFlowRules) {
+  public DataFlowRule getDataFlowRule(DataFlowRule dataFlowRules) {
     KieSession kieSession;
     try {
-      kieSession = kieBaseManager.reloadRules().newKieSession();
+      kieSession = kieBaseManager.reloadRules(1L).newKieSession();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return null;
@@ -59,8 +62,8 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public List<Map<String, String>> getRules() {
-    Iterable<DataFlowRules> preRepositoryDB = dataFlowRulesRepository.findAll();
-    List<DataFlowRules> preRepository = Lists.newArrayList(preRepositoryDB);
+    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+    List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
@@ -88,9 +91,9 @@ public class ValidationServiceImpl implements ValidationService {
 
 
   @Override
-  public void saveRule(DataFlowRules dataFlowRules) {
-    dataFlowRules.setId_DataFlow(1L);
-    dataFlowRules.setId_Rules(new ObjectId());
+  public void saveRule(DataFlowRule dataFlowRules) {
+    dataFlowRules.setDataFlowId(1L);
+    dataFlowRules.setRuleId(new ObjectId());
     dataFlowRules.setRuleName("nombre regla");
     dataFlowRules.setRuleScope(RuleScope.DATASET);
     dataFlowRules.setThenCondition("thencondition");

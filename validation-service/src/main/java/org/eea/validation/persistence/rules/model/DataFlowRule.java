@@ -15,16 +15,16 @@ import lombok.ToString;
 @Setter
 @ToString
 @Document(collection = "DataFlow_Rule_Collection")
-public class DataFlowRules {
+public class DataFlowRule {
 
   /** The id rules. */
   @Id
   @Field(value = "_id")
-  private ObjectId id_Rules;
+  private ObjectId ruleId;
 
   /** The id data flow. */
   @Field(value = "id_DataFlow")
-  private Long id_DataFlow;
+  private Long dataFlowId;
 
   /** The rules scope. */
   @Field(value = "rulesScope")
