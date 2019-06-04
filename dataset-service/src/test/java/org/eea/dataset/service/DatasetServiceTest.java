@@ -310,4 +310,18 @@ public class DatasetServiceTest {
     datasetService.setDataschemaTables(1L, 1L, new TableCollectionVO());
     Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
+
+  @Test(expected = EEAException.class)
+  public void testGetByIdException() throws Exception {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    datasetService.getById(1L);
+  }
+
+  @Test
+  public void testGetByIdSuccess() throws Exception {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(new DatasetValue()));
+    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(new DataSetVO());
+    DataSetVO result = datasetService.getById(1L);
+    assertEquals("not equals", new DataSetVO(), result);
+  }
 }

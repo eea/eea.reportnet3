@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,11 +104,19 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataset the dataset
    *
    * @return the data set VO
+   * @throws EEAException
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
-    return null;
+    if (dataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    try {
+      return datasetService.updateDataset(dataset);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
   /**
@@ -167,7 +176,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId id import
    */
   @Override
-  @DeleteMapping(value = "/deleteImportData")
+  @DeleteMapping(value = "{id}/deleteImportData")
   public void deleteImportData(final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -176,6 +185,13 @@ public class DataSetControllerImpl implements DatasetController {
     datasetService.deleteImportData(dataSetId);
   }
 
+  /**
+   * Load dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   * @param tableCollection the table collection
+   */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
   public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
@@ -192,4 +208,26 @@ public class DataSetControllerImpl implements DatasetController {
 
   }
 
+
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset
+   */
+  @Override
+  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  public DataSetVO getById(Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    DataSetVO result = null;
+    try {
+      result = datasetService.getById(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
 }

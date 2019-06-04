@@ -19,30 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/validation")
 public class ValidationControllerImpl implements ValidationController {
 
-
   /** The validation service. */
   @Autowired
   private ValidationService validationService;
-
-  /**
-   * Gets the questions.
-   *
-   * @param type the type
-   * @return the questions
-   */
-  @RequestMapping(value = "/getLenght", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public void getQuestions(@RequestParam(required = true) String type) {}
-
 
   /**
    * Gets the all rules.
    *
    * @return the all rules
    */
+  @Override
   @RequestMapping(value = "/getRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<Map<String, String>> getAllRules() {
+  public List<Map<String, String>> getAllRules(Long dataflowId) {
     return null;
   }
 
@@ -54,6 +43,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @param ruleCondition the rule condition
    * @param ruleAction the rule action
    */
+  @Override
   @RequestMapping(value = "/setRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void setNewRules(@RequestParam(required = true) String ruleName,

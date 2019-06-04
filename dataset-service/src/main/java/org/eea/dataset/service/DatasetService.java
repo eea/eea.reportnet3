@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
@@ -85,5 +86,24 @@ public interface DatasetService {
 
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
+
+
+  /**
+   * Gets the dataset by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  DataSetVO getById(Long datasetId) throws EEAException;
+
+  /**
+   * Update dataset.
+   *
+   * @param dataset the dataset
+   * @return the data set VO
+   * @throws EEAException
+   */
+  DataSetVO updateDataset(DataSetVO dataset) throws EEAException;
 
 }

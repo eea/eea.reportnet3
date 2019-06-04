@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -7,6 +9,7 @@ import static org.mockito.Mockito.when;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
@@ -125,7 +128,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Testget data tables values exception entry 1.
+   * Test get data tables values exception entry 1.
    *
    * @throws Exception the exception
    */
@@ -267,8 +270,8 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
@@ -282,10 +285,48 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaSuccess() throws Exception {
-    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
         Mockito.any());
+  }
+
+  /**
+   * Test get by id success.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetByIdSuccess() throws Exception {
+    when(datasetService.getById(Mockito.any())).thenReturn(new DataSetVO());
+    DataSetVO result = dataSetControllerImpl.getById(1L);
+    Mockito.verify(datasetService, times(1)).getById(Mockito.any());
+    assertEquals("failed assertion", new DataSetVO(), result);
+  }
+
+  /**
+   * Test get by id find exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetByIdFindException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).getById(Mockito.any());
+    DataSetVO result = dataSetControllerImpl.getById(1L);
+    Mockito.verify(datasetService, times(1)).getById(Mockito.any());
+    assertNull("should be null", result);
+  }
+
+
+  /**
+   * Test get by id exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testGetByIdException() throws Exception {
+    dataSetControllerImpl.getById(null);
   }
 }

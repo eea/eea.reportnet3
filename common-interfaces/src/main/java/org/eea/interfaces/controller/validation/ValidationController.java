@@ -16,24 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ValidationController {
 
   /**
-   * Gets the questions.
-   *
-   * @param type the type
-   * @return the questions
-   */
-  @RequestMapping(value = "/getLenght", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  void getQuestions(@RequestParam(required = true) String type);
-
-
-  /**
    * Gets the all rules.
    *
    * @return the all rules
    */
   @RequestMapping(value = "/getRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<Map<String, String>> getAllRules();
+  List<Map<String, String>> getAllRules(Long dataflowId);
 
   /**
    * Sets the new rules.

@@ -83,8 +83,8 @@ public interface DatasetController {
    *
    * @param datasetId the id of dataset
    */
-  @DeleteMapping(value = "/deleteImportData")
-  void deleteImportData(@RequestParam("datasetName") Long datasetId);
+  @DeleteMapping(value = "{id}/deleteImportData")
+  void deleteImportData(@RequestParam("id") Long datasetId);
 
 
   /**
@@ -98,4 +98,13 @@ public interface DatasetController {
   void loadDatasetSchema(@PathVariable("id") Long datasetId,
       @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
 
+
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   */
+  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  DataSetVO getById(@PathVariable("id") Long datasetId);
 }
