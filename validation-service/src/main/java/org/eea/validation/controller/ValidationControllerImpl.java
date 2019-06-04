@@ -72,7 +72,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return the list
    */
   @Override
-  public void validateDataSetData(Long datasetId) {
+  public void validateDataSetData(@RequestParam("id") Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
