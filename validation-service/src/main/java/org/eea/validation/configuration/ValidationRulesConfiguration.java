@@ -17,9 +17,10 @@ import com.mongodb.MongoClient;
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
-@EnableMongoRepositories(basePackages = "org.eea.dataset.persistence.rules.repository")
+@EnableMongoRepositories(basePackages = "org.eea.validation.persistence.rules.repository")
 public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
 
+  /** The Constant DEFAULT_PORT. */
   private static final int DEFAULT_PORT = 27017;
 
   /** The dll. */

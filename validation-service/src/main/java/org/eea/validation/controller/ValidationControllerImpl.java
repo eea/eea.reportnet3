@@ -3,6 +3,7 @@ package org.eea.validation.controller;
 import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.validation.persistence.rules.model.DataFlowRules;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -30,9 +31,12 @@ public class ValidationControllerImpl implements ValidationController {
    * @param type the type
    * @return the questions
    */
-  @RequestMapping(value = "/getLenght", method = RequestMethod.GET,
+  @RequestMapping(value = "/getDataFlowRule", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void getQuestions(@RequestParam(required = true) String type) {}
+  public void getDataFlowRule(@RequestParam(required = true) String type) {
+    DataFlowRules rule = new DataFlowRules();
+    validationService.getDataFlowRule(rule);
+  }
 
 
   /**
@@ -43,7 +47,7 @@ public class ValidationControllerImpl implements ValidationController {
   @RequestMapping(value = "/getRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<Map<String, String>> getAllRules() {
-    return null;
+    return validationService.getRules();
   }
 
   /**
@@ -59,7 +63,11 @@ public class ValidationControllerImpl implements ValidationController {
   public void setNewRules(@RequestParam(required = true) String ruleName,
       @RequestParam(required = true) String ruleAtrtibute,
       @RequestParam(required = true) String ruleCondition,
-      @RequestParam(required = true) String ruleAction) {}
+      @RequestParam(required = true) String ruleAction) {
+    validationService.saveRule(new DataFlowRules());
+
+  }
+
 
 
 }

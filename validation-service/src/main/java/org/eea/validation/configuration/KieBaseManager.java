@@ -7,14 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
-import org.eea.validation.persistance.rules.model.DataFlowRules;
-import org.eea.validation.persistance.rules.repository.DataFlowRulesRepository;
+import org.eea.validation.persistence.rules.model.DataFlowRules;
+import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
@@ -23,7 +24,6 @@ public class KieBaseManager {
 
   private static final String REGULATION_TEMPLATE_FILE =
       "src/main/resources/ruletemplate/template01.drl";
-
 
   private KieBase kieBase;
 
@@ -37,7 +37,8 @@ public class KieBaseManager {
    * @return Kiebase session object
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Integer dataflowId) throws FileNotFoundException {
+  @Bean
+  public KieBase reloadRules() throws FileNotFoundException {
 
     Iterable<DataFlowRules> preRepositoryDB = dataFlowRulesRepository.findAll();
     List<DataFlowRules> preRepository = Lists.newArrayList(preRepositoryDB);

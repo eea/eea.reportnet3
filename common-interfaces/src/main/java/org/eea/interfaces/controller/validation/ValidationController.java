@@ -23,7 +23,7 @@ public interface ValidationController {
    */
   @RequestMapping(value = "/getLenght", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void getQuestions(@RequestParam(required = true) String type);
+  void getDataFlowRule(@RequestParam(required = true) String type);
 
 
   /**
