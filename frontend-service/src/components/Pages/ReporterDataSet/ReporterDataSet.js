@@ -46,14 +46,14 @@ const ReporterDataSet = () => {
         label: resources.messages["export"],
         icon: "1",
         group: "left",
-        disabled: false,
+        disabled: true,
         clickHandler: null
       },
       {
         label: resources.messages["delete"],
         icon: "2",
         group: "left",
-        disabled: false,
+        disabled: true,
         clickHandler: null
         //() => setVisibleHandler(setDeleteDialogVisible, true)
       },
@@ -61,14 +61,14 @@ const ReporterDataSet = () => {
         label: resources.messages["events"],
         icon: "4",
         group: "right",
-        disabled: false,
+        disabled: true,
         clickHandler: null
       },
       {
         label: resources.messages["validate"],
         icon: "10",
         group: "right",
-        disabled: false,
+        disabled: true,
         //!validationError,
         clickHandler: null,
         ownButtonClasses:null,
@@ -88,7 +88,7 @@ const ReporterDataSet = () => {
         label: resources.messages["dashboards"],
         icon: "5",
         group: "right",
-        disabled: false,
+        disabled: true,
         clickHandler: null
         //() => setVisibleHandler(setDashDialogVisible, true)
       }
@@ -96,7 +96,7 @@ const ReporterDataSet = () => {
 
     setBreadCrumbItems( [
       {label: resources.messages["newDataset"], url: '#'},
-      {label: resources.messages["editData"], url: '#'}
+      {label: resources.messages["viewData"], url: '#'}
     ]);
 
     //TODO:Change + Error/warning treatment
