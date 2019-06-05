@@ -190,12 +190,14 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Error mapping file");
       }
       // save dataset to the database
-      datasetRepository.save(dataset);
+      datasetRepository.saveAndFlush(dataset);
       // after the dataset has been saved, an event is sent to notify it
-      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
+
+      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
     }
   }
 
@@ -358,9 +360,10 @@ public class DatasetServiceImpl implements DatasetService {
         recordVOs.sort((RecordVO v1, RecordVO v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
           String sortCriteria2 = v2.getSortCriteria();
-          //process the sort criteria
-          //it could happen that some values has no sortCriteria due to a matching error
-          //during the load process. If this is the case we need to ensure that sort logic does not fail
+          // process the sort criteria
+          // it could happen that some values has no sortCriteria due to a matching error
+          // during the load process. If this is the case we need to ensure that sort logic does not
+          // fail
           int sort = 0;
           if (null == sortCriteria1) {
             if (null != sortCriteria2) {
@@ -378,9 +381,9 @@ public class DatasetServiceImpl implements DatasetService {
         });
       });
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex =
-          (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size() ? recordVOs
-              .size() : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size()
+          ? recordVOs.size()
+          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
       result.setRecords(recordVOs.subList(initIndex, endIndex));
       result.setTotalRecords(Long.valueOf(recordVOs.size()));
       LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",
