@@ -370,7 +370,7 @@ public class DataSetControllerImplTest {
   @Test
   public void testUpdateDatasetSuccess() throws Exception {
     when(datasetService.updateDataset(Mockito.any())).thenReturn(new DataSetVO());
-    assertNotNull("", dataSetControllerImpl.updateDataset(new DataSetVO()));
+    assertNotNull("error", dataSetControllerImpl.updateDataset(new DataSetVO()));
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
   }
 
