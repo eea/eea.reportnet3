@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -324,4 +325,27 @@ public class DatasetServiceTest {
     DataSetVO result = datasetService.getById(1L);
     assertEquals("not equals", new DataSetVO(), result);
   }
+
+  @Test
+  public void testGetDataFlowIdByIdSuccess() throws Exception {
+    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Long result = datasetService.getDataFlowIdById(1L);
+    assertNotNull("it shouldn't be null", result);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testUpdateNullException() throws Exception {
+    datasetService.updateDataset(null);
+  }
+
+  @Test
+  public void testUpdateSuccess() throws Exception {
+    when(dataSetMapper.classToEntity((Mockito.any(DataSetVO.class))))
+        .thenReturn(new DatasetValue());
+    when(datasetRepository.save(Mockito.any())).thenReturn(new DatasetValue());
+    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(new DataSetVO());
+    DataSetVO result = datasetService.updateDataset(new DataSetVO());
+    assertEquals("not equals", new DataSetVO(), result);
+  }
+
 }

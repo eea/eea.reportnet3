@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -306,6 +307,7 @@ public class DataSetControllerImplTest {
     assertEquals("failed assertion", new DataSetVO(), result);
   }
 
+
   /**
    * Test get by id find exception.
    *
@@ -328,5 +330,60 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetByIdException() throws Exception {
     dataSetControllerImpl.getById(null);
+  }
+
+  /**
+   * Test get data flow id by id success.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetDataFlowIdByIdSuccess() throws Exception {
+    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    assertNotNull("", dataSetControllerImpl.getDataFlowIdById(1L));
+    Mockito.verify(datasetService, times(1)).getDataFlowIdById(Mockito.any());
+  }
+
+  /**
+   * Test get data flow id by id find error.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetDataFlowIdByIdFindError() throws Exception {
+    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
+    Long result = dataSetControllerImpl.getDataFlowIdById(1L);
+    Mockito.verify(datasetService, times(1)).getDataFlowIdById(Mockito.any());
+    assertNull("should be null", result);
+  }
+
+  /**
+   * Test get by id exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testGetDataFlowIdByIdException() throws Exception {
+    dataSetControllerImpl.getDataFlowIdById(null);
+  }
+
+  @Test
+  public void testUpdateDatasetSuccess() throws Exception {
+    when(datasetService.updateDataset(Mockito.any())).thenReturn(new DataSetVO());
+    assertNotNull("", dataSetControllerImpl.updateDataset(new DataSetVO()));
+    Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateDatasetError() throws Exception {
+    doThrow(new EEAException()).when(datasetService).updateDataset(Mockito.any());
+    DataSetVO result = dataSetControllerImpl.updateDataset(new DataSetVO());
+    Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
+    assertNull("should be null", result);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateDatasetException() throws Exception {
+    dataSetControllerImpl.updateDataset(null);
   }
 }
