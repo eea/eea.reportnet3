@@ -124,6 +124,7 @@ export class CustomFileUpload extends Component {
         this.files = this.state.files || [];
         let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
 
+        //TODO: Refactorizar y cambiar el this.state.files.shift() por versión inmutable
         if (this.props.fileLimit >= 1) {    
             console.log(this.files);
             console.log(this.state.files.length); 
