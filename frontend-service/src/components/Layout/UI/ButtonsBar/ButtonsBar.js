@@ -42,4 +42,4 @@ const buttons = props.buttons.forEach((b,i) => {
     );
 }
 
-export default ButtonsBar;
+export default React.memo(ButtonsBar);
