@@ -8,7 +8,8 @@ import langResources from './conf/messages.en.json';
 import iconsResources from './conf/prime.icons.json';
 
 const App = () => {
-  const [resources, setLangMessages] = useState({...langResources, ...iconsResources});
+  const [resources] = useState({...langResources, ...iconsResources});
+  console.log(resources)
   return (
     <div className={styles.App}>
     <ResourcesContext.Provider value={resources}>

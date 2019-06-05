@@ -104,6 +104,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       }
 
       command.withHostConfig(hostConfig).exec();
+      LOG.info("Container created with name:{}",containerName);
     }
     return getContainer(containerName);
   }
@@ -155,9 +156,9 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   /**
    * Gets the connection.
-   * 
-   * @deprecated (not used)
+   *
    * @return the connection
+   * @deprecated (not used)
    */
   @Deprecated
   @Override
@@ -205,6 +206,8 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   public void stopAndRemoveContainer(final Container container) {
     dockerClient.dockerClient().stopContainerCmd(container.getId()).exec();
     dockerClient.dockerClient().removeContainerCmd(container.getId()).exec();
+    LOG.info("Container stopped and removed");
+    
   }
 
   /**
@@ -215,7 +218,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   @Override
   public void stopContainer(final Container container) {
     dockerClient.dockerClient().stopContainerCmd(container.getId()).exec();
-
+    LOG.info("Container stopped");
   }
 
   /**

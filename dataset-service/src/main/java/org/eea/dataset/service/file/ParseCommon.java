@@ -18,14 +18,20 @@ import org.springframework.stereotype.Component;
 public class ParseCommon {
 
 
-  /** The Constant TABLE_HEADER. */
+  /**
+   * The Constant TABLE_HEADER.
+   */
   private static final String TABLE_HEADER = "_TABLE";
 
-  /** The data set schema service. */
+  /**
+   * The data set schema service.
+   */
   @Autowired
   private DatasetSchemaService dataSetSchemaService;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(ParseCommon.class);
 
 
@@ -33,6 +39,7 @@ public class ParseCommon {
    * Find id table.
    *
    * @param tableName the table name
+   * @param dataSetSchema the data set schema
    * @return the string
    */
   public String findIdTable(String tableName, DataSetSchemaVO dataSetSchema) {
@@ -56,37 +63,42 @@ public class ParseCommon {
    * Find id record.
    *
    * @param idTableMongo the id table mongo
+   * @param dataSetSchema the data set schema
    * @return the string
    */
   public String findIdRecord(String idTableMongo, DataSetSchemaVO dataSetSchema) {
-    // Find the idrecordSchema of MongoDB
+    // Find the idrecordSchema from MongoDB
     TableSchemaVO tableS = findTableSchema(idTableMongo, dataSetSchema);
+    String result = null;
     if (null != tableS) {
-      return null != tableS.getRecordSchema() ? tableS.getRecordSchema().getIdRecordSchema() : null;
+      result =
+          null != tableS.getRecordSchema() ? tableS.getRecordSchema().getIdRecordSchema() : null;
     }
-    return null;
+    return result;
   }
 
   /**
    * Find table schema.
    *
-   * @param idTableMongo the id table mongo
+   * @param idTableSchema the id table mongo
+   * @param dataSetSchema the data set schema
    * @return the table schema
    */
-  private TableSchemaVO findTableSchema(String idTableMongo, DataSetSchemaVO dataSetSchema) {
+  private TableSchemaVO findTableSchema(String idTableSchema, DataSetSchemaVO dataSetSchema) {
     // Find the tableSchema of MongoDB
     List<TableSchemaVO> tablesSchema = null;
     if (null != dataSetSchema) {
       tablesSchema = dataSetSchema.getTableSchemas();
     }
-    for (TableSchemaVO tableSchema : tablesSchema) {
-      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableMongo)) {
-        return tableSchema;
+    if (null != tablesSchema) {
+      for (TableSchemaVO tableSchema : tablesSchema) {
+      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableSchema)) {
+          return tableSchema;
+        }
       }
     }
     return null;
   }
-
 
 
   /**
@@ -94,11 +106,12 @@ public class ParseCommon {
    *
    * @param nameSchema the name schema
    * @param idTablaSchema the id tabla schema
+   * @param dataSetSchema the data set schema
    * @return the field schema
    */
   public FieldSchemaVO findIdFieldSchema(String nameSchema, String idTablaSchema,
       DataSetSchemaVO dataSetSchema) {
-    // Find the idFieldSchema of MongoDB
+    // Find the idFieldSchema
     TableSchemaVO recordSchemas = findTableSchema(idTablaSchema, dataSetSchema);
     RecordSchemaVO recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
     if (null != recordSchema && null != recordSchema.getFieldSchema()) {
@@ -115,7 +128,6 @@ public class ParseCommon {
    * Gets the data set schema.
    *
    * @param dataflowId the dataflow id
-   * @param datasetSchemaService the dataset schema service
    * @return the data set schema
    */
   public DataSetSchemaVO getDataSetSchema(Long dataflowId) {
@@ -133,12 +145,12 @@ public class ParseCommon {
    * Checks if is header.
    *
    * @param value the value
+   *
    * @return the boolean
    */
   public Boolean isHeader(String value) {
     return TABLE_HEADER.equalsIgnoreCase(value.trim());
   }
-
 
 
 }

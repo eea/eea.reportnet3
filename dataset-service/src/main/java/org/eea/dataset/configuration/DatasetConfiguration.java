@@ -64,11 +64,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
-  
+
   /**
    * The show sql propertie
    */
-  @Value("${spring.jpa.hibernate.show-sql:false}")
+  @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
 
 
@@ -136,7 +136,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the local container entity manager factory bean
    */
   @Bean
-  @Autowired
   @Primary
   @Qualifier("dataSetsEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
@@ -170,7 +169,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the platform transaction manager
    */
   @Bean
-  @Autowired
   @Primary
   public PlatformTransactionManager dataSetsTransactionManager() {
 

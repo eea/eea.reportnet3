@@ -33,6 +33,11 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
 
   /** The Constant DATASET_NAME_PATTERN. */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
@@ -160,6 +165,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       }
     }
 
+    LOG.info("Empty dataset created");
     final EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.CONNECTION_CREATED_EVENT);
     final Map<String, Object> data = new HashMap<>();

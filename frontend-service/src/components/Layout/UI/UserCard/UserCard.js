@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useContext }  from 'react';
 import styles from './UserCard.module.css';
+import ResourcesContext from '../../../Context/ResourcesContext';
 
 const UserCard = () => {
+    const resources = useContext(ResourcesContext);
+
     return (    
         <div id="userProfile" className={styles.userProfileCard}>  
             <div className={styles.userProfile}>    
@@ -10,7 +13,7 @@ const UserCard = () => {
                 </a>
             </div>
             <div className={styles.logOut}>
-                <a href="#logOut" title="Log out"><i className="pi pi-power-off"></i></a>
+                <a href="#logOut" title="Log out"><i className={resources.icons["logout"]}></i></a>
             </div>
         </div>
     );

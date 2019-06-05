@@ -25,9 +25,6 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.NoArgsConstructor;
 
-/**
- * The Class CSVReaderStrategy.
- */
 
 /**
  * Instantiates a new CSV reader strategy.
@@ -44,7 +41,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
   /** The delimiter. */
-  private static char delimiter;
+  private char delimiter;
 
   /**
    * The parse common.
@@ -173,8 +170,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    *
    * @return the CSV reader
    */
-  private static CSVReader initReader(final Reader buf) {
+  private CSVReader initReader(final Reader buf) {
     // Init CSV Library and select | as a delimiter
+
     final CSVParser csvParser = new CSVParserBuilder().withSeparator(delimiter).build();
     return new CSVReaderBuilder(buf).withCSVParser(csvParser).build();
   }
@@ -291,6 +289,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
     return fields;
   }
+
 
 
 }

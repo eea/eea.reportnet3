@@ -1,10 +1,10 @@
 package org.eea.dataset.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -258,11 +258,6 @@ public class DatasetServiceTest {
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any());
   }
 
-  @Test
-  public void testCountTableData() throws Exception {
-    when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
-    assertEquals((Long) 20L, datasetService.countTableData(1L));
-  }
 
   @Test
   public void testDeleteImportData() throws Exception {
@@ -280,7 +275,7 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesByIdEmpty() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
     TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
     Assert.assertNotNull("result null", result);
@@ -289,16 +284,16 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any()))
         .thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
   public void testGetTableValuesById() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any(), Mockito.any()))
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any()))
         .thenReturn(recordValues);
-    when(recordRepository.countByTableValue_id(Mockito.any())).thenReturn(20L);
+
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
     Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());

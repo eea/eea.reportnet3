@@ -1,7 +1,7 @@
 {
     "messages" : {
         "newDataset": "New Dataset",
-        "editData": "Edit data",
+        "viewData": "View data",
         "import": "Import",
         "export": "Export",
         "create": "Create",
@@ -20,6 +20,7 @@
         "copyrightContact": "Contact",
         "titleDataset": "Data Set: R3 Demo Dataflow",
         "titleDashboard": "Error/Warning dashboard",
+        "titleValidations": "Validations",
         "titleHeader": "Reportnet",
         "uploadDataset": "Upload your Dataset",
         "selectFile": "Select or drag here your dataset (.csv)",

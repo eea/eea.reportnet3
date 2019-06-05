@@ -104,19 +104,11 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataset the dataset
    *
    * @return the data set VO
-   * @throws EEAException
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
-    if (dataset == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    try {
-      return datasetService.updateDataset(dataset);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
+    return null;
   }
 
   /**
@@ -176,7 +168,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId id import
    */
   @Override
-  @DeleteMapping(value = "{id}/deleteImportData")
+  @DeleteMapping(value = "/deleteImportData")
   public void deleteImportData(final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -186,11 +178,8 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Load dataset schema.
-   *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
-   * @param tableCollection the table collection
    */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
@@ -207,7 +196,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
   }
-
 
   /**
    * Gets the by id.
@@ -252,4 +240,5 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
+
 }

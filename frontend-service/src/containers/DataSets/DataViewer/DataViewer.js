@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './DataViewer.module.css';
 import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
-import { MultiSelect } from 'primereact/multiselect';
+// import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
@@ -19,7 +19,7 @@ const DataViewer = (props) => {
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState(props.tableSchemaColumns); 
-    const [header, setHeader] = useState();
+    const [header] = useState();
     const [colOptions,setColOptions] = useState([{}]);    
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
