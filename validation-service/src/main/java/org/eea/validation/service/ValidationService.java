@@ -3,65 +3,43 @@ package org.eea.validation.service;
 
 import java.util.List;
 import java.util.Map;
-import org.eea.validation.model.rules.Rule;
-import org.eea.validation.repository.DataSetSchemaRepository;
-import org.kie.api.KieBase;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.springframework.stereotype.Service;
 
 /**
  * The Class ValidationService.
  */
 @Service
-public class ValidationService {
+public interface ValidationService {
+
+  /**
+   * Validate data set data.
+   *
+   * @param datasetId the dataset id
+   */
+  void validateDataSetData(Long datasetId);
 
 
   /**
    * Gets the element lenght.
    *
+   * @param dataFlowRules the data flow rules
    * @return the element lenght
    */
-  public void getElementLenght() {
-    /*
-     *  to be done in sprint 2
-     */
-  }
+  DataFlowRule getDataFlowRule(DataFlowRule dataFlowRules);
 
   /**
    * Gets the rules.
    *
-   * @param rules the rules
    * @return the rules
    */
-  public List<Map<String, String>> getRules(Rule rules) {
-    return null;
-  }
+  List<Map<String, String>> getRules();
+
 
   /**
-   * Sets the new rules.
+   * Save rule.
    *
-   * @param newRules the new new rules
+   * @param dataFlowRules the data flow rules
    */
-  public void setNewRules(Rule newRules) {
-    /*
-     *  to be done in sprint 2
-     */
-  }
-
-  // Object convertToObjectId(Object id) {
-  // if (id instanceof String && ObjectId.isValid(id)) {
-  // return new ObjectId(id);
-  // }
-  // return id;
-  /**
-   * Load new rules.
-   *
-   * @param rules the rules
-   * @return the kie base
-   */
-  // }
-  public KieBase loadNewRules(Rule rules) {
-    return null;
-  }
-
+  void saveRule(DataFlowRule dataFlowRules);
 }

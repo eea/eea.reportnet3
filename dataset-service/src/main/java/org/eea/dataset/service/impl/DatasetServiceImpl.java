@@ -196,8 +196,7 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
-
-      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+      releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
     }
   }
 
@@ -448,5 +447,32 @@ public class DatasetServiceImpl implements DatasetService {
     tableCollection.setDataFlowId(dataFlowId);
 
     dataSetMetabaseTableCollection.save(tableCollection);
+  }
+
+
+  @Override
+  public DataSetVO getById(Long datasetId) throws EEAException {
+    final DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
+    if (datasetValue == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return dataSetMapper.entityToClass(datasetValue);
+  }
+
+
+  @Override
+  public DataSetVO updateDataset(DataSetVO dataset) throws EEAException {
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    DatasetValue datasetValue = dataSetMapper.classToEntity(dataset);
+    DatasetValue result = datasetRepository.save(datasetValue);
+    return dataSetMapper.entityToClass(result);
+  }
+
+
+  @Override
+  public Long getDataFlowIdById(Long datasetId) throws EEAException {
+    return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
 }
