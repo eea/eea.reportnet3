@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -71,6 +72,9 @@ public class DatasetServiceTest {
 
   @Mock
   private DatasetRepository datasetRepository;
+
+  @Mock
+  private TableRepository tableRepository;
 
   @Mock
   private KafkaSender kafkaSender;
@@ -305,16 +309,20 @@ public class DatasetServiceTest {
     Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
 
-  @Test(expected = EEAException.class)
+  @Test
   public void testGetByIdException() throws Exception {
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    datasetService.getById(1L);
+    DataSetVO datasetVOtemp = new DataSetVO();
+    datasetVOtemp.setId(1L);
+    when(tableRepository.findAllTables()).thenReturn(new ArrayList<>());
+    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(datasetVOtemp);
+    assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
   }
 
   @Test
   public void testGetByIdSuccess() throws Exception {
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(new DatasetValue()));
+    when(tableRepository.findAllTables()).thenReturn(tableValues);
     when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(new DataSetVO());
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
     DataSetVO result = datasetService.getById(1L);
     assertEquals("not equals", new DataSetVO(), result);
   }
