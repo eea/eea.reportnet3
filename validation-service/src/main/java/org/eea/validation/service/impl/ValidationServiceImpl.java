@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -44,7 +44,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   /** The dataset controller. */
   @Autowired
-  private DatasetController datasetController;
+  private DataSetControllerZuul datasetController;
 
   /**
    * Gets the element lenght.

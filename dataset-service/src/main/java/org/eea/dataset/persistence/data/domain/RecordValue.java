@@ -14,10 +14,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
 
 /**
  * The Class Record.
@@ -36,8 +36,8 @@ public class RecordValue {
   public void initSortFields() {
     String sortingField = SortFieldsHelper.getSortingField();
     if (sortingField != null && !sortingField.isEmpty()) {
-      //it could happen that the value could not have been set a idFieldSchema
-      //in this case sortCriteria will be set to Null
+      // it could happen that the value could not have been set a idFieldSchema
+      // in this case sortCriteria will be set to Null
       this.sortCriteria = null;
       if (fields.size() > 0) {
         for (FieldValue fv : fields) {

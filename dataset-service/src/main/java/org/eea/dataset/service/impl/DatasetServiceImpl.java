@@ -20,8 +20,10 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -88,6 +90,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private RecordRepository recordRepository;
+
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
 
   /**
    * The data set metabase repository.
@@ -163,7 +169,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is) throws EEAException, IOException {
+      final InputStream is) throws EEAException, IOException, InterruptedException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -194,9 +200,12 @@ public class DatasetServiceImpl implements DatasetService {
       // after the dataset has been saved, an event is sent to notify it
 
       LOG.info("File processed and saved into DB");
+
     } finally {
       is.close();
+      Thread.sleep(2000);
       releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
+
     }
   }
 
@@ -452,10 +461,21 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   public DataSetVO getById(Long datasetId) throws EEAException {
-    final DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
-    if (datasetValue == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+
+    final DatasetValue datasetValue = new DatasetValue();
+
+    List<TableValue> allTableValues = tableRepository.findAllTables();
+
+    datasetValue.setTableValues(allTableValues);
+    datasetValue.setId(datasetId);
+
+    for (TableValue tableValue : allTableValues) {
+      // tableValueIterator.setRecords(recordRepository
+      // .findByTableValue_IdTableSchema(tableValueIterator.getIdTableSchema(), null));
+      tableValue
+          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
+
     return dataSetMapper.entityToClass(datasetValue);
   }
 
