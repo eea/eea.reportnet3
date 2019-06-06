@@ -2,7 +2,7 @@ package org.eea.validation.persistence.rules.model;
 
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.validation.RuleScopeVo;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.AllArgsConstructor;
@@ -33,7 +33,7 @@ public class DataFlowRule {
 
   /** The rules scope. */
   @Field(value = "rulesScope")
-  private RuleScopeVo ruleScope;
+  private TypeEntityEnum ruleScope;
 
   /** The rule name. */
   @Field(value = "ruleName")

@@ -14,9 +14,7 @@ template "templateValidateRules"
 
 rule "@{ruleid}"
   when
-    dataValidate : @{typevalidation}(@{whencondition});
-  	
-  	
+    dataValidate : @{typevalidation}(@{whencondition});	
   then
    @{thencondition}
    

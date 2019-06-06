@@ -41,6 +41,10 @@ public class DatasetValue {
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
 
+  /** The field validations. */
+  @OneToMany(mappedBy = "idDataset", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<DatasetValidation> datasetValidations;
+
   /**
    * return Objects.hash(id, tableValues, idRecordSchema); Equals.
    *
