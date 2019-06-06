@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -42,6 +43,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
+
+  @Autowired
+  private DataFlowController dataFlowController;
   /** The dataset controller. */
   @Autowired
   private DatasetController datasetController;
@@ -61,9 +65,9 @@ public class ValidationServiceImpl implements ValidationService {
       e.printStackTrace();
       return null;
     }
-    for (DataFlowRule dataFlowRule2 : dataFlowRule) {
-      kieSession.insert(dataFlowRule2);
-    }
+    // for (DataFlowRule dataFlowRule2 : dataFlowRule) {
+    // kieSession.insert(dataFlowRule2);
+    // }
     kieSession.fireAllRules();
     kieSession.dispose();
     return dataFlowRule.get(0);
