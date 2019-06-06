@@ -3,8 +3,13 @@ package org.eea.dataset.mapper;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -46,10 +51,18 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * @return the data set VO
    */
   @Mapping(source = "tableValues", target = "tableVO")
+  @Mapping(source = "datasetValidations", target = "validations")
   @Override
   DataSetVO entityToClass(DatasetValue entity);
 
+  @Mapping(source = "entity.recordValidations", target = "validations")
+  RecordVO entityToClass(RecordValue entity);
 
+  @Mapping(source = "entity.tableValidations", target = "validations")
+  TableVO entityToClass(TableValue entity);
+
+  @Mapping(source = "entity.fieldValidations", target = "validations")
+  FieldVO entityToClass(FieldValue entity);
 
   /**
    * Fill ids.

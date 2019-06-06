@@ -27,12 +27,15 @@ public class ValidationVO implements Serializable {
   private Long id;
 
   /** The id rule. */
-  private Long idRule;
+  private String idRule;
 
   /** The level error. */
   private TypeErrorEnum levelError;
 
   /** The type entity. */
   private TypeEntityEnum typeEntity;
+
+  /** The validation date. */
+  private String validationDate;
 
 }
