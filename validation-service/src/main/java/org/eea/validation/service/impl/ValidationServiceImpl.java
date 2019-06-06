@@ -64,7 +64,6 @@ public class ValidationServiceImpl implements ValidationService {
     for (DataFlowRule dataFlowRule2 : dataFlowRule) {
       kieSession.insert(dataFlowRule2);
     }
-
     kieSession.fireAllRules();
     kieSession.dispose();
     return dataFlowRule.get(0);

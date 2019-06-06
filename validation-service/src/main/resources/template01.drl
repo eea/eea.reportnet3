@@ -2,18 +2,20 @@ template header
 ruleid
 whencondition
 thencondition
+typevalidation
 
 package src.main.resources
 import org.eea.validation.persistence.rules.model.*;
-import org.eea.interfaces.vo.*;
+import org.eea.interfaces.vo.validation.*;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.configuration.*;
 
 template "templateValidateRules"
 
 rule "@{ruleid}"
-
   when
-    dataFlowRule : DataFlowRule(@{whencondition});
+    dataValidate : @{typevalidation}(@{whencondition});
+  	
   	
   then
    @{thencondition}

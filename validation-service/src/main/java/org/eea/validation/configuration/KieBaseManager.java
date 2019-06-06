@@ -41,9 +41,28 @@ public class KieBaseManager {
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
 
+    String LVTypeValidation = null;
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
       rule1.put("ruleid", preRepository.get(i).getRuleId().toString());
+      switch (preRepository.get(i).getRuleScope()) {
+        // case DATASET:
+        // LVTypeValidation = "DataSetVO";
+        // break;
+        // case FIELD:
+        // LVTypeValidation = "FieldVO";
+        // break;
+        // case RECORD:
+        // LVTypeValidation = "RecordVO";
+        // break;
+        // case TABLE:
+        // LVTypeValidation = "TableVO";
+        // break;
+        default:
+          LVTypeValidation = "DataFlowRule";
+          break;
+      }
+      rule1.put("typevalidation", LVTypeValidation);
       rule1.put("whencondition", preRepository.get(i).getWhenCondition().trim());
       rule1.put("thencondition", preRepository.get(i).getThenCondition().trim());
       ruleAttributes.add(rule1);
