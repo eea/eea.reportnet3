@@ -344,9 +344,9 @@ public class DatasetServiceTest {
     when(dataSetMapper.classToEntity((Mockito.any(DataSetVO.class))))
         .thenReturn(new DatasetValue());
     when(datasetRepository.save(Mockito.any())).thenReturn(new DatasetValue());
-    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(new DataSetVO());
-    DataSetVO result = datasetService.updateDataset(new DataSetVO());
-    assertEquals("not equals", new DataSetVO(), result);
+    datasetService.updateDataset(new DataSetVO());
+    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+
   }
 
 }

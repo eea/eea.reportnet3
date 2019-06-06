@@ -107,12 +107,12 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
+  public void updateDataset(@RequestBody final DataSetVO dataset) {
     if (dataset == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
     }
     try {
-      return datasetService.updateDataset(dataset);
+      datasetService.updateDataset(dataset);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
