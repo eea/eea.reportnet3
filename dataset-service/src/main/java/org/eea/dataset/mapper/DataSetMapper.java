@@ -40,9 +40,19 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * @return the dataset value
    */
   @Mapping(source = "tableVO", target = "tableValues")
+  @Mapping(source = "validations", target = "datasetValidations")
   @Override
   DatasetValue classToEntity(DataSetVO model);
 
+
+  @Mapping(source = "validations", target = "recordValidations")
+  RecordValue classToEntity(RecordVO model);
+
+  @Mapping(source = "validations", target = "tableValidations")
+  TableValue classToEntity(TableVO model);
+
+  @Mapping(source = "validations", target = "fieldValidations")
+  FieldValue classToEntity(FieldVO model);
 
   /**
    * Entity to class.

@@ -30,7 +30,7 @@ public class Validation {
 
   /** The id rule. */
   @Column(name = "ID_RULE")
-  private Long idRule;
+  private String idRule;
 
   /** The validation date. */
   @Column(name = "VALIDATION_DATE")
