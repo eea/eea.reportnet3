@@ -5,7 +5,7 @@ import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.validation.ValidationController;
-import org.eea.interfaces.vo.validation.RuleScopeVo;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +54,13 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @RequestMapping(value = "/setNewRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void setNewRules(@RequestParam(required = true) RuleScopeVo ruleScope,
+  public void setNewRules(@RequestParam(required = true) TypeEntityEnum typeEntityEnum,
       @RequestParam(required = true) String ruleName,
       @RequestParam(required = true) String whenCondition,
       @RequestParam(required = true) String thenCondition) {
 
-    DataFlowRule dataFlowRule =
-        new DataFlowRule(new ObjectId(), 1L, ruleScope, ruleName, whenCondition, thenCondition);
+    DataFlowRule dataFlowRule = new DataFlowRule(new ObjectId(), 1L, typeEntityEnum, ruleName,
+        whenCondition, thenCondition);
     validationService.saveRule(dataFlowRule);
 
   }

@@ -3,6 +3,7 @@ package org.eea.validation.service;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public interface ValidationService {
    * @param dataFlowRules the data flow rules
    * @return the element lenght
    */
-  DataFlowRule getDataFlowRule(List<DataFlowRule> dataFlowRules);
+  DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId);
 
   /**
    * Save rule.

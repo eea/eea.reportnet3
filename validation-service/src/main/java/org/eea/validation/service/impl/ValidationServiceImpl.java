@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
-import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -57,10 +57,10 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  public DataFlowRule getDataFlowRule(List<DataFlowRule> dataFlowRule) {
+  public DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId) {
     KieSession kieSession;
     try {
-      kieSession = kieBaseManager.reloadRules(1L).newKieSession();
+      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return null;
@@ -68,9 +68,10 @@ public class ValidationServiceImpl implements ValidationService {
     // for (DataFlowRule dataFlowRule2 : dataFlowRule) {
     // kieSession.insert(dataFlowRule2);
     // }
+    kieSession.insert(datasetVO);
     kieSession.fireAllRules();
     kieSession.dispose();
-    return dataFlowRule.get(0);
+    return datasetVO;
   }
 
   @Override
@@ -100,7 +101,7 @@ public class ValidationServiceImpl implements ValidationService {
     // // Read Dataset rules
     List<DataFlowRule> rules = dataFlowRulesRepository.findAll();
 
-    getDataFlowRule(rules);
+    getDataFlowRule(new DataSetVO(), 1L);
     // // Execute rules validation
     // DataSetVO result = runDatasetValidations(dataset, rules);
     // // Save results to the db

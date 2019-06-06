@@ -37,7 +37,9 @@ public class KieBaseManager {
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
 
-    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+    // Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+    Iterable<DataFlowRule> preRepositoryDB =
+        dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
 
@@ -46,18 +48,18 @@ public class KieBaseManager {
       Map<String, String> rule1 = new HashMap<>();
       rule1.put("ruleid", preRepository.get(i).getRuleId().toString());
       switch (preRepository.get(i).getRuleScope()) {
-        // case DATASET:
-        // LVTypeValidation = "DataSetVO";
-        // break;
-        // case FIELD:
-        // LVTypeValidation = "FieldVO";
-        // break;
-        // case RECORD:
-        // LVTypeValidation = "RecordVO";
-        // break;
-        // case TABLE:
-        // LVTypeValidation = "TableVO";
-        // break;
+        case DATASET:
+          LVTypeValidation = "DataSetVO";
+          break;
+        case FIELD:
+          LVTypeValidation = "FieldVO";
+          break;
+        case RECORD:
+          LVTypeValidation = "RecordVO";
+          break;
+        case TABLE:
+          LVTypeValidation = "TableVO";
+          break;
         default:
           LVTypeValidation = "DataFlowRule";
           break;
