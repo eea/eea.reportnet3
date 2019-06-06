@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -24,7 +25,7 @@ public interface DatasetController {
    * The interface Data set controller zuul.
    */
   @FeignClient(value = "dataset", path = "/dataset")
-  interface DataSetControllerZuul extends DatasetController {
+  public interface DataSetControllerZuul extends DatasetController {
 
   }
 
@@ -57,7 +58,7 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO updateDataset(@RequestBody DataSetVO dataset);
+  void updateDataset(@RequestBody DataSetVO dataset);
 
   /**
    * Creates the empty data set.
@@ -83,8 +84,8 @@ public interface DatasetController {
    *
    * @param datasetId the id of dataset
    */
-  @DeleteMapping(value = "/deleteImportData")
-  void deleteImportData(@RequestParam("datasetName") Long datasetId);
+  @DeleteMapping(value = "{id}/deleteImportData")
+  void deleteImportData(@RequestParam("id") Long datasetId);
 
 
   /**
@@ -98,4 +99,26 @@ public interface DatasetController {
   void loadDatasetSchema(@PathVariable("id") Long datasetId,
       @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
 
+
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   */
+  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  DataSetVO getById(@PathVariable("id") Long datasetId);
+
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   */
+  @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
+  Long getDataFlowIdById(@PathVariable("id") Long datasetId);
+  
+  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
 }

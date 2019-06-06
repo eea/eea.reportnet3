@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
@@ -29,9 +31,10 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InterruptedException
    */
   void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
-      throws EEAException, IOException;
+      throws EEAException, IOException, InterruptedException;
 
 
   /**
@@ -78,5 +81,35 @@ public interface DatasetService {
 
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
+
+
+  /**
+   * Gets the dataset by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Update dataset.
+   *
+   * @param dataset the dataset
+   * @return the data set VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDataset(DataSetVO dataset) throws EEAException;
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   * @throws EEAException the EEA exception
+   */
+  Long getDataFlowIdById(Long datasetId) throws EEAException;
+  
+  StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
 }

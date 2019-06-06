@@ -20,8 +20,10 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -37,6 +39,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -88,6 +91,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private RecordRepository recordRepository;
+
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
 
   /**
    * The data set metabase repository.
@@ -163,7 +170,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is) throws EEAException, IOException {
+      final InputStream is) throws EEAException, IOException, InterruptedException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -190,12 +197,14 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Error mapping file");
       }
       // save dataset to the database
-      datasetRepository.save(dataset);
-      // after the dataset has been saved, an event is sent to notify it
-      releaseKafkaEvent(EventType.DATASET_PARSED_FILE_EVENT, datasetId);
+      datasetRepository.saveAndFlush(dataset);
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
+      Thread.sleep(2000);
+      // after the dataset has been saved, an event is sent to notify it
+      releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
+
     }
   }
 
@@ -358,9 +367,10 @@ public class DatasetServiceImpl implements DatasetService {
         recordVOs.sort((RecordVO v1, RecordVO v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
           String sortCriteria2 = v2.getSortCriteria();
-          //process the sort criteria
-          //it could happen that some values has no sortCriteria due to a matching error
-          //during the load process. If this is the case we need to ensure that sort logic does not fail
+          // process the sort criteria
+          // it could happen that some values has no sortCriteria due to a matching error
+          // during the load process. If this is the case we need to ensure that sort logic does not
+          // fail
           int sort = 0;
           if (null == sortCriteria1) {
             if (null != sortCriteria2) {
@@ -378,9 +388,9 @@ public class DatasetServiceImpl implements DatasetService {
         });
       });
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex =
-          (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size() ? recordVOs
-              .size() : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size()
+          ? recordVOs.size()
+          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
       result.setRecords(recordVOs.subList(initIndex, endIndex));
       result.setTotalRecords(Long.valueOf(recordVOs.size()));
       LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",
@@ -446,4 +456,51 @@ public class DatasetServiceImpl implements DatasetService {
 
     dataSetMetabaseTableCollection.save(tableCollection);
   }
+
+
+  @Override
+  public DataSetVO getById(Long datasetId) throws EEAException {
+
+    final DatasetValue datasetValue = new DatasetValue();
+
+    List<TableValue> allTableValues = tableRepository.findAllTables();
+    datasetValue.setTableValues(allTableValues);
+    datasetValue.setId(datasetId);
+    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
+    for (TableValue tableValue : allTableValues) {
+      tableValue
+          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
+    }
+
+    return dataSetMapper.entityToClass(datasetValue);
+  }
+
+
+  @Override
+  @Transactional
+  public void updateDataset(DataSetVO dataset) throws EEAException {
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    DatasetValue datasetValue = dataSetMapper.classToEntity(dataset);
+    datasetRepository.save(datasetValue);
+  }
+
+
+  @Override
+  public Long getDataFlowIdById(Long datasetId) throws EEAException {
+    return dataSetMetabaseRepository.findDataflowIdById(datasetId);
+  }
+  
+  
+  @Override
+  @Transactional
+  public StatisticsVO getStatistics(final Long datasetId) throws EEAException {
+    
+    StatisticsVO statistics = new StatisticsVO();
+    
+    return statistics;
+    
+  }
+  
 }

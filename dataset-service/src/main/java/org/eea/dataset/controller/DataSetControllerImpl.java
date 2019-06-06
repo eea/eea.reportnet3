@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -12,6 +11,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
@@ -29,10 +29,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -106,8 +108,15 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
-    return null;
+  public void updateDataset(@RequestBody final DataSetVO dataset) {
+    if (dataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    try {
+      datasetService.updateDataset(dataset);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
   /**
@@ -177,8 +186,11 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
+   * Load dataset schema.
+   *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
+   * @param tableCollection the table collection
    */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
@@ -194,6 +206,66 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
     }
 
+  }
+
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset
+   */
+  @Override
+  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  public DataSetVO getById(Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    DataSetVO result = null;
+    try {
+      result = datasetService.getById(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
+
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   */
+  @Override
+  public Long getDataFlowIdById(Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    Long result = null;
+    try {
+      result = datasetService.getDataFlowIdById(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
+  
+  
+  
+  @Override
+  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
+    
+    StatisticsVO statistics = null;
+    try {
+      statistics = datasetService.getStatistics(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return statistics;
   }
 
 }

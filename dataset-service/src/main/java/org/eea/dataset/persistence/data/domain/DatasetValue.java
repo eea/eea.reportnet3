@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,6 +20,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@DynamicUpdate
 @Table(name = "DATASET_VALUE")
 public class DatasetValue {
 
@@ -40,6 +42,10 @@ public class DatasetValue {
    */
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
+
+  /** The field validations. */
+  @OneToMany(mappedBy = "idDataset", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<DatasetValidation> datasetValidations;
 
   /**
    * return Objects.hash(id, tableValues, idRecordSchema); Equals.

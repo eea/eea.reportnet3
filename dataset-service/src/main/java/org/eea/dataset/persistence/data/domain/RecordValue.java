@@ -14,10 +14,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
+import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
 
 /**
  * The Class Record.
@@ -26,6 +27,7 @@ import org.eea.dataset.persistence.data.SortFieldsHelper;
 @Getter
 @Setter
 @ToString
+@DynamicUpdate
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
@@ -36,8 +38,8 @@ public class RecordValue {
   public void initSortFields() {
     String sortingField = SortFieldsHelper.getSortingField();
     if (sortingField != null && !sortingField.isEmpty()) {
-      //it could happen that the value could not have been set a idFieldSchema
-      //in this case sortCriteria will be set to Null
+      // it could happen that the value could not have been set a idFieldSchema
+      // in this case sortCriteria will be set to Null
       this.sortCriteria = null;
       if (fields.size() > 0) {
         for (FieldValue fv : fields) {
@@ -83,6 +85,11 @@ public class RecordValue {
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
+  /** The record validations. */
+  @OneToMany(mappedBy = "idRecord", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<RecordValidation> recordValidations;
+
+  /** The sort criteria. */
   @Transient
   private String sortCriteria;
 
