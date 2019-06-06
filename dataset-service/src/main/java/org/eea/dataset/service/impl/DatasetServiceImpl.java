@@ -481,7 +481,7 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     DatasetValue datasetValue = dataSetMapper.classToEntity(dataset);
-    datasetRepository.saveAndFlush(datasetValue);
+    datasetRepository.save(datasetValue);
   }
 
 
