@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.util.HashMap;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -287,5 +288,48 @@ public class DataSetControllerImplTest {
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
         Mockito.any());
+  }
+  
+  
+  /**
+   * Test get table from any object id.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetTableFromAnyObjectId() throws Exception {
+    
+    when(datasetService.getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(new HashMap<String,TableVO>());
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, 1);
+    Mockito.verify(datasetService, times(1)).getTableFromAnyObjectId(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+   
+  }
+  
+  
+  /**
+   * Test get table from any object id exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testGetTableFromAnyObjectIdException() throws Exception {
+    dataSetControllerImpl.getTableFromAnyObjectId(null, null, 10, null);
+  }
+  
+  
+  /**
+   * Test get table from any object id exception 2.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testGetTableFromAnyObjectIdException2() throws Exception {
+
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableFromAnyObjectId(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, 1);
+
   }
 }

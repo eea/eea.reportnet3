@@ -142,12 +142,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private KafkaSender kafkaSender;
   
+  /** The table no record mapper. */
   @Autowired
   private TableNoRecordMapper tableNoRecordMapper;
   
+  /** The field repository. */
   @Autowired
   private FieldRepository fieldRepository;
   
+  /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
 
@@ -409,8 +412,12 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Retrieves in a controlled way the data from database
+   * 
+   * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
-   * This method ensures that Sorting Field Criteria is cleaned after every invocation
+   * @param idTableSchema the id table schema
+   * @param idFieldSchema the id field schema
+   * @return the list
    */
   private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
     Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
@@ -426,16 +433,21 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Removes duplicated records in the query.
+   *
+   * @param records the records
+   * @return the list
    */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
-    Set<Long> processedRecords = new HashSet<>();
-    for (RecordValue recordValue : records) {
-      if (!processedRecords.contains(recordValue.getId())) {
-        processedRecords.add(recordValue.getId());
-        sanitizedRecords.add(recordValue);
+    if(records!=null && !records.isEmpty()) {
+      Set<Long> processedRecords = new HashSet<>();
+      for (RecordValue recordValue : records) {
+        if (!processedRecords.contains(recordValue.getId())) {
+          processedRecords.add(recordValue.getId());
+          sanitizedRecords.add(recordValue);
+        }
+  
       }
-
     }
     return sanitizedRecords;
 
@@ -462,62 +474,97 @@ public class DatasetServiceImpl implements DatasetService {
   }
   
   
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageable the pageable
+   * @param type the type
+   * @return the table from any object id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
-  public TableVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, Integer type) throws EEAException{
+  public Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
+      Integer type) throws EEAException{
+    
     TableVO tableVO = new TableVO();
+    Map<String,TableVO> mapa;
     //TYPE 1 table; 2 record; 3 field 
-  
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
-    
-  
+
     //TABLE
     if(type!=null && 1==type && id!=null) {
-    
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(table);
-      
       records = table.getRecords();
-      record = table.getRecords().get(0);
+      if(records!=null && !records.isEmpty()) {
+        record = records.get(0);
+      }
     }
-    
     
     //RECORD
     if(type!=null && 2==type && id!=null) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(record.getTableValue());
-
       records = record.getTableValue().getRecords();
     }
-   
    
     //FIELD
     if(type!=null && 3==type && id!=null) {
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
-   
-      tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());
-    
-      records = field.getRecord().getTableValue().getRecords();
-      record = field.getRecord();
+      if(field !=null && field.getRecord()!=null && field.getRecord().getTableValue()!=null) {
+        tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());
+        records = field.getRecord().getTableValue().getRecords();
+        record = field.getRecord();
+      }
     }
     
+    mapa = this.processTable(tableVO, records, record, pageable);
+
+    return mapa;
+  }
+  
+  
+  
+  
+ /**
+  * Process table.
+  *
+  * @param table the table
+  * @param records the records
+  * @param record the record
+  * @param pageable the pageable
+  * @return the map
+  */
+  private Map<String,TableVO> processTable(TableVO table, List<RecordValue> records, 
+     RecordValue record, Pageable pageable){
+    
+    if(table == null) {
+      table = new TableVO();
+    }
     records = this.sanitizeRecords(records);
     int recordPosition = records.indexOf(record);
-    int pageNumberFounded = recordPosition / pageable.getPageSize();
+    int tamPage = 20;
+    if(pageable.getPageSize()!=0) {
+      tamPage = pageable.getPageSize();
+    }
+    int pageNumberFounded = recordPosition / tamPage;
     
     int initIndex = pageNumberFounded * pageable.getPageSize();
     int endIndex =
-        (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records
-            .size() : (pageNumberFounded + 1) * pageable.getPageSize();
-      
-    List<RecordVO> recordVOs = recordMapper.entityListToClass(records.subList(initIndex, endIndex));        
+        (pageable.getPageNumber() + 1) * tamPage > records.size() ? records
+            .size() : ((pageNumberFounded + 1) * tamPage);
+
    
-    tableVO.setRecords(recordVOs);
-    tableVO.setTotalRecords(Long.valueOf(recordVOs.size()));
-    
-    
-    return tableVO;
+    table.setRecords(recordMapper.entityListToClass(records.subList(initIndex, endIndex)));
+    table.setTotalRecords(Long.valueOf(records.size()));
+    Map<String,TableVO> map = new HashMap<>();
+    map.put(String.valueOf(pageNumberFounded), table);
+
+    return map; 
   }
   
 }

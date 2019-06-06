@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import java.util.Map;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -99,8 +100,19 @@ public interface DatasetController {
       @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
   
   
+  
+ 
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageSize the page size
+   * @param type the type
+   * @return the table from any object id
+   */
   @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  TableVO getTableFromAnyObjectId(@PathVariable("id") Long id,
+  Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) Integer type);

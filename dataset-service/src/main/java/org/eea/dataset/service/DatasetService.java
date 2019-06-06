@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -80,6 +81,19 @@ public interface DatasetService {
       TableCollectionVO tableCollections) throws EEAException;
   
   
-  TableVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, Integer type) throws EEAException;
+  
+
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageable the pageable
+   * @param type the type
+   * @return the table from any object id
+   * @throws EEAException the EEA exception
+   */
+  Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
+      Integer type) throws EEAException;
 
 }

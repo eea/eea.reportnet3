@@ -1,8 +1,8 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -177,8 +178,11 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
+   * Load dataset schema.
+   *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
+   * @param tableCollection the table collection
    */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
@@ -197,23 +201,38 @@ public class DataSetControllerImpl implements DatasetController {
   }
   
   
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageSize the page size
+   * @param type the type
+   * @return the table from any object id
+   */
   @Override
   @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public TableVO getTableFromAnyObjectId(@PathVariable("id") Long id, 
+  public Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id, 
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) Integer type) {
     
-    TableVO table = new TableVO();
-    try {
-      Pageable pageable = PageRequest.of(1, pageSize);
-      table = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
-    } catch (EEAException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    
+    Map<String,TableVO> mapPageTable = null;
+    if (id == null || idDataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     
-    return table;
+    try {
+      Pageable pageable = PageRequest.of(1, pageSize);
+      mapPageTable = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    
+    return mapPageTable;
   }
   
 

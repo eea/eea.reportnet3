@@ -3,7 +3,6 @@ package org.eea.dataset.service;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -11,11 +10,15 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.TableNoRecordMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -91,7 +94,17 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetTablesMapper dataSetTablesMapper;
+  
+  @Mock
+  private TableNoRecordMapper tableNoRecordMapper;
+  
+  @Mock
+  private TableRepository tableRepository;
+  
+  @Mock
+  private FieldRepository fieldRepository;
 
+  private FieldValue fieldValue;
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
   private TableValue tableValue;
@@ -103,6 +116,7 @@ public class DatasetServiceTest {
 
   @Before
   public void initMocks() {
+    fieldValue = new FieldValue();
     recordValues = new ArrayList<>();
     recordValue = new RecordValue();
     tableValue = new TableValue();
@@ -305,4 +319,41 @@ public class DatasetServiceTest {
     datasetService.setDataschemaTables(1L, 1L, new TableCollectionVO());
     Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
+  
+  @Test
+  public void testGetTableFromAnyObjectId() throws Exception {
+    
+    when(recordRepository.findByIdAndTableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
+    .thenReturn(recordValue);
+
+    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, 2);
+    Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
+    
+  }
+  
+  @Test
+  public void testGetTableFromAnyObjectId2() throws Exception {
+    
+    when(tableRepository.findByIdAndDatasetId_Id(Mockito.any(), Mockito.any()))
+    .thenReturn(tableValue);
+
+    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, 1);
+    Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
+    
+  }
+  
+  @Test
+  public void testGetTableFromAnyObjectId3() throws Exception {
+    
+    when(fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
+    .thenReturn(fieldValue);
+
+    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, 3);
+    Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
+    
+  }
+  
 }
