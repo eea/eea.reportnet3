@@ -260,9 +260,9 @@ public class DatasetServiceTest {
 
   @Test
   public void testDeleteImportData() throws Exception {
-    doNothing().when(datasetRepository).empty(Mockito.any());
+    doNothing().when(datasetRepository).removeDatasetData(Mockito.any());
     datasetService.deleteImportData(1L);
-    Mockito.verify(datasetRepository, times(1)).empty(Mockito.any());
+    Mockito.verify(datasetRepository, times(1)).removeDatasetData(Mockito.any());
   }
 
   @Test

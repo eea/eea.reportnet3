@@ -111,7 +111,7 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Creates the empty data set.
+   * Creates the removeDatasetData data set.
    *
    * @param datasetname the datasetname
    */
@@ -135,7 +135,7 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("{id}/loadDatasetData")
   public void loadDatasetData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file) {
-    // filter if the file is empty
+    // filter if the file is removeDatasetData
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }

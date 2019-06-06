@@ -139,7 +139,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Creates the empty dataset.
+   * Creates the removeDatasetData dataset.
    *
    * @param datasetName the dataset name
    */
@@ -301,7 +301,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteImportData(Long dataSetId) {
-    datasetRepository.empty(dataSetId);
+    datasetRepository.removeDatasetData(dataSetId);
     LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 

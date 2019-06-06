@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -197,7 +198,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test exception entry 1.
+   * Creates the removeDatasetData data set test exception entry 1.
    *
    * @throws Exception the exception
    */
@@ -207,7 +208,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test exception entry 2.
+   * Creates the removeDatasetData data set test exception entry 2.
    *
    * @throws Exception the exception
    */
@@ -217,7 +218,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test.
+   * Creates the removeDatasetData data set test.
    *
    * @throws Exception the exception
    */
@@ -267,8 +268,9 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(datasetService)
+        .setDataschemaTables(Mockito.any(), Mockito.any(),
+            Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
@@ -282,7 +284,8 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaSuccess() throws Exception {
-    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
+    doNothing().when(datasetService)
+        .setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
