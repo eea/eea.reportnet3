@@ -52,6 +52,10 @@ public class TableValue {
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValue> records;
 
+  /** The table validations. */
+  @OneToMany(mappedBy = "idTable", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<TableValidation> tableValidations;
+
   /**
    * The dataset id.
    */

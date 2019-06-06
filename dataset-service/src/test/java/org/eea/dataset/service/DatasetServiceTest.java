@@ -1,10 +1,10 @@
 package org.eea.dataset.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -284,15 +284,13 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any()))
-        .thenReturn(null);
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
   public void testGetTableValuesById() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any()))
-        .thenReturn(recordValues);
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
 
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
