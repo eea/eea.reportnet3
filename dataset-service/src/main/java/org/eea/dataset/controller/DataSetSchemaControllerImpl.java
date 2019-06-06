@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
 /**

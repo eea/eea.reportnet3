@@ -108,7 +108,14 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
-    return null;
+    if (dataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    try {
+      return datasetService.updateDataset(dataset);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
   /**
@@ -178,8 +185,11 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
+   * Load dataset schema.
+   *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
+   * @param tableCollection the table collection
    */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
