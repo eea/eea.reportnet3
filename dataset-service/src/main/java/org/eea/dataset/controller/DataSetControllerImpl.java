@@ -195,5 +195,26 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
   }
+  
+  
+  @Override
+  @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public TableVO getTableFromAnyObjectId(@PathVariable("id") Long id, 
+      @RequestParam(value = "datasetId", required = true) Long idDataset,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "type", required = true) Integer type) {
+    
+    TableVO table = new TableVO();
+    try {
+      Pageable pageable = PageRequest.of(1, pageSize);
+      table = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
+    } catch (EEAException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    return table;
+  }
+  
 
 }

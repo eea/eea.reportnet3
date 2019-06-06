@@ -16,12 +16,17 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.TableNoRecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -136,6 +141,15 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private KafkaSender kafkaSender;
+  
+  @Autowired
+  private TableNoRecordMapper tableNoRecordMapper;
+  
+  @Autowired
+  private FieldRepository fieldRepository;
+  
+  @Autowired
+  private TableRepository tableRepository;
 
 
   /**
@@ -446,4 +460,64 @@ public class DatasetServiceImpl implements DatasetService {
 
     dataSetMetabaseTableCollection.save(tableCollection);
   }
+  
+  
+  @Override
+  @Transactional
+  public TableVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, Integer type) throws EEAException{
+    TableVO tableVO = new TableVO();
+    //TYPE 1 table; 2 record; 3 field 
+  
+    RecordValue record = new RecordValue();
+    List<RecordValue> records = new ArrayList<>();
+    
+  
+    //TABLE
+    if(type!=null && 1==type && id!=null) {
+    
+      TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
+      tableVO = tableNoRecordMapper.entityToClass(table);
+      
+      records = table.getRecords();
+      record = table.getRecords().get(0);
+    }
+    
+    
+    //RECORD
+    if(type!=null && 2==type && id!=null) {
+      record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
+      tableVO = tableNoRecordMapper.entityToClass(record.getTableValue());
+
+      records = record.getTableValue().getRecords();
+    }
+   
+   
+    //FIELD
+    if(type!=null && 3==type && id!=null) {
+      FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
+   
+      tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());
+    
+      records = field.getRecord().getTableValue().getRecords();
+      record = field.getRecord();
+    }
+    
+    records = this.sanitizeRecords(records);
+    int recordPosition = records.indexOf(record);
+    int pageNumberFounded = recordPosition / pageable.getPageSize();
+    
+    int initIndex = pageNumberFounded * pageable.getPageSize();
+    int endIndex =
+        (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records
+            .size() : (pageNumberFounded + 1) * pageable.getPageSize();
+      
+    List<RecordVO> recordVOs = recordMapper.entityListToClass(records.subList(initIndex, endIndex));        
+   
+    tableVO.setRecords(recordVOs);
+    tableVO.setTotalRecords(Long.valueOf(recordVOs.size()));
+    
+    
+    return tableVO;
+  }
+  
 }

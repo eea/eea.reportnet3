@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,7 +102,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
 
     try (Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, Charset.forName("ISO-8859-15")))) {
+        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
       // Init de library of reader file
       final CSVReader reader = initReader(buf);

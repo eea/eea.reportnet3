@@ -78,5 +78,8 @@ public interface DatasetService {
 
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
+  
+  
+  TableVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, Integer type) throws EEAException;
 
 }

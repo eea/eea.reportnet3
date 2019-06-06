@@ -97,5 +97,12 @@ public interface DatasetController {
   @RequestMapping("{id}/loadDatasetSchema")
   void loadDatasetSchema(@PathVariable("id") Long datasetId,
       @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
+  
+  
+  @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  TableVO getTableFromAnyObjectId(@PathVariable("id") Long id,
+      @RequestParam(value = "datasetId", required = true) Long idDataset,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "type", required = true) Integer type);
 
 }
