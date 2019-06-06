@@ -22,6 +22,45 @@ const DataViewer = (props) => {
     const [header] = useState();
     const [colOptions,setColOptions] = useState([{}]);    
 
+    //TODO: Textos + iconos + ver si deben estar aquí.
+    const customButtons = [
+      {
+          label: "Visibility",
+          icon: "6",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+      },
+      {
+          label: "Filter",
+          icon: "7",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+      },
+      {
+          label: "Group by",
+          icon: "8",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+      },
+      {
+          label: "Sort",
+          icon: "9",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+      },
+      {
+          label: "Refresh",
+          icon: "11",
+          group: "right",
+          disabled: false,
+          clickHandler: props.onRefresh
+      }
+  ];
+
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     console.log("DataViewer Render..." + props.name);
     useEffect(() =>{            
@@ -141,7 +180,7 @@ const DataViewer = (props) => {
 
     return (
         <div>
-          <ButtonsBar buttons={props.customButtons} />
+          <ButtonsBar buttons={(props.customButtons)?props.customButtons:customButtons} />
             {/* <Toolbar>
                 <CustomButton label="Visibility" icon="6" />                
                 <CustomButton label="Filter" icon="7" />   

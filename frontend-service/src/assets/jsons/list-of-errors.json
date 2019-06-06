@@ -1,0 +1,107 @@
+{
+    "errors": {
+        "fields": [{
+                "table": "Table 1",
+                "type": "field",
+                "message": "Value exceeds maximum allowed",
+                "category": "Error"
+            },
+            {
+                "table": "Table 1",
+                "type": "table",
+                "message": "Table with errors",
+                "category": "Error"
+            },
+            {
+                "table": "Table 1",
+                "type": "row",
+                "message": "Row is duplicated",
+                "category": "Error"
+            },
+            {
+                "table": "Table 2",
+                "type": "field",
+                "message": "Value exceeds maximum allowed",
+                "category": "Error"
+            },
+            {
+                "table": "Table 2",
+                "type": "table",
+                "message": "Table with errors",
+                "category": "Error"
+            },
+            {
+                "table": "Table 2",
+                "type": "row",
+                "message": "Row is duplicated",
+                "category": "Error"
+            },
+            {
+                "table": "Table 3",
+                "type": "field",
+                "message": "Value exceeds maximum allowed",
+                "category": "Error"
+            },
+            {
+                "table": "Table 3",
+                "type": "table",
+                "message": "Table with errors",
+                "category": "Error"
+            },
+            {
+                "table": "Table 3",
+                "type": "row",
+                "message": "Row is duplicated",
+                "category": "Error"
+            }
+        ],
+        "totalRecords": 9
+    },
+    "blockers": {
+        "fields": [{
+                "table": "Table 1",
+                "type": "field",
+                "message": "Value is not a number",
+                "category": "Blocker"
+
+            },
+            {
+                "table": "Table 2",
+                "type": "field",
+                "message": "Value is not a number",
+                "category": "Blocker"
+
+            },
+            {
+                "table": "Table 3",
+                "type": "field",
+                "message": "Value is not a number",
+                "category": "Blocker"
+
+            }
+        ],
+        "totalRecords": 3
+    },
+    "warnings": {
+        "fields": [{
+                "table": "Table 1",
+                "type": "field",
+                "message": "Value is over 100",
+                "category": "Warning"
+            },
+            {
+                "table": "Table 2",
+                "type": "field",
+                "message": "Value is over 10",
+                "category": "Warning"
+            },
+            {
+                "table": "Table 3",
+                "type": "field",
+                "message": "Value is over 200",
+                "category": "Warning"
+            }
+        ],
+        "totalRecords": 3
+    }
+}

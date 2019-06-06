@@ -3,6 +3,7 @@ import config from '../../conf/web.config.json';
 
 const baseURL = `${config.api.protocol}${config.api.url}${config.api.port}`;
 
+//TODO: Existe axios-hook para usar hooks. Posible mejora.
 //Maps object queryString to 'key=value' format. Checks if queryString is undefined or empty object
 const mapQueryString = (queryString) => (!queryString)? "" : (Object.entries(queryString).length<=0)? "": `?${Object.entries(queryString).map(key => `${key[0]}=${key[1]}&`).join("").slice(0,-1)}`;
 

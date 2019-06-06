@@ -4,6 +4,8 @@ import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
+import ValidationDataViewer from '../../../containers/DataSets/ValidationDataViewer/ValidationDataViewer';
+
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
 import {Card} from 'primereact/card';
@@ -33,7 +35,6 @@ const ReporterDataSet = () => {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
-
 
   console.log('ReporterDataSet Render...');   
 
@@ -168,6 +169,8 @@ const ReporterDataSet = () => {
             name : item["nameTableSchema"]
             }
       })); 
+      
+
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
         return table.recordSchema.fieldSchema.map((item,i)=>{
           return {
@@ -235,11 +238,11 @@ const ReporterDataSet = () => {
         </Dialog>             
         <Dialog visible={validationsVisible} onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
                 header={resources.messages["titleValidations"]} maximizable dismissableMask={true} style={{width:'80%'}}>
-          <Card title="US-STP6-DSM-QC-01-List of Validations (next sprint)">
+          {/* <Card title="US-STP6-DSM-QC-01-List of Validations (next sprint)">
             <div style={{textAlign: 'center'}}>
               <img alt="Validations" src={validationImage} />;
             </div>
-          </Card>
+          </Card> */}          
         </Dialog>
         <Suspense fallback={<div>Loading...</div>}>
           <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
