@@ -48,7 +48,7 @@ public class ValidationServiceImpl implements ValidationService {
   private DataFlowController dataFlowController;
   /** The dataset controller. */
   @Autowired
-  private DatasetController datasetController;
+  private DataSetControllerZuul datasetController;
 
   /**
    * Gets the element lenght.

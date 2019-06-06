@@ -30,9 +30,10 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InterruptedException
    */
   void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
-      throws EEAException, IOException;
+      throws EEAException, IOException, InterruptedException;
 
 
   /**
