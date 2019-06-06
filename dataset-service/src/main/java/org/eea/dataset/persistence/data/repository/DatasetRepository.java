@@ -18,4 +18,13 @@ public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
   @Modifying
   @Query(nativeQuery = true, value = "delete from dataset_value")
   void empty(Long dataSetId);
+
+  /**
+   * Find id dataset schema by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
+  String findIdDatasetSchemaById(Long datasetId);
 }

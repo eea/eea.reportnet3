@@ -57,7 +57,7 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO updateDataset(@RequestBody DataSetVO dataset);
+  void updateDataset(@RequestBody DataSetVO dataset);
 
   /**
    * Creates the empty data set.

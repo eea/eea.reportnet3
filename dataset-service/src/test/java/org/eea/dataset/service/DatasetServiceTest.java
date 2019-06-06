@@ -343,10 +343,10 @@ public class DatasetServiceTest {
   public void testUpdateSuccess() throws Exception {
     when(dataSetMapper.classToEntity((Mockito.any(DataSetVO.class))))
         .thenReturn(new DatasetValue());
-    when(datasetRepository.save(Mockito.any())).thenReturn(new DatasetValue());
-    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(new DataSetVO());
-    DataSetVO result = datasetService.updateDataset(new DataSetVO());
-    assertEquals("not equals", new DataSetVO(), result);
+    when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
+    datasetService.updateDataset(new DataSetVO());
+    Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
+
   }
 
 }

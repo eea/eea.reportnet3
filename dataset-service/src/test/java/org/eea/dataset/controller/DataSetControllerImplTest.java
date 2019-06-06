@@ -369,17 +369,16 @@ public class DataSetControllerImplTest {
 
   @Test
   public void testUpdateDatasetSuccess() throws Exception {
-    when(datasetService.updateDataset(Mockito.any())).thenReturn(new DataSetVO());
-    assertNotNull("error", dataSetControllerImpl.updateDataset(new DataSetVO()));
+    doNothing().when(datasetService).updateDataset(Mockito.any());
+    dataSetControllerImpl.updateDataset(new DataSetVO());
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testUpdateDatasetError() throws Exception {
     doThrow(new EEAException()).when(datasetService).updateDataset(Mockito.any());
-    DataSetVO result = dataSetControllerImpl.updateDataset(new DataSetVO());
+    dataSetControllerImpl.updateDataset(new DataSetVO());
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
-    assertNull("should be null", result);
   }
 
   @Test(expected = ResponseStatusException.class)
