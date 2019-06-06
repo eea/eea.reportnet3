@@ -17,6 +17,7 @@ public interface DatasetRepository extends CrudRepository<DatasetValue, Long> {
    * @param dataSetId the data set id
    */
   @Modifying
-  @Query(nativeQuery = true, value = "delete from dataset_value")
+  @Query(nativeQuery = true,
+      value = "truncate table field_value, record_value, table_value, dataset_value")
   void removeDatasetData(Long dataSetId);
 }
