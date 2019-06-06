@@ -104,15 +104,14 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
-    // DataSetVO dataset = datasetController.getById(datasetId);
+    DataSetVO dataset = datasetController.getById(datasetId);
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-
+    // Execute rules validation
     DataSetVO result = runDatasetValidations(dataset, dataflowId);
-    // // Execute rules validation
-    // DataSetVO result = runDatasetValidations(dataset, rules);
-    // // Save results to the db
-    // // Release notification event
+    // Save results to the db
+    datasetController.updateDataset(result);
+    // Release notification event
     releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }
 

@@ -476,6 +476,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   @Override
+  @Transactional
   public void updateDataset(DataSetVO dataset) throws EEAException {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
