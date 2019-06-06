@@ -40,7 +40,7 @@ public class ValidationControllerImpl implements ValidationController {
   @RequestMapping(value = "/getRules", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<Map<String, String>> getAllRules(Long dataflowId) {
-    return validationService.getRules();
+    return validationService.getRulesByDataFlowId(dataflowId);
   }
 
   /**

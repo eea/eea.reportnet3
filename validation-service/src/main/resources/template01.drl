@@ -1,0 +1,23 @@
+template header
+ruleid
+whencondition
+thencondition
+
+package src.main.resources
+import org.eea.validation.persistence.rules.model.*;
+import org.eea.interfaces.vo.*;
+import org.eea.validation.configuration.*;
+
+template "templateValidateRules"
+
+rule "@{ruleid}"
+
+  when
+    dataFlowRule : DataFlowRule(@{whencondition});
+  	
+  then
+   @{thencondition}
+   
+end
+
+end template

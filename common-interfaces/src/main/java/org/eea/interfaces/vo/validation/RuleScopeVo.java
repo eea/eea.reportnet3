@@ -8,7 +8,7 @@ public enum RuleScopeVo {
   /** The dataset. */
   DATASET,
   /** The tabla. */
-  TABLA,
+  TABLE,
   /** The record. */
   RECORD,
   /** The field. */

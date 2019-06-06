@@ -21,8 +21,7 @@ import com.google.common.collect.Lists;
 @Component
 public class KieBaseManager {
 
-  private static final String REGULATION_TEMPLATE_FILE =
-      "src/main/resources/ruletemplate/template01.drl";
+  private static final String REGULATION_TEMPLATE_FILE = "src/main/resources/template01.drl";
 
   private KieBase kieBase;
 
@@ -38,16 +37,15 @@ public class KieBaseManager {
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
 
-    Iterable<DataFlowRule> preRepositoryDB =
-        dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
+    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
 
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
       rule1.put("ruleid", preRepository.get(i).getRuleId().toString());
-      rule1.put("whencondition", preRepository.get(i).getWhenCondition());
-      rule1.put("thencondition", preRepository.get(i).getThenCondition());
+      rule1.put("whencondition", preRepository.get(i).getWhenCondition().trim());
+      rule1.put("thencondition", preRepository.get(i).getThenCondition().trim());
       ruleAttributes.add(rule1);
     }
 
@@ -70,5 +68,8 @@ public class KieBaseManager {
     return this.kieBase;
   }
 
+  public static void testeoArchivo() {
+    System.err.println("HA ENTRADO AQUI DENTRO");
+  }
 
 }

@@ -53,7 +53,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  public DataFlowRule getDataFlowRule(DataFlowRule dataFlowRules) {
+  public DataFlowRule getDataFlowRule(List<DataFlowRule> dataFlowRule) {
     KieSession kieSession;
     try {
       kieSession = kieBaseManager.reloadRules(1L).newKieSession();
@@ -61,16 +61,19 @@ public class ValidationServiceImpl implements ValidationService {
       e.printStackTrace();
       return null;
     }
-    kieSession.insert(dataFlowRules);
+    for (DataFlowRule dataFlowRule2 : dataFlowRule) {
+      kieSession.insert(dataFlowRule2);
+    }
+
     kieSession.fireAllRules();
     kieSession.dispose();
-    return dataFlowRules;
+    return dataFlowRule.get(0);
   }
 
-
   @Override
-  public List<Map<String, String>> getRules() {
-    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+  public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
+    Iterable<DataFlowRule> preRepositoryDB =
+        dataFlowRulesRepository.findAllByDataFlowId(idDataflow);
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     for (int i = 0; i < preRepository.size(); i++) {
@@ -89,17 +92,19 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
-    DataSetVO dataset = datasetController.getById(datasetId);
-    Long dataFlowId = datasetController.getDataFlowIdById(datasetId);
-    // Read Dataset rules
-    List<DataFlowRule> rules = dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
-    // Execute rules validation
-    DataSetVO result = runDatasetValidations(dataset, rules);
-    // Save results to the db
-    datasetController.updateDataset(result);
-    // Release notification event
-    releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
-    LOG.info("Dataset validated");
+    // DataSetVO dataset = datasetController.getById(datasetId);
+    // Long dataFlowId = datasetController.getDataFlowIdById(datasetId);
+    // // Read Dataset rules
+    List<DataFlowRule> rules = dataFlowRulesRepository.findAll();
+
+    getDataFlowRule(rules);
+    // // Execute rules validation
+    // DataSetVO result = runDatasetValidations(dataset, rules);
+    // // Save results to the db
+    // datasetController.updateDataset(result);
+    // // Release notification event
+    // releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
+    // LOG.info("Dataset validated");
   }
 
   /**
