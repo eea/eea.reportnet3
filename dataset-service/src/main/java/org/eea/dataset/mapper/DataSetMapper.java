@@ -3,13 +3,8 @@ package org.eea.dataset.mapper;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -19,8 +14,10 @@ import org.mapstruct.MappingTarget;
 /**
  * The Interface DataSetMapper.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {DatasetValidationMapper.class,
+    TableValidationMapper.class, RecordValidationMapper.class, FieldValidationMapper.class})
 public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
+
 
   /**
    * Map.
@@ -40,19 +37,9 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * @return the dataset value
    */
   @Mapping(source = "tableVO", target = "tableValues")
-  @Mapping(source = "validations", target = "datasetValidations")
   @Override
   DatasetValue classToEntity(DataSetVO model);
 
-
-  @Mapping(source = "validations", target = "recordValidations")
-  RecordValue classToEntity(RecordVO model);
-
-  @Mapping(source = "validations", target = "tableValidations")
-  TableValue classToEntity(TableVO model);
-
-  @Mapping(source = "validations", target = "fieldValidations")
-  FieldValue classToEntity(FieldVO model);
 
   /**
    * Entity to class.
@@ -61,18 +48,9 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * @return the data set VO
    */
   @Mapping(source = "tableValues", target = "tableVO")
-  @Mapping(source = "datasetValidations", target = "validations")
   @Override
   DataSetVO entityToClass(DatasetValue entity);
 
-  @Mapping(source = "entity.recordValidations", target = "validations")
-  RecordVO entityToClass(RecordValue entity);
-
-  @Mapping(source = "entity.tableValidations", target = "validations")
-  TableVO entityToClass(TableValue entity);
-
-  @Mapping(source = "entity.fieldValidations", target = "validations")
-  FieldVO entityToClass(FieldValue entity);
 
   /**
    * Fill ids.
@@ -91,7 +69,54 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
       });
     });
 
+
   }
+
+
+  //
+  // @AfterMapping
+  // default void fill(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
+  // List<DatasetValidation> dbvalidation = dataset.getDatasetValidations();
+  // List<ValidationVO> validationsVODataSet = new ArrayList<>();
+  //
+  // List<ValidationVO> validationsVO = new ArrayList<>();
+  // if (null != dbvalidation) {
+  // dbvalidation.stream().forEach(validation -> {
+  // ValidationVO validationVo = new ValidationVO();
+  // validationVo.setId(validation.getValidation().getId());
+  // validationVo.setIdRule(validation.getValidation().getIdRule());
+  // validationVo.setLevelError(validation.getValidation().getLevelError());
+  // validationVo.setMessage(validation.getValidation().getMessage());
+  // validationVo.setTypeEntity(validation.getValidation().getTypeEntity());
+  // validationVo.setValidationDate(validation.getValidation().getValidationDate());
+  // validationsVODataSet.add(validationVo);
+  // });
+  // dataset.setDatasetValidations(new ArrayList<>());
+  // }
+  // List<TableValue> tableValues = dataset.getTableValues();
+  // if (null != tableValues) {
+  // tableValues.stream().forEach(tableValue -> {
+  // List<ValidationVO> validationsVOTable = new ArrayList<>();
+  // tableValue.getTableValidations().stream().forEach(validation -> {
+  // ValidationVO validationVo = new ValidationVO();
+  // validationVo.setId(validation.getValidation().getId());
+  // validationVo.setIdRule(validation.getValidation().getIdRule());
+  // validationVo.setLevelError(validation.getValidation().getLevelError());
+  // validationVo.setMessage(validation.getValidation().getMessage());
+  // validationVo.setTypeEntity(validation.getValidation().getTypeEntity());
+  // validationVo.setValidationDate(validation.getValidation().getValidationDate());
+  // });
+  //
+  // tableValue.getRecords().stream().forEach(record -> {
+  // record.getFields().stream().forEach(field -> {
+  //
+  // });
+  // });
+  // });
+  // }
+  // }
+  //
+
 
 
 }
