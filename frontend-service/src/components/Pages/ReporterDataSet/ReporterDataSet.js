@@ -4,21 +4,20 @@ import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
-import ValidationDataViewer from '../../../containers/DataSets/ValidationDataViewer/ValidationDataViewer';
+
 
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
-import {Card} from 'primereact/card';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
 //import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
+import config from '../../../conf/web.config.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
-
-import validationImage from '../../../assets/images/dataset_icon.png';
+import ReporterDataSetContext from '../../Context/ReporterDataSetContext';
 
 const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
@@ -29,12 +28,14 @@ const ReporterDataSet = () => {
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
+  const ValidationDataViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
 
   console.log('ReporterDataSet Render...');   
 
@@ -172,7 +173,7 @@ const ReporterDataSet = () => {
       
 
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
-        return table.recordSchema.fieldSchema.map((item,i)=>{
+        return table.recordSchema.fieldSchema.map(item=>{
           return {
               table: table["nameTableSchema"], 
               field: item["id"], 
@@ -222,30 +223,57 @@ const ReporterDataSet = () => {
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
-        {/*TODO: Loading spinner*/}
-        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
-          <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
-                  className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
-              <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
-                                onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
-                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
-                                fileLimit={1} className={styles.FileUpload}  /> 
-          </Dialog>                
-        <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
-                header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
+        {/*TODO: Loading spinner --> En el Suspense*/}
+        <TabsSchema tables={tableSchema} 
+                    tableSchemaColumns={tableSchemaColumns} 
+                    onRefresh={onRefreshClickHandler} 
+                    urlViewer={`${config.dataviewerAPI.url}1`}/>
+        <Dialog header={resources.messages["uploadDataset"]} 
+                visible={importDialogVisible}
+                className={styles.Dialog} 
+                dismissableMask={false} 
+                onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
+          <CustomFileUpload mode="advanced" 
+                            name="file" 
+                            url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
+                            onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
+                            multiple={false} 
+                            chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
+                            fileLimit={1} 
+                            className={styles.FileUpload}  /> 
+        </Dialog>                
+        <Dialog visible={dashDialogVisible} 
+                onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
+                header={resources.messages["titleDashboard"]} 
+                maximizable 
+                dismissableMask={true} 
+                style={{width:'80%'}}>
           <h1>US-STP6-DSM-VIS-01-List of Visualizations (next sprint)</h1>
-          <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
-        </Dialog>             
-        <Dialog visible={validationsVisible} onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
-                header={resources.messages["titleValidations"]} maximizable dismissableMask={true} style={{width:'80%'}}>
-          {/* <Card title="US-STP6-DSM-QC-01-List of Validations (next sprint)">
-            <div style={{textAlign: 'center'}}>
-              <img alt="Validations" src={validationImage} />;
-            </div>
-          </Card> */}          
-        </Dialog>
+          <Chart type="bar" 
+                 data={dashBoardData} 
+                 options={dashBoardOptions} />
+        </Dialog>   
+            {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
+        <ReporterDataSetContext.Provider value={{validationsVisibleHandler:()=>setVisibleHandler(setValidationsVisible, false)}}>     
+          <Dialog visible={validationsVisible} 
+                  onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
+                  header={resources.messages["titleValidations"]} 
+                  maximizable 
+                  dismissableMask={true} 
+                  style={{width:'80%'}}>
+                    <Suspense fallback={<div>Loading...</div>}>
+                      <ValidationDataViewer/>
+                    </Suspense>        
+          </Dialog>
+        </ReporterDataSetContext.Provider> 
         <Suspense fallback={<div>Loading...</div>}>
-          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+          <ConfirmDialog onConfirm={onConfirmDeleteHandler} 
+                         onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
+                         visible={deleteDialogVisible} 
+                         header={resources.messages["deleteDatasetHeader"]} 
+                         maximizable={false} 
+                         labelConfirm={resources.messages["yes"]}  
+                         labelCancel={resources.messages["no"]}>
             {resources.messages["deleteDatasetConfirm"]}
           </ConfirmDialog>
         </Suspense>

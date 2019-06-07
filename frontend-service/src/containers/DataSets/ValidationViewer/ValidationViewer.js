@@ -1,15 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react';
-import styles from './DataViewer.module.css';
-import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
+import React, { useState, useEffect, Suspense, useContext } from 'react';
+//import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 // import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-//import jsonData from '../../../assets/jsons/response_dataset_values2.json';
-import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
+import jsonData from '../../../assets/jsons/list-of-errors.json';
+import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
+//import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
-const DataViewer = (props) => {
+const ValidationViewer = (props) => {
+    const contextReporterDataSet = useContext(ReporterDataSetContext);
     const [totalRecords, setTotalRecords] = useState(0);
     const [fetchedData, setFetchedData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -18,11 +19,12 @@ const DataViewer = (props) => {
     const [sortOrder, setSortOrder] = useState();   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
-    const [cols, setCols] = useState(props.tableSchemaColumns); 
+    const [cols, setCols] = useState([]); 
     const [header] = useState();
-    const [colOptions,setColOptions] = useState([{}]);    
+    const [colOptions, setColOptions] = useState([{}]);    
 
-    //TODO: Textos + iconos + ver si deben estar aquí.
+    const ButtonsBar = React.lazy(() => import('../../../components/Layout/UI/ButtonsBar/ButtonsBar'));
+    //TODO: Refactorizar porque estamos duplicando lógica con DataViewer (Seguramente haya que cargarse el TabsSchema)
     const customButtons = [
       {
           label: "Visibility",
@@ -62,24 +64,24 @@ const DataViewer = (props) => {
   ];
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
-    console.log("DataViewer Render..." + props.name);
-    useEffect(() =>{            
-        console.log("Setting column options...");      
-        let colOpt = [];
-        for(let col of cols) {  
-          colOpt.push({label: col.header, value: col});
-        }              
-        setColOptions(colOpt);
+    // console.log("ValidationViewer Render..." + props.name);
+    // useEffect(() =>{            
+    //     console.log("Setting column options...");      
+    //     let colOpt = [];
+    //     for(let col of cols) {  
+    //       colOpt.push({label: col.header, value: col});
+    //     }              
+    //     setColOptions(colOpt);
   
-        console.log('Fetching data...');
-        fetchDataHandler(null, sortOrder, firstRow, numRows);   
+    //     console.log('Fetching data...');
+    //     fetchDataHandler(null, sortOrder, firstRow, numRows);   
         
-        console.log("Filtering data...");
-        const inmTableSchemaColumns = [...props.tableSchemaColumns];
-        console.log(inmTableSchemaColumns);
-        setCols(inmTableSchemaColumns);
+    //     console.log("Filtering data...");
+    //     const inmTableSchemaColumns = [...props.tableSchemaColumns];
+    //     console.log(inmTableSchemaColumns);
+    //     setCols(inmTableSchemaColumns);
 
-      }, []);
+    //   }, []);
   
       useEffect(()=>{         
         // let visibilityIcon = (<div className="TableDiv">
@@ -92,8 +94,8 @@ const DataViewer = (props) => {
         //     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
         // </div>;
         // setHeader(headerArr);
-        
-        let columnsArr = cols.map(col => <Column sortable={true} key={col.field} field={col.field} header={col.header} />);
+
+        let columnsArr = Object.keys(jsonData.errors.fields[0]).map(col => <Column sortable={true} key={col} field={col} header={`${col.charAt(0).toUpperCase()}${col.slice(1)}`} />);
         setColumns(columnsArr); 
   
       }, [cols, colOptions]);
@@ -118,10 +120,9 @@ const DataViewer = (props) => {
       //   setColOptions(colOptions);
       // }
   
-      // useEffect(()=>{
-      //   console.log("Fetching new data...");
-      // console.log(fetchedData);
-      // },[fetchedData]);
+      useEffect(()=>{
+        filterDataResponse(jsonData);
+      },[]);
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
@@ -137,63 +138,64 @@ const DataViewer = (props) => {
           queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
-        const dataPromise = HTTPRequesterAPI.get(
-          {
-            url: props.urlViewer,
-            queryString: queryString
-          }
-        );
+        //jsonData
 
-        dataPromise.then(response =>{
-          console.log(response.data);
-          filterDataResponse(response.data.records);
-          if(response.data.totalRecords!==totalRecords){
-            setTotalRecords(response.data.totalRecords);
-          }
+        // const dataPromise = HTTPRequesterAPI.get(
+        //   {
+        //     url: props.urlViewer,
+        //     queryString: queryString
+        //   }
+        // );
+
+        // dataPromise.then(response =>{
+        //   console.log(response.data);
+        //   filterDataResponse(response.data.records);
+        //   if(response.data.totalRecords!==totalRecords){
+        //     setTotalRecords(response.data.totalRecords);
+        //   }
         
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log(error);
-          return error;
-        });
+        //   setLoading(false);
+        // })
+        // .catch(error => {
+        //   console.log(error);
+        //   return error;
+        // });
       }
 
       const filterDataResponse = (data) =>{        
         
+        const values = [...data.errors.fields, ...data.blockers.fields, ...data.warnings.fields];
+
         //TODO: Refactorizar
-        const dataFiltered = data.map(record => record.fields.map(f =>{
-          return {[f.idFieldSchema]: f.value}
-        }));
-        console.log(data)
-        let auxFiltered = {}
-        let auxArrayFiltered = [];
-        dataFiltered.forEach(dat => {
-          dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
-          auxArrayFiltered.push(auxFiltered);
-          auxFiltered={};
-        });
-        setFetchedData(auxArrayFiltered);
+        // const dataFiltered = data.map(record => record.fields.map(f =>{
+        //   return {[f.idFieldSchema]: f.value}
+        // }));
+        // console.log(data)
+        // let auxFiltered = {}
+        // let auxArrayFiltered = [];
+        // dataFiltered.forEach(dat => {
+        //   dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
+        //   auxArrayFiltered.push(auxFiltered);
+        //   auxFiltered={};
+        // });
+        setFetchedData(values);
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
 
     return (
         <div>
-          <ButtonsBar buttons={(props.customButtons)?props.customButtons:customButtons} />
-            {/* <Toolbar>
-                <CustomButton label="Visibility" icon="6" />                
-                <CustomButton label="Filter" icon="7" />   
-                <CustomButton label="Group by" icon="8" />   
-                <CustomButton label="Sort" icon="9" />   
-            </Toolbar> */}
-            <div className={styles.Table}>
+            <Suspense fallback={<div>Loading...</div>}>
+                <ButtonsBar buttons={(props.customButtons)?props.customButtons:customButtons} />
+            </Suspense>
+            <div>
                 <DataTable value={fetchedData} paginatorRight={totalCount}
                        resizableColumns={true} reorderableColumns={true}
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
                        loading={loading} totalRecords={totalRecords} sortable={true}
-                       onSort={onSortHandler} header={header} sortField={sortField} sortOrder={sortOrder} autoLayout={true}>
+                       onSort={onSortHandler} header={header} sortField={sortField} sortOrder={sortOrder} autoLayout={true}
+                       selectionMode="single" onRowSelect={(event)=>{console.log(event.data);contextReporterDataSet.validationsVisibleHandler();}}>
                     {columns}
                 </DataTable>
             </div>
@@ -201,4 +203,4 @@ const DataViewer = (props) => {
     );
 }
 
-export default DataViewer;
+export default React.memo(ValidationViewer);

@@ -4,5 +4,11 @@
         "url": "localhost",
         "port": ":8030",                
         "ip": "127.0.0.1"
+    },
+    "dataviewerAPI":{
+        "url":"/dataset/TableValueDataset/"
+    },
+    "validationViewerAPI":{
+        "url":"localhost"
     }
 }
