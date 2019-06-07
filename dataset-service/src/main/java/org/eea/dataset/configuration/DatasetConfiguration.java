@@ -72,6 +72,13 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * The show sql propertie
    */
+  @Value("${spring.jpa.hibernate.flushMode}")
+  private String flushMode;
+
+
+  /**
+   * The show sql propertie
+   */
   @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
 
@@ -149,6 +156,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
+
     dataSetsEM.setJpaProperties(additionalProperties());
     return dataSetsEM;
   }
@@ -165,6 +173,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
     properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
     properties.setProperty("hibernate.show_sql", showSql);
+    properties.setProperty("hibernate.flushMode", flushMode);
     return properties;
   }
 

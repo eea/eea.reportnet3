@@ -200,7 +200,7 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
-      Thread.sleep(2000);
+      Thread.sleep(10000);
       // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
 
