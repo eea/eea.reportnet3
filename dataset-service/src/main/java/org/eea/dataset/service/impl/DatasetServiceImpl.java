@@ -197,13 +197,11 @@ public class DatasetServiceImpl implements DatasetService {
       }
       // save dataset to the database
       datasetRepository.saveAndFlush(dataset);
-      // after the dataset has been saved, an event is sent to notify it
-
       LOG.info("File processed and saved into DB");
-
     } finally {
       is.close();
-      Thread.sleep(2000);
+      Thread.sleep(10000);
+      // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
 
     }
@@ -465,13 +463,10 @@ public class DatasetServiceImpl implements DatasetService {
     final DatasetValue datasetValue = new DatasetValue();
 
     List<TableValue> allTableValues = tableRepository.findAllTables();
-
     datasetValue.setTableValues(allTableValues);
     datasetValue.setId(datasetId);
-
+    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
     for (TableValue tableValue : allTableValues) {
-      // tableValueIterator.setRecords(recordRepository
-      // .findByTableValue_IdTableSchema(tableValueIterator.getIdTableSchema(), null));
       tableValue
           .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
@@ -481,13 +476,13 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   @Override
-  public DataSetVO updateDataset(DataSetVO dataset) throws EEAException {
+  @Transactional
+  public void updateDataset(DataSetVO dataset) throws EEAException {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     DatasetValue datasetValue = dataSetMapper.classToEntity(dataset);
-    DatasetValue result = datasetRepository.save(datasetValue);
-    return dataSetMapper.entityToClass(result);
+    datasetRepository.save(datasetValue);
   }
 
 

@@ -96,15 +96,16 @@ public interface DatasetService {
    *
    * @param dataset the dataset
    * @return the data set VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
-  DataSetVO updateDataset(DataSetVO dataset) throws EEAException;
+  void updateDataset(DataSetVO dataset) throws EEAException;
 
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
    * @return the data flow id by id
+   * @throws EEAException the EEA exception
    */
   Long getDataFlowIdById(Long datasetId) throws EEAException;
 

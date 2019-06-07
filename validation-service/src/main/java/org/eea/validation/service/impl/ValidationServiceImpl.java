@@ -33,9 +33,6 @@ public class ValidationServiceImpl implements ValidationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceImpl.class);
 
-  @Autowired
-  private KafkaSender kafkaSender;
-
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
@@ -50,6 +47,12 @@ public class ValidationServiceImpl implements ValidationService {
   /** The dataset controller. */
   @Autowired
   private DataSetControllerZuul datasetController;
+
+  /**
+   * The kafka sender.
+   */
+  @Autowired
+  private KafkaSender kafkaSender;
 
   /**
    * Gets the element lenght.
@@ -78,6 +81,11 @@ public class ValidationServiceImpl implements ValidationService {
     return datasetVO;
   }
 
+  /**
+   * Gets the rules.
+   *
+   * @return the rules
+   */
   @Override
   public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
     Iterable<DataFlowRule> preRepositoryDB =
@@ -100,19 +108,37 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
-    // DataSetVO dataset = datasetController.getById(datasetId);
-    // Long dataFlowId = datasetController.getDataFlowIdById(datasetId);
-    // // Read Dataset rules
-    List<DataFlowRule> rules = dataFlowRulesRepository.findAll();
+    DataSetVO dataset = datasetController.getById(datasetId);
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    // Execute rules validation
+    DataSetVO result = runDatasetValidations(dataset, dataflowId);
+    // Save results to the db
+    datasetController.updateDataset(result);
+    // Release notification event
+    releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
+  }
 
-    getDataFlowRule(new DataSetVO(), 1L);
-    // // Execute rules validation
-    // DataSetVO result = runDatasetValidations(dataset, rules);
-    // // Save results to the db
-    // datasetController.updateDataset(result);
-    // // Release notification event
-    // releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
-    // LOG.info("Dataset validated");
+  /**
+   * Run dataset validations.
+   *
+   * @param datasetVO the dataset VO
+   * @param dataflowId the dataflow id
+   * @return the data set VO
+   */
+  private DataSetVO runDatasetValidations(DataSetVO datasetVO, Long dataflowId) {
+    return datasetVO;
+  }
+
+
+  /**
+   * Save rule.
+   *
+   * @param dataFlowRules the data flow rules
+   */
+  @Override
+  public void saveRule(DataFlowRule dataFlowRules) {
+    dataFlowRulesRepository.save(dataFlowRules);
   }
 
   /**
@@ -130,16 +156,5 @@ public class ValidationServiceImpl implements ValidationService {
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
   }
-
-  private DataSetVO runDatasetValidations(DataSetVO datasetVO, List<DataFlowRule> rules) {
-    return datasetVO;
-  }
-
-
-  @Override
-  public void saveRule(DataFlowRule dataFlowRules) {
-    dataFlowRulesRepository.save(dataFlowRules);
-  }
-
 
 }

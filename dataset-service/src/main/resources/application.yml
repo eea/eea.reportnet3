@@ -6,7 +6,8 @@ spring:
   jpa:
     hibernate:
       #use create if you are going to create the schema for the first time
-      ddl-auto: validate
+      ddl-auto: update
+      flushMode: commit
       metabase:
         ddl-auto: update
       show-sql: ${SHOW_SQL:false}
