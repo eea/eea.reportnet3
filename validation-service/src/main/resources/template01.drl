@@ -1,15 +1,16 @@
 template header
 ruleid
+typevalidation
 whencondition
 condition1
 condition2
-typevalidation
+
 
 package src.main.resources
 import org.eea.validation.persistence.rules.model.*;
 import org.eea.interfaces.vo.validation.*;
 import org.eea.interfaces.vo.dataset.*;
-import org.eea.validation.configuration.*;
+import org.eea.validation.util.*;
 
 template "templateValidateRules"
 
@@ -18,7 +19,7 @@ dialect "java"
   when
     dataValidate : @{typevalidation}(@{whencondition});	
   then
-   KieBaseManager.fillValidation(dataValidate, "@{condition1}","@{condition2}","@{ruleid}");
+   ValidationRuleDrools.fillValidation(dataValidate, "@{condition1}","@{condition2}","@{ruleid}");
  
    
 end

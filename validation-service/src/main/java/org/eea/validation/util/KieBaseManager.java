@@ -1,20 +1,12 @@
-package org.eea.validation.configuration;
+package org.eea.validation.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.kie.api.KieBase;
@@ -44,8 +36,6 @@ public class KieBaseManager {
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
-
-    // Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
     Iterable<DataFlowRule> preRepositoryDB =
         dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
@@ -96,63 +86,6 @@ public class KieBaseManager {
     KieBase newBase = kieHelper.build();
     this.kieBase = newBase;
     return this.kieBase;
-  }
-
-  public static void fillValidation(DataSetVO dataSetVO, String message, String typeError,
-      String ruleId) {
-
-    ValidationVO newValidation = new ValidationVO();
-    newValidation.setLevelError(
-        typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
-    newValidation.setMessage(message);
-    newValidation.setTypeEntity(TypeEntityEnum.DATASET);
-    newValidation.setIdRule(ruleId);
-    Date hoy = new Date();
-    newValidation.setValidationDate(hoy.toString());
-    dataSetVO.getValidations().add(newValidation);
-    System.err.println(dataSetVO.getClass());
-  }
-
-  public static void fillValidation(TableVO tableVO, String message, String typeError,
-      String ruleId) {
-    ValidationVO newValidation = new ValidationVO();
-    newValidation.setLevelError(
-        typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
-    newValidation.setMessage(message);
-    newValidation.setTypeEntity(TypeEntityEnum.TABLE);
-    newValidation.setIdRule(ruleId);
-    Date hoy = new Date();
-    newValidation.setValidationDate(hoy.toString());
-    tableVO.getValidations().add(newValidation);
-    System.err.println(tableVO.getClass());
-  }
-
-  public static void fillValidation(FieldVO fieldVO, String message, String typeError,
-      String ruleId) {
-    ValidationVO newValidation = new ValidationVO();
-    newValidation.setLevelError(
-        typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
-    newValidation.setMessage(message);
-    newValidation.setTypeEntity(TypeEntityEnum.FIELD);
-    newValidation.setIdRule(ruleId);
-    Date hoy = new Date();
-    newValidation.setValidationDate(hoy.toString());
-    fieldVO.getValidations().add(newValidation);
-    System.err.println(fieldVO.getClass());
-  }
-
-  public static void fillValidation(RecordVO recordVO, String message, String typeError,
-      String ruleId) {
-    ValidationVO newValidation = new ValidationVO();
-    newValidation.setLevelError(
-        typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
-    newValidation.setMessage(message);
-    newValidation.setTypeEntity(TypeEntityEnum.RECORD);
-    newValidation.setIdRule(ruleId);
-    Date hoy = new Date();
-    newValidation.setValidationDate(hoy.toString());
-    recordVO.getValidations().add(newValidation);
-    System.err.println(recordVO.getClass());
   }
 
 }
