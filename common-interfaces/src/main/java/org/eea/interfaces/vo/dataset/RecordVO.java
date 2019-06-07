@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
@@ -41,7 +42,8 @@ public class RecordVO implements Serializable {
   private Long datasetPartitionId;
 
   /** The validations. */
-  private List<ValidationVO> validations;
+
+  private List<ValidationVO> validations = new ArrayList<ValidationVO>();
 
   /** The sort criteria. */
   private String sortCriteria;

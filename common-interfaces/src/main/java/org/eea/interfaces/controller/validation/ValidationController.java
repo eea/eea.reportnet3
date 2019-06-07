@@ -44,7 +44,7 @@ public interface ValidationController {
   void setNewRules(@RequestParam(required = true) TypeEntityEnum typeEntityEnum,
       @RequestParam(required = true) String ruleName,
       @RequestParam(required = true) String whenCondition,
-      @RequestParam(required = true) String thenCondition);
+      @RequestParam(required = true) List<String> thenCondition);
 
   /**
    * Validate data set data.

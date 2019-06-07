@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -65,9 +66,12 @@ public class ValidationServiceImpl implements ValidationService {
       e.printStackTrace();
       return null;
     }
-    // for (DataFlowRule dataFlowRule2 : dataFlowRule) {
-    // kieSession.insert(dataFlowRule2);
-    // }
+
+    List<TableVO> tableVOList = new ArrayList();
+    TableVO table = new TableVO();
+    tableVOList.add(table);
+    datasetVO.setTableVO(tableVOList);
+    kieSession.insert(datasetVO.getTableVO().get(0));
     kieSession.insert(datasetVO);
     kieSession.fireAllRules();
     kieSession.dispose();

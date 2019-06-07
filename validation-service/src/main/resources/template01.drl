@@ -1,7 +1,8 @@
 template header
 ruleid
 whencondition
-thencondition
+condition1
+condition2
 typevalidation
 
 package src.main.resources
@@ -13,11 +14,13 @@ import org.eea.validation.configuration.*;
 template "templateValidateRules"
 
 rule "@{ruleid}"
+dialect "java"
   when
     dataValidate : @{typevalidation}(@{whencondition});	
   then
-   @{thencondition}
+   KieBaseManager.fillValidation(dataValidate, "@{condition1}","@{condition2}","@{ruleid}");
+ 
    
 end
-
+	
 end template

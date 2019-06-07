@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
@@ -32,7 +33,8 @@ public class FieldVO implements Serializable {
   private String idFieldSchema;
 
   /** The validations. */
-  private List<ValidationVO> validations;
+
+  private List<ValidationVO> validations = new ArrayList<ValidationVO>();
 
   /**
    * Hash code.

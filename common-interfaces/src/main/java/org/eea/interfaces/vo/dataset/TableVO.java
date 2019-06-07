@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -52,7 +53,7 @@ public class TableVO implements Serializable {
   private Long totalRecords;
 
   /** The validations. */
-  private List<ValidationVO> validations;
+  private List<ValidationVO> validations = new ArrayList<ValidationVO>();
 
   /**
    * Hash code.
