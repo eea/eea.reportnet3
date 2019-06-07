@@ -103,7 +103,6 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param dataset the dataset
    *
-   * @return the data set VO
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
