@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -16,6 +17,7 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -78,6 +80,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DataSetTablesMapper dataSetTablesMapper;
+
+  /** The table value mapper. */
+  @Autowired
+  TableValueMapper tableValueMapper;
 
   /**
    * The record mapper.
@@ -457,7 +463,15 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
   @Override
+  @Transactional
   public DataSetVO getById(Long datasetId) throws EEAException {
 
     final DatasetValue datasetValue = new DatasetValue();
@@ -470,12 +484,29 @@ public class DatasetServiceImpl implements DatasetService {
       tableValue
           .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
-
     return dataSetMapper.entityToClass(datasetValue);
+    // return multiThreadMapper(datasetValue);
   }
 
 
+  private DataSetVO multiThreadMapper(DatasetValue datasetValue) {
+    DataSetVO dataSetVO =
+        new DataSetVO(datasetValue.getId(), datasetValue.getIdDatasetSchema(), new ArrayList<>());
+    dataSetVO.setTableVO((datasetValue.getTableValues().parallelStream()
+        .map(tableValue -> tableValueMapper.entityToClass(tableValue))
+        .collect(Collectors.toList())));
+    return dataSetVO;
+  }
+
+
+  /**
+   * Update dataset.
+   *
+   * @param dataset the dataset
+   * @throws EEAException the EEA exception
+   */
   @Override
+  @Transactional
   public void updateDataset(DataSetVO dataset) throws EEAException {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -485,6 +516,13 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public Long getDataFlowIdById(Long datasetId) throws EEAException {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
