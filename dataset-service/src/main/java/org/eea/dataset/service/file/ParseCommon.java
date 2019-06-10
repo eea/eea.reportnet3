@@ -31,34 +31,11 @@ public class ParseCommon {
 
 
   /**
-   * Find id table.
-   *
-   * @param tableName the table name
-   * @param dataSetSchema the data set schema
-   * @return the string
-   */
-  public String findTableName(String idTableSchema, DataSetSchemaVO dataSetSchema) {
-    // Find the Id of tableSchema in MongoDB
-    String tableName = null;
-    List<TableSchemaVO> tablesSchema = null;
-    if (null != dataSetSchema) {
-      tablesSchema = dataSetSchema.getTableSchemas();
-    }
-    if (null != tablesSchema) {
-      for (TableSchemaVO tableSchema : tablesSchema) {
-        if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableSchema)) {
-          tableName = tableSchema.getNameTableSchema();
-        }
-      }
-    }
-    return tableName;
-  }
-
-  /**
    * Find id record.
    *
    * @param idTableMongo the id table mongo
    * @param dataSetSchema the data set schema
+   *
    * @return the string
    */
   public String findIdRecord(String idTableMongo, DataSetSchemaVO dataSetSchema) {
@@ -77,6 +54,7 @@ public class ParseCommon {
    *
    * @param idTableSchema the id table mongo
    * @param dataSetSchema the data set schema
+   *
    * @return the table schema
    */
   private TableSchemaVO findTableSchema(String idTableSchema, DataSetSchemaVO dataSetSchema) {
@@ -102,6 +80,7 @@ public class ParseCommon {
    * @param nameSchema the name schema
    * @param idTablaSchema the id tabla schema
    * @param dataSetSchema the data set schema
+   *
    * @return the field schema
    */
   public FieldSchemaVO findIdFieldSchema(String nameSchema, String idTablaSchema,
@@ -123,6 +102,7 @@ public class ParseCommon {
    * Gets the data set schema.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the data set schema
    */
   public DataSetSchemaVO getDataSetSchema(Long dataflowId) {
@@ -134,7 +114,6 @@ public class ParseCommon {
     }
     return dataSetSchema;
   }
-
 
 
 }

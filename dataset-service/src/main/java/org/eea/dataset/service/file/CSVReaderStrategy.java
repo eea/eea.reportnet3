@@ -1,5 +1,9 @@
 package org.eea.dataset.service.file;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +13,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import lombok.NoArgsConstructor;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -19,11 +24,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import lombok.NoArgsConstructor;
 
 
 /**
@@ -37,10 +37,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
-  /** The delimiter. */
+  /**
+   * The delimiter.
+   */
   private char delimiter;
 
   /**
@@ -84,7 +88,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
+   *
    * @return the data set VO
+   *
    * @throws InvalidFileException the invalid file exception
    */
   private DataSetVO readLines(final InputStream inputStream, final Long dataflowId,
@@ -151,7 +157,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param values the values
    * @param dataSetSchema the data set schema
    * @param headers the headers
+   *
    * @return the table VO
+   *
    * @throws InvalidFileException the invalid file exception
    */
   private TableVO sanitizeAndCreateDataSet(final Long partitionId, final String[] line,
@@ -209,19 +217,19 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param dataSetSchema the data set schema
    * @param headers the headers
+   *
    * @return the table VO
+   *
    * @throws InvalidFileException the invalid file exception
    */
   private TableVO createTableVO(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema) {
     // Create object Table and set the attributes
-    if (null == tableVO.getHeaders() && null == tableVO.getName()) {
+    if (null == tableVO.getHeaders()) {
       tableVO.setHeaders(headers);
       tableVO.setIdTableSchema(idTableSchema);
-      if (null != dataSetSchema) {
-        tableVO.setName(parseCommon.findTableName(idTableSchema, dataSetSchema));
-      }
+
       tableVO.setRecords(
           createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
       tables.add(tableVO);
@@ -241,6 +249,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTablaSchema the id tabla schema
    * @param dataSetSchema the data set schema
    * @param headers the headers
+   *
    * @return the list
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
@@ -263,6 +272,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTablaSchema the id tabla schema
    * @param dataSetSchema the data set schema
    * @param headers the headers
+   *
    * @return the list
    */
   private List<FieldVO> createFieldsVO(final List<String> values, final String idTablaSchema,

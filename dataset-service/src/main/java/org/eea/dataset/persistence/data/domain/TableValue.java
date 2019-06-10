@@ -35,12 +35,6 @@ public class TableValue {
   private Long id;
 
   /**
-   * The name.
-   */
-  @Column(name = "NAME")
-  private String name;
-
-  /**
    * The id mongo.
    */
   @Column(name = "ID_TABLE_SCHEMA")
@@ -66,13 +60,13 @@ public class TableValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records, idTableSchema, datasetId);
+    return Objects.hash(id, records, idTableSchema, datasetId);
   }
 
   /**
    * Equals.
    *
-   * @param o the o
+   * @param obj the o
    *
    * @return true, if successful
    */
@@ -85,7 +79,7 @@ public class TableValue {
       return false;
     }
     final TableValue table = (TableValue) obj;
-    return id.equals(table.id) && name.equals(table.name);
+    return id.equals(table.id);
   }
 
 }

@@ -3,6 +3,7 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,21 +26,31 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ParseCommonTest {
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   @InjectMocks
   private ParseCommon parseCommon;
 
-  /** The data set schema service. */
+  /**
+   * The data set schema service.
+   */
   @Mock
   private DatasetSchemaService dataSetSchemaService;
 
-  /** The Constant ID. */
+  /**
+   * The Constant ID.
+   */
   private static final String ID = "1";
 
-  /** The field schema. */
+  /**
+   * The field schema.
+   */
   private static FieldSchemaVO fieldSchema;
 
-  /** The dataset. */
+  /**
+   * The dataset.
+   */
   private static DataSetSchemaVO dataset;
 
   /**
@@ -67,12 +78,6 @@ public class ParseCommonTest {
     dataset.setTableSchemas(tableSchemas);
     MockitoAnnotations.initMocks(this);
   }
-
-  @Test
-  public void findTableName() {
-    assertEquals("fail", ID, parseCommon.findTableName(ID, dataset));
-  }
-
 
 
   /**
