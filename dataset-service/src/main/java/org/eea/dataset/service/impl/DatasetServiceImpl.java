@@ -163,7 +163,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is) throws EEAException, IOException {
+      final InputStream is, final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -179,7 +179,7 @@ public class DatasetServiceImpl implements DatasetService {
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
-          context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
+          context.parse(is, datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -358,9 +358,10 @@ public class DatasetServiceImpl implements DatasetService {
         recordVOs.sort((RecordVO v1, RecordVO v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
           String sortCriteria2 = v2.getSortCriteria();
-          //process the sort criteria
-          //it could happen that some values has no sortCriteria due to a matching error
-          //during the load process. If this is the case we need to ensure that sort logic does not fail
+          // process the sort criteria
+          // it could happen that some values has no sortCriteria due to a matching error
+          // during the load process. If this is the case we need to ensure that sort logic does not
+          // fail
           int sort = 0;
           if (null == sortCriteria1) {
             if (null != sortCriteria2) {
@@ -378,9 +379,9 @@ public class DatasetServiceImpl implements DatasetService {
         });
       });
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex =
-          (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size() ? recordVOs
-              .size() : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size()
+          ? recordVOs.size()
+          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
       result.setRecords(recordVOs.subList(initIndex, endIndex));
       result.setTotalRecords(Long.valueOf(recordVOs.size()));
       LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",

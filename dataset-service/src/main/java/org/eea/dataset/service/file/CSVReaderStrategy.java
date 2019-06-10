@@ -73,9 +73,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   @Override
   public DataSetVO parseFile(final InputStream inputStream, final Long dataflowId,
-      final Long partitionId) throws InvalidFileException {
+      final Long partitionId, final String idTableSchema) throws InvalidFileException {
     LOG.info("starting csv file reading");
-    return readLines(inputStream, dataflowId, partitionId);
+    return readLines(inputStream, dataflowId, partitionId, idTableSchema);
   }
 
   /**
@@ -88,7 +88,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @throws InvalidFileException the invalid file exception
    */
   private DataSetVO readLines(final InputStream inputStream, final Long dataflowId,
-      final Long partitionId) throws InvalidFileException {
+      final Long partitionId, final String idTableSchema) throws InvalidFileException {
     LOG.info("Processing entries at method readLines");
     // Init variables
     String[] line;
@@ -106,11 +106,24 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // Init de library of reader file
       final CSVReader reader = initReader(buf);
 
+      // Get the first Line
+      List<String> firstLine = Arrays.asList(reader.readNext());
+
+      // if first line is empty throw an error
+      if (null != firstLine && !firstLine.isEmpty() && firstLine.size() == 1
+          && firstLine.get(0).isEmpty()) {
+        // if the line is white then skip it
+        throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
+      }
+
+      // Get de headers
+      headers = setHeaders(firstLine);
+
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         tableVO = sanitizeAndCreateDataSet(partitionId, line, tableVO, tables, values,
-            dataSetSchema, headers);
+            dataSetSchema, headers, idTableSchema);
         headers = tableVO.getHeaders();
       }
       dataset.setTableVO(tables);
@@ -143,22 +156,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private TableVO sanitizeAndCreateDataSet(final Long partitionId, final String[] line,
       TableVO tableVO, final List<TableVO> tables, final List<String> values,
-      DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers) throws InvalidFileException {
+      DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers, final String idTableSchema) {
     if (null != values && !values.isEmpty()) {
       // if the line is white then skip it
       if (line.length == 1 && line[0].isEmpty()) {
         return tableVO;
-      } else if (line.length == 1) {
-        // File format is invalid
-        throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
       }
-      // determine whether the row is a header
-      if (parseCommon.isHeader(values.get(0))) {
-        headers = setHeaders(values);
-        tableVO.setHeaders(headers);
-      } else {
-        tableVO = createTableVO(tableVO, tables, values, partitionId, dataSetSchema, headers);
-      }
+      tableVO = createTableVO(tableVO, tables, values, partitionId, dataSetSchema, headers,
+          idTableSchema);
     }
     return tableVO;
   }
@@ -188,11 +193,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
     List<FieldSchemaVO> headers = new ArrayList<>();
 
     for (final String value : values) {
-      if (!parseCommon.isHeader(value)) {
-        final FieldSchemaVO header = new FieldSchemaVO();
-        header.setName(value);
-        headers.add(header);
-      }
+      final FieldSchemaVO header = new FieldSchemaVO();
+      header.setName(value);
+      headers.add(header);
     }
     return headers;
   }
@@ -211,17 +214,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private TableVO createTableVO(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
-      List<FieldSchemaVO> headers) throws InvalidFileException {
-    // Create object Table and set he attributes
-    if (headers.isEmpty()) {
-      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-    }
-    if (!values.get(0).equals(tableVO.getName())) {
-      tableVO = new TableVO();
+      List<FieldSchemaVO> headers, final String idTableSchema) {
+    // Create object Table and set the attributes
+    if (null == tableVO.getHeaders() && null == tableVO.getName()) {
       tableVO.setHeaders(headers);
-      tableVO.setName(values.get(0));
+      tableVO.setIdTableSchema(idTableSchema);
       if (null != dataSetSchema) {
-        tableVO.setIdTableSchema(parseCommon.findIdTable(tableVO.getName(), dataSetSchema));
+        tableVO.setName(parseCommon.findTableName(idTableSchema, dataSetSchema));
       }
       tableVO.setRecords(
           createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
@@ -271,7 +270,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     final List<FieldVO> fields = new ArrayList<>();
     values.size();
     int contAux = 0;
-    for (final String value : values.subList(1, values.size())) {
+    for (final String value : values) {
       final FieldVO field = new FieldVO();
       if (idTablaSchema != null) {
         final FieldSchemaVO fieldSchema = parseCommon
@@ -289,7 +288,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
     return fields;
   }
-
 
 
 }
