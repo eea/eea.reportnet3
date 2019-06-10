@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
@@ -16,23 +17,36 @@ import lombok.ToString;
 @ToString
 public class FieldVO implements Serializable {
 
-  /** The Constant serialVersionUID. */
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = -5257537261370694057L;
 
-  /** The type. */
+  /**
+   * The type.
+   */
   private String type;
 
-  /** The value. */
+  /**
+   * The value.
+   */
   private String value;
 
-  /** The id. */
+  /**
+   * The id.
+   */
   private Long id;
 
-  /** The id header. */
+  /**
+   * The id header.
+   */
   private String idFieldSchema;
 
-  /** The validations. */
-  private List<ValidationVO> validations;
+  /**
+   * The validations.
+   */
+
+  private List<FieldValidationVO> fieldValidations = new ArrayList<FieldValidationVO>();
 
   /**
    * Hash code.
@@ -48,6 +62,7 @@ public class FieldVO implements Serializable {
    * Equals.
    *
    * @param obj the obj
+   *
    * @return true, if successful
    */
   @Override

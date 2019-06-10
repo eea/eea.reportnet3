@@ -9,10 +9,10 @@ import java.util.Map;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.validation.configuration.KieBaseManager;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.KieBaseManager;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,18 +53,27 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId) {
     KieSession kieSession;
+    System.err.println(System.currentTimeMillis());
     try {
       kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return null;
     }
-    // for (DataFlowRule dataFlowRule2 : dataFlowRule) {
-    // kieSession.insert(dataFlowRule2);
-    // }
+    System.err.println(System.currentTimeMillis());
     kieSession.insert(datasetVO);
+    // for (TableVO tableData : datasetVO.getTableVO()) {
+    // kieSession.insert(tableData);
+    // for (RecordVO recordData : tableData.getRecords()) {
+    // kieSession.insert(recordData);
+    // for (FieldVO FieldData : recordData.getFields()) {
+    // kieSession.insert(FieldData);
+    // }
+    // }
+    // }
     kieSession.fireAllRules();
     kieSession.dispose();
+    System.err.println(System.currentTimeMillis());
     return datasetVO;
   }
 
@@ -95,11 +104,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
-    DataSetVO dataset = datasetController.getById(datasetId);
-    // Get Dataflow id
-    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    // DataSetVO dataset = datasetController.getById(datasetId);
+    // // Get Dataflow id
+    // Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     // Execute rules validation
-    DataSetVO result = runDatasetValidations(dataset, dataflowId);
+    DataSetVO result = getDataFlowRule(new DataSetVO(), 1L);
     // Save results to the db
     datasetController.saveValidations(result);
 

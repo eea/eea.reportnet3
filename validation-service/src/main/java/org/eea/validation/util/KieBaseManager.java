@@ -1,4 +1,4 @@
-package org.eea.validation.configuration;
+package org.eea.validation.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.validation.persistence.rules.model.ConditionsDrools;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
+import org.eea.validation.persistence.rules.model.TypeValidation;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -18,26 +20,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
+/**
+ * The Class KieBaseManager.
+ */
 @Component
 public class KieBaseManager {
 
+  /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE = "src/main/resources/template01.drl";
 
+  /** The kie base. */
   private KieBase kieBase;
 
+  /** The data flow rules repository. */
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
   /**
    * Reload rules.
    *
-   * @param dataflowId idDataflow to know the rules associates to the dataflow
+   * @param dataFlowId the data flow id
    * @return Kiebase session object
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
-
-    // Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
     Iterable<DataFlowRule> preRepositoryDB =
         dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
@@ -46,27 +52,31 @@ public class KieBaseManager {
     String LVTypeValidation = null;
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getRuleId().toString());
+      rule1.put(ConditionsDrools.RULE_ID.getValue(), preRepository.get(i).getRuleId().toString());
       switch (preRepository.get(i).getRuleScope()) {
         case DATASET:
-          LVTypeValidation = "DataSetVO";
+          LVTypeValidation = TypeValidation.DATASETVO.getValue();
           break;
         case FIELD:
-          LVTypeValidation = "FieldVO";
+          LVTypeValidation = TypeValidation.FIELDVO.getValue();
           break;
         case RECORD:
-          LVTypeValidation = "RecordVO";
+          LVTypeValidation = TypeValidation.RECORDVO.getValue();
           break;
         case TABLE:
-          LVTypeValidation = "TableVO";
+          LVTypeValidation = TypeValidation.TABLEVO.getValue();
           break;
         default:
-          LVTypeValidation = "DataFlowRule";
+          LVTypeValidation = TypeValidation.DATAFLOWRULE.getValue();
           break;
       }
-      rule1.put("typevalidation", LVTypeValidation);
-      rule1.put("whencondition", preRepository.get(i).getWhenCondition().trim());
-      rule1.put("thencondition", preRepository.get(i).getThenCondition().trim());
+      rule1.put(ConditionsDrools.TYPE_VALIDATION.getValue(), LVTypeValidation);
+      rule1.put(ConditionsDrools.WHEN_CONDITION.getValue(),
+          preRepository.get(i).getWhenCondition().trim());
+      rule1.put(ConditionsDrools.MESSAGE_FAIL_VALIDATION.getValue(),
+          preRepository.get(i).getThenCondition().get(0));
+      rule1.put(ConditionsDrools.TYPE_FAIL_VALIDATION.getValue(),
+          preRepository.get(i).getThenCondition().get(1));
       ruleAttributes.add(rule1);
     }
 
@@ -87,10 +97,6 @@ public class KieBaseManager {
     KieBase newBase = kieHelper.build();
     this.kieBase = newBase;
     return this.kieBase;
-  }
-
-  public static void testeoArchivo() {
-    System.err.println("HA ENTRADO AQUI DENTRO");
   }
 
 }

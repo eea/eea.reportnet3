@@ -35,7 +35,7 @@ public class DatasetValidation {
   /** The id field. */
   @ManyToOne
   @JoinColumn(name = "ID_DATASET")
-  private DatasetValue idDataset;
+  private DatasetValue datasetValue;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
   @JoinColumn(name = "ID_VALIDATION", referencedColumnName = "id")

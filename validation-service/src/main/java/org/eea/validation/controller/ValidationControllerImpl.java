@@ -57,7 +57,7 @@ public class ValidationControllerImpl implements ValidationController {
   public void setNewRules(@RequestParam(required = true) TypeEntityEnum typeEntityEnum,
       @RequestParam(required = true) String ruleName,
       @RequestParam(required = true) String whenCondition,
-      @RequestParam(required = true) String thenCondition) {
+      @RequestParam(required = true) List<String> thenCondition) {
 
     DataFlowRule dataFlowRule = new DataFlowRule(new ObjectId(), 1L, typeEntityEnum, ruleName,
         whenCondition, thenCondition);

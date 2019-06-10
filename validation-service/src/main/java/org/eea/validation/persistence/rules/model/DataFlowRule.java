@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.rules.model;
 
+import java.util.List;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -45,6 +46,6 @@ public class DataFlowRule {
 
   /** The then condition. */
   @Field(value = "thenCondition")
-  private String thenCondition;
+  private List<String> thenCondition;
 
 }
