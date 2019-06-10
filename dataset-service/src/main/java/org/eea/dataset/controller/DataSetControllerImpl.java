@@ -7,12 +7,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
+import org.eea.dataset.service.callable.SaveValidationsCallable;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  /** The kafka sender. */
+  @Autowired
+  KafkaSender kafkaSender;
 
   /**
    * Gets the data tables values.
@@ -102,6 +108,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Update dataset.
    *
    * @param dataset the dataset
+   * @return
    *
    */
   @Override
@@ -111,9 +118,10 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
     }
     try {
-      datasetService.updateDataset(dataset);
+      datasetService.updateDataset(dataset.getId(), dataset);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+
     }
   }
 
@@ -157,7 +165,8 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
+      callable =
+          new LoadDataCallable(this.kafkaSender, this.datasetService, datasetId, fileName, is);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {
@@ -248,6 +257,23 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
     }
     return result;
+  }
+
+  /**
+   * Save validations.
+   *
+   * @param dataset the dataset
+   */
+  @Override
+  public void saveValidations(DataSetVO dataset) {
+    if (dataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    SaveValidationsCallable callable = null;
+    callable = new SaveValidationsCallable(this.datasetService, dataset, kafkaSender);
+    executor.submit(callable);
+
   }
 
 }

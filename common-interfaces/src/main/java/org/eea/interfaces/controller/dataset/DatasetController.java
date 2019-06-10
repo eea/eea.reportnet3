@@ -60,6 +60,16 @@ public interface DatasetController {
   void updateDataset(@RequestBody DataSetVO dataset);
 
   /**
+   * Save validations.
+   *
+   * @param dataset the dataset
+   * @return the boolean
+   */
+  @RequestMapping(value = "/saveValidations", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void saveValidations(@RequestBody DataSetVO dataset);
+
+  /**
    * Creates the empty data set.
    *
    * @param datasetName the dataset name

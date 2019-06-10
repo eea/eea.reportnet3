@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
@@ -60,6 +61,9 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetMapper dataSetMapper;
+
+  @Mock
+  private TableValueMapper tableValueMapper;
 
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
@@ -123,6 +127,7 @@ public class DatasetServiceTest {
     tableVOs.add(tableVO);
     dataSetVO = new DataSetVO();
     dataSetVO.setTableVO(tableVOs);
+    dataSetVO.setId(1L);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -249,9 +254,8 @@ public class DatasetServiceTest {
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
-    doNothing().when(kafkaSender).sendMessage(Mockito.any());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
-    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+    Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
   }
 
 
@@ -310,21 +314,21 @@ public class DatasetServiceTest {
   }
 
   @Test
-  public void testGetByIdException() throws Exception {
+  public void testGetById() throws Exception {
     DataSetVO datasetVOtemp = new DataSetVO();
     datasetVOtemp.setId(1L);
+    datasetVOtemp.setTableVO(new ArrayList<TableVO>());
     when(tableRepository.findAllTables()).thenReturn(new ArrayList<>());
-    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(datasetVOtemp);
     assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
   }
 
   @Test
   public void testGetByIdSuccess() throws Exception {
     when(tableRepository.findAllTables()).thenReturn(tableValues);
-    when(dataSetMapper.entityToClass(Mockito.any(DatasetValue.class))).thenReturn(new DataSetVO());
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
+    when(tableValueMapper.entityToClass(tableValue)).thenReturn(tableVO);
     DataSetVO result = datasetService.getById(1L);
-    assertEquals("not equals", new DataSetVO(), result);
+    assertEquals("not equals", dataSetVO, result);
   }
 
   @Test
@@ -336,16 +340,16 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testUpdateNullException() throws Exception {
-    datasetService.updateDataset(null);
+    datasetService.updateDataset(1L, null);
   }
 
   @Test
   public void testUpdateSuccess() throws Exception {
     when(dataSetMapper.classToEntity((Mockito.any(DataSetVO.class))))
         .thenReturn(new DatasetValue());
-    when(datasetRepository.save(Mockito.any())).thenReturn(new DatasetValue());
-    datasetService.updateDataset(new DataSetVO());
-    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+    when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
+    datasetService.updateDataset(1L, new DataSetVO());
+    Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
 
   }
 

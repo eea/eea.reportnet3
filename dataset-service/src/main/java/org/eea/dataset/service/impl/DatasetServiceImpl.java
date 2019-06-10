@@ -3,10 +3,8 @@ package org.eea.dataset.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,9 +41,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
-import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,13 +139,6 @@ public class DatasetServiceImpl implements DatasetService {
   private IFileParserFactory fileParserFactory;
 
   /**
-   * The kafka sender.
-   */
-  @Autowired
-  private KafkaSender kafkaSender;
-
-
-  /**
    * Creates the empty dataset.
    *
    * @param datasetName the dataset name
@@ -206,10 +194,6 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
-      Thread.sleep(2000);
-      // after the dataset has been saved, an event is sent to notify it
-      releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
-
     }
   }
 
@@ -319,21 +303,6 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 
-  /**
-   * send message encapsulates the logic to send an event message to kafka.
-   *
-   * @param eventType the event type
-   * @param datasetId the dataset id
-   */
-  private void releaseKafkaEvent(final EventType eventType, final Long datasetId) {
-
-    final EEAEventVO event = new EEAEventVO();
-    event.setEventType(eventType);
-    final Map<String, Object> dataOutput = new HashMap<>();
-    dataOutput.put("dataset_id", datasetId);
-    event.setData(dataOutput);
-    kafkaSender.sendMessage(event);
-  }
 
   /**
    * Gets the table values by id. It additionally can page the results and sort them
@@ -484,11 +453,17 @@ public class DatasetServiceImpl implements DatasetService {
       tableValue
           .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
-    return dataSetMapper.entityToClass(datasetValue);
-    // return multiThreadMapper(datasetValue);
+
+    return multiThreadMapper(datasetValue);
   }
 
 
+  /**
+   * Multi thread mapper.
+   *
+   * @param datasetValue the dataset value
+   * @return the data set VO
+   */
   private DataSetVO multiThreadMapper(DatasetValue datasetValue) {
     DataSetVO dataSetVO =
         new DataSetVO(datasetValue.getId(), datasetValue.getIdDatasetSchema(), new ArrayList<>());
@@ -507,12 +482,12 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void updateDataset(DataSetVO dataset) throws EEAException {
+  public void updateDataset(Long datasetId, DataSetVO dataset) throws EEAException {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     DatasetValue datasetValue = dataSetMapper.classToEntity(dataset);
-    datasetRepository.save(datasetValue);
+    datasetRepository.saveAndFlush(datasetValue);
   }
 
 
