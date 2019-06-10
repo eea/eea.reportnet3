@@ -8,9 +8,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ValidationRuleDrools {
 
   public static void fillValidation(DataSetVO dataSetVO, String message, String typeError,

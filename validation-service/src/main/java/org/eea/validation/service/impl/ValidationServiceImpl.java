@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
+import io.micrometer.core.annotation.Timed;
 
 /**
  * The Class ValidationService.
@@ -60,6 +61,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
+  @Timed(value = "METRICAS DE TIEMPO DE REGLA")
   public DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId) {
     KieSession kieSession;
     try {
