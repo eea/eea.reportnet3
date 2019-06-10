@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
 
@@ -94,6 +95,6 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
-      Integer type) throws EEAException;
+      TypeEntityEnum type) throws EEAException;
 
 }

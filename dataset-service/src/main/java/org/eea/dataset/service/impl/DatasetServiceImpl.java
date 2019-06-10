@@ -43,6 +43,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -487,7 +488,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
-      Integer type) throws EEAException{
+      TypeEntityEnum type) throws EEAException{
     
     TableVO tableVO = new TableVO();
     Map<String,TableVO> mapa;
@@ -496,7 +497,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> records = new ArrayList<>();
 
     //TABLE
-    if(type!=null && 1==type && id!=null) {
+    if(type!=null && TypeEntityEnum.TABLE == type && id!=null) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(table);
       records = table.getRecords();
@@ -506,14 +507,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
     
     //RECORD
-    if(type!=null && 2==type && id!=null) {
+    if(type!=null && TypeEntityEnum.RECORD == type && id!=null) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(record.getTableValue());
       records = record.getTableValue().getRecords();
     }
    
     //FIELD
-    if(type!=null && 3==type && id!=null) {
+    if(type!=null && TypeEntityEnum.FIELD == type && id!=null) {
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if(field !=null && field.getRecord()!=null && field.getRecord().getTableValue()!=null) {
         tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());

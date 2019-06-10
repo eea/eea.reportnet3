@@ -9,6 +9,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -301,7 +302,7 @@ public class DataSetControllerImplTest {
     
     when(datasetService.getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(new HashMap<String,TableVO>());
-    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, 1);
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
     Mockito.verify(datasetService, times(1)).getTableFromAnyObjectId(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
    
@@ -329,7 +330,7 @@ public class DataSetControllerImplTest {
 
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableFromAnyObjectId(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, 1);
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
 
   }
 }

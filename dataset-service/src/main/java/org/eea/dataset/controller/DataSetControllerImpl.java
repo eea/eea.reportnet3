@@ -13,6 +13,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,7 +216,7 @@ public class DataSetControllerImpl implements DatasetController {
   public Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id, 
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "type", required = true) Integer type) {
+      @RequestParam(value = "type", required = true) TypeEntityEnum type) {
     
     
     Map<String,TableVO> mapPageTable = null;

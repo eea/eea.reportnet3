@@ -33,6 +33,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Assert;
@@ -327,7 +328,7 @@ public class DatasetServiceTest {
     .thenReturn(recordValue);
 
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, 2);
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.RECORD);
     Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
     
   }
@@ -339,7 +340,7 @@ public class DatasetServiceTest {
     .thenReturn(tableValue);
 
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, 1);
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.TABLE);
     Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
     
   }
@@ -351,7 +352,7 @@ public class DatasetServiceTest {
     .thenReturn(fieldValue);
 
     when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, 3);
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.FIELD);
     Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
     
   }

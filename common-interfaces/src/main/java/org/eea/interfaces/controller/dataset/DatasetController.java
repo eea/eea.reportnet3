@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataset;
 import java.util.Map;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -115,6 +116,6 @@ public interface DatasetController {
   Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "type", required = true) Integer type);
+      @RequestParam(value = "type", required = true) TypeEntityEnum type);
 
 }
