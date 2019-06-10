@@ -20,20 +20,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
+/**
+ * The Class KieBaseManager.
+ */
 @Component
 public class KieBaseManager {
 
+  /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE = "src/main/resources/template01.drl";
 
+  /** The kie base. */
   private KieBase kieBase;
 
+  /** The data flow rules repository. */
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
   /**
    * Reload rules.
    *
-   * @param dataflowId idDataflow to know the rules associates to the dataflow
+   * @param dataFlowId the data flow id
    * @return Kiebase session object
    * @throws FileNotFoundException the file not found exception
    */
