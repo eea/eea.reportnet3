@@ -1,19 +1,14 @@
 package org.eea.dataset.service.file;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import lombok.NoArgsConstructor;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -24,6 +19,11 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import lombok.NoArgsConstructor;
 
 
 /**
@@ -107,7 +107,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
 
     try (Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, Charset.forName("ISO-8859-15")))) {
+        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
       // Init de library of reader file
       final CSVReader reader = initReader(buf);
