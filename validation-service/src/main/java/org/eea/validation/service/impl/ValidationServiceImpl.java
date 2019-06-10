@@ -9,9 +9,6 @@ import java.util.Map;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.configuration.KieBaseManager;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
@@ -46,12 +43,6 @@ public class ValidationServiceImpl implements ValidationService {
   /** The dataset controller. */
   @Autowired
   private DataSetControllerZuul datasetController;
-
-  /**
-   * The kafka sender.
-   */
-  @Autowired
-  private KafkaSender kafkaSender;
 
   /**
    * Gets the element lenght.
@@ -110,9 +101,8 @@ public class ValidationServiceImpl implements ValidationService {
     // Execute rules validation
     DataSetVO result = runDatasetValidations(dataset, dataflowId);
     // Save results to the db
-    datasetController.updateDataset(result);
-    // Release notification event
-    releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
+    datasetController.saveValidations(result);
+
   }
 
   /**
@@ -123,6 +113,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the data set VO
    */
   private DataSetVO runDatasetValidations(DataSetVO datasetVO, Long dataflowId) {
+    datasetVO.setIdDatasetSchema("tralara");
     return datasetVO;
   }
 
@@ -135,22 +126,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void saveRule(DataFlowRule dataFlowRules) {
     dataFlowRulesRepository.save(dataFlowRules);
-  }
-
-  /**
-   * Release kafka event.
-   *
-   * @param eventType the event type
-   * @param datasetId the dataset id
-   */
-  private void releaseKafkaEvent(final EventType eventType, final Long datasetId) {
-
-    final EEAEventVO event = new EEAEventVO();
-    event.setEventType(eventType);
-    final Map<String, Object> dataOutput = new HashMap<>();
-    dataOutput.put("dataset_id", datasetId);
-    event.setData(dataOutput);
-    kafkaSender.sendMessage(event);
   }
 
 }
