@@ -41,11 +41,14 @@ public class RecordVO implements Serializable {
    */
   private Long datasetPartitionId;
 
-  /** The validations. */
+  /**
+   * The validations.
+   */
+  private List<RecordValidationVO> recordValidations;
 
-  private List<ValidationVO> validations = new ArrayList<ValidationVO>();
-
-  /** The sort criteria. */
+  /**
+   * The sort criteria.
+   */
   private String sortCriteria;
 
   /**

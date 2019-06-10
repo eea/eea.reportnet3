@@ -38,9 +38,10 @@ public class DataSetVO implements Serializable {
   private List<TableVO> tableVO;
 
 
-  /** The validations. */
-
-  private List<ValidationVO> validations = new ArrayList<ValidationVO>();
+  /**
+   * The validations.
+   */
+  private List<DatasetValidationVO> datasetValidations;
 
   /**
    * Hash code.
