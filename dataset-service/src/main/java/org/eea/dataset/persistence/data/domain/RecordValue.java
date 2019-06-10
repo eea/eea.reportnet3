@@ -86,7 +86,7 @@ public class RecordValue {
   private List<FieldValue> fields;
 
   /** The record validations. */
-  @OneToMany(mappedBy = "idRecord", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "recordValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
   /** The sort criteria. */
