@@ -2,8 +2,8 @@ template header
 ruleid
 typevalidation
 whencondition
-condition1
-condition2
+messageFailValidation
+typeFailValidation
 
 
 package src.main.resources
@@ -19,7 +19,7 @@ dialect "java"
   when
     dataValidate : @{typevalidation}(@{whencondition});	
   then
-   ValidationRuleDrools.fillValidation(dataValidate, "@{condition1}","@{condition2}","@{ruleid}");
+   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}");
  
    
 end

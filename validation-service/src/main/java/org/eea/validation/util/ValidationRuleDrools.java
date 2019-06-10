@@ -11,6 +11,8 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 
 public class ValidationRuleDrools {
 
+  private static final String Boolean = null;
+
   public static void fillValidation(DataSetVO dataSetVO, String message, String typeError,
       String ruleId) {
     ValidationVO newValidation =
@@ -49,5 +51,9 @@ public class ValidationRuleDrools {
     newValidation.setValidationDate(new Date().toString());
     newValidation.setTypeEntity(typeEntityEnum);
     return newValidation;
+  }
+
+  public Boolean devolucionTesteo(Boolean testeo) {
+    return testeo;
   }
 }

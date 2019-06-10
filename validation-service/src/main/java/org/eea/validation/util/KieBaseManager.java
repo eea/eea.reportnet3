@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.validation.persistence.rules.model.ConditionsDrools;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
+import org.eea.validation.persistence.rules.model.TypeValidation;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -44,28 +46,31 @@ public class KieBaseManager {
     String LVTypeValidation = null;
     for (int i = 0; i < preRepository.size(); i++) {
       Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getRuleId().toString());
+      rule1.put(ConditionsDrools.RULE_ID.getValue(), preRepository.get(i).getRuleId().toString());
       switch (preRepository.get(i).getRuleScope()) {
         case DATASET:
-          LVTypeValidation = "DataSetVO";
+          LVTypeValidation = TypeValidation.DATASETVO.getValue();
           break;
         case FIELD:
-          LVTypeValidation = "FieldVO";
+          LVTypeValidation = TypeValidation.FIELDVO.getValue();
           break;
         case RECORD:
-          LVTypeValidation = "RecordVO";
+          LVTypeValidation = TypeValidation.RECORDVO.getValue();
           break;
         case TABLE:
-          LVTypeValidation = "TableVO";
+          LVTypeValidation = TypeValidation.TABLEVO.getValue();
           break;
         default:
-          LVTypeValidation = "DataFlowRule";
+          LVTypeValidation = TypeValidation.DATAFLOWRULE.getValue();
           break;
       }
-      rule1.put("typevalidation", LVTypeValidation);
-      rule1.put("whencondition", preRepository.get(i).getWhenCondition().trim());
-      rule1.put("condition1", preRepository.get(i).getThenCondition().get(0));
-      rule1.put("condition2", preRepository.get(i).getThenCondition().get(1));
+      rule1.put(ConditionsDrools.TYPE_VALIDATION.getValue(), LVTypeValidation);
+      rule1.put(ConditionsDrools.WHEN_CONDITION.getValue(),
+          preRepository.get(i).getWhenCondition().trim());
+      rule1.put(ConditionsDrools.MESSAGE_FAIL_VALIDATION.getValue(),
+          preRepository.get(i).getThenCondition().get(0));
+      rule1.put(ConditionsDrools.TYPE_FAIL_VALIDATION.getValue(),
+          preRepository.get(i).getThenCondition().get(1));
       ruleAttributes.add(rule1);
     }
 

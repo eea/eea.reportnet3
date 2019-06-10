@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
-import io.micrometer.core.annotation.Timed;
 
 /**
  * The Class ValidationService.
@@ -61,16 +60,16 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  @Timed(value = "METRICAS DE TIEMPO DE REGLA")
   public DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId) {
     KieSession kieSession;
+    System.err.println(System.currentTimeMillis());
     try {
       kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return null;
     }
-
+    System.err.println(System.currentTimeMillis());
     kieSession.insert(datasetVO);
     // for (TableVO tableData : datasetVO.getTableVO()) {
     // kieSession.insert(tableData);
@@ -81,13 +80,9 @@ public class ValidationServiceImpl implements ValidationService {
     // }
     // }
     // }
-    // List<TableVO> tableVOList = new ArrayList();
-    // TableVO table = new TableVO();
-    // tableVOList.add(table);
-    // datasetVO.setTableVO(tableVOList);
-    // kieSession.insert(datasetVO.getTableVO().get(0));
     kieSession.fireAllRules();
     kieSession.dispose();
+    System.err.println(System.currentTimeMillis());
     return datasetVO;
   }
 
