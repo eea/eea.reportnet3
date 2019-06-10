@@ -14,8 +14,7 @@ import org.mapstruct.MappingTarget;
 /**
  * The Interface DataSetMapper.
  */
-@Mapper(componentModel = "spring", uses = {DatasetValidationMapper.class,
-    TableValidationMapper.class, RecordValidationMapper.class, FieldValidationMapper.class})
+@Mapper(componentModel = "spring")
 public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
 
 
@@ -23,6 +22,7 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * Map.
    *
    * @param value the value
+   *
    * @return the string
    */
   default String map(ObjectId value) {
@@ -34,6 +34,7 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * Class to entity.
    *
    * @param model the model
+   *
    * @return the dataset value
    */
   @Mapping(source = "tableVO", target = "tableValues")
@@ -45,6 +46,7 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * Entity to class.
    *
    * @param entity the entity
+   *
    * @return the data set VO
    */
   @Mapping(source = "tableValues", target = "tableVO")
@@ -71,7 +73,6 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
 
 
   }
-
 
   //
   // @AfterMapping
@@ -116,7 +117,6 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
   // }
   // }
   //
-
 
 
 }

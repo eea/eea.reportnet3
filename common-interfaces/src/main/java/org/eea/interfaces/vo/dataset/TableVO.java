@@ -3,10 +3,10 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 
 /**
  * The Class TableVO.
@@ -51,8 +51,10 @@ public class TableVO implements Serializable {
    */
   private Long totalRecords;
 
-  /** The validations. */
-  private List<ValidationVO> validations;
+  /**
+   * The validations.
+   */
+  private List<TableValidationVO> tableValidations;
 
   /**
    * Hash code.

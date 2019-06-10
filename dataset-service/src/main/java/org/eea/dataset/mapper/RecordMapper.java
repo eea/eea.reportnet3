@@ -9,8 +9,8 @@ import org.mapstruct.Mapper;
 /**
  * The interface RecordMapper.
  */
-@Mapper(componentModel = "spring",
-    uses = {FieldValidationMapper.class, RecordValidationMapper.class})
+@Mapper(componentModel = "spring"
+)
 public interface RecordMapper extends IMapper<RecordValue, RecordVO> {
 
 }
