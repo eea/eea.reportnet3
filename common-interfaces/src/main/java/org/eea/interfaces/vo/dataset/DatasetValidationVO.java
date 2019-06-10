@@ -12,7 +12,7 @@ public class DatasetValidationVO {
   private Long id;
 
 
-  private DataSetVO idDataset;
+  private DataSetVO datasetValue;
 
   private ValidationVO validation;
 }

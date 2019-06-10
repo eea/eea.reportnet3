@@ -12,7 +12,7 @@ public class TableValidationVO {
   private Long id;
 
 
-  private TableVO idTable;
+  private TableVO tableVlaue;
 
   private ValidationVO validation;
 }

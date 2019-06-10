@@ -11,8 +11,7 @@ public class RecordValidationVO {
 
   private Long id;
 
-
-  private RecordVO idRecord;
+  private RecordVO recordValue;
 
   private ValidationVO validation;
 }

@@ -12,7 +12,7 @@ public class FieldValidationVO {
   private Long id;
 
 
-  private FieldVO idField;
+  private FieldVO fieldValue;
 
   private ValidationVO validation;
 }
