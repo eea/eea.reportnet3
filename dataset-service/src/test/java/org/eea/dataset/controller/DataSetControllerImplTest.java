@@ -55,7 +55,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
+    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
   }
 
   /**
@@ -67,7 +67,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataThrowException2() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
-    dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
+    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
   }
 
   /**
@@ -77,7 +77,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException3() throws Exception {
-    dataSetControllerImpl.loadDatasetData(1L, null);
+    dataSetControllerImpl.loadTableData(1L, null, null);
   }
 
   /**
@@ -89,7 +89,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
-    dataSetControllerImpl.loadDatasetData(1L, file);
+    dataSetControllerImpl.loadTableData(1L, file, null);
   }
 
   /**
@@ -267,8 +267,8 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
@@ -282,7 +282,8 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaSuccess() throws Exception {
-    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),

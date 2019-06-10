@@ -19,11 +19,6 @@ public class ParseCommon {
 
 
   /**
-   * The Constant TABLE_HEADER.
-   */
-  private static final String TABLE_HEADER = "_TABLE";
-
-  /**
    * The data set schema service.
    */
   @Autowired
@@ -42,21 +37,21 @@ public class ParseCommon {
    * @param dataSetSchema the data set schema
    * @return the string
    */
-  public String findIdTable(String tableName, DataSetSchemaVO dataSetSchema) {
+  public String findTableName(String idTableSchema, DataSetSchemaVO dataSetSchema) {
     // Find the Id of tableSchema in MongoDB
-    String idTable = null;
+    String tableName = null;
     List<TableSchemaVO> tablesSchema = null;
     if (null != dataSetSchema) {
       tablesSchema = dataSetSchema.getTableSchemas();
     }
     if (null != tablesSchema) {
       for (TableSchemaVO tableSchema : tablesSchema) {
-        if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-          idTable = tableSchema.getIdTableSchema();
+        if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableSchema)) {
+          tableName = tableSchema.getNameTableSchema();
         }
       }
     }
-    return idTable;
+    return tableName;
   }
 
   /**
@@ -92,7 +87,7 @@ public class ParseCommon {
     }
     if (null != tablesSchema) {
       for (TableSchemaVO tableSchema : tablesSchema) {
-      if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableSchema)) {
+        if (tableSchema.getIdTableSchema().equalsIgnoreCase(idTableSchema)) {
           return tableSchema;
         }
       }
@@ -140,17 +135,6 @@ public class ParseCommon {
     return dataSetSchema;
   }
 
-
-  /**
-   * Checks if is header.
-   *
-   * @param value the value
-   *
-   * @return the boolean
-   */
-  public Boolean isHeader(String value) {
-    return TABLE_HEADER.equalsIgnoreCase(value.trim());
-  }
 
 
 }

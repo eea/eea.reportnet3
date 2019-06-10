@@ -1,9 +1,7 @@
 package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,13 +68,12 @@ public class ParseCommonTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  /**
-   * Test find id table.
-   */
   @Test
-  public void testFindIdTable() {
-    assertEquals("fail", ID, parseCommon.findIdTable(ID, dataset));
+  public void findTableName() {
+    assertEquals("fail", ID, parseCommon.findTableName(ID, dataset));
   }
+
+
 
   /**
    * Test find id record.
@@ -117,22 +114,6 @@ public class ParseCommonTest {
   public void testGetDataSetSchema() {
     when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(dataset);
     assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L));
-  }
-
-  /**
-   * Test is header true.
-   */
-  @Test
-  public void testIsHeaderTrue() {
-    assertTrue("fail", parseCommon.isHeader("_table"));
-  }
-
-  /**
-   * Test is header false.
-   */
-  @Test
-  public void testIsHeaderFalse() {
-    assertFalse("fail", parseCommon.isHeader(ID));
   }
 
 }
