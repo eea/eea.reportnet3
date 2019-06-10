@@ -2,6 +2,8 @@ package org.eea.dataset.persistence.data.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -26,6 +28,7 @@ public class Validation {
    * The id.
    */
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
