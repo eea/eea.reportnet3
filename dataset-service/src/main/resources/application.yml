@@ -3,74 +3,9 @@ server:
 spring:
   application:
     name: dataset
-  jpa:
-    hibernate:
-      #use create if you are going to create the schema for the first time
-      ddl-auto: validate
-      metabase:
-        ddl-auto: update
-      show-sql: ${SHOW_SQL:false}
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    database: postgresql
-  datasource:
-    metasource:
-      url: jdbc:postgresql://localhost/metabase
-      username: root
-      password: root
-      driver-class-name: org.postgresql.Driver
-      hikari:
-        connection-timeout: 60000
-        maximum-pool-size: 5
   cloud:
     consul:
       discovery:
         instanceId: ${spring.application.name}:${random.value}
       config:
         name: dataset
-  sleuth:
-    sampler:
-      probability: 1.0
-    web:
-      skipPattern: "(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)"
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
-
-mongodb:
-  hibernate:
-    ddl-auto: create
-  primary:
-    host: localhost
-    port: 27017
-    database: admin
-    username: root
-    password: root
-
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 10000
-      circuitBreaker:
-        requestVolumeThreshold: 2
-        sleepWindowInMilliseconds: 1000
