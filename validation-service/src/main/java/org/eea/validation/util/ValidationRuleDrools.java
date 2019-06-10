@@ -48,9 +48,9 @@ public class ValidationRuleDrools {
       String ruleId) {
     ValidationVO newValidation =
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD);
-    RecordValidationVO recordValidationVO = new RecordValidationVO();
+    RecordValidationVO recordValidationVO= new RecordValidationVO();
     recordValidationVO.setValidation(newValidation);
-    recordVO.getRecordValidations().add(recordValidationVO);
+     recordVO.getRecordValidations().add(recordValidationVO);
   }
 
   private static ValidationVO createValidationObject(String message, String typeError,
