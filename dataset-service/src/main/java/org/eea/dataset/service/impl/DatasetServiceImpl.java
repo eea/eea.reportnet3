@@ -19,6 +19,7 @@ import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
@@ -30,6 +31,8 @@ import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -40,7 +43,9 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -163,9 +168,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InterruptedException the interrupted exception
    */
   @Override
   @Transactional
@@ -405,8 +410,12 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Retrieves in a controlled way the data from database
+   * 
+   * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
-   * This method ensures that Sorting Field Criteria is cleaned after every invocation
+   * @param idTableSchema the id table schema
+   * @param idFieldSchema the id field schema
+   * @return the list
    */
   private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
     Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
@@ -422,6 +431,9 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Removes duplicated records in the query.
+   *
+   * @param records the records
+   * @return the list
    */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
@@ -458,6 +470,13 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public DataSetVO getById(Long datasetId) throws EEAException {
 
@@ -476,6 +495,12 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Update dataset.
+   *
+   * @param dataset the dataset
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public void updateDataset(DataSetVO dataset) throws EEAException {
@@ -487,20 +512,130 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public Long getDataFlowIdById(Long datasetId) throws EEAException {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
   
   
+  
+  /**
+   * Gets the statistics.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public StatisticsVO getStatistics(final Long datasetId) throws EEAException {
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+   
+    List<TableValue> allTableValues = dataset.getTableValues();
+    StatisticsVO stats = new StatisticsVO();
+    stats.setIdDataSetSchema(dataset.getIdDatasetSchema());
+    stats.setDatasetErrors(false);
+    stats.setTables(new ArrayList<>());
     
-    StatisticsVO statistics = new StatisticsVO();
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+    stats.setNameDataSetSchema(schema.getNameDataSetSchema());
+    List<String> listIdsDataSetSchema = new ArrayList<>();
+    Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+    for(TableSchema tableSchema : schema.getTableSchemas()) {
+      listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
+      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(), tableSchema.getNameTableSchema());
+    }
+  
+    List<String> listIdDataSetSchema = new ArrayList<>();
+    for (TableValue tableValue : allTableValues) {
+      listIdDataSetSchema.add(tableValue.getIdTableSchema());
     
-    return statistics;
+      TableStatisticsVO tableStats = processTableStats(tableValue, datasetId);
+      if(tableStats.getTableErrors()) {
+        stats.setDatasetErrors(true);
+      }
+      
+      stats.getTables().add(tableStats);
+    }
     
+    //Check if there are empty tables
+    listIdsDataSetSchema.removeAll(listIdDataSetSchema);
+    for(String idTableSchem : listIdsDataSetSchema) {
+      stats.getTables().add(createEmptyTableStat(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
+    }
+
+    return stats;   
   }
+  
+  
+  /**
+   * Process table stats.
+   *
+   * @param tableValue the table value
+   * @param datasetId the dataset id
+   * @return the table statistics VO
+   */
+  private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId) {
+    
+    Long countRecords = tableRepository.countRecordsByIdTable(tableValue.getId());
+    List<RecordValidation> recordValidations = 
+        datasetRepository.findValidationsByIdDataset(datasetId, tableValue.getId());
+    TableStatisticsVO tableStats = new TableStatisticsVO();
+    tableStats.setIdTableSchema(tableValue.getIdTableSchema());
+    tableStats.setNameTableSchema(tableValue.getName());
+    tableStats.setTotalRecords(countRecords);
+    Long totalTableErrors = 0L;
+    Long totalRecordsWithErrors = 0L;
+    Long totalRecordsWithWarnings = 0L;
+    for(RecordValidation recordValidation: recordValidations) {
+      if(TypeErrorEnum.ERROR == recordValidation.getValidation().getLevelError()) {
+        totalRecordsWithErrors++;
+        totalTableErrors++;
+      }
+      if(TypeErrorEnum.WARNING == recordValidation.getValidation().getLevelError()) {
+        totalRecordsWithWarnings++;
+        totalTableErrors++;
+      }
+    }
+    tableStats.setTotalErrors(totalTableErrors);
+    tableStats.setTotalRecordsWithErrors(totalRecordsWithErrors);
+    tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);
+    tableStats.setTableErrors(totalTableErrors>0 ? true : false);
+    
+    return tableStats;
+
+  }
+  
+  
+  /**
+   * Creates the empty table stat.
+   *
+   * @param idTableSchema the id table schema
+   * @param nameTableSchema the name table schema
+   * @return the table statistics VO
+   */
+  private TableStatisticsVO createEmptyTableStat(String idTableSchema, String nameTableSchema) {
+    
+    TableStatisticsVO tableStats = new TableStatisticsVO();
+    tableStats.setIdTableSchema(idTableSchema);
+    tableStats.setNameTableSchema(nameTableSchema);
+    tableStats.setTableErrors(false);
+    tableStats.setTotalErrors(0L);
+    tableStats.setTotalRecords(0L);
+    tableStats.setTotalRecordsWithErrors(0L);
+    tableStats.setTotalRecordsWithWarnings(0L);
+    
+    return tableStats;
+  }
+  
+  
   
 }

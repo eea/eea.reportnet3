@@ -5,28 +5,39 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The class TableStatisticsVO.
+ *
+ */
 
-@Getter
 @Setter
+@Getter
 @ToString
 public class TableStatisticsVO implements Serializable{
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 7063146120694063716L;
   
-  private Long idTable;
+ 
+  /** The id table schema. */
+  private String idTableSchema;
   
+  /** The name table schema. */
+  private String nameTableSchema;
+  
+  /** The table errors. */
   private Boolean tableErrors;
   
+  /** The total errors. */
   private Long totalErrors;
-  
-  private Long errorsInTable;
-  
-  /*private Long totalFields;
-  private Long totalFieldsWithErrors;
-  private Long totalFieldsWithWarnings;*/
-  
+
+  /** The total records. */
   private Long totalRecords;
+  
+  /** The total records with errors. */
   private Long totalRecordsWithErrors;
+  
+  /** The total records with warnings. */
   private Long totalRecordsWithWarnings;
   
   

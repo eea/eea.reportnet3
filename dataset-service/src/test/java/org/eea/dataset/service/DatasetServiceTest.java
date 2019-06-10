@@ -24,6 +24,7 @@ import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
@@ -36,6 +37,7 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -118,6 +120,7 @@ public class DatasetServiceTest {
     tableValues = new ArrayList<>();
     tableValues.add(tableValue);
     datasetValue.setTableValues(tableValues);
+    datasetValue.setIdDatasetSchema("5cf0e9b3b793310e9ceca190");
     tableVOs = new ArrayList<>();
     tableVO = new TableVO();
     tableVOs.add(tableVO);
@@ -347,6 +350,18 @@ public class DatasetServiceTest {
     datasetService.updateDataset(new DataSetVO());
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
 
+  }
+  
+  
+  @Test
+  public void testGetStatisticsSuccess() throws Exception {
+    
+    DataSetSchema schema = new DataSetSchema();
+    schema.setTableSchemas(new ArrayList<>());
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"))).thenReturn(schema);
+    datasetService.getStatistics(1L);
+    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
 
 }
