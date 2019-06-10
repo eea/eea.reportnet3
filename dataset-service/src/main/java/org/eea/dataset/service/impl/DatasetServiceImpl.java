@@ -18,11 +18,14 @@ import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
+import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -148,6 +151,12 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private KafkaSender kafkaSender;
+  
+  
+  /** The field repository. */
+  @Autowired
+  private FieldRepository fieldRepository;
+  
 
 
   /**
@@ -571,6 +580,13 @@ public class DatasetServiceImpl implements DatasetService {
     for(String idTableSchem : listIdsDataSetSchema) {
       stats.getTables().add(createEmptyTableStat(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
     }
+    
+    //Check dataset validations
+    for(DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
+      if(datasetValidation.getValidation()!=null) {
+        stats.setDatasetErrors(true);
+      }
+    }
 
     return stats;   
   }
@@ -587,7 +603,7 @@ public class DatasetServiceImpl implements DatasetService {
     
     Long countRecords = tableRepository.countRecordsByIdTable(tableValue.getId());
     List<RecordValidation> recordValidations = 
-        datasetRepository.findValidationsByIdDataset(datasetId, tableValue.getId());
+        recordRepository.findRecordValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setNameTableSchema(tableValue.getName());
@@ -595,6 +611,7 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalTableErrors = 0L;
     Long totalRecordsWithErrors = 0L;
     Long totalRecordsWithWarnings = 0L;
+    //Record validations
     for(RecordValidation recordValidation: recordValidations) {
       if(TypeErrorEnum.ERROR == recordValidation.getValidation().getLevelError()) {
         totalRecordsWithErrors++;
@@ -605,6 +622,22 @@ public class DatasetServiceImpl implements DatasetService {
         totalTableErrors++;
       }
     }
+    //Table validations
+    totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
+    //Field validations
+    List<FieldValidation> fieldValidations = 
+        fieldRepository.findFieldValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
+    for(FieldValidation fieldValidation: fieldValidations) {
+      if(TypeErrorEnum.ERROR == fieldValidation.getValidation().getLevelError()) {
+        totalRecordsWithErrors++;
+        totalTableErrors++;
+      }
+      if(TypeErrorEnum.WARNING == fieldValidation.getValidation().getLevelError()) {
+        totalRecordsWithWarnings++;
+        totalTableErrors++;
+      }
+    }
+    
     tableStats.setTotalErrors(totalTableErrors);
     tableStats.setTotalRecordsWithErrors(totalRecordsWithErrors);
     tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);

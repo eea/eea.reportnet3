@@ -16,6 +16,7 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -37,7 +38,6 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -98,6 +98,9 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetTablesMapper dataSetTablesMapper;
+  
+  @Mock
+  private FieldRepository fieldRepository;
 
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -114,6 +117,7 @@ public class DatasetServiceTest {
     recordValue = new RecordValue();
     tableValue = new TableValue();
     tableValue.setId(1L);
+    tableValue.setTableValidations(new ArrayList<>());
     recordValue.setTableValue(tableValue);
     recordValues.add(recordValue);
     datasetValue = new DatasetValue();
@@ -121,6 +125,7 @@ public class DatasetServiceTest {
     tableValues.add(tableValue);
     datasetValue.setTableValues(tableValues);
     datasetValue.setIdDatasetSchema("5cf0e9b3b793310e9ceca190");
+    datasetValue.setDatasetValidations(new ArrayList<>());
     tableVOs = new ArrayList<>();
     tableVO = new TableVO();
     tableVOs.add(tableVO);
@@ -352,7 +357,7 @@ public class DatasetServiceTest {
 
   }
   
-  
+
   @Test
   public void testGetStatisticsSuccess() throws Exception {
     
