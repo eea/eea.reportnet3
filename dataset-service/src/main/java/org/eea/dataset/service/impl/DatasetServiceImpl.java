@@ -20,7 +20,6 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
@@ -443,18 +442,21 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public DataSetVO getById(Long datasetId) throws EEAException {
 
-    final DatasetValue datasetValue = new DatasetValue();
+    DatasetValue datasetValue = new DatasetValue();
 
-    List<TableValue> allTableValues = tableRepository.findAllTables();
-    datasetValue.setTableValues(allTableValues);
-    datasetValue.setId(datasetId);
-    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
-    for (TableValue tableValue : allTableValues) {
-      tableValue
-          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
+    // List<TableValue> allTableValues = tableRepository.findAllTables();
+    // datasetValue.setTableValues(allTableValues);
+    // datasetValue.setId(datasetId);
+    // datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
+    // for (TableValue tableValue : allTableValues) {
+    // tableValue
+    // .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
+    // }
+    datasetValue = datasetRepository.findById(datasetId).orElse(null);
+    if (datasetValue != null) {
+      return multiThreadMapper(datasetValue);
     }
-
-    return multiThreadMapper(datasetValue);
+    return null;
   }
 
 
@@ -465,8 +467,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the data set VO
    */
   private DataSetVO multiThreadMapper(DatasetValue datasetValue) {
-    DataSetVO dataSetVO =
-        new DataSetVO(datasetValue.getId(), datasetValue.getIdDatasetSchema(), new ArrayList<>());
+    DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setTableVO((datasetValue.getTableValues().parallelStream()
         .map(tableValue -> tableValueMapper.entityToClass(tableValue))
         .collect(Collectors.toList())));

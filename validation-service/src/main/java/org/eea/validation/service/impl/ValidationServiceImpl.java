@@ -51,7 +51,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  public DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId) {
+  public DataSetVO runDatasetValidations(DataSetVO datasetVO, Long DataflowId) {
     KieSession kieSession;
     System.err.println(System.currentTimeMillis());
     try {
@@ -104,28 +104,15 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
-    // DataSetVO dataset = datasetController.getById(datasetId);
+    DataSetVO dataset = datasetController.getById(datasetId);
     // // Get Dataflow id
-    // Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     // Execute rules validation
-    DataSetVO result = getDataFlowRule(new DataSetVO(), 1L);
+    DataSetVO result = runDatasetValidations(dataset, dataflowId);
     // Save results to the db
     datasetController.saveValidations(result);
 
   }
-
-  /**
-   * Run dataset validations.
-   *
-   * @param datasetVO the dataset VO
-   * @param dataflowId the dataflow id
-   * @return the data set VO
-   */
-  private DataSetVO runDatasetValidations(DataSetVO datasetVO, Long dataflowId) {
-    datasetVO.setIdDatasetSchema("tralara");
-    return datasetVO;
-  }
-
 
   /**
    * Save rule.

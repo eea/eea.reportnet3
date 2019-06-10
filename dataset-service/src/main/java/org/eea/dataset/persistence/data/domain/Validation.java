@@ -4,11 +4,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 
 /**
  * The type Dataset.
@@ -17,6 +18,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 @Getter
 @Setter
 @ToString
+@DynamicUpdate
 @Table(name = "VALIDATION")
 public class Validation {
 

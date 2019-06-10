@@ -36,7 +36,7 @@ public interface ValidationService {
    * @param dataFlowRules the data flow rules
    * @return the element lenght
    */
-  DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId);
+  DataSetVO runDatasetValidations(DataSetVO datasetVO, Long DataflowId);
 
   /**
    * Save rule.

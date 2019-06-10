@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,27 +19,10 @@ import lombok.ToString;
  * The Class Record.
  */
 @Entity
-
-/**
- * Gets the id validation.
- *
- * @return the id validation
- */
 @Getter
-
-/**
- * Sets the id validation.
- *
- * @param idValidation the new id validation
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
+@DynamicUpdate
 @Table(name = "FIELD_VALIDATION")
 public class FieldValidation {
 
