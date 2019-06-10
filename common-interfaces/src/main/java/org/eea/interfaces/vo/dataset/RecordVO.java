@@ -44,7 +44,7 @@ public class RecordVO implements Serializable {
   /**
    * The validations.
    */
-  private List<RecordValidationVO> recordValidations;
+  private List<RecordValidationVO> recordValidations = new ArrayList<RecordValidationVO>();
 
   /**
    * The sort criteria.

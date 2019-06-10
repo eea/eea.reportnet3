@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 
 /**
  * The Class TableVO.
@@ -55,7 +55,8 @@ public class TableVO implements Serializable {
   /**
    * The validations.
    */
-  private List<TableValidationVO> tableValidations;
+  private List<TableValidationVO> tableValidations = new ArrayList<TableValidationVO>();
+
 
   /**
    * Hash code.

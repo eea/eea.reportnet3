@@ -45,7 +45,8 @@ public class FieldVO implements Serializable {
   /**
    * The validations.
    */
-  private List<FieldValidationVO> fieldValidations;
+
+  private List<FieldValidationVO> fieldValidations = new ArrayList<FieldValidationVO>();
 
   /**
    * Hash code.
