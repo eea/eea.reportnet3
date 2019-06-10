@@ -17,7 +17,7 @@ public class TableValidationVO {
 
 
   /** The table vlaue. */
-  private TableVO tableVlaue;
+  private TableVO tableValue;
 
   /** The validation. */
   private ValidationVO validation;
