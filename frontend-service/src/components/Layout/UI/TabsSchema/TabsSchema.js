@@ -1,11 +1,11 @@
-import React from 'react'; //, { useContext }
+import React, { useContext } from 'react'; //, { useContext }
 import DataViewer from '../../../../containers/DataSets/DataViewer/DataViewer';
 import { TabView, TabPanel } from 'primereact/tabview';
 import styles from './TabsSchema.module.css';
-// import ResourcesContext from '../../../Context/ResourcesContext';
+import ResourcesContext from '../../../Context/ResourcesContext';
 
 const TabsSchema = (props) => {
-    // const resources = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
 
       const customButtons = [
         {
@@ -50,7 +50,7 @@ const TabsSchema = (props) => {
         props.tables.map((table, i) => {
             return (
                 // rightIcon={resources.icons["warning"]}
-                <TabPanel header={table.name} key={table.name}>
+                <TabPanel header={table.name} key={table.name} rightIcon={table.hasErrors ? resources.icons["warning"] : null}>
                     <div className={styles.TabsSchema}>
                         <DataViewer key={table.id} id={table.id} name={table.name} customButtons={customButtons} 
                                     tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}/>
