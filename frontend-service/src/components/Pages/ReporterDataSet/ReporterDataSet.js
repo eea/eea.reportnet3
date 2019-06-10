@@ -1,18 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useState, useEffect, useContext, Suspense} from 'react';
 import {BreadCrumb} from 'primereact/breadcrumb';
+import {Dialog} from 'primereact/dialog';
+
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
-
-
-import {Dialog} from 'primereact/dialog';
-import {Chart} from 'primereact/chart';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
 //import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
+
 import config from '../../../conf/web.config.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
@@ -24,18 +23,18 @@ const ReporterDataSet = () => {
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
   const [validationError] = useState(true);
-  const [dashBoardData, setDashBoardData] = useState({});
-  const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  
+
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
+
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
   const ValidationDataViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
+  const Dashboard = React.lazy(()=> import('../../../containers/DashBoard/DashBoard'));
 
   console.log('ReporterDataSet Render...');   
 
@@ -43,6 +42,8 @@ const ReporterDataSet = () => {
 
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
+
+    //#region Button inicialization
     setCustomButtons([
       {
         label: resources.messages["import"],
@@ -99,61 +100,16 @@ const ReporterDataSet = () => {
         disabled: false,
         clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
       }
+
+      //#endregion Button inicialization
     ]);
 
     setBreadCrumbItems( [
       {label: resources.messages["newDataset"], url: '#'},
       {label: resources.messages["viewData"], url: '#'}
-    ]);
+    ]);    
 
-    //TODO:Change + Error/warning treatment
-    setDashBoardData({
-      labels: ['Table 1', 'Table 2', 'Table 3', 'Table 4'],
-      datasets: [
-          {
-              label: 'Info',
-              backgroundColor: '#004494',
-              data: getPercentage([105, 50, 80, 11])
-          },
-          {
-              label: 'Warning',
-              backgroundColor: '#ffd617',
-              data: getPercentage([15, 48, 58, 19])
-          },
-          {
-            label: 'Error',
-            backgroundColor: '#DA2131',
-            data: getPercentage([10, 2, 15, 85])
-        }
-      ]});
-
-    setDashBoardOptions({
-      tooltips: {
-        mode: 'index',
-        intersect: false,
-        callbacks: {
-            label: (tooltipItems, data) => `(${tooltipItems.yLabel} %)`
-        }
-      },
-      responsive: true,
-      scales: {
-          xAxes: [{
-              stacked: true,
-          }],
-          yAxes: [{
-              stacked: true,
-              scaleLabel: {
-								display: true
-								//labelString: 'Value'
-              },
-              ticks: {
-                // Include a % sign in the ticks
-                callback: (value, index, values) => `${value} %`
-            }
-          }]
-      }});
-
-    //Fetch data (JSON)
+    //Fetch DataSchema(JSON)
     //fetchDataHandler(jsonDataSchema);
     const dataPromise = HTTPRequesterAPI.get(
       {
@@ -163,7 +119,6 @@ const ReporterDataSet = () => {
     );
 
     dataPromise.then(response =>{
-      console.log(response.data);
       setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
             id: item["idTableSchema"],
@@ -171,7 +126,6 @@ const ReporterDataSet = () => {
             }
       })); 
       
-
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
         return table.recordSchema.fieldSchema.map(item=>{
           return {
@@ -207,15 +161,8 @@ const ReporterDataSet = () => {
       }
     );*/
   }
-
-  const getPercentage = (tableValues) =>{
-     let valArr = [[105, 50, 80, 11],[15, 48, 58, 19],[10, 2, 15, 85]];
-     let total = valArr.reduce((arr1, arr2) =>
-          arr1.map((v, i) => v + arr2[i]));
-      
-    return tableValues.map((v,i)=>((v/total[i])*100).toFixed(2));
-  }
-
+  
+  
   return (
     <div className="titleDiv">
         <BreadCrumb model={breadCrumbItems} home={home}/>
@@ -248,10 +195,9 @@ const ReporterDataSet = () => {
                 maximizable 
                 dismissableMask={true} 
                 style={{width:'80%'}}>
-          <h1>US-STP6-DSM-VIS-01-List of Visualizations (next sprint)</h1>
-          <Chart type="bar" 
-                 data={dashBoardData} 
-                 options={dashBoardOptions} />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Dashboard/>
+                </Suspense>
         </Dialog>   
             {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
         <ReporterDataSetContext.Provider value={{validationsVisibleHandler:()=>setVisibleHandler(setValidationsVisible, false)}}>     
