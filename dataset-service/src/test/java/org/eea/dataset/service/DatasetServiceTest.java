@@ -18,7 +18,9 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
+import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -105,6 +107,12 @@ public class DatasetServiceTest {
   
   @Mock
   private FieldRepository fieldRepository;
+  
+  @Mock
+  private FieldValidationRepository fieldValidationRepository;
+  
+  @Mock
+  private RecordValidationRepository recordValidationRepository;
 
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;

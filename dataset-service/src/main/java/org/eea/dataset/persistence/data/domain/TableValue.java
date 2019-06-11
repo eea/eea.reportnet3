@@ -32,23 +32,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class TableValue {
 
 
-  /**
-   * Init.
-   */
-  @PostLoad
-  public void init() {
-    //determine level error in validations
-    if (null != this.tableValidations && this.tableValidations.size() > 0) {
-      for (TableValidation tableValidation : this.tableValidations) {
-        if (tableValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
-          this.levelError = TypeErrorEnum.ERROR;
-          break;
-        } else {
-          this.levelError = tableValidation.getValidation().getLevelError();
-        }
-      }
-    }
-  }
+  
 
   /**
    * The id.

@@ -32,23 +32,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class FieldValue {
 
 
-  /**
-   * Init method.
-   */
-  @PostLoad
-  public void init() {
-    //determine level error in validations
-    if (null != this.fieldValidations && this.fieldValidations.size() > 0) {
-      for (FieldValidation fieldValidation : this.fieldValidations) {
-        if (fieldValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
-          this.levelError = TypeErrorEnum.ERROR;
-          break;
-        } else {
-          this.levelError = fieldValidation.getValidation().getLevelError();
-        }
-      }
-    }
-  }
+  
 
   /**
    * The id.

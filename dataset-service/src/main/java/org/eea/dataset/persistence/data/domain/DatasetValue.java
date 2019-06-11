@@ -28,23 +28,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class DatasetValue {
 
 
-  /**
-   * Init.
-   */
-  @PostLoad
-  public void init() {
-    //determine level error in validations
-    if (null != this.datasetValidations && this.datasetValidations.size() > 0) {
-      for (DatasetValidation datasetValidation : this.datasetValidations) {
-        if (datasetValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
-          this.levelError = TypeErrorEnum.ERROR;
-          break;
-        } else {
-          this.levelError = datasetValidation.getValidation().getLevelError();
-        }
-      }
-    }
-  }
+
 
   /**
    * The id.

@@ -52,17 +52,7 @@ public class RecordValue {
       }
     }
 
-    //determine level error in validations
-    if (null != this.recordValidations && this.recordValidations.size() > 0) {
-      for (RecordValidation recordValidation : this.recordValidations) {
-        if (recordValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
-          this.levelError = TypeErrorEnum.ERROR;
-          break;
-        } else {
-          this.levelError = recordValidation.getValidation().getLevelError();
-        }
-      }
-    }
+   
   }
 
   /**
