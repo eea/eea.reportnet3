@@ -118,11 +118,13 @@ public class ValidationServiceImpl implements ValidationService {
     // Execute rules validation
     // DatasetValue result = runDatasetValidations(dataset, dataflowId);
     // Save results to the db
-    // datasetController.saveValidations(result);
     datasetRepository.saveAndFlush(dataset);
-
+    // release kafka event to notify that the dataset validations have been executed
     releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
 
+    // Pasar for con la pasada de los registros, por cada tabla de 100 en 100
+    // Pasar las validaciones de las tablas
+    // Pasar las validaciones de dataset
   }
 
   /**
