@@ -2,7 +2,7 @@ package org.eea.interfaces.controller.validation;
 
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.vo.validation.RuleScopeVo;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +41,7 @@ public interface ValidationController {
    */
   @RequestMapping(value = "/setNewRule", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void setNewRules(@RequestParam(required = true) RuleScopeVo ruleScope,
+  void setNewRules(@RequestParam(required = true) TypeEntityEnum typeEntityEnum,
       @RequestParam(required = true) String ruleName,
       @RequestParam(required = true) String whenCondition,
       @RequestParam(required = true) String thenCondition);

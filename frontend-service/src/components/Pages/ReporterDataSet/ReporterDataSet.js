@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useContext, Suspense} from 'react';
 import {BreadCrumb} from 'primereact/breadcrumb';
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
@@ -8,7 +8,7 @@ import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
 import {Card} from 'primereact/card';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
-import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
+//import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
 //import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
@@ -31,6 +31,9 @@ const ReporterDataSet = () => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+
+  const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
+
 
   console.log('ReporterDataSet Render...');   
 
@@ -57,9 +60,8 @@ const ReporterDataSet = () => {
         label: resources.messages["delete"],
         icon: "2",
         group: "left",
-        disabled: true,
-        clickHandler: null
-        //() => setVisibleHandler(setDeleteDialogVisible, true)
+        disabled: false,
+        clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
       },
       {
         label: resources.messages["events"],
@@ -239,11 +241,11 @@ const ReporterDataSet = () => {
             </div>
           </Card>
         </Dialog>
-        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
-                       visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
-                       labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
-          {resources.messages["deleteDatasetConfirm"]}
-        </ConfirmDialog>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+            {resources.messages["deleteDatasetConfirm"]}
+          </ConfirmDialog>
+        </Suspense>
       </div>
   );
 }

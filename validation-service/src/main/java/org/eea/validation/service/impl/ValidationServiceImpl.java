@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -31,9 +32,6 @@ public class ValidationServiceImpl implements ValidationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceImpl.class);
 
-  @Autowired
-  private KafkaSender kafkaSender;
-
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
@@ -42,9 +40,18 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
+
+  @Autowired
+  private DataFlowController dataFlowController;
   /** The dataset controller. */
   @Autowired
   private DataSetControllerZuul datasetController;
+
+  /**
+   * The kafka sender.
+   */
+  @Autowired
+  private KafkaSender kafkaSender;
 
   /**
    * Gets the element lenght.
@@ -53,24 +60,32 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  public DataFlowRule getDataFlowRule(DataFlowRule dataFlowRules) {
+  public DataSetVO getDataFlowRule(DataSetVO datasetVO, Long DataflowId) {
     KieSession kieSession;
     try {
-      kieSession = kieBaseManager.reloadRules(1L).newKieSession();
+      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return null;
     }
-    kieSession.insert(dataFlowRules);
+    // for (DataFlowRule dataFlowRule2 : dataFlowRule) {
+    // kieSession.insert(dataFlowRule2);
+    // }
+    kieSession.insert(datasetVO);
     kieSession.fireAllRules();
     kieSession.dispose();
-    return dataFlowRules;
+    return datasetVO;
   }
 
-
+  /**
+   * Gets the rules.
+   *
+   * @return the rules
+   */
   @Override
-  public List<Map<String, String>> getRules() {
-    Iterable<DataFlowRule> preRepositoryDB = dataFlowRulesRepository.findAll();
+  public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
+    Iterable<DataFlowRule> preRepositoryDB =
+        dataFlowRulesRepository.findAllByDataFlowId(idDataflow);
     List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     for (int i = 0; i < preRepository.size(); i++) {
@@ -90,16 +105,36 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
     DataSetVO dataset = datasetController.getById(datasetId);
-    Long dataFlowId = datasetController.getDataFlowIdById(datasetId);
-    // Read Dataset rules
-    List<DataFlowRule> rules = dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     // Execute rules validation
-    DataSetVO result = runDatasetValidations(dataset, rules);
+    DataSetVO result = runDatasetValidations(dataset, dataflowId);
     // Save results to the db
     datasetController.updateDataset(result);
     // Release notification event
     releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
-    LOG.info("Dataset validated");
+  }
+
+  /**
+   * Run dataset validations.
+   *
+   * @param datasetVO the dataset VO
+   * @param dataflowId the dataflow id
+   * @return the data set VO
+   */
+  private DataSetVO runDatasetValidations(DataSetVO datasetVO, Long dataflowId) {
+    return datasetVO;
+  }
+
+
+  /**
+   * Save rule.
+   *
+   * @param dataFlowRules the data flow rules
+   */
+  @Override
+  public void saveRule(DataFlowRule dataFlowRules) {
+    dataFlowRulesRepository.save(dataFlowRules);
   }
 
   /**
@@ -117,16 +152,5 @@ public class ValidationServiceImpl implements ValidationService {
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
   }
-
-  private DataSetVO runDatasetValidations(DataSetVO datasetVO, List<DataFlowRule> rules) {
-    return datasetVO;
-  }
-
-
-  @Override
-  public void saveRule(DataFlowRule dataFlowRules) {
-    dataFlowRulesRepository.save(dataFlowRules);
-  }
-
 
 }

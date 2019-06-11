@@ -11,6 +11,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
@@ -107,12 +108,12 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
+  public void updateDataset(@RequestBody final DataSetVO dataset) {
     if (dataset == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
     }
     try {
-      return datasetService.updateDataset(dataset);
+      datasetService.updateDataset(dataset);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
@@ -249,6 +250,28 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
     }
     return result;
+  }
+  
+  
+  
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics by id
+   */
+  @Override
+  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
+    
+    StatisticsVO statistics = null;
+    try {
+      statistics = datasetService.getStatistics(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return statistics;
   }
 
 }

@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -57,7 +58,7 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetVO updateDataset(@RequestBody DataSetVO dataset);
+  void updateDataset(@RequestBody DataSetVO dataset);
 
   /**
    * Creates the empty data set.
@@ -117,4 +118,14 @@ public interface DatasetController {
    */
   @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
+  
+  
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics by id
+   */
+  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
 }
