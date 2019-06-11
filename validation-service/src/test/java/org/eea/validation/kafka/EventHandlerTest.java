@@ -26,9 +26,7 @@ public class EventHandlerTest {
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<String, Object>();
-
     event.setData(data);
-    // Mockito.doNothing().when(validationService.validateDataSetData(Mockito.any()));
     eventHandler.processMessage(event);
   }
 

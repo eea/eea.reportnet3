@@ -5,6 +5,7 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleRecordVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,6 +26,10 @@ public class RecordSchemaVO {
   private List<FieldSchemaVO> fieldSchema;
 
 
+  /** The rule record. */
+  private List<RuleRecordVO> ruleRecord;
+
+
   /**
    * Hash code.
    *
@@ -32,8 +37,9 @@ public class RecordSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(fieldSchema, idRecordSchema);
+    return Objects.hash(fieldSchema, idRecordSchema, ruleRecord);
   }
+
 
   /**
    * Equals.
@@ -51,8 +57,10 @@ public class RecordSchemaVO {
     }
     RecordSchemaVO other = (RecordSchemaVO) obj;
     return Objects.equals(fieldSchema, other.fieldSchema)
-        && Objects.equals(idRecordSchema, other.idRecordSchema);
+        && Objects.equals(idRecordSchema, other.idRecordSchema)
+        && Objects.equals(ruleRecord, other.ruleRecord);
   }
+
 
 
 }
