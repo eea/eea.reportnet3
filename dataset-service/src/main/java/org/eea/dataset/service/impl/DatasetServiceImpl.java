@@ -18,6 +18,7 @@ import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
+import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
@@ -30,6 +31,7 @@ import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -174,7 +176,14 @@ public class DatasetServiceImpl implements DatasetService {
   private FieldValidationRepository fieldValidationRepository;
 
   @Autowired
+  private RecordValidationRepository recordValidationRepository;
+
+  @Autowired
   private FieldValidationMapper fieldValidationMapper;
+
+  @Autowired
+  private RecordValidationMapper recordValidationMapper;
+
 
 
   /**
@@ -428,11 +437,14 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<RecordVO> sortedRecords = recordVOs.subList(initIndex, endIndex);
       Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(mongoID);
+      Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(mongoID);
       sortedRecords.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
           field.setFieldValidations(
               this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
         });
+        record.setRecordValidations(
+            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
       });
       result.setRecords(sortedRecords);
       result.setTotalRecords(Long.valueOf(recordVOs.size()));
@@ -591,15 +603,15 @@ public class DatasetServiceImpl implements DatasetService {
     stats.setDatasetErrors(false);
     stats.setTables(new ArrayList<>());
 
-    DataSetSchema schema = schemasRepository
-        .findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+    DataSetSchema schema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
     stats.setNameDataSetSchema(schema.getNameDataSetSchema());
     List<String> listIdsDataSetSchema = new ArrayList<>();
     Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
     for (TableSchema tableSchema : schema.getTableSchemas()) {
       listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
-      mapIdNameDatasetSchema
-          .put(tableSchema.getIdTableSchema().toString(), tableSchema.getNameTableSchema());
+      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+          tableSchema.getNameTableSchema());
     }
 
     List<String> listIdDataSetSchema = new ArrayList<>();
@@ -614,14 +626,14 @@ public class DatasetServiceImpl implements DatasetService {
       stats.getTables().add(tableStats);
     }
 
-    //Check if there are empty tables
+    // Check if there are empty tables
     listIdsDataSetSchema.removeAll(listIdDataSetSchema);
     for (String idTableSchem : listIdsDataSetSchema) {
       stats.getTables()
           .add(createEmptyTableStat(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
     }
 
-    //Check dataset validations
+    // Check dataset validations
     for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
       if (datasetValidation.getValidation() != null) {
         stats.setDatasetErrors(true);
@@ -652,7 +664,7 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalTableErrors = 0L;
     Long totalRecordsWithErrors = 0L;
     Long totalRecordsWithWarnings = 0L;
-    //Record validations
+    // Record validations
     for (RecordValidation recordValidation : recordValidations) {
       if (TypeErrorEnum.ERROR == recordValidation.getValidation().getLevelError()) {
         totalRecordsWithErrors++;
@@ -663,9 +675,9 @@ public class DatasetServiceImpl implements DatasetService {
         totalTableErrors++;
       }
     }
-    //Table validations
+    // Table validations
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
-    //Field validations
+    // Field validations
     List<FieldValidation> fieldValidations =
         fieldRepository.findFieldValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
     for (FieldValidation fieldValidation : fieldValidations) {
@@ -720,15 +732,36 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the Map
    */
   private Map<Long, List<FieldValidation>> getFieldValidations(String idTable) {
-    List<FieldValidation> fieldValidations = this.fieldValidationRepository
-        .findByFieldValue_Record_TableValueIdTableSchema(idTable);
+    List<FieldValidation> fieldValidations =
+        this.fieldValidationRepository.findByFieldValue_Record_TableValueIdTableSchema(idTable);
+
     Map<Long, List<FieldValidation>> result = new HashMap<>();
+
     fieldValidations.stream().forEach(fieldValidation -> {
       if (!result.containsKey(fieldValidation.getFieldValue().getId())) {
         result.put(fieldValidation.getFieldValue().getId(), new ArrayList<>());
       }
       result.get(fieldValidation.getFieldValue().getId()).add(fieldValidation);
     });
+
+
+    return result;
+  }
+
+  private Map<Long, List<RecordValidation>> getRecordValidations(String idTable) {
+    List<RecordValidation> recordValidations =
+        this.recordValidationRepository.findByRecordValue_TableValueIdTableSchema(idTable);
+
+    Map<Long, List<RecordValidation>> result = new HashMap<>();
+
+    recordValidations.stream().forEach(recordValidation -> {
+      if (!result.containsKey(recordValidation.getRecordValue().getId())) {
+        result.put(recordValidation.getRecordValue().getId(), new ArrayList<>());
+      }
+      result.get(recordValidation.getRecordValue().getId()).add(recordValidation);
+    });
+
+
     return result;
   }
 
