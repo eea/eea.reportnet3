@@ -11,11 +11,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
-import org.hibernate.annotations.DynamicUpdate;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * The Class TableValue.
@@ -27,6 +30,25 @@ import lombok.ToString;
 @DynamicUpdate
 @Table(name = "TABLE_VALUE")
 public class TableValue {
+
+
+  /**
+   * Init.
+   */
+  @PostLoad
+  public void init() {
+    //determine level error in validations
+    if (null != this.tableValidations && this.tableValidations.size() > 0) {
+      for (TableValidation tableValidation : this.tableValidations) {
+        if (tableValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+          this.levelError = TypeErrorEnum.ERROR;
+          break;
+        } else {
+          this.levelError = tableValidation.getValidation().getLevelError();
+        }
+      }
+    }
+  }
 
   /**
    * The id.
@@ -54,7 +76,9 @@ public class TableValue {
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValue> records;
 
-  /** The table validations. */
+  /**
+   * The table validations.
+   */
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValidation> tableValidations;
 
@@ -64,6 +88,9 @@ public class TableValue {
   @ManyToOne
   @JoinColumn(name = "DATASET_ID")
   private DatasetValue datasetId;
+
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.

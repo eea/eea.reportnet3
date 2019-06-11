@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,6 +42,8 @@ public class DataSetVO implements Serializable {
    */
   private List<TableVO> tableVO;
 
+  /** The level error. */
+  private TypeErrorEnum levelError;
 
   /**
    * The validations.

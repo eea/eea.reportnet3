@@ -11,6 +11,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
@@ -385,4 +386,24 @@ public class DataSetControllerImplTest {
   public void testUpdateDatasetException() throws Exception {
     dataSetControllerImpl.updateDataset(null);
   }
+  
+  
+  
+  @Test
+  public void testLoadStatistics() throws Exception {
+    when(datasetService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
+    dataSetControllerImpl.getStatisticsById(1L);
+
+    Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
+  }
+  
+  
+  @Test
+  public void testLoadStatisticsException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).getStatistics(Mockito.any());
+    dataSetControllerImpl.getStatisticsById(null);
+
+    Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
+  }
+  
 }

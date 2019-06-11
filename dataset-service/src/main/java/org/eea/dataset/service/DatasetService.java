@@ -5,6 +5,7 @@ import java.io.InputStream;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
@@ -27,10 +28,9 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InterruptedException
+   * @throws InterruptedException the interrupted exception
    */
   void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
       throws EEAException, IOException, InterruptedException;
@@ -109,5 +109,16 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   Long getDataFlowIdById(Long datasetId) throws EEAException;
+  
+  
+  
+  /**
+   * Gets the statistics.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics
+   * @throws EEAException the EEA exception
+   */
+  StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
 }

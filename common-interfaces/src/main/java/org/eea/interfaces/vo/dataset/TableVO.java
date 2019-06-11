@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +42,9 @@ public class TableVO implements Serializable {
    * The headers.
    */
   private List<FieldSchemaVO> headers;
+
+  /** The level error. */
+  private TypeErrorEnum levelError;
 
   /**
    * The name.
