@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
@@ -89,6 +90,9 @@ public class DatasetServiceTest {
 
   @Mock
   private RecordMapper recordMapper;
+  
+  @Mock
+  private RecordNoValidationMapper recordNoValidationMapper;
 
   @Mock
   private Pageable pageable;
@@ -304,9 +308,9 @@ public class DatasetServiceTest {
   public void testGetTableValuesById() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
 
-    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
-    Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
+    Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 
   @Test
