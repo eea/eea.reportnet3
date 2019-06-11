@@ -20,6 +20,7 @@ import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
@@ -444,19 +445,19 @@ public class DatasetServiceImpl implements DatasetService {
 
     DatasetValue datasetValue = new DatasetValue();
 
-    // List<TableValue> allTableValues = tableRepository.findAllTables();
-    // datasetValue.setTableValues(allTableValues);
-    // datasetValue.setId(datasetId);
-    // datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
-    // for (TableValue tableValue : allTableValues) {
-    // tableValue
-    // .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
-    // }
-    datasetValue = datasetRepository.findById(datasetId).orElse(null);
-    if (datasetValue != null) {
-      return multiThreadMapper(datasetValue);
+    List<TableValue> allTableValues = tableRepository.findAllTables();
+    datasetValue.setTableValues(allTableValues);
+    datasetValue.setId(datasetId);
+    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
+    for (TableValue tableValue : allTableValues) {
+      tableValue
+          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
-    return null;
+    // datasetValue = datasetRepository.findById(datasetId).orElse(null);
+    // if (datasetValue != null) {
+    // //return multiThreadMapper(datasetValue);
+    // }
+    return dataSetMapper.entityToClass(datasetValue);
   }
 
 

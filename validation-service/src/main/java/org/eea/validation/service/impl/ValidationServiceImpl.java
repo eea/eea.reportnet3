@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
-import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.eea.validation.service.ValidationService;
@@ -23,7 +26,7 @@ import com.google.common.collect.Lists;
 /**
  * The Class ValidationService.
  */
-@Service
+@Service("validationService")
 public class ValidationServiceImpl implements ValidationService {
 
   /** The Constant LOG. */
@@ -37,9 +40,14 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
-
   @Autowired
-  private DataFlowController dataFlowController;
+  private KafkaSender kafkaSender;
+
+
+  /** The dataset repository. */
+  @Autowired
+  private DatasetRepository datasetRepository;
+
   /** The dataset controller. */
   @Autowired
   private DataSetControllerZuul datasetController;
@@ -51,7 +59,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the element lenght
    */
   @Override
-  public DataSetVO runDatasetValidations(DataSetVO datasetVO, Long DataflowId) {
+  public DatasetValue runDatasetValidations(DatasetValue dataset, Long DataflowId) {
     KieSession kieSession;
     System.err.println(System.currentTimeMillis());
     try {
@@ -61,7 +69,7 @@ public class ValidationServiceImpl implements ValidationService {
       return null;
     }
     System.err.println(System.currentTimeMillis());
-    kieSession.insert(datasetVO);
+    kieSession.insert(dataset);
     // for (TableVO tableData : datasetVO.getTableVO()) {
     // kieSession.insert(tableData);
     // for (RecordVO recordData : tableData.getRecords()) {
@@ -74,7 +82,7 @@ public class ValidationServiceImpl implements ValidationService {
     kieSession.fireAllRules();
     kieSession.dispose();
     System.err.println(System.currentTimeMillis());
-    return datasetVO;
+    return dataset;
   }
 
   /**
@@ -104,14 +112,34 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateDataSetData(Long datasetId) {
     // read Dataset Data
-    DataSetVO dataset = datasetController.getById(datasetId);
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     // Execute rules validation
-    DataSetVO result = runDatasetValidations(dataset, dataflowId);
+    // DatasetValue result = runDatasetValidations(dataset, dataflowId);
     // Save results to the db
-    datasetController.saveValidations(result);
+    // datasetController.saveValidations(result);
+    datasetRepository.saveAndFlush(dataset);
 
+    releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
+
+  }
+
+  /**
+   * Release kafka event.
+   *
+   * @param eventType the event type
+   * @param datasetId the dataset id
+   */
+  private static void releaseKafkaEvent(final KafkaSender kafkaSender, final EventType eventType,
+      final Long datasetId) {
+
+    final EEAEventVO event = new EEAEventVO();
+    event.setEventType(eventType);
+    final Map<String, Object> dataOutput = new HashMap<>();
+    dataOutput.put("dataset_id", datasetId);
+    event.setData(dataOutput);
+    kafkaSender.sendMessage(event);
   }
 
   /**

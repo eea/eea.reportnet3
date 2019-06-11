@@ -7,11 +7,13 @@ spring:
     hibernate:
       #use create if you are going to create the schema for the first time
       ddl-auto: update
-    show-sql: ${SHOW_SQL:true}
+      flushMode: commit
+      show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
         dialect: ${DATABASE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
         jdbc:
+          batch_size: ${DATASET_BACH_JPA_SIZE:100}
           lob:
             non_contextual_creation: true
     database: postgresql

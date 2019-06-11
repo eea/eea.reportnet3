@@ -7,7 +7,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
-import org.eea.dataset.service.callable.SaveValidationsCallable;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -257,23 +256,6 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
     }
     return result;
-  }
-
-  /**
-   * Save validations.
-   *
-   * @param dataset the dataset
-   */
-  @Override
-  public void saveValidations(DataSetVO dataset) {
-    if (dataset == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    SaveValidationsCallable callable = null;
-    callable = new SaveValidationsCallable(this.datasetService, dataset, kafkaSender);
-    executor.submit(callable);
-
   }
 
 }
