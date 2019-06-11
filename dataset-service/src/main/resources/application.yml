@@ -6,7 +6,7 @@ spring:
   jpa:
     hibernate:
       #use create if you are going to create the schema for the first time
-      ddl-auto: validate
+      ddl-auto: update
       metabase:
         ddl-auto: update
       show-sql: ${SHOW_SQL:false}
@@ -14,6 +14,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
+          batch_size: ${DATASET_BACH_JPA_SIZE:100}
           lob:
             non_contextual_creation: true
     database: postgresql

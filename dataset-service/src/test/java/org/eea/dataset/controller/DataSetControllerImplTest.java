@@ -1,5 +1,8 @@
 package org.eea.dataset.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -8,6 +11,8 @@ import java.util.HashMap;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -127,7 +132,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Testget data tables values exception entry 1.
+   * Test get data tables values exception entry 1.
    *
    * @throws Exception the exception
    */
@@ -269,8 +274,8 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaEEAException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(datasetService).setDataschemaTables(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
@@ -284,53 +289,151 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void loadDatasetSchemaSuccess() throws Exception {
-    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).setDataschemaTables(Mockito.any(), Mockito.any(),
+        Mockito.any());
     dataSetControllerImpl.loadDatasetSchema(1L, 1L, new TableCollectionVO());
 
     Mockito.verify(datasetService, times(1)).setDataschemaTables(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
-  
-  
+
   /**
-   * Test get table from any object id.
+   * Test get by id success.
    *
    * @throws Exception the exception
    */
   @Test
-  public void testGetTableFromAnyObjectId() throws Exception {
-    
-    when(datasetService.getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(new HashMap<String,TableVO>());
-    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
-    Mockito.verify(datasetService, times(1)).getTableFromAnyObjectId(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
-   
+  public void testGetByIdSuccess() throws Exception {
+    when(datasetService.getById(Mockito.any())).thenReturn(new DataSetVO());
+    DataSetVO result = dataSetControllerImpl.getById(1L);
+    Mockito.verify(datasetService, times(1)).getById(Mockito.any());
+    assertEquals("failed assertion", new DataSetVO(), result);
   }
-  
-  
+
+
   /**
-   * Test get table from any object id exception.
+   * Test get by id find exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetByIdFindException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).getById(Mockito.any());
+    DataSetVO result = dataSetControllerImpl.getById(1L);
+    Mockito.verify(datasetService, times(1)).getById(Mockito.any());
+    assertNull("should be null", result);
+  }
+
+
+  /**
+   * Test get by id exception.
    *
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testGetTableFromAnyObjectIdException() throws Exception {
-    dataSetControllerImpl.getTableFromAnyObjectId(null, null, 10, null);
+  public void testGetByIdException() throws Exception {
+    dataSetControllerImpl.getById(null);
   }
-  
-  
+
   /**
-   * Test get table from any object id exception 2.
+   * Test get data flow id by id success.
    *
    * @throws Exception the exception
    */
+  @Test
+  public void testGetDataFlowIdByIdSuccess() throws Exception {
+    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    assertNotNull("", dataSetControllerImpl.getDataFlowIdById(1L));
+    Mockito.verify(datasetService, times(1)).getDataFlowIdById(Mockito.any());
+  }
+
+  /**
+   * Test get data flow id by id find error.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetDataFlowIdByIdFindError() throws Exception {
+    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
+    Long result = dataSetControllerImpl.getDataFlowIdById(1L);
+    Mockito.verify(datasetService, times(1)).getDataFlowIdById(Mockito.any());
+    assertNull("should be null", result);
+  }
+
+  /**
+   * Test get by id exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testGetDataFlowIdByIdException() throws Exception {
+    dataSetControllerImpl.getDataFlowIdById(null);
+  }
+
+  @Test
+  public void testUpdateDatasetSuccess() throws Exception {
+    doNothing().when(datasetService).updateDataset(Mockito.any());
+    dataSetControllerImpl.updateDataset(new DataSetVO());
+    Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateDatasetError() throws Exception {
+    doThrow(new EEAException()).when(datasetService).updateDataset(Mockito.any());
+    dataSetControllerImpl.updateDataset(new DataSetVO());
+    Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateDatasetException() throws Exception {
+    dataSetControllerImpl.updateDataset(null);
+  }
+  
+  
+  
+  @Test
+  public void testLoadStatistics() throws Exception {
+    when(datasetService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
+    dataSetControllerImpl.getStatisticsById(1L);
+
+    Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
+  }
+  
+  
+  @Test
+  public void testLoadStatisticsException() throws Exception {
+    doThrow(new EEAException()).when(datasetService).getStatistics(Mockito.any());
+    dataSetControllerImpl.getStatisticsById(null);
+
+    Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
+  }
+  
+  @Test
+  public void testGetTableFromAnyObjectId() throws Exception {
+      
+    when(datasetService.getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(),
+          Mockito.any())).thenReturn(new HashMap<String,TableVO>());
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
+    Mockito.verify(datasetService, times(1)).getTableFromAnyObjectId(Mockito.any(), Mockito.any(),
+          Mockito.any(), Mockito.any());
+  }
+  
+  
+  @Test(expected = ResponseStatusException.class)
+  public void testGetTableFromAnyObjectIdException() throws Exception {
+      dataSetControllerImpl.getTableFromAnyObjectId(null, null, 10, null);
+  }
+  
+  
   @Test(expected = ResponseStatusException.class)
   public void testGetTableFromAnyObjectIdException2() throws Exception {
 
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableFromAnyObjectId(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+          Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
 
   }
+ 
+   
+  
 }

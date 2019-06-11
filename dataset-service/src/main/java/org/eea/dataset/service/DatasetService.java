@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.Map;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -28,12 +30,12 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InterruptedException the interrupted exception
    */
   void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
-      throws EEAException, IOException;
+      throws EEAException, IOException, InterruptedException;
 
 
   /**
@@ -96,5 +98,44 @@ public interface DatasetService {
    */
   Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
       TypeEntityEnum type) throws EEAException;
+
+
+  /**
+   * Gets the dataset by id.
+   *
+   * @param datasetId the dataset id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
+  DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Update dataset.
+   *
+   * @param dataset the dataset
+   * @return the data set VO
+   * @throws EEAException the EEA exception
+   */
+  void updateDataset(DataSetVO dataset) throws EEAException;
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data flow id by id
+   * @throws EEAException the EEA exception
+   */
+  Long getDataFlowIdById(Long datasetId) throws EEAException;
+  
+  
+  
+  /**
+   * Gets the statistics.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics
+   * @throws EEAException the EEA exception
+   */
+  StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
 }

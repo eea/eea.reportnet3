@@ -65,6 +65,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
+  /** The batch size. */
+  @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
+  private String batch_Size;
+
   /**
    * The show sql propertie
    */
@@ -159,6 +163,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
     properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
+    properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
     properties.setProperty("hibernate.show_sql", showSql);
     return properties;
   }

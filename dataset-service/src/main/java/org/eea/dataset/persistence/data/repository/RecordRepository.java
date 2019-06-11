@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
+import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -44,6 +45,17 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   List<RecordValue> findByTableValue_IdTableSchema(@Param("idTableSchema") String idTableSchema);
   
  
+  /**
+   * Find record validations by id dataset and id table.
+   *
+   * @param datasetId the dataset id
+   * @param idTable the id table
+   * @return the list
+   */
+  @Query("SELECT rval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.records rv "
+      + "INNER JOIN rv.recordValidations rval WHERE dat.id=?1 and tv.id=?2")
+  List<RecordValidation> findRecordValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
+  
   
   /**
    * Find by id and table value dataset id id.
