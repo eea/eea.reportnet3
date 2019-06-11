@@ -35,7 +35,7 @@ public class TableValidation {
   /** The id field. */
   @ManyToOne
   @JoinColumn(name = "ID_TABLE")
-  private TableValue idTable;
+  private TableValue tableValue;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
   @JoinColumn(name = "ID_VALIDATION", referencedColumnName = "id")

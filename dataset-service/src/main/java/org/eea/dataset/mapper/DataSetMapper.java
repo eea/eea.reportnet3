@@ -1,15 +1,13 @@
 package org.eea.dataset.mapper;
 
 import java.util.List;
+import java.util.Objects;
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -22,10 +20,12 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
 
+
   /**
    * Map.
    *
    * @param value the value
+   *
    * @return the string
    */
   default String map(ObjectId value) {
@@ -37,6 +37,7 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * Class to entity.
    *
    * @param model the model
+   *
    * @return the dataset value
    */
   @Mapping(source = "tableVO", target = "tableValues")
@@ -48,39 +49,13 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
    * Entity to class.
    *
    * @param entity the entity
+   *
    * @return the data set VO
    */
   @Mapping(source = "tableValues", target = "tableVO")
-  @Mapping(source = "datasetValidations", target = "validations")
   @Override
   DataSetVO entityToClass(DatasetValue entity);
 
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the record VO
-   */
-  @Mapping(source = "entity.recordValidations", target = "validations")
-  RecordVO entityToClass(RecordValue entity);
-
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the table VO
-   */
-  @Mapping(source = "entity.tableValidations", target = "validations")
-  TableVO entityToClass(TableValue entity);
-
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the field VO
-   */
-  @Mapping(source = "entity.fieldValidations", target = "validations")
-  FieldVO entityToClass(FieldValue entity);
 
   /**
    * Fill ids.
@@ -99,8 +74,39 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
       });
     });
 
+
   }
 
 
+  @AfterMapping
+  default void fillIdsValidation(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
+    List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
+    if (null != datasetValidations) {
+      datasetValidations.stream().filter(Objects::nonNull)
+          .forEach(datasetValidation -> datasetValidation.setDatasetValue(dataset));
+    }
+    List<TableValue> tableValues = dataset.getTableValues();
+    if (null != tableValues) {
+      tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
+        List<TableValidation> tableValidations = tableValue.getTableValidations();
+        if (null != tableValidations) {
+          tableValidations.stream().filter(Objects::nonNull)
+              .forEach(tableValidation -> tableValidation.setTableValue(tableValue));
+        }
+        tableValue.getRecords().stream().filter(Objects::nonNull).forEach(record -> {
+          if (null != record.getRecordValidations()) {
+            record.getRecordValidations().stream().filter(Objects::nonNull)
+                .forEach(recordValidation -> recordValidation.setRecordValue(record));
+          }
+          record.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+            if (field.getFieldValidations() != null) {
+              field.getFieldValidations().stream()
+                  .forEach(fieldValidation -> fieldValidation.setFieldValue(field));
+            }
+          });
+        });
+      });
+    }
+  }
 }
 

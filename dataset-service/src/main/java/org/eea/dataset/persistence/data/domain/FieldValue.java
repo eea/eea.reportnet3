@@ -63,7 +63,7 @@ public class FieldValue {
 
 
   /** The field validations. */
-  @OneToMany(mappedBy = "idField", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "fieldValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
 
   /**
