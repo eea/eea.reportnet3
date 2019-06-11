@@ -16,6 +16,7 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
@@ -156,6 +157,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The field repository. */
   @Autowired
   private FieldRepository fieldRepository;
+  
+  /** The record no validation. */
+  @Autowired
+  private RecordNoValidationMapper recordNoValidationMapper;
   
 
 
@@ -376,7 +381,7 @@ public class DatasetServiceImpl implements DatasetService {
     } else {
       records = this.sanitizeRecords(records);
 
-      List<RecordVO> recordVOs = recordMapper.entityListToClass(records);
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       Optional.ofNullable(idFieldSchema).ifPresent(field -> {
         recordVOs.sort((RecordVO v1, RecordVO v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
