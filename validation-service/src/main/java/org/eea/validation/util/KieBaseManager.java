@@ -86,16 +86,16 @@ public class KieBaseManager {
       Map<String, String> ruleAdd = new HashMap<>();
       switch (listRules.get(i).getScope()) {
         case DATASET:
-          LVTypeValidation = TypeValidation.DATASETVO.getValue();
+          LVTypeValidation = TypeValidation.DATASET.getValue();
           break;
         case FIELD:
-          LVTypeValidation = TypeValidation.FIELDVO.getValue();
+          LVTypeValidation = TypeValidation.FIELD.getValue();
           break;
         case RECORD:
-          LVTypeValidation = TypeValidation.RECORDVO.getValue();
+          LVTypeValidation = TypeValidation.RECORD.getValue();
           break;
         case TABLE:
-          LVTypeValidation = TypeValidation.TABLEVO.getValue();
+          LVTypeValidation = TypeValidation.TABLE.getValue();
           break;
       }
       ruleAdd.put(ConditionsDrools.RULE_ID.getValue(), listRules.get(i).getRuleId().toString());
