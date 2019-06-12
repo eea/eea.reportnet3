@@ -1,8 +1,8 @@
 package org.eea.validation.util;
 
 import java.io.FileNotFoundException;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.kie.api.KieBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class KieBaseManager {
 
   /** The data flow rules repository. */
   @Autowired
-  private DatasetSchemaController controllerSchema;
+  private SchemasRepository schemasRepository;
 
   /**
    * Reload rules.
@@ -31,11 +31,10 @@ public class KieBaseManager {
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
-    DataSetSchemaVO preRepositoryDB =
+    DataSetSchema preRepositoryDB =
         // dataFlowRulesRepository.findAllByDataFlowId(dataFlowId);
 
-        controllerSchema.findDataSchemaByDataflow(dataFlowId);
-
+        schemasRepository.findSchemaByIdFlow(dataFlowId);
 
     // List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
     // List<Map<String, String>> ruleAttributes = new ArrayList<>();

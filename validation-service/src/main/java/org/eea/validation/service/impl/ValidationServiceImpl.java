@@ -24,8 +24,7 @@ import org.eea.validation.persistence.data.repository.ValidationDatasetRepositor
 import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
 import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
 import org.eea.validation.persistence.data.repository.ValidationTableRepository;
-import org.eea.validation.persistence.rules.model.DataFlowRule;
-import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
+import org.eea.validation.persistence.rules.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.kie.api.runtime.KieSession;
@@ -35,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.google.common.collect.Lists;
 
 /**
  * The Class ValidationService.
@@ -55,9 +53,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private KieBaseManager kieBaseManager;
 
-  /** The data flow rules repository. */
-  @Autowired
-  private DataFlowRulesRepository dataFlowRulesRepository;
 
   /** The validation record repository. */
   @Autowired
@@ -177,16 +172,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
-    Iterable<DataFlowRule> preRepositoryDB =
-        dataFlowRulesRepository.findAllByDataFlowId(idDataflow);
-    List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
-    List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    for (int i = 0; i < preRepository.size(); i++) {
-      Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getRuleName());
-      ruleAttributes.add(rule1);
-    }
-    return ruleAttributes;
+    return null;
   }
 
   /**
@@ -264,8 +250,6 @@ public class ValidationServiceImpl implements ValidationService {
    * @param dataFlowRules the data flow rules
    */
   @Override
-  public void saveRule(DataFlowRule dataFlowRules) {
-    dataFlowRulesRepository.save(dataFlowRules);
-  }
+  public void saveRule(DataFlowRule dataFlowRules) {}
 
 }

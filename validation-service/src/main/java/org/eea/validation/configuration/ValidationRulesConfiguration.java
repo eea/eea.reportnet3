@@ -17,7 +17,7 @@ import com.mongodb.MongoClient;
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
-@EnableMongoRepositories(basePackages = "org.eea.validation.persistence.rules.repository")
+@EnableMongoRepositories(basePackages = "org.eea.validation.persistence.repository")
 public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
 
   /** The Constant DEFAULT_PORT. */
@@ -61,7 +61,7 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   protected String getDatabaseName() {
-    return "Dataset_Rules";
+    return "dataset_schema";
   }
 
   /**
