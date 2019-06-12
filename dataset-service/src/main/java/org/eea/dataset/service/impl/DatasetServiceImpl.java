@@ -51,6 +51,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
@@ -878,6 +880,41 @@ public class DatasetServiceImpl implements DatasetService {
 
 
     return result;
+  }
+  
+  
+  @Override
+  @Transactional
+  public FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable) throws EEAException{
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+    FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
+    validations.setErrors(new ArrayList<>());
+    validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
+    validations.setIdDataset(datasetId);
+    DataSetSchema schema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+    validations.setNameDataSetSchema(schema.getNameDataSetSchema());
+    
+    //dataset errors
+    //dataset.getDatasetValidations().get(0).getValidation();
+    for(DatasetValidation validation : dataset.getDatasetValidations()) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(validation.getId());
+      error.setIdValidation(validation.getValidation().getId());
+      error.setLevelError(validation.getValidation().getLevelError());
+      error.setMessage(validation.getValidation().getMessage());
+      error.setNameTableSchema(null);
+      error.setTypeEntity(validation.getValidation().getTypeEntity());
+      error.setValidationDate(validation.getValidation().getValidationDate());
+      
+      validations.getErrors().add(error);
+    }
+    
+    
+    
+    return validations;
+    
   }
 
 

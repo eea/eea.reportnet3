@@ -12,6 +12,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -310,6 +311,26 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return statistics;
+  }
+  
+   
+  @Override
+  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public  FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize) {
+    
+    FailedValidationsDatasetVO validations = null;
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    try {
+      
+      validations = datasetService.getListValidations(datasetId, pageable);
+      
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return validations;
   }
 
 }

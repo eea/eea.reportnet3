@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -138,4 +139,5 @@ public interface DatasetService {
    */
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
+  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable) throws EEAException;
 }
