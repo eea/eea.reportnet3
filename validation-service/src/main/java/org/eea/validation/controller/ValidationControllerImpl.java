@@ -65,11 +65,11 @@ public class ValidationControllerImpl implements ValidationController {
 
   }
 
+
   /**
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   * @return the list
    */
   @Override
   public void validateDataSetData(@RequestParam("id") Long datasetId) {

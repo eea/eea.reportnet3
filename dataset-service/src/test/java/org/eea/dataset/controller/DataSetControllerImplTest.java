@@ -386,9 +386,7 @@ public class DataSetControllerImplTest {
   public void testUpdateDatasetException() throws Exception {
     dataSetControllerImpl.updateDataset(null);
   }
-  
-  
-  
+
   @Test
   public void testLoadStatistics() throws Exception {
     when(datasetService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
@@ -396,8 +394,8 @@ public class DataSetControllerImplTest {
 
     Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
   }
-  
-  
+
+
   @Test
   public void testLoadStatisticsException() throws Exception {
     doThrow(new EEAException()).when(datasetService).getStatistics(Mockito.any());
@@ -405,5 +403,5 @@ public class DataSetControllerImplTest {
 
     Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
   }
-  
+
 }

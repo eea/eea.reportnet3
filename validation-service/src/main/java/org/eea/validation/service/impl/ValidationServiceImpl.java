@@ -196,44 +196,49 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public void validateDataSetData(Long datasetId) {
-    // // Get Dataflow id
+    // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     loadRulesKnowledgeBase(dataflowId);
 
-    // Pasar las validaciones de dataset y tablas
+    // Dataset and TablesValue validations
     // read Dataset Data
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
     List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
     // Save results to the db
-    validationDatasetRepository.saveAll((Iterable) resultDataset);
+    validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
     List<TableValidation> resultTable = runTableValidations(dataset.getTableValues());
     // Save results to the db
-    validationTableRepository.saveAll((Iterable) resultDataset);
+    validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
 
-    // Pasar for con la pasada de los registros, por cada tabla de 100 en 100
+    // Records validation
     for (TableValue tableValue : dataset.getTableValues()) {
-      List<RecordValue> records = new ArrayList<>();
-      long Tableid = tableValue.getId();
-      while (records.size() == 100) {
-        // read Dataset Data
-        Pageable pageable = PageRequest.of(1, 100);
-        List<RecordValue> recordsPaged = recordRepository.findRecordsPaged(Tableid, pageable);
-        // Execute rules validation
+      int i = 1;
+      String tableIdTableSchema = tableValue.getIdTableSchema();
+      Pageable pageable = PageRequest.of(i, 100);
+      // read Dataset Data
+      List<RecordValue> recordsPaged =
+          recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
+
+      while (recordsPaged.size() != 0) {
+        // Execute record rules validation
         List<RecordValidation> resultRecord = runRecordValidations(recordsPaged);
         // Save results to the db
-        validationRecordRepository.saveAll((Iterable) resultRecord);
-
+        validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
         for (RecordValue record : recordsPaged) {
 
-          // Execute rules validation
+          // Execute field rules validation
           List<FieldValidation> resultField = runFieldValidations(record.getFields());
           // Save results to the db
-          validationFieldRepository.saveAll((Iterable) resultField);
+          validationFieldRepository.saveAll((Iterable<FieldValidation>) resultField);
         }
+        pageable = PageRequest.of(i++, 100);
+        recordsPaged = recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
       }
     }
+
+
     // release kafka event to notify that the dataset validations have been executed
     releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
   }
