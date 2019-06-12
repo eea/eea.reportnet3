@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 public interface DatasetService {
 
   /**
-   * Create empty dataset.
+   * Create removeDatasetData dataset.
    *
    * @param datasetName the dataset name
    */
