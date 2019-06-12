@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ public class ValidationControllerImpl implements ValidationController {
 
   /** The validation service. */
   @Autowired
+  @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
 
