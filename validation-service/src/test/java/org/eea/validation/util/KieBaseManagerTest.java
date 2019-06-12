@@ -1,19 +1,16 @@
 package org.eea.validation.util;
 
-import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
-import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.internal.utils.KieHelper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -21,8 +18,6 @@ public class KieBaseManagerTest {
 
   @InjectMocks
   private KieBaseManager kieBaseManager;
-  @Mock
-  private DataFlowRulesRepository dataFlowRulesRepository;
   @Mock
   private KieHelper kieHelper;
 
@@ -60,7 +55,7 @@ public class KieBaseManagerTest {
     rule4.setWhenCondition("1234");
     rule4.setThenCondition(listsString);
     list.add(rule4);
-    when(dataFlowRulesRepository.findAllByDataFlowId(Mockito.any())).thenReturn(list);
+    // when(dataFlowRulesRepository.findAllByDataFlowId(Mockito.any())).thenReturn(list);
     kieBaseManager.reloadRules(1L);
   }
 

@@ -2,7 +2,6 @@ package org.eea.validation.service.impl;
 
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,6 @@ import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
-import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.kie.api.runtime.KieSession;
@@ -21,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.google.common.collect.Lists;
 
 /**
  * The Class ValidationService.
@@ -37,8 +34,6 @@ public class ValidationServiceImpl implements ValidationService {
   private KieBaseManager kieBaseManager;
 
   /** The data flow rules repository. */
-  @Autowired
-  private DataFlowRulesRepository dataFlowRulesRepository;
 
   @Autowired
   private KafkaSender kafkaSender;
@@ -92,16 +87,9 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
-    Iterable<DataFlowRule> preRepositoryDB =
-        dataFlowRulesRepository.findAllByDataFlowId(idDataflow);
-    List<DataFlowRule> preRepository = Lists.newArrayList(preRepositoryDB);
-    List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    for (int i = 0; i < preRepository.size(); i++) {
-      Map<String, String> rule1 = new HashMap<>();
-      rule1.put("ruleid", preRepository.get(i).getRuleName());
-      ruleAttributes.add(rule1);
-    }
-    return ruleAttributes;
+
+
+    return null;
   }
 
   /**
@@ -116,7 +104,7 @@ public class ValidationServiceImpl implements ValidationService {
     // // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     // Execute rules validation
-    // DatasetValue result = runDatasetValidations(dataset, dataflowId);
+    DatasetValue result = runDatasetValidations(dataset, dataflowId);
     // Save results to the db
     // datasetController.saveValidations(result);
     datasetRepository.saveAndFlush(dataset);
@@ -149,7 +137,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public void saveRule(DataFlowRule dataFlowRules) {
-    dataFlowRulesRepository.save(dataFlowRules);
+
   }
 
 }
