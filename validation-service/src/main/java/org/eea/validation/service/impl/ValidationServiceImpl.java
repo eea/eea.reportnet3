@@ -2,7 +2,6 @@ package org.eea.validation.service.impl;
 
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,8 +151,13 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param DataflowId the dataflow id
    * @return the kie session
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
+   * @throws SecurityException
+   * @throws NoSuchFieldException
    */
-  public KieSession loadRulesKnowledgeBase(Long DataflowId) {
+  public KieSession loadRulesKnowledgeBase(Long DataflowId) throws NoSuchFieldException,
+      SecurityException, IllegalArgumentException, IllegalAccessException {
     try {
       kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
     } catch (FileNotFoundException e) {
@@ -184,7 +188,13 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    loadRulesKnowledgeBase(dataflowId);
+    try {
+      loadRulesKnowledgeBase(dataflowId);
+    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
+        | IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
     // Dataset and TablesValue validations
     // read Dataset Data

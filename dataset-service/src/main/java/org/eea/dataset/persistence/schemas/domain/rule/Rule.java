@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,6 +39,8 @@ public class Rule {
   @Field(value = "thenCondition")
   private List<String> thenCondition;
 
+  @Field(value = "scope")
+  private TypeEntityEnum scope;
 
   /**
    * Hash code.
@@ -46,7 +49,7 @@ public class Rule {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(dataFlowId, ruleId, ruleName, thenCondition, whenCondition);
+    return Objects.hash(dataFlowId, ruleId, ruleName, thenCondition, whenCondition, scope);
   }
 
   /**
@@ -67,6 +70,7 @@ public class Rule {
     return Objects.equals(dataFlowId, other.dataFlowId) && Objects.equals(ruleId, other.ruleId)
         && Objects.equals(ruleName, other.ruleName)
         && Objects.equals(thenCondition, other.thenCondition)
-        && Objects.equals(whenCondition, other.whenCondition);
+        && Objects.equals(whenCondition, other.whenCondition) && Objects.equals(scope, other.scope);
+
   }
 }

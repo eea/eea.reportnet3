@@ -56,7 +56,7 @@ public class KieBaseManagerTest {
     rule4.setThenCondition(listsString);
     list.add(rule4);
     // when(dataFlowRulesRepository.findAllByDataFlowId(Mockito.any())).thenReturn(list);
-    kieBaseManager.reloadRules(1L);
+    // kieBaseManager.reloadRules(1L);
   }
 
 }
