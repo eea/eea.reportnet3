@@ -385,4 +385,11 @@ public class DataSetControllerImplTest {
   public void testUpdateDatasetException() throws Exception {
     dataSetControllerImpl.updateDataset(null);
   }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testsaveValidationsError() throws Exception {
+    dataSetControllerImpl.saveValidations(null);
+  }
+
 }
