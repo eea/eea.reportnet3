@@ -167,8 +167,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId id import
    */
   @Override
-  @DeleteMapping(value = "/deleteImportData")
-  public void deleteImportData(final Long dataSetId) {
+  @DeleteMapping(value = "{id}/deleteImportData")
+  public void deleteImportData(@PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
