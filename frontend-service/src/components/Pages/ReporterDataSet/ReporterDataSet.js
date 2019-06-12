@@ -195,13 +195,13 @@ const ReporterDataSet = () => {
   const onConfirmDeleteHandler = () =>{
     console.log("Data deleted!");
     setDeleteDialogVisible(false);
-    /*TODO: API Call delete
+    //TODO: API Call delete
     HTTPRequesterAPI.delete(
       {
         url:'/dataset/deleteImportData/1',
         queryString: {}
       }
-    );*/
+    );
   }
 
   const getPercentage = (tableValues) =>{
