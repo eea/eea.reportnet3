@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -131,11 +131,13 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    */
+
   @Override
-  @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") final Long datasetId,
-      @RequestParam("file") final MultipartFile file) {
-    // filter if the file is removeDatasetData
+  @PostMapping("{id}/loadTableData/{idTableSchema}")
+  public void loadTableData(@PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file,
+      @PathVariable("idTableSchema") String idTableSchema) {
+    // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -150,7 +152,7 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is);
+      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is, idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {

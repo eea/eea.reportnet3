@@ -73,9 +73,9 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    */
-  @PostMapping("{id}/loadDatasetData")
-  void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam("file") MultipartFile file);
+  @PostMapping("{id}/loadTableData/{idTableSchema}")
+  void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
+      @PathVariable("idTableSchema") String idTableSchema);
 
 
   /**
