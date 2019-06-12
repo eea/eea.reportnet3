@@ -1,0 +1,60 @@
+{
+  "headers": [
+    {
+      "id": "string",
+      "idRecord": "string",
+      "name": "string",
+      "type": "string"
+    }
+  ],
+  "id": 0,
+  "idTableSchema": "string",
+  "name": "string",
+  "records": [
+    {
+      "datasetPartitionId": 0,
+      "fields": [
+        {
+          "id": 0,
+          "idFieldSchema": "string",
+          "type": "string",
+          "validations": [
+            {
+              "id": 0,
+              "idRule": "string",
+              "levelError": "WARNING",
+              "message": "string",
+              "typeEntity": "FIELD",
+              "validationDate": "string"
+            }
+          ],
+          "value": "string"
+        }
+      ],
+      "id": 0,
+      "idRecordSchema": "string",
+      "sortCriteria": "string",
+      "validations": [
+        {
+          "id": 0,
+          "idRule": "string",
+          "levelError": "WARNING",
+          "message": "string",
+          "typeEntity": "RECORD",
+          "validationDate": "string"
+        }
+      ]
+    }
+  ],
+  "totalRecords": 0,
+  "validations": [
+    {
+      "id": 0,
+      "idRule": "string",
+      "levelError": "WARNING",
+      "message": "string",
+      "typeEntity": "TABLE",
+      "validationDate": "string"
+    }
+  ]
+}

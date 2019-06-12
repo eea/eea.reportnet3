@@ -11,7 +11,8 @@ import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUploa
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
-//import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
+import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
+import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
@@ -22,7 +23,7 @@ const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError] = useState(true);
+  const [validationError, setValidationError] = useState(true);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
@@ -153,19 +154,20 @@ const ReporterDataSet = () => {
 
     //Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
-    const dataPromise = HTTPRequesterAPI.get(
+    /* const dataPromise = HTTPRequesterAPI.get(
       {
         url:'/dataschema/dataflow/1',
         queryString: {}
       }
-    );
+    ); */
 
-    dataPromise.then(response =>{
+    /*dataPromise.then(response =>{
       console.log(response.data);
       setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
             id: item["idTableSchema"],
             name : item["nameTableSchema"]
+            hasErrors: {...response.data.tables.filter(t=>t["idTableSchema"]===item["idTableSchema"])[0]}.tableErrors}}
             }
       })); 
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
@@ -181,7 +183,68 @@ const ReporterDataSet = () => {
     .catch(error => {
       console.log(error);
       return error;
-    });    
+    });   */ 
+
+    
+
+ //Mostrar el join de los json con la union mediante el hasErrors con el filter
+/* const dataPromise = HTTPRequesterAPI.get(
+  {
+    url:'/dataschema/dataflow/1',
+    queryString: {}
+  }
+);
+
+  
+dataPromise.then(response =>{
+  console.log(response.data);
+  const dataflow = response.data;
+  HTTPRequesterAPI.get(
+    {
+      url:'/dataschema/dataflow/1',
+      queryString: {}
+    }
+  ).then(response =>{
+    setTableSchema(dataflow.map((item,i)=>{
+      return {
+          id: item["idTableSchema"],
+          name : item["nameTableSchema"],
+          hasErrors: response.data.filter(t=>t["idTableSchema"]===item["idTableSchema"]).tableErrors
+          }
+    });
+  }) */
+
+    setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
+      return {
+        id:item["idTableSchema"],
+        name:item["nameTableSchema"],
+        
+      }
+    }));
+    
+    setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
+      return table.recordSchema.fieldSchema.map((item,i)=>{
+        return {
+            table: table["nameTableSchema"], 
+            field: item["id"], 
+            header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+          }
+      });        
+    }));
+
+
+    //Show validations button
+    /* const dataError = HTTPRequesterAPI.get(
+      {
+        url: '/dataschema/dataflow/1',
+        queryString: {}
+      }
+    );
+
+    dataError.then(response => {
+      console.log(response.data)
+    }) */
+    
   }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{

@@ -45,18 +45,27 @@ const TabsSchema = (props) => {
         }
     ];
 
-    
-    let tabs = (props.tables && props.tableSchemaColumns)?
-        props.tables.map((table, i) => {
-            return (
-                // rightIcon={resources.icons["warning"]}
-                <TabPanel header={table.name} key={table.name}>
-                    <div className={styles.TabsSchema}>
-                        <DataViewer key={table.id} id={table.id} name={table.name} customButtons={customButtons} 
-                                    tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}/>
-                    </div>
-                </TabPanel>
-            );
+  let tabs =
+    props.tables && props.tableSchemaColumns
+      ? props.tables.map(table => {
+          return (
+            // rightIcon={resources.icons["warning"]}
+            <TabPanel header={table.name} key={table.name}>
+              <div className={styles.TabsSchema}>
+                <DataViewer
+                  key={table.id}
+                  id={table.id}
+                  name={table.name}
+                  customButtons={customButtons}
+                  tableSchemaColumns={
+                    props.tableSchemaColumns
+                      .map(tab => tab.filter(t => t.table === table.name))
+                      .filter(f => f.length > 0)[0]
+                  }
+                />
+              </div>
+            </TabPanel>
+          );
         })
         : null;
     return (
