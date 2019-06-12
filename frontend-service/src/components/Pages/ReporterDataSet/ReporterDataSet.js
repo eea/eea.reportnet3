@@ -23,7 +23,7 @@ const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError, setValidationError] = useState(false);
+  //const [validationError, setValidationError] = useState(false);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
@@ -43,63 +43,72 @@ const ReporterDataSet = () => {
 
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
-    setCustomButtons([
-      {
-        label: resources.messages["import"],
-        icon: "0",
-        group: "left",
-        disabled: false,
-        clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
-      },
-      {
-        label: resources.messages["export"],
-        icon: "1",
-        group: "left",
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages["delete"],
-        icon: "2",
-        group: "left",
-        disabled: false,
-        clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
-      },
-      {
-        label: resources.messages["events"],
-        icon: "4",
-        group: "right",
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages["validate"],
-        icon: "10",
-        group: "right",
-        disabled: true,
-        //!validationError,
-        clickHandler: null,
-        ownButtonClasses:null,
-        iconClasses:null
-      },
-      {
-        label: resources.messages["showValidations"],
-        icon: "3",
-        group: "right",
-        disabled: validationError,
-        clickHandler: () => setVisibleHandler(setValidationsVisible, true),
-        ownButtonClasses:null,
-        iconClasses:(validationError)?"warning":""
-      },
-      {
-        //title: "Dashboards",
-        label: resources.messages["dashboards"],
-        icon: "5",
-        group: "right",
-        disabled: false,
-        clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
-      }
-    ]);
+    
+    fetch('http://dummy.restapiexample.com/api/v1/employees')
+    .then(response => response.json())
+    .then(myJson =>{
+
+      setCustomButtons([
+        {
+          label: resources.messages["import"],
+          icon: "0",
+          group: "left",
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
+        },
+        {
+          label: resources.messages["export"],
+          icon: "1",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+        },
+        {
+          label: resources.messages["delete"],
+          icon: "2",
+          group: "left",
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+        },
+        {
+          label: resources.messages["events"],
+          icon: "4",
+          group: "right",
+          disabled: true,
+          clickHandler: null
+        },
+        {
+          label: resources.messages["validate"],
+          icon: "10",
+          group: "right",
+          disabled: true,
+          //!validationError,
+          clickHandler: null,
+          ownButtonClasses:null,
+          iconClasses:null
+        },
+        {
+          label: resources.messages["showValidations"],
+          icon: "3",
+          group: "right",
+          disabled: !jsonDataSchemaErrors.datasetErrors,
+          clickHandler: () => setVisibleHandler(setValidationsVisible, true),
+          ownButtonClasses:null,
+          iconClasses:(jsonDataSchemaErrors.datasetErrors)?"warning":""
+        },
+        {
+          //title: "Dashboards",
+          label: resources.messages["dashboards"],
+          icon: "5",
+          group: "right",
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
+        }
+      ]);
+
+    });
+
+    
 
     setBreadCrumbItems( [
       {label: resources.messages["newDataset"], url: '#'},
@@ -155,21 +164,22 @@ const ReporterDataSet = () => {
 
     //Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
-    /* const dataPromise = HTTPRequesterAPI.get(
+     const dataPromise = HTTPRequesterAPI.get(
       {
         url:'/dataschema/dataflow/1',
         queryString: {}
       }
-    ); */
+    ); 
+console.log(dataPromise);
+    dataPromise.then(response =>{
 
-    /*dataPromise.then(response =>{
+      
       console.log(response.data);
       setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
             id: item["idTableSchema"],
-            name : item["nameTableSchema"]
-            hasErrors: {...response.data.tables.filter(t=>t["idTableSchema"]===item["idTableSchema"])[0]}.tableErrors}}
-            }
+            name : item["nameTableSchema"],
+            hasErrors: {...response.data.tables.filter(t=>t["idTableSchema"]===item["idTableSchema"])[0]}.tableErrors}
       })); 
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
         return table.recordSchema.fieldSchema.map((item,i)=>{
@@ -184,7 +194,7 @@ const ReporterDataSet = () => {
     .catch(error => {
       console.log(error);
       return error;
-    });   */ 
+    });   
 
     
 
@@ -261,22 +271,6 @@ setTimeout(() => {
     })*/ 
 
   }, []);
-
- 
-
-useEffect(() => {
-    console.log('Antes ', validationError)
-    
-    let test =jsonDataSchemaErrors.datasetErrors;
-
-      setValidationError(test) ;
-      console.log('despues ', validationError, 'test = ', test)
-    
-}, [])
-
-  
-
-
   
   const setVisibleHandler = (fnUseState, visible) =>{
     fnUseState(visible);
