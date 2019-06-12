@@ -81,28 +81,32 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
   @AfterMapping
   default void fillIdsValidation(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
     List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
-    datasetValidations.stream().filter(Objects::nonNull)
-        .forEach(datasetValidation -> datasetValidation.setDatasetValue(dataset));
+    if (null != datasetValidations) {
+      datasetValidations.stream().filter(Objects::nonNull)
+          .forEach(datasetValidation -> datasetValidation.setDatasetValue(dataset));
+    }
     List<TableValue> tableValues = dataset.getTableValues();
-    tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
-      List<TableValidation> tableValidations = tableValue.getTableValidations();
-      if (null != tableValidations) {
-        tableValidations.stream().filter(Objects::nonNull)
-            .forEach(tableValidation -> tableValidation.setTableValue(tableValue));
-      }
-      tableValue.getRecords().stream().filter(Objects::nonNull).forEach(record -> {
-        if (null != record.getRecordValidations()) {
-          record.getRecordValidations().stream().filter(Objects::nonNull)
-              .forEach(recordValidation -> recordValidation.setRecordValue(record));
+    if (null != tableValues) {
+      tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
+        List<TableValidation> tableValidations = tableValue.getTableValidations();
+        if (null != tableValidations) {
+          tableValidations.stream().filter(Objects::nonNull)
+              .forEach(tableValidation -> tableValidation.setTableValue(tableValue));
         }
-        record.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-          if (field.getFieldValidations() != null) {
-            field.getFieldValidations().stream()
-                .forEach(fieldValidation -> fieldValidation.setFieldValue(field));
+        tableValue.getRecords().stream().filter(Objects::nonNull).forEach(record -> {
+          if (null != record.getRecordValidations()) {
+            record.getRecordValidations().stream().filter(Objects::nonNull)
+                .forEach(recordValidation -> recordValidation.setRecordValue(record));
           }
+          record.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+            if (field.getFieldValidations() != null) {
+              field.getFieldValidations().stream()
+                  .forEach(fieldValidation -> fieldValidation.setFieldValue(field));
+            }
+          });
         });
       });
-    });
+    }
   }
 }
 

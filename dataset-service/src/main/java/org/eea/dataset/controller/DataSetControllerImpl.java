@@ -11,6 +11,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
@@ -256,6 +257,28 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
     }
     return result;
+  }
+  
+  
+  
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics by id
+   */
+  @Override
+  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
+    
+    StatisticsVO statistics = null;
+    try {
+      statistics = datasetService.getStatistics(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return statistics;
   }
 
 }

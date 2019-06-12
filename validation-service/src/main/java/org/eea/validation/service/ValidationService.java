@@ -3,7 +3,14 @@ package org.eea.validation.service;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 
 /**
@@ -27,20 +34,25 @@ public interface ValidationService {
    */
   void validateDataSetData(Long datasetId);
 
-
-  /**
-   * Gets the element lenght.
-   *
-   * @param dataFlowRules the data flow rules
-   * @return the element lenght
-   */
-  DatasetValue runDatasetValidations(DatasetValue dataset, Long DataflowId);
-
   /**
    * Save rule.
    *
    * @param dataFlowRules the data flow rules
    */
   void saveRule(DataFlowRule dataFlowRules);
+
+  /**
+   * Run dataset validations.
+   *
+   * @param dataset the dataset
+   * @return the dataset value
+   */
+  List<DatasetValidation> runDatasetValidations(DatasetValue dataset);
+
+  List<TableValidation> runTableValidations(List<TableValue> list);
+
+  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged);
+
+  List<FieldValidation> runFieldValidations(List<FieldValue> fields);
 
 }

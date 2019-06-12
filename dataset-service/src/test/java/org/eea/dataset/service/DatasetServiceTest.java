@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -25,6 +26,7 @@ import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
@@ -100,6 +102,9 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetTablesMapper dataSetTablesMapper;
+  
+  @Mock
+  private FieldRepository fieldRepository;
 
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -116,12 +121,15 @@ public class DatasetServiceTest {
     recordValue = new RecordValue();
     tableValue = new TableValue();
     tableValue.setId(1L);
+    tableValue.setTableValidations(new ArrayList<>());
     recordValue.setTableValue(tableValue);
     recordValues.add(recordValue);
     datasetValue = new DatasetValue();
     tableValues = new ArrayList<>();
     tableValues.add(tableValue);
     datasetValue.setTableValues(tableValues);
+    datasetValue.setIdDatasetSchema("5cf0e9b3b793310e9ceca190");
+    datasetValue.setDatasetValidations(new ArrayList<>());
     tableVOs = new ArrayList<>();
     tableVO = new TableVO();
     tableVOs.add(tableVO);
@@ -351,6 +359,18 @@ public class DatasetServiceTest {
     datasetService.updateDataset(1L, new DataSetVO());
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
 
+  }
+  
+
+  @Test
+  public void testGetStatisticsSuccess() throws Exception {
+    
+    DataSetSchema schema = new DataSetSchema();
+    schema.setTableSchemas(new ArrayList<>());
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"))).thenReturn(schema);
+    datasetService.getStatistics(1L);
+    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
 
 }
