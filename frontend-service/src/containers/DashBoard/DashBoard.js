@@ -20,7 +20,7 @@ useEffect(() => {
 	    tabStatisticValues.push([t.totalRecords-t.totalErrors,t.totalRecordsWithWarnings,t.totalRecordsWithErrors]);
     });
 
-    //Transpose value matrix and delete undefined elements
+    //Transpose value matrix and delete undefined elements to fit Chart data structure
     const transposedValues = Object.keys(tabStatisticValues).map(c =>
       tabStatisticValues.map(r => r[c])
     ).filter(t=>t[0]!==undefined);
@@ -50,29 +50,24 @@ useEffect(() => {
 
     setDashBoardOptions({
       tooltips: {
-        mode: 'index',
-        intersect: false,
+        mode: 'index',        
         callbacks: {
-            label: (tooltipItems, data) => {
-                    //var label = data.datasets[tooltipItems.datasetIndex].totalData || '';
-                    console.log(tooltipItems.datasetIndex);
-                    console.log(data);
-                    console.log("Datasets")
-                    console.log(data.datasets);
-                    console.log(data.datasets[tooltipItems.datasetIndex].totalData); 
-                    return `(${tooltipItems.yLabel} %)`}
-        }
+            label: (tooltipItems, data) => `${data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems["index"]][tooltipItems.datasetIndex]} (${tooltipItems.yLabel} %)`}
       },
       responsive: true,
       scales: {
           xAxes: [{
               stacked: true,
+              scaleLabel: {
+                  display:true,
+                  labelString: 'Tables'
+              }
           }],
           yAxes: [{
               stacked: true,
               scaleLabel: {
-								display: true
-								//labelString: 'Value'
+                    display: true,
+                    labelString: 'Percentage'
               },
               ticks: {
                 // Include a % sign in the ticks
@@ -82,8 +77,7 @@ useEffect(() => {
       }});
 }, []);
 
-    const getPercentage = (valArr) =>{
-        //let valArr = [[105, 50, 80, 11],[15, 48, 58, 19],[10, 2, 15, 85]];     
+    const getPercentage = (valArr) =>{  
         let total = valArr.reduce((arr1, arr2) =>
             arr1.map((v, i) => v + arr2[i]));
         return valArr.map(val=>(val.map((v,i)=>((v/total[i])*100).toFixed(2))));

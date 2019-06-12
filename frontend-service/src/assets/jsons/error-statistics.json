@@ -1,7 +1,7 @@
 {
     "datasetErrors": true,
     "idDataSetSchema": 0,
-    "nameDataSetSchema": "US-STP6-DSM-VIS-01-List of Visualizations",
+    "nameDataSetSchema": "List of errors/warnings",
     "tables": [
       {
         "idTableSchema": "5cefb5b592f28351b4e9784e",

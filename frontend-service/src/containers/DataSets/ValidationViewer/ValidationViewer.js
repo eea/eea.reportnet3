@@ -9,7 +9,11 @@ import jsonData from '../../../assets/jsons/list-of-errors.json';
 import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
+import styles from './ValidationViewer.module.css';
+import ResourcesContext from '../../../components/Context/ResourcesContext';
+
 const ValidationViewer = (props) => {
+  const resources = useContext(ResourcesContext);
     const contextReporterDataSet = useContext(ReporterDataSetContext);
     const [totalRecords, setTotalRecords] = useState(0);
     const [fetchedData, setFetchedData] = useState([]);
@@ -95,7 +99,25 @@ const ValidationViewer = (props) => {
         // </div>;
         // setHeader(headerArr);
 
-        let columnsArr = Object.keys(jsonData.errors.fields[0]).map(col => <Column sortable={true} key={col} field={col} header={`${col.charAt(0).toUpperCase()}${col.slice(1)}`} />);
+        //jsonData.errors
+        const headers = [{
+              id: "origin",
+              message: resources.messages["origin"]
+            },
+            {
+              id: "level",
+              message: resources.messages["levelError"]
+            },
+            {
+              id: "message",
+              message: resources.messages["errorMessage"]
+            },
+            {
+              id: "type",
+              message: resources.messages["typeEntity"]
+            }];
+        let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={`${col.message}`} />);
+        columnsArr.push(<Column sortable={true} key="idObject" field="idObject" header="ID Object" className={styles.VisibleHeader} />)
         setColumns(columnsArr); 
   
       }, [cols, colOptions]);
@@ -121,6 +143,7 @@ const ValidationViewer = (props) => {
       // }
   
       useEffect(()=>{
+        setTotalRecords(jsonData.totalErrors);
         filterDataResponse(jsonData);
       },[]);
 
@@ -160,11 +183,20 @@ const ValidationViewer = (props) => {
         //   console.log(error);
         //   return error;
         // });
+
+        
+
       }
 
       const filterDataResponse = (data) =>{        
         
-        const values = [...data.errors.fields, ...data.blockers.fields, ...data.warnings.fields];
+        //const values = [...data.errors];
+
+        console.log(data.nameDataSetSchema);
+
+        const values = data.errors.map(e => {
+          return { origin: (e.nameTableSchema !== null)? e.nameTableSchema : data.nameDataSetSchema, level: e.levelError, message: e.message, type: e.typeEntity  }
+        });
 
         //TODO: Refactorizar
         // const dataFiltered = data.map(record => record.fields.map(f =>{
