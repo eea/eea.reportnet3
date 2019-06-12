@@ -10,8 +10,20 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.RecordRepository;
+import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
+import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
+import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
+import org.eea.validation.persistence.data.repository.ValidationTableRepository;
 import org.eea.validation.persistence.rules.model.DataFlowRule;
 import org.eea.validation.persistence.rules.repository.DataFlowRulesRepository;
 import org.eea.validation.service.ValidationService;
@@ -20,6 +32,8 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 
@@ -31,6 +45,11 @@ public class ValidationServiceImpl implements ValidationService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceImpl.class);
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /** The kie base manager. */
   @Autowired
@@ -40,54 +59,120 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataFlowRulesRepository dataFlowRulesRepository;
 
+  /** The validation record repository. */
+  @Autowired
+  private ValidationRecordRepository validationRecordRepository;
+
+  /** The validation dataset repository. */
+  @Autowired
+  private ValidationDatasetRepository validationDatasetRepository;
+
+  /** The validation table repository. */
+  @Autowired
+  private ValidationTableRepository validationTableRepository;
+
+  /** The validation field repository. */
+  @Autowired
+  private ValidationFieldRepository validationFieldRepository;
+
+  /** The kafka sender. */
   @Autowired
   private KafkaSender kafkaSender;
-
 
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
+  /** The record repository. */
+  @Autowired
+  private RecordRepository recordRepository;
+
   /** The dataset controller. */
   @Autowired
   private DataSetControllerZuul datasetController;
 
+  /** The kie session. */
+  private KieSession kieSession;
+
   /**
    * Gets the element lenght.
    *
-   * @param dataFlowRules the data flow rules
+   * @param dataset the dataset
    * @return the element lenght
    */
   @Override
-  public DatasetValue runDatasetValidations(DatasetValue dataset, Long DataflowId) {
-    KieSession kieSession;
-    System.err.println(System.currentTimeMillis());
-    try {
-      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-      return null;
-    }
-    System.err.println(System.currentTimeMillis());
+  public List<DatasetValidation> runDatasetValidations(DatasetValue dataset) {
     kieSession.insert(dataset);
-    // for (TableVO tableData : datasetVO.getTableVO()) {
-    // kieSession.insert(tableData);
-    // for (RecordVO recordData : tableData.getRecords()) {
-    // kieSession.insert(recordData);
-    // for (FieldVO FieldData : recordData.getFields()) {
-    // kieSession.insert(FieldData);
-    // }
-    // }
-    // }
     kieSession.fireAllRules();
     kieSession.dispose();
     System.err.println(System.currentTimeMillis());
-    return dataset;
+    return null;
+  }
+
+  /**
+   * Run table validations.
+   *
+   * @param tableValues the table values
+   * @return the list
+   */
+  @Override
+  public List<TableValidation> runTableValidations(List<TableValue> tableValues) {
+    kieSession.insert(tableValues);
+    kieSession.fireAllRules();
+    kieSession.dispose();
+    return null;
+  }
+
+  /**
+   * Run record validations.
+   *
+   * @param recordsPaged the records paged
+   * @return the list
+   */
+  @Override
+  public List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged) {
+    kieSession.insert(recordsPaged);
+    kieSession.fireAllRules();
+    kieSession.dispose();
+    return null;
+  }
+
+  /**
+   * Run field validations.
+   *
+   * @param fields the fields
+   * @return the list
+   */
+  @Override
+  public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
+    kieSession.insert(fields);
+    kieSession.fireAllRules();
+    kieSession.dispose();
+    return null;
+  }
+
+
+  /**
+   * Load rules knowledge base.
+   *
+   * @param DataflowId the dataflow id
+   * @return the kie session
+   */
+  public KieSession loadRulesKnowledgeBase(Long DataflowId) {
+    try {
+      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
+    } catch (FileNotFoundException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+      return null;
+    }
+
+    return kieSession;
   }
 
   /**
    * Gets the rules.
    *
+   * @param idDataflow the id dataflow
    * @return the rules
    */
   @Override
@@ -111,25 +196,54 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public void validateDataSetData(Long datasetId) {
-    // read Dataset Data
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    loadRulesKnowledgeBase(dataflowId);
+
+    // Pasar las validaciones de dataset y tablas
+    // read Dataset Data
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
-    // DatasetValue result = runDatasetValidations(dataset, dataflowId);
+    List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
     // Save results to the db
-    datasetRepository.saveAndFlush(dataset);
-    // release kafka event to notify that the dataset validations have been executed
-    releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
+    validationDatasetRepository.saveAll((Iterable) resultDataset);
+
+    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues());
+    // Save results to the db
+    validationTableRepository.saveAll((Iterable) resultDataset);
 
     // Pasar for con la pasada de los registros, por cada tabla de 100 en 100
-    // Pasar las validaciones de las tablas
-    // Pasar las validaciones de dataset
+    for (TableValue tableValue : dataset.getTableValues()) {
+      List<RecordValue> records = new ArrayList<>();
+      long Tableid = tableValue.getId();
+      while (records.size() == 100) {
+        // read Dataset Data
+        Pageable pageable = PageRequest.of(1, 100);
+        List<RecordValue> recordsPaged = recordRepository.findRecordsPaged(Tableid, pageable);
+        // Execute rules validation
+        List<RecordValidation> resultRecord = runRecordValidations(recordsPaged);
+        // Save results to the db
+        validationRecordRepository.saveAll((Iterable) resultRecord);
+
+        for (RecordValue record : recordsPaged) {
+
+          // Execute rules validation
+          List<FieldValidation> resultField = runFieldValidations(record.getFields());
+          // Save results to the db
+          validationFieldRepository.saveAll((Iterable) resultField);
+        }
+      }
+    }
+    // release kafka event to notify that the dataset validations have been executed
+    releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
   }
+
+
 
   /**
    * Release kafka event.
    *
+   * @param kafkaSender the kafka sender
    * @param eventType the event type
    * @param datasetId the dataset id
    */
