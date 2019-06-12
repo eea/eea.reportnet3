@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -183,7 +184,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Autowired
   private RecordValidationMapper recordValidationMapper;
-
 
 
   /**
@@ -401,13 +401,12 @@ public class DatasetServiceImpl implements DatasetService {
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}", datasetId);
 
-    } else {
-      records = this.sanitizeRecords(records);
-
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
-
+    } else {//Records retrieved,
+      //1º need to remove duplicated data
+      List<RecordValue> sanitizeRecords = this.sanitizeRecords(records);
+//2º sort sanitized data
       Optional.ofNullable(idFieldSchema).ifPresent(field -> {
-        recordVOs.sort((RecordVO v1, RecordVO v2) -> {
+        sanitizeRecords.sort((RecordValue v1, RecordValue v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
           String sortCriteria2 = v2.getSortCriteria();
           // process the sort criteria
@@ -430,15 +429,21 @@ public class DatasetServiceImpl implements DatasetService {
           return sort;
         });
       });
+      //3º calculate first and last index to create the page to retrieve sorted data
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > recordVOs.size()
-          ? recordVOs.size()
-          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      int endIndex =
+          (pageable.getPageNumber() + 1) * pageable.getPageSize() > sanitizeRecords.size()
+              ? sanitizeRecords.size()
+              : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      //4º map to VO the records of the calculated page
+      List<RecordVO> recordVOs = recordNoValidationMapper
+          .entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
 
-      List<RecordVO> sortedRecords = recordVOs.subList(initIndex, endIndex);
-      Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(mongoID);
-      Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(mongoID);
-      sortedRecords.stream().forEach(record -> {
+      //5º retrieve validations to set them into the final result
+      List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
+      Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
+      Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
+      recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
           field.setFieldValidations(
               this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
@@ -446,10 +451,10 @@ public class DatasetServiceImpl implements DatasetService {
         record.setRecordValidations(
             this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
       });
-      result.setRecords(sortedRecords);
-      result.setTotalRecords(Long.valueOf(recordVOs.size()));
+      result.setRecords(recordVOs);
+      result.setTotalRecords(Long.valueOf(sanitizeRecords.size()));
       LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",
-          datasetId, recordVOs.size(), pageable.getPageNumber(), pageable.getPageSize());
+          datasetId, sanitizeRecords.size(), pageable.getPageNumber(), pageable.getPageSize());
       if (StringUtils.isNotBlank(idFieldSchema)) {
         LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
       }
@@ -727,13 +732,13 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Returns map with key = IdField value=List of FieldValidation.
    *
-   * @param idTable the id table
+   * @param recordIds the record ids
    *
    * @return the Map
    */
-  private Map<Long, List<FieldValidation>> getFieldValidations(String idTable) {
+  private Map<Long, List<FieldValidation>> getFieldValidations(List<Long> recordIds) {
     List<FieldValidation> fieldValidations =
-        this.fieldValidationRepository.findByFieldValue_Record_TableValueIdTableSchema(idTable);
+        this.fieldValidationRepository.findByFieldValue_RecordIdIn(recordIds);
 
     Map<Long, List<FieldValidation>> result = new HashMap<>();
 
@@ -744,13 +749,15 @@ public class DatasetServiceImpl implements DatasetService {
       result.get(fieldValidation.getFieldValue().getId()).add(fieldValidation);
     });
 
-
     return result;
   }
 
-  private Map<Long, List<RecordValidation>> getRecordValidations(String idTable) {
+  /**
+   * Returns map with key = IdField value=List of FieldValidation.
+   */
+  private Map<Long, List<RecordValidation>> getRecordValidations(List<Long> recordIds) {
     List<RecordValidation> recordValidations =
-        this.recordValidationRepository.findByRecordValue_TableValueIdTableSchema(idTable);
+        this.recordValidationRepository.findByRecordValue_IdIn(recordIds);
 
     Map<Long, List<RecordValidation>> result = new HashMap<>();
 
@@ -760,7 +767,6 @@ public class DatasetServiceImpl implements DatasetService {
       }
       result.get(recordValidation.getRecordValue().getId()).add(recordValidation);
     });
-
 
     return result;
   }

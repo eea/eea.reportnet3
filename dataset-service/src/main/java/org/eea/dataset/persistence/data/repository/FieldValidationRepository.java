@@ -9,12 +9,13 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface FieldValidationRepository extends CrudRepository<FieldValidation, Integer> {
 
+
   /**
-   * Find by field value record table value id list.
+   * Find by field value record id list.
    *
-   * @param idTableSchema the id table Schema
+   * @param recordIds the record ids
    *
    * @return the list
    */
-  List<FieldValidation> findByFieldValue_Record_TableValueIdTableSchema(String idTableSchema);
+  List<FieldValidation> findByFieldValue_RecordIdIn(List<Long> recordIds);
 }

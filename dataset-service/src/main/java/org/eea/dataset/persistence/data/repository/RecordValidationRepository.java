@@ -12,9 +12,9 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   /**
    * Find by field value record table value id list.
    *
-   * @param idTableSchema the id table Schema
+   * @param recordIds the record ids
    *
    * @return the list
    */
-  List<RecordValidation> findByRecordValue_TableValueIdTableSchema(String idTableSchema);
+  List<RecordValidation> findByRecordValue_IdIn(List<Long> recordIds);
 }
