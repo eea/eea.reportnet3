@@ -130,7 +130,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
         final List<String> values = Arrays.asList(line);
         tableVO = sanitizeAndCreateDataSet(partitionId, line, tableVO, tables, values,
             dataSetSchema, headers, idTableSchema);
-        headers = tableVO.getHeaders();
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -226,8 +225,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema) {
     // Create object Table and set the attributes
-    if (null == tableVO.getHeaders()) {
-      tableVO.setHeaders(headers);
+    if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(
