@@ -1,5 +1,9 @@
 package org.eea.dataset.service.file;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import lombok.NoArgsConstructor;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -19,11 +24,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import lombok.NoArgsConstructor;
 
 
 /**
@@ -101,7 +101,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
     TableVO tableVO = new TableVO();
     final List<TableVO> tables = new ArrayList<>();
     final DataSetVO dataset = new DataSetVO();
-    List<FieldSchemaVO> headers = new ArrayList<>();
 
     // Get DataSetSchema
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
@@ -123,14 +122,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
 
       // Get de headers
-      headers = setHeaders(firstLine);
+      List<FieldSchemaVO> headers = setHeaders(firstLine);
 
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         tableVO = sanitizeAndCreateDataSet(partitionId, line, tableVO, tables, values,
             dataSetSchema, headers, idTableSchema);
-        headers = tableVO.getHeaders();
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -226,8 +224,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema) {
     // Create object Table and set the attributes
-    if (null == tableVO.getHeaders()) {
-      tableVO.setHeaders(headers);
+    if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(

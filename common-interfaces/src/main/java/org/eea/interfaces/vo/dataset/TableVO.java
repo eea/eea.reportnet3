@@ -6,7 +6,6 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 
 /**
  * The Class TableVO.
@@ -36,11 +35,6 @@ public class TableVO implements Serializable {
    */
   private List<RecordVO> records;
 
-  /**
-   * The headers.
-   */
-  private List<FieldSchemaVO> headers;
-
 
   /**
    * The total records.
@@ -54,7 +48,7 @@ public class TableVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, idTableSchema, records, headers);
+    return Objects.hash(id, idTableSchema, records);
   }
 
   /**
@@ -73,8 +67,7 @@ public class TableVO implements Serializable {
       return false;
     }
     final TableVO table = (TableVO) obj;
-    return id.equals(table.id) && idTableSchema
-        .equals(table.idTableSchema)
-        && records.equals(table.records) && headers.equals(table.headers);
+    return id.equals(table.id) && idTableSchema.equals(table.idTableSchema)
+        && records.equals(table.records);
   }
 }
