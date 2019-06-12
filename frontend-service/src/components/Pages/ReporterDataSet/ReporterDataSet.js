@@ -173,6 +173,63 @@ const ReporterDataSet = () => {
 console.log(dataPromise);
     dataPromise.then(response =>{
 
+      setCustomButtons([
+        {
+          label: resources.messages["import"],
+          icon: "0",
+          group: "left",
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
+        },
+        {
+          label: resources.messages["export"],
+          icon: "1",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+        },
+        {
+          label: resources.messages["delete"],
+          icon: "2",
+          group: "left",
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+        },
+        {
+          label: resources.messages["events"],
+          icon: "4",
+          group: "right",
+          disabled: true,
+          clickHandler: null
+        },
+        {
+          label: resources.messages["validate"],
+          icon: "10",
+          group: "right",
+          disabled: true,
+          //!validationError,
+          clickHandler: null,
+          ownButtonClasses:null,
+          iconClasses:null
+        },
+        {
+          label: resources.messages["showValidations"],
+          icon: "3",
+          group: "right",
+          disabled: !response.data.datasetErrors,
+          clickHandler: () => setVisibleHandler(setValidationsVisible, true),
+          ownButtonClasses:null,
+          iconClasses:(response.data.datasetErrors)?"warning":""
+        },
+        {
+          //title: "Dashboards",
+          label: resources.messages["dashboards"],
+          icon: "5",
+          group: "right",
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
+        }
+      ]);
       
       console.log(response.data);
       setTableSchema(response.data.tableSchemas.map((item,i)=>{
@@ -225,12 +282,7 @@ dataPromise.then(response =>{
     });
   }) */
 
-/* console.log('antes ', validationError)
-setTimeout(() => {
-  let test =jsonDataSchemaErrors.datasetErrors;
-  setValidationError(test) ;
-  console.log('despues ', validationError, 'test ', test, 'setvalidationerror: ', setValidationError )
-}, 2000); */
+
 
     setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
       return {
@@ -249,26 +301,6 @@ setTimeout(() => {
           }
       });        
     }));
-
-
-    //Show validations button with HTTPResquesterAPI
-    /*const dataError = HTTPRequesterAPI.get(
-      {
-        url: '/dataschema/dataflow/1',
-        queryString: {}
-      }
-    );
-
-    dataError.then(response => {
-      console.log(response.data);
-      setValidationError(response.data.tableSchemas.map((item, i) =>{
-        return {
-          id:item["idTableSchema"],
-          name:item["nameTableSchema"],
-          hasErrors: {...jsonDataSchemaErrors.tables.filter( table => table["idTableSchema"]===item["idTableSchema"])[0]}.tableErrors
-        }
-      }));
-    })*/ 
 
   }, []);
   
