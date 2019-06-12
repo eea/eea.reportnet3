@@ -11,11 +11,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
-import org.hibernate.annotations.DynamicUpdate;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * The Class FieldValue.
@@ -27,6 +30,9 @@ import lombok.ToString;
 @DynamicUpdate
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
+
+
+  
 
   /**
    * The id.
@@ -62,9 +68,14 @@ public class FieldValue {
   private RecordValue record;
 
 
-  /** The field validations. */
+  /**
+   * The field validations.
+   */
   @OneToMany(mappedBy = "fieldValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
+
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.
@@ -79,7 +90,7 @@ public class FieldValue {
   /**
    * Equals.
    *
-   * @param o the o
+   * @param obj the o
    *
    * @return true, if successful
    */

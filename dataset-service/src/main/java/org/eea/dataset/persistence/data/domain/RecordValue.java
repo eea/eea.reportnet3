@@ -14,11 +14,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
-import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.dataset.persistence.data.SortFieldsHelper;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * The Class Record.
@@ -50,6 +51,8 @@ public class RecordValue {
         }
       }
     }
+
+   
   }
 
   /**
@@ -85,13 +88,20 @@ public class RecordValue {
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
-  /** The record validations. */
+  /**
+   * The record validations.
+   */
   @OneToMany(mappedBy = "recordValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
-  /** The sort criteria. */
+  /**
+   * The sort criteria.
+   */
   @Transient
   private String sortCriteria;
+
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.
