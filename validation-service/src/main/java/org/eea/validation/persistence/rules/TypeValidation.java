@@ -1,17 +1,20 @@
-package org.eea.validation.persistence.rules.model;
+package org.eea.validation.persistence.rules;
 
-public enum ConditionsDrools {
+/**
+ * The Enum TypeValidation.
+ */
+public enum TypeValidation {
 
   /** The datasetvo. */
-  TYPE_VALIDATION("typevalidation"),
+  DATASETVO("DataSetVO"),
   /** The fieldvo. */
-  WHEN_CONDITION("whencondition"),
+  FIELDVO("FieldVO"),
   /** The recordvo. */
-  MESSAGE_FAIL_VALIDATION("messageFailValidation"),
+  RECORDVO("RecordVO"),
   /** The tablevo. */
-  TYPE_FAIL_VALIDATION("typeFailValidation"),
+  TABLEVO("TableVO"),
   /** The dataflowrule. */
-  RULE_ID("ruleid");
+  DATAFLOWRULE("DataFlowRule");
 
   /** The value. */
   private final String value;
@@ -21,11 +24,12 @@ public enum ConditionsDrools {
    *
    * @param value the value
    */
-  ConditionsDrools(String value) {
+  TypeValidation(String value) {
     this.value = value;
   }
 
   public String getValue() {
     return value;
   }
+
 }
