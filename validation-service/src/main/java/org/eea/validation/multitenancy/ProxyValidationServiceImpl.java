@@ -36,21 +36,21 @@ public class ProxyValidationServiceImpl implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     Annotation[][] annotations = method.getParameterAnnotations();
-    String validationId = "";
+    String datasetId = "";
     Boolean continueLoop = true;
     for (int i = 0; i < annotations.length && continueLoop; i++) {
-      // annotated parameter, search @validationId annotated parameter if any
+      // annotated parameter, search @datasetId annotated parameter if any
       if (annotations[i].length > 0) {
         for (Annotation annotation : annotations[i]) {
           if (annotation.annotationType().equals(DatasetId.class)) {
-            validationId = args[i].toString();
+            datasetId = args[i].toString();
             continueLoop = false;
           }
         }
       }
     }
-    if (StringUtils.isNotBlank(validationId)) {
-      TenantResolver.setTenantName("validation_" + validationId);
+    if (StringUtils.isNotBlank(datasetId)) {
+      TenantResolver.setTenantName("dataset_" + datasetId);
     }
     Object result = null;
     try {
