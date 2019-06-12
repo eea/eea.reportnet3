@@ -253,35 +253,6 @@ console.log(dataPromise);
       return error;
     });   
 
-    
-
- //Mostrar el join de los json con la union mediante el hasErrors con el filter
-/* const dataPromise = HTTPRequesterAPI.get(
-  {
-    url:'/dataschema/dataflow/1',
-    queryString: {}
-  }
-);
-
-  
-dataPromise.then(response =>{
-  console.log(response.data);
-  const dataflow = response.data;
-  HTTPRequesterAPI.get(
-    {
-      url:'/dataschema/dataflow/1',
-      queryString: {}
-    }
-  ).then(response =>{
-    setTableSchema(dataflow.map((item,i)=>{
-      return {
-          id: item["idTableSchema"],
-          name : item["nameTableSchema"],
-          hasErrors: response.data.filter(t=>t["idTableSchema"]===item["idTableSchema"]).tableErrors
-          }
-    });
-  }) */
-
 
 
     setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
