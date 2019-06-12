@@ -3,9 +3,3 @@ server:
 spring:
   application:
     name: dataset
-  cloud:
-    consul:
-      discovery:
-        instanceId: ${spring.application.name}:${random.value}
-      config:
-        name: dataset
