@@ -53,8 +53,7 @@ public class KieBaseManager {
    * @throws IllegalAccessException
    * @throws IllegalArgumentException
    */
-  public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException, NoSuchFieldException,
-      SecurityException, IllegalArgumentException, IllegalAccessException {
+  public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
     DataSetSchema schema =
 
         schemasRepository.findSchemaByIdFlow(dataFlowId);
