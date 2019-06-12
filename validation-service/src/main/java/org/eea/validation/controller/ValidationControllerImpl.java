@@ -6,7 +6,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.validation.persistence.rules.model.DataFlowRule;
+import org.eea.validation.persistence.rules.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

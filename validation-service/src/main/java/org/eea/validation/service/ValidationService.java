@@ -11,7 +11,7 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
-import org.eea.validation.persistence.rules.model.DataFlowRule;
+import org.eea.validation.persistence.rules.DataFlowRule;
 
 /**
  * The Class ValidationService.

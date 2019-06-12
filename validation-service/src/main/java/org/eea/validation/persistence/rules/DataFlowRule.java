@@ -1,4 +1,4 @@
-package org.eea.validation.persistence.rules.model;
+package org.eea.validation.persistence.rules;
 
 import java.util.List;
 import javax.persistence.Id;

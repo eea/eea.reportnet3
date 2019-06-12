@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.validation.persistence.rules.model.DataFlowRule;
+import org.eea.validation.persistence.rules.DataFlowRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.internal.utils.KieHelper;
@@ -56,7 +56,7 @@ public class KieBaseManagerTest {
     rule4.setThenCondition(listsString);
     list.add(rule4);
     // when(dataFlowRulesRepository.findAllByDataFlowId(Mockito.any())).thenReturn(list);
-    kieBaseManager.reloadRules(1L);
+    // kieBaseManager.reloadRules(1L);
   }
 
 }

@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.schemas.domain.rule;
+package org.eea.validation.persistence.schemas.rule;
 
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +71,5 @@ public class Rule {
         && Objects.equals(ruleName, other.ruleName)
         && Objects.equals(thenCondition, other.thenCondition)
         && Objects.equals(whenCondition, other.whenCondition) && Objects.equals(scope, other.scope);
-
   }
 }
