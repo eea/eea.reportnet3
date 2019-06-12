@@ -1,5 +1,6 @@
 package org.eea.dataset.configuration;
 
+import com.mongodb.MongoClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +10,6 @@ import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import com.mongodb.MongoClient;
 
 /**
  * The Class SchemasConfiguration.
@@ -22,35 +22,43 @@ import com.mongodb.MongoClient;
 @EnableMongoRepositories(basePackages = "org.eea.dataset.persistence.schemas.repository")
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
-  /** The Constant DEFAULT_PORT. */
-  private static final int DEFAULT_PORT = 27017;
 
-  /** The dll. */
+  /**
+   * The dll.
+   */
   @Value("${mongodb.hibernate.ddl-auto}")
   private String dll;
 
-  /** The host. */
+  /**
+   * The host.
+   */
   @Value("${mongodb.primary.host}")
   private String host;
 
-  /** The port. */
+  /**
+   * The port.
+   */
   @Value("${mongodb.primary.port}")
   private Integer port;
 
-  /** The username. */
+  /**
+   * The username.
+   */
   @Value("${mongodb.primary.username}")
   private String username;
 
-  /** The password. */
+  /**
+   * The password.
+   */
   @Value("${mongodb.primary.password}")
   private String password;
-
 
 
   /**
    * Schemas transaction manager.
    *
    * @param dbFactory the db factory
+   *
    * @return the mongo transaction manager
    */
   @Bean
@@ -75,7 +83,7 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   public MongoClient mongoClient() {
-    return new MongoClient(host, DEFAULT_PORT);
+    return new MongoClient(host, port);
   }
 
 }
