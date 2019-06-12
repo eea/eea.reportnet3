@@ -12,6 +12,10 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RuleDataSet;
+import org.eea.dataset.persistence.schemas.domain.rule.RuleField;
+import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
+import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -58,34 +62,119 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     List<TableSchema> tableSchemas = new ArrayList<>();
 
+    ObjectId idDataSetSchema = new ObjectId();
     dataSetSchema.setNameDataSetSchema("dataSet_" + datasetId);
     dataSetSchema.setIdDataFlow(1L);
+    dataSetSchema.setIdDataSetSchema(idDataSetSchema);
+    List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
+    RuleDataSet ruleDataset = new RuleDataSet();
+    List<String> listaStrinsDataset = new ArrayList<String>();
+    listaStrinsDataset.add("ERROR AL VALIDAD");
+    listaStrinsDataset.add("ERROR");
+    ruleDataset.setThenCondition(listaStrinsDataset);
+
+    ruleDataset.setRuleId(new ObjectId());
+    ruleDataset.setDataFlowId(1L);
+    ruleDataset.setIdDataSetSchema(idDataSetSchema);
+    ruleDataset.setWhenCondition("id == null");
+    ruleDataset.setRuleName("dataset regla");
+    ruleDataSetList.add(ruleDataset);
+    dataSetSchema.setRuleDataSet(ruleDataSetList);
 
     for (int i = 1; i <= values.size(); i++) {
+      ObjectId idTableSchema = new ObjectId();
       TableCollection table = values.get(i - 1);
       TableSchema tableSchema = new TableSchema();
-      tableSchema.setIdTableSchema(new ObjectId());
+      tableSchema.setIdTableSchema(idTableSchema);
+
+
+      List<RuleTable> ruleTableList = new ArrayList<RuleTable>();
+      RuleTable ruleTable = new RuleTable();
+      List<String> listaStrinsRuleTable = new ArrayList<String>();
+      if (i % 2 == 0) {
+        listaStrinsRuleTable.add("ERROR AL VALIDAD");
+        listaStrinsRuleTable.add("ERROR");
+      } else {
+        listaStrinsRuleTable.add("WARNING AL VALIDAD");
+        listaStrinsRuleTable.add("WARNING");
+      }
+      ruleTable.setThenCondition(listaStrinsRuleTable);
+
+      ruleTable.setRuleId(new ObjectId());
+      ruleTable.setDataFlowId(1L);
+      ruleTable.setIdTableSchema(idTableSchema);
+      ruleTable.setWhenCondition("idTable == null");
+      ruleTable.setRuleName("table regla" + i);
+      ruleTableList.add(ruleTable);
+      ruleTableList.add(ruleTable);
+
 
       tableSchema.setNameTableSchema(table.getTableName());
-
+      ObjectId idRecordSchema = new ObjectId();
       RecordSchema recordSchema = new RecordSchema();
-      recordSchema.setIdRecordSchema(new ObjectId());
+      recordSchema.setIdRecordSchema(idRecordSchema);
       recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
+
+      List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
+      RuleRecord ruleRecord = new RuleRecord();
+      List<String> listaStrinsRuleRecord = new ArrayList<String>();
+      if (i % 2 == 0) {
+        listaStrinsRuleRecord.add("ERROR AL VALIDAD");
+        listaStrinsRuleRecord.add("ERROR");
+      } else {
+        listaStrinsRuleRecord.add("WARNING AL VALIDAD");
+        listaStrinsRuleRecord.add("WARNING");
+      }
+      ruleRecord.setThenCondition(listaStrinsRuleRecord);
+
+      ruleRecord.setRuleId(new ObjectId());
+      ruleRecord.setDataFlowId(1L);
+      ruleRecord.setIdRecordSchema(idRecordSchema);
+      ruleRecord.setWhenCondition("ruleRecord == null");
+      ruleRecord.setRuleName("record regla" + i);
+      ruleRecordList.add(ruleRecord);
+      ruleRecordList.add(ruleRecord);
+
 
       List<FieldSchema> fieldSchemas = new ArrayList<>();
 
       int headersSize = table.getTableHeadersCollections().size();
       for (int j = 1; j <= headersSize; j++) {
+        ObjectId idFieldSchema = new ObjectId();
         TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
+
+        List<RuleField> ruleField = new ArrayList<RuleField>();
+        RuleField rule = new RuleField();
+        rule.setRuleId(new ObjectId());
+        rule.setDataFlowId(1L);
+        rule.setIdFieldSchema(idFieldSchema);
+        rule.setWhenCondition("id == null");
+        rule.setRuleName("field regla" + i + " y " + j);
+        List<String> listaStrins = new ArrayList<String>();
+        if (j % 2 == 0) {
+          listaStrins.add("ERROR AL VALIDAD");
+          listaStrins.add("ERROR");
+        } else {
+          listaStrins.add("WARNING AL VALIDAD");
+          listaStrins.add("WARNING");
+        }
+        rule.setThenCondition(listaStrins);
+        ruleField.add(rule);
+        ruleField.add(rule);
+
         FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema.setIdFieldSchema(new ObjectId());
+        fieldSchema.setIdFieldSchema(idFieldSchema);
         fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
         fieldSchema.setHeaderName(header.getHeaderName());
         fieldSchema.setType(header.getHeaderType());
+        fieldSchema.setRuleField(ruleField);
         fieldSchemas.add(fieldSchema);
       }
+
+      recordSchema.setRuleRecord(ruleRecordList);
       recordSchema.setFieldSchema(fieldSchemas);
       tableSchema.setRecordSchema(recordSchema);
+      tableSchema.setRuleTable(ruleTableList);
       tableSchemas.add(tableSchema);
     }
     dataSetSchema.setTableSchemas(tableSchemas);
@@ -124,7 +213,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
 
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-    LOG.info("Schema retrived by idFlow {}",idFlow);
+    LOG.info("Schema retrived by idFlow {}", idFlow);
     return dataSchemaMapper.entityToClass(dataschema);
 
   }

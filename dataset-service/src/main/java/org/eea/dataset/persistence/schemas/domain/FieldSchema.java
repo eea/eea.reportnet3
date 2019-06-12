@@ -3,8 +3,10 @@
  */
 package org.eea.dataset.persistence.schemas.domain;
 
+import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.schemas.domain.rule.RuleField;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -12,7 +14,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @author Mario Severa
+ * The Class FieldSchema.
  *
  */
 @Getter
@@ -38,21 +40,28 @@ public class FieldSchema {
   @Field(value = "headerName")
   private String headerName;
 
+
+  /** The rule field. */
+  @Field(value = "rules")
+  private List<RuleField> ruleField;
+
+
   /**
-   * 
+   * Hash code.
    *
-   * @return
+   * @return the int
    */
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, idFieldSchema, idRecord, type);
+    return Objects.hash(headerName, idFieldSchema, idRecord, ruleField, type);
   }
 
+
   /**
-   * 
+   * Equals.
    *
-   * @param obj
-   * @return
+   * @param obj the obj
+   * @return true, if successful
    */
   @Override
   public boolean equals(Object obj) {
@@ -65,7 +74,9 @@ public class FieldSchema {
     FieldSchema other = (FieldSchema) obj;
     return Objects.equals(headerName, other.headerName)
         && Objects.equals(idFieldSchema, other.idFieldSchema)
-        && Objects.equals(idRecord, other.idRecord) && Objects.equals(type,other.type);
+        && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
+        && Objects.equals(type, other.type);
   }
+
 
 }
