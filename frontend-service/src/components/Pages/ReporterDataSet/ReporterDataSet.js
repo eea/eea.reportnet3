@@ -198,7 +198,7 @@ const ReporterDataSet = () => {
     //TODO: API Call delete
     HTTPRequesterAPI.delete(
       {
-        url:'/dataset/'+ idDataSet + '/deleteImportData/',
+        url:'/dataset/'+ idDataSet + '/deleteImportData',
         queryString: {}
       }
     );
