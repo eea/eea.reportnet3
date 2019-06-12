@@ -11,40 +11,40 @@ import jsonData from '../../../assets/jsons/response_dataset_values4.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';
 
-const DataViewer = props => {
+const DataViewer = (props) => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [fetchedData, setFetchedData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [numRows, setNumRows] = useState(10);
   const [firstRow, setFirstRow] = useState(0);
   const [sortOrder, setSortOrder] = useState();
-  const [sortField, setSortField] = useState();
+  const [sortField,setSortField] = useState();
   const [columns, setColumns] = useState([]);
   const [cols, setCols] = useState(props.tableSchemaColumns);
   const [header] = useState();
-  const [colOptions, setColOptions] = useState([{}]);
+  const [colOptions,setColOptions] = useState([{}]);
 
   //TODO: Render se está ejecutando dos veces. Mirar por qué.
   console.log("DataViewer Render..." + props.name);
-  useEffect(() => {
+  useEffect(() =>{
     console.log("Setting column options...");
     let colOpt = [];
-    for (let col of cols) {
-      colOpt.push({ label: col.header, value: col });
+    for(let col of cols) {
+      colOpt.push({label: col.header, value: col});
     }
     setColOptions(colOpt);
 
-    console.log("Fetching data...");
+    console.log('Fetching data...');
     fetchDataHandler(null, sortOrder, firstRow, numRows);
 
     console.log("Filtering data...");
     const inmTableSchemaColumns = [...props.tableSchemaColumns];
-
     console.log(inmTableSchemaColumns);
     setCols(inmTableSchemaColumns);
+
   }, []);
 
-  useEffect(() => {
+  useEffect(()=>{
     // let visibilityIcon = (<div className="TableDiv">
     //     <span className="pi pi-eye" style={{zoom:2}}></span>
     //     <span className="my-multiselected-empty-token">Visibility</span>
@@ -65,25 +65,25 @@ const DataViewer = props => {
       />
     ));
     let validationCol = (
-      <Column field="validations" header="" body={validationsTemplate} />
+      <Column key={'recordValidation'} field="validations" header="" body={validationsTemplate} />
     );
     let newColumnsArr = [validationCol].concat(columnsArr);
     setColumns(newColumnsArr);
   }, [cols, colOptions]);
 
-  const onChangePageHandler = event => {
-    console.log("Refetching data...");
+  const onChangePageHandler = (event)=>{
+    console.log('Refetching data...');
     setNumRows(event.rows);
     setFirstRow(event.first);
     fetchDataHandler(sortField, sortOrder, event.first, event.rows);
-  };
+  }
 
-  const onSortHandler = event => {
+  const onSortHandler = (event)=>{
     console.log("Sorting...");
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
     fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
-  };
+  }
 
   // const onColumnToggleHandler = (event) =>{
   //   console.log("OnColumnToggle...");
@@ -133,17 +133,22 @@ const DataViewer = props => {
     if (jsonData) {
       filterDataResponse(jsonData);
     }
+    console.log('total ',jsonData.totalRecords)
     setTotalRecords(jsonData.totalRecords);
     setLoading(false);
   };
 
-  const filterDataResponse = data => {
-    //TODO: Refactorizar
+  const filterDataResponse = (data) =>{
 
+    //TODO: Refactorizar
     const dataFiltered = data.records.map(record => {
       const recordValidations = record.recordValidations;
       const arrayDataFields = record.fields.map(field => {
-        return { [field.idFieldSchema]: field.value };
+        
+        return { 
+          [field.idFieldSchema]: field.value,
+          "fieldValidations"   : [field.fieldValidations]
+         };
       });
 
       const arrayDataAndValidations = {
@@ -153,17 +158,37 @@ const DataViewer = props => {
 
       return arrayDataAndValidations;
     });
+    
     console.log(dataFiltered);
-    /*
     let auxFiltered = {};
 
     let auxArrayFiltered = [];
-
+/* 
     dataFiltered.forEach(dat => {
+
       dat.forEach(d => (auxFiltered = { ...auxFiltered, ...d }));
+      
       auxArrayFiltered.push(auxFiltered);
+      
       auxFiltered = {};
-    });*/
+    }); */
+
+    // TO DO Para que se carguen bien los datos en la tabla el componente consume un objeto especifico:
+    /**
+     * en el    dataFiltered   tengo todos los datos necesarios para mostrar
+     * 
+     * Sacar el array de validaciones por record
+     * Sacar para cada campo el array de validaciones por field
+     * Sacar los datos
+     * 
+     * Procesar los datos para que se pueda consumir por el DataViewer
+     */
+    dataFiltered.forEach(dat => {
+
+      if (dat.recordValidations) {
+        console.log(dat.recordValidations);
+      }
+    });
 
     setFetchedData(dataFiltered);
   };
@@ -251,6 +276,6 @@ const DataViewer = props => {
       </div>
     </div>
   );
-};
+}
 
 export default DataViewer;
