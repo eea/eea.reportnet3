@@ -83,8 +83,8 @@ public interface DatasetController {
    *
    * @param datasetId the id of dataset
    */
-  @DeleteMapping(value = "/deleteImportData")
-  void deleteImportData(@RequestParam("datasetName") Long datasetId);
+  @DeleteMapping(value = "{id}/deleteImportData")
+  void deleteImportData(@PathVariable("id") Long datasetId);
 
 
   /**
