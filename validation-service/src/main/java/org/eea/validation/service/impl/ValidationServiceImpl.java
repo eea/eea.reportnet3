@@ -9,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -51,7 +52,6 @@ public class ValidationServiceImpl implements ValidationService {
   /** The kie base manager. */
   @Autowired
   private KieBaseManager kieBaseManager;
-
 
   /** The validation record repository. */
   @Autowired
@@ -185,7 +185,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    */
   @Override
-  public void validateDataSetData(Long datasetId) {
+  public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     try {
@@ -214,15 +214,14 @@ public class ValidationServiceImpl implements ValidationService {
       String tableIdTableSchema = tableValue.getIdTableSchema();
       Pageable pageable = PageRequest.of(i, 100);
       // read Dataset Data
-      List<RecordValue> recordsPaged =
-          recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
+      List<RecordValue> records = recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
 
-      while (recordsPaged.size() != 0) {
+      while (records.size() != 0) {
         // Execute record rules validation
-        List<RecordValidation> resultRecord = runRecordValidations(recordsPaged);
+        List<RecordValidation> resultRecord = runRecordValidations(records);
         // Save results to the db
         validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
-        for (RecordValue record : recordsPaged) {
+        for (RecordValue record : records) {
 
           // Execute field rules validation
           List<FieldValidation> resultField = runFieldValidations(record.getFields());
@@ -230,7 +229,7 @@ public class ValidationServiceImpl implements ValidationService {
           validationFieldRepository.saveAll((Iterable<FieldValidation>) resultField);
         }
         pageable = PageRequest.of(i++, 100);
-        recordsPaged = recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
+        records = recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
       }
     }
 

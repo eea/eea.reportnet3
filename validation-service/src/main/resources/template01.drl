@@ -7,7 +7,7 @@ typeFailValidation
 
 
 package src.main.resources
-import org.eea.validation.persistence.rules.model.*;
+import org.eea.validation.persistence.data.domain.*;
 import org.eea.interfaces.vo.validation.*;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;

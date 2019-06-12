@@ -1,17 +1,17 @@
 package org.eea.validation.util;
 
 import java.util.Date;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.DatasetValidationVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.FieldValidationVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.RecordValidationVO;
-import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.TableValidationVO;
-import org.eea.interfaces.vo.dataset.ValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.Validation;
 
 /**
  * The Class ValidationRuleDrools.
@@ -26,13 +26,13 @@ public class ValidationRuleDrools {
    * @param typeError the type error
    * @param ruleId the rule id
    */
-  public static void fillValidation(DataSetVO dataSetVO, String message, String typeError,
+  public static void fillValidation(DatasetValue dataSetValue, String message, String typeError,
       String ruleId) {
-    ValidationVO newValidation =
+    Validation newValidation =
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.DATASET);
-    DatasetValidationVO datasetValidation = new DatasetValidationVO();
+    DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setValidation(newValidation);
-    dataSetVO.getDatasetValidations().add(datasetValidation);
+    dataSetValue.getDatasetValidations().add(datasetValidation);
   }
 
   /**
@@ -43,13 +43,13 @@ public class ValidationRuleDrools {
    * @param typeError the type error
    * @param ruleId the rule id
    */
-  public static void fillValidation(TableVO tableVO, String message, String typeError,
+  public static void fillValidation(TableValue tableValue, String message, String typeError,
       String ruleId) {
-    ValidationVO newValidation =
+    Validation newValidation =
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.TABLE);
-    TableValidationVO tableValidationVO = new TableValidationVO();
-    tableValidationVO.setValidation(newValidation);
-    tableVO.getTableValidations().add(tableValidationVO);
+    TableValidation tableValidation = new TableValidation();
+    tableValidation.setValidation(newValidation);
+    tableValue.getTableValidations().add(tableValidation);
   }
 
   /**
@@ -60,13 +60,13 @@ public class ValidationRuleDrools {
    * @param typeError the type error
    * @param ruleId the rule id
    */
-  public static void fillValidation(FieldVO fieldVO, String message, String typeError,
+  public static void fillValidation(FieldValue fieldValue, String message, String typeError,
       String ruleId) {
-    ValidationVO newValidation =
+    Validation newValidation =
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.FIELD);
-    FieldValidationVO fieldValidationVO = new FieldValidationVO();
-    fieldValidationVO.setValidation(newValidation);
-    fieldVO.getFieldValidations().add(fieldValidationVO);
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setValidation(newValidation);
+    fieldValue.getFieldValidations().add(fieldValidation);
   }
 
   /**
@@ -77,13 +77,13 @@ public class ValidationRuleDrools {
    * @param typeError the type error
    * @param ruleId the rule id
    */
-  public static void fillValidation(RecordVO recordVO, String message, String typeError,
+  public static void fillValidation(RecordValue recordValue, String message, String typeError,
       String ruleId) {
-    ValidationVO newValidation =
+    Validation newValidation =
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD);
-    RecordValidationVO recordValidationVO = new RecordValidationVO();
-    recordValidationVO.setValidation(newValidation);
-    recordVO.getRecordValidations().add(recordValidationVO);
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setValidation(newValidation);
+    recordValue.getRecordValidations().add(recordValidation);
   }
 
   /**
@@ -95,9 +95,9 @@ public class ValidationRuleDrools {
    * @param typeEntityEnum the type entity enum
    * @return the validation VO
    */
-  private static ValidationVO createValidationObject(String message, String typeError,
-      String ruleId, TypeEntityEnum typeEntityEnum) {
-    ValidationVO newValidation = new ValidationVO();
+  private static Validation createValidationObject(String message, String typeError, String ruleId,
+      TypeEntityEnum typeEntityEnum) {
+    Validation newValidation = new Validation();
     newValidation.setLevelError(
         typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
     newValidation.setMessage(message);

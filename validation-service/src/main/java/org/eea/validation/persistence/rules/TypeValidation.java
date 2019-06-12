@@ -6,13 +6,13 @@ package org.eea.validation.persistence.rules;
 public enum TypeValidation {
 
   /** The datasetvo. */
-  DATASETVO("DataSetVO"),
+  DATASET("DatasetValue"),
   /** The fieldvo. */
-  FIELDVO("FieldVO"),
+  FIELD("FieldValue"),
   /** The recordvo. */
-  RECORDVO("RecordVO"),
+  RECORD("RecordValue"),
   /** The tablevo. */
-  TABLEVO("TableVO"),
+  TABLE("TableValue"),
   /** The dataflowrule. */
   DATAFLOWRULE("DataFlowRule");
 
