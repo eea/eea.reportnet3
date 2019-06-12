@@ -2,6 +2,7 @@ package org.eea.validation.service.impl;
 
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,9 +99,7 @@ public class ValidationServiceImpl implements ValidationService {
   public List<DatasetValidation> runDatasetValidations(DatasetValue dataset) {
     kieSession.insert(dataset);
     kieSession.fireAllRules();
-    kieSession.dispose();
-    System.err.println(System.currentTimeMillis());
-    return null;
+    return dataset.getDatasetValidations();
   }
 
   /**
@@ -111,10 +110,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<TableValidation> runTableValidations(List<TableValue> tableValues) {
-    kieSession.insert(tableValues);
+    tableValues.stream().forEach(table -> kieSession.insert(table));
     kieSession.fireAllRules();
-    kieSession.dispose();
-    return null;
+    return tableValues.isEmpty() ? new ArrayList<TableValidation>()
+        : tableValues.get(0).getTableValidations();
   }
 
   /**
@@ -124,11 +123,11 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged) {
-    kieSession.insert(recordsPaged);
+  public List<RecordValidation> runRecordValidations(List<RecordValue> records) {
+    records.stream().forEach(record -> kieSession.insert(record));
     kieSession.fireAllRules();
-    kieSession.dispose();
-    return null;
+    return records.isEmpty() ? new ArrayList<RecordValidation>()
+        : records.get(0).getRecordValidations();
   }
 
   /**
@@ -139,10 +138,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
-    kieSession.insert(fields);
+    fields.stream().forEach(field -> kieSession.insert(field));
     kieSession.fireAllRules();
-    kieSession.dispose();
-    return null;
+    return fields.isEmpty() ? new ArrayList<FieldValidation>()
+        : fields.get(0).getFieldValidations();
   }
 
 
@@ -151,10 +150,10 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param DataflowId the dataflow id
    * @return the kie session
-   * @throws IllegalAccessException
-   * @throws IllegalArgumentException
-   * @throws SecurityException
-   * @throws NoSuchFieldException
+   * @throws NoSuchFieldException the no such field exception
+   * @throws SecurityException the security exception
+   * @throws IllegalArgumentException the illegal argument exception
+   * @throws IllegalAccessException the illegal access exception
    */
   public KieSession loadRulesKnowledgeBase(Long DataflowId) {
     try {

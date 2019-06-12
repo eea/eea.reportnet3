@@ -3,6 +3,7 @@ package org.eea.validation.service;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.validation.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -32,7 +33,7 @@ public interface ValidationService {
    *
    * @param datasetId the dataset id
    */
-  void validateDataSetData(Long datasetId);
+  void validateDataSetData(@DatasetId Long datasetId);
 
   /**
    * Save rule.
@@ -49,10 +50,28 @@ public interface ValidationService {
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset);
 
+  /**
+   * Run table validations.
+   *
+   * @param list the list
+   * @return the list
+   */
   List<TableValidation> runTableValidations(List<TableValue> list);
 
+  /**
+   * Run record validations.
+   *
+   * @param recordsPaged the records paged
+   * @return the list
+   */
   List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged);
 
+  /**
+   * Run field validations.
+   *
+   * @param fields the fields
+   * @return the list
+   */
   List<FieldValidation> runFieldValidations(List<FieldValue> fields);
 
 }
