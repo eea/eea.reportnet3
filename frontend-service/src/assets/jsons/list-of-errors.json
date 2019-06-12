@@ -4,7 +4,7 @@
     "nameDataSetSchema": "Dataset 1",
     "errors": [
       {
-        "idObject": 0,
+        "idObject": 51651,
         "idValidation": 0,
         "nameTableSchema": "BWQD_2006_AbnormalSituations",
         "levelError": "WARNING",
@@ -13,7 +13,7 @@
         "validationDate": "string"
       },
       {
-        "idObject": 0,
+        "idObject": 45345,
         "idValidation": 0,
         "nameTableSchema": "BWQD_2006_AbnormalSituations",
         "levelError": "ERROR",

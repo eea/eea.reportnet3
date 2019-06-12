@@ -195,7 +195,7 @@ const ValidationViewer = (props) => {
         console.log(data.nameDataSetSchema);
 
         const values = data.errors.map(e => {
-          return { origin: (e.nameTableSchema !== null)? e.nameTableSchema : data.nameDataSetSchema, level: e.levelError, message: e.message, type: e.typeEntity  }
+          return { origin: (e.nameTableSchema !== null)? e.nameTableSchema : data.nameDataSetSchema, level: e.levelError, message: e.message, type: e.typeEntity, idObject: e.idObject  }
         });
 
         //TODO: Refactorizar
@@ -213,6 +213,26 @@ const ValidationViewer = (props) => {
         setFetchedData(values);
       }
 
+      const onRowSelectHandler = (event) =>{
+
+        // let queryString = {
+        //   idTableSchema: props.id,
+        //   pageNum: Math.floor(fRow / nRows),
+        //   pageSize: nRows
+        // }
+
+        // const dataPromise = HTTPRequesterAPI.get(
+        //   {
+        //     url: props.urlViewer,
+        //     queryString: queryString
+        //   }
+        // );
+
+        //http://localhost:8030/dataset/loadTableFromAnyObject/1629858?datasetId=1&pageSize=20&type=RECORD
+        console.log(event.data);
+        contextReporterDataSet.validationsVisibleHandler();
+      }
+
       let totalCount = <span>Total: {totalRecords} rows</span>;
 
     return (
@@ -227,7 +247,7 @@ const ValidationViewer = (props) => {
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
                        loading={loading} totalRecords={totalRecords} sortable={true}
                        onSort={onSortHandler} header={header} sortField={sortField} sortOrder={sortOrder} autoLayout={true}
-                       selectionMode="single" onRowSelect={(event)=>{console.log(event.data);contextReporterDataSet.validationsVisibleHandler();}}>
+                       selectionMode="single" onRowSelect={onRowSelectHandler}>
                     {columns}
                 </DataTable>
             </div>
