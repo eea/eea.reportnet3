@@ -18,6 +18,7 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleDataset.setRuleId(new ObjectId());
     ruleDataset.setDataFlowId(1L);
     ruleDataset.setIdDataSetSchema(idDataSetSchema);
+    ruleDataset.setScope(TypeEntityEnum.DATASET);
     ruleDataset.setWhenCondition("id == null");
     ruleDataset.setRuleName("dataset regla");
     ruleDataSetList.add(ruleDataset);
@@ -103,9 +105,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       ruleTable.setRuleId(new ObjectId());
       ruleTable.setDataFlowId(1L);
       ruleTable.setIdTableSchema(idTableSchema);
-      ruleTable.setWhenCondition("idTable == null");
+      ruleTable.setWhenCondition("id == null");
       ruleTable.setRuleName("table regla" + i);
-      ruleTableList.add(ruleTable);
+      ruleTable.setScope(TypeEntityEnum.TABLE);
       ruleTableList.add(ruleTable);
 
 
@@ -129,10 +131,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       ruleRecord.setRuleId(new ObjectId());
       ruleRecord.setDataFlowId(1L);
+      ruleRecord.setScope(TypeEntityEnum.RECORD);
       ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition("ruleRecord == null");
+      ruleRecord.setWhenCondition("id == null");
       ruleRecord.setRuleName("record regla" + i);
-      ruleRecordList.add(ruleRecord);
       ruleRecordList.add(ruleRecord);
 
 
@@ -160,7 +162,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
         rule.setThenCondition(listaStrins);
         ruleField.add(rule);
-        ruleField.add(rule);
+        rule.setScope(TypeEntityEnum.FIELD);
 
         FieldSchema fieldSchema = new FieldSchema();
         fieldSchema.setIdFieldSchema(idFieldSchema);
