@@ -1,8 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
+
 import java.io.Serializable;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,10 +20,11 @@ public class ErrorsValidationVO implements Serializable{
   
   private String message;
   
-  private TypeErrorEnum levelError;
+  private String levelError;
 
-  private TypeEntityEnum typeEntity;
+  private String typeEntity;
 
   private String validationDate;
+  
     
 }

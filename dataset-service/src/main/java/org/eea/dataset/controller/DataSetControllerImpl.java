@@ -318,13 +318,15 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public  FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize) {
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
     
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = PageRequest.of(pageNum, pageSize);
     try {
       
-      validations = datasetService.getListValidations(datasetId, pageable);
+      validations = datasetService.getListValidations(datasetId, pageable, fields, asc);
       
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());

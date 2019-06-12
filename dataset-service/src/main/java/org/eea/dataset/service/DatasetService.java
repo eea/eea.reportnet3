@@ -139,5 +139,6 @@ public interface DatasetService {
    */
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
-  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable) throws EEAException;
+  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable, 
+      String field, Boolean asc) throws EEAException;
 }
