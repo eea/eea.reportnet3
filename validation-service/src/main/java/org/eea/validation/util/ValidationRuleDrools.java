@@ -112,4 +112,6 @@ public class ValidationRuleDrools {
     return newValidation;
   }
 
+
+
 }
