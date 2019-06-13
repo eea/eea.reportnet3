@@ -39,10 +39,7 @@ public class LoadDataCallable implements Callable<Void> {
    * @param is the is
    */
   public LoadDataCallable(final KafkaSender kafkaSender, final DatasetService datasetService,
-      final Long dataSetId, final String fileName, InputStream is) {
-
-  public LoadDataCallable(final DatasetService datasetService, final Long dataSetId,
-      final String fileName, InputStream is, final String idTableSchema) {
+      final Long dataSetId, final String fileName, InputStream is, final String idTableSchema) {
     this.datasetService = datasetService;
     this.fileName = fileName;
     this.datasetId = dataSetId;
@@ -60,8 +57,8 @@ public class LoadDataCallable implements Callable<Void> {
    */
   @Override
   public Void call() throws Exception {
-    FileTreatmentHelper.executeFileProcess(kafkaSender, this.datasetService, datasetId, fileName, is);
-    datasetService.processFile(datasetId, fileName, is, idTableSchema);
+    FileTreatmentHelper.executeFileProcess(kafkaSender, this.datasetService, datasetId, fileName,
+        is, idTableSchema);
     return null;
   }
 }

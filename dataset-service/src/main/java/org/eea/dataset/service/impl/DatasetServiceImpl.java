@@ -17,9 +17,9 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
-import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
+import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
@@ -96,12 +96,6 @@ public class DatasetServiceImpl implements DatasetService {
   TableValueMapper tableValueMapper;
 
   /**
-   * The record mapper.
-   */
-  @Autowired
-  private RecordMapper recordMapper;
-
-  /**
    * The record repository.
    */
   @Autowired
@@ -156,15 +150,6 @@ public class DatasetServiceImpl implements DatasetService {
   private IFileParserFactory fileParserFactory;
 
   /**
-   * 
-   * 
-   * /** The field repository.
-   */
-  @Autowired
-  private KafkaSender kafkaSender;
-
-
-  /**
    * The field repository.
    */
   @Autowired
@@ -176,15 +161,19 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
+  /** The field validation repository. */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
+  /** The record validation repository. */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
+  /** The field validation mapper. */
   @Autowired
   private FieldValidationMapper fieldValidationMapper;
 
+  /** The record validation mapper. */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
@@ -385,10 +374,10 @@ public class DatasetServiceImpl implements DatasetService {
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}", datasetId);
 
-    } else {//Records retrieved,
-      //1º need to remove duplicated data
+    } else {// Records retrieved,
+      // 1º need to remove duplicated data
       List<RecordValue> sanitizeRecords = this.sanitizeRecords(records);
-//2º sort sanitized data
+      // 2º sort sanitized data
       Optional.ofNullable(idFieldSchema).ifPresent(field -> {
         sanitizeRecords.sort((RecordValue v1, RecordValue v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
@@ -413,17 +402,17 @@ public class DatasetServiceImpl implements DatasetService {
           return sort;
         });
       });
-      //3º calculate first and last index to create the page to retrieve sorted data
+      // 3º calculate first and last index to create the page to retrieve sorted data
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
       int endIndex =
           (pageable.getPageNumber() + 1) * pageable.getPageSize() > sanitizeRecords.size()
               ? sanitizeRecords.size()
               : (pageable.getPageNumber() + 1) * pageable.getPageSize();
-      //4º map to VO the records of the calculated page
-      List<RecordVO> recordVOs = recordNoValidationMapper
-          .entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
+      // 4º map to VO the records of the calculated page
+      List<RecordVO> recordVOs =
+          recordNoValidationMapper.entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
 
-      //5º retrieve validations to set them into the final result
+      // 5º retrieve validations to set them into the final result
       List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
       Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
       Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
@@ -653,7 +642,6 @@ public class DatasetServiceImpl implements DatasetService {
         recordRepository.findRecordValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
-    tableStats.setNameTableSchema(tableValue.getName());
     tableStats.setTotalRecords(countRecords);
     Long totalTableErrors = 0L;
     Long totalRecordsWithErrors = 0L;
