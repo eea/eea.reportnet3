@@ -33,12 +33,12 @@ export default function CustomIconToolTip(props) {
   }
 
   return (
-    <div className='tooltip '>
-      <span data-tip={props.message}>
-        <i className={validationIcon} style={{ color: iconColor }} />
+    <span>
+      <span data-tip={props.message} style={{float:"right"}}>
+        <i className={validationIcon} style={{ color: iconColor, float: "right" }} />
       </span>
 
       <ReactTooltip place='right' type='dark' effect='solid' />
-    </div>
+    </span>
   );
 }

@@ -56,18 +56,18 @@ const DataViewer = (props) => {
     // </div>;
     // setHeader(headerArr);
     
-    let columnsArr = cols.map(col => (
+    let columnsArr = cols.map((col,i) => (
       <Column
         sortable={true}
         key={col.field}
         field={col.field}
         header={col.header}
-        body={columnValidationsTemplate}
+        body={dataTemplate}
+        idx = {i}
       />
-     
-      ));
+    ));
     let validationCol = (
-      <Column key={'recordValidation'} field="validations" header="" body={validationsTemplate} />
+      <Column key="recordValidation" field="validations" header="" body={validationsTemplate} style={{width: "15px"}} />
     );
     let newColumnsArr = [validationCol].concat(columnsArr);
     setColumns(newColumnsArr);
@@ -136,7 +136,7 @@ const DataViewer = (props) => {
     if (jsonData) {
       filterDataResponse(jsonData);
     }
-    console.log('total ',jsonData.totalRecords)
+   
     setTotalRecords(jsonData.totalRecords);
     setLoading(false);
   };
@@ -147,52 +147,19 @@ const DataViewer = (props) => {
     const dataFiltered = data.records.map(record => {
       const recordValidations = record.recordValidations;
       const arrayDataFields = record.fields.map(field => {
-        
         return { 
-          [field.idFieldSchema]: field.value,
-          "fieldValidations"   : [field.fieldValidations]
+          fieldData: {[field.idFieldSchema]: field.value},
+          fieldValidations : field.fieldValidations
          };
       });
-
       const arrayDataAndValidations = {
-        ...arrayDataFields,
+        dataRow: arrayDataFields,
         recordValidations
       };
 
       return arrayDataAndValidations;
-    });
-    
-    console.log(dataFiltered);
-    let auxFiltered = {};
-
-    let auxArrayFiltered = [];
-/* 
-    dataFiltered.forEach(dat => {
-
-      dat.forEach(d => (auxFiltered = { ...auxFiltered, ...d }));
-      
-      auxArrayFiltered.push(auxFiltered);
-      
-      auxFiltered = {};
-    }); */
-
-    // TO DO Para que se carguen bien los datos en la tabla el componente consume un objeto especifico:
-    /**
-     * en el    dataFiltered   tengo todos los datos necesarios para mostrar
-     * 
-     * Sacar el array de validaciones por record
-     * Sacar para cada campo el array de validaciones por field
-     * Sacar los datos
-     * 
-     * Procesar los datos para que se pueda consumir por el DataViewer
-     */
-    dataFiltered.forEach(dat => {
-
-      if (dat.recordValidations) {
-        console.log(dat.recordValidations);
-      }
-    });
-
+    });    
+   
     setFetchedData(dataFiltered);
   };
 
@@ -242,24 +209,18 @@ const DataViewer = (props) => {
   };
   
   //Template for Field validation
-  const columnValidationsTemplate = (fetchedData, column) => {
-//TO DO ADAPTAR PARA  MOSTRAR VALIDACION POR CELDA. AHORA ES UN COPIA PEGA DE LAS VALIDACIONES POR RECORD
-    if (fetchedData.recordValidations) {
-      const validations = fetchedData.recordValidations.map(
+  const dataTemplate = (rowData, column) =>{
+      
+    if (rowData.dataRow[column.idx].fieldValidations!==null) {
+      const validations = rowData.dataRow[column.idx].fieldValidations.map(
         val => val.validation
       );
-        console.log('fetchedData', fetchedData);
-
-      let message = "";
+      let message = [];
       validations.forEach(validation =>
-        validation.message
-          ? (message += validation.message + ' \n')
-          : ""
+        validation.message ? (message += validation.message +"\n") : ""
       );
-
       let levelError = "";
       let lvlFlag = 0;
-
       validations.forEach(validation => {
         if (validation.levelError === "WARNING") {
           const wNum = 1;
@@ -281,13 +242,14 @@ const DataViewer = (props) => {
           }
         }
       });
-
-      return <CustomIconToolTip levelError={levelError} message={message} />;
-    } else {
-      return <CustomIconToolTip levelError={null} message={null} />;
-    }
-  };
-
+    
+        return <div> {rowData.dataRow[column.idx].fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message} /></div>;
+      }
+      else{
+        return <div>{rowData.dataRow[column.idx].fieldData[column.field]}</div>;
+      }
+    
+      }
   let totalCount = <span>Total: {totalRecords} rows</span>;
 
   return (
