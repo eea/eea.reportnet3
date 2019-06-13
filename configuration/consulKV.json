@@ -190,7 +190,12 @@
 		{
 				"key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
                 "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+		},
+		{
+				"key": "config/dataflow/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
 		}
+		
 		
 		
 ]

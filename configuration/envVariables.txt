@@ -20,3 +20,4 @@ ${FEIGN_CLIENT_READ_TIMEOUT:10000}
 ${FEIGN_CLIENT_LOG_LEVEL:basic}
 ${SLEUTH_SAMPLER_PROBABILITY:1.0}
 ${SLEUTH_SKIP_PATTERN:(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)}
+${spring.application.name:test-consumer-group}
