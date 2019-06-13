@@ -18,7 +18,7 @@ public class ProxyValidationServiceImpl implements InvocationHandler {
   /**
    * Instantiates a new Proxy validation service.
    *
-   * @param ValidationService the validation service
+   * @param validationService the validation service
    */
   public ProxyValidationServiceImpl(ValidationService validationService) {
     this.validationService = validationService;

@@ -1,5 +1,6 @@
 package org.eea.validation.util;
 
+import java.util.ArrayList;
 import java.util.Date;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -21,7 +22,7 @@ public class ValidationRuleDrools {
   /**
    * Fill validation.
    *
-   * @param dataSetVO the data set VO
+   * @param dataSetValue the data set value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -32,13 +33,16 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.DATASET);
     DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setValidation(newValidation);
+    if (null == dataSetValue.getDatasetValidations()) {
+      dataSetValue.setDatasetValidations(new ArrayList<>());
+    }
     dataSetValue.getDatasetValidations().add(datasetValidation);
   }
 
   /**
    * Fill validation.
    *
-   * @param tableVO the table VO
+   * @param tableValue the table value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -49,13 +53,16 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.TABLE);
     TableValidation tableValidation = new TableValidation();
     tableValidation.setValidation(newValidation);
+    if (null == tableValue.getTableValidations()) {
+      tableValue.setTableValidations(new ArrayList<>());
+    }
     tableValue.getTableValidations().add(tableValidation);
   }
 
   /**
    * Fill validation.
    *
-   * @param fieldVO the field VO
+   * @param fieldValue the field value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -66,13 +73,17 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.FIELD);
     FieldValidation fieldValidation = new FieldValidation();
     fieldValidation.setValidation(newValidation);
+    if (null == fieldValue.getFieldValidations()) {
+      fieldValue.setFieldValidations(new ArrayList<>());
+    }
     fieldValue.getFieldValidations().add(fieldValidation);
+
   }
 
   /**
    * Fill validation.
    *
-   * @param recordVO the record VO
+   * @param recordValue the record value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -83,6 +94,9 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD);
     RecordValidation recordValidation = new RecordValidation();
     recordValidation.setValidation(newValidation);
+    if (null == recordValue.getRecordValidations()) {
+      recordValue.setRecordValidations(new ArrayList<>());
+    }
     recordValue.getRecordValidations().add(recordValidation);
   }
 
@@ -106,5 +120,7 @@ public class ValidationRuleDrools {
     newValidation.setTypeEntity(typeEntityEnum);
     return newValidation;
   }
+
+
 
 }

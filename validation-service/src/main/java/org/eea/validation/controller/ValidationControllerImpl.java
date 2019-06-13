@@ -6,8 +6,10 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.persistence.rules.DataFlowRule;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -30,7 +32,8 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
-
+  @Autowired
+  private KafkaSender kafkaSender;
 
   /**
    * Gets the all rules.
@@ -79,7 +82,8 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    validationService.validateDataSetData(datasetId);
+    ValidationHelper.executeValidation(kafkaSender, this.validationService, datasetId);
+
   }
 
 }

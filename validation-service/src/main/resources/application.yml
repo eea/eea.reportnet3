@@ -8,10 +8,12 @@ spring:
       #use create if you are going to create the schema for the first time
       ddl-auto: ${DDL_AUTO:validate}
       flushMode: commit
-      show-sql: ${SHOW_SQL:true}
+      show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
         dialect: ${DATABASE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+        order_updates: false
+        order_inserts: true
         jdbc:
           batch_size: ${DATASET_BACH_JPA_SIZE:100}
           lob:

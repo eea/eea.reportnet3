@@ -7,11 +7,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
-import org.hibernate.annotations.DynamicUpdate;
+import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * The type Dataset.
@@ -23,6 +26,9 @@ import lombok.ToString;
 @DynamicUpdate
 @Table(name = "DATASET_VALUE")
 public class DatasetValue {
+
+
+
 
   /**
    * The id.
@@ -43,9 +49,14 @@ public class DatasetValue {
   @OneToMany(mappedBy = "datasetId", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<TableValue> tableValues;
 
-  /** The field validations. */
+  /**
+   * The field validations.
+   */
   @OneToMany(mappedBy = "datasetValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<DatasetValidation> datasetValidations;
+  
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * return Objects.hash(id, tableValues, idRecordSchema); Equals.

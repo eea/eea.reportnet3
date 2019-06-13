@@ -12,8 +12,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.data.SortFieldsHelper;
 import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
@@ -50,13 +52,17 @@ public class RecordValue {
         }
       }
     }
+
+
   }
 
   /**
    * The id.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
+      allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -85,13 +91,20 @@ public class RecordValue {
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
-  /** The record validations. */
+  /**
+   * The record validations.
+   */
   @OneToMany(mappedBy = "recordValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
-  /** The sort criteria. */
+  /**
+   * The sort criteria.
+   */
   @Transient
   private String sortCriteria;
+
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.
