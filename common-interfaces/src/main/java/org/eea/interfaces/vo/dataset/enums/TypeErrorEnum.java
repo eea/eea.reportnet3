@@ -9,21 +9,21 @@ public enum TypeErrorEnum {
 
 
   /** The warning. */
-  WARNING(1),
+  WARNING("WARNING"),
 
   /** The error. */
-  ERROR(2);
+  ERROR("ERROR");
 
 
   /** The value. */
-  private final int value;
+  private final String value;
 
   /**
    * Instantiates a new type error enum.
    *
    * @param value the value
    */
-  private TypeErrorEnum(int value) {
+  private TypeErrorEnum(String value) {
     this.value = value;
   }
 
@@ -32,7 +32,7 @@ public enum TypeErrorEnum {
    *
    * @return the value
    */
-  public int getValue() {
+  public String getValue() {
     return value;
   }
 }
