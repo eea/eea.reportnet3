@@ -203,14 +203,15 @@ const ReporterDataSet = () => {
   }
 
   const onConfirmValidateHandler = () =>{
-    console.log("Validating data");
+    let idDataSet = 1;
     setValidateDialogVisible(false);
     HTTPRequesterAPI.post(
       {
-        url:'/dataset/validateDataset/1',
+        url:'/validation/dataset/'+ idDataSet,
         queryString: {}
       }
     );
+    console.log("validateDataSetData");
   }
 
   const getPercentage = (tableValues) =>{
