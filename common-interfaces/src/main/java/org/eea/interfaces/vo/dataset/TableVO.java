@@ -38,18 +38,9 @@ public class TableVO implements Serializable {
    */
   private List<RecordVO> records;
 
-  /**
-   * The headers.
-   */
-  private List<FieldSchemaVO> headers;
 
   /** The level error. */
   private TypeErrorEnum levelError;
-
-  /**
-   * The name.
-   */
-  private String name;
 
   /**
    * The total records.
@@ -69,7 +60,7 @@ public class TableVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, idTableSchema, records, headers);
+    return Objects.hash(id, idTableSchema, records);
   }
 
   /**
@@ -88,8 +79,7 @@ public class TableVO implements Serializable {
       return false;
     }
     final TableVO table = (TableVO) obj;
-    return id.equals(table.id) && name.equals(table.name)
-        && idTableSchema.equals(table.idTableSchema) && records.equals(table.records)
-        && headers.equals(table.headers);
+    return id.equals(table.id) && idTableSchema.equals(table.idTableSchema)
+        && records.equals(table.records);
   }
 }

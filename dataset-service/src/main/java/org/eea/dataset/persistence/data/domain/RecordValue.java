@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
@@ -52,24 +53,17 @@ public class RecordValue {
       }
     }
 
-    //determine level error in validations
-    if (null != this.recordValidations && this.recordValidations.size() > 0) {
-      for (RecordValidation recordValidation : this.recordValidations) {
-        if (recordValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
-          this.levelError = TypeErrorEnum.ERROR;
-          break;
-        } else {
-          this.levelError = recordValidation.getValidation().getLevelError();
-        }
-      }
-    }
+   
   }
 
   /**
    * The id.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @SequenceGenerator(name = "record_sequence_generator",
+      sequenceName = "record_sequence",
+      allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

@@ -6,7 +6,7 @@ spring:
   jpa:
     hibernate:
       #use create if you are going to create the schema for the first time
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO:validate}
       flushMode: commit
       show-sql: ${SHOW_SQL:true}
     properties:
@@ -24,7 +24,7 @@ spring:
     driver-class-name: ${METABASE_DATASOURCE_DRIVER_CLASS:org.postgresql.Driver}
     hikari:
       connection-timeout: ${METABASE_DATABASE_CONNECTION_TIMEOUT:60000}
-      maximum-pool-size: ${METABASE_DATABASE_CONNECTION_MAXIMUM_POOL_SIZE:5} 
+      maximum-pool-size: ${METABASE_DATABASE_CONNECTION_MAXIMUM_POOL_SIZE:5}
 
   cloud:
     consul:
@@ -40,7 +40,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "${ACTUATOR_EXPOSURE_INCLUDE:*}"
   endpoint:
     health:
       show-details: always

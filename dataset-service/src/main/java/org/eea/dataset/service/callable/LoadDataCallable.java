@@ -26,6 +26,9 @@ public class LoadDataCallable implements Callable<Void> {
   /** The kafka sender. */
   private KafkaSender kafkaSender;
 
+  /** The id table schema. */
+  private final String idTableSchema;
+
   /**
    * Instantiates a new Load data callable.
    *
@@ -38,9 +41,13 @@ public class LoadDataCallable implements Callable<Void> {
   public LoadDataCallable(final KafkaSender kafkaSender, final DatasetService datasetService,
       final Long dataSetId, final String fileName, InputStream is) {
 
+  public LoadDataCallable(final DatasetService datasetService, final Long dataSetId,
+      final String fileName, InputStream is, final String idTableSchema) {
+    this.datasetService = datasetService;
     this.fileName = fileName;
     this.datasetId = dataSetId;
     this.is = is;
+    this.idTableSchema = idTableSchema;
     this.datasetService = datasetService;
     this.kafkaSender = kafkaSender;
   }
@@ -54,6 +61,7 @@ public class LoadDataCallable implements Callable<Void> {
   @Override
   public Void call() throws Exception {
     FileTreatmentHelper.executeFileProcess(kafkaSender, this.datasetService, datasetId, fileName, is);
+    datasetService.processFile(datasetId, fileName, is, idTableSchema);
     return null;
   }
 }
