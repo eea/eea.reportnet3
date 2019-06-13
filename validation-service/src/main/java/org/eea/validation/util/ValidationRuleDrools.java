@@ -33,6 +33,9 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.DATASET);
     DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setValidation(newValidation);
+    if (null == dataSetValue.getDatasetValidations()) {
+      dataSetValue.setDatasetValidations(new ArrayList<>());
+    }
     dataSetValue.getDatasetValidations().add(datasetValidation);
   }
 
@@ -50,6 +53,9 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.TABLE);
     TableValidation tableValidation = new TableValidation();
     tableValidation.setValidation(newValidation);
+    if (null == tableValue.getTableValidations()) {
+      tableValue.setTableValidations(new ArrayList<>());
+    }
     tableValue.getTableValidations().add(tableValidation);
   }
 
@@ -69,8 +75,8 @@ public class ValidationRuleDrools {
     fieldValidation.setValidation(newValidation);
     if (null == fieldValue.getFieldValidations()) {
       fieldValue.setFieldValidations(new ArrayList<>());
-      fieldValue.getFieldValidations().add(fieldValidation);
     }
+    fieldValue.getFieldValidations().add(fieldValidation);
 
   }
 
@@ -88,6 +94,9 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD);
     RecordValidation recordValidation = new RecordValidation();
     recordValidation.setValidation(newValidation);
+    if (null == recordValue.getRecordValidations()) {
+      recordValue.setRecordValidations(new ArrayList<>());
+    }
     recordValue.getRecordValidations().add(recordValidation);
   }
 

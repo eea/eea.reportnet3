@@ -83,26 +83,22 @@ public class KieBaseManagerTest {
     ruleField.setThenCondition(listString);
     ruleFieldList.add(ruleField);
 
-
+    // PART TO COMPONT THE OBJET TO RETURN
     List<TableSchema> tableSchemasList = new ArrayList<TableSchema>();
     TableSchema tableSchema = new TableSchema();
     RecordSchema record = new RecordSchema();
-
     List<FieldSchema> fieldSchemaList = new ArrayList<FieldSchema>();
     FieldSchema fieldSchema = new FieldSchema();
     fieldSchema.setRuleField(ruleFieldList);
-
+    fieldSchemaList.add(fieldSchema);
     record.setFieldSchema(fieldSchemaList);
     record.setRuleRecord(ruleRecordList);
     tableSchema.setRecordSchema(record);
     tableSchema.setRuleTable(ruleTableList);
     tableSchemasList.add(tableSchema);
-
-
     dataSchema.setRuleDataSet(ruleDataSetList);
     dataSchema.setTableSchemas(tableSchemasList);
-
-
+    // CALL SERVICES
     when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
     kieBaseManager.reloadRules(1L);
   }
