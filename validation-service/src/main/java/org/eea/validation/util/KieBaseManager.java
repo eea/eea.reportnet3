@@ -2,6 +2,7 @@ package org.eea.validation.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +10,11 @@ import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.rules.ConditionsDrools;
+import org.eea.validation.persistence.rules.SchemasDrools;
 import org.eea.validation.persistence.rules.TypeValidation;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
-import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RuleDataSet;
 import org.eea.validation.persistence.schemas.rule.RuleField;
 import org.eea.validation.persistence.schemas.rule.RuleRecord;
@@ -50,65 +51,48 @@ public class KieBaseManager {
    * @throws FileNotFoundException the file not found exception
    * @throws SecurityException
    * @throws NoSuchFieldException
+   * @throws NoSuchMethodException
+   * @throws InvocationTargetException
    * @throws IllegalAccessException
    * @throws IllegalArgumentException
    */
-  public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException, NoSuchFieldException,
-      SecurityException, IllegalArgumentException, IllegalAccessException {
+  public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
     DataSetSchema schema =
 
         schemasRepository.findSchemaByIdFlow(dataFlowId);
 
-    List<Rule> listRules = new ArrayList<>();
-
+    List<Map<String, String>> ruleAttributes = new ArrayList<>();
     for (RuleDataSet rule : schema.getRuleDataSet()) {
-      listRules.add(rule);
+      ruleAttributes.add(passDataToMap(rule.getIdDataSetSchema().toString(),
+          rule.getRuleId().toString(), TypeValidation.DATASET,
+          SchemasDrools.ID_DATASET_SCHEMA.getValue(), rule.getWhenCondition(),
+          rule.getThenCondition().get(0), rule.getThenCondition().get(1)));
     }
     for (TableSchema table : schema.getTableSchemas()) {
 
       for (RuleTable ruleTableList : table.getRuleTable()) {
-        listRules.add(ruleTableList);
+        ruleAttributes.add(passDataToMap(ruleTableList.getIdTableSchema().toString(),
+            ruleTableList.getRuleId().toString(), TypeValidation.TABLE,
+            SchemasDrools.ID_TABLE_SCHEMA.getValue(), ruleTableList.getWhenCondition(),
+            ruleTableList.getThenCondition().get(0), ruleTableList.getThenCondition().get(1)));
       }
       for (RuleRecord ruleRecordList : table.getRecordSchema().getRuleRecord()) {
-        listRules.add(ruleRecordList);
+        ruleAttributes.add(passDataToMap(ruleRecordList.getIdRecordSchema().toString(),
+            ruleRecordList.getRuleId().toString(), TypeValidation.RECORD,
+            SchemasDrools.ID_RECORD_SCHEMA.getValue(), ruleRecordList.getWhenCondition(),
+            ruleRecordList.getThenCondition().get(0), ruleRecordList.getThenCondition().get(1)));
       }
       for (FieldSchema fieldSchema : table.getRecordSchema().getFieldSchema()) {
 
         for (RuleField ruleField : fieldSchema.getRuleField()) {
-          listRules.add(ruleField);
+          ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
+              ruleField.getRuleId().toString(), TypeValidation.FIELD,
+              SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
+              ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1)));
         }
       }
     }
 
-    List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    String LVTypeValidation = null;
-    for (int i = 0; i < listRules.size(); i++) {
-      Map<String, String> ruleAdd = new HashMap<>();
-      switch (listRules.get(i).getScope()) {
-        case DATASET:
-          LVTypeValidation = TypeValidation.DATASET.getValue();
-          break;
-        case FIELD:
-          LVTypeValidation = TypeValidation.FIELD.getValue();
-          break;
-        case RECORD:
-          LVTypeValidation = TypeValidation.RECORD.getValue();
-          break;
-        case TABLE:
-          LVTypeValidation = TypeValidation.TABLE.getValue();
-          break;
-      }
-      ruleAdd.put(ConditionsDrools.RULE_ID.getValue(), listRules.get(i).getRuleId().toString());
-      ruleAdd.put(ConditionsDrools.TYPE_VALIDATION.getValue(), LVTypeValidation);
-      ruleAdd.put(ConditionsDrools.WHEN_CONDITION.getValue(),
-          listRules.get(i).getWhenCondition().trim());
-      ruleAdd.put(ConditionsDrools.MESSAGE_FAIL_VALIDATION.getValue(),
-          listRules.get(i).getThenCondition().get(0).toString());
-      ruleAdd.put(ConditionsDrools.TYPE_FAIL_VALIDATION.getValue(),
-          listRules.get(i).getThenCondition().get(1).toString());
-      ruleAttributes.add(ruleAdd);
-
-    }
     ObjectDataCompiler compiler = new ObjectDataCompiler();
 
     String generatedDRL =
@@ -126,6 +110,21 @@ public class KieBaseManager {
     KieBase newBase = kieHelper.build();
     this.kieBase = newBase;
     return this.kieBase;
+  }
+
+  private Map<String, String> passDataToMap(String idSchema, String idRule,
+      TypeValidation typeValidation, String schemaName, String whenCondition, String message,
+      String error) {
+    Map<String, String> ruleAdd = new HashMap<>();
+    ruleAdd.put(ConditionsDrools.DATASCHEMA_ID.getValue(), idSchema);
+    ruleAdd.put(ConditionsDrools.RULE_ID.getValue(), idRule);
+    ruleAdd.put(ConditionsDrools.SCHEMA_NAME.getValue(), schemaName);
+    ruleAdd.put(ConditionsDrools.RULE_ID.getValue(), idRule);
+    ruleAdd.put(ConditionsDrools.TYPE_VALIDATION.getValue(), typeValidation.getValue());
+    ruleAdd.put(ConditionsDrools.WHEN_CONDITION.getValue(), whenCondition);
+    ruleAdd.put(ConditionsDrools.MESSAGE_FAIL_VALIDATION.getValue(), message);
+    ruleAdd.put(ConditionsDrools.TYPE_FAIL_VALIDATION.getValue(), error);
+    return ruleAdd;
   }
 
 }
