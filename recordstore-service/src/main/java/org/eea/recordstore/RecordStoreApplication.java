@@ -6,8 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+
 /**
- * The type Data flow application.
+ * The Class RecordStoreApplication.
  */
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -15,11 +16,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableEEASwagger
 public class RecordStoreApplication {
 
-
   /**
-   * The entry point of application.
+   * The main method.
    *
-   * @param args the input arguments
+   * @param args the arguments
    */
   public static void main(final String[] args) {
     SpringApplication.run(RecordStoreApplication.class, args);

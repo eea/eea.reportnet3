@@ -10,9 +10,7 @@ import org.mapstruct.Mapping;
  * The Interface DataSetMapper.
  */
 @Mapper(componentModel = "spring")
-public abstract class TableNoRecordMapper implements IMapper<TableValue, TableVO> {
-
-
+public interface TableNoRecordMapper extends IMapper<TableValue, TableVO> {
 
   /**
    * Entity to class.
@@ -22,7 +20,7 @@ public abstract class TableNoRecordMapper implements IMapper<TableValue, TableVO
    */
   @Mapping(source = "records", target = "records", ignore = true)
   @Override
-  public abstract TableVO entityToClass(TableValue entity);
+  TableVO entityToClass(TableValue entity);
 
 
 

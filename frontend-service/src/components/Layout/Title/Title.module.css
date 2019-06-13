@@ -1,4 +1,21 @@
 .Title {
+  color:  #404040;
+  background-color: #ffffff;
+  display:table-cell;
+  width: 100%;
+ /*   text-align: center;
+margin-bottom: 0.66rem;
+  margin-top: 0.66rem;*/
+}
+
+.Title h2{
+  font-weight: 50;
+  vertical-align:middle;
   text-align: center;
-  color: #004494;
+}
+.Title img{
+  height: 35px;
+  vertical-align:middle;
+  text-align: center;
+  margin-right: 10px;
 }

@@ -16,16 +16,24 @@ import lombok.ToString;
 @ToString
 public class DataSetVO implements Serializable {
 
-  /** The Constant serialVersionUID. */
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = 2680945261242083928L;
 
-  /** The id. */
+  /**
+   * The id.
+   */
   private Long id;
 
-  /** The id mongo. */
-  private String idMongo;
+  /**
+   * The id mongo.
+   */
+  private String idDatasetSchema;
 
-  /** The table VO. */
+  /**
+   * The table VO.
+   */
   private List<TableVO> tableVO;
 
   /**
@@ -35,28 +43,28 @@ public class DataSetVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, tableVO, idMongo);
+    return Objects.hash(id, tableVO, idDatasetSchema);
   }
 
   /**
    * Equals.
    *
    * @param obj the obj
+   *
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
     }
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    DataSetVO other = (DataSetVO) obj;
+    final DataSetVO other = (DataSetVO) obj;
     return Objects.equals(id, other.id) && Objects.equals(tableVO, other.tableVO)
-        && Objects.equals(idMongo, other.idMongo);
+        && Objects.equals(idDatasetSchema, other.idDatasetSchema);
   }
-
 
 
 }

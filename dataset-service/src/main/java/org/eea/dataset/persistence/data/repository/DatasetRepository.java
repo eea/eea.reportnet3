@@ -1,6 +1,8 @@
 package org.eea.dataset.persistence.data.repository;
 
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -8,4 +10,14 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface DatasetRepository extends CrudRepository<DatasetValue, Long> {
 
+
+  /**
+   * Remove dataset data including all data inside tables and tables themselves.
+   *
+   * @param dataSetId the data set id
+   */
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "truncate table field_value, record_value, table_value, dataset_value")
+  void removeDatasetData(Long dataSetId);
 }

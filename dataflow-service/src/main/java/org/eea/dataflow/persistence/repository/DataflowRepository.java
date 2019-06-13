@@ -7,6 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * The interface Dataflow repository.
  */
-public interface DataflowRepository extends CrudRepository<Dataflow, Integer> {
+public interface DataflowRepository extends CrudRepository<Dataflow, Long> {
 
 }

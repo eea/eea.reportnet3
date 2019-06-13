@@ -38,14 +38,6 @@ public class FileParserFactoryTest {
   }
 
   /**
-   * Test create context xml.
-   */
-  @Test
-  public void testCreateContextXml() {
-    assertNotNull(fileParserFactory.createContext("xml"));
-  }
-
-  /**
    * Test create context.
    */
   @Test

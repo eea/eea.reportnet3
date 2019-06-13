@@ -28,6 +28,7 @@ import org.eea.document.type.NodeType;
 import org.eea.exception.EEAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,16 +41,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
+  /** The Constant CACHE_SIZE. */
+  private static final int CACHE_SIZE = 16;
+
+  /** The Constant PORT. */
+  private static final int PORT = 27017;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
   /** The Constant ADMIN. */
   private static final String ADMIN = "admin";
 
+  @Value(value = "C:/OutFiles/file.txt")
+  private String demoExitLocation;
+
   /**
    * test the connection.
-   * 
-   * @throws RepositoryException
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
    */
   @Override
   public void testLogging() throws EEAException, RepositoryException {
@@ -83,7 +94,8 @@ public class DocumentServiceImpl implements DocumentService {
       // Initialize the session
       session = getSession();
       // Add a file node with the document (in this demo, hardcoded)
-      addFileNode(session, "/test", new File("src/main/resources/file.txt"), ADMIN);
+      File fichero = new File(getClass().getClassLoader().getResource("file.txt").getFile());
+      addFileNode(session, "/test", fichero, ADMIN);
 
       LOG.info("Files added...");
     } catch (RepositoryException | IOException e) {
@@ -103,7 +115,7 @@ public class DocumentServiceImpl implements DocumentService {
   @Transactional
   public void getDocument() throws EEAException {
     Session session = null;
-    try (FileOutputStream fos = new FileOutputStream("C:/OutFiles/" + "file.txt")) {
+    try (FileOutputStream fos = new FileOutputStream(demoExitLocation)) {
       session = getSession();
       // Initialize the session
       LOG.info("Fething the file...");
@@ -122,7 +134,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-	 * creates a repository in that location
+   * creates a repository in that location
    *
    * @param host the host
    * @param port the port
@@ -133,7 +145,7 @@ public class DocumentServiceImpl implements DocumentService {
     LOG.info(uri);
     // creates a node with name oak_demo
     DocumentNodeStore ns =
-        new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak_demo", 16).build();
+        new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak_demo", CACHE_SIZE).build();
     return new Jcr(new Oak(ns)).createRepository();
   }
 
@@ -144,7 +156,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws RepositoryException the repository exception
    */
   private Session getSession() throws RepositoryException {
-    Repository repo = getRepo("localhost", 27017);
+    Repository repo = getRepo("localhost", PORT);
     if (repo.getDescriptorKeys() != null) {
       return repo.login(new SimpleCredentials(ADMIN, ADMIN.toCharArray()));
     } else {
@@ -220,7 +232,7 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Nodes already exist!");
       return session.getNode(absPath);
     }
-    String[] nodeNames = (null != absPath) ? absPath.split("/") : null;
+    String[] nodeNames = (null != absPath) ? absPath.split("/") : new String[1];
     Node node = createNodes(session, nodeNames);
     session.save();
     return node;
@@ -280,7 +292,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-	 * Reads the file and generate a FileResponse, with the content and the type
+   * Reads the file and generate a FileResponse, with the content and the type
    *
    * @param session the session
    * @param basePath the base path

@@ -1,5 +1,6 @@
 package org.eea.recordstore.service.impl;
 
+import com.github.dockerjava.api.model.Container;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.github.dockerjava.api.model.Container;
 
 /**
  * The Class RecordStoreServiceImpl.
@@ -31,46 +31,67 @@ import com.github.dockerjava.api.model.Container;
 @Service
 public class RecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant DATASET_NAME_PATTERN. */
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
+
+  /**
+   * The Constant DATASET_NAME_PATTERN.
+   */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
 
-  /** The docker interface service. */
+  /**
+   * The docker interface service.
+   */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
 
-  /** The container name. */
-  @Value("${dockerContainerName:crunchy-postgres}")
-  private String CONTAINER_NAME;
+  /**
+   * The container name.
+   */
+  @Value("${dockerContainerName}")
+  private String containerName;
 
-  /** The ip postgre db. */
-  @Value("${ipPostgre:localhost}")
-  private String IP_POSTGRE_DB;
+  /**
+   * The ip postgre db.
+   */
+  @Value("${ipPostgre}")
+  private String ipPostgreDb;
 
-  /** The user postgre db. */
-  @Value("${userPostgre:root}")
-  private String USER_POSTGRE_DB;
+  /**
+   * The user postgre db.
+   */
+  @Value("${userPostgre}")
+  private String userPostgreDb;
 
-  /** The pass postgre db. */
-  @Value("${passwordPostgre:root}")
-  private String PASS_POSTGRE_DB;
+  /**
+   * The pass postgre db.
+   */
+  @Value("${passwordPostgre}")
+  private String passPostgreDb;
 
-  /** The conn string postgre. */
-  @Value("${connStringPostgree:jdbc:postgresql://localhost/datasets}")
-  private String CONN_STRING_POSTGRE;
+  /**
+   * The conn string postgre.
+   */
+  @Value("${connStringPostgree}")
+  private String connStringPostgre;
 
-  /** The sql get datasets name. */
-  @Value("${sqlGetAllDatasetsName:select * from pg_namespace where nspname like 'dataset%'}")
-  private String SQL_GET_DATASETS_NAME;
+  /**
+   * The sql get datasets name.
+   */
+  @Value("${sqlGetAllDatasetsName}")
+  private String sqlGetDatasetsName;
 
 
-
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Autowired
   private KafkaSender kafkaSender;
 
@@ -88,7 +109,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     }
     // TODO END REMOVE
 
-    final Container container = dockerInterfaceService.createContainer(CONTAINER_NAME,
+    final Container container = dockerInterfaceService.createContainer(containerName,
         "crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1", "5432:5432");
 
     dockerInterfaceService.startContainer(container, 10l, TimeUnit.SECONDS);
@@ -97,7 +118,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     final File fileInitSql =
         new File(getClass().getClassLoader().getResource("init.sql").getFile());
 
-    dockerInterfaceService.copyFileFromHostToContainer(CONTAINER_NAME, fileInitSql.getPath(),
+    dockerInterfaceService.copyFileFromHostToContainer(containerName, fileInitSql.getPath(),
         "/pgwal");
 
     /*
@@ -108,7 +129,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql "
     try {
       dockerInterfaceService.executeCommandInsideContainer(container, "/bin/bash", "-c", "psql -h "
-          + IP_POSTGRE_DB + " -U " + USER_POSTGRE_DB + " -p 5432 -d datasets -f /pgwal/init.sql ");
+          + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
     } catch (final InterruptedException e) {
       LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
       throw new DockerAccessException(
@@ -122,6 +143,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
+   *
    * @throws DockerAccessException the docker access exception
    */
   @Override
@@ -132,7 +154,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     // PG_PRIMARY_PASSWORD=root
     // -e PG_ROOT_PASSWORD=root -e PGBACKREST=true -p 5432:5432 --name crunchy-postgres
     // crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1
-    final Container container = dockerInterfaceService.getContainer(CONTAINER_NAME);
+    final Container container = dockerInterfaceService.getContainer(containerName);
 
     final ClassLoader classLoader = this.getClass().getClassLoader();
     final File fileInitCommands =
@@ -153,8 +175,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     for (String command : commands) {
       command = command.replace("%dataset_name%", datasetName);
       try {
-        dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", IP_POSTGRE_DB,
-            "-U", USER_POSTGRE_DB, "-p", "5432", "-d", "datasets", "-c", command);
+        dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
+            "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
       } catch (final InterruptedException e) {
         LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
         throw new DockerAccessException(String
@@ -163,6 +185,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       }
     }
 
+    LOG.info("Empty dataset created");
     final EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.CONNECTION_CREATED_EVENT);
     final Map<String, Object> data = new HashMap<>();
@@ -190,7 +213,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data for dataset
+   *
    * @throws DockerAccessException the docker access exception
    */
   @Override
@@ -212,6 +237,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @return the connection data for dataset
+   *
    * @throws DockerAccessException the docker access exception
    */
   @Override
@@ -230,18 +256,18 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Gets the all data sets name.
    *
    * @return the all data sets name
+   *
    * @throws DockerAccessException the docker access exception
    */
   private List<String> getAllDataSetsName() throws DockerAccessException {
     final List<String> datasets = new ArrayList<>();
-    final Container container = dockerInterfaceService.getContainer(CONTAINER_NAME);
-
+    final Container container = dockerInterfaceService.getContainer(containerName);
 
     try {
-      final byte[] result = dockerInterfaceService.executeCommandInsideContainer(container, "psql",
-          "-h", IP_POSTGRE_DB, "-U", USER_POSTGRE_DB, "-p", "5432", "-d", "datasets", "-c",
-          SQL_GET_DATASETS_NAME);
-      //final String outcome = new String(result);
+      final byte[] result =
+          dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
+              "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", sqlGetDatasetsName);
+
       if (null != result && result.length > 0) {
         final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(new String(result));
         while (dataMatcher.find()) {
@@ -263,14 +289,15 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Creates the connection data VO.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data VO
    */
   private ConnectionDataVO createConnectionDataVO(final String datasetName) {
     final ConnectionDataVO result = new ConnectionDataVO();
 
-    result.setConnectionString(CONN_STRING_POSTGRE);
-    result.setUser(USER_POSTGRE_DB);
-    result.setPassword(PASS_POSTGRE_DB);
+    result.setConnectionString(connStringPostgre);
+    result.setUser(userPostgreDb);
+    result.setPassword(passPostgreDb);
     result.setSchema(datasetName);
     return result;
   }

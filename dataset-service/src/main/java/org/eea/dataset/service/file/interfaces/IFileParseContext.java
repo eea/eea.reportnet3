@@ -7,17 +7,18 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 /**
  * The Interface IFileParseContext.
  */
+@FunctionalInterface
 public interface IFileParseContext {
 
   /**
    * Parses the.
    *
    * @param inputStream the input stream
-   * @param datasetId the dataset id
-   * @param integer the integer
+   * @param dataflowId the dataflow id
+   * @param partitionId the partition id
    * @return the data set VO
-   * @throws InvalidFileException
+   * @throws InvalidFileException the invalid file exception
    */
-  DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId)
+  DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema)
       throws InvalidFileException;
 }

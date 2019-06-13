@@ -5,5 +5,5 @@ spring:
         preferIpAddress: true
         ipAddress: ${CONSUL_DISCOVERY_ADDRESS:localhost}
         instanceId: ${spring.application.name}:${random.value}
-      host: localhost
-      port: 8500
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}

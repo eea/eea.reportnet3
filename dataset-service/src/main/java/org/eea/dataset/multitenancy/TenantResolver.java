@@ -5,11 +5,19 @@ package org.eea.dataset.multitenancy;
  */
 public class TenantResolver {
 
+
   /** The tenant. */
   private static ThreadLocal<String> tenant = new ThreadLocal<>();
 
   /** The Constant DEFAULT_TENANT. */
   private static final String DEFAULT_TENANT = "dataset_1";
+
+  /**
+   * Instantiates a new tenant resolver.
+   */
+  private TenantResolver() {
+    super();
+  }
 
   /**
    * Sets tenant name.

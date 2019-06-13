@@ -47,9 +47,11 @@ public class FileParseContextImplTest {
    */
   @Test
   public void testParse() throws InvalidFileException {
-    Mockito.when(readerStrategy.parseFile(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito
+        .when(readerStrategy.parseFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetVO());
-    DataSetVO result = fileParseContext.parse(Mockito.any(), Mockito.any(), Mockito.any());
+    DataSetVO result =
+        fileParseContext.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     assertNotNull(result);
   }
 

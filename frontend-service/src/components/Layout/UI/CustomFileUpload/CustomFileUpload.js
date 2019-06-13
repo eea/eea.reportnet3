@@ -124,23 +124,23 @@ export class CustomFileUpload extends Component {
         this.files = this.state.files || [];
         let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
 
-        // if (this.props.fileLimit >= 1) {    
-        //     console.log(this.files);
-        //     console.log(this.state.files.length); 
-        //     if (this.state.files > 1) {
-        //         for (let i = 0; i < this.state.files.length - this.props.fileLimit; i++) {
-        //                 console.log("twts");
-        //             this.state.files.shift();
-        //           // const filesStates = [...this.state.files];
-        //           // console.log(filesStates + " before");
-        //           // filesStates.shift();
-        //           // console.log(filesStates + " after");
-        //           // this.setState({
-        //           //       files: filesStates
-        //           // });
-        //         }
-        //       }
-        //   }
+        //TODO: Refactorizar y cambiar el this.state.files.shift() por versión inmutable
+        if (this.props.fileLimit >= 1) {    
+            console.log(this.files);
+            console.log(this.state.files.length); 
+            if (this.files.length > 0) {
+                for (let i = 0; i <= (this.files.length - this.props.fileLimit); i++) {
+                    this.state.files.shift();
+                    // const filesStates = [...this.state.files];
+                    // console.log(filesStates + " before");
+                    // filesStates.shift();
+                    // console.log(filesStates + " after");
+                    // this.setState({
+                    //       files: filesStates
+                    // });
+                }
+            }
+        }
 
         for (let i = 0; i < files.length; i++) {
             let file = files[i];

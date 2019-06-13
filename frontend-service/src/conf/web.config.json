@@ -1,0 +1,8 @@
+{
+    "api":{
+        "protocol": "http://",
+        "url": "localhost",
+        "port": ":8030",                
+        "ip": "127.0.0.1"
+    }
+}

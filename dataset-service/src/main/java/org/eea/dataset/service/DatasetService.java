@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 public interface DatasetService {
 
   /**
-   * Create empty dataset.
+   * Create removeDatasetData dataset.
    *
    * @param datasetName the dataset name
    */
@@ -24,23 +24,14 @@ public interface DatasetService {
    * Process the file: read, parse and save in the db.
    *
    * @param datasetId the dataset id
-   * @param file file to process
+   * @param fileName the file name
+   * @param is the is
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
+  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
       throws EEAException, IOException;
-
-
-  /**
-   * Gets the dataset values by id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset values by id
-   * @throws EEAException the EEA exception
-   */
-  DataSetVO getDatasetValuesById(@DatasetId Long datasetId) throws EEAException;
-
 
 
   /**
@@ -56,25 +47,36 @@ public interface DatasetService {
    *
    * @param dataSetId the data set id
    */
-  void deleteImportData(Long dataSetId);
+  void deleteImportData(@DatasetId Long dataSetId);
 
   /**
    * Gets the table values by id.
    *
-   * @param MongoID the mongo ID
+   * @param datasetId the dataset id
+   * @param mongoID the mongo ID
    * @param pageable the pageable
+   * @param idFieldSchema the id field schema
+   * @param asc the asc
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(String mongoID, Pageable pageable) throws EEAException;
+  TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
+      String idFieldSchema, Boolean asc) throws EEAException;
 
 
   /**
-   * Count table data.
+   * Sets the dataschema tables.
    *
-   * @param tableId the table id
-   * @return the long
+   * @param datasetId the dataset id
+   * @param dataFlowId the data flow id
+   * @param tableCollections the table collections
+   *
+   * @throws EEAException the EEA exception
    */
-  Long countTableData(Long tableId);
+
+  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
+      TableCollectionVO tableCollections) throws EEAException;
 
 }

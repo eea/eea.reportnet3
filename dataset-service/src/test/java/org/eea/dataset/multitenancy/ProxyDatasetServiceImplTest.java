@@ -1,10 +1,10 @@
 package org.eea.dataset.multitenancy;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import org.eea.dataset.service.DatasetService;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
 /**
  * The Class ProxyDatasetServiceImplTest.
@@ -41,11 +43,16 @@ public class ProxyDatasetServiceImplTest {
    */
   @Test
   public void testInvoke() throws Throwable {
-    Mockito.when(datasetService.getDatasetValuesById(1L)).thenReturn(new DataSetVO());
-    Method method = DatasetService.class.getMethod("getDatasetValuesById", Long.class);
+    Mockito.doNothing().when(datasetService).processFile(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    Method method = DatasetService.class.getMethod("processFile", Long.class, String.class,
+        InputStream.class, String.class);
     ProxyDatasetServiceImpl proxy = new ProxyDatasetServiceImpl(datasetService);
-    Object result = proxy.invoke(datasetService, method, new Long[] {1l});
-    assertNotNull(result);
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    Object result =
+        proxy.invoke(datasetService, method, new Object[] {1L, "id", file.getInputStream(), null});
+    assertNull("failed", result);
   }
 
   /**
@@ -55,10 +62,12 @@ public class ProxyDatasetServiceImplTest {
    */
   @Test(expected = Throwable.class)
   public void testInvokeException() throws Throwable {
-    Method method = DatasetService.class.getMethod("getDatasetById", Long.class);
-    Mockito.when(method.invoke(datasetService, new Long[] {1l})).thenThrow(Throwable.class);
+    Method method =
+        DatasetService.class.getMethod("getTableValuesById", String.class, Pageable.class);
+    Mockito.when(method.invoke(datasetService, new Object[] {"id", Pageable.unpaged()}))
+        .thenThrow(Throwable.class);
     ProxyDatasetServiceImpl proxy = new ProxyDatasetServiceImpl(datasetService);
-    proxy.invoke(datasetService, method, new Long[] {1l});
+    proxy.invoke(datasetService, method, new Object[] {"id", Pageable.unpaged()});
   }
 
 }

@@ -37,15 +37,21 @@ import org.springframework.kafka.core.ProducerFactory;
 @ComponentScan("org.eea.kafka")
 public class KafkaConfiguration {
 
-  /** The bootstrap address. */
-  @Value(value = "${kafka.bootstrapAddress:localhost:9092}")
+  /**
+   * The bootstrap address.
+   */
+  @Value(value = "${kafka.bootstrapAddress}")
   private String bootstrapAddress;
 
-  /** The group id. */
-  @Value(value = "${spring.application.name:test-consumer-group}")
+  /**
+   * The group id.
+   */
+  @Value(value = "${spring.application.name}")
   private String groupId;
 
-  /** The admin. */
+  /**
+   * The admin.
+   */
   @Autowired
   private KafkaAdmin admin;
 
@@ -131,6 +137,8 @@ public class KafkaConfiguration {
         return Health.up().withDetail("clusterId", clusterId).withDetail("nodeCount", nodeCount)
             .build();
       } catch (final InterruptedException | ExecutionException e) {
+        // NOPMD false positive, I really need the thread to go on since this is a healtchecker.
+        // Exception is managed by Spring Actuator
         return Health.down().withException(e).build();
       }
     };
