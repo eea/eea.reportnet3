@@ -43,6 +43,7 @@ import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -213,6 +214,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TableNoRecordMapper tableNoRecordMapper;
 
+  @Autowired
+  private TableValidationRepository tableValidationRepository;
+  
+  
   /**
    * Creates the empty dataset.
    *
@@ -888,7 +893,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     Long countRecords = tableRepository.countRecordsByIdTable(tableValue.getId());
     List<RecordValidation> recordValidations =
-        recordRepository.findRecordValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
+        recordValidationRepository.findRecordValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setNameTableSchema(tableValue.getName());
@@ -1004,6 +1009,16 @@ public class DatasetServiceImpl implements DatasetService {
   }
   
   
+  /**
+   * Gets the list validations.
+   *
+   * @param datasetId the dataset id
+   * @param pageable the pageable
+   * @param headerField the header field
+   * @param asc the asc
+   * @return the list validations
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable, 
@@ -1052,7 +1067,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
   
   
-  private List<ErrorsValidationVO> processErrors(DatasetValue dataset, Map<String,String> mapNameTableSchema){
+  /*private List<ErrorsValidationVO> processErrors(DatasetValue dataset, Map<String,String> mapNameTableSchema){
     
     List<ErrorsValidationVO> errors = new ArrayList<>();
     
@@ -1093,7 +1108,7 @@ public class DatasetServiceImpl implements DatasetService {
       
       //RECORD ERRORS
       List<RecordValidation> recordValidations =
-          recordRepository.findRecordValidationsByIdDatasetAndIdTable(dataset.getId(), tableValue.getId());
+          recordValidationRepository.findRecordValidationsByIdDatasetAndIdTable(dataset.getId(), tableValue.getId());
       
       for (RecordValidation recordValidation : recordValidations) {
         
@@ -1129,7 +1144,99 @@ public class DatasetServiceImpl implements DatasetService {
     }
     
     return errors;
+  }*/
+  
+  
+  
+ 
+  /**
+   * Process errors.
+   *
+   * @param dataset the dataset
+   * @param mapNameTableSchema the map name table schema
+   * @return the list
+   */
+  private List<ErrorsValidationVO> processErrors(DatasetValue dataset, Map<String,String> mapNameTableSchema){
+    
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+    
+    //DATASET ERRORS
+    for(DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(datasetValidation.getDatasetValue().getId());
+      error.setIdValidation(datasetValidation.getValidation().getId());
+      error.setLevelError(datasetValidation.getValidation().getLevelError().name());
+      error.setMessage(datasetValidation.getValidation().getMessage());
+      error.setNameTableSchema(null);
+      error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
+      error.setValidationDate(datasetValidation.getValidation().getValidationDate());
+      
+      errors.add(error);
+    }
+    
+    
+    //TABLE ERRORS
+    List<TableValidation> tableValidations = tableValidationRepository.findTableValidationsByIdDataset(dataset.getId());
+    for (TableValidation tableValidation : tableValidations) {
+      
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(tableValidation.getTableValue().getId());
+      error.setIdValidation(tableValidation.getValidation().getId());
+      error.setLevelError(tableValidation.getValidation().getLevelError().name());
+      error.setMessage(tableValidation.getValidation().getMessage());
+      error.setNameTableSchema(mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema()));
+      error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
+      error.setValidationDate(tableValidation.getValidation().getValidationDate());
+      
+      errors.add(error);
+    }
+      
+    
+      
+      
+      //RECORD ERRORS
+      List<RecordValidation> recordValidations =
+          recordValidationRepository.findRecordValidationsByIdDataset(dataset.getId());
+      
+      for (RecordValidation recordValidation : recordValidations) {
+        
+        ErrorsValidationVO error = new ErrorsValidationVO();
+        error.setIdObject(recordValidation.getRecordValue().getId());
+        error.setIdValidation(recordValidation.getValidation().getId());
+        error.setLevelError(recordValidation.getValidation().getLevelError().name());
+        error.setMessage(recordValidation.getValidation().getMessage());
+        error.setNameTableSchema(mapNameTableSchema.get(recordValidation.
+            getRecordValue().getTableValue().getIdTableSchema()));
+        error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
+        error.setValidationDate(recordValidation.getValidation().getValidationDate());
+        
+        errors.add(error);
+      }
+      
+      // FIELD ERRORS
+      List<FieldValidation> fieldValidations =
+          fieldValidationRepository.findFieldValidationsByIdDataset(dataset.getId());
+      for (FieldValidation fieldValidation : fieldValidations) {
+      
+        ErrorsValidationVO error = new ErrorsValidationVO();
+        error.setIdObject(fieldValidation.getFieldValue().getId());
+        error.setIdValidation(fieldValidation.getValidation().getId());
+        error.setLevelError(fieldValidation.getValidation().getLevelError().name());
+        error.setMessage(fieldValidation.getValidation().getMessage());
+        error.setNameTableSchema(mapNameTableSchema.get(fieldValidation.getFieldValue().
+            getRecord().getTableValue().getIdTableSchema()));
+        error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
+        error.setValidationDate(fieldValidation.getValidation().getValidationDate());
+        
+        errors.add(error);
+      }
+      
+    
+    
+    return errors;
   }
+  
+  
   
   private Method retrieveGetMethod(String fieldName) {
     Method valueGetter = null;

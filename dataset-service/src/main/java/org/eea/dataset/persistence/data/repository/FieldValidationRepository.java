@@ -35,5 +35,16 @@ public interface FieldValidationRepository extends CrudRepository<FieldValidatio
       + "INNER JOIN rv.fields flds INNER JOIN flds.fieldValidations fval WHERE dat.id=?1 and tv.id=?2")
   List<FieldValidation> findFieldValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
 
-
+  
+  
+  /**
+   * Find field validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the list
+   */
+  @Query("SELECT fv FROM FieldValidation fv INNER JOIN FETCH fv.validation INNER JOIN fv.fieldValue field "
+      + "INNER JOIN field.record rc INNER JOIN rc.tableValue tab WHERE tab.datasetId.id=?1")
+  List<FieldValidation> findFieldValidationsByIdDataset(Long datasetId);
+  
 }

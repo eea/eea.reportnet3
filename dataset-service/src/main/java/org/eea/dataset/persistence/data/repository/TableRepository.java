@@ -1,7 +1,7 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
-import org.eea.dataset.persistence.data.domain.RecordValidation;
+import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,18 +32,6 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   Long countRecordsByIdTable(Long id);
   
   
-  /**
-   * Find record validations by id dataset and id table.
-   *
-   * @param datasetId the dataset id
-   * @param idTable the id table
-   * @return the list
-   */
-  @Query("SELECT rval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.records rv "
-      + "INNER JOIN rv.recordValidations rval WHERE dat.id=?1 and tv.id=?2")
-  List<RecordValidation> findRecordValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
-  
-  
   
   /**
    * Find by id and dataset id id.
@@ -53,4 +41,17 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * @return the table value
    */
   TableValue findByIdAndDatasetId_Id(Long id, Long idDataset);
+  
+  
+  /**
+   * Find table validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the list
+   */
+  @Query("SELECT tval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.tableValidations tval "
+      + "WHERE dat.id=?1")
+  List<TableValidation> findTableValidationsByIdDataset(Long datasetId); 
+  
+
 }
