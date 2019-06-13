@@ -13,7 +13,7 @@ const TabsSchema = (props) => {
                 // rightIcon={resources.icons["warning"]}
                 //TODO: Refactorizar para no renderizar siempre DataViewer sino pasárselo como composición de componentes. Así se podrá reutilizar
                 //TabsSchema para cualquier visualización de datos
-                <TabPanel header={table.name} key={table.name}>
+                <TabPanel header={table.name} key={table.id}>
                     <div className={styles.TabsSchema}>
                         <DataViewer key={table.id} id={table.id} name={table.name} customButtons={(props.customButtons)?props.customButtons:null} 
                                     tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}
@@ -23,8 +23,12 @@ const TabsSchema = (props) => {
             );
         })
         : null;
+    const filterActiveIndex = (idTableSchema) =>{
+       return (tabs) ? tabs.findIndex(t => t.key === idTableSchema) : 0;
+    }
+
     return (
-        <TabView>
+        <TabView activeIndex={(props.activeIndex) ? filterActiveIndex(props.activeIndex) : 0}>
             {tabs}
         </TabView>
     );

@@ -101,22 +101,22 @@ const ValidationViewer = (props) => {
 
         //jsonData.errors
         const headers = [{
-              id: "origin",
-              message: resources.messages["origin"]
+              id: "nameTableSchema",
+              header: resources.messages["origin"]
             },
             {
-              id: "level",
-              message: resources.messages["levelError"]
+              id: "levelError",
+              header: resources.messages["levelError"]
             },
             {
               id: "message",
-              message: resources.messages["errorMessage"]
+              header: resources.messages["errorMessage"]
             },
             {
-              id: "type",
-              message: resources.messages["typeEntity"]
+              id: "typeEntity",
+              header: resources.messages["typeEntity"]
             }];
-        let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={`${col.message}`} />);
+        let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={`${col.header}`} />);
         columnsArr.push(<Column sortable={true} key="idObject" field="idObject" header="ID Object" className={styles.VisibleHeader} />)
         setColumns(columnsArr); 
   
@@ -194,9 +194,9 @@ const ValidationViewer = (props) => {
 
         console.log(data.nameDataSetSchema);
 
-        const values = data.errors.map(e => {
-          return { origin: (e.nameTableSchema !== null)? e.nameTableSchema : data.nameDataSetSchema, level: e.levelError, message: e.message, type: e.typeEntity, idObject: e.idObject  }
-        });
+        // const values = data.errors.map(e => {
+        //   return { nameTableSchema: e.nameTableSchema, levelError: e.levelError, message: e.message, typeEntity: e.typeEntity, idObject: e.idObject  }
+        // });
 
         //TODO: Refactorizar
         // const dataFiltered = data.map(record => record.fields.map(f =>{
@@ -210,7 +210,7 @@ const ValidationViewer = (props) => {
         //   auxArrayFiltered.push(auxFiltered);
         //   auxFiltered={};
         // });
-        setFetchedData(values);
+        setFetchedData(data.errors);
       }
 
       const onRowSelectHandler = (event) =>{
@@ -227,10 +227,10 @@ const ValidationViewer = (props) => {
         //     queryString: queryString
         //   }
         // );
-
-        //http://localhost:8030/dataset/loadTableFromAnyObject/1629858?datasetId=1&pageSize=20&type=RECORD
         console.log(event.data);
+        //http://localhost:8030/dataset/loadTableFromAnyObject/1629858?datasetId=1&pageSize=20&type=RECORD
         contextReporterDataSet.validationsVisibleHandler();
+        contextReporterDataSet.setTabHandler("5cffc519903713258408d56d");
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;

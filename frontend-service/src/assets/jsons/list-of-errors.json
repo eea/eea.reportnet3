@@ -51,7 +51,7 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": null,
+        "nameTableSchema": "Dataset 1",
         "levelError": "WARNING",
         "message": "Dataset with errors",
         "typeEntity": "DATASET",
