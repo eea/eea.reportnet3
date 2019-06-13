@@ -45,9 +45,7 @@ pipeline {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
                         script {
-                            sh "${scannerHome}/bin/sonar-scanner"
-                            sh "cat .scannerwork/report-task.txt"
-                            def props = readProperties  file: '.scannerwork/report-task.txt'
+                            def props = readProperties  file: 'target/sonar/report-task.txt'
                             echo "properties=${props}"
                             def sonarServerUrl=props['serverUrl']
                             def ceTaskUrl= props['ceTaskUrl']
