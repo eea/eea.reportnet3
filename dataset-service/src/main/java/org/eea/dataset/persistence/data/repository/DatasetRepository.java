@@ -21,6 +21,13 @@ public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
       value = "truncate table field_value, record_value, table_value, dataset_value")
   void removeDatasetData(Long dataSetId);
 
+
+  /**
+   * Find id dataset schema by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
 }

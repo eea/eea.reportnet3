@@ -23,6 +23,12 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
   List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
 
 
+  /**
+   * Find by table value id table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the list
+   */
   List<TableValidation> findByTableValue_IdTableSchema(String idTableSchema);
 
 }
