@@ -1,5 +1,6 @@
 package org.eea.validation.kafka;
 
+import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.kafka.domain.EEAEventVO;
@@ -36,5 +37,20 @@ public class EventHandlerTest {
     event.setData(data);
     eventHandler.processMessage(event);
   }
+
+  @Test
+  public void testKafkanotLoad() {
+    EEAEventVO event = new EEAEventVO();
+    event.setEventType(EventType.CONNECTION_CREATED_EVENT);
+    Map<String, Object> data = new HashMap<String, Object>();
+    event.setData(data);
+    eventHandler.processMessage(event);
+  }
+
+  @Test
+  public void getType() {
+    assertEquals(EEAEventVO.class, eventHandler.getType());
+  }
+
 
 }
