@@ -9,4 +9,7 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
 
   @Query(value = "SELECT u FROM TableValue u")
   List<TableValue> findAllTables();
+
+
+
 }

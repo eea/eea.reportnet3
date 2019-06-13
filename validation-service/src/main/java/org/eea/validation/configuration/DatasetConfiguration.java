@@ -75,13 +75,19 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.hibernate.flushMode}")
   private String flushMode;
 
-
   /**
    * The show sql propertie
    */
   @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
 
+  /** The stats. */
+  @Value("${spring.jpa.properties.hibernate.order_updates}")
+  private String orderUpdates;
+
+  /** The order. */
+  @Value("${spring.jpa.properties.hibernate.order_inserts}")
+  private String orderInserts;
 
   /**
    * The record store controller zull.
@@ -174,6 +180,8 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
     properties.setProperty("hibernate.show_sql", showSql);
     properties.setProperty("hibernate.flushMode", flushMode);
+    properties.setProperty("hibernate.order_updates", orderUpdates);
+    properties.setProperty("hibernate.order_inserts", orderInserts);
     return properties;
   }
 

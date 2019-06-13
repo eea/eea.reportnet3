@@ -30,7 +30,7 @@ public class DatasetValidation {
    * The id.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

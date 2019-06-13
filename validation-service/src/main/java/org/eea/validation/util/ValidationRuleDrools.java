@@ -1,5 +1,6 @@
 package org.eea.validation.util;
 
+import java.util.ArrayList;
 import java.util.Date;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -66,7 +67,11 @@ public class ValidationRuleDrools {
         createValidationObject(message, typeError, ruleId, TypeEntityEnum.FIELD);
     FieldValidation fieldValidation = new FieldValidation();
     fieldValidation.setValidation(newValidation);
-    fieldValue.getFieldValidations().add(fieldValidation);
+    if (null == fieldValue.getFieldValidations()) {
+      fieldValue.setFieldValidations(new ArrayList<>());
+      fieldValue.getFieldValidations().add(fieldValidation);
+    }
+
   }
 
   /**

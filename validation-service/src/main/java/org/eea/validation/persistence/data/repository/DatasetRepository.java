@@ -29,4 +29,13 @@ public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
 
+
+  /**
+   * Delete validation table.
+   */
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "truncate table validation, dataset_validation, field_validation, record_validation, table_validation")
+  void deleteValidationTable();
+
 }

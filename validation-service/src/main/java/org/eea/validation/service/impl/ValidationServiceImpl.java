@@ -4,8 +4,12 @@ package org.eea.validation.service.impl;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
+import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -21,6 +25,7 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
 import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
@@ -78,6 +83,10 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DatasetRepository datasetRepository;
 
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
+
   /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
@@ -113,7 +122,8 @@ public class ValidationServiceImpl implements ValidationService {
     tableValues.stream().forEach(table -> kieSession.insert(table));
     kieSession.fireAllRules();
     return tableValues.isEmpty() ? new ArrayList<TableValidation>()
-        : tableValues.get(0).getTableValidations();
+        : tableValues.get(0).getTableValidations() == null ? new ArrayList<TableValidation>()
+            : tableValues.get(0).getTableValidations();
   }
 
   /**
@@ -140,8 +150,9 @@ public class ValidationServiceImpl implements ValidationService {
   public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
     fields.stream().forEach(field -> kieSession.insert(field));
     kieSession.fireAllRules();
-    return fields.isEmpty() ? new ArrayList<FieldValidation>()
-        : fields.get(0).getFieldValidations();
+    return null == fields.get(0).getFieldValidations()
+        || fields.get(0).getFieldValidations().isEmpty() ? new ArrayList<FieldValidation>()
+            : fields.get(0).getFieldValidations();
   }
 
 
@@ -184,6 +195,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    */
   @Override
+  @Transactional
   public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
@@ -193,9 +205,12 @@ public class ValidationServiceImpl implements ValidationService {
         | IllegalAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
     }
-
+    // We delete all validation to delete before pass the new validations
+    deleteAllValidation();
     // Dataset and TablesValue validations
     // read Dataset Data
+    long startTime = System.currentTimeMillis();
+    LOG.info(String.valueOf(startTime));
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
     List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
@@ -209,34 +224,49 @@ public class ValidationServiceImpl implements ValidationService {
     // Records validation
     for (TableValue tableValue : dataset.getTableValues()) {
       int i = 1;
-      String tableIdTableSchema = tableValue.getIdTableSchema();
+      Long tableId = tableValue.getId();
       Pageable pageable = PageRequest.of(i, 100);
       // read Dataset Data
-      List<RecordValue> records = recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
+      List<RecordValue> recordsBonicos =
+          sanitizeRecords(recordRepository.findAllRecords_ByTableValueId(tableId));
 
-      while (records.size() != 0) {
-        // Execute record rules validation
-        List<RecordValidation> resultRecord = runRecordValidations(records);
-        // Save results to the db
-        validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
-        for (RecordValue record : records) {
-
-          // Execute field rules validation
-          List<FieldValidation> resultField = runFieldValidations(record.getFields());
-          // Save results to the db
-          validationFieldRepository.saveAll((Iterable<FieldValidation>) resultField);
-        }
-        pageable = PageRequest.of(i++, 100);
-        records = recordRepository.findRecordsPaged(tableIdTableSchema, pageable);
-      }
+      // Execute record rules validation
+      List<RecordValidation> resultRecord = runRecordValidations(recordsBonicos);
+      // Save results to the db
+      validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
+      ForkJoinPool myPool = new ForkJoinPool(8);
+      myPool.submit(() -> recordsBonicos.stream().forEach(record -> validationFieldRepository
+          .saveAll((Iterable<FieldValidation>) runFieldValidations(record.getFields()))));
     }
-
+    long finishTime = System.currentTimeMillis();
+    LOG.info("Ha tardado: " + (finishTime - startTime));
 
     // release kafka event to notify that the dataset validations have been executed
     releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
   }
 
 
+  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
+    List<RecordValue> sanitizedRecords = new ArrayList<>();
+    Set<Long> processedRecords = new HashSet<>();
+    for (RecordValue recordValue : records) {
+      if (!processedRecords.contains(recordValue.getId())) {
+        processedRecords.add(recordValue.getId());
+        recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
+        sanitizedRecords.add(recordValue);
+      }
+
+    }
+    return sanitizedRecords;
+
+  }
+
+  /**
+   * Delete all validation.
+   */
+  public void deleteAllValidation() {
+    datasetRepository.deleteValidationTable();
+  }
 
   /**
    * Release kafka event.
