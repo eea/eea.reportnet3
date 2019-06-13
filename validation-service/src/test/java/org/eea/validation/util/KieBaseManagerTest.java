@@ -1,16 +1,24 @@
 package org.eea.validation.util;
 
+import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.validation.persistence.rules.DataFlowRule;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.RecordSchema;
+import org.eea.validation.persistence.schemas.TableSchema;
+import org.eea.validation.persistence.schemas.rule.RuleDataSet;
+import org.eea.validation.persistence.schemas.rule.RuleField;
+import org.eea.validation.persistence.schemas.rule.RuleRecord;
+import org.eea.validation.persistence.schemas.rule.RuleTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.internal.utils.KieHelper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -19,44 +27,77 @@ public class KieBaseManagerTest {
   @InjectMocks
   private KieBaseManager kieBaseManager;
   @Mock
-  private KieHelper kieHelper;
+  private SchemasRepository schemasRepository;
 
   @Test
   public void testKieBaseManager() throws FileNotFoundException {
+    DataSetSchema dataSchema = new DataSetSchema();
+    // LIST STRINGS
+    List<String> listString = new ArrayList<String>();
+    listString.add("ERROR VALIDATION");
+    listString.add("ERROR");
+    // RULES DATASET
+    List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
+    RuleDataSet ruleDataset = new RuleDataSet();
+    ruleDataset.setIdDataSetSchema(new ObjectId());
+    ruleDataset.setRuleId(new ObjectId());
+    ruleDataset.setRuleName("regla dataset");
+    ruleDataset.setWhenCondition("id == null");
+    ruleDataset.setThenCondition(listString);
+    ruleDataSetList.add(ruleDataset);
+    // RULE TABLE
+    List<RuleTable> ruleTableList = new ArrayList<RuleTable>();
+    RuleTable ruleTable = new RuleTable();
+    ruleTable.setIdTableSchema(new ObjectId());
+    ruleTable.setRuleId(new ObjectId());
+    ruleTable.setRuleName("regla tabñe");
+    ruleTable.setWhenCondition("id == null");
+    ruleTable.setThenCondition(listString);
+    ruleTableList.add(ruleTable);
 
-    List<DataFlowRule> list = new ArrayList<DataFlowRule>();
-    DataFlowRule rule = new DataFlowRule();
-    rule.setRuleScope(TypeEntityEnum.DATASET);
-    rule.setRuleId(new ObjectId());
-    rule.setWhenCondition("1234");
-    List<String> listsString = new ArrayList<String>();
-    listsString.add("ERROR");
-    listsString.add("ERROR");
-    rule.setThenCondition(listsString);
-    list.add(rule);
+    // RULES RECORDS
+    List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
+    RuleRecord ruleRecord = new RuleRecord();
+    ruleRecord.setIdRecordSchema(new ObjectId());
+    ruleRecord.setRuleId(new ObjectId());
+    ruleRecord.setRuleName("regla record");
+    ruleRecord.setWhenCondition("id == null");
+    ruleRecord.setThenCondition(listString);
+    ruleRecordList.add(ruleRecord);
 
-    DataFlowRule rule2 = new DataFlowRule();
-    rule2.setRuleScope(TypeEntityEnum.TABLE);
-    rule2.setRuleId(new ObjectId());
-    rule2.setWhenCondition("1234");
-    rule2.setThenCondition(listsString);
-    list.add(rule2);
+    // RULES FIELDS
+    List<RuleField> ruleFieldList = new ArrayList<RuleField>();
+    ruleDataset.setIdDataSetSchema(new ObjectId());
+    RuleField ruleField = new RuleField();
+    ruleField.setIdFieldSchema(new ObjectId());
+    ruleField.setRuleId(new ObjectId());
+    ruleField.setRuleName("regla field");
+    ruleField.setWhenCondition("id == null");
+    ruleField.setThenCondition(listString);
+    ruleFieldList.add(ruleField);
 
-    DataFlowRule rule3 = new DataFlowRule();
-    rule3.setRuleScope(TypeEntityEnum.FIELD);
-    rule3.setRuleId(new ObjectId());
-    rule3.setWhenCondition("1234");
-    rule3.setThenCondition(listsString);
-    list.add(rule3);
 
-    DataFlowRule rule4 = new DataFlowRule();
-    rule4.setRuleScope(TypeEntityEnum.RECORD);
-    rule4.setRuleId(new ObjectId());
-    rule4.setWhenCondition("1234");
-    rule4.setThenCondition(listsString);
-    list.add(rule4);
-    // when(dataFlowRulesRepository.findAllByDataFlowId(Mockito.any())).thenReturn(list);
-    // kieBaseManager.reloadRules(1L);
+    List<TableSchema> tableSchemasList = new ArrayList<TableSchema>();
+    TableSchema tableSchema = new TableSchema();
+    RecordSchema record = new RecordSchema();
+
+    List<FieldSchema> fieldSchemaList = new ArrayList<FieldSchema>();
+    FieldSchema fieldSchema = new FieldSchema();
+    fieldSchema.setRuleField(ruleFieldList);
+
+    record.setFieldSchema(fieldSchemaList);
+    record.setRuleRecord(ruleRecordList);
+    tableSchema.setRecordSchema(record);
+    tableSchema.setRuleTable(ruleTableList);
+    tableSchemasList.add(tableSchema);
+
+
+    dataSchema.setRuleDataSet(ruleDataSetList);
+    dataSchema.setTableSchemas(tableSchemasList);
+
+
+    when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
+    kieBaseManager.reloadRules(1L);
   }
 
 }
