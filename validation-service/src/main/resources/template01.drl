@@ -1,9 +1,12 @@
 template header
 ruleid
+dataSchemaId
+schemaName
 typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
+
 
 
 package src.main.resources
@@ -17,7 +20,7 @@ template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
   when
-    dataValidate : @{typevalidation}(@{whencondition});	
+    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});	
   then
    ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}");
  

@@ -1,5 +1,8 @@
 package org.eea.validation.persistence.rules;
 
+/**
+ * The Enum ConditionsDrools.
+ */
 public enum ConditionsDrools {
 
   /** The datasetvo. */
@@ -11,7 +14,11 @@ public enum ConditionsDrools {
   /** The tablevo. */
   TYPE_FAIL_VALIDATION("typeFailValidation"),
   /** The dataflowrule. */
-  RULE_ID("ruleid");
+  RULE_ID("ruleid"),
+
+  SCHEMA_NAME("schemaName"),
+  /** The dataschema id. */
+  DATASCHEMA_ID("dataSchemaId");
 
   /** The value. */
   private final String value;

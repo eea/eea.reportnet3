@@ -12,9 +12,7 @@ public enum TypeValidation {
   /** The recordvo. */
   RECORD("RecordValue"),
   /** The tablevo. */
-  TABLE("TableValue"),
-  /** The dataflowrule. */
-  DATAFLOWRULE("DataFlowRule");
+  TABLE("TableValue");
 
   /** The value. */
   private final String value;
