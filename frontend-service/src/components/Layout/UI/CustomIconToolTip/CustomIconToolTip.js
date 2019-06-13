@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
+import ReactTooltip from 'react-tooltip';
 
-import './CustomIconToolTip.css';
+//import './CustomIconToolTip.css';
 
 export default function CustomIconToolTip(props) {
   let validationIcon = '';
@@ -33,8 +34,11 @@ export default function CustomIconToolTip(props) {
 
   return (
     <div className='tooltip '>
-      <i className={validationIcon} style={{ color: iconColor }} />
-      <span className='tooltiptext  tooltip-right'>{props.message}</span>
+      <span data-tip={props.message}>
+        <i className={validationIcon} style={{ color: iconColor }} />
+      </span>
+
+      <ReactTooltip place='right' type='dark' effect='solid' />
     </div>
   );
 }

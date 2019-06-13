@@ -9,13 +9,13 @@
             "idRecordSchema":"5cefdb2912ea3e11dc029ffb",
             "fieldSchema":[  
                {  
-                  "id":"5cefb5b592f28351b4e97850",
+                  "id":"5cefdb2912ea3e11dc029ffc",
                   "idRecord":"5cefdb2912ea3e11dc029ffb",
                   "name":"BWID",
                   "type":"string"
                },
                {  
-                  "id":"5cefb5b592f28351b4e97851",
+                  "id":"5cefdb2912ea3e11dc029ffd",
                   "idRecord":"5cefdb2912ea3e11dc029ffb",
                   "name":"GroupID",
                   "type":"String"

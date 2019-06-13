@@ -55,22 +55,25 @@ const DataViewer = (props) => {
     //     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
     // </div>;
     // setHeader(headerArr);
-
+    
     let columnsArr = cols.map(col => (
       <Column
         sortable={true}
         key={col.field}
         field={col.field}
         header={col.header}
+        body={columnValidationsTemplate}
       />
-    ));
+     
+      ));
     let validationCol = (
       <Column key={'recordValidation'} field="validations" header="" body={validationsTemplate} />
     );
     let newColumnsArr = [validationCol].concat(columnsArr);
     setColumns(newColumnsArr);
+   
   }, [cols, colOptions]);
-
+  
   const onChangePageHandler = (event)=>{
     console.log('Refetching data...');
     setNumRows(event.rows);
@@ -203,8 +206,54 @@ const DataViewer = (props) => {
       let message = "";
       validations.forEach(validation =>
         validation.message
-          ? (message += `${validation.message}
-        `)
+          ? (message += validation.message + ' \n')
+          : ""
+      );
+
+      let levelError = "";
+      let lvlFlag = 0;
+
+      validations.forEach(validation => {
+        if (validation.levelError === "WARNING") {
+          const wNum = 1;
+          if (wNum > lvlFlag) {
+            lvlFlag = wNum;
+            levelError = "WARNING";
+          }
+        } else if (validation.levelError === "ERROR") {
+          const eNum = 2;
+          if (eNum > lvlFlag) {
+            lvlFlag = eNum;
+            levelError = "ERROR";
+          }
+        } else if (validation.levelError === "BLOCKER") {
+          const bNum = 2;
+          if (bNum > lvlFlag) {
+            lvlFlag = bNum;
+            levelError = "BLOCKER";
+          }
+        }
+      });
+
+      return <CustomIconToolTip levelError={levelError} message={message} />;
+    } else {
+      return <CustomIconToolTip levelError={null} message={null} />;
+    }
+  };
+  
+  //Template for Field validation
+  const columnValidationsTemplate = (fetchedData, column) => {
+//TO DO ADAPTAR PARA  MOSTRAR VALIDACION POR CELDA. AHORA ES UN COPIA PEGA DE LAS VALIDACIONES POR RECORD
+    if (fetchedData.recordValidations) {
+      const validations = fetchedData.recordValidations.map(
+        val => val.validation
+      );
+        console.log('fetchedData', fetchedData);
+
+      let message = "";
+      validations.forEach(validation =>
+        validation.message
+          ? (message += validation.message + ' \n')
           : ""
       );
 
