@@ -16,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 public interface DatasetService {
 
   /**
-   * Create empty dataset.
+   * Create removeDatasetData dataset.
    *
    * @param datasetName the dataset name
    */
@@ -32,8 +32,8 @@ public interface DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws InterruptedException the interrupted exception
    */
-  void processFile(@DatasetId Long datasetId, String fileName, InputStream is)
-      throws EEAException, IOException, InterruptedException;
+  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
+      throws EEAException, IOException;
 
 
   /**

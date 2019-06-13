@@ -19,7 +19,7 @@ const HTTPRequesterAPI = {
         return axios.put(`${baseURL}${options.url}`, options.data);
     },
     delete: (options) =>{
-        return axios.delete(`${baseURL}${options.url}`, options.data);
+        return axios.delete(`${baseURL}${options.url}`);
     }    
 }
 

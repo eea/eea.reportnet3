@@ -187,7 +187,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Creates the empty dataset.
+   * Creates the removeDatasetData dataset.
    *
    * @param datasetName the dataset name
    */
@@ -212,7 +212,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is) throws EEAException, IOException, InterruptedException {
+      final InputStream is, final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -228,7 +228,7 @@ public class DatasetServiceImpl implements DatasetService {
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
-          context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
+          context.parse(is, datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -352,7 +352,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteImportData(Long dataSetId) {
-    datasetRepository.empty(dataSetId);
+    datasetRepository.removeDatasetData(dataSetId);
     LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 

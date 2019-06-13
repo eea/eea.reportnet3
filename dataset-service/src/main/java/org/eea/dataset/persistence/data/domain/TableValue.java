@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -38,15 +39,12 @@ public class TableValue {
    * The id.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @SequenceGenerator(name = "table_sequence_generator",
+      sequenceName = "table_sequence",
+      allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "table_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
-
-  /**
-   * The name.
-   */
-  @Column(name = "NAME")
-  private String name;
 
   /**
    * The id mongo.
@@ -83,13 +81,13 @@ public class TableValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records, idTableSchema, datasetId);
+    return Objects.hash(id, records, idTableSchema, datasetId);
   }
 
   /**
    * Equals.
    *
-   * @param o the o
+   * @param obj the o
    *
    * @return true, if successful
    */
@@ -102,7 +100,7 @@ public class TableValue {
       return false;
     }
     final TableValue table = (TableValue) obj;
-    return id.equals(table.id) && name.equals(table.name);
+    return id.equals(table.id);
   }
 
 }

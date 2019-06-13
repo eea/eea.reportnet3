@@ -10,23 +10,22 @@ import org.springframework.data.jpa.repository.Query;
  */
 public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
 
+
   /**
-   * Empties the dataset.
+   * Remove dataset data including all data inside tables and tables themselves.
    *
    * @param dataSetId the data set id
    */
   @Modifying
-  @Query(nativeQuery = true, value = "delete from dataset_value")
-  void empty(Long dataSetId);
-
-  /**
-   * Find id dataset schema by id.
-   *
-   * @param datasetId the dataset id
-   * @return the string
-   */
+  @Query(nativeQuery = true,
+      value = "truncate table field_value, record_value, table_value, dataset_value")
+  void removeDatasetData(Long dataSetId);
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
-  
-  
+   */
+   * @return the string
+   * @param datasetId the dataset id
+   * Find id dataset schema by id.
+  /**
+   *
 }

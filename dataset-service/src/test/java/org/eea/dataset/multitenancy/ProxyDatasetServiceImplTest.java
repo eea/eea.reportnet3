@@ -44,14 +44,14 @@ public class ProxyDatasetServiceImplTest {
   @Test
   public void testInvoke() throws Throwable {
     Mockito.doNothing().when(datasetService).processFile(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Method method =
-        DatasetService.class.getMethod("processFile", Long.class, String.class, InputStream.class);
+        Mockito.any(), Mockito.any());
+    Method method = DatasetService.class.getMethod("processFile", Long.class, String.class,
+        InputStream.class, String.class);
     ProxyDatasetServiceImpl proxy = new ProxyDatasetServiceImpl(datasetService);
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     Object result =
-        proxy.invoke(datasetService, method, new Object[] {1L, "id", file.getInputStream()});
+        proxy.invoke(datasetService, method, new Object[] {1L, "id", file.getInputStream(), null});
     assertNull("failed", result);
   }
 
