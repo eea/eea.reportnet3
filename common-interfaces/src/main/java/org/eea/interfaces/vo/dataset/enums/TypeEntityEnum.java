@@ -8,26 +8,26 @@ public enum TypeEntityEnum {
 
 
   /** The table. */
-  TABLE(1),
+  TABLE("TABLE"),
 
   /** The dataset. */
-  DATASET(2),
+  DATASET("DATASET"),
 
   /** The field. */
-  FIELD(3),
+  FIELD("FIELD"),
 
   /** The record. */
-  RECORD(4);
+  RECORD("RECORD");
 
   /** The value. */
-  private final int value;
+  private final String value;
 
   /**
    * Instantiates a new type entity enum.
    *
    * @param value the value
    */
-  private TypeEntityEnum(int value) {
+  private TypeEntityEnum(String value) {
     this.value = value;
   }
 
@@ -36,7 +36,7 @@ public enum TypeEntityEnum {
    *
    * @return the value
    */
-  public int getValue() {
+  public String getValue() {
     return value;
   }
 

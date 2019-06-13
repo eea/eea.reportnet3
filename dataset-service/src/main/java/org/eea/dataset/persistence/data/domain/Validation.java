@@ -2,6 +2,8 @@ package org.eea.dataset.persistence.data.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,12 +56,14 @@ public class Validation {
    * The level error.
    */
   @Column(name = "LEVEL_ERROR")
+  @Enumerated(EnumType.STRING)
   private TypeErrorEnum levelError;
 
   /**
    * The type entity.
    */
   @Column(name = "TYPE_ENTITY")
+  @Enumerated(EnumType.STRING)
   private TypeEntityEnum typeEntity;
 
 

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -60,7 +61,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
+    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
   }
 
   /**
@@ -72,7 +73,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataThrowException2() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
-    dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
+    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
   }
 
   /**
@@ -82,7 +83,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException3() throws Exception {
-    dataSetControllerImpl.loadDatasetData(1L, null);
+    dataSetControllerImpl.loadTableData(1L, null, null);
   }
 
   /**
@@ -94,7 +95,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
-    dataSetControllerImpl.loadDatasetData(1L, file);
+    dataSetControllerImpl.loadTableData(1L, file, null);
   }
 
   /**
@@ -202,7 +203,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test exception entry 1.
+   * Creates the removeDatasetData data set test exception entry 1.
    *
    * @throws Exception the exception
    */
@@ -212,7 +213,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test exception entry 2.
+   * Creates the removeDatasetData data set test exception entry 2.
    *
    * @throws Exception the exception
    */
@@ -222,7 +223,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test.
+   * Creates the removeDatasetData data set test.
    *
    * @throws Exception the exception
    */

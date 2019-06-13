@@ -12,13 +12,16 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
+import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
+import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -95,6 +98,9 @@ public class DatasetServiceTest {
   private RecordMapper recordMapper;
 
   @Mock
+  private RecordNoValidationMapper recordNoValidationMapper;
+
+  @Mock
   private Pageable pageable;
 
   @Mock
@@ -102,9 +108,15 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetTablesMapper dataSetTablesMapper;
-  
+
   @Mock
   private FieldRepository fieldRepository;
+
+  @Mock
+  private FieldValidationRepository fieldValidationRepository;
+
+  @Mock
+  private RecordValidationRepository recordValidationRepository;
 
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -143,28 +155,28 @@ public class DatasetServiceTest {
   public void testProcessFileThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(null, "fileOriginal", fileNoExtension.getInputStream());
+    datasetService.processFile(null, "fileOriginal", fileNoExtension.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
   public void testProcessFilenameNullThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(null, null, fileNoExtension.getInputStream());
+    datasetService.processFile(null, null, fileNoExtension.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
   public void testProcessFileBadExtensionThrowException() throws Exception {
     final MockMultipartFile fileBadExtension =
         new MockMultipartFile("file", "fileOriginal.doc", "doc", "content".getBytes());
-    datasetService.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream());
+    datasetService.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
   public void testProcessFileThrowException2() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(1L, "fileOriginal", fileNoExtension.getInputStream());
+    datasetService.processFile(1L, "fileOriginal", fileNoExtension.getInputStream(), null);
   }
 
   @Test(expected = IOException.class)
@@ -176,9 +188,10 @@ public class DatasetServiceTest {
     when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     when(fileParserFactory.createContext("csv")).thenReturn(context);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
+    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(null);
 
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
@@ -187,7 +200,7 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
@@ -196,7 +209,7 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.xml", "xml", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
@@ -205,7 +218,7 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.xls", "xls", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
@@ -214,7 +227,7 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test(expected = EEAException.class)
@@ -224,7 +237,7 @@ public class DatasetServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test(expected = IOException.class)
@@ -238,9 +251,10 @@ public class DatasetServiceTest {
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dataSetVO);
+    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetVO);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(null);
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
   @Test
@@ -254,7 +268,8 @@ public class DatasetServiceTest {
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(dataSetVO);
+    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetVO);
     final DatasetValue entityValue = new DatasetValue();
     final ArrayList<TableValue> tableValues = new ArrayList<>();
     tableValues.add(new TableValue());
@@ -262,7 +277,7 @@ public class DatasetServiceTest {
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream());
+    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
   }
 
@@ -277,9 +292,9 @@ public class DatasetServiceTest {
 
   @Test
   public void testDeleteImportData() throws Exception {
-    doNothing().when(datasetRepository).empty(Mockito.any());
+    doNothing().when(datasetRepository).removeDatasetData(Mockito.any());
     datasetService.deleteImportData(1L);
-    Mockito.verify(datasetRepository, times(1)).empty(Mockito.any());
+    Mockito.verify(datasetRepository, times(1)).removeDatasetData(Mockito.any());
   }
 
   @Test
@@ -308,9 +323,9 @@ public class DatasetServiceTest {
   public void testGetTableValuesById() throws Exception {
     when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
 
-    when(recordMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
-    Mockito.verify(recordMapper, times(1)).entityListToClass(Mockito.any());
+    Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 
   @Test
@@ -326,15 +341,14 @@ public class DatasetServiceTest {
     DataSetVO datasetVOtemp = new DataSetVO();
     datasetVOtemp.setId(1L);
     datasetVOtemp.setTableVO(new ArrayList<TableVO>());
-    when(tableRepository.findAllTables()).thenReturn(new ArrayList<>());
+    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(datasetVOtemp);
     assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
   }
 
   @Test
   public void testGetByIdSuccess() throws Exception {
     when(tableRepository.findAllTables()).thenReturn(tableValues);
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
-    when(tableValueMapper.entityToClass(tableValue)).thenReturn(tableVO);
+    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(dataSetVO);
     DataSetVO result = datasetService.getById(1L);
     assertEquals("not equals", dataSetVO, result);
   }
@@ -360,15 +374,16 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
 
   }
-  
+
 
   @Test
   public void testGetStatisticsSuccess() throws Exception {
-    
+
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"))).thenReturn(schema);
+    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190")))
+        .thenReturn(schema);
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }

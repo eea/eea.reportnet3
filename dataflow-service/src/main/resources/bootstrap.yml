@@ -3,7 +3,9 @@ spring:
     consul:
       discovery:
         preferIpAddress: true
-        ipAddress: ${CONSUL_DISCOVERY_ADDRESS:localhost}
+        ipAddress: ${CONSUL_HOST:localhost}
         instanceId: ${spring.application.name}:${random.value}
+      config:
+        name: dataflow
       host: ${CONSUL_HOST:localhost}
       port: ${CONSUL_PORT:8500}

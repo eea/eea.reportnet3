@@ -126,7 +126,7 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Creates the empty data set.
+   * Creates the removeDatasetData data set.
    *
    * @param datasetname the datasetname
    */
@@ -146,10 +146,12 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    */
+
   @Override
-  @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") final Long datasetId,
-      @RequestParam("file") final MultipartFile file) {
+  @PostMapping("{id}/loadTableData/{idTableSchema}")
+  public void loadTableData(@PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file,
+      @PathVariable("idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -165,8 +167,8 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable =
-          new LoadDataCallable(this.kafkaSender, this.datasetService, datasetId, fileName, is);
+      callable = new LoadDataCallable(kafkaSender, this.datasetService, datasetId, fileName, is,
+          idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {
@@ -183,8 +185,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId id import
    */
   @Override
-  @DeleteMapping(value = "/deleteImportData")
-  public void deleteImportData(final Long dataSetId) {
+  @DeleteMapping(value = "{id}/deleteImportData")
+  public void deleteImportData(@PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -258,9 +260,9 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
-  
-  
-  
+
+
+
   /**
    * Gets the statistics by id.
    *
@@ -270,7 +272,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
-    
+
     StatisticsVO statistics = null;
     try {
       statistics = datasetService.getStatistics(datasetId);

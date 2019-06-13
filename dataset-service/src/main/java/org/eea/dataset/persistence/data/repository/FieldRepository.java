@@ -11,17 +11,18 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  */
 public interface FieldRepository extends PagingAndSortingRepository<FieldValue, Integer> {
 
-  
+
   /**
    * Find field validations by id dataset and id table.
    *
    * @param datasetId the dataset id
    * @param idTable the id table
+   *
    * @return the list
    */
   @Query("SELECT fval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.records rv "
       + "INNER JOIN rv.fields flds INNER JOIN flds.fieldValidations fval WHERE dat.id=?1 and tv.id=?2")
   List<FieldValidation> findFieldValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
-  
-  
+
+
 }
