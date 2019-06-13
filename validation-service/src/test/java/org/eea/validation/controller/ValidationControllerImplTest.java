@@ -1,7 +1,7 @@
 package org.eea.validation.controller;
 
-import org.eea.interfaces.controller.validation.ValidationController;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -16,13 +16,11 @@ public class ValidationControllerImplTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
   @InjectMocks
-  private ValidationController validationController;
+  private ValidationControllerImpl validationController;
 
-
+  @Test
   public void test() {
-
 
   }
 

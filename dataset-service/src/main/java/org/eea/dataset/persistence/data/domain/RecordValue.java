@@ -14,12 +14,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.hibernate.annotations.DynamicUpdate;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * The Class Record.
@@ -52,7 +52,7 @@ public class RecordValue {
       }
     }
 
-    //determine level error in validations
+    // determine level error in validations
     if (null != this.recordValidations && this.recordValidations.size() > 0) {
       for (RecordValidation recordValidation : this.recordValidations) {
         if (recordValidation.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
