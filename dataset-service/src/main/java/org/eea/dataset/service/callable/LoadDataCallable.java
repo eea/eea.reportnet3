@@ -21,6 +21,9 @@ public class LoadDataCallable implements Callable<Void> {
   /** The is. */
   private final InputStream is;
 
+  /** The id table schema. */
+  private final String idTableSchema;
+
   /**
    * Instantiates a new Load data callable.
    *
@@ -30,11 +33,12 @@ public class LoadDataCallable implements Callable<Void> {
    * @param is the is
    */
   public LoadDataCallable(final DatasetService datasetService, final Long dataSetId,
-      final String fileName, InputStream is) {
+      final String fileName, InputStream is, final String idTableSchema) {
     this.datasetService = datasetService;
     this.fileName = fileName;
     this.datasetId = dataSetId;
     this.is = is;
+    this.idTableSchema = idTableSchema;
   }
 
   /**
@@ -45,7 +49,7 @@ public class LoadDataCallable implements Callable<Void> {
    */
   @Override
   public Void call() throws Exception {
-    datasetService.processFile(datasetId, fileName, is);
+    datasetService.processFile(datasetId, fileName, is, idTableSchema);
     return null;
   }
 }

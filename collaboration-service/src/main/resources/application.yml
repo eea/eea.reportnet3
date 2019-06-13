@@ -2,11 +2,7 @@ server:
   port: 9010
 spring:
   application:
-    name: communicatin-service
-  cloud:
-    consul:
-      discovery:
-        instanceId: ${spring.application.name}:${random.value}
+    name: communication-service
   sleuth:
     sampler:
       probability: 1.0
@@ -17,7 +13,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "${ACTUATOR_EXPOSURE_INCLUDE:*}"
   endpoint:
     health:
       show-details: always

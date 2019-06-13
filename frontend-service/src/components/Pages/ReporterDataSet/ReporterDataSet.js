@@ -7,7 +7,7 @@ import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
 import {Card} from 'primereact/card';
-import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
+
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
@@ -26,8 +26,7 @@ const ReporterDataSet = () => {
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
-  const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [importDialogVisible, setImportDialogVisible] = useState(false);
+  const [tableSchemaColumns, setTableSchemaColumns] = useState();  
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -41,14 +40,7 @@ const ReporterDataSet = () => {
 
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
-    setCustomButtons([
-      {
-        label: resources.messages["import"],
-        icon: "0",
-        group: "left",
-        disabled: false,
-        clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
-      },
+    setCustomButtons([      
       {
         label: resources.messages["export"],
         icon: "1",
@@ -182,6 +174,25 @@ const ReporterDataSet = () => {
       console.log(error);
       return error;
     });    
+
+    // setTableSchema(jsonDataSchema.tableSchemas.map((item,i)=>{
+    //   return {
+    //       id: item["idTableSchema"],
+    //       name : item["nameTableSchema"]
+    //       }
+    // }));
+
+    // setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
+    //   return table.recordSchema.fieldSchema.map((item,i)=>{
+    //     return {
+    //         table: table["nameTableSchema"], 
+    //         field: item["id"], 
+    //         header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+    //       }
+    //   });        
+    // }));
+
+
   }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
@@ -193,15 +204,16 @@ const ReporterDataSet = () => {
   }
 
   const onConfirmDeleteHandler = () =>{
-    console.log("Data deleted!");
+    let idDataSet = 1;
     setDeleteDialogVisible(false);
-    /*TODO: API Call delete
+    //TODO: API Call delete
     HTTPRequesterAPI.delete(
       {
-        url:'/dataset/deleteImportData/1',
+        url:'/dataset/'+ idDataSet + '/deleteImportData',
         queryString: {}
       }
-    );*/
+    );
+    console.log("Data deleted!");
   }
 
   const getPercentage = (tableValues) =>{
@@ -220,14 +232,7 @@ const ReporterDataSet = () => {
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner*/}
-        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
-          <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
-                  className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
-              <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
-                                onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
-                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
-                                fileLimit={1} className={styles.FileUpload}  /> 
-          </Dialog>                
+        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>                        
         <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
                 header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
           <h1>US-STP6-DSM-VIS-01-List of Visualizations (next sprint)</h1>

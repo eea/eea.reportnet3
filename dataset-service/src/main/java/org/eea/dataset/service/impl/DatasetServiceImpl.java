@@ -215,7 +215,7 @@ public class DatasetServiceImpl implements DatasetService {
   
   
   /**
-   * Creates the empty dataset.
+   * Creates the removeDatasetData dataset.
    *
    * @param datasetName the dataset name
    */
@@ -232,15 +232,14 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
-   *
+   * @param idTableSchema the id table schema
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InterruptedException the interrupted exception
    */
   @Override
   @Transactional
   public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is) throws EEAException, IOException, InterruptedException {
+      final InputStream is, final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -256,7 +255,7 @@ public class DatasetServiceImpl implements DatasetService {
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
-          context.parse(is, datasetMetabase.getDataflowId(), partition.getId());
+          context.parse(is, datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -272,7 +271,6 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
-      Thread.sleep(2000);
       // after the dataset has been saved, an event is sent to notify it
       releaseKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
 
@@ -381,7 +379,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteImportData(Long dataSetId) {
-    datasetRepository.empty(dataSetId);
+    datasetRepository.removeDatasetData(dataSetId);
     LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 
@@ -430,10 +428,10 @@ public class DatasetServiceImpl implements DatasetService {
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}", datasetId);
 
-    } else {//Records retrieved,
-      //1º need to remove duplicated data
+    } else {// Records retrieved,
+      // 1º need to remove duplicated data
       List<RecordValue> sanitizeRecords = this.sanitizeRecords(records);
-//2º sort sanitized data
+      // 2º sort sanitized data
       Optional.ofNullable(idFieldSchema).ifPresent(field -> {
         sanitizeRecords.sort((RecordValue v1, RecordValue v2) -> {
           String sortCriteria1 = v1.getSortCriteria();
@@ -458,17 +456,17 @@ public class DatasetServiceImpl implements DatasetService {
           return sort;
         });
       });
-      //3º calculate first and last index to create the page to retrieve sorted data
+      // 3º calculate first and last index to create the page to retrieve sorted data
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
       int endIndex =
           (pageable.getPageNumber() + 1) * pageable.getPageSize() > sanitizeRecords.size()
               ? sanitizeRecords.size()
               : (pageable.getPageNumber() + 1) * pageable.getPageSize();
-      //4º map to VO the records of the calculated page
-      List<RecordVO> recordVOs = recordNoValidationMapper
-          .entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
+      // 4º map to VO the records of the calculated page
+      List<RecordVO> recordVOs =
+          recordNoValidationMapper.entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
 
-      //5º retrieve validations to set them into the final result
+      // 5º retrieve validations to set them into the final result
       List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
       Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
       Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
@@ -751,7 +749,7 @@ public class DatasetServiceImpl implements DatasetService {
     for (TableValue tableValue : allTableValues) {
       listIdDataSetSchema.add(tableValue.getIdTableSchema());
 
-      TableStatisticsVO tableStats = processTableStats(tableValue, datasetId);
+      TableStatisticsVO tableStats = processTableStats(tableValue, datasetId, mapIdNameDatasetSchema);
       if (tableStats.getTableErrors()) {
         stats.setDatasetErrors(true);
       }
@@ -777,15 +775,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+ 
   /**
    * Process table stats.
    *
    * @param tableValue the table value
    * @param datasetId the dataset id
-   *
+   * @param mapIdNameDatasetSchema the map id name dataset schema
    * @return the table statistics VO
    */
-  private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId) {
+  private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId, 
+      Map<String,String> mapIdNameDatasetSchema) {
 
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
     List<RecordValidation> recordValidations =
@@ -793,7 +793,6 @@ public class DatasetServiceImpl implements DatasetService {
             tableValue.getIdTableSchema());
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
-    tableStats.setNameTableSchema(tableValue.getName());
     tableStats.setTotalRecords(countRecords);
     Long totalTableErrors = 0L;
     Long totalRecordsWithErrors = 0L;
@@ -825,6 +824,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
+    tableStats.setNameTableSchema(mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
     tableStats.setTotalErrors(totalTableErrors);
     tableStats.setTotalRecordsWithErrors(totalRecordsWithErrors);
     tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);

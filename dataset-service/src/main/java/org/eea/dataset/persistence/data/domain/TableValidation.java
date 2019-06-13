@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,10 @@ public class TableValidation {
    * The id.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @SequenceGenerator(name = "table_validation_sequence_generator",
+  sequenceName = "table_validation_sequence",
+  allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "table_validation_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
