@@ -523,10 +523,7 @@ public class DatasetServiceImpl implements DatasetService {
       tableValue
           .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
-    // datasetValue = datasetRepository.findById(datasetId).orElse(null);
-    // if (datasetValue != null) {
-    // //return multiThreadMapper(datasetValue);
-    // }
+
     return dataSetMapper.entityToClass(datasetValue);
   }
 

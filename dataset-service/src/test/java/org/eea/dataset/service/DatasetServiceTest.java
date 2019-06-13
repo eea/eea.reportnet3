@@ -341,15 +341,14 @@ public class DatasetServiceTest {
     DataSetVO datasetVOtemp = new DataSetVO();
     datasetVOtemp.setId(1L);
     datasetVOtemp.setTableVO(new ArrayList<TableVO>());
-    when(tableRepository.findAllTables()).thenReturn(new ArrayList<>());
+    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(datasetVOtemp);
     assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
   }
 
   @Test
   public void testGetByIdSuccess() throws Exception {
     when(tableRepository.findAllTables()).thenReturn(tableValues);
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
-    when(tableValueMapper.entityToClass(tableValue)).thenReturn(tableVO);
+    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(dataSetVO);
     DataSetVO result = datasetService.getById(1L);
     assertEquals("not equals", dataSetVO, result);
   }
