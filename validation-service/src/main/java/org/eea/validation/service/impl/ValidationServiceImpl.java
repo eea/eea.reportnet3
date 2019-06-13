@@ -199,9 +199,16 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    loadRulesKnowledgeBase(dataflowId);
+    try {
+      loadRulesKnowledgeBase(dataflowId);
+    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
+        | IllegalAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
     // We delete all validation to delete before pass the new validations
-    deleteAllValidation();
+
+    // deleteAllValidation();
+
     // Dataset and TablesValue validations
     // read Dataset Data
     long startTime = System.currentTimeMillis();
@@ -280,10 +287,6 @@ public class ValidationServiceImpl implements ValidationService {
     dataOutput.put("dataset_id", datasetId);
     event.setData(dataOutput);
     kafkaSender.sendMessage(event);
-  }
-
-  private void deleteAllValidation() {
-    datasetRepository.deleteValidationTable();
   }
 
   /**
