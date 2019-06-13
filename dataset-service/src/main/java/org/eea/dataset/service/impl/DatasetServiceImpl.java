@@ -100,6 +100,7 @@ public class DatasetServiceImpl implements DatasetService {
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
   
   
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
@@ -214,6 +215,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TableNoRecordMapper tableNoRecordMapper;
 
+  /** The table validation repository. */
   @Autowired
   private TableValidationRepository tableValidationRepository;
   
@@ -852,6 +854,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     List<String> listIdDataSetSchema = new ArrayList<>();
+    allTableValues = sanitizeTableValues(allTableValues);
     for (TableValue tableValue : allTableValues) {
       listIdDataSetSchema.add(tableValue.getIdTableSchema());
 
@@ -891,9 +894,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId) {
 
-    Long countRecords = tableRepository.countRecordsByIdTable(tableValue.getId());
+    Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
     List<RecordValidation> recordValidations =
-        recordValidationRepository.findRecordValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
+        recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(datasetId, 
+            tableValue.getIdTableSchema());
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setNameTableSchema(tableValue.getName());
@@ -914,9 +918,9 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // Table validations
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
-    // Field validations
     List<FieldValidation> fieldValidations =
-        fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTable(datasetId, tableValue.getId());
+        fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(datasetId, 
+            tableValue.getIdTableSchema());
     for (FieldValidation fieldValidation : fieldValidations) {
       if (TypeErrorEnum.ERROR == fieldValidation.getValidation().getLevelError()) {
         totalRecordsWithErrors++;
@@ -958,6 +962,39 @@ public class DatasetServiceImpl implements DatasetService {
     tableStats.setTotalRecordsWithWarnings(0L);
 
     return tableStats;
+  }
+  
+  
+  /**
+   * Sanitize table values.
+   *
+   * @param tables the tables
+   * @return the list
+   */
+  private List<TableValue> sanitizeTableValues(List<TableValue> tables){
+    
+    List<TableValue> sanitizedTables = new ArrayList<>();
+    if(tables!=null && !tables.isEmpty()) {
+        Set<String> processedTables = new HashSet<>();
+        for (TableValue tableValue : tables) {
+          if (!processedTables.contains(tableValue.getIdTableSchema())) {
+            processedTables.add(tableValue.getIdTableSchema());
+            sanitizedTables.add(tableValue);
+          }
+          else {
+            for(int i=0;i<sanitizedTables.size();i++) {
+              if(sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())){
+                sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
+                sanitizedTables.get(i).getTableValidations().addAll(tableValue.getTableValidations());
+                break;
+              }
+            }
+          }
+        }
+    }
+    return sanitizedTables;
+    
+    
   }
 
 
@@ -1037,6 +1074,7 @@ public class DatasetServiceImpl implements DatasetService {
       mapNameTableSchema.put(schema.getTableSchemas().get(i).getIdTableSchema().toString(), 
           schema.getTableSchemas().get(i).getNameTableSchema());
     }
+    mapNameTableSchema.put(schema.getIdDataSetSchema().toString(), schema.getNameDataSetSchema());
     
     //PROCESS LIST OF ERRORS VALIDATIONS
     List<ErrorsValidationVO> errors = processErrors(dataset, mapNameTableSchema);
@@ -1057,8 +1095,13 @@ public class DatasetServiceImpl implements DatasetService {
         (pageable.getPageNumber() + 1) * pageable.getPageSize() > errors.size()
             ? errors.size()
             : ((pageable.getPageNumber() + 1) * tamPage);
-            
-    validation.setErrors(errors.subList(initIndex, endIndex));
+    
+    if(!errors.isEmpty()) {
+      if(endIndex > errors.size()) {
+        endIndex = errors.size();
+      }
+      validation.setErrors(errors.subList(initIndex, endIndex));
+    }
     validation.setTotalErrors(Long.valueOf(errors.size()));
     
     
@@ -1067,88 +1110,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
   
   
-  /*private List<ErrorsValidationVO> processErrors(DatasetValue dataset, Map<String,String> mapNameTableSchema){
-    
-    List<ErrorsValidationVO> errors = new ArrayList<>();
-    
-    //DATASET ERRORS
-    for(DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
-      ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(datasetValidation.getDatasetValue().getId());
-      error.setIdValidation(datasetValidation.getValidation().getId());
-      error.setLevelError(datasetValidation.getValidation().getLevelError().name());
-      error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(null);
-      error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(datasetValidation.getValidation().getValidationDate());
-      
-      errors.add(error);
-    }
-    
-    
-    //TABLE ERRORS
-    for(TableValue tableValue : dataset.getTableValues()) {
-     
-      String nameTableSchema = null;
-      for (TableValidation tableValidation : tableValue.getTableValidations()) {
-        nameTableSchema = mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema());
-        ErrorsValidationVO error = new ErrorsValidationVO();
-        error.setIdObject(tableValidation.getTableValue().getId());
-        error.setIdValidation(tableValidation.getValidation().getId());
-        error.setLevelError(tableValidation.getValidation().getLevelError().name());
-        error.setMessage(tableValidation.getValidation().getMessage());
-        error.setNameTableSchema(nameTableSchema);
-        error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
-        error.setValidationDate(tableValidation.getValidation().getValidationDate());
-        
-        errors.add(error);
-      }
-      
-      
-      
-      //RECORD ERRORS
-      List<RecordValidation> recordValidations =
-          recordValidationRepository.findRecordValidationsByIdDatasetAndIdTable(dataset.getId(), tableValue.getId());
-      
-      for (RecordValidation recordValidation : recordValidations) {
-        
-        ErrorsValidationVO error = new ErrorsValidationVO();
-        error.setIdObject(recordValidation.getRecordValue().getId());
-        error.setIdValidation(recordValidation.getValidation().getId());
-        error.setLevelError(recordValidation.getValidation().getLevelError().name());
-        error.setMessage(recordValidation.getValidation().getMessage());
-        error.setNameTableSchema(nameTableSchema);
-        error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
-        error.setValidationDate(recordValidation.getValidation().getValidationDate());
-        
-        errors.add(error);
-      }
-      
-      // FIELD ERRORS
-      List<FieldValidation> fieldValidations =
-          fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTable(dataset.getId(), tableValue.getId());
-      for (FieldValidation fieldValidation : fieldValidations) {
-      
-        ErrorsValidationVO error = new ErrorsValidationVO();
-        error.setIdObject(fieldValidation.getFieldValue().getId());
-        error.setIdValidation(fieldValidation.getValidation().getId());
-        error.setLevelError(fieldValidation.getValidation().getLevelError().name());
-        error.setMessage(fieldValidation.getValidation().getMessage());
-        error.setNameTableSchema(nameTableSchema);
-        error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
-        error.setValidationDate(fieldValidation.getValidation().getValidationDate());
-        
-        errors.add(error);
-      }
-      
-    }
-    
-    return errors;
-  }*/
-  
-  
-  
- 
   /**
    * Process errors.
    *
@@ -1167,7 +1128,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setIdValidation(datasetValidation.getValidation().getId());
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(null);
+      error.setNameTableSchema(mapNameTableSchema.get(dataset.getIdDatasetSchema()));
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
       
@@ -1238,6 +1199,12 @@ public class DatasetServiceImpl implements DatasetService {
   
   
   
+  /**
+   * Retrieve get method.
+   *
+   * @param fieldName the field name
+   * @return the method
+   */
   private Method retrieveGetMethod(String fieldName) {
     Method valueGetter = null;
       try {
@@ -1255,6 +1222,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
   
   
+  /**
+   * Sorting validation errors.
+   *
+   * @param errors the errors
+   * @param headerField the header field
+   * @param asc the asc
+   * @return the list
+   */
   private List<ErrorsValidationVO> sortingValidationErrors(List<ErrorsValidationVO> errors, String headerField, Boolean asc){
     
     Method valueGetter = retrieveGetMethod(headerField);

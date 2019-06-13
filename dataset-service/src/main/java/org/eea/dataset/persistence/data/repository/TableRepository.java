@@ -32,6 +32,16 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   Long countRecordsByIdTable(Long id);
   
   
+  /**
+   * Count records by id table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  @Query("SELECT COUNT(rv) FROM TableValue tv INNER JOIN tv.records rv WHERE tv.idTableSchema=?1")
+  Long countRecordsByIdTableSchema(String idTableSchema);
+  
+  
   
   /**
    * Find by id and dataset id id.

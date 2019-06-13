@@ -23,17 +23,22 @@ public interface FieldValidationRepository extends CrudRepository<FieldValidatio
   List<FieldValidation> findByFieldValue_RecordIdIn(@Param("recordIds") List<Long> recordIds);
   
   
+ 
+  
   /**
    * Find field validations by id dataset and id table.
    *
    * @param datasetId the dataset id
    * @param idTable the id table
-   *
    * @return the list
    */
-  @Query("SELECT fval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.records rv "
-      + "INNER JOIN rv.fields flds INNER JOIN flds.fieldValidations fval WHERE dat.id=?1 and tv.id=?2")
+  @Query("SELECT fv FROM FieldValidation fv INNER JOIN FETCH fv.validation INNER JOIN fv.fieldValue field "
+      + "INNER JOIN field.record rc INNER JOIN rc.tableValue tab WHERE tab.datasetId.id=?1 and tab.id=?2")
   List<FieldValidation> findFieldValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
+  
+  @Query("SELECT fv FROM FieldValidation fv INNER JOIN FETCH fv.validation INNER JOIN fv.fieldValue field "
+      + "INNER JOIN field.record rc INNER JOIN rc.tableValue tab WHERE tab.datasetId.id=?1 and tab.idTableSchema=?2")
+  List<FieldValidation> findFieldValidationsByIdDatasetAndIdTableSchema(Long datasetId, String idTableSchema);
 
   
   

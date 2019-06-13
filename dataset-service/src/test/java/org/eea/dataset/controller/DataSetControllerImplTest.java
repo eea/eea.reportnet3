@@ -433,6 +433,22 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
 
   }
+  
+  
+  @Test
+  public void testListValidations() throws Exception {
+      
+    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
+    Mockito.verify(datasetService, times(1)).getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+  
+  @Test
+  public void testListValidationsException() throws Exception {
+   
+    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService).
+      getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
+  }
  
    
   

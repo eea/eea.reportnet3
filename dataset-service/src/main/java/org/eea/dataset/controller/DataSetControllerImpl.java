@@ -314,6 +314,16 @@ public class DataSetControllerImpl implements DatasetController {
   }
   
    
+  /**
+   * Gets the failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   * @return the failed validations by id dataset
+   */
   @Override
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public  FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
@@ -325,9 +335,7 @@ public class DataSetControllerImpl implements DatasetController {
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = PageRequest.of(pageNum, pageSize);
     try {
-      
       validations = datasetService.getListValidations(datasetId, pageable, fields, asc);
-      
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
