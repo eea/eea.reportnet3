@@ -3,7 +3,6 @@ package org.eea.validation.service.impl;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +10,6 @@ import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
-import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -25,7 +21,6 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
 import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
@@ -37,8 +32,6 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -75,17 +68,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private ValidationFieldRepository validationFieldRepository;
 
-  /** The kafka sender. */
-  @Autowired
-  private KafkaSender kafkaSender;
-
   /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
-
-  /** The table repository. */
-  @Autowired
-  private TableRepository tableRepository;
 
   /** The record repository. */
   @Autowired
@@ -207,8 +192,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
     // We delete all validation to delete before pass the new validations
 
-    // deleteAllValidation();
-
     // Dataset and TablesValue validations
     // read Dataset Data
     long startTime = System.currentTimeMillis();
@@ -226,9 +209,7 @@ public class ValidationServiceImpl implements ValidationService {
 
     // Records validation
     for (TableValue tableValue : dataset.getTableValues()) {
-      int i = 1;
       Long tableId = tableValue.getId();
-      Pageable pageable = PageRequest.of(i, 100);
       // read Dataset Data
       List<RecordValue> recordsBonicos =
           sanitizeRecords(recordRepository.findAllRecords_ByTableValueId(tableId));
@@ -243,9 +224,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
     long finishTime = System.currentTimeMillis();
     LOG.info("Ha tardado: " + (finishTime - startTime));
-
-    // release kafka event to notify that the dataset validations have been executed
-    releaseKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, dataset.getId());
   }
 
 
@@ -266,27 +244,13 @@ public class ValidationServiceImpl implements ValidationService {
 
   /**
    * Delete all validation.
-   */
-  public void deleteAllValidation() {
-    datasetRepository.deleteValidationTable();
-  }
-
-  /**
-   * Release kafka event.
    *
-   * @param kafkaSender the kafka sender
-   * @param eventType the event type
    * @param datasetId the dataset id
    */
-  private static void releaseKafkaEvent(final KafkaSender kafkaSender, final EventType eventType,
-      final Long datasetId) {
-
-    final EEAEventVO event = new EEAEventVO();
-    event.setEventType(eventType);
-    final Map<String, Object> dataOutput = new HashMap<>();
-    dataOutput.put("dataset_id", datasetId);
-    event.setData(dataOutput);
-    kafkaSender.sendMessage(event);
+  @Transactional
+  @Override
+  public void deleteAllValidation(@DatasetId Long datasetId) {
+    datasetRepository.deleteValidationTable();
   }
 
   /**
