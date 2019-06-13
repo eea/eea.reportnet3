@@ -2,11 +2,14 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
 
@@ -80,6 +83,22 @@ public interface DatasetService {
 
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
+  
+  
+  
+
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageable the pageable
+   * @param type the type
+   * @return the table from any object id
+   * @throws EEAException the EEA exception
+   */
+  Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
+      TypeEntityEnum type) throws EEAException;
 
 
   /**
@@ -121,4 +140,6 @@ public interface DatasetService {
    */
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
+  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable, 
+      String field, Boolean asc) throws EEAException;
 }
