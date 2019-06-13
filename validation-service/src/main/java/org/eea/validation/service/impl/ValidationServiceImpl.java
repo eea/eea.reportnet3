@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
 import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.validation.multitenancy.DatasetId;
@@ -104,12 +104,8 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<TableValidation> runTableValidations(List<TableValue> tableValues) {
-    tableValues.stream().forEach(table -> {
-      kieSession.insert(table);
-      table.getTableValidations().stream().forEach(tableV -> tableV.setTableValue(table));
-    });
+    tableValues.stream().forEach(table -> kieSession.insert(table));
     kieSession.fireAllRules();
-
     return tableValues.isEmpty() ? new ArrayList<TableValidation>()
         : tableValues.get(0).getTableValidations() == null ? new ArrayList<TableValidation>()
             : tableValues.get(0).getTableValidations();
@@ -123,10 +119,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<RecordValidation> runRecordValidations(List<RecordValue> records) {
-    records.stream().forEach(record -> {
-      kieSession.insert(record);
-      record.getRecordValidations().stream().forEach(recordV -> recordV.setRecordValue(record));
-    });
+    records.stream().forEach(record -> kieSession.insert(record));
     kieSession.fireAllRules();
     return records.isEmpty() ? new ArrayList<RecordValidation>()
         : records.get(0).getRecordValidations();
@@ -140,10 +133,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
-    fields.stream().forEach(field -> {
-      kieSession.insert(field);
-      field.getFieldValidations().stream().forEach(fieldV -> fieldV.setFieldValue(field));
-    });
+    fields.stream().forEach(field -> kieSession.insert(field));
     kieSession.fireAllRules();
     return null == fields.get(0).getFieldValidations()
         || fields.get(0).getFieldValidations().isEmpty() ? new ArrayList<FieldValidation>()
@@ -210,7 +200,9 @@ public class ValidationServiceImpl implements ValidationService {
     // Execute rules validation
 
     List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
+    // Asign ID Dataset
     resultDataset.stream().forEach(datasetV -> {
+
       datasetV.setDatasetValue(dataset);
 
     });
@@ -218,6 +210,14 @@ public class ValidationServiceImpl implements ValidationService {
     validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
     List<TableValidation> resultTable = runTableValidations(dataset.getTableValues());
+    // Asign ID Table
+    dataset.getTableValues().stream().forEach(table -> {
+      if (null != table.getTableValidations()) {
+        table.getTableValidations().stream().forEach(tableV -> {
+          tableV.setTableValue(table);
+        });
+      }
+    });
 
     // Save results to the db
     validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
@@ -231,12 +231,39 @@ public class ValidationServiceImpl implements ValidationService {
 
       // Execute record rules validation
       List<RecordValidation> resultRecord = runRecordValidations(recordsBonicos);
+
+      // Assign ID Records and Fields
+      recordsBonicos.stream().filter(Objects::nonNull).forEach(row1 -> {
+        if (null != row1.getRecordValidations()) {
+          row1.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowV -> {
+            rowV.setRecordValue(row1);
+          });
+        }
+      });
+
       // Save results to the db
       validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
 
-      ForkJoinPool myPool = new ForkJoinPool(8);
-      myPool.submit(() -> recordsBonicos.stream().forEach(record -> validationFieldRepository
-          .saveAll((Iterable<FieldValidation>) runFieldValidations(record.getFields()))));
+
+
+      // ForkJoinPool myPool = new ForkJoinPool(8);
+      // myPool.submit(() ->
+      recordsBonicos.stream().filter(Objects::nonNull).forEach(row2 -> {
+        if (null != row2.getRecordValidations()) {
+          row2.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+            List<FieldValidation> resultFields = runFieldValidations(row2.getFields());
+            if (null != field.getFieldValidations()) {
+              field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldV -> {
+                fieldV.setFieldValue(field);
+              });
+              validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
+            }
+          });
+        }
+      })
+      // )
+      ;
+
     }
     long finishTime = System.currentTimeMillis();
     LOG.info("Ha tardado: " + (finishTime - startTime));
