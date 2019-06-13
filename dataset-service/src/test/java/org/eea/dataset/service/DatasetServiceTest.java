@@ -13,6 +13,7 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
+import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
@@ -95,7 +96,7 @@ public class DatasetServiceTest {
 
   @Mock
   private RecordMapper recordMapper;
-  
+
   @Mock
   private RecordNoValidationMapper recordNoValidationMapper;
 
@@ -107,13 +108,13 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetTablesMapper dataSetTablesMapper;
-  
+
   @Mock
   private FieldRepository fieldRepository;
-  
+
   @Mock
   private FieldValidationRepository fieldValidationRepository;
-  
+
   @Mock
   private RecordValidationRepository recordValidationRepository;
 
@@ -277,7 +278,7 @@ public class DatasetServiceTest {
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+    Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
   }
 
 
@@ -374,15 +375,16 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
 
   }
-  
+
 
   @Test
   public void testGetStatisticsSuccess() throws Exception {
-    
+
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"))).thenReturn(schema);
+    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190")))
+        .thenReturn(schema);
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }

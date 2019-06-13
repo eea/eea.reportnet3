@@ -167,7 +167,8 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is, idTableSchema);
+      callable = new LoadDataCallable(kafkaSender, this.datasetService, datasetId, fileName, is,
+          idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {
@@ -259,9 +260,9 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
-  
-  
-  
+
+
+
   /**
    * Gets the statistics by id.
    *
@@ -271,7 +272,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
-    
+
     StatisticsVO statistics = null;
     try {
       statistics = datasetService.getStatistics(datasetId);
