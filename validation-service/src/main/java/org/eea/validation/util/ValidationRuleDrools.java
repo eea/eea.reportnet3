@@ -22,7 +22,7 @@ public class ValidationRuleDrools {
   /**
    * Fill validation.
    *
-   * @param dataSetVO the data set VO
+   * @param dataSetValue the data set value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -39,7 +39,7 @@ public class ValidationRuleDrools {
   /**
    * Fill validation.
    *
-   * @param tableVO the table VO
+   * @param tableValue the table value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -56,7 +56,7 @@ public class ValidationRuleDrools {
   /**
    * Fill validation.
    *
-   * @param fieldVO the field VO
+   * @param fieldValue the field value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
@@ -77,7 +77,7 @@ public class ValidationRuleDrools {
   /**
    * Fill validation.
    *
-   * @param recordVO the record VO
+   * @param recordValue the record value
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id

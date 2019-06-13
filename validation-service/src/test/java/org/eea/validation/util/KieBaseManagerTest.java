@@ -14,11 +14,13 @@ import org.eea.validation.persistence.schemas.rule.RuleDataSet;
 import org.eea.validation.persistence.schemas.rule.RuleField;
 import org.eea.validation.persistence.schemas.rule.RuleRecord;
 import org.eea.validation.persistence.schemas.rule.RuleTable;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,6 +30,11 @@ public class KieBaseManagerTest {
   private KieBaseManager kieBaseManager;
   @Mock
   private SchemasRepository schemasRepository;
+
+  @Before
+  public void initMocks() {
+    MockitoAnnotations.initMocks(this);
+  }
 
   @Test
   public void testKieBaseManager() throws FileNotFoundException {
