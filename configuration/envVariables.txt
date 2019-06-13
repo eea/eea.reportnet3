@@ -20,4 +20,11 @@ ${FEIGN_CLIENT_READ_TIMEOUT:10000}
 ${FEIGN_CLIENT_LOG_LEVEL:basic}
 ${SLEUTH_SAMPLER_PROBABILITY:1.0}
 ${SLEUTH_SKIP_PATTERN:(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)}
-${spring.application.name:test-consumer-group}
+
+${DOCKER_SERVER_URL:tcp://localhost:2375}
+${DOCER_CONTAINER_NAME:crunchy-postgres}
+${RECORDSTORE_IP:localhost}
+${RECORDSTORE_USERNAME:root}
+${RECORDSTORE_PASSWORD:root}
+${RECORDSTORE_CONNECTION_STRING:jdbc:postgresql://localhost/datasets}
+${RECORDSTORE_QUERY_GET_ALL_DATASET_SCHEMA:select * from pg_namespace where nspname like 'dataset%'}
