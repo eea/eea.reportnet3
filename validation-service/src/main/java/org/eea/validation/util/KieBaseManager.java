@@ -2,7 +2,6 @@ package org.eea.validation.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,24 +42,16 @@ public class KieBaseManager {
   @Autowired
   private SchemasRepository schemasRepository;
 
+
   /**
    * Reload rules.
    *
    * @param dataFlowId the data flow id
-   * @return Kiebase session object
+   * @return the kie base
    * @throws FileNotFoundException the file not found exception
-   * @throws SecurityException
-   * @throws NoSuchFieldException
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws IllegalAccessException
-   * @throws IllegalArgumentException
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
-    DataSetSchema schema =
-
-        schemasRepository.findSchemaByIdFlow(dataFlowId);
-
+    DataSetSchema schema = schemasRepository.findSchemaByIdFlow(dataFlowId);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     for (RuleDataSet rule : schema.getRuleDataSet()) {
       ruleAttributes.add(passDataToMap(rule.getIdDataSetSchema().toString(),
@@ -112,6 +103,18 @@ public class KieBaseManager {
     return this.kieBase;
   }
 
+  /**
+   * Pass data to map.
+   *
+   * @param idSchema the id schema
+   * @param idRule the id rule
+   * @param typeValidation the type validation
+   * @param schemaName the schema name
+   * @param whenCondition the when condition
+   * @param message the message
+   * @param error the error
+   * @return the map
+   */
   private Map<String, String> passDataToMap(String idSchema, String idRule,
       TypeValidation typeValidation, String schemaName, String whenCondition, String message,
       String error) {
