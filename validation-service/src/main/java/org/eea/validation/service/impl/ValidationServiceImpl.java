@@ -119,8 +119,12 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<TableValidation> runTableValidations(List<TableValue> tableValues) {
-    tableValues.stream().forEach(table -> kieSession.insert(table));
+    tableValues.stream().forEach(table -> {
+      kieSession.insert(table);
+      table.getTableValidations().stream().forEach(tableV -> tableV.setTableValue(table));
+    });
     kieSession.fireAllRules();
+
     return tableValues.isEmpty() ? new ArrayList<TableValidation>()
         : tableValues.get(0).getTableValidations() == null ? new ArrayList<TableValidation>()
             : tableValues.get(0).getTableValidations();
@@ -134,7 +138,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<RecordValidation> runRecordValidations(List<RecordValue> records) {
-    records.stream().forEach(record -> kieSession.insert(record));
+    records.stream().forEach(record -> {
+      kieSession.insert(record);
+      record.getRecordValidations().stream().forEach(recordV -> recordV.setRecordValue(record));
+    });
     kieSession.fireAllRules();
     return records.isEmpty() ? new ArrayList<RecordValidation>()
         : records.get(0).getRecordValidations();
@@ -148,7 +155,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
-    fields.stream().forEach(field -> kieSession.insert(field));
+    fields.stream().forEach(field -> {
+      kieSession.insert(field);
+      field.getFieldValidations().stream().forEach(fieldV -> fieldV.setFieldValue(field));
+    });
     kieSession.fireAllRules();
     return null == fields.get(0).getFieldValidations()
         || fields.get(0).getFieldValidations().isEmpty() ? new ArrayList<FieldValidation>()
@@ -217,10 +227,15 @@ public class ValidationServiceImpl implements ValidationService {
     // Execute rules validation
 
     List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
+    resultDataset.stream().forEach(datasetV -> {
+      datasetV.setDatasetValue(dataset);
+
+    });
     // Save results to the db
     validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
     List<TableValidation> resultTable = runTableValidations(dataset.getTableValues());
+
     // Save results to the db
     validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
 
@@ -237,6 +252,7 @@ public class ValidationServiceImpl implements ValidationService {
       List<RecordValidation> resultRecord = runRecordValidations(recordsBonicos);
       // Save results to the db
       validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
+
       ForkJoinPool myPool = new ForkJoinPool(8);
       myPool.submit(() -> recordsBonicos.stream().forEach(record -> validationFieldRepository
           .saveAll((Iterable<FieldValidation>) runFieldValidations(record.getFields()))));
