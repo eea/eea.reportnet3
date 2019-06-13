@@ -74,4 +74,13 @@ public interface ValidationService {
    */
   List<FieldValidation> runFieldValidations(List<FieldValue> fields);
 
+  /**
+   * Delete all validation.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteAllValidation(@DatasetId Long datasetId);
+
+
+
 }
