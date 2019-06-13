@@ -38,6 +38,9 @@ pipeline {
         }
 
         stage("Quality Gate"){
+            input(message: 'Add pause for investigating, continue?', ok: 'Yes', 
+                        parameters: [booleanParam(defaultValue: true, 
+                        description: 'Go to the container and check!',name: 'Yes?')])
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
