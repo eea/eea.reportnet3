@@ -445,6 +445,7 @@ public class DatasetServiceTest {
     
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
+    schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"))).thenReturn(schema);
     datasetService.getListValidations(0L, pageable, null, false);
@@ -486,6 +487,7 @@ public class DatasetServiceTest {
     
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
+    schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"))).thenReturn(schema);
     when(tableValidationRepository.findTableValidationsByIdDataset(Mockito.any())).thenReturn(tableValidations);
