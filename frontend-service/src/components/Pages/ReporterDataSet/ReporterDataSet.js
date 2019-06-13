@@ -30,6 +30,7 @@ const ReporterDataSet = () => {
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   console.log('ReporterDataSet Render...');   
@@ -57,9 +58,8 @@ const ReporterDataSet = () => {
         label: resources.messages["delete"],
         icon: "2",
         group: "left",
-        disabled: true,
-        clickHandler: null
-        //() => setVisibleHandler(setDeleteDialogVisible, true)
+        disabled: false,
+        clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
       },
       {
         label: resources.messages["events"],
@@ -72,9 +72,9 @@ const ReporterDataSet = () => {
         label: resources.messages["validate"],
         icon: "10",
         group: "right",
-        disabled: true,
+        disabled: false,
         //!validationError,
-        clickHandler: null,
+        clickHandler: () => setVisibleHandler(setValidateDialogVisible, true),
         ownButtonClasses:null,
         iconClasses:null
       },
@@ -193,13 +193,24 @@ const ReporterDataSet = () => {
   const onConfirmDeleteHandler = () =>{
     console.log("Data deleted!");
     setDeleteDialogVisible(false);
-    /*TODO: API Call delete
+    //TODO: API Call delete
     HTTPRequesterAPI.delete(
       {
         url:'/dataset/deleteImportData/1',
         queryString: {}
       }
-    );*/
+    );
+  }
+
+  const onConfirmValidateHandler = () =>{
+    console.log("Validating data");
+    setValidateDialogVisible(false);
+    HTTPRequesterAPI.post(
+      {
+        url:'/dataset/validateDataset/1',
+        queryString: {}
+      }
+    );
   }
 
   const getPercentage = (tableValues) =>{
@@ -243,6 +254,11 @@ const ReporterDataSet = () => {
                        visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
                        labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
           {resources.messages["deleteDatasetConfirm"]}
+        </ConfirmDialog>
+        <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
+                        visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={true}
+                        labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
+                        {resources.messages["validateDataSetExplanation"]} {resources.messages["validateDataSetConfirm"]}
         </ConfirmDialog>
       </div>
   );

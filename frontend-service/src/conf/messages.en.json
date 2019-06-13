@@ -27,6 +27,9 @@
         "deleteDatasetConfirm": "Are you sure you want to delete the dataset?",
         "deleteDatasetHeader": "Delete dataset",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "validateDataSet": "Validate dataset",
+        "validateDataSetExplanation": "This action will take some minutes. And it will run in background.",
+        "validateDataSetConfirm": "Are you sure you want to validate the dataset?"
     }
 }
