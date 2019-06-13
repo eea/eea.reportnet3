@@ -258,7 +258,7 @@ const ReporterDataSet = () => {
         <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
                         visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={true}
                         labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
-                        {resources.messages["validateDataSetExplanation"]} {resources.messages["validateDataSetConfirm"]}
+                        {resources.messages["validateDataSetConfirm"]}
         </ConfirmDialog>
       </div>
   );
