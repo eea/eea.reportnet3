@@ -66,6 +66,8 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkContentVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -636,12 +638,12 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public Map<String, TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
+  public ValidationLinkVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
       TypeEntityEnum type) throws EEAException {
 
-    TableVO tableVO = new TableVO();
-    Map<String, TableVO> mapa;
+    ValidationLinkVO validationLink = new ValidationLinkVO();
     // TYPE 1 table; 2 record; 3 field
+    TableVO tableVO = new TableVO();
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
 
@@ -672,9 +674,8 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
-    mapa = this.processTable(tableVO, records, record, pageable);
-
-    return mapa;
+    validationLink.setPage(this.processTable(tableVO, records, record, pageable));
+    return validationLink;
   }
 
 
@@ -688,7 +689,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param pageable the pageable
    * @return the map
    */
-  private Map<String, TableVO> processTable(TableVO table, List<RecordValue> records,
+  private ValidationLinkContentVO processTable(TableVO table, List<RecordValue> records,
       RecordValue recordValue, Pageable pageable) {
 
     if (table == null) {
@@ -730,10 +731,13 @@ public class DatasetServiceImpl implements DatasetService {
 
     table.setRecords(recordVOs);
     table.setTotalRecords(Long.valueOf(records.size()));
-    Map<String, TableVO> map = new HashMap<>();
-    map.put(String.valueOf(pageNumberFounded + 1), table);
 
-    return map;
+    ValidationLinkContentVO valLink = new ValidationLinkContentVO();
+    valLink.setNumPage(pageNumberFounded + 1);
+    valLink.setTable(table);
+
+
+    return valLink;
   }
 
 
@@ -787,7 +791,7 @@ public class DatasetServiceImpl implements DatasetService {
     listIdsDataSetSchema.removeAll(listIdDataSetSchema);
     for (String idTableSchem : listIdsDataSetSchema) {
       stats.getTables()
-          .add(createEmptyTableStat(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
+          .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
     }
 
     // Check dataset validations
@@ -859,28 +863,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-  /**
-   * Creates the empty table stat.
-   *
-   * @param idTableSchema the id table schema
-   * @param nameTableSchema the name table schema
-   *
-   * @return the table statistics VO
-   */
-  private TableStatisticsVO createEmptyTableStat(String idTableSchema, String nameTableSchema) {
-
-    TableStatisticsVO tableStats = new TableStatisticsVO();
-    tableStats.setIdTableSchema(idTableSchema);
-    tableStats.setNameTableSchema(nameTableSchema);
-    tableStats.setTableErrors(false);
-    tableStats.setTotalErrors(0L);
-    tableStats.setTotalRecords(0L);
-    tableStats.setTotalRecordsWithErrors(0L);
-    tableStats.setTotalRecordsWithWarnings(0L);
-
-    return tableStats;
-  }
-
 
   /**
    * Sanitize table values.
@@ -891,24 +873,21 @@ public class DatasetServiceImpl implements DatasetService {
   private List<TableValue> sanitizeTableValues(List<TableValue> tables) {
 
     List<TableValue> sanitizedTables = new ArrayList<>();
-    if (tables != null && !tables.isEmpty()) {
-      Set<String> processedTables = new HashSet<>();
-      for (TableValue tableValue : tables) {
-        if (!processedTables.contains(tableValue.getIdTableSchema())) {
-          processedTables.add(tableValue.getIdTableSchema());
-          sanitizedTables.add(tableValue);
-        } else {
-          for (int i = 0; i < sanitizedTables.size(); i++) {
-            if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
-              sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
-              break;
-            }
+    Set<String> processedTables = new HashSet<>();
+    for (TableValue tableValue : tables) {
+      if (!processedTables.contains(tableValue.getIdTableSchema())) {
+        processedTables.add(tableValue.getIdTableSchema());
+        sanitizedTables.add(tableValue);
+      } else {
+        for (int i = 0; i < sanitizedTables.size(); i++) {
+          if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
+            sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
+            break;
           }
         }
       }
     }
     return sanitizedTables;
-
 
   }
 

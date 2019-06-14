@@ -2,13 +2,13 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.data.domain.Pageable;
@@ -96,7 +96,7 @@ public interface DatasetService {
    * @return the table from any object id
    * @throws EEAException the EEA exception
    */
-  Map<String, TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
+  ValidationLinkVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
       TypeEntityEnum type) throws EEAException;
 
 

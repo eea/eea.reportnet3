@@ -1,10 +1,10 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.Map;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -101,10 +101,9 @@ public interface DatasetController {
   @RequestMapping("{id}/loadDatasetSchema")
   void loadDatasetSchema(@PathVariable("id") Long datasetId,
       @RequestParam("dataFlowId") Long dataFlowId, @RequestBody TableCollectionVO tableCollections);
-  
-  
-  
- 
+
+
+
   /**
    * Gets the table from any object id.
    *
@@ -115,7 +114,7 @@ public interface DatasetController {
    * @return the table from any object id
    */
   @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id,
+  ValidationLinkVO getTableFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) TypeEntityEnum type);
@@ -139,8 +138,8 @@ public interface DatasetController {
    */
   @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
-  
-  
+
+
   /**
    * Gets the statistics by id.
    *
@@ -149,8 +148,8 @@ public interface DatasetController {
    */
   @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
-  
-  
+
+
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
