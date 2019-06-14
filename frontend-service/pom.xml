@@ -36,6 +36,7 @@
           <skip>false</skip>
         </configuration>
       </plugin>
+      <!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -58,6 +59,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
@@ -87,6 +89,18 @@
             </goals>
             <configuration>
               <arguments>run build</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>NPM Run Publish</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>npm</executable>
+              <arguments>
+                <argument>publish</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
@@ -98,39 +112,6 @@
   <build>
     <plugins>
 
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <version>1.6</version>
-        <configuration>
-          <nodeVersion>v11.11.0</nodeVersion>
-          <npmVersion>6.9.1-next.0</npmVersion>
-          <workingDirectory>frontend-service/src/</workingDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>Install node and npm locally to the project</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>npm install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>Build frontend</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>run build</arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
