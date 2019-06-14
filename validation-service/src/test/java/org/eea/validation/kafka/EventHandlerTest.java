@@ -1,16 +1,19 @@
 package org.eea.validation.kafka;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.validation.service.ValidationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -22,7 +25,7 @@ public class EventHandlerTest {
   private EventHandler eventHandler;
 
   @Mock
-  private ValidationService validationService;
+  private ValidationController validationController;
 
   @Before
   public void initMocks() {
@@ -35,7 +38,9 @@ public class EventHandlerTest {
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<String, Object>();
     event.setData(data);
+    doNothing().when(validationController).validateDataSetData(Mockito.any());
     eventHandler.processMessage(event);
+    Mockito.verify(validationController, times(1)).validateDataSetData(Mockito.any());
   }
 
   @Test

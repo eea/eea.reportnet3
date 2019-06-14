@@ -1,7 +1,9 @@
 package org.eea.validation.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -101,10 +103,10 @@ public class ValidationServiceTest {
         validationServiceImpl.runFieldValidations(fields));
   }
 
-  @Test(expected = FileNotFoundException.class)
+  @Test
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException {
-    when(kieBaseManager.reloadRules(Mockito.any())).thenThrow(FileNotFoundException.class);
-    validationServiceImpl.loadRulesKnowledgeBase(1L);
+    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
+    assertNull("failed", validationServiceImpl.loadRulesKnowledgeBase(1L));
   }
 
   @Test
@@ -117,7 +119,7 @@ public class ValidationServiceTest {
 
   @Test
   public void testDeleteAllValidation() {
-    doNothing().when(datasetRepository);
+    doNothing().when(datasetRepository).deleteValidationTable();
     validationServiceImpl.deleteAllValidation(1L);
   }
 }
