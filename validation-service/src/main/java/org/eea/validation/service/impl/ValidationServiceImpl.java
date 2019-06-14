@@ -244,10 +244,6 @@ public class ValidationServiceImpl implements ValidationService {
       // Save results to the db
       validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
 
-
-
-      // ForkJoinPool myPool = new ForkJoinPool(8);
-      // myPool.submit(() ->
       recordsBonicos.stream().filter(Objects::nonNull).forEach(row2 -> {
         if (null != row2.getRecordValidations()) {
           row2.getFields().stream().filter(Objects::nonNull).forEach(field -> {

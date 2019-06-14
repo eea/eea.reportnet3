@@ -31,9 +31,9 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the is
+   * @param idTableSchema the id table schema
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InterruptedException the interrupted exception
    */
   void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
       throws EEAException, IOException;
@@ -83,9 +83,8 @@ public interface DatasetService {
 
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
-  
-  
-  
+
+
 
   /**
    * Gets the table from any object id.
@@ -97,7 +96,7 @@ public interface DatasetService {
    * @return the table from any object id
    * @throws EEAException the EEA exception
    */
-  Map<String,TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable, 
+  Map<String, TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
       TypeEntityEnum type) throws EEAException;
 
 
@@ -128,9 +127,9 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   Long getDataFlowIdById(Long datasetId) throws EEAException;
-  
-  
-  
+
+
+
   /**
    * Gets the statistics.
    *
@@ -140,6 +139,6 @@ public interface DatasetService {
    */
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
-  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable, 
+  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
       String field, Boolean asc) throws EEAException;
 }

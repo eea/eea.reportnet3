@@ -6,10 +6,20 @@ import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * The Interface RecordValidationMapper.
+ */
 @Mapper(componentModel = "spring")
 public interface RecordValidationMapper extends IMapper<RecordValidation, RecordValidationVO> {
 
 
+  /**
+   * Class to entity.
+   *
+   * @param vo the vo
+   * @return the record validation
+   */
+  @Override
   @Mapping(source = "recordValue", target = "recordValue", ignore = true)
   RecordValidation classToEntity(RecordValidationVO vo);
 
@@ -19,6 +29,7 @@ public interface RecordValidationMapper extends IMapper<RecordValidation, Record
    * @param entity the entity
    * @return the t
    */
+  @Override
   @Mapping(source = "recordValue", target = "recordValue", ignore = true)
   RecordValidationVO entityToClass(RecordValidation entity);
 

@@ -16,6 +16,7 @@ public interface IFileParseContext {
    * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
+   * @param idTableSchema the id table schema
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
    */
