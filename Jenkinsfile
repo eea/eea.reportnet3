@@ -39,9 +39,6 @@ pipeline {
 
         stage("Quality Gate"){
             steps {
-                input(message: 'Add pause for investigating, continue?', ok: 'Yes', 
-                        parameters: [booleanParam(defaultValue: true, 
-                        description: 'Go to the container and check!',name: 'Yes?')])
                 timeout(time: 2, unit: 'MINUTES') {
                     retry(3) {
                         script {
@@ -62,7 +59,11 @@ pipeline {
                             def qualitygate =  readJSON text: response2.content
                             echo qualitygate.toString()
                             if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                                error  "Quality Gate failure"
+                                error  "Quality Gate Failure"
+                            }
+                            if ("WARN".equals(qualitygate["projectStatus"]["status"])) {
+                                currentBuild.result = 'UNSTABLE'
+                                slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate in WARNING (marked as UNSTABLE) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                             }
                         }
                     }
@@ -71,8 +72,8 @@ pipeline {
             }
             post {
                 failure {
-                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate not mer https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                   }
+                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate not met https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                }
             }
         }
         
