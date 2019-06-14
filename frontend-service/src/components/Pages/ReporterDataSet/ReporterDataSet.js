@@ -205,13 +205,13 @@ const ReporterDataSet = () => {
   const onConfirmValidateHandler = () =>{
     let idDataSet = 1;
     setValidateDialogVisible(false);
-    HTTPRequesterAPI.post(
+    HTTPRequesterAPI.get(
       {
         url:'/validation/dataset/'+ idDataSet,
         queryString: {}
       }
     );
-    console.log("validateDataSetData");
+    console.log("/validation/dataset/" + idDataSet);
   }
 
   const getPercentage = (tableValues) =>{
@@ -257,7 +257,7 @@ const ReporterDataSet = () => {
           {resources.messages["deleteDatasetConfirm"]}
         </ConfirmDialog>
         <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
-                        visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={true}
+                        visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={false}
                         labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
                         {resources.messages["validateDataSetConfirm"]}
         </ConfirmDialog>
