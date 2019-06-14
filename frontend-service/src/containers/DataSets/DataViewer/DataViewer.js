@@ -6,7 +6,7 @@ import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-import jsonData from '../../../assets/jsons/response_dataset_values4.json';
+//import jsonData from '../../../assets/jsons/response_dataset_values4.json';
 
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';

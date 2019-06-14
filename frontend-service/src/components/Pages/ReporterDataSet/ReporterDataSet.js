@@ -11,8 +11,8 @@ import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUploa
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
-import jsonDataSchema from '../../../assets/jsons/datosDataSchema3.json';
-import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
+//import jsonDataSchema from '../../../assets/jsons/datosDataSchema3.json';
+//import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
