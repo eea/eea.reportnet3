@@ -190,12 +190,9 @@ public class ValidationServiceImpl implements ValidationService {
         | IllegalAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
     }
-    // We delete all validation to delete before pass the new validations
-
     // Dataset and TablesValue validations
     // read Dataset Data
     long startTime = System.currentTimeMillis();
-    LOG.info(String.valueOf(startTime));
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
 
@@ -262,7 +259,7 @@ public class ValidationServiceImpl implements ValidationService {
 
     }
     long finishTime = System.currentTimeMillis();
-    LOG.info("Ha tardado: " + (finishTime - startTime));
+    LOG.info("Has ended in: " + (finishTime - startTime) + " Millisec.");
   }
 
 
