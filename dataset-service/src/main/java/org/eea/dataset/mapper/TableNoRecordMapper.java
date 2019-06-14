@@ -19,6 +19,7 @@ public interface TableNoRecordMapper extends IMapper<TableValue, TableVO> {
    * @return the table VO
    */
   @Mapping(source = "records", target = "records", ignore = true)
+  @Mapping(target = "tableValidations", ignore = true)
   @Override
   TableVO entityToClass(TableValue entity);
 

@@ -7,12 +7,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.util.HashMap;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +62,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
+    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
   }
 
   /**
@@ -72,7 +74,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataThrowException2() throws Exception {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
-    dataSetControllerImpl.loadDatasetData(null, fileNoExtension);
+    dataSetControllerImpl.loadTableData(null, fileNoExtension, null);
   }
 
   /**
@@ -82,7 +84,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testLoadDatasetDataThrowException3() throws Exception {
-    dataSetControllerImpl.loadDatasetData(1L, null);
+    dataSetControllerImpl.loadTableData(1L, null, null);
   }
 
   /**
@@ -94,7 +96,7 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
-    dataSetControllerImpl.loadDatasetData(1L, file);
+    dataSetControllerImpl.loadTableData(1L, file, null);
   }
 
   /**
@@ -202,7 +204,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test exception entry 1.
+   * Creates the removeDatasetData data set test exception entry 1.
    *
    * @throws Exception the exception
    */
@@ -212,7 +214,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test exception entry 2.
+   * Creates the removeDatasetData data set test exception entry 2.
    *
    * @throws Exception the exception
    */
@@ -222,7 +224,7 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Creates the empty data set test.
+   * Creates the removeDatasetData data set test.
    *
    * @throws Exception the exception
    */
@@ -403,5 +405,49 @@ public class DataSetControllerImplTest {
 
     Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
   }
+  
+  @Test
+  public void testGetTableFromAnyObjectId() throws Exception {
+      
+    when(datasetService.getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(),
+          Mockito.any())).thenReturn(new HashMap<String,TableVO>());
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
+    Mockito.verify(datasetService, times(1)).getTableFromAnyObjectId(Mockito.any(), Mockito.any(),
+          Mockito.any(), Mockito.any());
+  }
+  
+  
+  @Test(expected = ResponseStatusException.class)
+  public void testGetTableFromAnyObjectIdException() throws Exception {
+      dataSetControllerImpl.getTableFromAnyObjectId(null, null, 10, null);
+  }
+  
+  
+  @Test(expected = ResponseStatusException.class)
+  public void testGetTableFromAnyObjectIdException2() throws Exception {
 
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableFromAnyObjectId(
+          Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
+
+  }
+  
+  
+  @Test
+  public void testListValidations() throws Exception {
+      
+    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
+    Mockito.verify(datasetService, times(1)).getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+  
+  @Test
+  public void testListValidationsException() throws Exception {
+   
+    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService).
+      getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
+  }
+ 
+   
+  
 }

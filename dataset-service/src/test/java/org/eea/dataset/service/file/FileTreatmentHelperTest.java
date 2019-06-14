@@ -37,7 +37,7 @@ public class FileTreatmentHelperTest {
     final MockMultipartFile fileNoExtension =
         new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     FileTreatmentHelper.executeFileProcess(kafkaSender, datasetService, 1L, "file",
-        fileNoExtension.getInputStream());
+        fileNoExtension.getInputStream(), null);
   }
 
 }

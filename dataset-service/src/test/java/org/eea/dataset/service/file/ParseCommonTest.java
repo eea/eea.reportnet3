@@ -1,10 +1,9 @@
 package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,21 +26,31 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ParseCommonTest {
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   @InjectMocks
   private ParseCommon parseCommon;
 
-  /** The data set schema service. */
+  /**
+   * The data set schema service.
+   */
   @Mock
   private DatasetSchemaService dataSetSchemaService;
 
-  /** The Constant ID. */
+  /**
+   * The Constant ID.
+   */
   private static final String ID = "1";
 
-  /** The field schema. */
+  /**
+   * The field schema.
+   */
   private static FieldSchemaVO fieldSchema;
 
-  /** The dataset. */
+  /**
+   * The dataset.
+   */
   private static DataSetSchemaVO dataset;
 
   /**
@@ -70,13 +79,6 @@ public class ParseCommonTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  /**
-   * Test find id table.
-   */
-  @Test
-  public void testFindIdTable() {
-    assertEquals("fail", ID, parseCommon.findIdTable(ID, dataset));
-  }
 
   /**
    * Test find id record.
@@ -117,22 +119,6 @@ public class ParseCommonTest {
   public void testGetDataSetSchema() {
     when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(dataset);
     assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L));
-  }
-
-  /**
-   * Test is header true.
-   */
-  @Test
-  public void testIsHeaderTrue() {
-    assertTrue("fail", parseCommon.isHeader("_table"));
-  }
-
-  /**
-   * Test is header false.
-   */
-  @Test
-  public void testIsHeaderFalse() {
-    assertFalse("fail", parseCommon.isHeader(ID));
   }
 
 }

@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +12,10 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
@@ -126,7 +129,7 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Creates the empty data set.
+   * Creates the removeDatasetData data set.
    *
    * @param datasetname the datasetname
    */
@@ -146,10 +149,12 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param file the file
    */
+
   @Override
-  @PostMapping("{id}/loadDatasetData")
-  public void loadDatasetData(@PathVariable("id") final Long datasetId,
-      @RequestParam("file") final MultipartFile file) {
+  @PostMapping("{id}/loadTableData/{idTableSchema}")
+  public void loadTableData(@PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file,
+      @PathVariable("idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -165,8 +170,8 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable =
-          new LoadDataCallable(this.kafkaSender, this.datasetService, datasetId, fileName, is);
+      callable = new LoadDataCallable(kafkaSender, this.datasetService, datasetId, fileName, is,
+          idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {
@@ -183,8 +188,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId id import
    */
   @Override
-  @DeleteMapping(value = "/deleteImportData")
-  public void deleteImportData(final Long dataSetId) {
+  @DeleteMapping(value = "{id}/deleteImportData")
+  public void deleteImportData(@PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -214,6 +219,42 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
   }
+  
+  
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageSize the page size
+   * @param type the type
+   * @return the table from any object id
+   */
+  @Override
+  @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id, 
+      @RequestParam(value = "datasetId", required = true) Long idDataset,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "type", required = true) TypeEntityEnum type) {
+    
+    
+    Map<String,TableVO> mapPageTable = null;
+    if (id == null || idDataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    
+    try {
+      Pageable pageable = PageRequest.of(1, pageSize);
+      mapPageTable = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+    
+    return mapPageTable;
+  }
+  
 
   /**
    * Gets the by id.
@@ -258,9 +299,9 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
-  
-  
-  
+
+
+
   /**
    * Gets the statistics by id.
    *
@@ -270,7 +311,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
-    
+
     StatisticsVO statistics = null;
     try {
       statistics = datasetService.getStatistics(datasetId);
@@ -279,6 +320,36 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return statistics;
+  }
+  
+   
+  /**
+   * Gets the failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   * @return the failed validations by id dataset
+   */
+  @Override
+  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public  FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
+    
+    FailedValidationsDatasetVO validations = null;
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    try {
+      validations = datasetService.getListValidations(datasetId, pageable, fields, asc);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return validations;
   }
 
 }

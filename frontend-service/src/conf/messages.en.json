@@ -27,6 +27,11 @@
         "deleteDatasetConfirm": "Are you sure you want to delete the dataset?",
         "deleteDatasetHeader": "Delete dataset",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "visibility": "Visibility",
+        "filter": "Filter",
+        "groupBy": "Group by",
+        "sort": "Sort",
+        "refresh": "Refresh"
     }
 }

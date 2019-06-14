@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
@@ -30,7 +31,10 @@ public class FieldValidation {
    * The id.
    */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @SequenceGenerator(name = "field_validation_sequence_generator",
+  sequenceName = "field_validation_sequence",
+  allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_validation_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

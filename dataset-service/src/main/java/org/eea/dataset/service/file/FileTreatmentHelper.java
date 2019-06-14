@@ -32,8 +32,9 @@ public class FileTreatmentHelper extends Helper {
    */
   public static void executeFileProcess(final KafkaSender kafkaSender,
       final DatasetService datasetService, final Long datasetId, final String fileName,
-      final InputStream is) throws EEAException, IOException, InterruptedException {
-    datasetService.processFile(datasetId, fileName, is);
+      final InputStream is, String idTableSchema)
+      throws EEAException, IOException, InterruptedException {
+    datasetService.processFile(datasetId, fileName, is, idTableSchema);
 
     // after the dataset has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(kafkaSender, EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);

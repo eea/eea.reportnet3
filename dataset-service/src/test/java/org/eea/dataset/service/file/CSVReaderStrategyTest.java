@@ -57,9 +57,7 @@ public class CSVReaderStrategyTest {
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
     ReflectionTestUtils.setField(csvReaderStrategy, "delimiter", '|');
-    String csv =
-        "\n_table|campo_1|campo_2|campo_3\r\n" + "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n"
-            + "_table|campo_11|campo_12\r\n" + "TABLA3|J|K\r\n" + "TABLA3|M|N";
+    String csv = "campo_1|campo_2|campo_3\r\n" + "B|C|D\r\n" + "\"I|I\"|I|I";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
@@ -93,11 +91,9 @@ public class CSVReaderStrategyTest {
   public void testParseFile() throws InvalidFileException {
 
     when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
-    when(parseCommon.findIdTable(Mockito.any(), Mockito.any())).thenReturn("111");
     when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
-    when(parseCommon.isHeader("_table")).thenReturn(true);
-    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L);
+    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "");
     assertNotNull(result);
   }
 
@@ -110,30 +106,12 @@ public class CSVReaderStrategyTest {
    */
   @Test(expected = InvalidFileException.class)
   public void testParseException() throws InvalidFileException, IOException {
-    String csv = "TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
+    String csv = "\n TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
     when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
-    csvReaderStrategy.parseFile(input, 1L, null);
-  }
-
-
-
-  /**
-   * Test parse exception.
-   *
-   * @throws InvalidFileException the invalid file exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test(expected = InvalidFileException.class)
-  public void testParseException2() throws InvalidFileException, IOException {
-    String csv = "TABLA1\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
-    MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
-    input = file.getInputStream();
-    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
-    csvReaderStrategy.parseFile(input, 1L, null);
+    csvReaderStrategy.parseFile(input, 1L, null, null);
   }
 
 
