@@ -154,20 +154,20 @@ const ReporterDataSet = () => {
 
     //Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
-    /* const dataPromise = HTTPRequesterAPI.get(
+     const dataPromise = HTTPRequesterAPI.get(
       {
         url:'/dataschema/dataflow/1',
         queryString: {}
       }
-    ); */
+    ); 
 
-    /*dataPromise.then(response =>{
+    dataPromise.then(response =>{
       console.log(response.data);
       setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
             id: item["idTableSchema"],
             name : item["nameTableSchema"]
-            hasErrors: {...response.data.tables.filter(t=>t["idTableSchema"]===item["idTableSchema"])[0]}.tableErrors}}
+           
             }
       })); 
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
@@ -183,44 +183,18 @@ const ReporterDataSet = () => {
     .catch(error => {
       console.log(error);
       return error;
-    });   */ 
+    });   
 
     
 
- //Mostrar el join de los json con la union mediante el hasErrors con el filter
-/* const dataPromise = HTTPRequesterAPI.get(
-  {
-    url:'/dataschema/dataflow/1',
-    queryString: {}
-  }
-);
-
-  
-dataPromise.then(response =>{
-  console.log(response.data);
-  const dataflow = response.data;
-  HTTPRequesterAPI.get(
-    {
-      url:'/dataschema/dataflow/1',
-      queryString: {}
-    }
-  ).then(response =>{
-    setTableSchema(dataflow.map((item,i)=>{
-      return {
-          id: item["idTableSchema"],
-          name : item["nameTableSchema"],
-          hasErrors: response.data.filter(t=>t["idTableSchema"]===item["idTableSchema"]).tableErrors
-          }
-    });
-  }) */
-
+/* 
     setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
       return {
         id:item["idTableSchema"],
         name:item["nameTableSchema"],
         
       }
-    }));
+    })); 
     
     setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
       return table.recordSchema.fieldSchema.map((item,i)=>{
@@ -230,20 +204,7 @@ dataPromise.then(response =>{
             header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
           }
       });        
-    }));
-
-
-    //Show validations button
-    /* const dataError = HTTPRequesterAPI.get(
-      {
-        url: '/dataschema/dataflow/1',
-        queryString: {}
-      }
-    );
-
-    dataError.then(response => {
-      console.log(response.data)
-    }) */
+    }));*/
     
   }, []);
 

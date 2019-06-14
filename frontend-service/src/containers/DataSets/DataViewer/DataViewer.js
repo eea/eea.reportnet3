@@ -38,8 +38,7 @@ const DataViewer = (props) => {
     fetchDataHandler(null, sortOrder, firstRow, numRows);
 
     console.log("Filtering data...");
-    const inmTableSchemaColumns = [...props.tableSchemaColumns];
-    console.log(inmTableSchemaColumns);
+    const inmTableSchemaColumns = [...props.tableSchemaColumns];   
     setCols(inmTableSchemaColumns);
 
   }, []);
@@ -101,7 +100,7 @@ const DataViewer = (props) => {
 
   const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
     setLoading(true);
-    /* 
+    
         let queryString = {
           idTableSchema: props.id,
           pageNum: Math.floor(fRow / nRows),
@@ -132,13 +131,13 @@ const DataViewer = (props) => {
         .catch(error => {
           console.log(error);
           return error;
-        }); */
-    if (jsonData) {
+        }); 
+    /* if (jsonData) {
       filterDataResponse(jsonData);
     }
    
     setTotalRecords(jsonData.totalRecords);
-    setLoading(false);
+    setLoading(false); */
   };
 
   const filterDataResponse = (data) =>{
