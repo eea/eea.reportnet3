@@ -16,7 +16,6 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
-import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
@@ -86,10 +85,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetTablesMapper dataSetTablesMapper;
 
-  /** The table value mapper. */
-  @Autowired
-  TableValueMapper tableValueMapper;
-
   /**
    * The record mapper.
    */
@@ -149,9 +144,7 @@ public class DatasetServiceImpl implements DatasetService {
   private IFileParserFactory fileParserFactory;
 
   /**
-   * 
-   * 
-   * /** The field repository.
+   * The field repository.
    */
   @Autowired
   private FieldRepository fieldRepository;
