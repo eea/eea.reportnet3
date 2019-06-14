@@ -38,7 +38,7 @@ pipeline {
                 stage('Compile NPM') {
                     steps {
                         sh '''
-                            npm install frontend-service/
+                            npm install frontend-service/ --registry https://registry.npmjs.org/
                         '''                                
                     }
                     post {
