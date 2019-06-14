@@ -12,7 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface TableRepository extends JpaRepository<TableValue, Long> {
 
 
-
+  
+  
   /**
    * Find all tables.
    *
@@ -20,7 +21,7 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    */
   @Query(value = "SELECT u FROM TableValue u")
   List<TableValue> findAllTables();
-
+  
   /**
    * Count records by id table.
    *
@@ -29,8 +30,8 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    */
   @Query("SELECT COUNT(rv) FROM TableValue tv INNER JOIN tv.records rv WHERE tv.id=?1")
   Long countRecordsByIdTable(Long id);
-
-
+  
+  
   /**
    * Count records by id table schema.
    *
@@ -39,9 +40,9 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    */
   @Query("SELECT COUNT(rv) FROM TableValue tv INNER JOIN tv.records rv WHERE tv.idTableSchema=?1")
   Long countRecordsByIdTableSchema(String idTableSchema);
-
-
-
+  
+  
+  
   /**
    * Find by id and dataset id id.
    *
@@ -50,8 +51,8 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * @return the table value
    */
   TableValue findByIdAndDatasetId_Id(Long id, Long idDataset);
-
-
+  
+  
   /**
    * Find table validations by id dataset.
    *
@@ -60,13 +61,7 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    */
   @Query("SELECT tval FROM DatasetValue dat INNER JOIN dat.tableValues tv INNER JOIN tv.tableValidations tval "
       + "WHERE dat.id=?1")
-  List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
+  List<TableValidation> findTableValidationsByIdDataset(Long datasetId); 
+  
 
-  /**
-   * Find table value id by id table schema.
-   *
-   * @param idTableSchema the id table schema
-   * @return the long
-   */
-  Long findTableValue_idByIdTableSchema(String idTableSchema);
 }
