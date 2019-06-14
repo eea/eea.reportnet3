@@ -151,10 +151,9 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IllegalArgumentException the illegal argument exception
    * @throws IllegalAccessException the illegal access exception
    */
-  public KieSession loadRulesKnowledgeBase(Long DataflowId) throws NoSuchFieldException,
-      SecurityException, IllegalArgumentException, IllegalAccessException {
+  public KieSession loadRulesKnowledgeBase(Long dataflowId) {
     try {
-      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
+      kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       LOG_ERROR.error(e.getMessage(), e);
       return null;
@@ -184,18 +183,11 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    try {
-      loadRulesKnowledgeBase(dataflowId);
-    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-        | IllegalAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-    }
+    loadRulesKnowledgeBase(dataflowId);
     // We delete all validation to delete before pass the new validations
 
     // Dataset and TablesValue validations
     // read Dataset Data
-    long startTime = System.currentTimeMillis();
-    LOG.info(String.valueOf(startTime));
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
 
@@ -256,13 +248,9 @@ public class ValidationServiceImpl implements ValidationService {
             }
           });
         }
-      })
-      // )
-      ;
+      });
 
     }
-    long finishTime = System.currentTimeMillis();
-    LOG.info("Ha tardado: " + (finishTime - startTime));
   }
 
 
