@@ -250,7 +250,7 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Error mapping file");
       }
       // Check if the table with idTableSchema has been populated already
-      Long oldTableId = tableRepository.findTableValue_idByIdTableSchema(idTableSchema);
+      Long oldTableId = tableRepository.findFirstId_ByIdTableSchema(idTableSchema);
       fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
       // save dataset to the database
       datasetRepository.saveAndFlush(dataset);

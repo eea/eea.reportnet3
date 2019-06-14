@@ -62,11 +62,13 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
       + "WHERE dat.id=?1")
   List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
 
+
   /**
-   * Find table value id by id table schema.
+   * Find id by id table schema.
    *
    * @param idTableSchema the id table schema
    * @return the long
    */
-  Long findTableValue_idByIdTableSchema(String idTableSchema);
+  @Query("SELECT DISTINCT TV.id FROM TableValue TV WHERE TV.idTableSchema=?1 ")
+  Long findFirstId_ByIdTableSchema(String idTableSchema);
 }
