@@ -249,11 +249,30 @@ public class DatasetServiceImpl implements DatasetService {
       if (dataset == null) {
         throw new IOException("Error mapping file");
       }
+      // Check if the table with idTableSchema has been populated already
+      Long oldTableId = tableRepository.findTableValue_idByIdTableSchema(idTableSchema);
+      fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
       // save dataset to the database
       datasetRepository.saveAndFlush(dataset);
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
+    }
+  }
+
+
+  /**
+   * Fill table id.
+   *
+   * @param idTableSchema the id table schema
+   * @param listTableValues the list table values
+   * @param oldTableId the old table id
+   */
+  private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
+      Long oldTableId) {
+    if (oldTableId != null) {
+      listTableValues.stream().filter(tableValue -> tableValue.getIdTableSchema() == idTableSchema)
+          .forEach(tableValue -> tableValue.setId(oldTableId));
     }
   }
 
