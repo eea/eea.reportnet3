@@ -29,6 +29,7 @@ const ReporterDataSet = () => {
   const [tableSchemaColumns, setTableSchemaColumns] = useState();  
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
@@ -66,9 +67,9 @@ const ReporterDataSet = () => {
         label: resources.messages["validate"],
         icon: "10",
         group: "right",
-        disabled: true,
+        disabled: false,
         //!validationError,
-        clickHandler: null,
+        clickHandler: () => setVisibleHandler(setValidateDialogVisible, true),
         ownButtonClasses:null,
         iconClasses:null
       },
@@ -216,6 +217,18 @@ const ReporterDataSet = () => {
     console.log("Data deleted!");
   }
 
+  const onConfirmValidateHandler = () =>{
+    let idDataSet = 1;
+    setValidateDialogVisible(false);
+    HTTPRequesterAPI.get(
+      {
+        url:'/validation/dataset/'+ idDataSet,
+        queryString: {}
+      }
+    );
+    console.log("/validation/dataset/" + idDataSet);
+  }
+
   const getPercentage = (tableValues) =>{
      let valArr = [[105, 50, 80, 11],[15, 48, 58, 19],[10, 2, 15, 85]];
      let total = valArr.reduce((arr1, arr2) =>
@@ -247,8 +260,15 @@ const ReporterDataSet = () => {
           </Card>
         </Dialog>
         <Suspense fallback={<div>Loading...</div>}>
-          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
+                        visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
+                        labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
             {resources.messages["deleteDatasetConfirm"]}
+          </ConfirmDialog>
+          <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
+                          visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={false}
+                          labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
+                          {resources.messages["validateDataSetConfirm"]}
           </ConfirmDialog>
         </Suspense>
       </div>
