@@ -12,7 +12,6 @@
         "import": "pi pi-upload",
         "info": "pi pi-info",
         "logout": "pi pi-power-off",
-        "banned": "pi pi-ban",
         "refresh": "pi pi-refresh",
         "sort": "pi pi-sort",
         "trash": "pi pi-trash",
