@@ -1,0 +1,320 @@
+{
+  "id": null,
+  "idTableSchema": null,
+  "records": [
+    {
+      "idRecordSchema": "5cefdb2912ea3e11dc029ffb",
+      "id": 6,
+      "fields": [
+        {
+          "type": "string",
+          "value": "ES120M070531",
+          "id": 7,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffc",
+          "fieldValidations": [
+            {
+              "id": 9,
+              "fieldValue": null,
+              "validation": {
+                "message": "Error Message",
+                "id": 8,
+                "idRule": "idMongo",
+                "levelError": "WARNING",
+                "typeEntity": "FIELD",
+                "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+              }
+            },
+            {
+              "id": 11,
+              "fieldValue": null,
+              "validation": {
+                "message": "Error Message",
+                "id": 10,
+                "idRule": "idMongo",
+                "levelError": "WARNING",
+                "typeEntity": "FIELD",
+                "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+              }
+            },
+            {
+              "id": 13,
+              "fieldValue": null,
+              "validation": {
+                "message": "Error Message",
+                "id": 12,
+                "idRule": "idMongo",
+                "levelError": "WARNING",
+                "typeEntity": "FIELD",
+                "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+              }
+            }
+          ],
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "na",
+          "id": 14,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffd",
+          "fieldValidations": [
+            {
+              "id": 16,
+              "fieldValue": null,
+              "validation": {
+                "message": "Error Message",
+                "id": 15,
+                "idRule": "idMongo",
+                "levelError": "WARNING",
+                "typeEntity": "FIELD",
+                "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+              }
+            },
+            {
+              "id": 18,
+              "fieldValue": null,
+              "validation": {
+                "message": "Error Message",
+                "id": 17,
+                "idRule": "idMongo",
+                "levelError": "WARNING",
+                "typeEntity": "FIELD",
+                "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+              }
+            },
+            {
+              "id": 20,
+              "fieldValue": null,
+              "validation": {
+                "message": "Error Message",
+                "id": 19,
+                "idRule": "idMongo",
+                "levelError": "WARNING",
+                "typeEntity": "FIELD",
+                "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+              }
+            }
+          ],
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-07-05",
+          "id": 21,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffe",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-07-09",
+          "id": 22,
+          "idFieldSchema": "5cefdb2912ea3e11dc029fff",
+          "fieldValidations": null,
+          "levelError": null
+        }
+      ],
+      "datasetPartitionId": 1,
+      "recordValidations": [
+        {
+          "id": 24,
+          "recordValue": null,
+          "validation": {
+            "message": "Warning Message",
+            "id": 23,
+            "idRule": "idMongo",
+            "levelError": "WARNING",
+            "typeEntity": "RECORD",
+            "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+          }
+        },
+        {
+          "id": 24,
+          "recordValue": null,
+          "validation": {
+            "message": "Error Message",
+            "id": 23,
+            "idRule": "idMongo",
+            "levelError": "ERROR",
+            "typeEntity": "RECORD",
+            "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+          }
+        }
+      ],
+      "sortCriteria": null,
+      "levelError": null
+    },
+    {
+      "idRecordSchema": "5cefdb2912ea3e11dc029ffb",
+      "id": 25,
+      "fields": [
+        {
+          "type": "string",
+          "value": "ES120M025499",
+          "id": 26,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffc",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "na",
+          "id": 27,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffd",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-06-20",
+          "id": 28,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffe",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-06-25",
+          "id": 29,
+          "idFieldSchema": "5cefdb2912ea3e11dc029fff",
+          "fieldValidations": null,
+          "levelError": null
+        }
+      ],
+      "datasetPartitionId": 1,
+      "recordValidations": null,
+      "sortCriteria": null,
+      "levelError": null
+    },
+    {
+      "idRecordSchema": "5cefdb2912ea3e11dc029ffb",
+      "id": 30,
+      "fields": [
+        {
+          "type": "string",
+          "value": "ES425C0612013",
+          "id": 31,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffc",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "na",
+          "id": 32,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffd",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-06-19",
+          "id": 33,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffe",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-07-23",
+          "id": 34,
+          "idFieldSchema": "5cefdb2912ea3e11dc029fff",
+          "fieldValidations": null,
+          "levelError": null
+        }
+      ],
+      "datasetPartitionId": 1,
+      "recordValidations": null,
+      "sortCriteria": null,
+      "levelError": null
+    },
+    {
+      "idRecordSchema": "5cefdb2912ea3e11dc029ffb",
+      "id": 35,
+      "fields": [
+        {
+          "type": "string",
+          "value": "ES511M0152407",
+          "id": 36,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffc",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "na",
+          "id": 37,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffd",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-06-01",
+          "id": 38,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffe",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-09-14",
+          "id": 39,
+          "idFieldSchema": "5cefdb2912ea3e11dc029fff",
+          "fieldValidations": null,
+          "levelError": null
+        }
+      ],
+      "datasetPartitionId": 1,
+      "recordValidations": null,
+      "sortCriteria": null,
+      "levelError": null
+    },
+    {
+      "idRecordSchema": "5cefdb2912ea3e11dc029ffb",
+      "id": 40,
+      "fields": [
+        {
+          "type": "string",
+          "value": "ES424C2912010",
+          "id": 41,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffc",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "na",
+          "id": 42,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffd",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-06-04",
+          "id": 43,
+          "idFieldSchema": "5cefdb2912ea3e11dc029ffe",
+          "fieldValidations": null,
+          "levelError": null
+        },
+        {
+          "type": "String",
+          "value": "2018-06-11",
+          "id": 44,
+          "idFieldSchema": "5cefdb2912ea3e11dc029fff",
+          "fieldValidations": null,
+          "levelError": null
+        }
+      ],
+      "datasetPartitionId": 1,
+      "recordValidations": null,
+      "sortCriteria": null,
+      "levelError": null
+    }
+  ],
+  "headers": null,
+  "levelError": null,
+  "name": null,
+  "totalRecords": 5,
+  "tableValidations": null
+}
