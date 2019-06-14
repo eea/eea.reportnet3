@@ -6,7 +6,8 @@
       {
         "idObject": 51651,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_AbnormalSituations",
+        "idTableSchema": "5cefb5b592f28351b4e9781d",
+        "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "WARNING",
         "message": "Table with errors",
         "typeEntity": "TABLE",
@@ -15,7 +16,8 @@
       {
         "idObject": 45345,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_AbnormalSituations",
+        "idTableSchema": "5cefb5b592f28351b4e9781d",
+        "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "ERROR",
         "message": "Row is duplicated",
         "typeEntity": "ROW",
@@ -24,7 +26,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_AbnormalSituations",
+        "idTableSchema": "5cefb5b592f28351b4e9781d",
+        "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "WARNING",
         "message": "Value is not a number",
         "typeEntity": "FIELD",
@@ -33,7 +36,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_NormalSituations",
+        "idTableSchema": "5cffc519903713258408d53d",
+        "nameTableSchema": "BWQD_2006_SeasonalInfo",
         "levelError": "WARNING",
         "message": "Value exceeds maximum allowed",
         "typeEntity": "FIELD",
@@ -42,7 +46,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_AbnormalSituations",
+        "idTableSchema": "5cefb5b592f28351b4e9781d",
+        "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "ERROR",
         "message": "Table with errors",
         "typeEntity": "TABLE",
@@ -51,6 +56,7 @@
       {
         "idObject": 0,
         "idValidation": 0,
+        "idTableSchema": null,
         "nameTableSchema": "Dataset 1",
         "levelError": "WARNING",
         "message": "Dataset with errors",
@@ -60,7 +66,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_NormalSituations",
+        "idTableSchema": "5cffc519903713258408d53d",
+        "nameTableSchema": "BWQD_2006_SeasonalInfo",
         "levelError": "WARNING",
         "message": "Value is over 10",
         "typeEntity": "FIELD",
@@ -69,7 +76,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_NormalSituations",
+        "idTableSchema": "5cffc519903713258408d53d",
+        "nameTableSchema": "BWQD_2006_SeasonalInfo",
         "levelError": "WARNING",
         "message": "Value is over 200",
         "typeEntity": "FIELD",
@@ -78,7 +86,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_NormalSituations",
+        "idTableSchema": "5cffc519903713258408d53d",
+        "nameTableSchema": "BWQD_2006_SeasonalInfo",
         "levelError": "WARNING",
         "message": "Value exceeds maximum allowed",
         "typeEntity": "FIELD",
@@ -87,7 +96,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_NormalSituations",
+        "idTableSchema": "5cffc519903713258408d53d",
+        "nameTableSchema": "BWQD_2006_SeasonalInfo",
         "levelError": "WARNING",
         "message": "Value exceeds maximum allowed",
         "typeEntity": "FIELD",
@@ -96,7 +106,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_NormalSituations",
+        "idTableSchema": "5cffc519903713258408d53d",
+        "nameTableSchema": "BWQD_2006_SeasonalInfo",
         "levelError": "WARNING",
         "message": "Wrong date",
         "typeEntity": "FIELD",
@@ -105,7 +116,8 @@
       {
         "idObject": 0,
         "idValidation": 0,
-        "nameTableSchema": "BWQD_2006_AbnormalSituations",
+        "idTableSchema": "5cefb5b592f28351b4e9781d",
+        "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "WARNING",
         "message": "Value is not a string",
         "typeEntity": "FIELD",

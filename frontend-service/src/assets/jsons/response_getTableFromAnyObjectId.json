@@ -1,0 +1,245 @@
+{
+  "page": {
+	"numPage":"1",
+	"table":{
+    "id": 3,
+    "idTableSchema": "5cf0e9b3b793310e9ceca17c",
+    "records": [
+      {
+        "idRecordSchema": "5cf0e9b3b793310e9ceca17d",
+        "id": 151,
+        "fields": [
+          {
+            "type": "string",
+            "value": "AT1110002000120010",
+            "id": 901,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca17e",
+            "fieldValidations": [
+              {
+                "id": 4,
+                "fieldValue": null,
+                "validation": {
+                  "message": "Error Message",
+                  "id": 3,
+                  "idRule": "idMongo",
+                  "levelError": "WARNING",
+                  "typeEntity": "FIELD",
+                  "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+                }
+              }
+            ],
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "",
+            "id": 902,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca17f",
+            "fieldValidations": [
+              {
+                "id": 72,
+                "fieldValue": null,
+                "validation": {
+                  "message": "Error Message",
+                  "id": 71,
+                  "idRule": "idMongo",
+                  "levelError": "WARNING",
+                  "typeEntity": "FIELD",
+                  "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+                }
+              },
+              {
+                "id": 74,
+                "fieldValue": null,
+                "validation": {
+                  "message": "Error Message",
+                  "id": 73,
+                  "idRule": "idMongo",
+                  "levelError": "WARNING",
+                  "typeEntity": "FIELD",
+                  "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+                }
+              }
+            ],
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "2018-06-04",
+            "id": 903,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca180",
+            "fieldValidations": null,
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "675",
+            "id": 904,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca181",
+            "fieldValidations": null,
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "15",
+            "id": 905,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca182",
+            "fieldValidations": null,
+            "levelError": null
+          },
+          {
+            "type": "string",
+            "value": "",
+            "id": 906,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca183",
+            "fieldValidations": null,
+            "levelError": null
+          }
+        ],
+        "datasetPartitionId": 1,
+        "recordValidations": [
+          {
+            "id": 1,
+            "recordValue": null,
+            "validation": {
+              "message": "Error Message",
+              "id": 139,
+              "idRule": "idMongo",
+              "levelError": "WARNING",
+              "typeEntity": "RECORD",
+              "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+            }
+          },
+          {
+            "id": 2,
+            "recordValue": null,
+            "validation": {
+              "message": "Error Message",
+              "id": 140,
+              "idRule": "idMongo",
+              "levelError": "WARNING",
+              "typeEntity": "RECORD",
+              "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+            }
+          }
+        ],
+        "sortCriteria": null,
+        "levelError": null
+      },
+      {
+        "idRecordSchema": "5cf0e9b3b793310e9ceca17d",
+        "id": 152,
+        "fields": [
+          {
+            "type": "string",
+            "value": "AT1110002000120010",
+            "id": 907,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca17e",
+            "fieldValidations": [              
+              {
+                "id": 216,
+                "fieldValue": null,
+                "validation": {
+                  "message": "Error Message",
+                  "id": 215,
+                  "idRule": "idMongo",
+                  "levelError": "WARNING",
+                  "typeEntity": "FIELD",
+                  "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+                }
+              }
+            ],
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "",
+            "id": 908,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca17f",
+            "fieldValidations": [
+              {
+                "id": 218,
+                "fieldValue": null,
+                "validation": {
+                  "message": "Error Message",
+                  "id": 217,
+                  "idRule": "idMongo",
+                  "levelError": "WARNING",
+                  "typeEntity": "FIELD",
+                  "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+                }
+              }
+            ],
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "2018-06-18",
+            "id": 909,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca180",
+            "fieldValidations": null,
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "15",
+            "id": 910,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca181",
+            "fieldValidations": null,
+            "levelError": null
+          },
+          {
+            "type": "String",
+            "value": "15",
+            "id": 911,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca182",
+            "fieldValidations": null,
+            "levelError": null
+          },
+          {
+            "type": "string",
+            "value": "",
+            "id": 912,
+            "idFieldSchema": "5cf0e9b3b793310e9ceca183",
+            "fieldValidations": null,
+            "levelError": null
+          }
+        ],
+        "datasetPartitionId": 1,
+        "recordValidations": [
+          {
+            "id": 11,
+            "recordValue": null,
+            "validation": {
+              "message": "Error Message",
+              "id": 285,
+              "idRule": "idMongo",
+              "levelError": "WARNING",
+              "typeEntity": "RECORD",
+              "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+            }
+          }
+        ],
+        "sortCriteria": null,
+        "levelError": null
+      }
+    ],
+		"levelError": null,
+		"totalRecords": 2,
+		"tableValidations": [
+		  {
+			"id": 1,
+			"tableValue": null,
+			"validation": {
+			  "message": "Error Message",
+			  "id": 451,
+			  "idRule": "idMongo",
+			  "levelError": "WARNING",
+			  "typeEntity": "TABLE",
+			  "validationDate": "Thu Jun 13 14:57:51 CEST 2019"
+			}
+		  }
+		]
+	}
+  }
+}

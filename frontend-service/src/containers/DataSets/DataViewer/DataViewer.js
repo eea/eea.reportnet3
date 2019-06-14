@@ -6,7 +6,7 @@ import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-//import jsonData from '../../../assets/jsons/response_dataset_values2.json';
+import jsonData from '../../../assets/jsons/response_dataset_values2.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
@@ -143,20 +143,22 @@ const DataViewer = (props) => {
             queryString: queryString
           }
         );
-
-        dataPromise.then(response =>{
-          console.log(response.data);
-          filterDataResponse(response.data.records);
-          if(response.data.totalRecords!==totalRecords){
-            setTotalRecords(response.data.totalRecords);
-          }
+        filterDataResponse(jsonData.records);
+        setTotalRecords(jsonData.totalRecords);
+        setLoading(false);
+        // dataPromise.then(response =>{
+        //   console.log(response.data);
+        //   filterDataResponse(response.data.records);          
+        //   if(response.data.totalRecords!==totalRecords){
+        //     setTotalRecords(response.data.totalRecords);
+        //   }
         
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log(error);
-          return error;
-        });
+        //   setLoading(false);
+        // })
+        // .catch(error => {
+        //   console.log(error);
+        //   return error;
+        // });
       }
 
       const filterDataResponse = (data) =>{        

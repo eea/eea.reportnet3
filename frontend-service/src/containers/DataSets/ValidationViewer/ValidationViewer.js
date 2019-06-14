@@ -6,6 +6,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
 import jsonData from '../../../assets/jsons/list-of-errors.json';
+import jsonLinkData from '../../../assets/jsons/response_getTableFromAnyObjectId.json';
 import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
@@ -117,7 +118,8 @@ const ValidationViewer = (props) => {
               header: resources.messages["typeEntity"]
             }];
         let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={`${col.header}`} />);
-        columnsArr.push(<Column sortable={true} key="idObject" field="idObject" header="ID Object" className={styles.VisibleHeader} />)
+        columnsArr.push(<Column key="idObject" field="idObject" header="" className={styles.VisibleHeader} />)
+        columnsArr.push(<Column key="idTableSchema" field="idTableSchema" header="" className={styles.VisibleHeader} />)
         setColumns(columnsArr); 
   
       }, [cols, colOptions]);
@@ -213,6 +215,24 @@ const ValidationViewer = (props) => {
         setFetchedData(data.errors);
       }
 
+      const filterLinkedDataResponse = (data) =>{  
+        console.log("FILTERLINKED")      
+        console.log(data);
+        const dataFiltered = data.map(record => record.fields.map(f =>{
+          return {[f.idFieldSchema]: f.value}
+        }));
+        let auxFiltered = {}
+        let auxArrayFiltered = [];
+        dataFiltered.forEach(dat => {
+          dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
+          auxArrayFiltered.push(auxFiltered);
+          auxFiltered={};
+        });
+        //setFetchedData(auxArrayFiltered);
+        console.log(auxArrayFiltered)
+        return auxArrayFiltered;
+      }
+
       const onRowSelectHandler = (event) =>{
 
         // let queryString = {
@@ -230,7 +250,8 @@ const ValidationViewer = (props) => {
         console.log(event.data);
         //http://localhost:8030/dataset/loadTableFromAnyObject/1629858?datasetId=1&pageSize=20&type=RECORD
         contextReporterDataSet.validationsVisibleHandler();
-        contextReporterDataSet.setTabHandler("5cffc519903713258408d56d");
+        contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+        contextReporterDataSet.dataShowValidations = filterLinkedDataResponse(jsonLinkData.page.table.records);
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
