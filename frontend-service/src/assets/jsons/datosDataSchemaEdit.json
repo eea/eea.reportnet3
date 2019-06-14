@@ -1,0 +1,36 @@
+{  
+   "idDataSetSchema":"5cefb5b592f28351b4e97854",
+   "nameDataSetSchema":"dataSet_1",
+   "tableSchemas":[  
+   {  
+         "idTableSchema":"5cefb5b592f28351b4e9784e",
+         "nameTableSchema":"BWQD_2006_AbnormalSituations",
+         "recordSchema":{  
+            "idRecordSchema":"5cefb5b592f28351b4e9784f",
+            "fieldSchema":[  
+               {  
+                  "id":"5cefb5b592f28351b4e97850",
+                  "idRecord":"5cefb5b592f28351b4e9784f",
+                  "name":"BWID",
+                  "type":"string"
+               },
+               {  
+                  "id":"5cefb5b592f28351b4e97851",
+                  "idRecord":"5cefb5b592f28351b4e9784f",
+                  "name":"GroupID",
+                  "type":"String"
+               },
+               {  
+                  "id":"5cefb5b592f28351b4e97852",
+                  "idRecord":"5cefb5b592f28351b4e9784f",
+                  "name":"StartDateA",
+                  "type":"String"
+               }
+              
+            ]
+         }
+      }
+      
+          
+   ]
+}
