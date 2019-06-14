@@ -901,7 +901,6 @@ public class DatasetServiceImpl implements DatasetService {
           for (int i = 0; i < sanitizedTables.size(); i++) {
             if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
               sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
-              sanitizedTables.get(i).getTableValidations().addAll(tableValue.getTableValidations());
               break;
             }
           }
@@ -1045,6 +1044,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
       error.setNameTableSchema(mapNameTableSchema.get(dataset.getIdDatasetSchema()));
+      error.setIdTableSchema(dataset.getIdDatasetSchema());
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
 
@@ -1064,6 +1064,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setMessage(tableValidation.getValidation().getMessage());
       error.setNameTableSchema(
           mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema()));
+      error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
       error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(tableValidation.getValidation().getValidationDate());
 
@@ -1085,6 +1086,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setMessage(recordValidation.getValidation().getMessage());
       error.setNameTableSchema(mapNameTableSchema
           .get(recordValidation.getRecordValue().getTableValue().getIdTableSchema()));
+      error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
       error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(recordValidation.getValidation().getValidationDate());
 
@@ -1103,6 +1105,8 @@ public class DatasetServiceImpl implements DatasetService {
       error.setMessage(fieldValidation.getValidation().getMessage());
       error.setNameTableSchema(mapNameTableSchema
           .get(fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema()));
+      error.setIdTableSchema(
+          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
       error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(fieldValidation.getValidation().getValidationDate());
 
