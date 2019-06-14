@@ -1,9 +1,9 @@
 package org.eea.validation.kafka;
 
+import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.handler.EEAEventHandler;
-import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class EventHandler implements EEAEventHandler {
 
   /** The validation service. */
   @Autowired
-  private ValidationService validationService;
+  private ValidationController validationController;
 
   /**
    * Gets the type.
@@ -43,7 +43,7 @@ public class EventHandler implements EEAEventHandler {
     LOG.info("ValidationService has received this message from Kafka {}", eeaEventVO);
 
     if (EventType.LOAD_DATA_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
-      validationService.validateDataSetData((Long) eeaEventVO.getData().get("dataset_id"));
+      validationController.validateDataSetData((Long) eeaEventVO.getData().get("dataset_id"));
     }
   }
 }
