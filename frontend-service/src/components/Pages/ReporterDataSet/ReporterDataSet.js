@@ -259,16 +259,18 @@ const ReporterDataSet = () => {
             </div>
           </Card>
         </Dialog>
-        <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
-                       visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
-                       labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
-          {resources.messages["deleteDatasetConfirm"]}
-        </ConfirmDialog>
-        <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
-                        visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={false}
-                        labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
-                        {resources.messages["validateDataSetConfirm"]}
-        </ConfirmDialog>
+        <Suspense fallback={<div>Loading...</div>}>
+          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
+                        visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
+                        labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+            {resources.messages["deleteDatasetConfirm"]}
+          </ConfirmDialog>
+          <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
+                          visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={false}
+                          labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
+                          {resources.messages["validateDataSetConfirm"]}
+          </ConfirmDialog>
+        </Suspense>
       </div>
   );
 }
