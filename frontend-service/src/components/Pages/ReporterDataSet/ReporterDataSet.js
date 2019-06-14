@@ -11,8 +11,8 @@ import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUploa
 // import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
-import jsonDataSchema from '../../../assets/jsons/datosDataSchema3.json';
-import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
+//import jsonDataSchema from '../../../assets/jsons/datosDataSchema3.json';
+//import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
@@ -44,7 +44,7 @@ const ReporterDataSet = () => {
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
     
-    fetch('http://dummy.restapiexample.com/api/v1/employees')
+    /*fetch('http://dummy.restapiexample.com/api/v1/employees')
     .then(response => response.json())
     .then(myJson =>{
 
@@ -106,7 +106,7 @@ const ReporterDataSet = () => {
         }
       ]);
 
-    });
+    });*/
 
     
 
@@ -255,7 +255,7 @@ console.log(dataPromise);
 
 
 
-    setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
+    /*setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
       return {
         id:item["idTableSchema"],
         name:item["nameTableSchema"],
@@ -271,7 +271,7 @@ console.log(dataPromise);
             header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
           }
       });        
-    }));
+    }));*/
 
   }, []);
   
