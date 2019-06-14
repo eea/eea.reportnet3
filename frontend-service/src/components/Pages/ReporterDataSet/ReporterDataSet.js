@@ -7,11 +7,12 @@ import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {Dialog} from 'primereact/dialog';
 import {Chart} from 'primereact/chart';
 import {Card} from 'primereact/card';
-
+import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
-//import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
+//import jsonDataSchema from '../../../assets/jsons/datosDataSchema3.json';
+//import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
@@ -22,14 +23,14 @@ const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
-  const [validationError] = useState(true);
+  const [validationError, setValidationError] = useState(true);
   const [dashBoardData, setDashBoardData] = useState({});
   const [dashBoardOptions, setDashBoardOptions] = useState({});
   const [tableSchema, setTableSchema] = useState();
-  const [tableSchemaColumns, setTableSchemaColumns] = useState();  
+  const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
-  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
@@ -41,7 +42,14 @@ const ReporterDataSet = () => {
 
   useEffect(()=>{
     console.log("ReporterDataSet useEffect");
-    setCustomButtons([      
+    setCustomButtons([
+      {
+        label: resources.messages["import"],
+        icon: "0",
+        group: "left",
+        disabled: false,
+        clickHandler: () => setVisibleHandler(setImportDialogVisible, true)
+      },
       {
         label: resources.messages["export"],
         icon: "1",
@@ -67,9 +75,9 @@ const ReporterDataSet = () => {
         label: resources.messages["validate"],
         icon: "10",
         group: "right",
-        disabled: false,
+        disabled: true,
         //!validationError,
-        clickHandler: () => setVisibleHandler(setValidateDialogVisible, true),
+        clickHandler: null,
         ownButtonClasses:null,
         iconClasses:null
       },
@@ -146,12 +154,12 @@ const ReporterDataSet = () => {
 
     //Fetch data (JSON)
     //fetchDataHandler(jsonDataSchema);
-    const dataPromise = HTTPRequesterAPI.get(
+     const dataPromise = HTTPRequesterAPI.get(
       {
         url:'/dataschema/dataflow/1',
         queryString: {}
       }
-    );
+    ); 
 
     dataPromise.then(response =>{
       console.log(response.data);
@@ -159,6 +167,7 @@ const ReporterDataSet = () => {
         return {
             id: item["idTableSchema"],
             name : item["nameTableSchema"]
+           
             }
       })); 
       setTableSchemaColumns(response.data.tableSchemas.map(table =>{
@@ -174,26 +183,29 @@ const ReporterDataSet = () => {
     .catch(error => {
       console.log(error);
       return error;
-    });    
+    });   
 
-    // setTableSchema(jsonDataSchema.tableSchemas.map((item,i)=>{
-    //   return {
-    //       id: item["idTableSchema"],
-    //       name : item["nameTableSchema"]
-    //       }
-    // }));
+    
 
-    // setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
-    //   return table.recordSchema.fieldSchema.map((item,i)=>{
-    //     return {
-    //         table: table["nameTableSchema"], 
-    //         field: item["id"], 
-    //         header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
-    //       }
-    //   });        
-    // }));
-
-
+/* 
+    setTableSchema(jsonDataSchema.tableSchemas.map(item=>{
+      return {
+        id:item["idTableSchema"],
+        name:item["nameTableSchema"],
+        
+      }
+    })); 
+    
+    setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
+      return table.recordSchema.fieldSchema.map((item,i)=>{
+        return {
+            table: table["nameTableSchema"], 
+            field: item["id"], 
+            header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+          }
+      });        
+    }));*/
+    
   }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
@@ -205,28 +217,15 @@ const ReporterDataSet = () => {
   }
 
   const onConfirmDeleteHandler = () =>{
-    let idDataSet = 1;
+    console.log("Data deleted!");
     setDeleteDialogVisible(false);
-    //TODO: API Call delete
+    /*TODO: API Call delete
     HTTPRequesterAPI.delete(
       {
-        url:'/dataset/'+ idDataSet + '/deleteImportData',
+        url:'/dataset/deleteImportData/1',
         queryString: {}
       }
-    );
-    console.log("Data deleted!");
-  }
-
-  const onConfirmValidateHandler = () =>{
-    let idDataSet = 1;
-    setValidateDialogVisible(false);
-    HTTPRequesterAPI.get(
-      {
-        url:'/validation/dataset/'+ idDataSet,
-        queryString: {}
-      }
-    );
-    console.log("/validation/dataset/" + idDataSet);
+    );*/
   }
 
   const getPercentage = (tableValues) =>{
@@ -245,7 +244,14 @@ const ReporterDataSet = () => {
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner*/}
-        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>                        
+        <TabsSchema tables={tableSchema} tableSchemaColumns={tableSchemaColumns} onRefresh={onRefreshClickHandler}/>
+          <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
+                  className={styles.Dialog} dismissableMask={false} onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
+              <CustomFileUpload mode="advanced" name="file" url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
+                                onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
+                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
+                                fileLimit={1} className={styles.FileUpload}  /> 
+          </Dialog>                
         <Dialog visible={dashDialogVisible} onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
                 header={resources.messages["titleDashboard"]} maximizable dismissableMask={true} style={{width:'80%'}}>
           <h1>US-STP6-DSM-VIS-01-List of Visualizations (next sprint)</h1>
@@ -260,15 +266,8 @@ const ReporterDataSet = () => {
           </Card>
         </Dialog>
         <Suspense fallback={<div>Loading...</div>}>
-          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
-                        visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} 
-                        labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
+          <ConfirmDialog onConfirm={onConfirmDeleteHandler} onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} visible={deleteDialogVisible} header={resources.messages["deleteDatasetHeader"]} maximizable={false} labelConfirm={resources.messages["yes"]}  labelCancel={resources.messages["no"]}>
             {resources.messages["deleteDatasetConfirm"]}
-          </ConfirmDialog>
-          <ConfirmDialog  onConfirm={onConfirmValidateHandler} onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
-                          visible={validateDialogVisible} header={resources.messages["validateDataSet"]} maximizable={false}
-                          labelConfirm={resources.messages["yes"]} labelCancel={resources.messages["no"]}>
-                          {resources.messages["validateDataSetConfirm"]}
           </ConfirmDialog>
         </Suspense>
       </div>

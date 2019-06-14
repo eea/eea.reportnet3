@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.transaction.Transactional;
@@ -25,7 +24,6 @@ import org.eea.validation.persistence.data.repository.ValidationDatasetRepositor
 import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
 import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
 import org.eea.validation.persistence.data.repository.ValidationTableRepository;
-import org.eea.validation.persistence.rules.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.kie.api.runtime.KieSession;
@@ -114,7 +112,7 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Run record validations.
    *
-   * @param recordsPaged the records paged
+   * @param records the records
    * @return the list
    */
   @Override
@@ -144,34 +142,20 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Load rules knowledge base.
    *
-   * @param DataflowId the dataflow id
+   * @param dataflowId the dataflow id
    * @return the kie session
-   * @throws NoSuchFieldException the no such field exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
-   * @throws IllegalAccessException the illegal access exception
    */
-  public KieSession loadRulesKnowledgeBase(Long DataflowId) throws NoSuchFieldException,
-      SecurityException, IllegalArgumentException, IllegalAccessException {
+  public KieSession loadRulesKnowledgeBase(Long dataflowId) {
     try {
-      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
+      kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       LOG_ERROR.error(e.getMessage(), e);
       return null;
     }
 
     return kieSession;
-  }
-
-  /**
-   * Gets the rules.
-   *
-   * @param idDataflow the id dataflow
-   * @return the rules
-   */
-  @Override
-  public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
-    return null;
   }
 
   /**
@@ -184,18 +168,11 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    try {
-      loadRulesKnowledgeBase(dataflowId);
-    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-        | IllegalAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-    }
+    loadRulesKnowledgeBase(dataflowId);
     // We delete all validation to delete before pass the new validations
 
     // Dataset and TablesValue validations
     // read Dataset Data
-    long startTime = System.currentTimeMillis();
-    LOG.info(String.valueOf(startTime));
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
 
@@ -256,16 +233,18 @@ public class ValidationServiceImpl implements ValidationService {
             }
           });
         }
-      })
-      // )
-      ;
+      });
 
     }
-    long finishTime = System.currentTimeMillis();
-    LOG.info("Ha tardado: " + (finishTime - startTime));
   }
 
 
+  /**
+   * Sanitize records.
+   *
+   * @param records the records
+   * @return the list
+   */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<Long> processedRecords = new HashSet<>();
@@ -291,13 +270,5 @@ public class ValidationServiceImpl implements ValidationService {
   public void deleteAllValidation(@DatasetId Long datasetId) {
     datasetRepository.deleteValidationTable();
   }
-
-  /**
-   * Save rule.
-   *
-   * @param dataFlowRules the data flow rules
-   */
-  @Override
-  public void saveRule(DataFlowRule dataFlowRules) {}
 
 }
