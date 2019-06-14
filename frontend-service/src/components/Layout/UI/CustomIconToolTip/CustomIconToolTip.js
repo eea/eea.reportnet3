@@ -34,11 +34,11 @@ export default function CustomIconToolTip(props) {
 
   return (
     <span>
-      <span data-tip={props.message} style={{float:"right"}}>
+      <a  data-tip={props.message} data-iscapture="true" style={{float:"right", whiteSpace: "pre-line"}}>
         <i className={validationIcon} style={{ color: iconColor, float: "right" }} />
-      </span>
+      </a>
 
-      <ReactTooltip place='right' type='dark' effect='solid' />
+      <ReactTooltip place='right' type='dark' effect='solid' multiline='true'/>
     </span>
   );
 }

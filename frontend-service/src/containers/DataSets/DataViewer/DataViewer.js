@@ -173,7 +173,7 @@ const DataViewer = (props) => {
       let message = "";
       validations.forEach(validation =>
         validation.message
-          ? (message += validation.message + ' \n')
+          ? (message += validation.message + '<br/>')
           : ""
       );
 
@@ -217,7 +217,7 @@ const DataViewer = (props) => {
       );
       let message = [];
       validations.forEach(validation =>
-        validation.message ? (message += validation.message +"\n") : ""
+        validation.message ? (message += validation.message +"<br/>") : ""
       );
       let levelError = "";
       let lvlFlag = 0;
