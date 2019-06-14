@@ -162,7 +162,7 @@ pipeline {
                 script {
                     echo 'IndexSearch Service'
                     def app
-                    app = docker.build("k8s-swi001:5000/indexsearch-service:3.0", "--build-arg JAR_FILE=indexsearch-service/target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                    app = docker.build("k8s-swi001:5000/indexsearch-service:3.0", "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
                     app.push()                    
                 }
                 script {
