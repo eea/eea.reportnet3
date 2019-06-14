@@ -97,7 +97,7 @@
               <goal>npm</goal>
             </goals>
             <configuration>
-              <arguments>run publish</arguments>
+              <arguments>publish</arguments>
             </configuration>
           </execution>
         </executions>
