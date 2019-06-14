@@ -16,23 +16,41 @@ pipeline {
             }
         }
         stage('Compile') {
-            steps {
-                sh '''
-                    mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
-                '''                                
-            }
-            post {
-                failure {
-                    input(message: 'Do you like Java?', ok: 'Yes', 
-                        parameters: [booleanParam(defaultValue: true, 
-                        description: 'If you like Java, just push the button',name: 'Yes?')])
-                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+            parallel {
+                stage('Compile JAVA') {
+                    steps {
+                        sh '''
+                            mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
+                        '''                                
+                    }
+                    post {
+                        failure {
+                            input(message: 'Do you like Java?', ok: 'Yes', 
+                                parameters: [booleanParam(defaultValue: true, 
+                                description: 'If you like Java, just push the button',name: 'Yes?')])
+                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - JAVA Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                        }
+                        always {
+                            junit '**/target/surefire-reports/*.xml'
+                        }
+                    }
                 }
-                always {
-                    junit '**/target/surefire-reports/*.xml'
+                stage('Compile NPM') {
+                    steps {
+                        sh '''
+                            npm install frontend-service/
+                        '''                                
+                    }
+                    post {
+                        failure {
+                            input(message: 'Do you like Java?', ok: 'Yes', 
+                                parameters: [booleanParam(defaultValue: true, 
+                                description: 'If you like Java, just push the button',name: 'Yes?')])
+                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                        }                        
+                    }
                 }
             }
-            
         }
         stage('Static Code Analysis') {
             steps {
