@@ -5,12 +5,12 @@ import {Dialog} from 'primereact/dialog';
 
 import Title from '../../Layout/Title/Title';
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
-import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
+//import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
 
-//import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
+import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
 
 import config from '../../../conf/web.config.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
@@ -31,10 +31,13 @@ const ReporterDataSet = () => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
+  const [activeIndex, setActiveIndex] = useState();
+
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
   const ValidationDataViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
   const Dashboard = React.lazy(()=> import('../../../containers/DashBoard/DashBoard'));
+  const TabsSchema = React.lazy(() => import('../../Layout/UI/TabsSchema/TabsSchema'));
 
   console.log('ReporterDataSet Render...');   
 
@@ -118,28 +121,45 @@ const ReporterDataSet = () => {
       }
     );
 
-    dataPromise.then(response =>{
-      setTableSchema(response.data.tableSchemas.map((item,i)=>{
-        return {
-            id: item["idTableSchema"],
-            name : item["nameTableSchema"]
-            }
-      })); 
+    // dataPromise.then(response =>{
+    //   setTableSchema(response.data.tableSchemas.map((item,i)=>{
+    //     return {
+    //         id: item["idTableSchema"],
+    //         name : item["nameTableSchema"]
+    //         }
+    //   })); 
       
-      setTableSchemaColumns(response.data.tableSchemas.map(table =>{
-        return table.recordSchema.fieldSchema.map(item=>{
-          return {
-              table: table["nameTableSchema"], 
-              field: item["id"], 
-              header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
-            }
-        });        
-      }));
-    })
-    .catch(error => {
-      console.log(error);
-      return error;
-    });    
+    //   setTableSchemaColumns(response.data.tableSchemas.map(table =>{
+    //     return table.recordSchema.fieldSchema.map(item=>{
+    //       return {
+    //           table: table["nameTableSchema"], 
+    //           field: item["id"], 
+    //           header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+    //         }
+    //     });        
+    //   }));
+    // })
+    // .catch(error => {
+    //   console.log(error);
+    //   return error;
+    // });    
+
+    setTableSchema(jsonDataSchema.tableSchemas.map((item,i)=>{
+      return {
+          id: item["idTableSchema"],
+          name : item["nameTableSchema"]
+          }
+    }));
+
+    setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
+      return table.recordSchema.fieldSchema.map((item,i)=>{
+        return {
+            table: table["nameTableSchema"], 
+            field: item["id"], 
+            header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+          }
+      });        
+    }));
   }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
@@ -171,10 +191,13 @@ const ReporterDataSet = () => {
           <ButtonsBar buttons={customButtons} />
         </div>
         {/*TODO: Loading spinner --> En el Suspense*/}
+        <Suspense fallback={<div>Loading TabsSchema...</div>}>
         <TabsSchema tables={tableSchema} 
                     tableSchemaColumns={tableSchemaColumns} 
                     onRefresh={onRefreshClickHandler} 
-                    urlViewer={`${config.dataviewerAPI.url}1`}/>
+                    urlViewer={`${config.dataviewerAPI.url}1`}
+                    activeIndex={activeIndex}/>
+        </Suspense>
         <Dialog header={resources.messages["uploadDataset"]} 
                 visible={importDialogVisible}
                 className={styles.Dialog} 
@@ -200,7 +223,11 @@ const ReporterDataSet = () => {
                 </Suspense>
         </Dialog>   
             {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
-        <ReporterDataSetContext.Provider value={{validationsVisibleHandler:()=>setVisibleHandler(setValidationsVisible, false)}}>     
+        <ReporterDataSetContext.Provider value={
+                    {
+                      validationsVisibleHandler:()=>{setVisibleHandler(setValidationsVisible, false)},
+                      setTabHandler: (idTableSchema)=>{ setActiveIndex(idTableSchema) }
+                    }}>     
           <Dialog visible={validationsVisible} 
                   onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
                   header={resources.messages["titleValidations"]} 
