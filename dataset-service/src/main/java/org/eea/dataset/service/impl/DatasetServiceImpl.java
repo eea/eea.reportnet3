@@ -25,7 +25,6 @@ import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
-import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
@@ -106,10 +105,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DataSetTablesMapper dataSetTablesMapper;
-
-  /** The table value mapper. */
-  @Autowired
-  TableValueMapper tableValueMapper;
 
   /**
    * The record repository.
