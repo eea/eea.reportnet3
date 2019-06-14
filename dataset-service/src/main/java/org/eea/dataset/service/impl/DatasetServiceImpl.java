@@ -648,7 +648,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> records = new ArrayList<>();
 
     // TABLE
-    if (type != null && TypeEntityEnum.TABLE == type && id != null) {
+    if (TypeEntityEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(table);
       records = table.getRecords();
@@ -658,14 +658,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // RECORD
-    if (type != null && TypeEntityEnum.RECORD == type && id != null) {
+    if (TypeEntityEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(record.getTableValue());
       records = record.getTableValue().getRecords();
     }
 
     // FIELD
-    if (type != null && TypeEntityEnum.FIELD == type && id != null) {
+    if (TypeEntityEnum.FIELD == type) {
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
         tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());

@@ -18,12 +18,12 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @return the list
    */
-  @Query("SELECT rv FROM RecordValidation rv INNER JOIN FETCH rv.validation INNER JOIN FETCH rv.recordValue record WHERE record.id in (:recordIds)")
+  @Query("SELECT rv FROM RecordValidation rv INNER JOIN FETCH rv.validation INNER JOIN FETCH rv.recordValue record "
+      + "WHERE record.id in (:recordIds)")
   List<RecordValidation> findByRecordValue_IdIn(@Param("recordIds") List<Long> recordIds);
-  
- 
-  
-  
+
+
+
   /**
    * Find record validations by id dataset and id table.
    *
@@ -34,9 +34,9 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
       + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.id=?2")
   List<RecordValidation> findRecordValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
- 
-  
-  
+
+
+
   /**
    * Find record validations by id dataset and id table schema.
    *
@@ -46,9 +46,10 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    */
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
       + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.idTableSchema=?2")
-  List<RecordValidation> findRecordValidationsByIdDatasetAndIdTableSchema(Long datasetId, String idTableSchema);
-  
-  
+  List<RecordValidation> findRecordValidationsByIdDatasetAndIdTableSchema(Long datasetId,
+      String idTableSchema);
+
+
   /**
    * Find record validations by id dataset.
    *
@@ -58,5 +59,5 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
       + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1")
   List<RecordValidation> findRecordValidationsByIdDataset(Long datasetId);
- 
+
 }
