@@ -1,6 +1,7 @@
 package org.eea.validation.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.service.impl.ValidationServiceImpl;
 import org.eea.validation.util.KieBaseManager;
 import org.junit.Before;
@@ -34,6 +36,8 @@ public class ValidationServiceTest {
   private KieSession kieSession;
   @Mock
   private KieBaseManager kieBaseManager;
+  @Mock
+  private DatasetRepository datasetRepository;
 
   @Before
   public void initMocks() {
@@ -109,5 +113,11 @@ public class ValidationServiceTest {
     KieBase kiebase = kieHelper.build();
     when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
     validationServiceImpl.loadRulesKnowledgeBase(1L);
+  }
+
+  @Test
+  public void testDeleteAllValidation() {
+    doNothing().when(datasetRepository);
+    validationServiceImpl.deleteAllValidation(1L);
   }
 }
