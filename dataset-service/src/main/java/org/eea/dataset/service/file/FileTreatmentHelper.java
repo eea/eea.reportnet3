@@ -26,6 +26,7 @@ public class FileTreatmentHelper extends Helper {
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the input stream
+   * @param idTableSchema the id table schema
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws InterruptedException the interrupted exception
