@@ -25,9 +25,6 @@ pipeline {
                     }
                     post {
                         failure {
-                            input(message: 'Do you like Java?', ok: 'Yes', 
-                                parameters: [booleanParam(defaultValue: true, 
-                                description: 'If you like Java, just push the button',name: 'Yes?')])
                             slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - JAVA Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
                         }
                         always {
@@ -43,9 +40,6 @@ pipeline {
                     }
                     post {
                         failure {
-                            input(message: 'Do you like Java?', ok: 'Yes', 
-                                parameters: [booleanParam(defaultValue: true, 
-                                description: 'If you like Java, just push the button',name: 'Yes?')])
                             slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
                         }                        
                     }
@@ -106,10 +100,21 @@ pipeline {
             when {
                 branch 'develop' 
             }
-            steps {
-                sh '''
-                    mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
-                '''
+            parallel {
+                stage('Install in JAVA repository') {
+                    steps {
+                        sh '''
+                            mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
+                        '''
+                    }
+                }
+                stage('Install in NPM repository') {
+                    steps {
+                        sh '''
+                            npm publish frontend-service/
+                        '''
+                    }
+                }
             }
         }
 
