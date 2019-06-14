@@ -34,7 +34,45 @@ pipeline {
                     // requires SonarQube Scanner for Maven 3.2+
                     sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
                 }
-                slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - check quality here https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
+            }
+        }
+
+        stage("Quality Gate"){
+            steps {
+                input(message: 'Add pause for investigating, continue?', ok: 'Yes', 
+                        parameters: [booleanParam(defaultValue: true, 
+                        description: 'Go to the container and check!',name: 'Yes?')])
+                timeout(time: 2, unit: 'MINUTES') {
+                    retry(3) {
+                        script {
+                            def props = readProperties  file: 'target/sonar/report-task.txt'
+                            echo "properties=${props}"
+                            def sonarServerUrl=props['serverUrl']
+                            def ceTaskUrl= props['ceTaskUrl']
+                            def ceTask
+                            timeout(time: 1, unit: 'MINUTES') {
+                                waitUntil {
+                                    def response = httpRequest ceTaskUrl
+                                    ceTask = readJSON text: response.content
+                                    echo ceTask.toString()
+                                    return "SUCCESS".equals(ceTask["task"]["status"])
+                                }
+                            }
+                            def response2 = httpRequest url : sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask["task"]["analysisId"], authentication: 'jenkins_scanner'
+                            def qualitygate =  readJSON text: response2.content
+                            echo qualitygate.toString()
+                            if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
+                                error  "Quality Gate failure"
+                            }
+                        }
+                    }
+                }
+                
+            }
+            post {
+                failure {
+                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate not mer https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                   }
             }
         }
         
