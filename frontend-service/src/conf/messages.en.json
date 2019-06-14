@@ -28,10 +28,7 @@
         "deleteDatasetHeader": "Delete dataset",
         "yes": "Yes",
         "no": "No",
-        "visibility": "Visibility",
-        "filter": "Filter",
-        "groupBy": "Group by",
-        "sort": "Sort",
-        "refresh": "Refresh"
+        "validateDataSet": "Validate dataset",
+        "validateDataSetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?"
     }
 }
