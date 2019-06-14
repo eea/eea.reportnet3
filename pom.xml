@@ -247,6 +247,9 @@
             <exclude>
               org.eea.interfaces.*
             </exclude>
+             <exclude>
+              org.eea.interfaces.*.mapper
+            </exclude>
           </excludes>
         </configuration>
         <executions>
