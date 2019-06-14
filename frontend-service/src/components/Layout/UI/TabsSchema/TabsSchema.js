@@ -17,7 +17,8 @@ const TabsSchema = (props) => {
                     <div className={styles.TabsSchema}>
                         <DataViewer key={table.id} id={table.id} name={table.name} customButtons={(props.customButtons)?props.customButtons:null} 
                                     tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}
-                                    urlViewer={props.urlViewer}/>
+                                    urlViewer={props.urlViewer}
+                                    linkedErrorData={props.linkedErrorData}/>
                     </div>
                 </TabPanel>
             );

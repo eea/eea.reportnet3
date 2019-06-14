@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, Suspense, useContext } from 'react';
-//import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 // import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -12,6 +11,8 @@ import ReporterDataSetContext from '../../../components/Context/ReporterDataSetC
 
 import styles from './ValidationViewer.module.css';
 import ResourcesContext from '../../../components/Context/ResourcesContext';
+
+import PropTypes from 'prop-types';
 
 const ValidationViewer = (props) => {
   const resources = useContext(ResourcesContext);
@@ -64,12 +65,10 @@ const ValidationViewer = (props) => {
           icon: "11",
           group: "right",
           disabled: false,
-          clickHandler: props.onRefresh
+          clickHandler: null
       }
   ];
 
-    //TODO: Render se está ejecutando dos veces. Mirar por qué.
-    // console.log("ValidationViewer Render..." + props.name);
     // useEffect(() =>{            
     //     console.log("Setting column options...");      
     //     let colOpt = [];
@@ -251,7 +250,7 @@ const ValidationViewer = (props) => {
         //http://localhost:8030/dataset/loadTableFromAnyObject/1629858?datasetId=1&pageSize=20&type=RECORD
         contextReporterDataSet.validationsVisibleHandler();
         contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-        contextReporterDataSet.dataShowValidations = filterLinkedDataResponse(jsonLinkData.page.table.records);
+        contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(jsonLinkData.page.table.records));
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
@@ -275,5 +274,10 @@ const ValidationViewer = (props) => {
         </div>
     );
 }
+
+ValidationViewer.propTypes = {
+  id: PropTypes.string,
+  customButtons: PropTypes.array
+};
 
 export default React.memo(ValidationViewer);

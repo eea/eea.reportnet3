@@ -9,6 +9,7 @@ import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
 //import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
 // import {Lightbox} from 'primereact/lightbox';
+import {Loader} from '../../Layout/UI/Loader/Loader';
 
 import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
 
@@ -18,6 +19,7 @@ import styles from './ReporterDataSet.module.css';
 import ResourcesContext from '../../Context/ResourcesContext';
 import ReporterDataSetContext from '../../Context/ReporterDataSetContext';
 
+
 const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
   const [customButtons, setCustomButtons] = useState([]);
@@ -25,6 +27,7 @@ const ReporterDataSet = () => {
   const [validationError] = useState(true);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [linkedErrorData, setLinkedErrorData] = useState([]);
 
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
@@ -35,7 +38,7 @@ const ReporterDataSet = () => {
 
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
-  const ValidationDataViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
+  const ValidationViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
   const Dashboard = React.lazy(()=> import('../../../containers/DashBoard/DashBoard'));
   const TabsSchema = React.lazy(() => import('../../Layout/UI/TabsSchema/TabsSchema'));
 
@@ -166,10 +169,6 @@ const ReporterDataSet = () => {
     fnUseState(visible);
   }
   
-  const onRefreshClickHandler = () => {
-    console.log("Refresh Clicked!");
-  }
-
   const onConfirmDeleteHandler = () =>{
     console.log("Data deleted!");
     setDeleteDialogVisible(false);
@@ -190,13 +189,14 @@ const ReporterDataSet = () => {
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
-        {/*TODO: Loading spinner --> En el Suspense*/}
-        <Suspense fallback={<div>Loading TabsSchema...</div>}>
-        <TabsSchema tables={tableSchema} 
-                    tableSchemaColumns={tableSchemaColumns} 
-                    onRefresh={onRefreshClickHandler} 
-                    urlViewer={`${config.dataviewerAPI.url}1`}
-                    activeIndex={activeIndex}/>
+        {/*TODO: Loading spinner --> En el Suspense
+        ¿LinkedErrorData mejor pasar por props o tirar de context?*/}
+        <Suspense fallback={<Loader loadingMessage={resources.messages["loading"]}/>}>
+            <TabsSchema tables={tableSchema} 
+                        tableSchemaColumns={tableSchemaColumns} 
+                        urlViewer={`${config.dataviewerAPI.url}1`}
+                        activeIndex={activeIndex}
+                        linkedErrorData={linkedErrorData}/>
         </Suspense>
         <Dialog header={resources.messages["uploadDataset"]} 
                 visible={importDialogVisible}
@@ -226,7 +226,8 @@ const ReporterDataSet = () => {
         <ReporterDataSetContext.Provider value={
                     {
                       validationsVisibleHandler:()=>{setVisibleHandler(setValidationsVisible, false)},
-                      setTabHandler: (idTableSchema)=>{ setActiveIndex(idTableSchema) }
+                      setTabHandler: (idTableSchema)=>{ setActiveIndex(idTableSchema) },
+                      setLinkedErrorDataHandler: (linkedData)=>{ setLinkedErrorData(linkedData) }
                     }}>     
           <Dialog visible={validationsVisible} 
                   onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
@@ -235,7 +236,7 @@ const ReporterDataSet = () => {
                   dismissableMask={true} 
                   style={{width:'80%'}}>
                     <Suspense fallback={<div>Loading...</div>}>
-                      <ValidationDataViewer/>
+                      <ValidationViewer/>
                     </Suspense>        
           </Dialog>
         </ReporterDataSetContext.Provider> 

@@ -1,17 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styles from './DataViewer.module.css';
 import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 // import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 
 import jsonData from '../../../assets/jsons/response_dataset_values2.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
+    const contextReporterDataSet = useContext(ReporterDataSetContext);
     const [totalRecords, setTotalRecords] = useState(0);
-    const [fetchedData, setFetchedData] = useState([]);
+    const [fetchedData, setFetchedData] = useState([]);    
+    const [linkedErrorData, setLinkedErrorData] = useState((props.linkedErrorData.length>0) ? props.linkedErrorData : []);
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
@@ -20,51 +23,13 @@ const DataViewer = (props) => {
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState(props.tableSchemaColumns); 
     const [header] = useState();
-    const [colOptions,setColOptions] = useState([{}]);    
-
-    //TODO: Textos + iconos + ver si deben estar aquí.
-    const customButtons = [
-      {
-          label: "Visibility",
-          icon: "6",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Filter",
-          icon: "7",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Group by",
-          icon: "8",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Sort",
-          icon: "9",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Refresh",
-          icon: "11",
-          group: "right",
-          disabled: false,
-          clickHandler: props.onRefresh
-      }
-  ];
+    const [colOptions,setColOptions] = useState([{}]);       
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     console.log("DataViewer Render..." + props.name);
     useEffect(() =>{            
         console.log("Setting column options...");      
+        console.log(contextReporterDataSet.dataShowValidations)
         let colOpt = [];
         for(let col of cols) {  
           colOpt.push({label: col.header, value: col});
@@ -112,6 +77,11 @@ const DataViewer = (props) => {
         fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
       }
   
+      const onRefreshClickHandler = () => {
+        setLinkedErrorData([]);
+        fetchDataHandler(null, sortOrder, firstRow, numRows);  
+      }
+
       // const onColumnToggleHandler = (event) =>{
       //   console.log("OnColumnToggle...");
       //   setCols(event.value);
@@ -137,12 +107,12 @@ const DataViewer = (props) => {
           queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
-        const dataPromise = HTTPRequesterAPI.get(
-          {
-            url: props.urlViewer,
-            queryString: queryString
-          }
-        );
+        // const dataPromise = HTTPRequesterAPI.get(
+        //   {
+        //     url: props.urlViewer,
+        //     queryString: queryString
+        //   }
+        // );
         filterDataResponse(jsonData.records);
         setTotalRecords(jsonData.totalRecords);
         setLoading(false);
@@ -178,6 +148,45 @@ const DataViewer = (props) => {
         setFetchedData(auxArrayFiltered);
       }
 
+      //TODO: Textos + iconos + ver si deben estar aquí.
+      const customButtons = [
+        {
+            label: "Visibility",
+            icon: "6",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Filter",
+            icon: "7",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Group by",
+            icon: "8",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Sort",
+            icon: "9",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Refresh",
+            icon: "11",
+            group: "right",
+            disabled: false,
+            clickHandler: onRefreshClickHandler
+        }
+      ];
+
       let totalCount = <span>Total: {totalRecords} rows</span>;
 
     return (
@@ -190,7 +199,7 @@ const DataViewer = (props) => {
                 <CustomButton label="Sort" icon="9" />   
             </Toolbar> */}
             <div className={styles.Table}>
-                <DataTable value={fetchedData} paginatorRight={totalCount}
+                <DataTable value={(linkedErrorData.length>0) ? linkedErrorData : fetchedData} paginatorRight={totalCount}
                        resizableColumns={true} reorderableColumns={true}
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 

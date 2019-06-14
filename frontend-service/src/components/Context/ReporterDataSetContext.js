@@ -3,7 +3,7 @@ import React from 'react';
 const ReporterDataSetContext = React.createContext({
         validationsVisibleHandler:null,
         setTabHandler: null,
-        dataShowValidations: [] 
+        setLinkedErrorDataHandler: null 
     });
 
 export default ReporterDataSetContext;

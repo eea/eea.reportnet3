@@ -10,5 +10,8 @@
     },
     "validationViewerAPI":{
         "url":"localhost"
+    },
+    "loadStatisticsAPI":{
+        "url":"/dataset/loadStatistics/"
     }
 }

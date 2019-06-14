@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Chart} from 'primereact/chart';
 
+import HTTPRequesterAPI from '../../services/HTTPRequester/HTTPRequester';
 import jsonErrorStatistics from '../../assets/jsons/error-statistics.json';
 
 const DashBoard = () =>{
@@ -9,7 +10,14 @@ const DashBoard = () =>{
     const [dashBoardTitle, setDashBoardTitle] = useState("");
 
 useEffect(() => {
-   //TODO HTTPAPI
+    //TODO HTTPAPI
+    // const dataPromise = HTTPRequesterAPI.get(
+    //   {
+    //     url: props.urlViewer,
+    //     queryString: queryString
+    //   }
+    // );
+    //http://localhost:8030/dataset/loadStatistics/1
 
     //Parse JSON to array statistic values
     const tabStatisticNames = [];
