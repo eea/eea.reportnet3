@@ -111,7 +111,7 @@ pipeline {
                 stage('Install in NPM repository') {
                     steps {
                         sh '''
-                            npm publish frontend-service/
+                            npm publish frontend-service/ --registry=https://nexus-oami.altia.es/content/repositories/npm-internal/
                         '''
                     }
                 }
