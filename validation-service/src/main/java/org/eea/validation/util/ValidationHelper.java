@@ -1,5 +1,6 @@
 package org.eea.validation.util;
 
+import org.eea.exception.EEAException;
 import org.eea.helper.Helper;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -21,9 +22,10 @@ public class ValidationHelper extends Helper {
    * @param kafkaSender the kafka sender
    * @param validationService the validation service
    * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
    */
   public static void executeValidation(final KafkaSender kafkaSender,
-      final ValidationService validationService, final Long datasetId) {
+      final ValidationService validationService, final Long datasetId) throws EEAException {
     validationService.deleteAllValidation(datasetId);
 
     validationService.validateDataSetData(datasetId);

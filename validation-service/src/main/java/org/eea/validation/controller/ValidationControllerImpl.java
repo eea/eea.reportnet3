@@ -1,6 +1,7 @@
 package org.eea.validation.controller;
 
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.service.ValidationService;
@@ -41,7 +42,17 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    ValidationHelper.executeValidation(kafkaSender, this.validationService, datasetId);
+    try {
+      ValidationHelper.executeValidation(kafkaSender, this.validationService, datasetId);
+    } catch (EEAException e) {
+      if (e.getMessage().equals(EEAErrorMessage.DATASET_INCORRECT_ID)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
 
   }
 
