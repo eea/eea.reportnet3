@@ -4,15 +4,13 @@ import React, { useState, useEffect, Suspense, useContext } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-import jsonData from '../../../assets/jsons/list-of-errors.json';
-import jsonLinkData from '../../../assets/jsons/response_getTableFromAnyObjectId.json';
 import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
-//import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 import styles from './ValidationViewer.module.css';
 import ResourcesContext from '../../../components/Context/ResourcesContext';
 
 import PropTypes from 'prop-types';
+import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester.js';
 
 const ValidationViewer = (props) => {
   const resources = useContext(ResourcesContext);
@@ -25,9 +23,9 @@ const ValidationViewer = (props) => {
     const [sortOrder, setSortOrder] = useState();   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
-    const [cols, setCols] = useState([]); 
+    //const [cols, setCols] = useState([]); 
     const [header] = useState();
-    const [colOptions, setColOptions] = useState([{}]);    
+    //const [colOptions, setColOptions] = useState([{}]);    
 
     const ButtonsBar = React.lazy(() => import('../../../components/Layout/UI/ButtonsBar/ButtonsBar'));
     //TODO: Refactorizar porque estamos duplicando lógica con DataViewer (Seguramente haya que cargarse el TabsSchema)
@@ -68,38 +66,8 @@ const ValidationViewer = (props) => {
           clickHandler: null
       }
   ];
-
-    // useEffect(() =>{            
-    //     console.log("Setting column options...");      
-    //     let colOpt = [];
-    //     for(let col of cols) {  
-    //       colOpt.push({label: col.header, value: col});
-    //     }              
-    //     setColOptions(colOpt);
-  
-    //     console.log('Fetching data...');
-    //     fetchDataHandler(null, sortOrder, firstRow, numRows);   
-        
-    //     console.log("Filtering data...");
-    //     const inmTableSchemaColumns = [...props.tableSchemaColumns];
-    //     console.log(inmTableSchemaColumns);
-    //     setCols(inmTableSchemaColumns);
-
-    //   }, []);
   
       useEffect(()=>{         
-        // let visibilityIcon = (<div className="TableDiv">
-        //     <span className="pi pi-eye" style={{zoom:2}}></span> 
-        //     <span className="my-multiselected-empty-token">Visibility</span>
-        //   </div>
-        // );
-        // let headerArr = <div className="TableDiv">
-        //     <i className="pi pi-eye"></i>
-        //     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
-        // </div>;
-        // setHeader(headerArr);
-
-        //jsonData.errors
         const headers = [{
               id: "nameTableSchema",
               header: resources.messages["origin"]
@@ -119,19 +87,21 @@ const ValidationViewer = (props) => {
         let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={`${col.header}`} />);
         columnsArr.push(<Column key="idObject" field="idObject" header="" className={styles.VisibleHeader} />)
         columnsArr.push(<Column key="idTableSchema" field="idTableSchema" header="" className={styles.VisibleHeader} />)
-        setColumns(columnsArr); 
-  
-      }, [cols, colOptions]);
+        setColumns(columnsArr);   
+        
+        fetchDataHandler(null, sortOrder, firstRow, numRows);      
+
+      }, []);
       
       const onChangePageHandler = (event)=>{     
-        console.log('Refetching data...');                
+        console.log('Refetching data ValidationViewer...');                       
         setNumRows(event.rows);
         setFirstRow(event.first);        
         fetchDataHandler(sortField, sortOrder, event.first, event.rows); 
       }
   
       const onSortHandler = (event)=>{      
-        console.log("Sorting...");
+        console.log("Sorting ValidationViewer...");
         setSortOrder(event.sortOrder);  
         setSortField(event.sortField);    
         fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
@@ -143,16 +113,14 @@ const ValidationViewer = (props) => {
       //   setColOptions(colOptions);
       // }
   
-      useEffect(()=>{
-        setTotalRecords(jsonData.totalErrors);
-        filterDataResponse(jsonData);
-      },[]);
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
 
+        //http://localhost:8030/dataset/listValidations/1?asc=true&fields=typeEntity&pageNum=0&pageSize=20
+        
         let queryString = {
-          idTableSchema: props.id,
+          idDataSet: props.idDataSet,
           pageNum: Math.floor(fRow / nRows),
           pageSize: nRows
         }
@@ -160,63 +128,32 @@ const ValidationViewer = (props) => {
         if (sField !== undefined && sField !== null) {
           queryString.fields = sField;
           queryString.asc = sOrder === -1 ? 0 : 1;
-        }
+        }       
 
-        //jsonData
-
-        // const dataPromise = HTTPRequesterAPI.get(
-        //   {
-        //     url: props.urlViewer,
-        //     queryString: queryString
-        //   }
-        // );
-
-        // dataPromise.then(response =>{
-        //   console.log(response.data);
-        //   filterDataResponse(response.data.records);
-        //   if(response.data.totalRecords!==totalRecords){
-        //     setTotalRecords(response.data.totalRecords);
-        //   }
-        
-        //   setLoading(false);
-        // })
-        // .catch(error => {
-        //   console.log(error);
-        //   return error;
-        // });
-
-        
+        const dataPromise = HTTPRequester.get(
+          {
+            url:'/jsons/list-of-errors.json',
+            queryString: queryString
+          }
+        );
+        dataPromise
+        .then(res => {
+          setTotalRecords(res.data.totalErrors);
+          filterDataResponse(res.data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.log(error);
+          return error;
+        });      
 
       }
 
-      const filterDataResponse = (data) =>{        
-        
-        //const values = [...data.errors];
-
-        console.log(data.nameDataSetSchema);
-
-        // const values = data.errors.map(e => {
-        //   return { nameTableSchema: e.nameTableSchema, levelError: e.levelError, message: e.message, typeEntity: e.typeEntity, idObject: e.idObject  }
-        // });
-
-        //TODO: Refactorizar
-        // const dataFiltered = data.map(record => record.fields.map(f =>{
-        //   return {[f.idFieldSchema]: f.value}
-        // }));
-        // console.log(data)
-        // let auxFiltered = {}
-        // let auxArrayFiltered = [];
-        // dataFiltered.forEach(dat => {
-        //   dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
-        //   auxArrayFiltered.push(auxFiltered);
-        //   auxFiltered={};
-        // });
+      const filterDataResponse = (data) =>{                
         setFetchedData(data.errors);
       }
 
       const filterLinkedDataResponse = (data) =>{  
-        console.log("FILTERLINKED")      
-        console.log(data);
         const dataFiltered = data.map(record => record.fields.map(f =>{
           return {[f.idFieldSchema]: f.value}
         }));
@@ -227,30 +164,38 @@ const ValidationViewer = (props) => {
           auxArrayFiltered.push(auxFiltered);
           auxFiltered={};
         });
-        //setFetchedData(auxArrayFiltered);
-        console.log(auxArrayFiltered)
         return auxArrayFiltered;
       }
 
-      const onRowSelectHandler = (event) =>{
+      const onRowSelectHandler = (event) =>{      
+        
 
-        // let queryString = {
-        //   idTableSchema: props.id,
-        //   pageNum: Math.floor(fRow / nRows),
-        //   pageSize: nRows
-        // }
+        //http://localhost:8030/dataset/loadTableFromAnyObject/901?datasetId=1&pageSize=2&type=FIELD
 
-        // const dataPromise = HTTPRequesterAPI.get(
-        //   {
-        //     url: props.urlViewer,
-        //     queryString: queryString
-        //   }
-        // );
-        console.log(event.data);
-        //http://localhost:8030/dataset/loadTableFromAnyObject/1629858?datasetId=1&pageSize=20&type=RECORD
-        contextReporterDataSet.validationsVisibleHandler();
-        contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-        contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(jsonLinkData.page.table.records));
+        //`${config.validationViewerAPI.url}event.data.idObject`
+        let queryString = {
+          datasetId: props.idDataSet,
+          pageSize: numRows,
+          type: event.typeEntity
+        }
+
+        const dataPromise = HTTPRequester.get(
+          {
+            url: '/jsons/response_getTableFromAnyObjectId.json',
+            queryString: queryString
+          }
+        );
+
+        dataPromise
+        .then(res => {
+          contextReporterDataSet.validationsVisibleHandler();
+          contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+          contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(res.data.page.table.records));
+        })
+        .catch(error => {
+          console.log(error);
+          return error;
+        });         
       }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;

@@ -11,8 +11,6 @@ import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUploa
 // import {Lightbox} from 'primereact/lightbox';
 import {Loader} from '../../Layout/UI/Loader/Loader';
 
-import jsonDataSchema from '../../../assets/jsons/datosDataSchema2.json';
-
 import config from '../../../conf/web.config.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
@@ -117,58 +115,43 @@ const ReporterDataSet = () => {
 
     //Fetch DataSchema(JSON)
     //fetchDataHandler(jsonDataSchema);
+    //`${config.dataSchemaAPI.url}1`
     const dataPromise = HTTPRequesterAPI.get(
       {
-        url:'/dataschema/dataflow/1',
+        url:'/jsons/datosDataSchema2.json',
         queryString: {}
       }
     );
 
-    // dataPromise.then(response =>{
-    //   setTableSchema(response.data.tableSchemas.map((item,i)=>{
-    //     return {
-    //         id: item["idTableSchema"],
-    //         name : item["nameTableSchema"]
-    //         }
-    //   })); 
-      
-    //   setTableSchemaColumns(response.data.tableSchemas.map(table =>{
-    //     return table.recordSchema.fieldSchema.map(item=>{
-    //       return {
-    //           table: table["nameTableSchema"], 
-    //           field: item["id"], 
-    //           header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
-    //         }
-    //     });        
-    //   }));
-    // })
-    // .catch(error => {
-    //   console.log(error);
-    //   return error;
-    // });    
-
-    setTableSchema(jsonDataSchema.tableSchemas.map((item,i)=>{
-      return {
-          id: item["idTableSchema"],
-          name : item["nameTableSchema"]
-          }
-    }));
-
-    setTableSchemaColumns(jsonDataSchema.tableSchemas.map(table =>{
-      return table.recordSchema.fieldSchema.map((item,i)=>{
+    dataPromise.then(response =>{
+      setTableSchema(response.data.tableSchemas.map((item,i)=>{
         return {
-            table: table["nameTableSchema"], 
-            field: item["id"], 
-            header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
-          }
-      });        
-    }));
+            id: item["idTableSchema"],
+            name : item["nameTableSchema"]
+            }
+      })); 
+      
+      setTableSchemaColumns(response.data.tableSchemas.map(table =>{
+        return table.recordSchema.fieldSchema.map(item=>{
+          return {
+              table: table["nameTableSchema"], 
+              field: item["id"], 
+              header: `${item["name"].charAt(0).toUpperCase()}${item["name"].slice(1)}`
+            }
+        });        
+      }));
+    })
+    .catch(error => {
+      console.log(error);
+      return error;
+    });    
+    
   }, []);
 
   const setVisibleHandler = (fnUseState, visible) =>{
     fnUseState(visible);
   }
-  
+
   const onConfirmDeleteHandler = () =>{
     console.log("Data deleted!");
     setDeleteDialogVisible(false);
@@ -196,7 +179,9 @@ const ReporterDataSet = () => {
                         tableSchemaColumns={tableSchemaColumns} 
                         urlViewer={`${config.dataviewerAPI.url}1`}
                         activeIndex={activeIndex}
-                        linkedErrorData={linkedErrorData}/>
+                        linkedErrorData={linkedErrorData}
+                        onTabChangeHandler={(idTableSchema)=>{setActiveIndex(idTableSchema.index) }}
+                        />
         </Suspense>
         <Dialog header={resources.messages["uploadDataset"]} 
                 visible={importDialogVisible}
@@ -205,7 +190,7 @@ const ReporterDataSet = () => {
                 onHide={() => setVisibleHandler(setImportDialogVisible, false)} >
           <CustomFileUpload mode="advanced" 
                             name="file" 
-                            url="http://127.0.0.1:8030/dataset/1/loadDatasetData" 
+                            url={`${config.loadDatasetData.url}`}
                             onUpload={() => setVisibleHandler(setImportDialogVisible, false)} 
                             multiple={false} 
                             chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
@@ -236,7 +221,7 @@ const ReporterDataSet = () => {
                   dismissableMask={true} 
                   style={{width:'80%'}}>
                     <Suspense fallback={<div>Loading...</div>}>
-                      <ValidationViewer/>
+                      <ValidationViewer idDataSet = {1}/>
                     </Suspense>        
           </Dialog>
         </ReporterDataSetContext.Provider> 

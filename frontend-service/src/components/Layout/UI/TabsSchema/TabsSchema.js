@@ -25,11 +25,17 @@ const TabsSchema = (props) => {
         })
         : null;
     const filterActiveIndex = (idTableSchema) =>{
-       return (tabs) ? tabs.findIndex(t => t.key === idTableSchema) : 0;
+        //TODO: Refactorizar este apaño.
+        if (Number.isInteger(idTableSchema)){
+            return (tabs) ? props.activeIndex : 0;
+        }
+        else{
+            return (tabs) ?  tabs.findIndex(t => t.key === idTableSchema) : 0;
+        }
     }
 
     return (
-        <TabView activeIndex={(props.activeIndex) ? filterActiveIndex(props.activeIndex) : 0}>
+        <TabView activeIndex={(props.activeIndex) ? filterActiveIndex(props.activeIndex) : 0} onTabChange={props.onTabChangeHandler}>
             {tabs}
         </TabView>
     );

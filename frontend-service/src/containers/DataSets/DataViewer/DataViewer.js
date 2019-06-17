@@ -7,8 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 
-import jsonData from '../../../assets/jsons/response_dataset_values2.json';
-import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
+import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
     const contextReporterDataSet = useContext(ReporterDataSetContext);
@@ -29,7 +28,6 @@ const DataViewer = (props) => {
     console.log("DataViewer Render..." + props.name);
     useEffect(() =>{            
         console.log("Setting column options...");      
-        console.log(contextReporterDataSet.dataShowValidations)
         let colOpt = [];
         for(let col of cols) {  
           colOpt.push({label: col.header, value: col});
@@ -41,7 +39,6 @@ const DataViewer = (props) => {
         
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
-        console.log(inmTableSchemaColumns);
         setCols(inmTableSchemaColumns);
 
       }, []);
@@ -107,28 +104,25 @@ const DataViewer = (props) => {
           queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
-        // const dataPromise = HTTPRequesterAPI.get(
-        //   {
-        //     url: props.urlViewer,
-        //     queryString: queryString
-        //   }
-        // );
-        filterDataResponse(jsonData.records);
-        setTotalRecords(jsonData.totalRecords);
-        setLoading(false);
-        // dataPromise.then(response =>{
-        //   console.log(response.data);
-        //   filterDataResponse(response.data.records);          
-        //   if(response.data.totalRecords!==totalRecords){
-        //     setTotalRecords(response.data.totalRecords);
-        //   }
+        // props.urlViewer
+        const dataPromise = HTTPRequester.get(
+          {
+            url: '/jsons/response_dataset_values2.json',
+            queryString: queryString
+          }
+        );        
+        dataPromise.then(response =>{
+          filterDataResponse(response.data.records);          
+          if(response.data.totalRecords!==totalRecords){
+            setTotalRecords(response.data.totalRecords);
+          }
         
-        //   setLoading(false);
-        // })
-        // .catch(error => {
-        //   console.log(error);
-        //   return error;
-        // });
+          setLoading(false);
+        })
+        .catch(error => {
+          console.log(error);
+          return error;
+        });
       }
 
       const filterDataResponse = (data) =>{        
@@ -137,7 +131,6 @@ const DataViewer = (props) => {
         const dataFiltered = data.map(record => record.fields.map(f =>{
           return {[f.idFieldSchema]: f.value}
         }));
-        console.log(data)
         let auxFiltered = {}
         let auxArrayFiltered = [];
         dataFiltered.forEach(dat => {
@@ -212,4 +205,4 @@ const DataViewer = (props) => {
     );
 }
 
-export default DataViewer;
+export default React.memo(DataViewer);
