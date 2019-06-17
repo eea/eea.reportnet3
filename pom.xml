@@ -236,7 +236,7 @@
         <configuration>
           <excludes>
             <exclude>
-              org.eea.*.persistence.domain
+              org.eea.*.persistence.**
             </exclude>
             <exclude>
               org.eea.*.configuration
