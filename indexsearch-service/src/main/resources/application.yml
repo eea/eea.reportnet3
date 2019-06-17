@@ -2,7 +2,7 @@ server:
   port: 9030
 spring:
   application:
-    name: indexsearch-service
+    name: indexsearch
   cloud:
     consul:
       discovery:

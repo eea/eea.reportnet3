@@ -2,7 +2,7 @@ server:
   port: 9010
 spring:
   application:
-    name: communication-service
+    name: collaboration
   sleuth:
     sampler:
       probability: 1.0
