@@ -277,7 +277,8 @@ public class DatasetServiceImpl implements DatasetService {
   private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
       Long oldTableId) {
     if (oldTableId != null) {
-      listTableValues.stream().filter(tableValue -> tableValue.getIdTableSchema() == idTableSchema)
+      listTableValues.stream()
+          .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
           .forEach(tableValue -> tableValue.setId(oldTableId));
     }
   }
