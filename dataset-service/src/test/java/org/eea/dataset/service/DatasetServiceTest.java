@@ -386,7 +386,7 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesByIdEmpty() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any()))
+    when(recordRepository.findByTableValueIdTableSchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
     TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
     Assert.assertNotNull("result null", result);
@@ -395,13 +395,13 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(null);
+    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
   public void testGetTableValuesById() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(recordValues);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);

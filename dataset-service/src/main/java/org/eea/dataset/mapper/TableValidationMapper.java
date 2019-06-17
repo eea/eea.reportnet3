@@ -12,6 +12,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TableValidationMapper extends IMapper<TableValidation, TableValidationVO> {
 
+  /** The Constant TABLE_VALUE. */
+  String TABLE_VALUE = "tableValue";
 
   /**
    * Class to entity.
@@ -20,7 +22,7 @@ public interface TableValidationMapper extends IMapper<TableValidation, TableVal
    * @return the table validation
    */
   @Override
-  @Mapping(source = "tableValue", target = "tableValue", ignore = true)
+  @Mapping(source = TABLE_VALUE, target = TABLE_VALUE, ignore = true)
   TableValidation classToEntity(TableValidationVO vo);
 
   /**
@@ -30,7 +32,7 @@ public interface TableValidationMapper extends IMapper<TableValidation, TableVal
    * @return the t
    */
   @Override
-  @Mapping(source = "tableValue", target = "tableValue", ignore = true)
+  @Mapping(source = TABLE_VALUE, target = TABLE_VALUE, ignore = true)
   TableValidationVO entityToClass(TableValidation entity);
 
 }

@@ -512,7 +512,7 @@ public class DatasetServiceImpl implements DatasetService {
     Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
     List<RecordValue> records = null;
     try {
-      records = recordRepository.findByTableValue_IdTableSchema(idTableSchema);
+      records = recordRepository.findByTableValueIdTableSchema(idTableSchema);
     } finally {
       SortFieldsHelper.cleanSortingField();
     }
@@ -907,7 +907,7 @@ public class DatasetServiceImpl implements DatasetService {
   private Map<Long, List<RecordValidation>> getRecordValidations(List<Long> recordIds) {
 
     List<RecordValidation> recordValidations =
-        this.recordValidationRepository.findByRecordValue_IdIn(recordIds);
+        this.recordValidationRepository.findByRecordValueIdIn(recordIds);
 
     Map<Long, List<RecordValidation>> result = new HashMap<>();
 
