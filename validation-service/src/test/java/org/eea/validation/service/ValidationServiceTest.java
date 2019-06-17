@@ -41,6 +41,7 @@ public class ValidationServiceTest {
   @Mock
   private DatasetRepository datasetRepository;
 
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -50,8 +51,8 @@ public class ValidationServiceTest {
   public void testRunDatasetValidations() {
     DatasetValue dataset = new DatasetValue();
     dataset.setDatasetValidations(new ArrayList<>());
-    assertEquals("Good result", dataset.getDatasetValidations(),
-        validationServiceImpl.runDatasetValidations(dataset));
+    assertEquals("failed", dataset.getDatasetValidations(),
+        validationServiceImpl.runDatasetValidations(dataset, kieSession));
   }
 
 
@@ -62,51 +63,57 @@ public class ValidationServiceTest {
     tableVal.setTableValidations(new ArrayList<TableValidation>());
     tableValues.add(tableVal);
     tableValues.add(new TableValue());
-    assertEquals("Good result", tableVal.getTableValidations(),
-        validationServiceImpl.runTableValidations(tableValues));
+    assertEquals("failed", tableVal.getTableValidations(),
+        validationServiceImpl.runTableValidations(tableValues, kieSession));
 
-    assertEquals("Good result", new ArrayList<>(),
-        validationServiceImpl.runTableValidations(new ArrayList<>()));
+    assertEquals("failed", new ArrayList<>(),
+        validationServiceImpl.runTableValidations(new ArrayList<>(), kieSession));
   }
 
   @Test
   public void testRunRecordValidations() {
     List<RecordValue> records = new ArrayList<RecordValue>();
     records.add(new RecordValue());
-    assertEquals("Good result", records.get(0).getRecordValidations(),
-        validationServiceImpl.runRecordValidations(records));
-    assertEquals("Good result", new ArrayList<RecordValue>(),
-        validationServiceImpl.runRecordValidations(new ArrayList<RecordValue>()));
+    assertEquals("failed", records.get(0).getRecordValidations(),
+        validationServiceImpl.runRecordValidations(records, kieSession));
+    assertEquals("failed", new ArrayList<RecordValue>(),
+        validationServiceImpl.runRecordValidations(new ArrayList<RecordValue>(), kieSession));
   }
 
   @Test
   public void testRunFieldValidations() {
     List<FieldValue> fields = new ArrayList<FieldValue>();
     fields.add(new FieldValue());
-    validationServiceImpl.runFieldValidations(fields);
-    assertEquals("Good result", new ArrayList<FieldValidation>(),
-        validationServiceImpl.runFieldValidations(fields));
+    validationServiceImpl.runFieldValidations(fields, kieSession);
+    assertEquals("failed", new ArrayList<FieldValidation>(),
+        validationServiceImpl.runFieldValidations(fields, kieSession));
 
     fields.remove(0);
     FieldValue fieldValue = new FieldValue();
     fieldValue.setFieldValidations(new ArrayList<>());
     fields.add(fieldValue);
-    validationServiceImpl.runFieldValidations(fields);
-    assertEquals("Good result", new ArrayList<FieldValidation>(),
-        validationServiceImpl.runFieldValidations(fields));
+    validationServiceImpl.runFieldValidations(fields, kieSession);
+    assertEquals("failed", new ArrayList<FieldValidation>(),
+        validationServiceImpl.runFieldValidations(fields, kieSession));
     fields.remove(0);
     List<FieldValidation> fieldValidations = new ArrayList<>();
     fieldValidations.add(new FieldValidation());
     fieldValue.setFieldValidations(fieldValidations);
     fields.add(fieldValue);
-    assertEquals("Good result", fields.get(0).getFieldValidations(),
-        validationServiceImpl.runFieldValidations(fields));
+    assertEquals("failed", fields.get(0).getFieldValidations(),
+        validationServiceImpl.runFieldValidations(fields, kieSession));
   }
 
   @Test
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException {
     doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
     assertNull("failed", validationServiceImpl.loadRulesKnowledgeBase(1L));
+  }
+
+  @Test
+  public void testValidateDataSetData() {
+    validationServiceImpl.validateDataSetData(1L);
+
   }
 
   @Test

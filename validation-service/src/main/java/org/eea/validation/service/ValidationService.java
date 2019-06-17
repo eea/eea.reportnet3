@@ -11,6 +11,7 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.kie.api.runtime.KieSession;
 
 /**
  * The Class ValidationService.
@@ -31,7 +32,7 @@ public interface ValidationService {
    * @param dataset the dataset
    * @return the dataset value
    */
-  List<DatasetValidation> runDatasetValidations(DatasetValue dataset);
+  List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
   /**
    * Run table validations.
@@ -39,7 +40,7 @@ public interface ValidationService {
    * @param list the list
    * @return the list
    */
-  List<TableValidation> runTableValidations(List<TableValue> list);
+  List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
 
   /**
    * Run record validations.
@@ -47,7 +48,8 @@ public interface ValidationService {
    * @param recordsPaged the records paged
    * @return the list
    */
-  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged);
+  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
+      KieSession kieSession);
 
   /**
    * Run field validations.
@@ -55,7 +57,7 @@ public interface ValidationService {
    * @param fields the fields
    * @return the list
    */
-  List<FieldValidation> runFieldValidations(List<FieldValue> fields);
+  List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
 
   /**
    * Delete all validation.

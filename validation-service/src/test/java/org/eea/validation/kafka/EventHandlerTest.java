@@ -54,7 +54,7 @@ public class EventHandlerTest {
 
   @Test
   public void getType() {
-    assertEquals(EEAEventVO.class, eventHandler.getType());
+    assertEquals("failed", EEAEventVO.class, eventHandler.getType());
   }
 
 

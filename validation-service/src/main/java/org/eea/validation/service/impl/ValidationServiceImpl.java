@@ -78,17 +78,18 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
-  /** The kie session. */
-  private KieSession kieSession;
+
 
   /**
    * Gets the element lenght.
    *
    * @param dataset the dataset
+   * @param kieSession
    * @return the element lenght
    */
   @Override
-  public List<DatasetValidation> runDatasetValidations(DatasetValue dataset) {
+  public List<DatasetValidation> runDatasetValidations(DatasetValue dataset,
+      KieSession kieSession) {
     kieSession.insert(dataset);
     kieSession.fireAllRules();
     return dataset.getDatasetValidations();
@@ -101,7 +102,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<TableValidation> runTableValidations(List<TableValue> tableValues) {
+  public List<TableValidation> runTableValidations(List<TableValue> tableValues,
+      KieSession kieSession) {
     tableValues.stream().forEach(table -> kieSession.insert(table));
     kieSession.fireAllRules();
     return tableValues.isEmpty() ? new ArrayList<TableValidation>()
@@ -116,7 +118,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<RecordValidation> runRecordValidations(List<RecordValue> records) {
+  public List<RecordValidation> runRecordValidations(List<RecordValue> records,
+      KieSession kieSession) {
     records.stream().forEach(record -> kieSession.insert(record));
     kieSession.fireAllRules();
     return records.isEmpty() ? new ArrayList<RecordValidation>()
@@ -130,7 +133,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
+  public List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession) {
     fields.stream().forEach(field -> kieSession.insert(field));
     kieSession.fireAllRules();
     return null == fields.get(0).getFieldValidations()
@@ -148,6 +151,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IllegalArgumentException the illegal argument exception
    */
   public KieSession loadRulesKnowledgeBase(Long dataflowId) {
+    KieSession kieSession;
     try {
       kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
@@ -168,24 +172,22 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    loadRulesKnowledgeBase(dataflowId);
+
+    KieSession session = loadRulesKnowledgeBase(dataflowId);
     // Dataset and TablesValue validations
     // read Dataset Data
-    long startTime = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
 
-    List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
+    List<DatasetValidation> resultDataset = runDatasetValidations(dataset, session);
     // Asign ID Dataset
     resultDataset.stream().forEach(datasetV -> {
-
       datasetV.setDatasetValue(dataset);
-
     });
     // Save results to the db
     validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
-    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues());
+    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues(), session);
     // Asign ID Table
     dataset.getTableValues().stream().forEach(table -> {
       if (null != table.getTableValidations()) {
@@ -202,14 +204,14 @@ public class ValidationServiceImpl implements ValidationService {
     for (TableValue tableValue : dataset.getTableValues()) {
       Long tableId = tableValue.getId();
       // read Dataset Data
-      List<RecordValue> recordsBonicos =
+      List<RecordValue> recordsByTable =
           sanitizeRecords(recordRepository.findAllRecords_ByTableValueId(tableId));
 
       // Execute record rules validation
-      List<RecordValidation> resultRecord = runRecordValidations(recordsBonicos);
+      List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);
 
       // Assign ID Records and Fields
-      recordsBonicos.stream().filter(Objects::nonNull).forEach(row1 -> {
+      recordsByTable.stream().filter(Objects::nonNull).forEach(row1 -> {
         if (null != row1.getRecordValidations()) {
           row1.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowV -> {
             rowV.setRecordValue(row1);
@@ -220,10 +222,10 @@ public class ValidationServiceImpl implements ValidationService {
       // Save results to the db
       validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
 
-      recordsBonicos.stream().filter(Objects::nonNull).forEach(row2 -> {
+      recordsByTable.stream().filter(Objects::nonNull).forEach(row2 -> {
         if (null != row2.getRecordValidations()) {
           row2.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-            List<FieldValidation> resultFields = runFieldValidations(row2.getFields());
+            List<FieldValidation> resultFields = runFieldValidations(row2.getFields(), session);
             if (null != field.getFieldValidations()) {
               field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldV -> {
                 fieldV.setFieldValue(field);
@@ -233,10 +235,7 @@ public class ValidationServiceImpl implements ValidationService {
           });
         }
       });
-
     }
-    long finishTime = System.currentTimeMillis();
-    LOG.info("Has ended in: " + (finishTime - startTime) + " Millisec.");
   }
 
 
