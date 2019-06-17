@@ -28,11 +28,13 @@ public interface ValidationService {
    */
   void validateDataSetData(@DatasetId Long datasetId) throws EEAException;
 
+
   /**
    * Run dataset validations.
    *
    * @param dataset the dataset
-   * @return the dataset value
+   * @param kieSession the kie session
+   * @return the list
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
@@ -40,6 +42,7 @@ public interface ValidationService {
    * Run table validations.
    *
    * @param list the list
+   * @param kieSession the kie session
    * @return the list
    */
   List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
@@ -48,6 +51,7 @@ public interface ValidationService {
    * Run record validations.
    *
    * @param recordsPaged the records paged
+   * @param kieSession the kie session
    * @return the list
    */
   List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
@@ -57,6 +61,7 @@ public interface ValidationService {
    * Run field validations.
    *
    * @param fields the fields
+   * @param kieSession the kie session
    * @return the list
    */
   List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
