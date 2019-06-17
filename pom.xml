@@ -178,11 +178,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eea.interfaces</groupId>
-      <artifactId>common-interfaces</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
@@ -247,7 +242,7 @@
             <exclude>
               org.eea.interfaces.*
             </exclude>
-             <exclude>
+            <exclude>
               org.eea.*.mapper
             </exclude>
           </excludes>
@@ -315,9 +310,12 @@
     <profile>
       <id>sonar</id>
       <properties>
-        <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}</sonar.projectKey>
+        <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}
+        </sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
-        <sonar.coverage.exclusions>**/org/eea/**/persistence/**domain/**,**/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>
+          **/org/eea/**/persistence/**domain/**,**/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**
+        </sonar.coverage.exclusions>
       </properties>
       <build>
         <plugins>
