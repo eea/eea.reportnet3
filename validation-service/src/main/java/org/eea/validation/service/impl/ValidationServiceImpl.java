@@ -158,12 +158,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      return null;
-    } catch (Exception e) {
-      throw new EEAException(EEAErrorMessage.VALIDATION_SESSION_ERROR);
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
-
     return kieSession;
   }
 
