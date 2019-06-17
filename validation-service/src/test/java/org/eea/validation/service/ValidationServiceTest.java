@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.FieldValue;
@@ -111,7 +112,7 @@ public class ValidationServiceTest {
   }
 
   // @Test
-  public void testValidateDataSetData() {
+  public void testValidateDataSetData() throws EEAException {
     validationServiceImpl.validateDataSetData(1L);
 
   }

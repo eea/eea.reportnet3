@@ -1,6 +1,7 @@
 package org.eea.validation.util;
 
 import static org.mockito.Mockito.doNothing;
+import org.eea.exception.EEAException;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.service.ValidationService;
 import org.junit.Before;
@@ -30,9 +31,9 @@ public class ValidationHelperTest {
   }
 
   @Test
-  public void testKafkaHelper() {
+  public void testKafkaHelper() throws EEAException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    validationHelper.executeValidation(kafkaSender, validationService, 1L);
+    ValidationHelper.executeValidation(kafkaSender, validationService, 1L);
   }
 
 }
