@@ -1,11 +1,11 @@
 package org.eea.validation.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,51 +48,75 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ValidationServiceTest {
 
-  /** The validation service impl. */
+  /**
+   * The validation service impl.
+   */
   @InjectMocks
   private ValidationServiceImpl validationServiceImpl;
 
-  /** The validation service impl mocke. */
+  /**
+   * The validation service impl mocke.
+   */
   @Mock
   private ValidationServiceImpl validationServiceImplMocke;
 
-  /** The kie session. */
+  /**
+   * The kie session.
+   */
   @Mock
   private KieSession kieSession;
 
-  /** The kie base manager. */
+  /**
+   * The kie base manager.
+   */
   @Mock
   private KieBaseManager kieBaseManager;
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Mock
   private DatasetRepository datasetRepository;
 
-  /** The dataset controller. */
+  /**
+   * The dataset controller.
+   */
   @Mock
   private DataSetControllerZuul datasetController;
 
-  /** The validation dataset repository. */
+  /**
+   * The validation dataset repository.
+   */
   @Mock
   private ValidationDatasetRepository validationDatasetRepository;
 
-  /** The validation table repository. */
+  /**
+   * The validation table repository.
+   */
   @Mock
   private ValidationTableRepository validationTableRepository;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Mock
   private RecordRepository recordRepository;
 
-  /** The validation record repository. */
+  /**
+   * The validation record repository.
+   */
   @Mock
   private ValidationRecordRepository validationRecordRepository;
 
-  /** The validation field repository. */
+  /**
+   * The validation field repository.
+   */
   @Mock
   private ValidationFieldRepository validationFieldRepository;
 
-  /** The dataset value. */
+  /**
+   * The dataset value.
+   */
   private DatasetValue datasetValue;
 
   /**
@@ -147,7 +171,7 @@ public class ValidationServiceTest {
   public void testRunTableValidations() {
     List<TableValue> tableValues = new ArrayList<>();
     TableValue tableVal = new TableValue();
-    tableVal.setTableValidations(new ArrayList<TableValidation>());
+    tableVal.setTableValidations(new ArrayList<>());
     tableValues.add(tableVal);
     tableValues.add(new TableValue());
     assertEquals("failed", tableVal.getTableValidations(),
@@ -166,12 +190,12 @@ public class ValidationServiceTest {
    */
   @Test
   public void testRunRecordValidations() {
-    List<RecordValue> records = new ArrayList<RecordValue>();
+    List<RecordValue> records = new ArrayList<>();
     records.add(new RecordValue());
     assertEquals("failed", records.get(0).getRecordValidations(),
         validationServiceImpl.runRecordValidations(records, kieSession));
     assertEquals("failed", new ArrayList<RecordValue>(),
-        validationServiceImpl.runRecordValidations(new ArrayList<RecordValue>(), kieSession));
+        validationServiceImpl.runRecordValidations(new ArrayList<>(), kieSession));
   }
 
   /**
@@ -179,7 +203,7 @@ public class ValidationServiceTest {
    */
   @Test
   public void testRunFieldValidations() {
-    List<FieldValue> fields = new ArrayList<FieldValue>();
+    List<FieldValue> fields = new ArrayList<>();
     fields.add(new FieldValue());
     validationServiceImpl.runFieldValidations(fields, kieSession);
     assertEquals("failed", new ArrayList<FieldValidation>(),
@@ -207,10 +231,17 @@ public class ValidationServiceTest {
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
     doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
-    assertNull("failed", validationServiceImpl.loadRulesKnowledgeBase(1L));
+    try {
+      validationServiceImpl.loadRulesKnowledgeBase(1L);
+    } catch (EEAException e) {
+      assertEquals("Error, cause is not FileNotFoundException", e.getCause().getClass(),
+          FileNotFoundException.class);
+      throw e;
+    }
+
   }
 
   /**
@@ -254,6 +285,9 @@ public class ValidationServiceTest {
     records.add(recordValue);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(validationRecordRepository.saveAll(Mockito.any())).thenReturn(null);
+
+    // when(validationFieldRepository.saveAll(Mockito.any())).thenReturn(null);
+
     validationServiceImpl.validateDataSetData(1L);
 
   }
@@ -292,7 +326,7 @@ public class ValidationServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
-  public void testValidateDataSetDataDatasetExcep() throws FileNotFoundException, EEAException {
+  public void testValidateDataSetDataExcep() throws FileNotFoundException, EEAException {
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
