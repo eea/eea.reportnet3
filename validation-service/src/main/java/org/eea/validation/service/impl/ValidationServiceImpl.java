@@ -149,16 +149,19 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param dataflowId the dataflow id
    * @return the kie session
+   * @throws EEAException
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    */
-  public KieSession loadRulesKnowledgeBase(Long dataflowId) {
+  public KieSession loadRulesKnowledgeBase(Long dataflowId) throws EEAException {
     KieSession kieSession;
     try {
       kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       LOG_ERROR.error(e.getMessage(), e);
       return null;
+    } catch (Exception e) {
+      throw new EEAException(EEAErrorMessage.VALIDATION_SESSION_ERROR);
     }
 
     return kieSession;
@@ -181,13 +184,10 @@ public class ValidationServiceImpl implements ValidationService {
 
     // Get the session for the rules validation
     KieSession session = loadRulesKnowledgeBase(dataflowId);
-    if (session == null) {
-      throw new EEAException(EEAErrorMessage.VALIDATION_SESSION_ERROR);
-    }
 
     // Dataset and TablesValue validations
     // read Dataset Data
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
