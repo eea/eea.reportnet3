@@ -156,35 +156,35 @@ const DataViewer = (props) => {
           clickHandler: () => setImportDialogVisible(true)
       },
         {
-            label: "Visibility",
+            label: resources.messages["visibility"],
             icon: "6",
             group: "left",
             disabled: true,
             clickHandler: null
         },
         {
-            label: "Filter",
+            label: resources.messages["filter"],
             icon: "7",
             group: "left",
             disabled: true,
             clickHandler: null
         },
         {
-            label: "Group by",
+            label: resources.messages["group-by"],
             icon: "8",
             group: "left",
             disabled: true,
             clickHandler: null
         },
         {
-            label: "Sort",
+            label: resources.messages["sort"],
             icon: "9",
             group: "left",
             disabled: true,
             clickHandler: null
         },
         {
-            label: "Refresh",
+            label: resources.messages["refresh"],
             icon: "11",
             group: "right",
             disabled: false,

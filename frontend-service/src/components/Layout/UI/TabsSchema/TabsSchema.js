@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import DataViewer from '../../../../containers/DataSets/DataViewer/DataViewer';
 import { TabView, TabPanel } from 'primereact/tabview';
 import ResourcesContext from '../../../Context/ResourcesContext';
@@ -12,7 +12,6 @@ const TabsSchema = (props) => {
     let tabs = (props.tables && props.tableSchemaColumns)?
         props.tables.map((table, i) => {
             return (
-                // rightIcon={resources.icons["warning"]}
                 //TODO: Refactorizar para no renderizar siempre DataViewer sino pasárselo como composición de componentes. Así se podrá reutilizar
                 //TabsSchema para cualquier visualización de datos
                 <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? resources.icons["warning"] : null}>

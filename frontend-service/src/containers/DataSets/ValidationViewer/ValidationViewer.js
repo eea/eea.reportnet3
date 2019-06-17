@@ -29,44 +29,7 @@ const ValidationViewer = (props) => {
 
     const ButtonsBar = React.lazy(() => import('../../../components/Layout/UI/ButtonsBar/ButtonsBar'));
     //TODO: Refactorizar porque estamos duplicando lógica con DataViewer (Seguramente haya que cargarse el TabsSchema)
-    const customButtons = [
-      {
-          label: "Visibility",
-          icon: "6",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Filter",
-          icon: "7",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Group by",
-          icon: "8",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Sort",
-          icon: "9",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-      },
-      {
-          label: "Refresh",
-          icon: "11",
-          group: "right",
-          disabled: false,
-          clickHandler: null
-      }
-  ];
-  
+      
       useEffect(()=>{         
         const headers = [{
               id: "nameTableSchema",
@@ -91,6 +54,7 @@ const ValidationViewer = (props) => {
         
         fetchDataHandler(null, sortOrder, firstRow, numRows);      
 
+        
       }, []);
       
       const onChangePageHandler = (event)=>{     
@@ -197,6 +161,44 @@ const ValidationViewer = (props) => {
           return error;
         });         
       }
+
+      const customButtons = [
+        {
+          label: resources.messages["visibility"],
+          icon: "6",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+        },
+        {
+            label: resources.messages["filter"],
+            icon: "7",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: resources.messages["group-by"],
+            icon: "8",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: resources.messages["sort"],
+            icon: "9",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: resources.messages["refresh"],
+            icon: "11",
+            group: "right",
+            disabled: false,
+            clickHandler: () => fetchDataHandler(null, sortOrder, firstRow, numRows)
+        }
+      ];
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
 
