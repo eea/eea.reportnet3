@@ -19,6 +19,9 @@ public class RuleDataSet extends Rule {
   @Field(value = "idDataSetSchema")
   private ObjectId idDataSetSchema;
 
+  /** The Constant PRIME. */
+  private static final int PRIME = 31;
+
   /**
    * Hash code.
    *
@@ -26,9 +29,8 @@ public class RuleDataSet extends Rule {
    */
   @Override
   public int hashCode() {
-    final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + Objects.hash(idDataSetSchema);
+    result = PRIME * result + Objects.hash(idDataSetSchema);
     return result;
   }
 

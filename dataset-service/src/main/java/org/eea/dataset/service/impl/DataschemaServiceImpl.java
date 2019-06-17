@@ -49,6 +49,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
+  /** The Constant VALIDATE_ERROR. */
+  private static final String VALIDATE_ERROR = "Validation Error";
+
+  /** The Constant VALIDATE_WARNING. */
+  private static final String VALIDATE_WARNING = "Validation Warning";
+
   /**
    * Creates the data schema.
    *
@@ -70,7 +76,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
     RuleDataSet ruleDataset = new RuleDataSet();
     List<String> listaStrinsDataset = new ArrayList<String>();
-    listaStrinsDataset.add("ERROR AL VALIDAD");
+    listaStrinsDataset.add(VALIDATE_ERROR);
     listaStrinsDataset.add("ERROR");
     ruleDataset.setThenCondition(listaStrinsDataset);
 
@@ -94,10 +100,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       RuleTable ruleTable = new RuleTable();
       List<String> listaStrinsRuleTable = new ArrayList<String>();
       if (i % 2 == 0) {
-        listaStrinsRuleTable.add("ERROR AL VALIDAD");
+        listaStrinsRuleTable.add(VALIDATE_ERROR);
         listaStrinsRuleTable.add("ERROR");
       } else {
-        listaStrinsRuleTable.add("WARNING AL VALIDAD");
+        listaStrinsRuleTable.add(VALIDATE_WARNING);
         listaStrinsRuleTable.add("WARNING");
       }
       ruleTable.setThenCondition(listaStrinsRuleTable);
@@ -121,10 +127,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       RuleRecord ruleRecord = new RuleRecord();
       List<String> listaStrinsRuleRecord = new ArrayList<String>();
       if (i % 2 == 0) {
-        listaStrinsRuleRecord.add("ERROR AL VALIDAD");
+        listaStrinsRuleRecord.add(VALIDATE_ERROR);
         listaStrinsRuleRecord.add("ERROR");
       } else {
-        listaStrinsRuleRecord.add("WARNING AL VALIDAD");
+        listaStrinsRuleRecord.add(VALIDATE_WARNING);
         listaStrinsRuleRecord.add("WARNING");
       }
       ruleRecord.setThenCondition(listaStrinsRuleRecord);
@@ -154,10 +160,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         rule.setRuleName("field regla" + i + " y " + j);
         List<String> listaStrins = new ArrayList<String>();
         if (j % 2 == 0) {
-          listaStrins.add("ERROR AL VALIDAD");
+          listaStrins.add(VALIDATE_ERROR);
           listaStrins.add("ERROR");
         } else {
-          listaStrins.add("WARNING AL VALIDAD");
+          listaStrins.add(VALIDATE_WARNING);
           listaStrins.add("WARNING");
         }
         rule.setThenCondition(listaStrins);
