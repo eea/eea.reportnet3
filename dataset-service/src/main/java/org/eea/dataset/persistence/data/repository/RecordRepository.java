@@ -40,11 +40,12 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    *
    * @return the list
    */
-  @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields WHERE tv.idTableSchema = :idTableSchema")
+  @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields "
+      + "WHERE tv.idTableSchema = :idTableSchema")
   List<RecordValue> findByTableValue_IdTableSchema(@Param("idTableSchema") String idTableSchema);
-  
- 
-  
+
+
+
   /**
    * Find by id and table value dataset id id.
    *
