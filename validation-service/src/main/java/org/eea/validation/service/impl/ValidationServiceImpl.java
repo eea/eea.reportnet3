@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.transaction.Transactional;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.validation.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
@@ -166,76 +168,122 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
+   * @throws EEAException
    */
   @Override
   @Transactional
-  public void validateDataSetData(@DatasetId Long datasetId) {
+  public void validateDataSetData(@DatasetId Long datasetId) throws EEAException {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
 
+    // Get the session for the rules validation
     KieSession session = loadRulesKnowledgeBase(dataflowId);
+    if (session == null) {
+      throw new EEAException(EEAErrorMessage.VALIDATION_SESSION_ERROR);
+    }
+
     // Dataset and TablesValue validations
     // read Dataset Data
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-    // Execute rules validation
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
 
-    List<DatasetValidation> resultDataset = runDatasetValidations(dataset, session);
-    // Asign ID Dataset
-    resultDataset.stream().forEach(datasetV -> {
-      datasetV.setDatasetValue(dataset);
-    });
+    // Execute rules validation
+    List<DatasetValidation> resultDataset = executeDatasetValidations(session, dataset);
     // Save results to the db
     validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
-    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues(), session);
-    // Asign ID Table
-    dataset.getTableValues().stream().forEach(table -> {
-      if (null != table.getTableValidations()) {
-        table.getTableValidations().stream().forEach(tableV -> {
-          tableV.setTableValue(table);
-        });
-      }
-    });
-
+    // Execute tables validation
+    List<TableValidation> resultTable = executeTableValidations(session, dataset);
     // Save results to the db
     validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
 
     // Records validation
     for (TableValue tableValue : dataset.getTableValues()) {
       Long tableId = tableValue.getId();
-      // read Dataset Data
+      // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
           sanitizeRecords(recordRepository.findAllRecords_ByTableValueId(tableId));
 
       // Execute record rules validation
       List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);
-
       // Assign ID Records and Fields
-      recordsByTable.stream().filter(Objects::nonNull).forEach(row1 -> {
-        if (null != row1.getRecordValidations()) {
-          row1.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowV -> {
-            rowV.setRecordValue(row1);
-          });
-        }
-      });
-
+      populateRecordValidations(recordsByTable);
       // Save results to the db
       validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
 
-      recordsByTable.stream().filter(Objects::nonNull).forEach(row2 -> {
-        if (null != row2.getRecordValidations()) {
-          row2.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-            List<FieldValidation> resultFields = runFieldValidations(row2.getFields(), session);
+      // Execute field rules validation
+      recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+        if (null != row.getRecordValidations()) {
+          row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+            List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
             if (null != field.getFieldValidations()) {
-              field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldV -> {
-                fieldV.setFieldValue(field);
+              field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
+                fieldValue.setFieldValue(field);
               });
+              // Save results to the db
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           });
         }
       });
     }
+  }
+
+  /**
+   * Populate record validations.
+   *
+   * @param recordsByTable the records by table
+   */
+  private void populateRecordValidations(List<RecordValue> recordsByTable) {
+    recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+      if (null != row.getRecordValidations()) {
+        row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValue -> {
+          rowValue.setRecordValue(row);
+        });
+      }
+    });
+  }
+
+  /**
+   * Execute table validations.
+   *
+   * @param session the session
+   * @param dataset the dataset
+   * @return the list
+   */
+  private List<TableValidation> executeTableValidations(KieSession session, DatasetValue dataset) {
+    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues(), session);
+    // Asign ID Table
+    dataset.getTableValues().stream().forEach(table -> {
+      if (null != table.getTableValidations()) {
+        table.getTableValidations().stream().forEach(tableValue -> {
+          tableValue.setTableValue(table);
+        });
+      }
+    });
+    return resultTable;
+  }
+
+  /**
+   * Execute dataset validations.
+   *
+   * @param session the session
+   * @param dataset the dataset
+   * @return the list
+   */
+  private List<DatasetValidation> executeDatasetValidations(KieSession session,
+      DatasetValue dataset) {
+    List<DatasetValidation> resultDataset = runDatasetValidations(dataset, session);
+    // Asign ID Dataset
+    resultDataset.stream().forEach(datasetValue -> {
+      datasetValue.setDatasetValue(dataset);
+    });
+    return resultDataset;
   }
 
 

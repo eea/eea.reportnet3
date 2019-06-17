@@ -33,6 +33,9 @@ public class EEAErrorMessage {
   /** The Constant EXECUTION_ERROR. */
   public static final String EXECUTION_ERROR = "Runtime error";
 
+  /** The Constant VALIDATION_SESSION_ERROR. */
+  public static final String VALIDATION_SESSION_ERROR = "Validation session error";
+
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }
