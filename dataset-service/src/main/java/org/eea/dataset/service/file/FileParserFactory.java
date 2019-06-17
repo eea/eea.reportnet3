@@ -13,17 +13,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory implements IFileParserFactory {
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   @Autowired
   private ParseCommon parseCommon;
 
-  @Value("${dataset.loadDataDelimiter:|}")
+  @Value("${dataset.loadDataDelimiter}")
   private char delimiter;
 
   /**
    * Creates a new FileParser object.
    *
    * @param mimeType the mime type
+   *
    * @return the i file parse contextd
    */
   @Override
