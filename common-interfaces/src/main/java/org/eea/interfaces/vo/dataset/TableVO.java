@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

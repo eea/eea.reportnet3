@@ -419,7 +419,8 @@ public class DatasetServiceImpl implements DatasetService {
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}", datasetId);
 
-    } else {// Records retrieved,
+    } else {
+      // Records retrieved,
       // 1º need to remove duplicated data
       List<RecordValue> sanitizeRecords = this.sanitizeRecords(records);
       // 2º sort sanitized data
