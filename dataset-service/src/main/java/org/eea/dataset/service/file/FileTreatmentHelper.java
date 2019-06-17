@@ -16,7 +16,9 @@ public class FileTreatmentHelper extends Helper {
   /**
    * Instantiates a new file loader helper.
    */
-  public FileTreatmentHelper() {}
+  public FileTreatmentHelper() {
+    super();
+  }
 
   /**
    * Execute file process.
