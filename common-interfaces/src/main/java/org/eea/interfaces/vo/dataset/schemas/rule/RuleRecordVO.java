@@ -16,6 +16,9 @@ public class RuleRecordVO extends RuleVO {
   /** The id record schema. */
   private String idRecordSchema;
 
+  /** The Constant PRIME. */
+  private static final int PRIME = 31;
+
   /**
    * Hash code.
    *
@@ -23,9 +26,8 @@ public class RuleRecordVO extends RuleVO {
    */
   @Override
   public int hashCode() {
-    final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + Objects.hash(idRecordSchema);
+    result = PRIME * result + Objects.hash(idRecordSchema);
     return result;
   }
 

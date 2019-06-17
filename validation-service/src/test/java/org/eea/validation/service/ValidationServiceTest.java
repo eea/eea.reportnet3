@@ -205,7 +205,7 @@ public class ValidationServiceTest {
     records.add(recordValue);
 
 
-    when(recordRepository.findAllRecords_ByTableValueId(Mockito.any())).thenReturn(records);
+    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(validationRecordRepository.saveAll(Mockito.any())).thenReturn(null);
     // when(validationFieldRepository.saveAll(Mockito.any())).thenReturn(null);
 

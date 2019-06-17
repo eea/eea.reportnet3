@@ -70,5 +70,5 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    * @return the long
    */
   @Query("SELECT DISTINCT TV.id FROM TableValue TV WHERE TV.idTableSchema=?1 ")
-  Long findFirstId_ByIdTableSchema(String idTableSchema);
+  Long findIdByIdTableSchema(String idTableSchema);
 }

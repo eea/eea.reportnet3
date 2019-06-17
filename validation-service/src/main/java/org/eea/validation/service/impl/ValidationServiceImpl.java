@@ -207,7 +207,7 @@ public class ValidationServiceImpl implements ValidationService {
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
-          sanitizeRecords(recordRepository.findAllRecords_ByTableValueId(tableId));
+          sanitizeRecords(recordRepository.findAllRecordsByTableValueId(tableId));
 
       // Execute record rules validation
       List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);

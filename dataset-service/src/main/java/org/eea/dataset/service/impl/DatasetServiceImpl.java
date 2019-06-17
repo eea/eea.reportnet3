@@ -256,7 +256,7 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Error mapping file");
       }
       // Check if the table with idTableSchema has been populated already
-      Long oldTableId = tableRepository.findFirstId_ByIdTableSchema(idTableSchema);
+      Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
       fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
       // save dataset to the database
       datasetRepository.saveAndFlush(dataset);
@@ -594,22 +594,17 @@ public class DatasetServiceImpl implements DatasetService {
     datasetRepository.saveAndFlush(datasetValue);
   }
 
-
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the data flow id by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   public Long getDataFlowIdById(Long datasetId) throws EEAException {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
-
-
 
   /**
    * Gets the table from any object id.

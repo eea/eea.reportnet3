@@ -32,6 +32,7 @@ public interface ValidationService {
    * Run dataset validations.
    *
    * @param dataset the dataset
+   * @param kieSession the kie session
    * @return the dataset value
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
@@ -40,6 +41,7 @@ public interface ValidationService {
    * Run table validations.
    *
    * @param list the list
+   * @param kieSession the kie session
    * @return the list
    */
   List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
@@ -48,6 +50,7 @@ public interface ValidationService {
    * Run record validations.
    *
    * @param recordsPaged the records paged
+   * @param kieSession the kie session
    * @return the list
    */
   List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
@@ -57,6 +60,7 @@ public interface ValidationService {
    * Run field validations.
    *
    * @param fields the fields
+   * @param kieSession the kie session
    * @return the list
    */
   List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);

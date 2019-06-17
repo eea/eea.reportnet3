@@ -26,6 +26,11 @@ public enum TypeValidation {
     this.value = value;
   }
 
+  /**
+   * Gets the value.
+   *
+   * @return the value
+   */
   public String getValue() {
     return value;
   }

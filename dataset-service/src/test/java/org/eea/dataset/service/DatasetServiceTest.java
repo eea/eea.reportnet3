@@ -303,7 +303,7 @@ public class DatasetServiceTest {
     entityValue.setId(1L);
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findFirstId_ByIdTableSchema(Mockito.any())).thenReturn(2L);
+    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(2L);
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), "schema");
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
@@ -330,7 +330,7 @@ public class DatasetServiceTest {
     entityValue.setId(1L);
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findFirstId_ByIdTableSchema(Mockito.any())).thenReturn(2L);
+    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(2L);
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), "schema");
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
@@ -355,7 +355,7 @@ public class DatasetServiceTest {
     entityValue.setId(1L);
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findFirstId_ByIdTableSchema(Mockito.any())).thenReturn(null);
+    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(null);
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
