@@ -20,6 +20,15 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    */
   @Query("SELECT tval FROM TableValidation tval INNER JOIN FETCH tval.validation INNER JOIN tval.tableValue tv "
       + "WHERE tv.datasetId.id=?1")
-  List<TableValidation> findTableValidationsByIdDataset(Long datasetId); 
-  
+  List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
+
+
+  /**
+   * Find by table value id table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the list
+   */
+  List<TableValidation> findByTableValue_IdTableSchema(String idTableSchema);
+
 }

@@ -15,6 +15,7 @@ import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
+import org.eea.dataset.mapper.TableValidationMapper;
 import org.eea.dataset.mapper.TableValueMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -134,6 +135,9 @@ public class DatasetServiceTest {
 
   @Mock
   private TableValidationRepository tableValidationRepository;
+
+  @Mock
+  private TableValidationMapper tableValidationMapper;
 
   private FieldValue fieldValue;
   private RecordValue recordValue;
@@ -472,6 +476,10 @@ public class DatasetServiceTest {
         .thenReturn(recordValue);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(tableValidationRepository.findByTableValue_IdTableSchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    when(tableValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+
     datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.RECORD);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
 
@@ -484,6 +492,9 @@ public class DatasetServiceTest {
         .thenReturn(tableValue);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(tableValidationRepository.findByTableValue_IdTableSchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    when(tableValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.TABLE);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
 
@@ -494,8 +505,10 @@ public class DatasetServiceTest {
 
     when(fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
         .thenReturn(fieldValue);
-
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(tableValidationRepository.findByTableValue_IdTableSchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    when(tableValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.FIELD);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
 

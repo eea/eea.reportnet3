@@ -2,7 +2,6 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +14,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
@@ -219,8 +219,8 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
   }
-  
-  
+
+
   /**
    * Gets the table from any object id.
    *
@@ -232,29 +232,29 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Map<String,TableVO> getTableFromAnyObjectId(@PathVariable("id") Long id, 
+  public ValidationLinkVO getTableFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) TypeEntityEnum type) {
-    
-    
-    Map<String,TableVO> mapPageTable = null;
+
+
+    ValidationLinkVO result = null;
     if (id == null || idDataset == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    
+
     try {
       Pageable pageable = PageRequest.of(1, pageSize);
-      mapPageTable = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
+      result = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-    
-    return mapPageTable;
+
+    return result;
   }
-  
+
 
   /**
    * Gets the by id.
@@ -321,8 +321,8 @@ public class DataSetControllerImpl implements DatasetController {
 
     return statistics;
   }
-  
-   
+
+
   /**
    * Gets the failed validations by id dataset.
    *
@@ -335,12 +335,13 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public  FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
+  public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
+      @PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
-    
+
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = PageRequest.of(pageNum, pageSize);
     try {

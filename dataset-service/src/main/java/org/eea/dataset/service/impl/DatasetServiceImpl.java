@@ -25,6 +25,7 @@ import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
+import org.eea.dataset.mapper.TableValidationMapper;
 import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
@@ -64,6 +65,8 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkContentVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
@@ -196,6 +199,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TableValidationRepository tableValidationRepository;
 
+  /** The table validation mapper. */
+  @Autowired
+  private TableValidationMapper tableValidationMapper;
 
   /**
    * Creates the removeDatasetData dataset.
@@ -615,17 +621,17 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public Map<String, TableVO> getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
+  public ValidationLinkVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
       TypeEntityEnum type) throws EEAException {
 
-    TableVO tableVO = new TableVO();
-    Map<String, TableVO> mapa;
+    ValidationLinkVO validationLink = new ValidationLinkVO();
     // TYPE 1 table; 2 record; 3 field
+    TableVO tableVO = new TableVO();
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
 
     // TABLE
-    if (type != null && TypeEntityEnum.TABLE == type && id != null) {
+    if (TypeEntityEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(table);
       records = table.getRecords();
@@ -635,14 +641,15 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // RECORD
-    if (type != null && TypeEntityEnum.RECORD == type && id != null) {
+    if (TypeEntityEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
       tableVO = tableNoRecordMapper.entityToClass(record.getTableValue());
       records = record.getTableValue().getRecords();
     }
 
     // FIELD
-    if (type != null && TypeEntityEnum.FIELD == type && id != null) {
+    if (TypeEntityEnum.FIELD == type) {
+
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
         tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());
@@ -651,30 +658,21 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
-    mapa = this.processTable(tableVO, records, record, pageable);
-
-    return mapa;
+    validationLink.setPage(this.processTable(tableVO, records, record, pageable));
+    return validationLink;
   }
 
 
+  private ValidationLinkContentVO processTable(TableVO table, List<RecordValue> records,
+      RecordValue recordValue, Pageable pageable) {
 
-  /**
-   * Process table.
-   *
-   * @param table the table
-   * @param records the records
-   * @param record the record
-   * @param pageable the pageable
-   * @return the map
-   */
-  private Map<String, TableVO> processTable(TableVO table, List<RecordValue> records,
-      RecordValue record, Pageable pageable) {
 
     if (table == null) {
       table = new TableVO();
     }
+    // PAGINATION
     records = this.sanitizeRecords(records);
-    int recordPosition = records.indexOf(record);
+    int recordPosition = records.indexOf(recordValue);
     int tamPage = 20;
     if (pageable.getPageSize() != 0) {
       tamPage = pageable.getPageSize();
@@ -686,13 +684,37 @@ public class DatasetServiceImpl implements DatasetService {
         : ((pageNumberFounded + 1) * tamPage);
 
 
-    table.setRecords(
-        recordNoValidationMapper.entityListToClass(records.subList(initIndex, endIndex)));
-    table.setTotalRecords(Long.valueOf(records.size()));
-    Map<String, TableVO> map = new HashMap<>();
-    map.put(String.valueOf(pageNumberFounded + 1), table);
 
-    return map;
+    // RECORD AND FIELDS VALIDATION
+    List<RecordVO> recordVOs =
+        recordNoValidationMapper.entityListToClass(records.subList(initIndex, endIndex));
+    List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
+    Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
+    Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
+    recordVOs.stream().forEach(record -> {
+      record.getFields().stream().forEach(field -> {
+        field.setFieldValidations(
+            this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
+      });
+      record.setRecordValidations(
+          this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
+    });
+
+    // TABLE VALIDATIONS
+    List<TableValidation> tableValidations =
+        tableValidationRepository.findByTableValue_IdTableSchema(table.getIdTableSchema());
+    table.setTableValidations(this.tableValidationMapper.entityListToClass(tableValidations));
+
+    table.setRecords(recordVOs);
+    table.setTotalRecords(Long.valueOf(records.size()));
+
+    ValidationLinkContentVO valLink = new ValidationLinkContentVO();
+    valLink.setNumPage(pageNumberFounded + 1);
+    valLink.setTable(table);
+
+
+    return valLink;
+
   }
 
 
@@ -746,7 +768,7 @@ public class DatasetServiceImpl implements DatasetService {
     listIdsDataSetSchema.removeAll(listIdDataSetSchema);
     for (String idTableSchem : listIdsDataSetSchema) {
       stats.getTables()
-          .add(createEmptyTableStat(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
+          .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
     }
 
     // Check dataset validations
@@ -818,57 +840,25 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-  /**
-   * Creates the empty table stat.
-   *
-   * @param idTableSchema the id table schema
-   * @param nameTableSchema the name table schema
-   *
-   * @return the table statistics VO
-   */
-  private TableStatisticsVO createEmptyTableStat(String idTableSchema, String nameTableSchema) {
 
-    TableStatisticsVO tableStats = new TableStatisticsVO();
-    tableStats.setIdTableSchema(idTableSchema);
-    tableStats.setNameTableSchema(nameTableSchema);
-    tableStats.setTableErrors(false);
-    tableStats.setTotalErrors(0L);
-    tableStats.setTotalRecords(0L);
-    tableStats.setTotalRecordsWithErrors(0L);
-    tableStats.setTotalRecordsWithWarnings(0L);
-
-    return tableStats;
-  }
-
-
-  /**
-   * Sanitize table values.
-   *
-   * @param tables the tables
-   * @return the list
-   */
   private List<TableValue> sanitizeTableValues(List<TableValue> tables) {
 
     List<TableValue> sanitizedTables = new ArrayList<>();
-    if (tables != null && !tables.isEmpty()) {
-      Set<String> processedTables = new HashSet<>();
-      for (TableValue tableValue : tables) {
-        if (!processedTables.contains(tableValue.getIdTableSchema())) {
-          processedTables.add(tableValue.getIdTableSchema());
-          sanitizedTables.add(tableValue);
-        } else {
-          for (int i = 0; i < sanitizedTables.size(); i++) {
-            if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
-              sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
-              sanitizedTables.get(i).getTableValidations().addAll(tableValue.getTableValidations());
-              break;
-            }
+    Set<String> processedTables = new HashSet<>();
+    for (TableValue tableValue : tables) {
+      if (!processedTables.contains(tableValue.getIdTableSchema())) {
+        processedTables.add(tableValue.getIdTableSchema());
+        sanitizedTables.add(tableValue);
+      } else {
+        for (int i = 0; i < sanitizedTables.size(); i++) {
+          if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
+            sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
+            break;
           }
         }
       }
     }
     return sanitizedTables;
-
 
   }
 
@@ -1004,6 +994,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
       error.setNameTableSchema(mapNameTableSchema.get(dataset.getIdDatasetSchema()));
+      error.setIdTableSchema(dataset.getIdDatasetSchema());
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
 
@@ -1023,6 +1014,9 @@ public class DatasetServiceImpl implements DatasetService {
       error.setMessage(tableValidation.getValidation().getMessage());
       error.setNameTableSchema(
           mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema()));
+
+      error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
+
       error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(tableValidation.getValidation().getValidationDate());
 
@@ -1044,6 +1038,9 @@ public class DatasetServiceImpl implements DatasetService {
       error.setMessage(recordValidation.getValidation().getMessage());
       error.setNameTableSchema(mapNameTableSchema
           .get(recordValidation.getRecordValue().getTableValue().getIdTableSchema()));
+
+      error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+
       error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(recordValidation.getValidation().getValidationDate());
 
@@ -1062,6 +1059,10 @@ public class DatasetServiceImpl implements DatasetService {
       error.setMessage(fieldValidation.getValidation().getMessage());
       error.setNameTableSchema(mapNameTableSchema
           .get(fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema()));
+
+      error.setIdTableSchema(
+          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
+
       error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(fieldValidation.getValidation().getValidationDate());
 
