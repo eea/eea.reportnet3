@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.validation.multitenancy.MultiTenantDataSource;
+import org.eea.multitenancy.MultiTenantDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +65,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
-  /** The batch size. */
+  /**
+   * The batch size.
+   */
   @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
   private String batch_Size;
 
@@ -81,11 +83,15 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
 
-  /** The stats. */
+  /**
+   * The stats.
+   */
   @Value("${spring.jpa.properties.hibernate.order_updates}")
   private String orderUpdates;
 
-  /** The order. */
+  /**
+   * The order.
+   */
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 

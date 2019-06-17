@@ -2,6 +2,7 @@ package org.eea.dataset.multitenancy;
 
 import java.lang.reflect.Proxy;
 import org.eea.dataset.service.DatasetService;
+import org.eea.multitenancy.ProxyMultitenantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -23,10 +24,10 @@ public class TransactionalProxyConfiguration {
    * @return the dataset service
    */
   @Bean
-  public DatasetService proxyDatasetService(){
+  public DatasetService proxyDatasetService() {
     return (DatasetService) Proxy.newProxyInstance(
         TransactionalProxyConfiguration.class.getClassLoader(),
-        new Class[] { DatasetService.class },
-        new ProxyDatasetServiceImpl(datasetService));
+        new Class[]{DatasetService.class},
+        new ProxyMultitenantService<>(datasetService));
   }
 }
