@@ -2,7 +2,6 @@ package org.eea.validation.service;
 
 
 import java.util.List;
-import java.util.Map;
 import org.eea.validation.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -12,21 +11,13 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
-import org.eea.validation.persistence.rules.DataFlowRule;
+import org.kie.api.runtime.KieSession;
 
 /**
  * The Class ValidationService.
  */
 public interface ValidationService {
 
-
-  /**
-   * Gets the rules by data flow id.
-   *
-   * @param idDataflow the id dataflow
-   * @return the rules by data flow id
-   */
-  List<Map<String, String>> getRulesByDataFlowId(Long idDataflow);
 
   /**
    * Validate data set data.
@@ -36,19 +27,12 @@ public interface ValidationService {
   void validateDataSetData(@DatasetId Long datasetId);
 
   /**
-   * Save rule.
-   *
-   * @param dataFlowRules the data flow rules
-   */
-  void saveRule(DataFlowRule dataFlowRules);
-
-  /**
    * Run dataset validations.
    *
    * @param dataset the dataset
    * @return the dataset value
    */
-  List<DatasetValidation> runDatasetValidations(DatasetValue dataset);
+  List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
   /**
    * Run table validations.
@@ -56,7 +40,7 @@ public interface ValidationService {
    * @param list the list
    * @return the list
    */
-  List<TableValidation> runTableValidations(List<TableValue> list);
+  List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
 
   /**
    * Run record validations.
@@ -64,7 +48,8 @@ public interface ValidationService {
    * @param recordsPaged the records paged
    * @return the list
    */
-  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged);
+  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
+      KieSession kieSession);
 
   /**
    * Run field validations.
@@ -72,7 +57,7 @@ public interface ValidationService {
    * @param fields the fields
    * @return the list
    */
-  List<FieldValidation> runFieldValidations(List<FieldValue> fields);
+  List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
 
   /**
    * Delete all validation.
@@ -80,7 +65,5 @@ public interface ValidationService {
    * @param datasetId the dataset id
    */
   void deleteAllValidation(@DatasetId Long datasetId);
-
-
 
 }
