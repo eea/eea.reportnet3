@@ -1,4 +1,4 @@
-package org.eea.dataset.multitenancy;
+package org.eea.multitenancy;
 
 import java.util.Map;
 import javax.sql.DataSource;
@@ -13,7 +13,9 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
  */
 public class MultiTenantDataSource extends AbstractRoutingDataSource {
 
-  /** The data sources. */
+  /**
+   * The data sources.
+   */
   @Autowired
   @Qualifier("targetDataSources")
   private Map<Object, Object> dataSources;
@@ -45,6 +47,7 @@ public class MultiTenantDataSource extends AbstractRoutingDataSource {
    * Creates the data source.
    *
    * @param connectionDataVO the connection data VO
+   *
    * @return the data source
    */
   private DataSource createDataSource(ConnectionDataVO connectionDataVO) {
