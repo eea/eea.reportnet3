@@ -11,7 +11,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +22,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@DynamicUpdate
 @Table(name = "VALIDATION")
 public class Validation {
 
@@ -32,9 +30,9 @@ public class Validation {
    */
   @Id
   @SequenceGenerator(name = "field_validation_sequence_generator",
-  sequenceName = "field_validation_sequence",
-  allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_validation_sequence_generator")
+      sequenceName = "field_validation_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE,
+      generator = "field_validation_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

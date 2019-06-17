@@ -11,7 +11,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +22,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@DynamicUpdate
 @Table(name = "RECORD_VALIDATION")
 public class RecordValidation {
 
@@ -32,9 +30,9 @@ public class RecordValidation {
    */
   @Id
   @SequenceGenerator(name = "record_validation_sequence_generator",
-  sequenceName = "record_validation_sequence",
-  allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_validation_sequence_generator")
+      sequenceName = "record_validation_sequence", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE,
+      generator = "record_validation_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

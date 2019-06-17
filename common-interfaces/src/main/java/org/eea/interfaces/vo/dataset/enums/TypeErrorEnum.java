@@ -23,7 +23,7 @@ public enum TypeErrorEnum {
    *
    * @param value the value
    */
-  private TypeErrorEnum(String value) {
+  TypeErrorEnum(String value) {
     this.value = value;
   }
 

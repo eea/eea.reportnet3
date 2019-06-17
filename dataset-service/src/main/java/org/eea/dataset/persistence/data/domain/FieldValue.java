@@ -10,16 +10,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * The Class FieldValue.
@@ -28,19 +26,16 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @Setter
 @ToString
-@DynamicUpdate
 @Table(name = "FIELD_VALUE")
 public class FieldValue {
 
 
-  
 
   /**
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "field_sequence_generator",
-      sequenceName = "field_sequence",
+  @SequenceGenerator(name = "field_sequence_generator", sequenceName = "field_sequence",
       allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")

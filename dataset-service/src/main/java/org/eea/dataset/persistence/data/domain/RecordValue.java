@@ -17,7 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -29,7 +28,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@DynamicUpdate
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
@@ -53,15 +51,14 @@ public class RecordValue {
       }
     }
 
-   
+
   }
 
   /**
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "record_sequence_generator",
-      sequenceName = "record_sequence",
+  @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
       allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
