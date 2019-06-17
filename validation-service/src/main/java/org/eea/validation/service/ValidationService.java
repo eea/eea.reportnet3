@@ -3,6 +3,7 @@ package org.eea.validation.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -34,6 +35,7 @@ public interface ValidationService {
    *
    * @param dataset the dataset
    * @param kieSession the kie session
+   *
    * @return the list
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
@@ -43,6 +45,7 @@ public interface ValidationService {
    *
    * @param list the list
    * @param kieSession the kie session
+   *
    * @return the list
    */
   List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
@@ -52,6 +55,7 @@ public interface ValidationService {
    *
    * @param recordsPaged the records paged
    * @param kieSession the kie session
+   *
    * @return the list
    */
   List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
@@ -62,6 +66,7 @@ public interface ValidationService {
    *
    * @param fields the fields
    * @param kieSession the kie session
+   *
    * @return the list
    */
   List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
