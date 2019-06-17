@@ -34,7 +34,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextCsv() {
-    assertNotNull(fileParserFactory.createContext("csv"));
+    assertNotNull("is null", fileParserFactory.createContext("csv"));
   }
 
   /**
@@ -42,7 +42,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContext() {
-    assertNull(fileParserFactory.createContext("xx"));
+    assertNull("is null", fileParserFactory.createContext("xx"));
   }
 
 }

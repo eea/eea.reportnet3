@@ -44,7 +44,7 @@ public class MultiTenantDataSourceTest {
   @Test
   public void testDetermineCurrentLookupKey() {
     Object result = multiTenantDataSource.determineCurrentLookupKey();
-    assertNotNull(result);
+    assertNotNull("is null", result);
   }
 
   /**

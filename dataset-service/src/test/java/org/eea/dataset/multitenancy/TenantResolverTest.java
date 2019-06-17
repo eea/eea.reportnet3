@@ -47,7 +47,7 @@ public class TenantResolverTest {
   @Test
   public void testGetTenantName() {
     tenantResolver.setTenantName(NAME);
-    assertEquals(NAME, tenantResolver.getTenantName());
+    assertEquals("not the same name", NAME, tenantResolver.getTenantName());
   }
 
   /**
@@ -56,7 +56,7 @@ public class TenantResolverTest {
   @Test
   public void testGetTenantNameNull() {
     tenantResolver.setTenantName(null);
-    assertNotNull(tenantResolver.getTenantName());
+    assertNotNull("name is null? ", tenantResolver.getTenantName());
   }
 
   /**

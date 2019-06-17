@@ -45,7 +45,7 @@ public class TableStatisticsVO implements Serializable {
    * Instantiates a new table statistics VO.
    */
   public TableStatisticsVO() {
-
+    super();
   }
 
 
@@ -55,7 +55,7 @@ public class TableStatisticsVO implements Serializable {
    * @param idTableSchema the id table schema
    * @param nameTableSchema the name table schema
    */
-  public TableStatisticsVO(String idTableSchema, String nameTableSchema) {
+  public TableStatisticsVO(final String idTableSchema, final String nameTableSchema) {
 
     this.idTableSchema = idTableSchema;
     this.nameTableSchema = nameTableSchema;
