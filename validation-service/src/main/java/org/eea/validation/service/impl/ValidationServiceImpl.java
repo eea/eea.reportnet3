@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.transaction.Transactional;
@@ -25,7 +24,6 @@ import org.eea.validation.persistence.data.repository.ValidationDatasetRepositor
 import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
 import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
 import org.eea.validation.persistence.data.repository.ValidationTableRepository;
-import org.eea.validation.persistence.rules.DataFlowRule;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.kie.api.runtime.KieSession;
@@ -80,17 +78,18 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
-  /** The kie session. */
-  private KieSession kieSession;
+
 
   /**
    * Gets the element lenght.
    *
    * @param dataset the dataset
+   * @param kieSession
    * @return the element lenght
    */
   @Override
-  public List<DatasetValidation> runDatasetValidations(DatasetValue dataset) {
+  public List<DatasetValidation> runDatasetValidations(DatasetValue dataset,
+      KieSession kieSession) {
     kieSession.insert(dataset);
     kieSession.fireAllRules();
     return dataset.getDatasetValidations();
@@ -103,7 +102,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<TableValidation> runTableValidations(List<TableValue> tableValues) {
+  public List<TableValidation> runTableValidations(List<TableValue> tableValues,
+      KieSession kieSession) {
     tableValues.stream().forEach(table -> kieSession.insert(table));
     kieSession.fireAllRules();
     return tableValues.isEmpty() ? new ArrayList<TableValidation>()
@@ -114,11 +114,12 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Run record validations.
    *
-   * @param recordsPaged the records paged
+   * @param records the records
    * @return the list
    */
   @Override
-  public List<RecordValidation> runRecordValidations(List<RecordValue> records) {
+  public List<RecordValidation> runRecordValidations(List<RecordValue> records,
+      KieSession kieSession) {
     records.stream().forEach(record -> kieSession.insert(record));
     kieSession.fireAllRules();
     return records.isEmpty() ? new ArrayList<RecordValidation>()
@@ -132,7 +133,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<FieldValidation> runFieldValidations(List<FieldValue> fields) {
+  public List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession) {
     fields.stream().forEach(field -> kieSession.insert(field));
     kieSession.fireAllRules();
     return null == fields.get(0).getFieldValidations()
@@ -144,34 +145,21 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Load rules knowledge base.
    *
-   * @param DataflowId the dataflow id
+   * @param dataflowId the dataflow id
    * @return the kie session
-   * @throws NoSuchFieldException the no such field exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
-   * @throws IllegalAccessException the illegal access exception
    */
-  public KieSession loadRulesKnowledgeBase(Long DataflowId) throws NoSuchFieldException,
-      SecurityException, IllegalArgumentException, IllegalAccessException {
+  public KieSession loadRulesKnowledgeBase(Long dataflowId) {
+    KieSession kieSession;
     try {
-      kieSession = kieBaseManager.reloadRules(DataflowId).newKieSession();
+      kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
       LOG_ERROR.error(e.getMessage(), e);
       return null;
     }
 
     return kieSession;
-  }
-
-  /**
-   * Gets the rules.
-   *
-   * @param idDataflow the id dataflow
-   * @return the rules
-   */
-  @Override
-  public List<Map<String, String>> getRulesByDataFlowId(Long idDataflow) {
-    return null;
   }
 
   /**
@@ -184,32 +172,22 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateDataSetData(@DatasetId Long datasetId) {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    try {
-      loadRulesKnowledgeBase(dataflowId);
-    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-        | IllegalAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-    }
-    // We delete all validation to delete before pass the new validations
 
+    KieSession session = loadRulesKnowledgeBase(dataflowId);
     // Dataset and TablesValue validations
     // read Dataset Data
-    long startTime = System.currentTimeMillis();
-    LOG.info(String.valueOf(startTime));
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     // Execute rules validation
 
-    List<DatasetValidation> resultDataset = runDatasetValidations(dataset);
+    List<DatasetValidation> resultDataset = runDatasetValidations(dataset, session);
     // Asign ID Dataset
     resultDataset.stream().forEach(datasetV -> {
-
       datasetV.setDatasetValue(dataset);
-
     });
     // Save results to the db
     validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
-    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues());
+    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues(), session);
     // Asign ID Table
     dataset.getTableValues().stream().forEach(table -> {
       if (null != table.getTableValidations()) {
@@ -226,14 +204,14 @@ public class ValidationServiceImpl implements ValidationService {
     for (TableValue tableValue : dataset.getTableValues()) {
       Long tableId = tableValue.getId();
       // read Dataset Data
-      List<RecordValue> recordsBonicos =
+      List<RecordValue> recordsByTable =
           sanitizeRecords(recordRepository.findAllRecords_ByTableValueId(tableId));
 
       // Execute record rules validation
-      List<RecordValidation> resultRecord = runRecordValidations(recordsBonicos);
+      List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);
 
       // Assign ID Records and Fields
-      recordsBonicos.stream().filter(Objects::nonNull).forEach(row1 -> {
+      recordsByTable.stream().filter(Objects::nonNull).forEach(row1 -> {
         if (null != row1.getRecordValidations()) {
           row1.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowV -> {
             rowV.setRecordValue(row1);
@@ -244,10 +222,10 @@ public class ValidationServiceImpl implements ValidationService {
       // Save results to the db
       validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
 
-      recordsBonicos.stream().filter(Objects::nonNull).forEach(row2 -> {
+      recordsByTable.stream().filter(Objects::nonNull).forEach(row2 -> {
         if (null != row2.getRecordValidations()) {
           row2.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-            List<FieldValidation> resultFields = runFieldValidations(row2.getFields());
+            List<FieldValidation> resultFields = runFieldValidations(row2.getFields(), session);
             if (null != field.getFieldValidations()) {
               field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldV -> {
                 fieldV.setFieldValue(field);
@@ -256,16 +234,17 @@ public class ValidationServiceImpl implements ValidationService {
             }
           });
         }
-      })
-      // )
-      ;
-
+      });
     }
-    long finishTime = System.currentTimeMillis();
-    LOG.info("Ha tardado: " + (finishTime - startTime));
   }
 
 
+  /**
+   * Sanitize records.
+   *
+   * @param records the records
+   * @return the list
+   */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<Long> processedRecords = new HashSet<>();
@@ -291,13 +270,5 @@ public class ValidationServiceImpl implements ValidationService {
   public void deleteAllValidation(@DatasetId Long datasetId) {
     datasetRepository.deleteValidationTable();
   }
-
-  /**
-   * Save rule.
-   *
-   * @param dataFlowRules the data flow rules
-   */
-  @Override
-  public void saveRule(DataFlowRule dataFlowRules) {}
 
 }
