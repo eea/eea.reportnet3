@@ -152,6 +152,16 @@ public interface DatasetController {
   StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
 
 
+  /**
+   * Gets the failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   * @return the failed validations by id dataset
+   */
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,

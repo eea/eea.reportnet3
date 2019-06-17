@@ -42,34 +42,62 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class ValidationServiceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class ValidationServiceTest {
 
+  /** The validation service impl. */
   @InjectMocks
   private ValidationServiceImpl validationServiceImpl;
+
+  /** The validation service impl mocke. */
   @Mock
   private ValidationServiceImpl validationServiceImplMocke;
+
+  /** The kie session. */
   @Mock
   private KieSession kieSession;
+
+  /** The kie base manager. */
   @Mock
   private KieBaseManager kieBaseManager;
+
+  /** The dataset repository. */
   @Mock
   private DatasetRepository datasetRepository;
+
+  /** The dataset controller. */
   @Mock
   private DataSetControllerZuul datasetController;
+
+  /** The validation dataset repository. */
   @Mock
   private ValidationDatasetRepository validationDatasetRepository;
+
+  /** The validation table repository. */
   @Mock
   private ValidationTableRepository validationTableRepository;
+
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
+
+  /** The validation record repository. */
   @Mock
   private ValidationRecordRepository validationRecordRepository;
+
+  /** The validation field repository. */
   @Mock
   private ValidationFieldRepository validationFieldRepository;
 
+  /** The dataset value. */
   private DatasetValue datasetValue;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -100,6 +128,9 @@ public class ValidationServiceTest {
     datasetValue.setDatasetValidations(datasetValidations);
   }
 
+  /**
+   * Test run dataset validations.
+   */
   @Test
   public void testRunDatasetValidations() {
     DatasetValue dataset = new DatasetValue();
@@ -109,6 +140,9 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Test run table validations.
+   */
   @Test
   public void testRunTableValidations() {
     List<TableValue> tableValues = new ArrayList<>();
@@ -127,6 +161,9 @@ public class ValidationServiceTest {
         validationServiceImpl.runTableValidations(new ArrayList<>(), kieSession));
   }
 
+  /**
+   * Test run record validations.
+   */
   @Test
   public void testRunRecordValidations() {
     List<RecordValue> records = new ArrayList<RecordValue>();
@@ -137,6 +174,9 @@ public class ValidationServiceTest {
         validationServiceImpl.runRecordValidations(new ArrayList<RecordValue>(), kieSession));
   }
 
+  /**
+   * Test run field validations.
+   */
   @Test
   public void testRunFieldValidations() {
     List<FieldValue> fields = new ArrayList<FieldValue>();
@@ -161,12 +201,24 @@ public class ValidationServiceTest {
         validationServiceImpl.runFieldValidations(fields, kieSession));
   }
 
+  /**
+   * Test load rules knowledge base throw.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
     doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
     assertNull("failed", validationServiceImpl.loadRulesKnowledgeBase(1L));
   }
 
+  /**
+   * Test validate data set data.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testValidateDataSetData() throws FileNotFoundException, EEAException {
 
@@ -177,7 +229,6 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(validationDatasetRepository.saveAll(Mockito.any())).thenReturn(null);
     when(validationTableRepository.saveAll(Mockito.any())).thenReturn(null);
-
     Validation validation = new Validation();
     validation.setId(1L);
     List<RecordValue> records = new ArrayList<>();
@@ -193,33 +244,38 @@ public class ValidationServiceTest {
     fieldValue.setFieldValidations(fieldValidations);
     fieldValue.setId(1L);
     fields.add(fieldValue);
-
     List<RecordValidation> recordValidations = new ArrayList<>();
     RecordValidation recordValidation = new RecordValidation();
-
     recordValidation.setId(1l);
     recordValidation.setValidation(validation);
     recordValidations.add(recordValidation);
     recordValue.setFields(fields);
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
-
-
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(validationRecordRepository.saveAll(Mockito.any())).thenReturn(null);
-    // when(validationFieldRepository.saveAll(Mockito.any())).thenReturn(null);
-
-
     validationServiceImpl.validateDataSetData(1L);
 
   }
 
+  /**
+   * Test validate data set data dataflow id excep.
+   *
+   * @throws EEAException the EEA exception
+   * @throws FileNotFoundException the file not found exception
+   */
   @Test(expected = EEAException.class)
-  public void testValidateDataSetDataDataflowIdExcep() throws EEAException {
+  public void testValidateDataSetDataDataflowIdExcep() throws EEAException, FileNotFoundException {
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(null);
     validationServiceImpl.validateDataSetData(1L);
   }
 
+  /**
+   * Test validate data set data session excep.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testValidateDataSetDataSessionExcep() throws FileNotFoundException, EEAException {
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
@@ -229,6 +285,12 @@ public class ValidationServiceTest {
 
   }
 
+  /**
+   * Test validate data set data dataset excep.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testValidateDataSetDataDatasetExcep() throws FileNotFoundException, EEAException {
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
@@ -240,6 +302,12 @@ public class ValidationServiceTest {
 
   }
 
+  /**
+   * Test load rules knowledge base.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testLoadRulesKnowledgeBase() throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
@@ -248,6 +316,9 @@ public class ValidationServiceTest {
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
+  /**
+   * Test delete all validation.
+   */
   @Test
   public void testDeleteAllValidation() {
     doNothing().when(datasetRepository).deleteValidationTable();

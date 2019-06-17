@@ -2,7 +2,6 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
@@ -32,10 +31,11 @@ public interface DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
+  void processFile(Long datasetId, String fileName, InputStream is, String idTableSchema)
       throws EEAException, IOException;
 
 
@@ -52,7 +52,7 @@ public interface DatasetService {
    *
    * @param dataSetId the data set id
    */
-  void deleteImportData(@DatasetId Long dataSetId);
+  void deleteImportData(Long dataSetId);
 
   /**
    * Gets the table values by id.
@@ -67,7 +67,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
+  TableVO getTableValuesById(Long datasetId, String mongoID, Pageable pageable,
       String idFieldSchema, Boolean asc) throws EEAException;
 
 
@@ -81,9 +81,8 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
 
-  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
+  void setDataschemaTables(Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
-
 
 
   /**
@@ -93,7 +92,9 @@ public interface DatasetService {
    * @param idDataset the id dataset
    * @param pageable the pageable
    * @param type the type
+   *
    * @return the table from any object id
+   *
    * @throws EEAException the EEA exception
    */
 
@@ -105,41 +106,47 @@ public interface DatasetService {
    * Gets the dataset by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
-  DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
+  DataSetVO getById(Long datasetId) throws EEAException;
 
   /**
    * Update dataset.
    *
    * @param datasetId the dataset id
    * @param dataset the dataset
+   *
    * @return the data set VO
+   *
    * @throws EEAException the EEA exception
    */
-  void updateDataset(@DatasetId Long datasetId, DataSetVO dataset) throws EEAException;
+  void updateDataset(Long datasetId, DataSetVO dataset) throws EEAException;
 
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data flow id by id
+   *
    * @throws EEAException the EEA exception
    */
   Long getDataFlowIdById(Long datasetId) throws EEAException;
-
 
 
   /**
    * Gets the statistics.
    *
    * @param datasetId the dataset id
+   *
    * @return the statistics
+   *
    * @throws EEAException the EEA exception
    */
-  StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
-
+  StatisticsVO getStatistics(Long datasetId) throws EEAException;
 
 
   /**
@@ -149,9 +156,11 @@ public interface DatasetService {
    * @param pageable the pageable
    * @param field the field
    * @param asc the asc
+   *
    * @return the list validations
+   *
    * @throws EEAException the EEA exception
    */
-  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
+  FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
       String field, Boolean asc) throws EEAException;
 }

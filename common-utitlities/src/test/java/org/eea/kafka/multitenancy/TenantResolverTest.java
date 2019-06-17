@@ -1,8 +1,10 @@
-package org.eea.dataset.multitenancy;
+package org.eea.kafka.multitenancy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
+import org.eea.multitenancy.TenantResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +18,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class TenantResolverTest {
 
-  /** The tenant resolver. */
+  /**
+   * The tenant resolver.
+   */
   @InjectMocks
   private TenantResolver tenantResolver;
 
-  /** The Constant NAME. */
+  /**
+   * The Constant NAME.
+   */
   private static final String NAME = "dataset";
 
   /**
@@ -47,7 +53,7 @@ public class TenantResolverTest {
   @Test
   public void testGetTenantName() {
     tenantResolver.setTenantName(NAME);
-    assertEquals(NAME, tenantResolver.getTenantName());
+    assertEquals("not the same name", NAME, tenantResolver.getTenantName());
   }
 
   /**
@@ -56,7 +62,7 @@ public class TenantResolverTest {
   @Test
   public void testGetTenantNameNull() {
     tenantResolver.setTenantName(null);
-    assertNotNull(tenantResolver.getTenantName());
+    assertNotNull("name is null? ", tenantResolver.getTenantName());
   }
 
   /**

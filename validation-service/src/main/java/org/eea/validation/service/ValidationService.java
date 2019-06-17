@@ -3,7 +3,6 @@ package org.eea.validation.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.validation.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -24,16 +23,18 @@ public interface ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   void validateDataSetData(@DatasetId Long datasetId) throws EEAException;
+
 
   /**
    * Run dataset validations.
    *
    * @param dataset the dataset
    * @param kieSession the kie session
-   * @return the dataset value
+   * @return the list
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
