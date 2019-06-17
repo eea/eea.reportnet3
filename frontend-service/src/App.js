@@ -9,7 +9,6 @@ import iconsResources from './conf/prime.icons.json';
 
 const App = () => {
   const [resources] = useState({...langResources, ...iconsResources});
-  console.log(resources)
   return (
     <div className={styles.App}>
     <ResourcesContext.Provider value={resources}>

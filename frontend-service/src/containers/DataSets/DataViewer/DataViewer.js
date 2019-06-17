@@ -1,17 +1,23 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styles from './DataViewer.module.css';
 import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 // import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import {Dialog} from 'primereact/dialog';
+import {CustomFileUpload} from '../../../components/Layout/UI/CustomFileUpload/CustomFileUpload';
+//import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
+import ResourcesContext from '../../../components/Context/ResourcesContext';
 
-//import jsonData from '../../../assets/jsons/response_dataset_values2.json';
-import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
+import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester';
 
 const DataViewer = (props) => {
+    //const contextReporterDataSet = useContext(ReporterDataSetContext);
+    const [importDialogVisible, setImportDialogVisible] = useState(false);    
     const [totalRecords, setTotalRecords] = useState(0);
-    const [fetchedData, setFetchedData] = useState([]);
+    const [fetchedData, setFetchedData] = useState([]);    
+    const [linkedErrorData, setLinkedErrorData] = useState((props.linkedErrorData.length>0) ? props.linkedErrorData : []);
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
@@ -20,7 +26,8 @@ const DataViewer = (props) => {
     const [columns, setColumns] = useState([]); 
     const [cols, setCols] = useState(props.tableSchemaColumns); 
     const [header] = useState();
-    const [colOptions,setColOptions] = useState([{}]);    
+    const [colOptions,setColOptions] = useState([{}]); 
+    const resources = useContext(ResourcesContext);      
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     console.log("DataViewer Render..." + props.name);
@@ -37,7 +44,6 @@ const DataViewer = (props) => {
         
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
-        console.log(inmTableSchemaColumns);
         setCols(inmTableSchemaColumns);
 
       }, []);
@@ -73,6 +79,11 @@ const DataViewer = (props) => {
         fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
       }
   
+      const onRefreshClickHandler = () => {
+        setLinkedErrorData([]);
+        fetchDataHandler(null, sortOrder, firstRow, numRows);  
+      }
+
       // const onColumnToggleHandler = (event) =>{
       //   console.log("OnColumnToggle...");
       //   setCols(event.value);
@@ -98,16 +109,15 @@ const DataViewer = (props) => {
           queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
-        const dataPromise = HTTPRequesterAPI.get(
+        // props.urlViewer
+        const dataPromise = HTTPRequester.get(
           {
-            url:'/dataset/TableValueDataset/1',
+            url: '/jsons/response_dataset_values2.json',
             queryString: queryString
           }
-        );
-
+        );        
         dataPromise.then(response =>{
-          console.log(response.data);
-          filterDataResponse(response.data.records);
+          filterDataResponse(response.data.records);          
           if(response.data.totalRecords!==totalRecords){
             setTotalRecords(response.data.totalRecords);
           }
@@ -126,7 +136,6 @@ const DataViewer = (props) => {
         const dataFiltered = data.map(record => record.fields.map(f =>{
           return {[f.idFieldSchema]: f.value}
         }));
-        console.log(data)
         let auxFiltered = {}
         let auxArrayFiltered = [];
         dataFiltered.forEach(dat => {
@@ -137,24 +146,57 @@ const DataViewer = (props) => {
         setFetchedData(auxArrayFiltered);
       }
 
-      let totalCount = <span>Total: {totalRecords} rows</span>;
+      //TODO: Textos + iconos + ver si deben estar aquí.
+      const customButtons = [
+        {
+          label: resources.messages["import"],
+          icon: "0",
+          group: "left",
+          disabled: false,
+          clickHandler: () => setImportDialogVisible(true)
+      },
+        {
+            label: "Visibility",
+            icon: "6",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Filter",
+            icon: "7",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Group by",
+            icon: "8",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Sort",
+            icon: "9",
+            group: "left",
+            disabled: true,
+            clickHandler: null
+        },
+        {
+            label: "Refresh",
+            icon: "11",
+            group: "right",
+            disabled: false,
+            clickHandler: onRefreshClickHandler
+        }
+      ];
 
-// const cars = [
-// 	{ brand: 'VW', year: 2012, color: 'Orange', vin: 'dsad231ff' },
-// 	{ brand: 'Audi', year: 2011, color: 'Black', vin: 'gwregre345' },
-// 	{ brand: 'Renault', year: 2005, color: 'Gray', vin: 'h354htr' },
-// 	{ brand: 'BMW', year: 2003, color: 'Blue', vin: 'j6w54qgh' },
-// 	{ brand: 'Mercedes', year: 1995, color: 'Orange', vin: 'hrtwy34' },
-// 	{ brand: 'Volvo', year: 2005, color: 'Black', vin: 'jejtyj' },
-// 	{ brand: 'Honda', year: 2012, color: 'Yellow', vin: 'g43gr' },
-// 	{ brand: 'Jaguar', year: 2013, color: 'Orange', vin: 'greg34' },
-// 	{ brand: 'Ford', year: 2000, color: 'Black', vin: 'h54hw5' },
-// 	{ brand: 'Fiat', year: 2013, color: 'Red', vin: '245t2s' }
-// ];
+      let totalCount = <span>Total: {totalRecords} rows</span>;
 
     return (
         <div>
-          <ButtonsBar buttons={props.customButtons} />
+          <ButtonsBar buttons={(props.customButtons)?props.customButtons:customButtons} />
             {/* <Toolbar>
                 <CustomButton label="Visibility" icon="6" />                
                 <CustomButton label="Filter" icon="7" />   
@@ -162,7 +204,7 @@ const DataViewer = (props) => {
                 <CustomButton label="Sort" icon="9" />   
             </Toolbar> */}
             <div className={styles.Table}>
-                <DataTable value={fetchedData} paginatorRight={totalCount}
+                <DataTable value={(linkedErrorData.length>0) ? linkedErrorData : fetchedData} paginatorRight={totalCount}
                        resizableColumns={true} reorderableColumns={true}
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
@@ -171,8 +213,15 @@ const DataViewer = (props) => {
                     {columns}
                 </DataTable>
             </div>
+            <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
+                                className={styles.Dialog} dismissableMask={false} onHide={() => setImportDialogVisible(false)} >
+                            <CustomFileUpload mode="advanced" name="file" url={`http://127.0.0.1:8030/dataset/1/loadTableData/${props.id}`}
+                                                onUpload={() => setImportDialogVisible(false)} 
+                                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
+                                                fileLimit={1} className={styles.FileUpload}  /> 
+                        </Dialog>
         </div>
     );
 }
 
-export default DataViewer;
+export default React.memo(DataViewer);

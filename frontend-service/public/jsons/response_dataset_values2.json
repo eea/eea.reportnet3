@@ -1,34 +1,12 @@
 {  
-	"headers": [
-		{
-		  "id": "string",
-		  "idRecord": "string",
-		  "name": "string",
-		  "type": "string"
-		}
-	],
    "id":null,
    "idTableSchema":null,
-   "name":"string",
    "records":[  
       {  
          "idRecordSchema":"5cefb5b592f28351b4e9781e",
          "id":2,
          "fields":[  
             {  
-				"fieldValidations": [
-				{
-				  "id": 0,
-				  "validation": {
-					"id": 0,
-					"idRule": "string",
-					"levelError": "WARNING",
-					"message": "stringfgf",
-					"typeEntity": "FIELD",
-					"validationDate": "string"
-				  }
-				}
-			  ],
                "type":"string",
                "value":"ES111C0021902",
                "id":3,
@@ -167,20 +145,7 @@
                "idFieldSchema":"5cefb5b592f28351b4e97828"
             }
          ],
-         "recordValidations": [
-			{
-			  "id": 0,
-			  "validation": {
-				"id": 0,
-				"idRule": "string",
-				"levelError": "WARNING",
-				"message": "string",
-				"typeEntity": "RECORD",
-				"validationDate": "string"
-			  }
-			}
-		],
-		 "datasetPartitionId":1
+         "datasetPartitionId":1
       },
       {  
          "idRecordSchema":"5cefb5b592f28351b4e9781e",
@@ -2938,18 +2903,7 @@
          "datasetPartitionId":1
       }
    ],
-   "tableValidations": [
-    {
-      "id": 0,
-      "validation": {
-        "id": 0,
-        "idRule": "string",
-        "levelError": "WARNING",
-        "message": "string",
-        "typeEntity": "TABLE",
-        "validationDate": "string"
-      }
-    }
-  ],    
+   "headers":null,
+   "name":null,
    "totalRecords":2244
 }

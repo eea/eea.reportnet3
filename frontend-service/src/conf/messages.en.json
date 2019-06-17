@@ -29,6 +29,11 @@
         "yes": "Yes",
         "no": "No",
         "validateDataSet": "Validate dataset",
-        "validateDataSetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?"
+        "validateDataSetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
+        "origin": "Origin",
+        "levelError": "Level error",
+        "errorMessage": "Message",
+        "typeEntity": "Entity",
+        "loading": "Loading..."
     }
 }
