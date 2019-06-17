@@ -71,11 +71,13 @@ public interface DatasetController {
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
 
+
   /**
-   * Load dataset data.
+   * Load table data.
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param idTableSchema the id table schema
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
