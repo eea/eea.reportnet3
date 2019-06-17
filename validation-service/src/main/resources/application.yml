@@ -12,7 +12,7 @@ spring:
     properties:
       hibernate:
         dialect: ${DATABASE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
-        order_updates: false
+        order_updates: true
         order_inserts: true
         jdbc:
           batch_size: ${DATASET_BACH_JPA_SIZE:100}

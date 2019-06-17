@@ -11,7 +11,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.hibernate.annotations.DynamicUpdate;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +22,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@DynamicUpdate
 @Table(name = "TABLE_VALIDATION")
 public class TableValidation {
 
