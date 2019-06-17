@@ -108,13 +108,10 @@
                 "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
 		},
 		{
-				"key": "config/recordstore/management.endpoints.web.exposure.include",
-                "value": "Kg=="
+				"key": "config/dataset/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
 		},
-		{
-				"key": "config/recordstore/management.endpoints.web.exposure.include",
-                "value": "Kg=="
-		},
+		
 		{
                 "key": "config/dataflow/spring.jpa.hibernate.ddl-auto",
                 "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
@@ -190,7 +187,85 @@
 		{
 				"key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
                 "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+		},
+		{
+				"key": "config/dataflow/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+		},
+		{
+				"key": "config/recordstore/management.endpoints.web.exposure.include",
+                "value": "Kg=="
+		},
+		
+		{
+				"key": "config/recordstore/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+		},
+		{
+				"key": "config/recordstore/spring.sleuth.sampler.probability",
+                "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+		},
+		{
+				"key": "config/recordstore/spring.sleuth.web.skipPattern",
+                "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+		},
+		{
+				"key": "config/recordstore/feign.client.config.default.connectTimeout",
+                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+		},
+		{
+				"key": "config/recordstore/feign.client.config.default.readTimeout",
+                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+		},
+		{
+				"key": "config/recordstore/feign.client.config.default.loggerLevel",
+                "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+		},
+		{
+				"key": "config/recordstore/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+                "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+		},
+		{
+				"key": "config/recordstore/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+                "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+		},
+		{
+				"key": "config/recordstore/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+                "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+		},
+		{
+				"key": "config/recordstore/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+		},
+		{
+				"key": "config/recordstore/dockerContainerName",
+                "value": "JHtET0NFUl9DT05UQUlORVJfTkFNRTpjcnVuY2h5LXBvc3RncmVzfQ=="
+		},
+		{
+				"key": "config/recordstore/ipPostgre",
+                "value": "JHtSRUNPUkRTVE9SRV9JUDpsb2NhbGhvc3R9"
+		},
+		{
+				"key": "config/recordstore/userPostgre",
+                "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
+		},
+		{
+				"key": "config/recordstore/passwordPostgre",
+                "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
+		},
+		{
+				"key": "config/recordstore/connStringPostgree",
+                "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
+		},
+		{
+				"key": "config/recordstore/sqlGetAllDatasetsName",
+                "value": "JHtSRUNPUkRTVE9SRV9RVUVSWV9HRVRfQUxMX0RBVEFTRVRfU0NIRU1BOnNlbGVjdCAqIGZyb20gcGdfbmFtZXNwYWNlIHdoZXJlIG5zcG5hbWUgbGlrZSAnZGF0YXNldCUnfQ=="
+		},
+		{
+				"key": "config/recordstore/dockerServerUrl",
+                "value": "JHtET0NLRVJfU0VSVkVSX1VSTDp0Y3A6Ly9sb2NhbGhvc3Q6MjM3NX0="
 		}
+		
 		
 		
 ]

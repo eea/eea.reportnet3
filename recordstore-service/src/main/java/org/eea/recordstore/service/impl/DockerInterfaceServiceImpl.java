@@ -1,5 +1,13 @@
 package org.eea.recordstore.service.impl;
 
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.model.Binds;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,14 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.model.Binds;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Ports;
-import com.github.dockerjava.core.command.ExecStartResultCallback;
 
 
 /**
@@ -67,7 +67,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
   /**
    * The container name.
    */
-  @Value("${dockerContainerName:crunchy-postgres}")
+  @Value("${dockerContainerName}")
   private String containerName;
 
 
@@ -104,7 +104,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       }
 
       command.withHostConfig(hostConfig).exec();
-      LOG.info("Container created with name:{}",containerName);
+      LOG.info("Container created with name:{}", containerName);
     }
     return getContainer(containerName);
   }
@@ -158,6 +158,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
    * Gets the connection.
    *
    * @return the connection
+   *
    * @deprecated (not used)
    */
   @Deprecated
@@ -207,7 +208,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     dockerClient.dockerClient().stopContainerCmd(container.getId()).exec();
     dockerClient.dockerClient().removeContainerCmd(container.getId()).exec();
     LOG.info("Container stopped and removed");
-    
+
   }
 
   /**

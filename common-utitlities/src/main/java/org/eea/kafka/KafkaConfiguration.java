@@ -40,13 +40,13 @@ public class KafkaConfiguration {
   /**
    * The bootstrap address.
    */
-  @Value(value = "${kafka.bootstrapAddress:localhost:9092}")
+  @Value(value = "${kafka.bootstrapAddress}")
   private String bootstrapAddress;
 
   /**
    * The group id.
    */
-  @Value(value = "${spring.application.name:test-consumer-group}")
+  @Value(value = "${spring.application.name}")
   private String groupId;
 
   /**

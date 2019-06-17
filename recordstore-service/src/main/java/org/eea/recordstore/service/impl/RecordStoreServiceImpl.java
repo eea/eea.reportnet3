@@ -1,5 +1,6 @@
 package org.eea.recordstore.service.impl;
 
+import com.github.dockerjava.api.model.Container;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.github.dockerjava.api.model.Container;
 
 /**
  * The Class RecordStoreServiceImpl.
@@ -31,48 +31,67 @@ import com.github.dockerjava.api.model.Container;
 @Service
 public class RecordStoreServiceImpl implements RecordStoreService {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-  
+
   /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
 
-  /** The Constant DATASET_NAME_PATTERN. */
+  /**
+   * The Constant DATASET_NAME_PATTERN.
+   */
   private static final Pattern DATASET_NAME_PATTERN = Pattern.compile("((?)dataset_[0-9]+)");
 
-  /** The docker interface service. */
+  /**
+   * The docker interface service.
+   */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
 
-  /** The container name. */
-  @Value("${dockerContainerName:crunchy-postgres}")
+  /**
+   * The container name.
+   */
+  @Value("${dockerContainerName}")
   private String containerName;
 
-  /** The ip postgre db. */
-  @Value("${ipPostgre:localhost}")
+  /**
+   * The ip postgre db.
+   */
+  @Value("${ipPostgre}")
   private String ipPostgreDb;
 
-  /** The user postgre db. */
-  @Value("${userPostgre:root}")
+  /**
+   * The user postgre db.
+   */
+  @Value("${userPostgre}")
   private String userPostgreDb;
 
-  /** The pass postgre db. */
-  @Value("${passwordPostgre:root}")
+  /**
+   * The pass postgre db.
+   */
+  @Value("${passwordPostgre}")
   private String passPostgreDb;
 
-  /** The conn string postgre. */
-  @Value("${connStringPostgree:jdbc:postgresql://localhost/datasets}")
+  /**
+   * The conn string postgre.
+   */
+  @Value("${connStringPostgree}")
   private String connStringPostgre;
 
-  /** The sql get datasets name. */
-  @Value("${sqlGetAllDatasetsName:select * from pg_namespace where nspname like 'dataset%'}")
+  /**
+   * The sql get datasets name.
+   */
+  @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
 
-
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Autowired
   private KafkaSender kafkaSender;
 
@@ -124,6 +143,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
+   *
    * @throws DockerAccessException the docker access exception
    */
   @Override
@@ -193,7 +213,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data for dataset
+   *
    * @throws DockerAccessException the docker access exception
    */
   @Override
@@ -215,6 +237,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @return the connection data for dataset
+   *
    * @throws DockerAccessException the docker access exception
    */
   @Override
@@ -233,12 +256,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Gets the all data sets name.
    *
    * @return the all data sets name
+   *
    * @throws DockerAccessException the docker access exception
    */
   private List<String> getAllDataSetsName() throws DockerAccessException {
     final List<String> datasets = new ArrayList<>();
     final Container container = dockerInterfaceService.getContainer(containerName);
-
 
     try {
       final byte[] result =
@@ -266,6 +289,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * Creates the connection data VO.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data VO
    */
   private ConnectionDataVO createConnectionDataVO(final String datasetName) {
