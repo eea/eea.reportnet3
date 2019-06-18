@@ -748,52 +748,55 @@ public class DatasetServiceImpl implements DatasetService {
   public StatisticsVO getStatistics(final Long datasetId) throws EEAException {
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-
-    List<TableValue> allTableValues = dataset.getTableValues();
     StatisticsVO stats = new StatisticsVO();
-    stats.setIdDataSetSchema(dataset.getIdDatasetSchema());
-    stats.setDatasetErrors(false);
-    stats.setTables(new ArrayList<>());
+    if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
+      List<TableValue> allTableValues = dataset.getTableValues();
+      stats.setIdDataSetSchema(dataset.getIdDatasetSchema());
+      stats.setDatasetErrors(false);
+      stats.setTables(new ArrayList<>());
 
-    DataSetSchema schema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-    stats.setNameDataSetSchema(schema.getNameDataSetSchema());
-    List<String> listIdsDataSetSchema = new ArrayList<>();
-    Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
-    for (TableSchema tableSchema : schema.getTableSchemas()) {
-      listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
-      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-          tableSchema.getNameTableSchema());
-    }
-
-    List<String> listIdDataSetSchema = new ArrayList<>();
-    allTableValues = sanitizeTableValues(allTableValues);
-    for (TableValue tableValue : allTableValues) {
-      listIdDataSetSchema.add(tableValue.getIdTableSchema());
-
-      TableStatisticsVO tableStats =
-          processTableStats(tableValue, datasetId, mapIdNameDatasetSchema);
-      if (tableStats.getTableErrors()) {
-        stats.setDatasetErrors(true);
+      DataSetSchema schema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+      stats.setNameDataSetSchema(schema.getNameDataSetSchema());
+      List<String> listIdsDataSetSchema = new ArrayList<>();
+      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
+        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+            tableSchema.getNameTableSchema());
       }
 
-      stats.getTables().add(tableStats);
-    }
+      List<String> listIdDataSetSchema = new ArrayList<>();
+      allTableValues = sanitizeTableValues(allTableValues);
+      for (TableValue tableValue : allTableValues) {
+        listIdDataSetSchema.add(tableValue.getIdTableSchema());
 
-    // Check if there are empty tables
-    listIdsDataSetSchema.removeAll(listIdDataSetSchema);
-    for (String idTableSchem : listIdsDataSetSchema) {
-      stats.getTables()
-          .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
-    }
+        TableStatisticsVO tableStats =
+            processTableStats(tableValue, datasetId, mapIdNameDatasetSchema);
+        if (tableStats.getTableErrors()) {
+          stats.setDatasetErrors(true);
+        }
 
-    // Check dataset validations
-    for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
-      if (datasetValidation.getValidation() != null) {
-        stats.setDatasetErrors(true);
+        stats.getTables().add(tableStats);
       }
+
+      // Check if there are empty tables
+      listIdsDataSetSchema.removeAll(listIdDataSetSchema);
+      for (String idTableSchem : listIdsDataSetSchema) {
+        stats.getTables()
+            .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
+      }
+
+      // Check dataset validations
+      for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
+        if (datasetValidation.getValidation() != null) {
+          stats.setDatasetErrors(true);
+        }
+      }
+      LOG.info("Statistics received from datasetId {}.", datasetId);
+    } else {
+      LOG_ERROR.error("No dataset founded to show statistics. DatasetId:{}", datasetId);
     }
-    LOG.info("Statistics received from datasetId {}.", datasetId);
     return stats;
   }
 
