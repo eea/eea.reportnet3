@@ -192,7 +192,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       RuleField rule2 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<String>();
-      switch (header.getHeaderType().toLowerCase().trim()) {
+      switch (header.getHeaderType().toString().toLowerCase().trim()) {
         case "string":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
@@ -209,7 +209,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("isValid(value)");
+          rule2.setWhenCondition("!isValid(value) || value == null");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(INTEGER_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
