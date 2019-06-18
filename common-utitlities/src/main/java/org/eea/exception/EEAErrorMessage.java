@@ -3,7 +3,7 @@ package org.eea.exception;
 /**
  * Instantiates a new EEA error message.
  */
-public class EEAErrorMessage {
+public final class EEAErrorMessage {
 
   /**
    * The Constant DB_FILEFORMAT.

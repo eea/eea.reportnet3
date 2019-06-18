@@ -10,11 +10,12 @@ import org.eea.recordstore.exception.DockerAccessException;
 public interface RecordStoreService {
 
 
+
   /**
-   * Reset dataset database. TO BE REMOVED. ONLY FOR TEST PURPOSES
+   * Reset dataset database.
    *
    * @throws DockerAccessException the docker access exception
-   * @deprecated 
+   * @deprecated (pending to remove)
    */
   @Deprecated
   void resetDatasetDatabase() throws DockerAccessException;
@@ -34,8 +35,7 @@ public interface RecordStoreService {
    * @param sourceDatasetName the source dataset name
    * @param destinationDataSetName the destination data set name
    */
-  void createDataSetFromOther(String sourceDatasetName,
-      String destinationDataSetName);
+  void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName);
 
   /**
    * Gets connection data for dataset.

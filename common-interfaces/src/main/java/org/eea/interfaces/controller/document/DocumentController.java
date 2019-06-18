@@ -22,7 +22,7 @@ public interface DocumentController {
    * @throws Exception the exception
    */
   @GetMapping(value = "/testLog")
-  void testLogging() throws Exception;
+  void testLogging();
 
   /**
    * Upload document .
@@ -30,7 +30,7 @@ public interface DocumentController {
    * @throws Exception the exception
    */
   @GetMapping(value = "/create")
-  void uploadDocument() throws Exception;
+  void uploadDocument();
 
   /**
    * Download document .
@@ -39,6 +39,6 @@ public interface DocumentController {
    * @throws Exception the exception
    */
   @GetMapping
-  void getDocument() throws Exception;
+  void getDocument();
 
 }
