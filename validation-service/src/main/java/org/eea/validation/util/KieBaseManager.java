@@ -9,9 +9,9 @@ import java.util.Map;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
-import org.eea.validation.util.droolsCompose.ConditionsDrools;
-import org.eea.validation.util.droolsCompose.SchemasDrools;
-import org.eea.validation.util.droolsCompose.TypeValidation;
+import org.eea.validation.util.drools.compose.ConditionsDrools;
+import org.eea.validation.util.drools.compose.SchemasDrools;
+import org.eea.validation.util.drools.compose.TypeValidation;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.io.Resource;
@@ -66,17 +66,17 @@ public class KieBaseManager {
             ruleRecord.getRuleId().toString(), TypeValidation.RECORD,
             SchemasDrools.ID_RECORD_SCHEMA.getValue(), ruleRecord.getWhenCondition(),
             ruleRecord.getThenCondition().get(0), ruleRecord.getThenCondition().get(1)));
-
-        tableSchema.getRecordSchema().getFieldSchema().stream().forEach(fieldSchema -> {
-          fieldSchema.getRuleField().forEach(ruleField -> {
-            ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
-                ruleField.getRuleId().toString(), TypeValidation.FIELD,
-                SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
-                ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1)));
-          });
-
-        });
       });
+      tableSchema.getRecordSchema().getFieldSchema().stream().forEach(fieldSchema -> {
+        fieldSchema.getRuleField().forEach(ruleField -> {
+          ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
+              ruleField.getRuleId().toString(), TypeValidation.FIELD,
+              SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
+              ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1)));
+        });
+
+      });
+
 
     });
 

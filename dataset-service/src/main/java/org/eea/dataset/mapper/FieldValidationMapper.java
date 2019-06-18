@@ -13,7 +13,7 @@ import org.mapstruct.Mapping;
 public interface FieldValidationMapper extends IMapper<FieldValidation, FieldValidationVO> {
 
   /** The Constant FIELD_VALUE. */
-  final String FIELD_VALUE = "fieldValue";
+  String FIELD_VALUE = "fieldValue";
 
   /**
    * Class to entity.
@@ -29,7 +29,7 @@ public interface FieldValidationMapper extends IMapper<FieldValidation, FieldVal
    * Entity to class.
    *
    * @param entity the entity
-   * @return the t
+   * @return the field validation VO
    */
   @Override
   @Mapping(source = FIELD_VALUE, target = FIELD_VALUE, ignore = true)

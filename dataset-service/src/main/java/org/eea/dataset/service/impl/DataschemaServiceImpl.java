@@ -49,6 +49,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
+  /** The Constant VALIDATE_ERROR. */
+  private static final String VALIDATE_ERROR = "Validation Error";
+
+  /** The Constant ERROR. */
+  private static final String ERROR = "ERROR";
+
+  /** The Constant VALIDATE_WARNING. */
+  private static final String VALIDATE_WARNING = "Validation Warning";
+
+  private static final String WARNING = "WARNING";
+
+  /** The Constant NULL. */
+  private static final String NULL = "id == null";
+
   /**
    * Creates the data schema.
    *
@@ -70,15 +84,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
     RuleDataSet ruleDataset = new RuleDataSet();
     List<String> listaStrinsDataset = new ArrayList<String>();
-    listaStrinsDataset.add("ERROR AL VALIDAD");
-    listaStrinsDataset.add("ERROR");
+    listaStrinsDataset.add(VALIDATE_ERROR);
+    listaStrinsDataset.add(ERROR);
     ruleDataset.setThenCondition(listaStrinsDataset);
 
     ruleDataset.setRuleId(new ObjectId());
     ruleDataset.setDataFlowId(1L);
     ruleDataset.setIdDataSetSchema(idDataSetSchema);
     ruleDataset.setScope(TypeEntityEnum.DATASET);
-    ruleDataset.setWhenCondition("id == null");
+    ruleDataset.setWhenCondition(NULL);
     ruleDataset.setRuleName("dataset regla");
     ruleDataSetList.add(ruleDataset);
     dataSetSchema.setRuleDataSet(ruleDataSetList);
@@ -94,18 +108,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       RuleTable ruleTable = new RuleTable();
       List<String> listaStrinsRuleTable = new ArrayList<String>();
       if (i % 2 == 0) {
-        listaStrinsRuleTable.add("ERROR AL VALIDAD");
-        listaStrinsRuleTable.add("ERROR");
+        listaStrinsRuleTable.add(VALIDATE_ERROR);
+        listaStrinsRuleTable.add(ERROR);
       } else {
-        listaStrinsRuleTable.add("WARNING AL VALIDAD");
-        listaStrinsRuleTable.add("WARNING");
+        listaStrinsRuleTable.add(VALIDATE_WARNING);
+        listaStrinsRuleTable.add(WARNING);
       }
       ruleTable.setThenCondition(listaStrinsRuleTable);
 
       ruleTable.setRuleId(new ObjectId());
       ruleTable.setDataFlowId(1L);
       ruleTable.setIdTableSchema(idTableSchema);
-      ruleTable.setWhenCondition("id == null");
+      ruleTable.setWhenCondition(NULL);
       ruleTable.setRuleName("table regla" + i);
       ruleTable.setScope(TypeEntityEnum.TABLE);
       ruleTableList.add(ruleTable);
@@ -121,11 +135,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       RuleRecord ruleRecord = new RuleRecord();
       List<String> listaStrinsRuleRecord = new ArrayList<String>();
       if (i % 2 == 0) {
-        listaStrinsRuleRecord.add("ERROR AL VALIDAD");
-        listaStrinsRuleRecord.add("ERROR");
+        listaStrinsRuleRecord.add(VALIDATE_ERROR);
+        listaStrinsRuleRecord.add(ERROR);
       } else {
-        listaStrinsRuleRecord.add("WARNING AL VALIDAD");
-        listaStrinsRuleRecord.add("WARNING");
+        listaStrinsRuleRecord.add(VALIDATE_WARNING);
+        listaStrinsRuleRecord.add(WARNING);
       }
       ruleRecord.setThenCondition(listaStrinsRuleRecord);
 
@@ -133,7 +147,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       ruleRecord.setDataFlowId(1L);
       ruleRecord.setScope(TypeEntityEnum.RECORD);
       ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition("id == null");
+      ruleRecord.setWhenCondition(NULL);
       ruleRecord.setRuleName("record regla" + i);
       ruleRecordList.add(ruleRecord);
 
@@ -141,37 +155,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       List<FieldSchema> fieldSchemas = new ArrayList<>();
 
       int headersSize = table.getTableHeadersCollections().size();
-      for (int j = 1; j <= headersSize; j++) {
-        ObjectId idFieldSchema = new ObjectId();
-        TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
-
-        List<RuleField> ruleField = new ArrayList<RuleField>();
-        RuleField rule = new RuleField();
-        rule.setRuleId(new ObjectId());
-        rule.setDataFlowId(1L);
-        rule.setIdFieldSchema(idFieldSchema);
-        rule.setWhenCondition("id == null");
-        rule.setRuleName("field regla" + i + " y " + j);
-        List<String> listaStrins = new ArrayList<String>();
-        if (j % 2 == 0) {
-          listaStrins.add("ERROR AL VALIDAD");
-          listaStrins.add("ERROR");
-        } else {
-          listaStrins.add("WARNING AL VALIDAD");
-          listaStrins.add("WARNING");
-        }
-        rule.setThenCondition(listaStrins);
-        ruleField.add(rule);
-        rule.setScope(TypeEntityEnum.FIELD);
-
-        FieldSchema fieldSchema = new FieldSchema();
-        fieldSchema.setIdFieldSchema(idFieldSchema);
-        fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
-        fieldSchema.setHeaderName(header.getHeaderName());
-        fieldSchema.setType(header.getHeaderType());
-        fieldSchema.setRuleField(ruleField);
-        fieldSchemas.add(fieldSchema);
-      }
+      createRuleFields(i, table, recordSchema, fieldSchemas, headersSize);
 
       recordSchema.setRuleRecord(ruleRecordList);
       recordSchema.setFieldSchema(fieldSchemas);
@@ -182,6 +166,51 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setTableSchemas(tableSchemas);
     schemasRepository.save(dataSetSchema);
 
+  }
+
+
+  /**
+   * Creates the rule fields.
+   *
+   * @param i the i
+   * @param table the table
+   * @param recordSchema the record schema
+   * @param fieldSchemas the field schemas
+   * @param headersSize the headers size
+   */
+  private void createRuleFields(int i, TableCollection table, RecordSchema recordSchema,
+      List<FieldSchema> fieldSchemas, int headersSize) {
+    for (int j = 1; j <= headersSize; j++) {
+      ObjectId idFieldSchema = new ObjectId();
+      TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
+
+      List<RuleField> ruleField = new ArrayList<RuleField>();
+      RuleField rule = new RuleField();
+      rule.setRuleId(new ObjectId());
+      rule.setDataFlowId(1L);
+      rule.setIdFieldSchema(idFieldSchema);
+      rule.setWhenCondition(NULL);
+      rule.setRuleName("field regla" + i + " y " + j);
+      List<String> listaStrins = new ArrayList<String>();
+      if (j % 2 == 0) {
+        listaStrins.add(VALIDATE_ERROR);
+        listaStrins.add(ERROR);
+      } else {
+        listaStrins.add(VALIDATE_WARNING);
+        listaStrins.add(WARNING);
+      }
+      rule.setThenCondition(listaStrins);
+      ruleField.add(rule);
+      rule.setScope(TypeEntityEnum.FIELD);
+
+      FieldSchema fieldSchema = new FieldSchema();
+      fieldSchema.setIdFieldSchema(idFieldSchema);
+      fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
+      fieldSchema.setHeaderName(header.getHeaderName());
+      fieldSchema.setType(header.getHeaderType());
+      fieldSchema.setRuleField(ruleField);
+      fieldSchemas.add(fieldSchema);
+    }
   }
 
 

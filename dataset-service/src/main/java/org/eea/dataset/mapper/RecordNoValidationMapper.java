@@ -10,10 +10,9 @@ import org.mapstruct.Mapping;
 /**
  * The Interface RecordNoValidationMapper.
  */
-@Mapper(componentModel = "spring", uses= FieldNoValidationMapper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = FieldNoValidationMapper.class,
+    injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface RecordNoValidationMapper extends IMapper<RecordValue, RecordVO> {
-
-  
 
   /**
    * Entity to class.
@@ -21,8 +20,8 @@ public interface RecordNoValidationMapper extends IMapper<RecordValue, RecordVO>
    * @param entity the entity
    * @return the record VO
    */
-  @Mapping(target = "recordValidations", ignore=true)
+  @Mapping(target = "recordValidations", ignore = true)
   @Override
   RecordVO entityToClass(RecordValue entity);
-  
+
 }

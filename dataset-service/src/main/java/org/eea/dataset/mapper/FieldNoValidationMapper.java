@@ -12,16 +12,14 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FieldNoValidationMapper extends IMapper<FieldValue, FieldVO> {
 
-  
-
   /**
    * Entity to class.
    *
    * @param entity the entity
    * @return the record VO
    */
-  @Mapping(target = "fieldValidations", ignore=true)
+  @Mapping(target = "fieldValidations", ignore = true)
   @Override
   FieldVO entityToClass(FieldValue entity);
-  
+
 }

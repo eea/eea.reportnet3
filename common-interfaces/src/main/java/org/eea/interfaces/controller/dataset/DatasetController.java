@@ -28,7 +28,7 @@ public interface DatasetController {
    * The interface Data set controller zuul.
    */
   @FeignClient(value = "dataset", path = "/dataset")
-  public interface DataSetControllerZuul extends DatasetController {
+  interface DataSetControllerZuul extends DatasetController {
 
   }
 
