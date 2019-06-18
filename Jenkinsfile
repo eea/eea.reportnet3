@@ -205,7 +205,7 @@ pipeline {
                         script {
                             echo 'ReportNet 3.0 Frontend'
                             def app
-                            app = docker.build("k8s-swi001:5000/frontend-service:3.0", " ./frontend-service/")
+                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:3.0", " ./frontend-service/")
                             app.push()                    
                         }
                     }
