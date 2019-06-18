@@ -84,7 +84,7 @@ public interface DatasetService {
    */
 
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
-      throws EEAException;
+      TableCollectionVO tableCollections) throws EEAException;
 
 
   /**
@@ -164,7 +164,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
-      Boolean asc) throws EEAException;
+      String field, Boolean asc) throws EEAException;
 
   /**
    * Update record.
