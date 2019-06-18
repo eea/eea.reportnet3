@@ -243,8 +243,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void processFile(final Long datasetId, final String fileName,
-      final InputStream is, final String idTableSchema) throws EEAException, IOException {
+  public void processFile(final Long datasetId, final String fileName, final InputStream is,
+      final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -433,7 +433,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (records.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}", datasetId);
+      LOG.info("No records founded in datasetId {}, tableSchema {}", datasetId, mongoID);
 
     } else {
       // Records retrieved,
@@ -469,7 +469,7 @@ public class DatasetServiceImpl implements DatasetService {
       int endIndex =
           (pageable.getPageNumber() + 1) * pageable.getPageSize() > sanitizeRecords.size()
               ? sanitizeRecords.size()
-              : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+              : ((pageable.getPageNumber() + 1) * pageable.getPageSize());
       // 4º map to VO the records of the calculated page
       List<RecordVO> recordVOs =
           recordNoValidationMapper.entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
@@ -488,8 +488,10 @@ public class DatasetServiceImpl implements DatasetService {
       });
       result.setRecords(recordVOs);
       result.setTotalRecords(Long.valueOf(sanitizeRecords.size()));
-      LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",
-          datasetId, sanitizeRecords.size(), pageable.getPageNumber(), pageable.getPageSize());
+      LOG.info(
+          "Total records founded in datasetId {} tableSchema {}: {}. Now in page {}, {} records by page",
+          datasetId, mongoID, sanitizeRecords.size(), pageable.getPageNumber(),
+          pageable.getPageSize());
       if (StringUtils.isNotBlank(idFieldSchema)) {
         LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
       }
@@ -587,7 +589,7 @@ public class DatasetServiceImpl implements DatasetService {
       tableValue
           .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
-
+    LOG.info("Get dataset by id: {}", datasetId);
     return dataSetMapper.entityToClass(datasetValue);
   }
 
@@ -672,8 +674,11 @@ public class DatasetServiceImpl implements DatasetService {
         record = field.getRecord();
       }
     }
-
     validationLink.setPage(this.processTable(tableVO, records, record, pageable));
+    LOG.info(
+        "Validation error with id {} clicked in dataset {}. Redirect to page {} from table schema {}, with a page size of {}",
+        id, idDataset, validationLink.getPage().getNumPage(),
+        validationLink.getPage().getTable().getIdTableSchema(), pageable.getPageSize());
     return validationLink;
   }
 
@@ -788,7 +793,7 @@ public class DatasetServiceImpl implements DatasetService {
         stats.setDatasetErrors(true);
       }
     }
-
+    LOG.info("Statistics received from datasetId {}.", datasetId);
     return stats;
   }
 
@@ -979,6 +984,9 @@ public class DatasetServiceImpl implements DatasetService {
       validation.setErrors(errors.subList(initIndex, endIndex));
     }
     validation.setTotalErrors(Long.valueOf(errors.size()));
+    LOG.info(
+        "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
+        datasetId, errors.size(), pageable.getPageNumber(), pageable.getPageSize());
 
     return validation;
 
