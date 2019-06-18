@@ -61,7 +61,9 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -485,11 +487,28 @@ public class DatasetServiceImpl implements DatasetService {
       Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
+          List<FieldValidationVO> validations = this.fieldValidationMapper
+              .entityListToClass(fieldValidations.get(field.getId()));
           field.setFieldValidations(
-              this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
+              validations);
+          if (null != validations && !validations.isEmpty()) {
+            field.setLevelError(
+                validations.stream().map(validation -> validation.getValidation().getLevelError())
+                    .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
+                    .orElse(TypeErrorEnum.WARNING));
+          }
         });
-        record.setRecordValidations(
-            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
+
+        List<RecordValidationVO> validations = this.recordValidationMapper
+            .entityListToClass(recordValidations.get(record.getId()));
+        record.setRecordValidations(validations
+        );
+        if (null != validations && !validations.isEmpty()) {
+          record.setLevelError(
+              validations.stream().map(validation -> validation.getValidation().getLevelError())
+                  .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
+                  .orElse(TypeErrorEnum.WARNING));
+        }
       });
       result.setRecords(recordVOs);
       result.setTotalRecords(Long.valueOf(sanitizeRecords.size()));
@@ -621,7 +640,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data flow id by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -716,10 +737,13 @@ public class DatasetServiceImpl implements DatasetService {
     recordVOs.stream().forEach(record -> {
       record.getFields().stream().forEach(field -> {
         field.setFieldValidations(
-            this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
+            this.fieldValidationMapper
+                .entityListToClass(fieldValidations.get(field.getId())));
       });
-      record.setRecordValidations(
-          this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
+      record.setRecordValidations(this.recordValidationMapper
+          .entityListToClass(recordValidations.get(record.getId()))
+      );
+
     });
 
     // TABLE VALIDATIONS
@@ -753,52 +777,55 @@ public class DatasetServiceImpl implements DatasetService {
   public StatisticsVO getStatistics(final Long datasetId) throws EEAException {
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-
-    List<TableValue> allTableValues = dataset.getTableValues();
     StatisticsVO stats = new StatisticsVO();
-    stats.setIdDataSetSchema(dataset.getIdDatasetSchema());
-    stats.setDatasetErrors(false);
-    stats.setTables(new ArrayList<>());
+    if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
+      List<TableValue> allTableValues = dataset.getTableValues();
+      stats.setIdDataSetSchema(dataset.getIdDatasetSchema());
+      stats.setDatasetErrors(false);
+      stats.setTables(new ArrayList<>());
 
-    DataSetSchema schema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-    stats.setNameDataSetSchema(schema.getNameDataSetSchema());
-    List<String> listIdsDataSetSchema = new ArrayList<>();
-    Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
-    for (TableSchema tableSchema : schema.getTableSchemas()) {
-      listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
-      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-          tableSchema.getNameTableSchema());
-    }
-
-    List<String> listIdDataSetSchema = new ArrayList<>();
-    allTableValues = sanitizeTableValues(allTableValues);
-    for (TableValue tableValue : allTableValues) {
-      listIdDataSetSchema.add(tableValue.getIdTableSchema());
-
-      TableStatisticsVO tableStats =
-          processTableStats(tableValue, datasetId, mapIdNameDatasetSchema);
-      if (tableStats.getTableErrors()) {
-        stats.setDatasetErrors(true);
+      DataSetSchema schema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+      stats.setNameDataSetSchema(schema.getNameDataSetSchema());
+      List<String> listIdsDataSetSchema = new ArrayList<>();
+      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
+        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+            tableSchema.getNameTableSchema());
       }
 
-      stats.getTables().add(tableStats);
-    }
+      List<String> listIdDataSetSchema = new ArrayList<>();
+      allTableValues = sanitizeTableValues(allTableValues);
+      for (TableValue tableValue : allTableValues) {
+        listIdDataSetSchema.add(tableValue.getIdTableSchema());
 
-    // Check if there are empty tables
-    listIdsDataSetSchema.removeAll(listIdDataSetSchema);
-    for (String idTableSchem : listIdsDataSetSchema) {
-      stats.getTables()
-          .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
-    }
+        TableStatisticsVO tableStats =
+            processTableStats(tableValue, datasetId, mapIdNameDatasetSchema);
+        if (tableStats.getTableErrors()) {
+          stats.setDatasetErrors(true);
+        }
 
-    // Check dataset validations
-    for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
-      if (datasetValidation.getValidation() != null) {
-        stats.setDatasetErrors(true);
+        stats.getTables().add(tableStats);
       }
+
+      // Check if there are empty tables
+      listIdsDataSetSchema.removeAll(listIdDataSetSchema);
+      for (String idTableSchem : listIdsDataSetSchema) {
+        stats.getTables()
+            .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
+      }
+
+      // Check dataset validations
+      for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
+        if (datasetValidation.getValidation() != null) {
+          stats.setDatasetErrors(true);
+        }
+      }
+      LOG.info("Statistics received from datasetId {}.", datasetId);
+    } else {
+      LOG_ERROR.error("No dataset founded to show statistics. DatasetId:{}", datasetId);
     }
-    LOG.info("Statistics received from datasetId {}.", datasetId);
     return stats;
   }
 

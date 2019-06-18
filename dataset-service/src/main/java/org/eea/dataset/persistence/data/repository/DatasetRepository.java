@@ -18,7 +18,7 @@ public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
    */
   @Modifying
   @Query(nativeQuery = true,
-      value = "truncate table field_validation, field_value, record_validation, record_value, table_validation, table_value, dataset_validation, validation, dataset_value")
+      value = "truncate table field_validation, field_value, record_validation, record_value, table_validation, table_value, dataset_validation, validation")
   void removeDatasetData(Long dataSetId);
 
 
