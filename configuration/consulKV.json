@@ -420,6 +420,10 @@
                 "value": "ZmFsc2U="
 		},
 		{
+				"key": "config/validation/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+		},
+		{
 				"key": "config/apiGateway/zuul.retryable",
                 "value": "dHJ1ZQ=="
 		},
@@ -458,8 +462,6 @@
 		{
 				"key": "config/apiGateway/service.ribbon.retryableStatusCodes",
                 "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
-		},
-		
-		
-		
+		}
+
 ]
