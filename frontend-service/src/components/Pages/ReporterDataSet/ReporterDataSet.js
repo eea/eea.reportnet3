@@ -28,6 +28,7 @@ const ReporterDataSet = () => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
 
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
@@ -149,7 +150,7 @@ const ReporterDataSet = () => {
 
     });   
     
-  }, []);
+  }, [isDataDeleted]);
 
   const setVisibleHandler = (fnUseState, visible) =>{
     fnUseState(visible);
@@ -164,7 +165,10 @@ const ReporterDataSet = () => {
         url:'/dataset/'+ idDataSet + '/deleteImportData',
         queryString: {}
       }
-    );
+    )
+    .then(res=>{
+      setIsDataDeleted(true);
+    });
     console.log("Data deleted!");
   }
 
