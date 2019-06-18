@@ -26,7 +26,6 @@
     <module>common-interfaces</module>
     <module>common-utitlities</module>
     <module>document-container-service</module>
-    <module>frontend-service</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
@@ -176,7 +175,11 @@
       <artifactId>common-utitlities</artifactId>
       <version>3.0-SNAPSHOT</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.eea.interfaces</groupId>
+      <artifactId>common-interfaces</artifactId>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -314,7 +317,7 @@
         </sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
         <sonar.coverage.exclusions>
-          **/org/eea/**/persistence/**domain/**,**/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**
+          **/org/eea/**/persistence/**domain/**,**/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**
         </sonar.coverage.exclusions>
       </properties>
       <build>
