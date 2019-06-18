@@ -11,6 +11,8 @@ import ResourcesContext from '../../../components/Context/ResourcesContext';
 
 import PropTypes from 'prop-types';
 import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester.js';
+import config from '../../../conf/web.config.json';
+
 
 const ValidationViewer = (props) => {
   const resources = useContext(ResourcesContext);
@@ -47,7 +49,7 @@ const ValidationViewer = (props) => {
               id: "typeEntity",
               header: resources.messages["typeEntity"]
             }];
-        let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={`${col.header}`} />);
+        let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
         columnsArr.push(<Column key="idObject" field="idObject" header="" className={styles.VisibleHeader} />)
         columnsArr.push(<Column key="idTableSchema" field="idTableSchema" header="" className={styles.VisibleHeader} />)
         setColumns(columnsArr);   
@@ -96,7 +98,7 @@ const ValidationViewer = (props) => {
 
         const dataPromise = HTTPRequester.get(
           {
-            url:'/jsons/list-of-errors.json',
+            url:`${config.listValidationsAPI.url}1`,
             queryString: queryString
           }
         );
@@ -118,25 +120,28 @@ const ValidationViewer = (props) => {
       }
 
       const filterLinkedDataResponse = (data) =>{  
-        const dataFiltered = data.map(record => record.fields.map(f =>{
-          return {[f.idFieldSchema]: f.value}
-        }));
-        let auxFiltered = {}
-        let auxArrayFiltered = [];
-        dataFiltered.forEach(dat => {
-          dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
-          auxArrayFiltered.push(auxFiltered);
-          auxFiltered={};
-        });
-        return auxArrayFiltered;
+
+        const dataFiltered = data.records.map(record => {
+          const recordValidations = record.recordValidations;
+          const arrayDataFields = record.fields.map(field => {
+            return { 
+              fieldData: {[field.idFieldSchema]: field.value},
+              fieldValidations : field.fieldValidations
+             };
+          });
+          const arrayDataAndValidations = {
+            dataRow: arrayDataFields,
+            recordValidations
+          };
+    
+          return arrayDataAndValidations;
+        });    
+
+        return dataFiltered;
       }
 
       const onRowSelectHandler = (event) =>{      
-        
-
         //http://localhost:8030/dataset/loadTableFromAnyObject/901?datasetId=1&pageSize=2&type=FIELD
-
-        //`${config.validationViewerAPI.url}event.data.idObject`
         let queryString = {
           datasetId: props.idDataSet,
           pageSize: numRows,
@@ -145,7 +150,7 @@ const ValidationViewer = (props) => {
 
         const dataPromise = HTTPRequester.get(
           {
-            url: '/jsons/response_getTableFromAnyObjectId.json',
+            url: `${config.validationViewerAPI.url}${event.data.idObject}`,
             queryString: queryString
           }
         );
@@ -154,7 +159,7 @@ const ValidationViewer = (props) => {
         .then(res => {
           contextReporterDataSet.validationsVisibleHandler();
           contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-          contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(res.data.page.table.records));
+          contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(res.data.page.table));
         })
         .catch(error => {
           console.log(error);

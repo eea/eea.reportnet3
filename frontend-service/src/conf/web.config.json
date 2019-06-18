@@ -2,7 +2,7 @@
     "api":{
         "protocol": "http://",
         "url": "localhost",
-        "port": ":3000",                
+        "port": ":8030",                
         "ip": "127.0.0.1"
     },
     "dataSchemaAPI":{
@@ -17,8 +17,14 @@
     "loadStatisticsAPI":{
         "url":"/dataset/loadStatistics/"
     },
-    "loadDatasetData":{
+    "loadDatasetDataAPI":{
         "url":"/dataset/1/loadDatasetData/"
+    },
+    "listValidationsAPI":{
+        "url": "/dataset/listValidations/"
+    },
+    "loadDataTableAPI":{
+        "url":"/dataset/1/loadTableData/"
     }
     
 }

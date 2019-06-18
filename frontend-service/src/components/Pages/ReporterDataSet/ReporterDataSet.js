@@ -53,15 +53,15 @@ const ReporterDataSet = () => {
     //`${config.dataSchemaAPI.url}1`
     const dataPromise = HTTPRequesterAPI.get(
       {
-        url:'/jsons/datosDataSchema2.json',
+        url:`${config.dataSchemaAPI.url}1`,
         queryString: {}
       }
     ); 
     dataPromise.then(response =>{
-      //`${config.loadStatisticsAPI.url}1`
+      //'/jsons/error-statistics.json'
       const dataPromiseError = HTTPRequesterAPI.get(
         {
-          url: '/jsons/error-statistics.json',
+          url: `${config.loadStatisticsAPI.url}1`,
           queryString: {}
         }
       );

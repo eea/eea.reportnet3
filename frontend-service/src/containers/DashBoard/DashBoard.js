@@ -11,10 +11,10 @@ const DashBoard = () =>{
 
     useEffect(() => {   
     
-    //`${config.loadStatisticsAPI.url}1`
+    //'/jsons/error-statistics.json'
     const dataPromise = HTTPRequester.get(
       {
-        url: '/jsons/error-statistics.json',
+        url: `${config.loadStatisticsAPI.url}1`,
         queryString: {}
       }
     );

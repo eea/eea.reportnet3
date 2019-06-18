@@ -17,6 +17,7 @@
         "trash": "pi pi-trash",
         "user": "pi pi-user",
         "validate": "pi pi-check-circle",
-        "warning": "pi pi-exclamation-triangle"
+        "warning": "pi pi-exclamation-triangle",
+        "banned": "pi pi-ban"
     }
 }

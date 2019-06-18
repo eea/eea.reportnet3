@@ -7,10 +7,12 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import {Dialog} from 'primereact/dialog';
 import {CustomFileUpload} from '../../../components/Layout/UI/CustomFileUpload/CustomFileUpload';
+import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';
 //import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 import ResourcesContext from '../../../components/Context/ResourcesContext';
 
 import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester';
+import config from '../../../conf/web.config.json';
 
 const DataViewer = (props) => {
     //const contextReporterDataSet = useContext(ReporterDataSetContext);
@@ -30,7 +32,6 @@ const DataViewer = (props) => {
     const resources = useContext(ResourcesContext);      
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
-    console.log("DataViewer Render..." + props.name);
     useEffect(() =>{            
         console.log("Setting column options...");      
         let colOpt = [];
@@ -60,8 +61,21 @@ const DataViewer = (props) => {
         // </div>;
         // setHeader(headerArr);
         
-        let columnsArr = cols.map(col => <Column sortable={true} key={col.field} field={col.field} header={col.header} />);
-        setColumns(columnsArr); 
+        let columnsArr = cols.map((col,i) => (
+          <Column
+            sortable={true}
+            key={col.field}
+            field={col.field}
+            header={col.header}
+            body={dataTemplate}
+            idx = {i}
+          />
+        ));
+        let validationCol = (
+          <Column key="recordValidation" field="validations" header="" body={validationsTemplate} style={{width: "15px"}} />
+        );
+        let newColumnsArr = [validationCol].concat(columnsArr);
+        setColumns(newColumnsArr); 
   
       }, [cols, colOptions]);
       
@@ -112,12 +126,12 @@ const DataViewer = (props) => {
         // props.urlViewer
         const dataPromise = HTTPRequester.get(
           {
-            url: '/jsons/response_dataset_values2.json',
+            url: props.urlViewer,
             queryString: queryString
           }
         );        
         dataPromise.then(response =>{
-          filterDataResponse(response.data.records);          
+          filterDataResponse(response.data);          
           if(response.data.totalRecords!==totalRecords){
             setTotalRecords(response.data.totalRecords);
           }
@@ -130,21 +144,114 @@ const DataViewer = (props) => {
         });
       }
 
-      const filterDataResponse = (data) =>{        
-        
+      const filterDataResponse = (data) =>{
+
         //TODO: Refactorizar
-        const dataFiltered = data.map(record => record.fields.map(f =>{
-          return {[f.idFieldSchema]: f.value}
-        }));
-        let auxFiltered = {}
-        let auxArrayFiltered = [];
-        dataFiltered.forEach(dat => {
-          dat.forEach(d=>auxFiltered = {...auxFiltered,...d});
-          auxArrayFiltered.push(auxFiltered);
-          auxFiltered={};
-        });
-        setFetchedData(auxArrayFiltered);
+        const dataFiltered = data.records.map(record => {
+          const recordValidations = record.recordValidations;
+          const arrayDataFields = record.fields.map(field => {
+            return { 
+              fieldData: {[field.idFieldSchema]: field.value},
+              fieldValidations : field.fieldValidations
+             };
+          });
+          const arrayDataAndValidations = {
+            dataRow: arrayDataFields,
+            recordValidations
+          };
+    
+          return arrayDataAndValidations;
+        });    
+       
+        setFetchedData(dataFiltered);
+      };
+
+//Template for Record validation
+const validationsTemplate = (fetchedData, column) => {
+  if (fetchedData.recordValidations) {
+    const validations = fetchedData.recordValidations.map(
+      val => val.validation
+    );
+
+    let message = "";
+    validations.forEach(validation =>
+      validation.message
+        ? (message += validation.message + '<br/>')
+        : ""
+    );
+
+    let levelError = "";
+    let lvlFlag = 0;
+
+    validations.forEach(validation => {
+      if (validation.levelError === "WARNING") {
+        const wNum = 1;
+        if (wNum > lvlFlag) {
+          lvlFlag = wNum;
+          levelError = "WARNING";
+        }
+      } else if (validation.levelError === "ERROR") {
+        const eNum = 2;
+        if (eNum > lvlFlag) {
+          lvlFlag = eNum;
+          levelError = "ERROR";
+        }
+      } else if (validation.levelError === "BLOCKER") {
+        const bNum = 2;
+        if (bNum > lvlFlag) {
+          lvlFlag = bNum;
+          levelError = "BLOCKER";
+        }
       }
+    });
+
+    return <CustomIconToolTip levelError={levelError} message={message} />;
+  } else {
+    return <CustomIconToolTip levelError={null} message={null} />;
+  }
+};
+
+//Template for Field validation
+const dataTemplate = (rowData, column) =>{
+    
+  if (rowData.dataRow[column.idx].fieldValidations!==null) {
+    const validations = rowData.dataRow[column.idx].fieldValidations.map(
+      val => val.validation
+    );
+    let message = [];
+    validations.forEach(validation =>
+      validation.message ? (message += validation.message +"<br/>") : ""
+    );
+    let levelError = "";
+    let lvlFlag = 0;
+    validations.forEach(validation => {
+      if (validation.levelError === "WARNING") {
+        const wNum = 1;
+        if (wNum > lvlFlag) {
+          lvlFlag = wNum;
+          levelError = "WARNING";
+        }
+      } else if (validation.levelError === "ERROR") {
+        const eNum = 2;
+        if (eNum > lvlFlag) {
+          lvlFlag = eNum;
+          levelError = "ERROR";
+        }
+      } else if (validation.levelError === "BLOCKER") {
+        const bNum = 2;
+        if (bNum > lvlFlag) {
+          lvlFlag = bNum;
+          levelError = "BLOCKER";
+        }
+      }
+    });
+  
+      return <div> {rowData.dataRow[column.idx].fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message} /></div>;
+    }
+    else{
+      return <div>{rowData.dataRow[column.idx].fieldData[column.field]}</div>;
+    }
+  }
 
       //TODO: Textos + iconos + ver si deben estar aquí.
       const customButtons = [
@@ -215,7 +322,7 @@ const DataViewer = (props) => {
             </div>
             <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
                                 className={styles.Dialog} dismissableMask={false} onHide={() => setImportDialogVisible(false)} >
-                            <CustomFileUpload mode="advanced" name="file" url={`http://127.0.0.1:8030/dataset/1/loadTableData/${props.id}`}
+                            <CustomFileUpload mode="advanced" name="file" url={`${config.loadDataTableAPI.url}/${props.id}`}
                                                 onUpload={() => setImportDialogVisible(false)} 
                                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                                 fileLimit={1} className={styles.FileUpload}  /> 
