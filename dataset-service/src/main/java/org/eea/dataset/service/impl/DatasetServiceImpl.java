@@ -60,7 +60,9 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -480,11 +482,28 @@ public class DatasetServiceImpl implements DatasetService {
       Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
+          List<FieldValidationVO> validations = this.fieldValidationMapper
+              .entityListToClass(fieldValidations.get(field.getId()));
           field.setFieldValidations(
-              this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
+              validations);
+          if (null != validations && !validations.isEmpty()) {
+            field.setLevelError(
+                validations.stream().map(validation -> validation.getValidation().getLevelError())
+                    .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
+                    .orElse(TypeErrorEnum.WARNING));
+          }
         });
-        record.setRecordValidations(
-            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
+
+        List<RecordValidationVO> validations = this.recordValidationMapper
+            .entityListToClass(recordValidations.get(record.getId()));
+        record.setRecordValidations(validations
+        );
+        if (null != validations && !validations.isEmpty()) {
+          record.setLevelError(
+              validations.stream().map(validation -> validation.getValidation().getLevelError())
+                  .filter(error -> error.equals(TypeErrorEnum.ERROR)).findFirst()
+                  .orElse(TypeErrorEnum.WARNING));
+        }
       });
       result.setRecords(recordVOs);
       result.setTotalRecords(Long.valueOf(sanitizeRecords.size()));
@@ -616,7 +635,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data flow id by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -711,10 +732,13 @@ public class DatasetServiceImpl implements DatasetService {
     recordVOs.stream().forEach(record -> {
       record.getFields().stream().forEach(field -> {
         field.setFieldValidations(
-            this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
+            this.fieldValidationMapper
+                .entityListToClass(fieldValidations.get(field.getId())));
       });
-      record.setRecordValidations(
-          this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
+      record.setRecordValidations(this.recordValidationMapper
+          .entityListToClass(recordValidations.get(record.getId()))
+      );
+
     });
 
     // TABLE VALIDATIONS

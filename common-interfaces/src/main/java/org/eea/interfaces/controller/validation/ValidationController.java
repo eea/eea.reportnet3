@@ -2,9 +2,9 @@ package org.eea.interfaces.controller.validation;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface ValidationController.
@@ -23,10 +23,11 @@ public interface ValidationController {
    * Validate data set data.
    *
    * @param datasetId the dataset id
+   *
    * @return the data set VO
    */
-  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
+  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void validateDataSetData(@RequestParam("id") Long datasetId);
+  void validateDataSetData(@PathVariable("id") Long datasetId);
 
 }

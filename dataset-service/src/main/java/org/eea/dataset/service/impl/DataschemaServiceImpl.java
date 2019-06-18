@@ -53,7 +53,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static String GENERAL_WARNING = "WARNING!";
   private static String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
   private static String GENERAL_ERROR = "ERROR!";
-  private static String STRING_ERROR = "ERROR!, THIS IS NOT TEXT";
+  private static String STRING_ERROR = "ERROR!, THIS TEXT IS LONGER THAN 30 CHARACTERES";
   private static String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
   private static String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
   private static String COORDINATE_ERROR = "ERROR!, THIS IS NOT A COORDINATE";
@@ -210,7 +210,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("isValid(value)");
+          rule2.setWhenCondition("!isValid(value) || value == null");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(INTEGER_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
