@@ -425,7 +425,7 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesById2() throws Exception {
-    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(recordValues);
     when(pageable.getPageSize()).thenReturn(1);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
@@ -443,7 +443,7 @@ public class DatasetServiceTest {
     recV.add(recValidation);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
-    when(recordValidationRepository.findByRecordValue_IdIn(Mockito.any())).thenReturn(recV);
+    when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, "123", true);
