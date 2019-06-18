@@ -39,6 +39,9 @@ public final class EEAErrorMessage {
   /** The Constant FILE_NOT_FOUND. */
   public static final String FILE_NOT_FOUND = "File not found in the application";
 
+  /** The Constant FILE_NOT_FOUND. */
+  public static final String RECORD_NOTFOUND = "Record not found";
+
   /**
    * Instantiates a new EEA error message.
    */

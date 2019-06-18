@@ -487,10 +487,9 @@ public class DatasetServiceImpl implements DatasetService {
       Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
-          List<FieldValidationVO> validations = this.fieldValidationMapper
-              .entityListToClass(fieldValidations.get(field.getId()));
-          field.setFieldValidations(
-              validations);
+          List<FieldValidationVO> validations =
+              this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
+          field.setFieldValidations(validations);
           if (null != validations && !validations.isEmpty()) {
             field.setLevelError(
                 validations.stream().map(validation -> validation.getValidation().getLevelError())
@@ -499,10 +498,9 @@ public class DatasetServiceImpl implements DatasetService {
           }
         });
 
-        List<RecordValidationVO> validations = this.recordValidationMapper
-            .entityListToClass(recordValidations.get(record.getId()));
-        record.setRecordValidations(validations
-        );
+        List<RecordValidationVO> validations =
+            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
+        record.setRecordValidations(validations);
         if (null != validations && !validations.isEmpty()) {
           record.setLevelError(
               validations.stream().map(validation -> validation.getValidation().getLevelError())
@@ -737,12 +735,10 @@ public class DatasetServiceImpl implements DatasetService {
     recordVOs.stream().forEach(record -> {
       record.getFields().stream().forEach(field -> {
         field.setFieldValidations(
-            this.fieldValidationMapper
-                .entityListToClass(fieldValidations.get(field.getId())));
+            this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
       });
-      record.setRecordValidations(this.recordValidationMapper
-          .entityListToClass(recordValidations.get(record.getId()))
-      );
+      record.setRecordValidations(
+          this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
 
     });
 
@@ -1195,19 +1191,37 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Update record.
+   * Update records.
    *
    * @param datasetId the dataset id
-   * @param record the record
+   * @param records the records
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateRecord(Long datasetId, RecordVO record) throws EEAException {
-    if (record == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+  @Transactional
+  public void updateRecords(Long datasetId, List<RecordVO> records) throws EEAException {
+    if (records == null) {
+      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
-    RecordValue recordValue = recordMapper.classToEntity(record);
-    recordRepository.save(recordValue);
+    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
+    recordRepository.saveAll(recordValue);
+  }
+
+
+  /**
+   * Delete.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void delete(Long datasetId, List<Long> recordIds) throws EEAException {
+    if (recordIds == null) {
+      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    recordRepository.deleteRecordsWithIds(recordIds);
   }
 
 

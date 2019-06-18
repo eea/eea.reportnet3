@@ -3,6 +3,7 @@ package org.eea.dataset.persistence.data.repository;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -54,5 +55,14 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    * @return the record value
    */
   RecordValue findByIdAndTableValue_DatasetId_Id(Long id, Long idDataset);
+
+  /**
+   * Delete records with ids.
+   *
+   * @param recordIds the record ids
+   */
+  @Modifying
+  @Query("delete from RecordValue record where record.id in ?1")
+  void deleteRecordsWithIds(List<Long> recordIds);
 
 }

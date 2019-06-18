@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
@@ -170,8 +171,18 @@ public interface DatasetService {
    * Update record.
    *
    * @param datasetId the dataset id
-   * @param record the record
+   * @param records the records
    * @throws EEAException the EEA exception
    */
-  void updateRecord(Long datasetId, RecordVO record) throws EEAException;
+  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
+
+  /**
+   * Delete.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   * @throws EEAException the EEA exception
+   */
+  void delete(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
+
 }

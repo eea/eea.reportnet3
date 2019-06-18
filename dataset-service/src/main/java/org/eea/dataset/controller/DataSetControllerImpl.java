@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
@@ -354,19 +355,60 @@ public class DataSetControllerImpl implements DatasetController {
     return validations;
   }
 
+  /**
+   * Update records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
   @Override
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateRecord(@PathVariable("id") final Long datasetId,
-      @RequestBody final RecordVO record) {
-    if (datasetId == null || record == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+  public void updateRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<RecordVO> records) {
+    if (datasetId == null || records == null || records.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     try {
-      datasetService.updateRecord(datasetId, record);
+      datasetService.updateRecords(datasetId, records);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
 
     }
+  }
+
+
+  /**
+   * Delete records.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   */
+  @Override
+  public void deleteRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<Long> recordIds) {
+    if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      datasetService.delete(datasetId, recordIds);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  public void insertRecords(Long datasetId, List<RecordVO> records) {
+    if (datasetId == null || records == null || records.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      datasetService.updateRecords(datasetId, records);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+
+    }
+
   }
 
 }
