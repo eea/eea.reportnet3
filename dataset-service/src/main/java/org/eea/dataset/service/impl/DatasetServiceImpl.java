@@ -22,6 +22,7 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
+import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
@@ -109,6 +110,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private DataSetTablesMapper dataSetTablesMapper;
+
+  /** The record mapper. */
+  @Autowired
+  private RecordMapper recordMapper;
 
   /**
    * The record repository.
@@ -1159,6 +1164,23 @@ public class DatasetServiceImpl implements DatasetService {
     });
 
     return errors;
+  }
+
+
+  /**
+   * Update record.
+   *
+   * @param datasetId the dataset id
+   * @param record the record
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateRecord(Long datasetId, RecordVO record) throws EEAException {
+    if (record == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    RecordValue recordValue = recordMapper.classToEntity(record);
+    recordRepository.save(recordValue);
   }
 
 

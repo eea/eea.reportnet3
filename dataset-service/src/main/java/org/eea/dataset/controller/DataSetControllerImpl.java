@@ -12,6 +12,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -351,6 +352,21 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return validations;
+  }
+
+  @Override
+  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateRecord(@PathVariable("id") final Long datasetId,
+      @RequestBody final RecordVO record) {
+    if (datasetId == null || record == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    try {
+      datasetService.updateRecord(datasetId, record);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+
+    }
   }
 
 }

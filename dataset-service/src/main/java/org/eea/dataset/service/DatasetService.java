@@ -5,6 +5,7 @@ import java.io.InputStream;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -81,8 +82,8 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
 
-  void setDataschemaTables(Long datasetId, Long dataFlowId,
-      TableCollectionVO tableCollections) throws EEAException;
+  void setDataschemaTables(Long datasetId, Long dataFlowId, TableCollectionVO tableCollections)
+      throws EEAException;
 
 
   /**
@@ -161,6 +162,15 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
-      String field, Boolean asc) throws EEAException;
+  FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable, String field,
+      Boolean asc) throws EEAException;
+
+  /**
+   * Update record.
+   *
+   * @param datasetId the dataset id
+   * @param record the record
+   * @throws EEAException the EEA exception
+   */
+  void updateRecord(Long datasetId, RecordVO record) throws EEAException;
 }

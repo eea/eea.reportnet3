@@ -1,7 +1,11 @@
+/*
+ * 
+ */
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -168,4 +172,16 @@ public interface DatasetController {
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+
+  /**
+   * Update record.
+   *
+   * @param record the record
+   * @param DatasetId the dataset id
+   */
+  @RequestMapping(value = "/{id}/updateRecord", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateRecord(@PathVariable("id") Long DatasetId,
+      @RequestParam(value = "record", required = true) RecordVO record);
+
 }
