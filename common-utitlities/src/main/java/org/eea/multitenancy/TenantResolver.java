@@ -3,7 +3,7 @@ package org.eea.multitenancy;
 /**
  * The type Tenant resolver.
  */
-public class TenantResolver {
+public final class TenantResolver {
 
 
   /**
