@@ -1,0 +1,48 @@
+{
+  "datasetErrors": true,
+  "idDataSetSchema": "dataSet_1",
+  "tables": [
+    {
+      "idTableSchema": "5cffc519903713258408d50b",
+      "nameTableSchema":"BWQD_2006_AbnormalSituations",
+      "tableErrors": true,
+      "totalErrors": 0,
+      "totalRecords": 0,
+      "totalRecordsWithErrors": 0,
+      "totalRecordsWithWarnings": 0
+    },
+    {
+      "idTableSchema": "5cffc519903713258408d53d",
+      "nameTableSchema":"BWQD_2006_IdentifiedBW",
+      "tableErrors": true,
+      "totalErrors": 0,
+      "totalRecords": 0,
+      "totalRecordsWithErrors": 0,
+      "totalRecordsWithWarnings": 0
+    },
+    {
+      "idTableSchema": "5cffc519903713258408d551",
+      "tableErrors": true,
+      "totalErrors": 0,
+      "totalRecords": 0,
+      "totalRecordsWithErrors": 0,
+      "totalRecordsWithWarnings": 0
+    },
+    {
+      "idTableSchema": "5cffc519903713258408d561",
+      "tableErrors": true,
+      "totalErrors": 0,
+      "totalRecords": 0,
+      "totalRecordsWithErrors": 0,
+      "totalRecordsWithWarnings": 0
+    },
+    {
+      "idTableSchema": "5cffc519903713258408d56d",
+      "tableErrors": true,
+      "totalErrors": 0,
+      "totalRecords": 0,
+      "totalRecordsWithErrors": 0,
+      "totalRecordsWithWarnings": 0
+    }
+  ]
+}
