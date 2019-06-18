@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -462,7 +463,7 @@ public class DatasetServiceTest {
   public void testGetById() throws Exception {
     DataSetVO datasetVOtemp = new DataSetVO();
     datasetVOtemp.setId(1L);
-    datasetVOtemp.setTableVO(new ArrayList<TableVO>());
+    datasetVOtemp.setTableVO(new ArrayList<>());
     when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(datasetVOtemp);
     assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
   }
@@ -504,8 +505,7 @@ public class DatasetServiceTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190")))
-        .thenReturn(schema);
+
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
@@ -548,11 +548,7 @@ public class DatasetServiceTest {
     tableSchemas.add(table);
     schema.setTableSchemas(tableSchemas);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    when(recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(recordValidations);
-    when(fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(fieldValidations);
+
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
@@ -594,11 +590,7 @@ public class DatasetServiceTest {
     tableSchemas.add(table);
     schema.setTableSchemas(tableSchemas);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    when(recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(recordValidations);
-    when(fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(fieldValidations);
+
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
@@ -710,7 +702,6 @@ public class DatasetServiceTest {
     fieldValidation.setValidation(validation);
     List<FieldValidation> fieldValidations = new ArrayList<>();
     fieldValidations.add(fieldValidation);
-
 
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());

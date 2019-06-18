@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -52,7 +53,7 @@ public interface DatasetService {
    *
    * @param dataSetId the data set id
    */
-  void deleteImportData(Long dataSetId);
+  void deleteImportData(@DatasetId Long dataSetId);
 
   /**
    * Gets the table values by id.
@@ -67,7 +68,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  TableVO getTableValuesById(Long datasetId, String mongoID, Pageable pageable,
+  TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
       String idFieldSchema, Boolean asc) throws EEAException;
 
 
@@ -81,7 +82,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
 
-  void setDataschemaTables(Long datasetId, Long dataFlowId,
+  void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
 
 
@@ -111,7 +112,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  DataSetVO getById(Long datasetId) throws EEAException;
+  DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
 
   /**
    * Update dataset.
@@ -123,7 +124,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  void updateDataset(Long datasetId, DataSetVO dataset) throws EEAException;
+  void updateDataset(@DatasetId Long datasetId, DataSetVO dataset) throws EEAException;
 
   /**
    * Gets the data flow id by id.
@@ -134,7 +135,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  Long getDataFlowIdById(Long datasetId) throws EEAException;
+  Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;
 
 
   /**
@@ -146,7 +147,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  StatisticsVO getStatistics(Long datasetId) throws EEAException;
+  StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
 
   /**
@@ -161,6 +162,6 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
+  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
       String field, Boolean asc) throws EEAException;
 }
