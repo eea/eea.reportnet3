@@ -51,6 +51,10 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Document> documents;
 
+  /** The accepted. */
+  @Column(name = "ACCEPTED")
+  private Boolean accepted;
+
   /**
    * Equals.
    *
