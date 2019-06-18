@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -38,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -60,7 +60,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The kafka sender. */
+  /**
+   * The kafka sender.
+   */
   @Autowired
   private KafkaSender kafkaSender;
 
@@ -111,8 +113,6 @@ public class DataSetControllerImpl implements DatasetController {
    * Update dataset.
    *
    * @param dataset the dataset
-   * @return
-   *
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -228,6 +228,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param idDataset the id dataset
    * @param pageSize the page size
    * @param type the type
+   *
    * @return the table from any object id
    */
   @Override
@@ -236,7 +237,6 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "datasetId", required = true) Long idDataset,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) TypeEntityEnum type) {
-
 
     ValidationLinkVO result = null;
     if (id == null || idDataset == null) {
@@ -260,6 +260,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset
    */
   @Override
@@ -283,6 +284,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the data flow id by id
    */
   @Override
@@ -301,11 +303,11 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
-
   /**
    * Gets the statistics by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the statistics by id
    */
   @Override
@@ -331,6 +333,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageSize the page size
    * @param fields the fields
    * @param asc the asc
+   *
    * @return the failed validations by id dataset
    */
   @Override

@@ -1,13 +1,15 @@
-package org.eea.validation.configuration;
+package org.eea.apigateway.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * The type Api gateway configuration.
+ */
 @Configuration
-@EnableWebMvc
-public class ValidationConfiguration implements WebMvcConfigurer {
+public class ApiGatewayConfiguration implements WebMvcConfigurer {
+
 
   @Override
   public void addCorsMappings(final CorsRegistry registry) {

@@ -277,6 +277,18 @@
 				"key": "config/recordstore/dockerServerUrl",
                 "value": "JHtET0NLRVJfU0VSVkVSX1VSTDp0Y3A6Ly9sb2NhbGhvc3Q6MjM3NX0="
 		},
+		{
+				"key": "config/apiGateway/feign.client.config.default.connectTimeout",
+                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+		},
+		{
+				"key": "config/apiGateway/feign.client.config.default.readTimeout",
+                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+		},
+		{
+				"key": "config/apiGateway/feign.client.config.default.loggerLevel",
+                "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+		},
 		
 		{
 				"key": "config/apiGateway/management.endpoints.web.exposure.include",
@@ -333,6 +345,18 @@
 		},
 		{
 				"key": "config/apiGateway/zuul.routes.dataset.stripPrefix",
+                "value": "ZmFsc2U="
+		},
+		{
+				"key": "config/apiGateway/zuul.routes.dataschema.path",
+                "value": "L2RhdGFzY2hlbWEvKio="
+		},
+		{
+				"key": "config/apiGateway/zuul.routes.dataschema.serviceId",
+                "value": "ZGF0YXNldA=="
+		},
+		{
+				"key": "config/apiGateway/zuul.routes.dataschema.stripPrefix",
                 "value": "ZmFsc2U="
 		},
 		{
@@ -420,48 +444,50 @@
                 "value": "ZmFsc2U="
 		},
 		{
-				"key": "config/validation/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		},
-		{
 				"key": "config/apiGateway/zuul.retryable",
                 "value": "dHJ1ZQ=="
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.ConnectTimeout",
+				"key": "config/apiGateway/ribbon.ConnectTimeout",
                 "value": "JHtSSUJCT05fQ09OTkVDVF9USU1FT1VUOjEwMDB9"
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.ReadTimeout",
+				"key": "config/apiGateway/ribbon.ReadTimeout",
                 "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjEwMDB9"
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.MaxTotalHttpConnections",
+				"key": "config/apiGateway/ribbon.MaxTotalHttpConnections",
                 "value": "JHtSSUJCT05fTUFYX0hUVFBfQ09OTkVDVElPTjoxMDB9"
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.MaxConnectionsPerHost",
+				"key": "config/apiGateway/ribbon.MaxConnectionsPerHost",
                 "value": "JHtSSUJCT05fTUFYX0NPTk5FQ1RJT05fUEVSX0hPU1Q6MTAwfQ=="
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.MaxAutoRetries",
+				"key": "config/apiGateway/ribbon.MaxAutoRetries",
                 "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUlk6MH0="
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.MaxAutoRetriesNextServer",
+				"key": "config/apiGateway/ribbon.MaxAutoRetriesNextServer",
                 "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUllfTkVYVF9TRVJWRVI6Mn0="
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.ServerListRefreshInterval",
+				"key": "config/apiGateway/ribbon.ServerListRefreshInterval",
                 "value": "JHtSSUJCT05fU0VSVkVSX0xJU1RfUkVGUkVTSF9JTlRFUlZBTDoyMDAwfQ=="
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.OkToRetryOnAllOperations",
+				"key": "config/apiGateway/ribbon.OkToRetryOnAllOperations",
                 "value": "JHtSSUJCT05fT0tfUkVUUllfQUxMX09QRVJBVElPTjp0cnVlfQ=="
 		},
 		{
-				"key": "config/apiGateway/service.ribbon.retryableStatusCodes",
+				"key": "config/apiGateway/ribbon.retryableStatusCodes",
                 "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
+		},
+		{
+				"key": "config/validation/kafka.bootstrapAddress",
+                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
 		}
-
+		
+		
+		
 ]
