@@ -16,17 +16,35 @@ pipeline {
             }
         }
         stage('Compile') {
-            steps {
-                sh '''
-                    mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
-                '''
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
+            parallel {
+                stage('Compile JAVA') {
+                    steps {
+                        sh '''
+                            mvn -Dmaven.test.failure.ignore=true -s '/home/jenkins/.m2/settings.xml' clean install
+                        '''                                
+                    }
+                    post {
+                        failure {
+                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - JAVA Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                        }
+                        always {
+                            junit '**/target/surefire-reports/*.xml'
+                        }
+                    }
+                }
+                stage('Compile NPM') {
+                    steps {
+                        sh '''
+                            npm install frontend-service/
+                        '''                                
+                    }
+                    post {
+                        failure {
+                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                        }                        
+                    }
                 }
             }
-            
         }
         stage('Static Code Analysis') {
             steps {
@@ -72,7 +90,7 @@ pipeline {
             }
             post {
                 failure {
-                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate not met https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                    slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate NOT MET (marked as ERROR) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
                 }
             }
         }
@@ -81,10 +99,21 @@ pipeline {
             when {
                 branch 'develop' 
             }
-            steps {
-                sh '''
-                    mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
-                '''
+            parallel {
+                stage('Install in JAVA repository') {
+                    steps {
+                        sh '''
+                            mvn -Dmaven.test.skip=true -s '/home/jenkins/.m2/settings.xml' deploy
+                        '''
+                    }
+                }
+                stage('Install in NPM repository') {
+                    steps {
+                        sh '''
+                            npm publish frontend-service/ --registry=https://nexus-oami.altia.es/content/repositories/npm-internal/
+                        '''
+                    }
+                }
             }
         }
 
@@ -99,6 +128,89 @@ pipeline {
                     sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop --allow-unrelated-histories')
                     sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:develop')
                 }
+            }
+        }
+
+        stage('Build Docker Images') {
+            when {
+                branch 'develop' 
+            }
+            parallel {
+                stage('Build Microservices') {
+                    steps {
+                        script {
+                            echo 'Dataflow Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/dataflow-service:1.0", "--build-arg JAR_FILE=dataflow-service/target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Dataset Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/dataset-service:1.0", "--build-arg JAR_FILE=dataset-service/target/dataset-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8030 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'API Gateway'
+                            def app
+                            app = docker.build("k8s-swi001:5000/api-gateway:1.0", "--build-arg JAR_FILE=api-gateway/target/api-gateway-1.0-SNAPSHOT.jar --build-arg MS_PORT=8010 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Inspire Harvester'
+                            def app
+                            app = docker.build("k8s-swi001:5000/inspire-harvester:3.0", "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Recordstore Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Validation Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=9000 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Collaboration Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/collaboration-service:3.0", "--build-arg JAR_FILE=collaboration-service/target/collaboration-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Communication Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/communication-service:3.0", "--build-arg JAR_FILE=communication-service/target/communication-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9020 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'IndexSearch Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/indexsearch-service:3.0", "--build-arg JAR_FILE=indexsearch-service/target/indexsearch-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'Document Container Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                            app.push()                    
+                        }    
+                    }
+                }
+                stage('Build Frontend') {
+                    steps {
+                        script {
+                            echo 'ReportNet 3.0 Frontend'
+                            def app
+                            app = docker.build("k8s-swi001:5000/frontend-service:3.0.0", " ./frontend-service/")
+                            app.push()                    
+                        }
+                    }
+                }
+            
             }
         }
         

@@ -2,7 +2,7 @@ server:
   port: 8050
 spring:
   application:
-    name: inspire-harvester
+    name: inspireHarvester
   cloud:
     consul:
       discovery:

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.DescribeClusterOptions;
 import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -13,7 +14,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.serializer.EEAEventDeserializer;
 import org.eea.kafka.serializer.EEAEventSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -40,20 +40,22 @@ public class KafkaConfiguration {
   /**
    * The bootstrap address.
    */
-  @Value(value = "${kafka.bootstrapAddress:localhost:9092}")
+  @Value(value = "${kafka.bootstrapAddress}")
   private String bootstrapAddress;
 
   /**
    * The group id.
    */
-  @Value(value = "${spring.application.name:test-consumer-group}")
+  @Value(value = "${spring.application.name}")
   private String groupId;
 
-  /**
-   * The admin.
-   */
-  @Autowired
-  private KafkaAdmin admin;
+
+  @Bean
+  public KafkaAdmin kafkaAdmin() {
+    Map<String, Object> configs = new HashMap<>();
+    configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+    return new KafkaAdmin(configs);
+  }
 
   /**
    * Kafka admin client.
@@ -62,7 +64,7 @@ public class KafkaConfiguration {
    */
   @Bean
   public AdminClient kafkaAdminClient() {
-    return AdminClient.create(admin.getConfig());
+    return AdminClient.create(kafkaAdmin().getConfig());
   }
 
   /**
