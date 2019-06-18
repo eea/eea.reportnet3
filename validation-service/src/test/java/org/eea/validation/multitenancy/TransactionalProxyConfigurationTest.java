@@ -36,7 +36,7 @@ public class TransactionalProxyConfigurationTest {
   @Test
   public void testProxyDatasetService() {
     ValidationService result = transactionalProxyConfiguration.proxyValidationService();
-    assertNotNull(result);
+    assertNotNull("is null", result);
   }
 
 }

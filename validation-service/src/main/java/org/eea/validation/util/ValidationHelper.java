@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.validation.util;
 
 import org.eea.exception.EEAException;
@@ -14,7 +17,9 @@ public class ValidationHelper extends Helper {
   /**
    * Instantiates a new file loader helper.
    */
-  public ValidationHelper() {}
+  public ValidationHelper() {
+    super();
+  }
 
   /**
    * Execute file process.

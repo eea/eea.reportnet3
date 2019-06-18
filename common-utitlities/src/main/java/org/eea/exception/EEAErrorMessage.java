@@ -3,7 +3,7 @@ package org.eea.exception;
 /**
  * Instantiates a new EEA error message.
  */
-public class EEAErrorMessage {
+public final class EEAErrorMessage {
 
   /**
    * The Constant DB_FILEFORMAT.
@@ -36,6 +36,12 @@ public class EEAErrorMessage {
   /** The Constant VALIDATION_SESSION_ERROR. */
   public static final String VALIDATION_SESSION_ERROR = "Validation session error";
 
+  /** The Constant FILE_NOT_FOUND. */
+  public static final String FILE_NOT_FOUND = "File not found in the application";
+
+  /**
+   * Instantiates a new EEA error message.
+   */
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }

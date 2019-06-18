@@ -53,6 +53,7 @@ public class DocumentServiceImpl implements DocumentService {
   /** The Constant ADMIN. */
   private static final String ADMIN = "admin";
 
+  /** The demo exit location. */
   @Value(value = "C:/OutFiles/file.txt")
   private String demoExitLocation;
 
@@ -82,12 +83,10 @@ public class DocumentServiceImpl implements DocumentService {
 
   /**
    * upload a file to the jackrabbit content repository.
-   *
-   * @throws Exception the exception
    */
   @Override
   @Transactional
-  public void uploadDocument() throws EEAException {
+  public void uploadDocument() {
     Session session = null;
     try {
       LOG.info("Adding the file...");
@@ -98,7 +97,7 @@ public class DocumentServiceImpl implements DocumentService {
       addFileNode(session, "/test", fichero, ADMIN);
 
       LOG.info("Files added...");
-    } catch (RepositoryException | IOException e) {
+    } catch (RepositoryException | IOException | EEAException e) {
       LOG.error(e.getMessage());
     } finally {
       cleanUp(session);
@@ -109,7 +108,7 @@ public class DocumentServiceImpl implements DocumentService {
    * Download the file to the fileSystem.
    *
    * @return the document
-   * @throws Exception the exception
+   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
@@ -134,7 +133,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * creates a repository in that location
+   * creates a repository in that location.
    *
    * @param host the host
    * @param port the port
@@ -154,13 +153,14 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @return the session
    * @throws RepositoryException the repository exception
+   * @throws EEAException the EEA exception
    */
-  private Session getSession() throws RepositoryException {
+  private Session getSession() throws RepositoryException, EEAException {
     Repository repo = getRepo("localhost", PORT);
     if (repo.getDescriptorKeys() != null) {
       return repo.login(new SimpleCredentials(ADMIN, ADMIN.toCharArray()));
     } else {
-      throw new NullPointerException("Repository not initialized");
+      throw new EEAException("Repository not initialized");
     }
   }
 
@@ -175,9 +175,10 @@ public class DocumentServiceImpl implements DocumentService {
    * @param userName the user name
    * @throws RepositoryException the repository exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
    */
   public static void addFileNode(Session session, String absPath, File file, String userName)
-      throws RepositoryException, IOException {
+      throws RepositoryException, IOException, EEAException {
 
     Node node = createNodes(session, absPath);
     if (node.hasNode(file.getName())) {
@@ -220,12 +221,14 @@ public class DocumentServiceImpl implements DocumentService {
    * @param absPath the abs path
    * @return the node
    * @throws RepositoryException the repository exception
+   * @throws EEAException the EEA exception
    */
-  public static Node createNodes(Session session, String absPath) throws RepositoryException {
+  public static Node createNodes(Session session, String absPath)
+      throws RepositoryException, EEAException {
     // check if the value session is null
 
     if (session == null) {
-      throw new NullPointerException("Session doesn't exist");
+      throw new EEAException("Session doesn't exist");
     }
     // check if the node is already created
     if (session.itemExists(absPath)) {
@@ -241,10 +244,10 @@ public class DocumentServiceImpl implements DocumentService {
   /**
    * Creates nodes from a list.
    *
-   * @param session
-   * @param nodes
-   * @return
-   * @throws RepositoryException
+   * @param session the session
+   * @param nodes the nodes
+   * @return the node
+   * @throws RepositoryException the repository exception
    */
   private static Node createNodes(Session session, String[] nodes) throws RepositoryException {
     Node parentNode = session.getRootNode();
@@ -292,7 +295,7 @@ public class DocumentServiceImpl implements DocumentService {
   }
 
   /**
-   * Reads the file and generate a FileResponse, with the content and the type
+   * Reads the file and generate a FileResponse, with the content and the type.
    *
    * @param session the session
    * @param basePath the base path

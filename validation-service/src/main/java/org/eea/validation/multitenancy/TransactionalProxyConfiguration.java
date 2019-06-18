@@ -1,6 +1,7 @@
 package org.eea.validation.multitenancy;
 
 import java.lang.reflect.Proxy;
+import org.eea.multitenancy.ProxyMultitenantService;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +27,7 @@ public class TransactionalProxyConfiguration {
   public ValidationService proxyValidationService() {
     return (ValidationService) Proxy.newProxyInstance(
         TransactionalProxyConfiguration.class.getClassLoader(),
-        new Class[] {ValidationService.class}, new ProxyValidationServiceImpl(validationService));
+        new Class[]{ValidationService.class},
+        new ProxyMultitenantService<>(validationService));
   }
 }

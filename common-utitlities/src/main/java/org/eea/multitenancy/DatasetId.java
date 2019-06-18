@@ -1,4 +1,4 @@
-package org.eea.validation.multitenancy;
+package org.eea.multitenancy;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

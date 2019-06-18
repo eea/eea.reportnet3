@@ -17,7 +17,7 @@ public interface DataFlowController {
    * The Interface DataFlowControllerZuul.
    */
   @FeignClient(value = "dataflow", path = "/dataflow")
-  public interface DataFlowControllerZuul extends DataFlowController {
+  interface DataFlowControllerZuul extends DataFlowController {
 
   }
 

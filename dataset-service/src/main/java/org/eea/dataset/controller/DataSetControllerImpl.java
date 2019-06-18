@@ -62,7 +62,7 @@ public class DataSetControllerImpl implements DatasetController {
 
   /** The kafka sender. */
   @Autowired
-  KafkaSender kafkaSender;
+  private KafkaSender kafkaSender;
 
   /**
    * Gets the data tables values.

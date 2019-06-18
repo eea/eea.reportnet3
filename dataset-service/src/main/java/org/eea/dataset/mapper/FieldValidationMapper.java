@@ -12,6 +12,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FieldValidationMapper extends IMapper<FieldValidation, FieldValidationVO> {
 
+  /** The Constant FIELD_VALUE. */
+  String FIELD_VALUE = "fieldValue";
 
   /**
    * Class to entity.
@@ -20,17 +22,17 @@ public interface FieldValidationMapper extends IMapper<FieldValidation, FieldVal
    * @return the field validation
    */
   @Override
-  @Mapping(source = "fieldValue", target = "fieldValue", ignore = true)
+  @Mapping(source = FIELD_VALUE, target = FIELD_VALUE, ignore = true)
   FieldValidation classToEntity(FieldValidationVO vo);
 
   /**
    * Entity to class.
    *
    * @param entity the entity
-   * @return the t
+   * @return the field validation VO
    */
   @Override
-  @Mapping(source = "fieldValue", target = "fieldValue", ignore = true)
+  @Mapping(source = FIELD_VALUE, target = FIELD_VALUE, ignore = true)
   FieldValidationVO entityToClass(FieldValidation entity);
 
 }

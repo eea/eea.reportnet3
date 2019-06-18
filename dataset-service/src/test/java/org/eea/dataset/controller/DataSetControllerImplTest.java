@@ -96,7 +96,20 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), true);
-    dataSetControllerImpl.loadTableData(1L, file, null);
+    dataSetControllerImpl.loadTableData(1L, file, "example");
+  }
+
+
+  /**
+   * Test load dataset data success 2.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testLoadDatasetDataSuccess2() throws Exception {
+    final EEAMockMultipartFile file =
+        new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+    dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 
   /**
@@ -429,7 +442,12 @@ public class DataSetControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
         .getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
+  }
 
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetTableFromAnyObjectIdException3() throws Exception {
+    dataSetControllerImpl.getTableFromAnyObjectId(1L, null, 10, null);
   }
 
 

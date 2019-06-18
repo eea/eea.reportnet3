@@ -19,6 +19,8 @@ public class RuleRecord extends Rule {
   @Field(value = "idRecordSchema")
   private ObjectId idRecordSchema;
 
+  /** The Constant PRIME. */
+  private static final int PRIME = 31;
 
   /**
    * Hash code.
@@ -27,9 +29,8 @@ public class RuleRecord extends Rule {
    */
   @Override
   public int hashCode() {
-    final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + Objects.hash(idRecordSchema);
+    result = PRIME * result + Objects.hash(idRecordSchema);
     return result;
   }
 

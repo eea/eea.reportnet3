@@ -1,9 +1,5 @@
 package org.eea.dataset.service.file;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import lombok.NoArgsConstructor;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -24,6 +19,11 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import lombok.NoArgsConstructor;
 
 
 /**
@@ -115,13 +115,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<String> firstLine = Arrays.asList(reader.readNext());
 
       // if first line is empty throw an error
-      if (null != firstLine && !firstLine.isEmpty() && firstLine.size() == 1
-          && firstLine.get(0).isEmpty()) {
-        // if the line is white then skip it
-        throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-      }
+      firstLineEmpty(firstLine);
 
-      // Get de headers
+      // Get the headers
       List<FieldSchemaVO> headers = setHeaders(firstLine);
 
       // through the file
@@ -143,6 +139,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
     LOG.info("Reading Csv File Completed");
     return dataset;
 
+  }
+
+  private void firstLineEmpty(List<String> firstLine) throws InvalidFileException {
+    if (null != firstLine && !firstLine.isEmpty() && firstLine.size() == 1
+        && firstLine.get(0).isEmpty()) {
+      // if the line is white then skip it
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
+    }
   }
 
   /**

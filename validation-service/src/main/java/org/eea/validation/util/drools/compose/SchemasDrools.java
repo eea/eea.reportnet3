@@ -1,4 +1,4 @@
-package org.eea.validation.persistence.rules;
+package org.eea.validation.util.drools.compose;
 
 /**
  * The Enum ConditionsDrools.

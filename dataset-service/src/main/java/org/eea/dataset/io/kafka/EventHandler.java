@@ -1,11 +1,11 @@
 package org.eea.dataset.io.kafka;
 
 import javax.sql.DataSource;
-import org.eea.dataset.multitenancy.MultiTenantDataSource;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.handler.EEAEventHandler;
+import org.eea.multitenancy.MultiTenantDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class EventHandler implements EEAEventHandler {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(EventHandler.class);
 
-  /** The data source. */
+  /**
+   * The data source.
+   */
   @Autowired
   private DataSource dataSource;
 

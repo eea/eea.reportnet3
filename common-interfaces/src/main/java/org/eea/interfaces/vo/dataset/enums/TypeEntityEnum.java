@@ -27,7 +27,7 @@ public enum TypeEntityEnum {
    *
    * @param value the value
    */
-  private TypeEntityEnum(String value) {
+  TypeEntityEnum(String value) {
     this.value = value;
   }
 

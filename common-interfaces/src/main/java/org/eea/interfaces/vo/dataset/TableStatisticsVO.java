@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -45,7 +46,7 @@ public class TableStatisticsVO implements Serializable {
    * Instantiates a new table statistics VO.
    */
   public TableStatisticsVO() {
-
+    super();
   }
 
 
@@ -55,7 +56,7 @@ public class TableStatisticsVO implements Serializable {
    * @param idTableSchema the id table schema
    * @param nameTableSchema the name table schema
    */
-  public TableStatisticsVO(String idTableSchema, String nameTableSchema) {
+  public TableStatisticsVO(final String idTableSchema, final String nameTableSchema) {
 
     this.idTableSchema = idTableSchema;
     this.nameTableSchema = nameTableSchema;
@@ -65,6 +66,42 @@ public class TableStatisticsVO implements Serializable {
     this.totalRecordsWithErrors = 0L;
     this.totalRecordsWithWarnings = 0L;
 
+  }
+
+
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(idTableSchema, nameTableSchema, tableErrors, totalErrors, totalRecords,
+        totalRecordsWithErrors, totalRecordsWithWarnings);
+  }
+
+
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    final TableStatisticsVO other = (TableStatisticsVO) obj;
+    return Objects.equals(idTableSchema, other.idTableSchema)
+        && Objects.equals(nameTableSchema, other.nameTableSchema)
+        && Objects.equals(tableErrors, other.tableErrors)
+        && Objects.equals(totalErrors, other.totalErrors)
+        && Objects.equals(totalRecordsWithErrors, other.totalRecordsWithErrors)
+        && Objects.equals(totalRecordsWithWarnings, other.totalRecordsWithWarnings);
   }
 
 }

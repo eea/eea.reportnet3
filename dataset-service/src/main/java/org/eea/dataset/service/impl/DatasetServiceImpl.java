@@ -26,7 +26,6 @@ import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
 import org.eea.dataset.mapper.TableValidationMapper;
-import org.eea.dataset.multitenancy.DatasetId;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -93,7 +92,9 @@ public class DatasetServiceImpl implements DatasetService {
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
@@ -175,31 +176,45 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /** The field validation repository. */
+  /**
+   * The field validation repository.
+   */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
-  /** The record validation repository. */
+  /**
+   * The record validation repository.
+   */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
-  /** The field validation mapper. */
+  /**
+   * The field validation mapper.
+   */
   @Autowired
   private FieldValidationMapper fieldValidationMapper;
 
-  /** The record validation mapper. */
+  /**
+   * The record validation mapper.
+   */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /** The record no validation. */
+  /**
+   * The record no validation.
+   */
   @Autowired
   private TableNoRecordMapper tableNoRecordMapper;
 
-  /** The table validation repository. */
+  /**
+   * The table validation repository.
+   */
   @Autowired
   private TableValidationRepository tableValidationRepository;
 
-  /** The table validation mapper. */
+  /**
+   * The table validation mapper.
+   */
   @Autowired
   private TableValidationMapper tableValidationMapper;
 
@@ -222,13 +237,14 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
-  public void processFile(@DatasetId final Long datasetId, final String fileName,
-      final InputStream is, final String idTableSchema) throws EEAException, IOException {
+  public void processFile(final Long datasetId, final String fileName, final InputStream is,
+      final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -256,7 +272,7 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Error mapping file");
       }
       // Check if the table with idTableSchema has been populated already
-      Long oldTableId = tableRepository.findFirstId_ByIdTableSchema(idTableSchema);
+      Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
       fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
       // save dataset to the database
       datasetRepository.saveAndFlush(dataset);
@@ -417,9 +433,10 @@ public class DatasetServiceImpl implements DatasetService {
     if (records.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}", datasetId);
+      LOG.info("No records founded in datasetId {}, tableSchema {}", datasetId, mongoID);
 
-    } else {// Records retrieved,
+    } else {
+      // Records retrieved,
       // 1º need to remove duplicated data
       List<RecordValue> sanitizeRecords = this.sanitizeRecords(records);
       // 2º sort sanitized data
@@ -452,7 +469,7 @@ public class DatasetServiceImpl implements DatasetService {
       int endIndex =
           (pageable.getPageNumber() + 1) * pageable.getPageSize() > sanitizeRecords.size()
               ? sanitizeRecords.size()
-              : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+              : ((pageable.getPageNumber() + 1) * pageable.getPageSize());
       // 4º map to VO the records of the calculated page
       List<RecordVO> recordVOs =
           recordNoValidationMapper.entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
@@ -471,8 +488,10 @@ public class DatasetServiceImpl implements DatasetService {
       });
       result.setRecords(recordVOs);
       result.setTotalRecords(Long.valueOf(sanitizeRecords.size()));
-      LOG.info("Total records founded in datasetId {}: {}. Now in page {}, {} records by page",
-          datasetId, sanitizeRecords.size(), pageable.getPageNumber(), pageable.getPageSize());
+      LOG.info(
+          "Total records founded in datasetId {} tableSchema {}: {}. Now in page {}, {} records by page",
+          datasetId, mongoID, sanitizeRecords.size(), pageable.getPageNumber(),
+          pageable.getPageSize());
       if (StringUtils.isNotBlank(idFieldSchema)) {
         LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
       }
@@ -495,7 +514,7 @@ public class DatasetServiceImpl implements DatasetService {
     Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
     List<RecordValue> records = null;
     try {
-      records = recordRepository.findByTableValue_IdTableSchema(idTableSchema);
+      records = recordRepository.findByTableValueIdTableSchema(idTableSchema);
     } finally {
       SortFieldsHelper.cleanSortingField();
     }
@@ -537,7 +556,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void setDataschemaTables(@DatasetId final Long datasetId, final Long dataFlowId,
+  public void setDataschemaTables(final Long datasetId, final Long dataFlowId,
       final TableCollectionVO tableCollectionVO) throws EEAException {
     final TableCollection tableCollection = dataSetTablesMapper.classToEntity(tableCollectionVO);
     tableCollection.setDataSetId(datasetId);
@@ -570,7 +589,7 @@ public class DatasetServiceImpl implements DatasetService {
       tableValue
           .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
     }
-
+    LOG.info("Get dataset by id: {}", datasetId);
     return dataSetMapper.entityToClass(datasetValue);
   }
 
@@ -593,22 +612,17 @@ public class DatasetServiceImpl implements DatasetService {
     datasetRepository.saveAndFlush(datasetValue);
   }
 
-
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the data flow id by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   public Long getDataFlowIdById(Long datasetId) throws EEAException {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
-
-
 
   /**
    * Gets the table from any object id.
@@ -617,7 +631,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idDataset the id dataset
    * @param pageable the pageable
    * @param type the type
+   *
    * @return the table from any object id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -658,15 +674,17 @@ public class DatasetServiceImpl implements DatasetService {
         record = field.getRecord();
       }
     }
-
     validationLink.setPage(this.processTable(tableVO, records, record, pageable));
+    LOG.info(
+        "Validation error with id {} clicked in dataset {}. Redirect to page {} from table schema {}, with a page size of {}",
+        id, idDataset, validationLink.getPage().getNumPage(),
+        validationLink.getPage().getTable().getIdTableSchema(), pageable.getPageSize());
     return validationLink;
   }
 
 
   private ValidationLinkContentVO processTable(TableVO table, List<RecordValue> records,
       RecordValue recordValue, Pageable pageable) {
-
 
     if (table == null) {
       table = new TableVO();
@@ -683,8 +701,6 @@ public class DatasetServiceImpl implements DatasetService {
     int initIndex = pageNumberFounded * pageable.getPageSize();
     int endIndex = (pageable.getPageNumber() + 1) * tamPage > records.size() ? records.size()
         : ((pageNumberFounded + 1) * tamPage);
-
-
 
     // RECORD AND FIELDS VALIDATION
     List<RecordVO> recordVOs =
@@ -712,7 +728,6 @@ public class DatasetServiceImpl implements DatasetService {
     ValidationLinkContentVO valLink = new ValidationLinkContentVO();
     valLink.setNumPage(pageNumberFounded + 1);
     valLink.setTable(table);
-
 
     return valLink;
 
@@ -778,10 +793,9 @@ public class DatasetServiceImpl implements DatasetService {
         stats.setDatasetErrors(true);
       }
     }
-
+    LOG.info("Statistics received from datasetId {}.", datasetId);
     return stats;
   }
-
 
 
   /**
@@ -790,6 +804,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tableValue the table value
    * @param datasetId the dataset id
    * @param mapIdNameDatasetSchema the map id name dataset schema
+   *
    * @return the table statistics VO
    */
   private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId,
@@ -839,7 +854,6 @@ public class DatasetServiceImpl implements DatasetService {
     return tableStats;
 
   }
-
 
 
   private List<TableValue> sanitizeTableValues(List<TableValue> tables) {
@@ -892,12 +906,13 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the record validations.
    *
    * @param recordIds the record ids
+   *
    * @return the record validations
    */
   private Map<Long, List<RecordValidation>> getRecordValidations(List<Long> recordIds) {
 
     List<RecordValidation> recordValidations =
-        this.recordValidationRepository.findByRecordValue_IdIn(recordIds);
+        this.recordValidationRepository.findByRecordValueIdIn(recordIds);
 
     Map<Long, List<RecordValidation>> result = new HashMap<>();
 
@@ -919,7 +934,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
+   *
    * @return the list validations
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -950,7 +967,6 @@ public class DatasetServiceImpl implements DatasetService {
       sortingValidationErrors(errors, headerField, asc);
     }
 
-
     // PAGINATION
     int tamPage = 20;
     if (pageable.getPageSize() != 0) {
@@ -968,7 +984,9 @@ public class DatasetServiceImpl implements DatasetService {
       validation.setErrors(errors.subList(initIndex, endIndex));
     }
     validation.setTotalErrors(Long.valueOf(errors.size()));
-
+    LOG.info(
+        "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
+        datasetId, errors.size(), pageable.getPageNumber(), pageable.getPageSize());
 
     return validation;
 
@@ -980,6 +998,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param dataset the dataset
    * @param mapNameTableSchema the map name table schema
+   *
    * @return the list
    */
   private List<ErrorsValidationVO> processErrors(DatasetValue dataset,
@@ -1002,7 +1021,6 @@ public class DatasetServiceImpl implements DatasetService {
       errors.add(error);
     }
 
-
     // TABLE ERRORS
     List<TableValidation> tableValidations =
         tableValidationRepository.findTableValidationsByIdDataset(dataset.getId());
@@ -1023,8 +1041,6 @@ public class DatasetServiceImpl implements DatasetService {
 
       errors.add(error);
     }
-
-
 
     // RECORD ERRORS
     List<RecordValidation> recordValidations =
@@ -1070,17 +1086,15 @@ public class DatasetServiceImpl implements DatasetService {
       errors.add(error);
     }
 
-
-
     return errors;
   }
-
 
 
   /**
    * Retrieve get method.
    *
    * @param fieldName the field name
+   *
    * @return the method
    */
   private Method retrieveGetMethod(String fieldName) {
@@ -1107,6 +1121,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param errors the errors
    * @param headerField the header field
    * @param asc the asc
+   *
    * @return the list
    */
   private List<ErrorsValidationVO> sortingValidationErrors(List<ErrorsValidationVO> errors,

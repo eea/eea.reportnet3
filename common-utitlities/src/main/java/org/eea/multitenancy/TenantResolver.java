@@ -1,15 +1,19 @@
-package org.eea.validation.multitenancy;
+package org.eea.multitenancy;
 
 /**
  * The type Tenant resolver.
  */
-public class TenantResolver {
+public final class TenantResolver {
 
 
-  /** The tenant. */
+  /**
+   * The tenant.
+   */
   private static ThreadLocal<String> tenant = new ThreadLocal<>();
 
-  /** The Constant DEFAULT_TENANT. */
+  /**
+   * The Constant DEFAULT_TENANT.
+   */
   private static final String DEFAULT_TENANT = "dataset_1";
 
   /**

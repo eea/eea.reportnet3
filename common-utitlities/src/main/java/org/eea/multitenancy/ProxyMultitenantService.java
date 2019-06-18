@@ -1,27 +1,30 @@
-package org.eea.dataset.multitenancy;
+package org.eea.multitenancy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.service.DatasetService;
 
 
 /**
  * The type Proxy dataset service.
+ *
+ * @param <T> the type parameter
  */
-public class ProxyDatasetServiceImpl implements InvocationHandler {
+public class ProxyMultitenantService<T> implements InvocationHandler {
 
-  /** The dataset service. */
-  private DatasetService datasetService;
+  /**
+   * The dataset service.
+   */
+  private T proxiedService;
 
   /**
    * Instantiates a new Proxy dataset service.
    *
-   * @param datasetService the dataset service
+   * @param proxiedService the proxied service
    */
-  public ProxyDatasetServiceImpl(DatasetService datasetService) {
-    this.datasetService = datasetService;
+  public ProxyMultitenantService(T proxiedService) {
+    this.proxiedService = proxiedService;
   }
 
   /**
@@ -30,7 +33,9 @@ public class ProxyDatasetServiceImpl implements InvocationHandler {
    * @param proxy the proxy
    * @param method the method
    * @param args the args
+   *
    * @return the object
+   *
    * @throws Throwable the throwable
    */
   @Override
@@ -54,7 +59,7 @@ public class ProxyDatasetServiceImpl implements InvocationHandler {
     }
     Object result = null;
     try {
-      result = method.invoke(datasetService, args);
+      result = method.invoke(proxiedService, args);
     } finally {
       TenantResolver.clean();
     }
