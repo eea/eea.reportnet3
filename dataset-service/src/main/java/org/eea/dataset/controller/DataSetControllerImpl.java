@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
+import org.eea.dataset.service.file.RecordModifiedHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -369,7 +370,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     try {
-      datasetService.updateRecords(datasetId, records);
+      RecordModifiedHelper.executeUpdateProcess(kafkaSender, this.datasetService, datasetId,
+          records);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
 
@@ -403,7 +405,8 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     try {
-      datasetService.updateRecords(datasetId, records);
+      RecordModifiedHelper.executeCreateProcess(kafkaSender, this.datasetService, datasetId,
+          records);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
 
