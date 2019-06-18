@@ -8,18 +8,18 @@ import { Column } from 'primereact/column';
 import {Dialog} from 'primereact/dialog';
 import {CustomFileUpload} from '../../../components/Layout/UI/CustomFileUpload/CustomFileUpload';
 import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';
-//import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
+import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 import ResourcesContext from '../../../components/Context/ResourcesContext';
 
 import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester';
 import config from '../../../conf/web.config.json';
 
 const DataViewer = (props) => {
-    //const contextReporterDataSet = useContext(ReporterDataSetContext);
+    const contextReporterDataSet = useContext(ReporterDataSetContext);
     const [importDialogVisible, setImportDialogVisible] = useState(false);    
     const [totalRecords, setTotalRecords] = useState(0);
     const [fetchedData, setFetchedData] = useState([]);    
-    const [linkedErrorData, setLinkedErrorData] = useState((props.linkedErrorData.length>0) ? props.linkedErrorData : []);
+    const [linkedErrorData, setLinkedErrorData] = useState((props.linkedErrorData && props.linkedErrorData.length>0) ? props.linkedErrorData : []);
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
     const [firstRow, setFirstRow] = useState(0);
@@ -94,7 +94,7 @@ const DataViewer = (props) => {
       }
   
       const onRefreshClickHandler = () => {
-        setLinkedErrorData([]);
+        contextReporterDataSet.setLinkedErrorDataHandler(setLinkedErrorData([]));
         fetchDataHandler(null, sortOrder, firstRow, numRows);  
       }
 
@@ -246,10 +246,10 @@ const dataTemplate = (rowData, column) =>{
       }
     });
   
-      return <div> {rowData.dataRow[column.idx].fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message} /></div>;
+      return <div style={{'display':'flex','alignItems':'center'}}> {rowData.dataRow[column.idx].fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message}/></div>;
     }
     else{
-      return <div>{rowData.dataRow[column.idx].fieldData[column.field]}</div>;
+      return <div style={{'display':'flex','alignItems':'center'}}>{rowData.dataRow[column.idx].fieldData[column.field]}</div>;
     }
   }
 
@@ -311,7 +311,7 @@ const dataTemplate = (rowData, column) =>{
                 <CustomButton label="Sort" icon="9" />   
             </Toolbar> */}
             <div className={styles.Table}>
-                <DataTable value={(linkedErrorData.length>0) ? linkedErrorData : fetchedData} paginatorRight={totalCount}
+              <DataTable value={(linkedErrorData && linkedErrorData.length>0) ? linkedErrorData : fetchedData} paginatorRight={totalCount}
                        resizableColumns={true} reorderableColumns={true}
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 

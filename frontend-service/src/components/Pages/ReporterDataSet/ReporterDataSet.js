@@ -190,15 +190,22 @@ const ReporterDataSet = () => {
         </div>
         {/*TODO: Loading spinner --> En el Suspense
         ¿LinkedErrorData mejor pasar por props o tirar de context?*/}
-        <Suspense fallback={<Loader loadingMessage={resources.messages["loading"]}/>}>
-            <TabsSchema tables={tableSchema} 
-                        tableSchemaColumns={tableSchemaColumns} 
-                        urlViewer={`${config.dataviewerAPI.url}1`}
-                        activeIndex={activeIndex}
-                        linkedErrorData={linkedErrorData}
-                        onTabChangeHandler={(idTableSchema)=>{setActiveIndex(idTableSchema.index) }}
-                        />
-        </Suspense>            
+        <ReporterDataSetContext.Provider value={
+                    {
+                      validationsVisibleHandler: null,
+                      setTabHandler: null,
+                      setLinkedErrorDataHandler: (linkedData)=>{ setLinkedErrorData(linkedData) }
+                    }}>    
+          <Suspense fallback={<Loader loadingMessage={resources.messages["loading"]}/>}>
+              <TabsSchema tables={tableSchema} 
+                          tableSchemaColumns={tableSchemaColumns} 
+                          urlViewer={`${config.dataviewerAPI.url}1`}
+                          activeIndex={activeIndex}
+                          linkedErrorData={linkedErrorData}
+                          onTabChangeHandler={(idTableSchema)=>{setActiveIndex(idTableSchema.index) }}
+                          />
+          </Suspense>   
+        </ReporterDataSetContext.Provider>               
         <Dialog visible={dashDialogVisible} 
                 onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 
                 header={resources.messages["titleDashboard"]} 

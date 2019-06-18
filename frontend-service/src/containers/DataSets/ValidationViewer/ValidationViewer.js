@@ -145,7 +145,7 @@ const ValidationViewer = (props) => {
         let queryString = {
           datasetId: props.idDataSet,
           pageSize: numRows,
-          type: event.typeEntity
+          type: event.data.typeEntity
         }
 
         const dataPromise = HTTPRequester.get(
