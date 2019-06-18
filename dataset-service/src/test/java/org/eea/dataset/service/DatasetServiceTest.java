@@ -12,8 +12,10 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.DataSetTablesMapper;
+import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
+import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.mapper.TableNoRecordMapper;
 import org.eea.dataset.mapper.TableValidationMapper;
 import org.eea.dataset.mapper.TableValueMapper;
@@ -40,6 +42,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
@@ -47,6 +50,8 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -139,6 +144,13 @@ public class DatasetServiceTest {
   @Mock
   private TableValidationMapper tableValidationMapper;
 
+  @Mock
+  private FieldValidationMapper fieldValidationMapper;
+
+  @Mock
+  private RecordValidationMapper recordValidationMapper;
+
+
   private FieldValue fieldValue;
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -156,6 +168,9 @@ public class DatasetServiceTest {
     fieldValue = new FieldValue();
     recordValues = new ArrayList<>();
     recordValue = new RecordValue();
+    recordValue.setIdRecordSchema("");
+    recordValue.setLevelError(TypeErrorEnum.ERROR);
+    recordValue.setFields(new ArrayList<>());
     tableValue = new TableValue();
     tableValue.setId(1L);
     tableValue.setTableValidations(new ArrayList<>());
@@ -409,6 +424,33 @@ public class DatasetServiceTest {
   }
 
   @Test
+  public void testGetTableValuesById2() throws Exception {
+    when(recordRepository.findByTableValue_IdTableSchema(Mockito.any())).thenReturn(recordValues);
+    when(pageable.getPageSize()).thenReturn(1);
+    List<RecordVO> recordVOs = new ArrayList<>();
+    RecordVO recordVO = new RecordVO();
+    ArrayList<FieldVO> fields = new ArrayList<>();
+    fields.add(new FieldVO());
+    recordVO.setFields(fields);
+    recordVOs.add(recordVO);
+    List<FieldValidation> fieldV = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setFieldValue(new FieldValue());
+    fieldV.add(fieldValidation);
+    List<RecordValidation> recV = new ArrayList<>();
+    RecordValidation recValidation = new RecordValidation();
+    recValidation.setRecordValue(new RecordValue());
+    recV.add(recValidation);
+    when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
+    when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
+    when(recordValidationRepository.findByRecordValue_IdIn(Mockito.any())).thenReturn(recV);
+    when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetService.getTableValuesById(1L, "mongoId", pageable, "123", true);
+    Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
+  }
+
+  @Test
   public void testSetDataschemaTables() throws Exception {
     when(dataSetTablesMapper.classToEntity(Mockito.any())).thenReturn(new TableCollection());
     when(dataSetMetabaseTableCollection.save(Mockito.any())).thenReturn(new TableCollection());
@@ -470,6 +512,98 @@ public class DatasetServiceTest {
 
 
   @Test
+  public void testGetStatisticsSuccess2() throws Exception {
+    List<DatasetValidation> datasetValidations = new ArrayList<>();
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    Validation validation = new Validation();
+    validation.setLevelError(TypeErrorEnum.ERROR);
+    Validation validation2 = new Validation();
+    validation2.setLevelError(TypeErrorEnum.WARNING);
+    RecordValidation recordV = new RecordValidation();
+    RecordValidation recordV2 = new RecordValidation();
+    recordV.setValidation(validation);
+    recordV2.setValidation(validation2);
+    DatasetValidation datasetV = new DatasetValidation();
+    datasetV.setValidation(validation);
+    DatasetValidation datasetV2 = new DatasetValidation();
+    datasetV2.setValidation(validation2);
+    FieldValidation fieldV = new FieldValidation();
+    FieldValidation fieldV2 = new FieldValidation();
+    fieldV.setValidation(validation);
+    fieldV2.setValidation(validation2);
+    fieldValidations.add(fieldV);
+    fieldValidations.add(fieldV2);
+    datasetValidations.add(datasetV);
+    datasetValidations.add(datasetV2);
+    recordValidations.add(recordV);
+    recordValidations.add(recordV2);
+
+    datasetValue.setDatasetValidations(datasetValidations);
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    table.setNameTableSchema("");
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(table);
+    schema.setTableSchemas(tableSchemas);
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    when(recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
+        Mockito.any())).thenReturn(recordValidations);
+    when(fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
+        Mockito.any())).thenReturn(fieldValidations);
+    datasetService.getStatistics(1L);
+    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
+  }
+
+  @Test
+  public void testGetStatisticsSuccessSanitizeElse() throws Exception {
+    List<DatasetValidation> datasetValidations = new ArrayList<>();
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    Validation validation = new Validation();
+    validation.setLevelError(TypeErrorEnum.ERROR);
+    Validation validation2 = new Validation();
+    validation2.setLevelError(TypeErrorEnum.WARNING);
+    RecordValidation recordV = new RecordValidation();
+    recordV.setValidation(validation);
+    DatasetValidation datasetV = new DatasetValidation();
+    datasetV.setValidation(validation);
+    DatasetValidation datasetV2 = new DatasetValidation();
+    datasetV2.setValidation(validation2);
+    FieldValidation fieldV = new FieldValidation();
+    FieldValidation fieldV2 = new FieldValidation();
+    fieldV.setValidation(validation);
+    fieldV2.setValidation(validation2);
+    fieldValidations.add(fieldV);
+    fieldValidations.add(fieldV2);
+    datasetValidations.add(datasetV);
+    datasetValidations.add(datasetV2);
+    recordValidations.add(recordV);
+    tableValue.setIdTableSchema("");
+    tableValue.setRecords(new ArrayList<>());
+    datasetValue.setDatasetValidations(datasetValidations);
+    datasetValue.getTableValues().add(tableValue);
+    datasetValue.getTableValues().add(tableValue);
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    table.setNameTableSchema("");
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(table);
+    schema.setTableSchemas(tableSchemas);
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    when(recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
+        Mockito.any())).thenReturn(recordValidations);
+    when(fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
+        Mockito.any())).thenReturn(fieldValidations);
+    datasetService.getStatistics(1L);
+    Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
+  }
+
+  @Test
   public void testGetTableFromAnyObjectId() throws Exception {
 
     when(recordRepository.findByIdAndTableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
@@ -491,6 +625,23 @@ public class DatasetServiceTest {
     when(tableRepository.findByIdAndDatasetId_Id(Mockito.any(), Mockito.any()))
         .thenReturn(tableValue);
 
+    when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(tableValidationRepository.findByTableValue_IdTableSchema(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    when(tableValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetService.getTableFromAnyObjectId(1L, 1L, pageable, TypeEntityEnum.TABLE);
+    Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
+
+  }
+
+  @Test
+  public void testGetTableFromAnyObjectIdTable() throws Exception {
+    TableValue table = new TableValue();
+    List<RecordValue> records = new ArrayList<>();
+    records.add(new RecordValue());
+    table.setRecords(records);
+    when(tableRepository.findByIdAndDatasetId_Id(Mockito.any(), Mockito.any())).thenReturn(table);
+    when(tableNoRecordMapper.entityToClass(Mockito.any())).thenReturn(tableVO);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(tableValidationRepository.findByTableValue_IdTableSchema(Mockito.any()))
         .thenReturn(new ArrayList<>());

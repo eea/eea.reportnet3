@@ -317,7 +317,7 @@
       <properties>
         <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}</sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
-        <sonar.coverage.exclusions>**/org/eea/**/persistence/**domain/**,**/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>**/org/eea/**/persistence/**domain/**,**/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper,**/org/eea/**/persistence/**</sonar.coverage.exclusions>
       </properties>
       <build>
         <plugins>
