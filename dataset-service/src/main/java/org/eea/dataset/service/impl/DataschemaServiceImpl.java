@@ -131,8 +131,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       RuleRecord ruleRecord = new RuleRecord();
       List<String> listaStrinsRuleRecord = new ArrayList<String>();
-        listaStrinsRuleRecord.add(VALIDATE_WARNING);
-        listaStrinsRuleRecord.add(WARNING);
+      listaStrinsRuleRecord.add(VALIDATION_WARNING);
+      listaStrinsRuleRecord.add(WARNING);
       ruleRecord.setRuleId(new ObjectId());
       ruleRecord.setDataFlowId(1L);
       ruleRecord.setScope(TypeEntityEnum.RECORD);
@@ -182,78 +182,78 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rule.setDataFlowId(1L);
       rule.setIdFieldSchema(idFieldSchema);
       rule.setWhenCondition(NULL);
-        rule.setRuleName("FieldRule_" + i + "." + j);
-        List<String> listaMsgValidation = new ArrayList<String>();
-        listaMsgValidation.add(VALIDATION_WARNING);
-        listaMsgValidation.add(GENERAL_ERROR);
-        rule.setThenCondition(listaMsgValidation);
+      rule.setRuleName("FieldRule_" + i + "." + j);
+      List<String> listaMsgValidation = new ArrayList<String>();
+      listaMsgValidation.add(VALIDATION_WARNING);
+      listaMsgValidation.add(GENERAL_ERROR);
+      rule.setThenCondition(listaMsgValidation);
       ruleField.add(rule);
       rule.setScope(TypeEntityEnum.FIELD);
 
-        RuleField rule2 = new RuleField();
-        List<String> listaMsgTypeValidation = new ArrayList<String>();
-        switch (header.getHeaderType().toLowerCase().trim()) {
-          case "string":
-            rule2.setRuleId(new ObjectId());
-            rule2.setDataFlowId(1L);
-            rule2.setIdFieldSchema(idFieldSchema);
-            rule2.setWhenCondition("type == null");
-            rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-            listaMsgTypeValidation.add(STRING_ERROR);
-            listaMsgTypeValidation.add(GENERAL_ERROR);
-            rule2.setThenCondition(listaMsgTypeValidation);
-            ruleField.add(rule2);
-            rule2.setScope(TypeEntityEnum.FIELD);
-            break;
-          case "integer":
-            rule2.setRuleId(new ObjectId());
-            rule2.setDataFlowId(1L);
-            rule2.setIdFieldSchema(idFieldSchema);
-            rule2.setWhenCondition("isValid(value)");
-            rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-            listaMsgTypeValidation.add(INTEGER_ERROR);
-            listaMsgTypeValidation.add(GENERAL_ERROR);
-            rule2.setThenCondition(listaMsgTypeValidation);
-            ruleField.add(rule2);
-            rule2.setScope(TypeEntityEnum.FIELD);
-            break;
-          case "boolean":
-            rule2.setRuleId(new ObjectId());
-            rule2.setDataFlowId(1L);
-            rule2.setIdFieldSchema(idFieldSchema);
-            rule2.setWhenCondition("value==true || value==false");
-            rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-            listaMsgTypeValidation.add(BOOLEAN_ERROR);
-            listaMsgTypeValidation.add(GENERAL_ERROR);
-            rule2.setThenCondition(listaMsgTypeValidation);
-            ruleField.add(rule2);
-            rule2.setScope(TypeEntityEnum.FIELD);
-            break;
-          case "coordinateLat":
-            rule2.setRuleId(new ObjectId());
-            rule2.setDataFlowId(1L);
-            rule2.setIdFieldSchema(idFieldSchema);
-            rule2.setWhenCondition("isValid(value) && (value >= -90 && value <= 90)");
-            rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-            listaMsgTypeValidation.add(COORDINATE_ERROR);
-            listaMsgTypeValidation.add(GENERAL_ERROR);
-            rule2.setThenCondition(listaMsgTypeValidation);
-            ruleField.add(rule2);
-            rule2.setScope(TypeEntityEnum.FIELD);
-            break;
-          case "coordinateLong":
-            rule2.setRuleId(new ObjectId());
-            rule2.setDataFlowId(1L);
-            rule2.setIdFieldSchema(idFieldSchema);
-            rule2.setWhenCondition("isValid(value) && (value >= -180 && value <= 180)");
-            rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-            listaMsgTypeValidation.add(COORDINATE_ERROR);
-            listaMsgTypeValidation.add(GENERAL_ERROR);
-            rule2.setThenCondition(listaMsgTypeValidation);
-            ruleField.add(rule2);
-            rule2.setScope(TypeEntityEnum.FIELD);
-            break;
-        }
+      RuleField rule2 = new RuleField();
+      List<String> listaMsgTypeValidation = new ArrayList<String>();
+      switch (header.getHeaderType().toLowerCase().trim()) {
+        case "string":
+          rule2.setRuleId(new ObjectId());
+          rule2.setDataFlowId(1L);
+          rule2.setIdFieldSchema(idFieldSchema);
+          rule2.setWhenCondition("type == null");
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
+          listaMsgTypeValidation.add(STRING_ERROR);
+          listaMsgTypeValidation.add(GENERAL_ERROR);
+          rule2.setThenCondition(listaMsgTypeValidation);
+          ruleField.add(rule2);
+          rule2.setScope(TypeEntityEnum.FIELD);
+          break;
+        case "integer":
+          rule2.setRuleId(new ObjectId());
+          rule2.setDataFlowId(1L);
+          rule2.setIdFieldSchema(idFieldSchema);
+          rule2.setWhenCondition("isValid(value)");
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
+          listaMsgTypeValidation.add(INTEGER_ERROR);
+          listaMsgTypeValidation.add(GENERAL_ERROR);
+          rule2.setThenCondition(listaMsgTypeValidation);
+          ruleField.add(rule2);
+          rule2.setScope(TypeEntityEnum.FIELD);
+          break;
+        case "boolean":
+          rule2.setRuleId(new ObjectId());
+          rule2.setDataFlowId(1L);
+          rule2.setIdFieldSchema(idFieldSchema);
+          rule2.setWhenCondition("value==true || value==false");
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
+          listaMsgTypeValidation.add(BOOLEAN_ERROR);
+          listaMsgTypeValidation.add(GENERAL_ERROR);
+          rule2.setThenCondition(listaMsgTypeValidation);
+          ruleField.add(rule2);
+          rule2.setScope(TypeEntityEnum.FIELD);
+          break;
+        case "coordinateLat":
+          rule2.setRuleId(new ObjectId());
+          rule2.setDataFlowId(1L);
+          rule2.setIdFieldSchema(idFieldSchema);
+          rule2.setWhenCondition("isValid(value) && (value >= -90 && value <= 90)");
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
+          listaMsgTypeValidation.add(COORDINATE_ERROR);
+          listaMsgTypeValidation.add(GENERAL_ERROR);
+          rule2.setThenCondition(listaMsgTypeValidation);
+          ruleField.add(rule2);
+          rule2.setScope(TypeEntityEnum.FIELD);
+          break;
+        case "coordinateLong":
+          rule2.setRuleId(new ObjectId());
+          rule2.setDataFlowId(1L);
+          rule2.setIdFieldSchema(idFieldSchema);
+          rule2.setWhenCondition("isValid(value) && (value >= -180 && value <= 180)");
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
+          listaMsgTypeValidation.add(COORDINATE_ERROR);
+          listaMsgTypeValidation.add(GENERAL_ERROR);
+          rule2.setThenCondition(listaMsgTypeValidation);
+          ruleField.add(rule2);
+          rule2.setScope(TypeEntityEnum.FIELD);
+          break;
+      }
 
       FieldSchema fieldSchema = new FieldSchema();
       fieldSchema.setIdFieldSchema(idFieldSchema);
