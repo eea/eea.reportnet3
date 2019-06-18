@@ -97,7 +97,7 @@ pipeline {
         
         stage('Install in Nexus') {
             when {
-                branch 'develop' 
+                branch 'develop1' 
             }
             parallel {
                 stage('Install in JAVA repository') {
@@ -119,7 +119,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'develop' 
+                branch 'develop1' 
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {

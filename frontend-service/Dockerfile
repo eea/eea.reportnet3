@@ -7,6 +7,7 @@ RUN yarn build
 
 # Stage 2 - the production environment
 FROM nginx:alpine
+MAINTAINER TRACASA-ALTIA for the EEA
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=react-build /app/build /usr/share/nginx/html
 EXPOSE 80
