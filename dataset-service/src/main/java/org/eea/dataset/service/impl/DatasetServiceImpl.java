@@ -837,32 +837,41 @@ public class DatasetServiceImpl implements DatasetService {
   private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId,
       Map<String, String> mapIdNameDatasetSchema) {
 
+    HashSet<Long> recordIdsFromRecordWithValidationError =
+        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    HashSet<Long> recordIdsFromRecordWithValidationWarning =
+        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
+    HashSet<Long> recordIdsFromFieldWithValidationError =
+        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    HashSet<Long> recordIdsFromFieldWithValidationWarning =
+        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
+    Set<Long> idsErrors = new HashSet<>();
+    idsErrors.addAll(recordIdsFromRecordWithValidationError);
+    idsErrors.addAll(recordIdsFromFieldWithValidationError);
+
+    Set<Long> idsWarnings = new HashSet<>();
+    idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
+    idsWarnings.addAll(recordIdsFromFieldWithValidationWarning);
+
+    idsWarnings.removeAll(idsErrors);
+
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
-
-    Long countErrorRecordValidations =
-        recordValidationRepository.countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
-
-    Long countWarningRecordValidations =
-        recordValidationRepository.countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
-
-    Long countErrorFieldValidations =
-        fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
-
-    Long countWarningFieldValidations =
-        fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setTotalRecords(countRecords);
 
-    Long totalRecordsWithErrors = countErrorRecordValidations + countErrorFieldValidations;
-    Long totalRecordsWithWarnings = countWarningRecordValidations + countWarningFieldValidations;
+    Long totalRecordsWithErrors = Long.valueOf(idsErrors.size());
+    Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
     Long totalTableErrors = totalRecordsWithErrors + totalRecordsWithWarnings;
-
 
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
 
