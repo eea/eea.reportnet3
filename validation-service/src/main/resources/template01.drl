@@ -6,12 +6,18 @@ typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
+
 package src.main.resources
+
 import org.eea.validation.persistence.data.domain.*;
 import org.eea.interfaces.vo.validation.*;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;
 import java.util.regex.*;
+
+
+
+
 template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
@@ -24,6 +30,7 @@ dialect "java"
 end
 
 end template
+
 function boolean isValid( String s ){
     try {
         Double.valueOf( s );
@@ -33,7 +40,7 @@ function boolean isValid( String s ){
     }
  }
  
- function boolean isText( String s ){
+function boolean isText( String s ){
     try {
         Pattern pat = Pattern.compile("[^a-zA-Z0-9$]");
        	Matcher mat = pat.matcher(s);
@@ -47,7 +54,7 @@ function boolean isValid( String s ){
     }
  }
  
-  function boolean isDateYYYYMMDD( String s ){
+function boolean isDateYYYYMMDD( String s ){
     try {
         Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
        	Matcher dataMatcher = dataValue.matcher(s);
@@ -59,4 +66,27 @@ function boolean isValid( String s ){
     } catch( Exception e ){
         return false;
     }
+ }
+ 
+ function boolean isCordenateLat( String s ){
+	
+	String numberDouble =  s.replaceAll(".", ",");
+   if(isValid(numberDouble)){
+    	if(Double.valueOf(numberDouble) >= -90 && Double.valueOf(numberDouble) <= 90){
+		   return true;   	
+    	}
+    	return false;
+   }
+   return false;
+ }  
+function boolean isCordenateLong( String s ){
+	
+	String numberDouble =  s.replaceAll(".", ",");
+   if(isValid(numberDouble)){
+    	if(Double.valueOf(numberDouble) >= -180 && Double.valueOf(numberDouble) <= 180){
+		   return true;   	
+    	}
+    	return false;
+   }
+   return false;
  }
