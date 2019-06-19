@@ -173,13 +173,12 @@ const ReporterDataSet = () => {
   const onConfirmValidateHandler = () =>{
     let idDataSet = 1;
     setValidateDialogVisible(false);
-    HTTPRequesterAPI.get(
+    HTTPRequesterAPI.update(
       {
         url:'/validation/dataset/'+ idDataSet,
         queryString: {}
       }
     );
-    console.log("/validation/dataset/" + idDataSet);
   }
   
   
