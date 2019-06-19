@@ -7,6 +7,7 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,8 +20,10 @@ public class FileTreatmentHelper {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+
   /** The dataset service. */
   @Autowired
+  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /**

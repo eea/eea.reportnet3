@@ -3,7 +3,6 @@ package org.eea.dataset.service.callable;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 import org.eea.dataset.service.file.FileTreatmentHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The type Load data callable.
@@ -23,7 +22,7 @@ public class LoadDataCallable implements Callable<Void> {
   /** The id table schema. */
   private final String idTableSchema;
 
-  @Autowired
+  /** The file treatment helper. */
   private FileTreatmentHelper fileTreatmentHelper;
 
   /**
@@ -34,12 +33,13 @@ public class LoadDataCallable implements Callable<Void> {
    * @param is the is
    * @param idTableSchema the id table schema
    */
-  public LoadDataCallable(final Long dataSetId, final String fileName, InputStream is,
-      final String idTableSchema) {
+  public LoadDataCallable(final FileTreatmentHelper fileTreatmentHelper, final Long dataSetId,
+      final String fileName, InputStream is, final String idTableSchema) {
     this.fileName = fileName;
     this.datasetId = dataSetId;
     this.is = is;
     this.idTableSchema = idTableSchema;
+    this.fileTreatmentHelper = fileTreatmentHelper;
   }
 
   /**
