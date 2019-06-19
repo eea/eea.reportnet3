@@ -201,8 +201,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("isText(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(STRING_WARNING);
           listaMsgTypeValidation.add("that text have invalid caracteres");
+          listaMsgTypeValidation.add("ERROR");
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
