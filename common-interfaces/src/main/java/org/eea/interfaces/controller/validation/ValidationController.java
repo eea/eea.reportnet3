@@ -26,7 +26,7 @@ public interface ValidationController {
    *
    * @return the data set VO
    */
-  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.POST,
+  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void validateDataSetData(@PathVariable("id") Long datasetId);
 
