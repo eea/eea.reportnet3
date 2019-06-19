@@ -100,6 +100,143 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  @Test
+  public void testCreateDataSchemaInteger() {
+
+    List<TableCollection> tables2 = new ArrayList<>();
+
+    TableCollection table = new TableCollection();
+    TableHeadersCollection header = new TableHeadersCollection();
+    List<TableHeadersCollection> headers = new ArrayList<>();
+
+    header.setHeaderName("test");
+    header.setId(1L);
+    header.setHeaderType("integer");
+    headers.add(header);
+
+    table.setId(1L);
+    table.setDataFlowId(1L);
+    table.setDataSetId(1L);
+    table.setTableName("test");
+    table.setTableHeadersCollections(headers);
+    tables2.add(table);
+
+    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+    dataSchemaServiceImpl.createDataSchema(1L);
+    dataschemaService.createDataSchema(1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+  }
+
+
+  @Test
+  public void testCreateDataSchemaBoolean() {
+
+    List<TableCollection> tables2 = new ArrayList<>();
+
+    TableCollection table = new TableCollection();
+    TableHeadersCollection header = new TableHeadersCollection();
+    List<TableHeadersCollection> headers = new ArrayList<>();
+
+    header.setHeaderName("test");
+    header.setId(1L);
+    header.setHeaderType("boolean");
+    headers.add(header);
+
+    table.setId(1L);
+    table.setDataFlowId(1L);
+    table.setDataSetId(1L);
+    table.setTableName("test");
+    table.setTableHeadersCollections(headers);
+    tables2.add(table);
+
+    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+    dataSchemaServiceImpl.createDataSchema(1L);
+    dataschemaService.createDataSchema(1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+  }
+
+
+
+  @Test
+  public void testCreateDataSchemaCoordinateLat() {
+
+    List<TableCollection> tables2 = new ArrayList<>();
+
+    TableCollection table = new TableCollection();
+    TableHeadersCollection header = new TableHeadersCollection();
+    List<TableHeadersCollection> headers = new ArrayList<>();
+
+    header.setHeaderName("test");
+    header.setId(1L);
+    header.setHeaderType("coordinateLat");
+    headers.add(header);
+
+    table.setId(1L);
+    table.setDataFlowId(1L);
+    table.setDataSetId(1L);
+    table.setTableName("test");
+    table.setTableHeadersCollections(headers);
+    tables2.add(table);
+
+    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+    dataSchemaServiceImpl.createDataSchema(1L);
+    dataschemaService.createDataSchema(1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+  }
+
+  @Test
+  public void testCreateDataSchemaCoordinateLong() {
+
+    List<TableCollection> tables2 = new ArrayList<>();
+
+    TableCollection table = new TableCollection();
+    TableHeadersCollection header = new TableHeadersCollection();
+    List<TableHeadersCollection> headers = new ArrayList<>();
+
+    header.setHeaderName("test");
+    header.setId(1L);
+    header.setHeaderType("coordinateLong");
+    headers.add(header);
+
+    table.setId(1L);
+    table.setDataFlowId(1L);
+    table.setDataSetId(1L);
+    table.setTableName("test");
+    table.setTableHeadersCollections(headers);
+    tables2.add(table);
+
+    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+    dataSchemaServiceImpl.createDataSchema(1L);
+    dataschemaService.createDataSchema(1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+  }
+
+  @Test
+  public void testCreateDataSchemaCoordinateDate() {
+
+    List<TableCollection> tables2 = new ArrayList<>();
+
+    TableCollection table = new TableCollection();
+    TableHeadersCollection header = new TableHeadersCollection();
+    List<TableHeadersCollection> headers = new ArrayList<>();
+
+    header.setHeaderName("test");
+    header.setId(1L);
+    header.setHeaderType("date");
+    headers.add(header);
+
+    table.setId(1L);
+    table.setDataFlowId(1L);
+    table.setDataSetId(1L);
+    table.setTableName("test");
+    table.setTableHeadersCollections(headers);
+    tables2.add(table);
+
+    when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+    dataSchemaServiceImpl.createDataSchema(1L);
+    dataschemaService.createDataSchema(1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+  }
 
   /**
    * Test find data schema by id.

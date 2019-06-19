@@ -1,12 +1,16 @@
 package org.eea.validation.kafka;
 
-import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.handler.EEAEventHandler;
+import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,12 +19,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class EventHandler implements EEAEventHandler {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(EventHandler.class);
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The validation service. */
   @Autowired
-  private ValidationController validationController;
+  @Qualifier("proxyValidationService")
+  private ValidationService validationService;
+
+  @Autowired
+  private KafkaSender kafkaSender;
 
   /**
    * Gets the type.
@@ -43,7 +53,14 @@ public class EventHandler implements EEAEventHandler {
     LOG.info("ValidationService has received this message from Kafka {}", eeaEventVO);
 
     if (EventType.LOAD_DATA_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
-      validationController.validateDataSetData((Long) eeaEventVO.getData().get("dataset_id"));
+      Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+      try {
+        ValidationHelper.executeValidation(kafkaSender, this.validationService,
+            datasetId);
+      } catch (EEAException e) {
+        LOG_ERROR
+            .error("Error processing validations for dataset {} due to exception {}", datasetId, e);
+      }
     }
   }
 }
