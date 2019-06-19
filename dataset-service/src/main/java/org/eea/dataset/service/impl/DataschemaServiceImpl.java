@@ -179,18 +179,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
 
       List<RuleField> ruleField = new ArrayList<RuleField>();
-      RuleField rule = new RuleField();
-      rule.setRuleId(new ObjectId());
-      rule.setDataFlowId(1L);
-      rule.setIdFieldSchema(idFieldSchema);
-      rule.setWhenCondition(NULL);
-      rule.setRuleName("FieldRule_" + i + "." + j);
-      List<String> listaMsgValidation = new ArrayList<String>();
-      listaMsgValidation.add(VALIDATION_WARNING);
-      listaMsgValidation.add(GENERAL_ERROR);
-      rule.setThenCondition(listaMsgValidation);
-      ruleField.add(rule);
-      rule.setScope(TypeEntityEnum.FIELD);
+      // RuleField rule = new RuleField();
+      // rule.setRuleId(new ObjectId());
+      // rule.setDataFlowId(1L);
+      // rule.setIdFieldSchema(idFieldSchema);
+      // rule.setWhenCondition(NULL);
+      // rule.setRuleName("FieldRule_" + i + "." + j);
+      // List<String> listaMsgValidation = new ArrayList<String>();
+      // listaMsgValidation.add(VALIDATION_WARNING);
+      // listaMsgValidation.add(GENERAL_ERROR);
+      // rule.setThenCondition(listaMsgValidation);
+      // ruleField.add(rule);
+      // rule.setScope(TypeEntityEnum.FIELD);
 
       RuleField rule2 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<String>();
@@ -201,7 +201,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("isText(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add("that text have invalid caracteres");
+          listaMsgTypeValidation.add("that text have invalid caracteres or is empty");
           listaMsgTypeValidation.add("ERROR");
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
