@@ -22,6 +22,8 @@ public class EventHandler implements EEAEventHandler {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(EventHandler.class);
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Autowired
