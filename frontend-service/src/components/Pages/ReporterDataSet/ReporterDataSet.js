@@ -8,6 +8,10 @@ import {Dialog} from 'primereact/dialog';
 // import {Lightbox} from 'primereact/lightbox';
 //import {Loader} from '../../Layout/UI/Loader/Loader';
 import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
+import ConfirmDialog from '../../Layout/UI/ConfirmDialog/ConfirmDialog';
+import ValidationViewer from '../../../containers/DataSets/ValidationViewer/ValidationViewer';
+import Dashboard from '../../../containers/DashBoard/DashBoard';
+
 import config from '../../../conf/web.config.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
@@ -30,10 +34,6 @@ const ReporterDataSet = () => {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
-
-  const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
-  const ValidationViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
-  const Dashboard = React.lazy(()=> import('../../../containers/DashBoard/DashBoard'));
 
 
   console.log('ReporterDataSet Render...');   
@@ -212,9 +212,7 @@ const ReporterDataSet = () => {
                 maximizable 
                 dismissableMask={true} 
                 style={{width:'80%'}}>
-                <Suspense fallback={<div>Loading...</div>}>
-                  <Dashboard/>
-                </Suspense>
+                <Dashboard/>
         </Dialog>   
             {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
         <ReporterDataSetContext.Provider value={
@@ -229,12 +227,9 @@ const ReporterDataSet = () => {
                   maximizable 
                   dismissableMask={true} 
                   style={{width:'80%'}}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                      <ValidationViewer idDataSet = {1}/>
-                    </Suspense>        
+                      <ValidationViewer idDataSet = {1}/>     
           </Dialog>
         </ReporterDataSetContext.Provider> 
-        <Suspense fallback={<div>Loading...</div>}>
           <ConfirmDialog onConfirm={onConfirmDeleteHandler} 
                          onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
                          visible={deleteDialogVisible} 
@@ -253,7 +248,6 @@ const ReporterDataSet = () => {
                           labelCancel={resources.messages["no"]}>
                           {resources.messages["validateDataSetConfirm"]}
           </ConfirmDialog>
-        </Suspense>
       </div>
     );
 }
