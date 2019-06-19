@@ -61,14 +61,13 @@ const DataViewer = (props) => {
         // </div>;
         // setHeader(headerArr);
         
-        let columnsArr = cols.map((col,i) => (
+        let columnsArr = cols.map(col => (
           <Column
             sortable={true}
             key={col.field}
             field={col.field}
             header={col.header}
             body={dataTemplate}
-            idx = {i}
           />
         ));
         let validationCol = (
@@ -213,9 +212,9 @@ const validationsTemplate = (fetchedData, column) => {
 
 //Template for Field validation
 const dataTemplate = (rowData, column) =>{
-    
-  if (rowData.dataRow[column.idx].fieldValidations!==null) {
-    const validations = rowData.dataRow[column.idx].fieldValidations.map(
+    let row = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+  if (row !== null && row.fieldValidations!==null) {
+    const validations = row.fieldValidations.map(
       val => val.validation
     );
     let message = [];
@@ -246,10 +245,10 @@ const dataTemplate = (rowData, column) =>{
       }
     });
   
-      return <div style={{'display':'flex','alignItems':'center'}}> {rowData.dataRow[column.idx].fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message}/></div>;
+      return <div style={{'display':'flex','alignItems':'center'}}> {row.fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message}/></div>;
     }
     else{
-      return <div style={{'display':'flex','alignItems':'center'}}>{rowData.dataRow[column.idx].fieldData[column.field]}</div>;
+      return <div style={{'display':'flex','alignItems':'center'}}>{row.fieldData[column.field]}</div>;
     }
   }
 
