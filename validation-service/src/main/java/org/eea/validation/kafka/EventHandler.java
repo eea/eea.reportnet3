@@ -4,7 +4,6 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.handler.EEAEventHandler;
-import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ public class EventHandler implements EEAEventHandler {
   private ValidationService validationService;
 
   @Autowired
-  private KafkaSender kafkaSender;
+  private ValidationHelper validationHelper;
 
   /**
    * Gets the type.
@@ -55,11 +54,10 @@ public class EventHandler implements EEAEventHandler {
     if (EventType.LOAD_DATA_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
       Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
       try {
-        ValidationHelper.executeValidation(kafkaSender, this.validationService,
-            datasetId);
+        validationHelper.executeValidation(datasetId);
       } catch (EEAException e) {
-        LOG_ERROR
-            .error("Error processing validations for dataset {} due to exception {}", datasetId, e);
+        LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
+            datasetId, e);
       }
     }
   }

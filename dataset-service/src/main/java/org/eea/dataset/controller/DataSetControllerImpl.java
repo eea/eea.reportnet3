@@ -17,7 +17,6 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
-import org.eea.kafka.io.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,12 +58,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
-
-  /**
-   * The kafka sender.
-   */
-  @Autowired
-  private KafkaSender kafkaSender;
 
   /**
    * Gets the data tables values.
@@ -170,8 +163,7 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(kafkaSender, this.datasetService, datasetId, fileName, is,
-          idTableSchema);
+      callable = new LoadDataCallable(datasetId, fileName, is, idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {

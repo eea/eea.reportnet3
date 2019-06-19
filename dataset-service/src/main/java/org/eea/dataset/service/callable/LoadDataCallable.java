@@ -2,9 +2,8 @@ package org.eea.dataset.service.callable;
 
 import java.io.InputStream;
 import java.util.concurrent.Callable;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileTreatmentHelper;
-import org.eea.kafka.io.KafkaSender;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The type Load data callable.
@@ -20,34 +19,27 @@ public class LoadDataCallable implements Callable<Void> {
   /** The is. */
   private final InputStream is;
 
-  /** The dataset service. */
-  private DatasetService datasetService;
-
-  /** The kafka sender. */
-  private KafkaSender kafkaSender;
 
   /** The id table schema. */
   private final String idTableSchema;
 
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
+
   /**
    * Instantiates a new Load data callable.
    *
-   * @param kafkaSender the kafka sender
-   * @param datasetService the dataset service
    * @param dataSetId the data set id
    * @param fileName the file
    * @param is the is
    * @param idTableSchema the id table schema
    */
-  public LoadDataCallable(final KafkaSender kafkaSender, final DatasetService datasetService,
-      final Long dataSetId, final String fileName, InputStream is, final String idTableSchema) {
-    this.datasetService = datasetService;
+  public LoadDataCallable(final Long dataSetId, final String fileName, InputStream is,
+      final String idTableSchema) {
     this.fileName = fileName;
     this.datasetId = dataSetId;
     this.is = is;
     this.idTableSchema = idTableSchema;
-    this.datasetService = datasetService;
-    this.kafkaSender = kafkaSender;
   }
 
   /**
@@ -58,8 +50,7 @@ public class LoadDataCallable implements Callable<Void> {
    */
   @Override
   public Void call() throws Exception {
-    FileTreatmentHelper.executeFileProcess(kafkaSender, this.datasetService, datasetId, fileName,
-        is, idTableSchema);
+    fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     return null;
   }
 }

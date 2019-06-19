@@ -4,14 +4,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.helper.KafkaSenderHelper;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class FileTreatmentHelper.
  */
-public class FileTreatmentHelper extends KafkaSenderHelper {
+@Component
+public class FileTreatmentHelper {
+
+  /** The kafka sender helper. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
 
   /**
    * Instantiates a new file loader helper.
@@ -23,8 +33,6 @@ public class FileTreatmentHelper extends KafkaSenderHelper {
   /**
    * Execute file process.
    *
-   * @param kafkaSender the kafka sender
-   * @param datasetService the dataset service
    * @param datasetId the dataset id
    * @param fileName the file name
    * @param is the input stream
@@ -33,14 +41,12 @@ public class FileTreatmentHelper extends KafkaSenderHelper {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws InterruptedException the interrupted exception
    */
-  public static void executeFileProcess(final KafkaSender kafkaSender,
-      final DatasetService datasetService, final Long datasetId, final String fileName,
-      final InputStream is, String idTableSchema)
-      throws EEAException, IOException, InterruptedException {
+  public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
+      String idTableSchema) throws EEAException, IOException, InterruptedException {
     datasetService.processFile(datasetId, fileName, is, idTableSchema);
 
     // after the dataset has been saved, an event is sent to notify it
-    releaseDatasetKafkaEvent(kafkaSender, EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
   }
 
 }

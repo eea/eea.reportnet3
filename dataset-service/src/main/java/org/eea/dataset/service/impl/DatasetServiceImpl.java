@@ -356,7 +356,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  private static String getMimetype(final String file) throws EEAException {
+  private String getMimetype(final String file) throws EEAException {
     String mimeType = null;
     final int location = file.lastIndexOf('.');
     if (location == -1) {
@@ -373,7 +373,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  private static void validateFileType(final String mimeType) throws EEAException {
+  private void validateFileType(final String mimeType) throws EEAException {
     // files that will be accepted: csv, xml, xls, xlsx
     switch (mimeType) {
       case "csv":

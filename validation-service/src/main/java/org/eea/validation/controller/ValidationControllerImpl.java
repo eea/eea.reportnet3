@@ -3,7 +3,6 @@ package org.eea.validation.controller;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
-import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +30,9 @@ public class ValidationControllerImpl implements ValidationController {
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
-  /**
-   * The kafka sender.
-   */
+  /** The validation helper. */
   @Autowired
-  private KafkaSender kafkaSender;
+  private ValidationHelper validationHelper;
 
   /**
    * Validate data set data.
@@ -51,7 +48,7 @@ public class ValidationControllerImpl implements ValidationController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      ValidationHelper.executeValidation(kafkaSender, this.validationService, datasetId);
+      validationHelper.executeValidation(datasetId);
     } catch (EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_INCORRECT_ID)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

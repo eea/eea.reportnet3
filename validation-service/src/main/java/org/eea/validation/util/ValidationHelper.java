@@ -1,15 +1,27 @@
 package org.eea.validation.util;
 
 import org.eea.exception.EEAException;
-import org.eea.helper.KafkaSenderHelper;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.service.ValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class ValidationHelper.
  */
-public class ValidationHelper extends KafkaSenderHelper {
+@Component
+public class ValidationHelper {
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The validation service. */
+  @Autowired
+  @Qualifier("proxyValidationService")
+  private ValidationService validationService;
 
   /**
    * Instantiates a new file loader helper.
@@ -21,18 +33,13 @@ public class ValidationHelper extends KafkaSenderHelper {
   /**
    * Execute file process.
    *
-   * @param kafkaSender the kafka sender
-   * @param validationService the validation service
    * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  public static void executeValidation(final KafkaSender kafkaSender,
-      final ValidationService validationService, final Long datasetId) throws EEAException {
-    validationService.deleteAllValidation(datasetId);
-
+  public void executeValidation(final Long datasetId) throws EEAException {
     validationService.validateDataSetData(datasetId);
     // after the dataset has been saved, an event is sent to notify it
-    releaseDatasetKafkaEvent(kafkaSender, EventType.VALIDATION_FINISHED_EVENT, datasetId);
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }
 
 }

@@ -205,6 +205,9 @@ public class ValidationServiceImpl implements ValidationService {
     // Get the session for the rules validation
     KieSession session = loadRulesKnowledgeBase(dataflowId);
 
+    // Remove previous validations
+    datasetRepository.deleteValidationTable();
+
     // Dataset and TablesValue validations
     // read Dataset Data
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);

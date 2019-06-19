@@ -6,7 +6,7 @@ import static org.mockito.Mockito.times;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.kafka.io.KafkaSender;
-import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ public class ValidationControllerImplTest {
   private ValidationControllerImpl validationController;
 
   @Mock
-  private ValidationService validationService;
+  private ValidationHelper validationHelper;
 
   @Mock
   private KafkaSender kafkaSender;
@@ -42,31 +42,29 @@ public class ValidationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void validateDataSetDataExceptionBadIdTest() throws EEAException {
-    doNothing().when(validationService).deleteAllValidation(Mockito.any());
-    doThrow(new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID)).when(validationService)
-        .validateDataSetData(Mockito.any());
+    doThrow(new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID)).when(validationHelper)
+        .executeValidation(Mockito.any());
     validationController.validateDataSetData(1L);
   }
 
   @Test(expected = ResponseStatusException.class)
   public void validateDataSetDataExceptionDatasetNotFoundTest() throws EEAException {
-    doNothing().when(validationService).deleteAllValidation(Mockito.any());
-    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(validationService)
-        .validateDataSetData(Mockito.any());
+    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(validationHelper)
+        .executeValidation(Mockito.any());
     validationController.validateDataSetData(1L);
   }
 
   @Test(expected = ResponseStatusException.class)
   public void validateDataSetDataExceptionInternalErrorTest() throws EEAException {
-    doNothing().when(validationService).deleteAllValidation(Mockito.any());
-    doThrow(new EEAException("")).when(validationService).validateDataSetData(Mockito.any());
+    doThrow(new EEAException("")).when(validationHelper).executeValidation(Mockito.any());
     validationController.validateDataSetData(1L);
   }
 
   @Test
-  public void validateDataSetDataTest() {
+  public void validateDataSetDataTest() throws EEAException {
+    doNothing().when(validationHelper).executeValidation(Mockito.any());
     validationController.validateDataSetData(1L);
-    Mockito.verify(validationService, times(1)).deleteAllValidation(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
   }
 
 }

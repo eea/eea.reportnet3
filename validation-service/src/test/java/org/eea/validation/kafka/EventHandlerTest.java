@@ -9,8 +9,7 @@ import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
-import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,10 +27,8 @@ public class EventHandlerTest {
   private EventHandler eventHandler;
 
   @Mock
-  private ValidationService validationService;
+  private ValidationHelper validationHelper;
 
-  @Mock
-  private KafkaSender kafkaSender;
 
   @Before
   public void initMocks() {
@@ -44,10 +41,9 @@ public class EventHandlerTest {
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<String, Object>();
     event.setData(data);
-    doNothing().when(validationService).deleteAllValidation(Mockito.any());
-    doNothing().when(validationService).validateDataSetData(Mockito.any());
+    doNothing().when(validationHelper).executeValidation(Mockito.any());
     eventHandler.processMessage(event);
-    Mockito.verify(validationService, times(1)).validateDataSetData(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
   }
 
   @Test
@@ -56,19 +52,19 @@ public class EventHandlerTest {
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<String, Object>();
     event.setData(data);
-    doNothing().when(validationService).deleteAllValidation(Mockito.any());
-    doThrow(new EEAException()).when(validationService).validateDataSetData(Mockito.any());
+    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any());
     eventHandler.processMessage(event);
-    Mockito.verify(validationService, times(1)).validateDataSetData(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
   }
 
   @Test
-  public void testKafkanotLoad() {
+  public void testKafkanotLoad() throws EEAException {
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.CONNECTION_CREATED_EVENT);
     Map<String, Object> data = new HashMap<String, Object>();
     event.setData(data);
     eventHandler.processMessage(event);
+    Mockito.verify(validationHelper, times(0)).executeValidation(Mockito.any());
   }
 
   @Test
