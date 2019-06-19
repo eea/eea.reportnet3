@@ -43,7 +43,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @param datasetId the dataset id
    */
   @Override
-  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.POST,
+  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void validateDataSetData(@PathVariable("id") Long datasetId) {
     if (datasetId == null) {
