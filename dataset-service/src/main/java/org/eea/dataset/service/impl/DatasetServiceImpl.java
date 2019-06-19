@@ -1189,40 +1189,4 @@ public class DatasetServiceImpl implements DatasetService {
     return errors;
   }
 
-
-  /**
-   * Update records.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void updateRecords(Long datasetId, List<RecordVO> records) throws EEAException {
-    if (records == null) {
-      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
-    recordRepository.saveAll(recordValue);
-  }
-
-
-  /**
-   * Delete.
-   *
-   * @param datasetId the dataset id
-   * @param recordIds the record ids
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void delete(Long datasetId, List<Long> recordIds) throws EEAException {
-    if (recordIds == null) {
-      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    recordRepository.deleteRecordsWithIds(recordIds);
-  }
-
-
 }

@@ -1,21 +1,17 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
-import org.eea.dataset.service.file.RecordModifiedHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -42,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -357,64 +354,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return validations;
-  }
-
-  /**
-   * Update records.
-   *
-   * @param datasetId the dataset id
-   * @param records the records
-   */
-  @Override
-  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateRecords(@PathVariable("id") final Long datasetId,
-      @RequestBody final List<RecordVO> records) {
-    if (datasetId == null || records == null || records.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    try {
-      RecordModifiedHelper.executeUpdateProcess(kafkaSender, this.datasetService, datasetId,
-          records);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-
-    }
-  }
-
-
-  /**
-   * Delete records.
-   *
-   * @param datasetId the dataset id
-   * @param recordIds the record ids
-   */
-  @Override
-  public void deleteRecords(@PathVariable("id") final Long datasetId,
-      @RequestBody final List<Long> recordIds) {
-    if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    try {
-      datasetService.delete(datasetId, recordIds);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-    }
-  }
-
-
-  @Override
-  public void insertRecords(Long datasetId, List<RecordVO> records) {
-    if (datasetId == null || records == null || records.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
-    }
-    try {
-      RecordModifiedHelper.executeCreateProcess(kafkaSender, this.datasetService, datasetId,
-          records);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-
-    }
-
   }
 
 }

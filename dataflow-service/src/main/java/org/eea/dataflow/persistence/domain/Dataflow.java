@@ -51,10 +51,6 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Document> documents;
 
-  /** The accepted. */
-  @Column(name = "ACCEPTED")
-  private Boolean accepted;
-
   /**
    * Equals.
    *
@@ -81,8 +77,7 @@ public class Dataflow {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, contributors, submissionAgreement, documents,
-        accepted);
+    return Objects.hash(id, name, description, contributors, submissionAgreement, documents);
   }
 
 }
