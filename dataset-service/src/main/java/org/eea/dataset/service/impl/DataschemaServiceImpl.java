@@ -53,10 +53,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static String GENERAL_WARNING = "WARNING!";
   private static String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
   private static String GENERAL_ERROR = "ERROR!";
-  private static String STRING_ERROR = "ERROR!, THIS TEXT IS LONGER THAN 30 CHARACTERES";
+  private static String STRING_WARNING =
+      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
   private static String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
   private static String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
   private static String COORDINATE_ERROR = "ERROR!, THIS IS NOT A COORDINATE";
+  private static String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
   private static final String WARNING = "WARNING";
 
@@ -197,10 +199,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("value.length() > 30");
+          rule2.setWhenCondition("isText(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(STRING_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
+          listaMsgTypeValidation.add(STRING_WARNING);
+          listaMsgTypeValidation.add(GENERAL_WARNING);
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
@@ -248,6 +250,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setWhenCondition("isValid(value) && (value >= -180 && value <= 180)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(COORDINATE_ERROR);
+          listaMsgTypeValidation.add(GENERAL_ERROR);
+          rule2.setThenCondition(listaMsgTypeValidation);
+          ruleField.add(rule2);
+          rule2.setScope(TypeEntityEnum.FIELD);
+          break;
+        case "date":
+          rule2.setRuleId(new ObjectId());
+          rule2.setDataFlowId(1L);
+          rule2.setIdFieldSchema(idFieldSchema);
+          rule2.setWhenCondition("!isDateYYYYMMDD(value)");
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
+          listaMsgTypeValidation.add(DATE_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);

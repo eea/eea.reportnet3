@@ -6,34 +6,56 @@ typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
-
-
-
 package src.main.resources
 import org.eea.validation.persistence.data.domain.*;
 import org.eea.interfaces.vo.validation.*;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;
-
+import java.util.regex.*;
 template "templateValidateRules"
-
 rule "@{ruleid}"
 dialect "java"
   when
-    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});	
+    dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});
   then
    ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}");
- 
-   
+
+
 end
-	
+
 end template
-
-
 function boolean isValid( String s ){
     try {
         Double.valueOf( s );
         return true;
+    } catch( Exception e ){
+        return false;
+    }
+ }
+ 
+ function boolean isText( String s ){
+    try {
+        Pattern pat = Pattern.compile("[^a-zA-Z0-9$]");
+       	Matcher mat = pat.matcher(s);
+        if(mat.find()){
+        	return true;
+        }else{
+        	return false;
+        }
+    } catch( Exception e ){
+        return false;
+    }
+ }
+ 
+  function boolean isDateYYYYMMDD( String s ){
+    try {
+        Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
+       	Matcher dataMatcher = dataValue.matcher(s);
+        if(dataMatcher.find()){
+        	return true;
+        }else{
+        	return false;
+        }
     } catch( Exception e ){
         return false;
     }

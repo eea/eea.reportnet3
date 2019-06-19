@@ -142,8 +142,7 @@ public class ValidationServiceImpl implements ValidationService {
       KieSession kieSession) {
     records.stream().forEach(record -> kieSession.insert(record));
     kieSession.fireAllRules();
-    return records.isEmpty() ? new ArrayList<>()
-        : records.get(0).getRecordValidations();
+    return records.isEmpty() ? new ArrayList<>() : records.get(0).getRecordValidations();
   }
 
   /**
@@ -159,7 +158,7 @@ public class ValidationServiceImpl implements ValidationService {
     kieSession.fireAllRules();
     return null == fields.get(0).getFieldValidations()
         || fields.get(0).getFieldValidations().isEmpty() ? new ArrayList<>()
-        : fields.get(0).getFieldValidations();
+            : fields.get(0).getFieldValidations();
   }
 
 

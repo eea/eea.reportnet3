@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -43,9 +43,9 @@ public class ValidationControllerImpl implements ValidationController {
    * @param datasetId the dataset id
    */
   @Override
-  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
+  @RequestMapping(value = "/dataset/{id}", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void validateDataSetData(@RequestParam("id") Long datasetId) {
+  public void validateDataSetData(@PathVariable("id") Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);

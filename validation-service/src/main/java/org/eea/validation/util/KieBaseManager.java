@@ -1,6 +1,5 @@
 package org.eea.validation.util;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,13 +25,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class KieBaseManager {
 
-  /** The Constant REGULATION_TEMPLATE_FILE. */
-  private static final String REGULATION_TEMPLATE_FILE = "src/main/resources/template01.drl";
+  /**
+   * The Constant REGULATION_TEMPLATE_FILE.
+   */
+  private static final String REGULATION_TEMPLATE_FILE = "/template01.drl";
 
-  /** The kie base. */
+  /**
+   * The kie base.
+   */
   private KieBase kieBase;
 
-  /** The data flow rules repository. */
+  /**
+   * The data flow rules repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
@@ -41,7 +46,9 @@ public class KieBaseManager {
    * Reload rules.
    *
    * @param dataFlowId the data flow id
+   *
    * @return the kie base
+   *
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
@@ -79,7 +86,7 @@ public class KieBaseManager {
     ObjectDataCompiler compiler = new ObjectDataCompiler();
 
     String generatedDRL =
-        compiler.compile(ruleAttributes, new FileInputStream(REGULATION_TEMPLATE_FILE));
+        compiler.compile(ruleAttributes, getClass().getResourceAsStream(REGULATION_TEMPLATE_FILE));
 
     KieServices kieServices = KieServices.Factory.get();
 
@@ -105,6 +112,7 @@ public class KieBaseManager {
    * @param whenCondition the when condition
    * @param message the message
    * @param error the error
+   *
    * @return the map
    */
   private Map<String, String> passDataToMap(String idSchema, String idRule,
