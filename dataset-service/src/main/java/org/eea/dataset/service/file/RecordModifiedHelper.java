@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.helper.Helper;
+import org.eea.helper.KafkaSenderHelper;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -12,7 +12,7 @@ import org.eea.kafka.io.KafkaSender;
 /**
  * The Class FileTreatmentHelper.
  */
-public class RecordModifiedHelper extends Helper {
+public class RecordModifiedHelper extends KafkaSenderHelper {
 
   /**
    * Instantiates a new file loader helper.

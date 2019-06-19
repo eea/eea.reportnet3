@@ -81,7 +81,8 @@ public class Dataflow {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, contributors, submissionAgreement, documents);
+    return Objects.hash(id, name, description, contributors, submissionAgreement, documents,
+        accepted);
   }
 
 }

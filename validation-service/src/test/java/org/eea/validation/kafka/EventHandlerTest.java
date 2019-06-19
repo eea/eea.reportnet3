@@ -2,12 +2,15 @@ package org.eea.validation.kafka;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.service.ValidationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +28,10 @@ public class EventHandlerTest {
   private EventHandler eventHandler;
 
   @Mock
-  private ValidationController validationController;
+  private ValidationService validationService;
+
+  @Mock
+  private KafkaSender kafkaSender;
 
   @Before
   public void initMocks() {
@@ -33,14 +39,27 @@ public class EventHandlerTest {
   }
 
   @Test
-  public void testKafka() {
+  public void testKafka() throws EEAException {
     EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<String, Object>();
     event.setData(data);
-    doNothing().when(validationController).validateDataSetData(Mockito.any());
+    doNothing().when(validationService).deleteAllValidation(Mockito.any());
+    doNothing().when(validationService).validateDataSetData(Mockito.any());
     eventHandler.processMessage(event);
-    Mockito.verify(validationController, times(1)).validateDataSetData(Mockito.any());
+    Mockito.verify(validationService, times(1)).validateDataSetData(Mockito.any());
+  }
+
+  @Test
+  public void testKafkaException() throws EEAException {
+    EEAEventVO event = new EEAEventVO();
+    event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
+    Map<String, Object> data = new HashMap<String, Object>();
+    event.setData(data);
+    doNothing().when(validationService).deleteAllValidation(Mockito.any());
+    doThrow(new EEAException()).when(validationService).validateDataSetData(Mockito.any());
+    eventHandler.processMessage(event);
+    Mockito.verify(validationService, times(1)).validateDataSetData(Mockito.any());
   }
 
   @Test

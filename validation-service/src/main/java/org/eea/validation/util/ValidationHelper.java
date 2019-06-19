@@ -1,10 +1,7 @@
-/*
- * 
- */
 package org.eea.validation.util;
 
 import org.eea.exception.EEAException;
-import org.eea.helper.Helper;
+import org.eea.helper.KafkaSenderHelper;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.validation.service.ValidationService;
@@ -12,7 +9,7 @@ import org.eea.validation.service.ValidationService;
 /**
  * The Class ValidationHelper.
  */
-public class ValidationHelper extends Helper {
+public class ValidationHelper extends KafkaSenderHelper {
 
   /**
    * Instantiates a new file loader helper.

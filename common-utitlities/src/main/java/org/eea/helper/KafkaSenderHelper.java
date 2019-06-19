@@ -12,7 +12,7 @@ import org.eea.kafka.io.KafkaSender;
  *
  * @author ruben.lozano
  */
-public class Helper {
+public class KafkaSenderHelper {
 
   /**
    * Release Dataset kafka event.
