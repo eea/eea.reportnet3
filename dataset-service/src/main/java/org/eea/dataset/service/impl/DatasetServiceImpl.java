@@ -482,10 +482,9 @@ public class DatasetServiceImpl implements DatasetService {
       Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
-          List<FieldValidationVO> validations = this.fieldValidationMapper
-              .entityListToClass(fieldValidations.get(field.getId()));
-          field.setFieldValidations(
-              validations);
+          List<FieldValidationVO> validations =
+              this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
+          field.setFieldValidations(validations);
           if (null != validations && !validations.isEmpty()) {
             field.setLevelError(
                 validations.stream().map(validation -> validation.getValidation().getLevelError())
@@ -494,10 +493,9 @@ public class DatasetServiceImpl implements DatasetService {
           }
         });
 
-        List<RecordValidationVO> validations = this.recordValidationMapper
-            .entityListToClass(recordValidations.get(record.getId()));
-        record.setRecordValidations(validations
-        );
+        List<RecordValidationVO> validations =
+            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
+        record.setRecordValidations(validations);
         if (null != validations && !validations.isEmpty()) {
           record.setLevelError(
               validations.stream().map(validation -> validation.getValidation().getLevelError())
@@ -732,12 +730,10 @@ public class DatasetServiceImpl implements DatasetService {
     recordVOs.stream().forEach(record -> {
       record.getFields().stream().forEach(field -> {
         field.setFieldValidations(
-            this.fieldValidationMapper
-                .entityListToClass(fieldValidations.get(field.getId())));
+            this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
       });
-      record.setRecordValidations(this.recordValidationMapper
-          .entityListToClass(recordValidations.get(record.getId()))
-      );
+      record.setRecordValidations(
+          this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
 
     });
 
@@ -791,7 +787,6 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
       List<String> listIdDataSetSchema = new ArrayList<>();
-      allTableValues = sanitizeTableValues(allTableValues);
       for (TableValue tableValue : allTableValues) {
         listIdDataSetSchema.add(tableValue.getIdTableSchema());
 
@@ -838,39 +833,33 @@ public class DatasetServiceImpl implements DatasetService {
       Map<String, String> mapIdNameDatasetSchema) {
 
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
-    List<RecordValidation> recordValidations = recordValidationRepository
-        .findRecordValidationsByIdDatasetAndIdTableSchema(datasetId, tableValue.getIdTableSchema());
+
+    Long countErrorRecordValidations =
+        recordValidationRepository.countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(
+            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    Long countWarningRecordValidations =
+        recordValidationRepository.countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(
+            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
+    Long countErrorFieldValidations =
+        fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
+            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    Long countWarningFieldValidations =
+        fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
+            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setTotalRecords(countRecords);
-    Long totalTableErrors = 0L;
-    Long totalRecordsWithErrors = 0L;
-    Long totalRecordsWithWarnings = 0L;
-    // Record validations
-    for (RecordValidation recordValidation : recordValidations) {
-      if (TypeErrorEnum.ERROR == recordValidation.getValidation().getLevelError()) {
-        totalRecordsWithErrors++;
-        totalTableErrors++;
-      }
-      if (TypeErrorEnum.WARNING == recordValidation.getValidation().getLevelError()) {
-        totalRecordsWithWarnings++;
-        totalTableErrors++;
-      }
-    }
-    // Table validations
+
+    Long totalRecordsWithErrors = countErrorRecordValidations + countErrorFieldValidations;
+    Long totalRecordsWithWarnings = countWarningRecordValidations + countWarningFieldValidations;
+    Long totalTableErrors = totalRecordsWithErrors + totalRecordsWithWarnings;
+
+
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
-    List<FieldValidation> fieldValidations = fieldValidationRepository
-        .findFieldValidationsByIdDatasetAndIdTableSchema(datasetId, tableValue.getIdTableSchema());
-    for (FieldValidation fieldValidation : fieldValidations) {
-      if (TypeErrorEnum.ERROR == fieldValidation.getValidation().getLevelError()) {
-        totalRecordsWithErrors++;
-        totalTableErrors++;
-      }
-      if (TypeErrorEnum.WARNING == fieldValidation.getValidation().getLevelError()) {
-        totalRecordsWithWarnings++;
-        totalTableErrors++;
-      }
-    }
 
     tableStats.setNameTableSchema(mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
     tableStats.setTotalErrors(totalTableErrors);
@@ -879,28 +868,6 @@ public class DatasetServiceImpl implements DatasetService {
     tableStats.setTableErrors(totalTableErrors > 0 ? true : false);
 
     return tableStats;
-
-  }
-
-
-  private List<TableValue> sanitizeTableValues(List<TableValue> tables) {
-
-    List<TableValue> sanitizedTables = new ArrayList<>();
-    Set<String> processedTables = new HashSet<>();
-    for (TableValue tableValue : tables) {
-      if (!processedTables.contains(tableValue.getIdTableSchema())) {
-        processedTables.add(tableValue.getIdTableSchema());
-        sanitizedTables.add(tableValue);
-      } else {
-        for (int i = 0; i < sanitizedTables.size(); i++) {
-          if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
-            sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
-            break;
-          }
-        }
-      }
-    }
-    return sanitizedTables;
 
   }
 

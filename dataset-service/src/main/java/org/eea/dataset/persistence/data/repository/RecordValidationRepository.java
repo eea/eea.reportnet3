@@ -2,6 +2,7 @@ package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -48,6 +49,21 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.idTableSchema=?2")
   List<RecordValidation> findRecordValidationsByIdDatasetAndIdTableSchema(Long datasetId,
       String idTableSchema);
+
+
+  /**
+   * Count record validations by id dataset and id table schema and type error.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param typeError the type error
+   * @return the long
+   */
+  @Query("SELECT COUNT (rv.id) FROM RecordValidation rv  "
+      + " WHERE rv.recordValue.tableValue.datasetId.id=?1 AND rv.recordValue.tableValue.idTableSchema=?2 "
+      + " AND rv.validation.levelError=?3")
+  Long countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(Long datasetId,
+      String idTableSchema, TypeErrorEnum typeError);
 
 
   /**
