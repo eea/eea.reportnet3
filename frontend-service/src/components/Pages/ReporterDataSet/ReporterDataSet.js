@@ -159,7 +159,6 @@ const ReporterDataSet = () => {
   const onConfirmDeleteHandler = () =>{
     let idDataSet = 1;
     setDeleteDialogVisible(false);
-    //TODO: API Call delete
     HTTPRequesterAPI.delete(
       {
         url:'/dataset/'+ idDataSet + '/deleteImportData',
@@ -169,7 +168,6 @@ const ReporterDataSet = () => {
     .then(res=>{
       setIsDataDeleted(true);
     });
-    console.log("Data deleted!");
   }
 
   const onConfirmValidateHandler = () =>{

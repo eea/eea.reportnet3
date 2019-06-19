@@ -123,7 +123,6 @@ export class CustomFileUpload extends Component {
         this.setState({msgs:[]});
         this.files = this.state.files || [];
         let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-        let inmFiles = [];
 
         if (this.props.fileLimit > 1) {    
             for (let i = 0; i < files.length; i++) {
