@@ -50,9 +50,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
 
-  private static String GENERAL_WARNING = "WARNING!";
+  private static String GENERAL_WARNING = "WARNING";
   private static String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-  private static String GENERAL_ERROR = "ERROR!";
+  private static String GENERAL_ERROR = "ERROR";
   private static String STRING_WARNING =
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
   private static String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
@@ -202,7 +202,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setWhenCondition("isText(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(STRING_WARNING);
-          listaMsgTypeValidation.add(GENERAL_WARNING);
+          listaMsgTypeValidation.add("that text have invalid caracteres");
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
