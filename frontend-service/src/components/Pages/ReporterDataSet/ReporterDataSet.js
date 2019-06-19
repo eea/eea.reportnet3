@@ -35,9 +35,6 @@ const ReporterDataSet = () => {
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
 
-
-  console.log('ReporterDataSet Render...');   
-
   const home = {icon: resources.icons["home"], url: '#'};
 
   useEffect(()=>{
