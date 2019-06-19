@@ -42,6 +42,8 @@ public final class EEAErrorMessage {
   /** The Constant FILE_NOT_FOUND. */
   public static final String RECORD_NOTFOUND = "Record not found";
 
+  public static final String PARTITION_ID_NOTFOUND = "Partition not found";
+
   /**
    * Instantiates a new EEA error message.
    */

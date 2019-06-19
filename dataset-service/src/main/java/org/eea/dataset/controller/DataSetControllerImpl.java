@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
+import org.eea.dataset.service.file.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -58,6 +59,9 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /**
    * Gets the data tables values.
@@ -141,6 +145,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param idTableSchema the id table schema
    */
 
   @Override
@@ -163,7 +168,7 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(datasetId, fileName, is, idTableSchema);
+      callable = new LoadDataCallable(fileTreatmentHelper, datasetId, fileName, is, idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {

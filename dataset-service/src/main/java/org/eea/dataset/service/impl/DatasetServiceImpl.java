@@ -262,6 +262,9 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+      if (partition == null) {
+        throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+      }
       // Get the dataFlowId from the metabase
       final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
       // create the right file parser for the file type

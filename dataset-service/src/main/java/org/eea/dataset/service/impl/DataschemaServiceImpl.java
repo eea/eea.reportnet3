@@ -57,7 +57,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
   private static String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
   private static String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-  private static String COORDINATE_ERROR = "ERROR!, THIS IS NOT A COORDINATE";
+  private static String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
+  private static String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
   private static String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
   private static final String WARNING = "WARNING";
@@ -179,18 +180,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
 
       List<RuleField> ruleField = new ArrayList<RuleField>();
-      // RuleField rule = new RuleField();
-      // rule.setRuleId(new ObjectId());
-      // rule.setDataFlowId(1L);
-      // rule.setIdFieldSchema(idFieldSchema);
-      // rule.setWhenCondition(NULL);
-      // rule.setRuleName("FieldRule_" + i + "." + j);
-      // List<String> listaMsgValidation = new ArrayList<String>();
-      // listaMsgValidation.add(VALIDATION_WARNING);
-      // listaMsgValidation.add(GENERAL_ERROR);
-      // rule.setThenCondition(listaMsgValidation);
-      // ruleField.add(rule);
-      // rule.setScope(TypeEntityEnum.FIELD);
+      RuleField rule = new RuleField();
+      rule.setRuleId(new ObjectId());
+      rule.setDataFlowId(1L);
+      rule.setIdFieldSchema(idFieldSchema);
+      rule.setWhenCondition("!isBlank(value)");
+      rule.setRuleName("FieldRule_" + i + "." + j);
+      List<String> listaMsgValidation = new ArrayList<String>();
+      listaMsgValidation.add("that character should be field");
+      listaMsgValidation.add(GENERAL_WARNING);
+      rule.setThenCondition(listaMsgValidation);
+      ruleField.add(rule);
+      rule.setScope(TypeEntityEnum.FIELD);
 
       RuleField rule2 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<String>();
@@ -235,9 +236,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("isValid(value) && (value >= -90 && value <= 90)");
+          rule2.setWhenCondition("!isCordenateLat(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(COORDINATE_ERROR);
+          listaMsgTypeValidation.add(COORDINATE_LAT_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
@@ -247,10 +248,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("isValid(value) && (value >= -180 && value <= 180)");
+          rule2.setWhenCondition("!isCordenateLong(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add(COORDINATE_ERROR);
-          listaMsgTypeValidation.add(GENERAL_ERROR);
+          listaMsgTypeValidation.add(COORDINATE_LONG_ERROR);
+          listaMsgTypeValidation.add("WARNING");
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);

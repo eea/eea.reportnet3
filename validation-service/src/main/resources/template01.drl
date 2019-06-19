@@ -6,12 +6,18 @@ typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
+
 package src.main.resources
+
 import org.eea.validation.persistence.data.domain.*;
 import org.eea.interfaces.vo.validation.*;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;
 import java.util.regex.*;
+import org.apache.commons.lang3.StringUtils;
+
+
+
 template "templateValidateRules"
 rule "@{ruleid}"
 dialect "java"
@@ -24,7 +30,9 @@ dialect "java"
 end
 
 end template
+
 function boolean isValid( String s ){
+
     try {
         Double.valueOf( s );
         return true;
@@ -33,7 +41,7 @@ function boolean isValid( String s ){
     }
  }
  
- function boolean isText( String s ){
+function boolean isText( String s ){
     try {
         Pattern pat = Pattern.compile("[^a-zA-Z0-9$]");
        	Matcher mat = pat.matcher(s);
@@ -47,7 +55,15 @@ function boolean isValid( String s ){
     }
  }
  
-  function boolean isDateYYYYMMDD( String s ){
+function boolean isBlank(String s){
+
+	if(StringUtils.isBlank(s)){
+		return false;
+	}else{
+		return true;
+	}
+} 
+function boolean isDateYYYYMMDD( String s ){
     try {
         Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
        	Matcher dataMatcher = dataValue.matcher(s);
@@ -59,4 +75,23 @@ function boolean isValid( String s ){
     } catch( Exception e ){
         return false;
     }
+ }
+ 
+ function boolean isCordenateLat( String s ){
+   if(isValid(s)){
+    	if(Double.valueOf(s) >= -90 && Double.valueOf(s) <= 90){
+		   return true;   	
+    	}
+    	return false;
+   }
+   return false;
+ }  
+function boolean isCordenateLong( String s ){	
+   if(isValid(s)){
+    	if(Double.valueOf(s) >= -180 && Double.valueOf(s) <= 180){
+		   return true;   	
+    	}
+    	return false;
+   }
+   return false;
  }

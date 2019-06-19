@@ -6,7 +6,10 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,12 +18,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileTreatmentHelper {
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
+
   /** The kafka sender helper. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+
   /** The dataset service. */
   @Autowired
+  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /**
@@ -43,6 +53,7 @@ public class FileTreatmentHelper {
    */
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
       String idTableSchema) throws EEAException, IOException, InterruptedException {
+    LOG.info("Processing file");
     datasetService.processFile(datasetId, fileName, is, idTableSchema);
 
     // after the dataset has been saved, an event is sent to notify it
