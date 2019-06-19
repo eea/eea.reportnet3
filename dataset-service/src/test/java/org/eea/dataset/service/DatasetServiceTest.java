@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -401,8 +402,6 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesByIdEmpty() throws Exception {
-    when(recordRepository.findByTableValueIdTableSchema(Mockito.any()))
-        .thenReturn(new ArrayList<>());
     TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
     Assert.assertNotNull("result null", result);
     Assert.assertEquals("wrong number of records", Long.valueOf(0), result.getTotalRecords());
@@ -410,13 +409,13 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(null);
+    when(recordRepository.findByTableValueNoOrder(Mockito.any())).thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
   public void testGetTableValuesById() throws Exception {
-    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.findByTableValueNoOrder(Mockito.any())).thenReturn(recordValues);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
@@ -425,7 +424,8 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesById2() throws Exception {
-    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
     when(pageable.getPageSize()).thenReturn(1);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
