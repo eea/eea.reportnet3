@@ -322,7 +322,7 @@ const dataTemplate = (rowData, column) =>{
             </div>
             <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
                                 className={styles.Dialog} dismissableMask={false} onHide={() => setImportDialogVisible(false)} >
-                            <CustomFileUpload mode="advanced" name="file" url={`${config.loadDataTableAPI.url}${props.id}`}
+                            <CustomFileUpload mode="advanced" name="file" url={`${config.api.protocol}${config.api.url}${config.api.port}${config.loadDataTableAPI.url}${props.id}`}
                                                 onUpload={() => setImportDialogVisible(false)} 
                                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                                 fileLimit={1} className={styles.FileUpload}  /> 

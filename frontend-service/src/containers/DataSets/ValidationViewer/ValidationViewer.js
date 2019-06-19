@@ -140,32 +140,45 @@ const ValidationViewer = (props) => {
         return dataFiltered;
       }
 
+
+
       const onRowSelectHandler = (event) =>{      
         //http://localhost:8030/dataset/loadTableFromAnyObject/901?datasetId=1&pageSize=2&type=FIELD
-        let queryString = {
-          datasetId: props.idDataSet,
-          pageSize: numRows,
-          type: event.data.typeEntity
-        }
-
-        const dataPromise = HTTPRequester.get(
-          {
-            url: `${config.validationViewerAPI.url}${event.data.idObject}`,
-            queryString: queryString
-          }
-        );
-
-        dataPromise
-        .then(res => {
-          contextReporterDataSet.validationsVisibleHandler();
-          contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-          contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(res.data.page.table));
-        })
-        .catch(error => {
-          console.log(error);
-          return error;
-        });         
-      }
+        switch (event.data.typeEntity) {
+          case "FIELD":
+          case "ROW":
+              let queryString = {
+                datasetId: props.idDataSet,
+                pageSize: numRows,
+                type: event.data.typeEntity
+              }
+              const dataPromise = HTTPRequester.get(
+                {
+                  url: `${config.validationViewerAPI.url}${event.data.idObject}`,
+                  queryString: queryString
+                }
+              );
+    
+              dataPromise
+              .then(res => {
+                contextReporterDataSet.validationsVisibleHandler();
+                contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+                contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(res.data.page.table));
+              })
+              .catch(error => {
+                console.log(error);
+                return error;
+              });   
+            break;
+          case "TABLE":
+              contextReporterDataSet.validationsVisibleHandler();
+              contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+              break;              
+          default:
+              contextReporterDataSet.validationsVisibleHandler();
+            break;
+        }        
+      }      
 
       const customButtons = [
         {
@@ -216,7 +229,7 @@ const ValidationViewer = (props) => {
                 <DataTable value={fetchedData} paginatorRight={totalCount}
                        resizableColumns={true} reorderableColumns={true}
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
-                       rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
+                       rowsPerPageOptions={[5, 10, 15]} lazy={true} 
                        loading={loading} totalRecords={totalRecords} sortable={true}
                        onSort={onSortHandler} header={header} sortField={sortField} sortOrder={sortOrder} autoLayout={true}
                        selectionMode="single" onRowSelect={onRowSelectHandler}>

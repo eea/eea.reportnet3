@@ -6,8 +6,8 @@ import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import {BreadCrumb} from 'primereact/breadcrumb';
 import {Dialog} from 'primereact/dialog';
 // import {Lightbox} from 'primereact/lightbox';
-import {Loader} from '../../Layout/UI/Loader/Loader';
-
+//import {Loader} from '../../Layout/UI/Loader/Loader';
+import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
 import config from '../../../conf/web.config.json';
 import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from './ReporterDataSet.module.css';
@@ -34,7 +34,7 @@ const ReporterDataSet = () => {
   const ConfirmDialog = React.lazy(() => import('../../Layout/UI/ConfirmDialog/ConfirmDialog'));
   const ValidationViewer = React.lazy(() => import('../../../containers/DataSets/ValidationViewer/ValidationViewer'));
   const Dashboard = React.lazy(()=> import('../../../containers/DashBoard/DashBoard'));
-  const TabsSchema = React.lazy(() => import('../../Layout/UI/TabsSchema/TabsSchema'));
+
 
   console.log('ReporterDataSet Render...');   
 
@@ -200,15 +200,13 @@ const ReporterDataSet = () => {
                       setTabHandler: null,
                       setLinkedErrorDataHandler: (linkedData)=>{ setLinkedErrorData(linkedData) }
                     }}>    
-          <Suspense fallback={<Loader loadingMessage={resources.messages["loading"]}/>}>
-              <TabsSchema tables={tableSchema} 
-                          tableSchemaColumns={tableSchemaColumns} 
-                          urlViewer={`${config.dataviewerAPI.url}1`}
-                          activeIndex={activeIndex}
-                          linkedErrorData={linkedErrorData}
-                          onTabChangeHandler={(idTableSchema)=>{setActiveIndex(idTableSchema.index) }}
-                          />
-          </Suspense>   
+          <TabsSchema tables={tableSchema} 
+                      tableSchemaColumns={tableSchemaColumns} 
+                      urlViewer={`${config.dataviewerAPI.url}1`}
+                      activeIndex={activeIndex}
+                      linkedErrorData={linkedErrorData}
+                      onTabChangeHandler={(idTableSchema)=>{setActiveIndex(idTableSchema.index) }}
+                      /> 
         </ReporterDataSetContext.Provider>               
         <Dialog visible={dashDialogVisible} 
                 onHide={()=>setVisibleHandler(setDashDialogVisible,false)} 

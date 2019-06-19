@@ -39,6 +39,7 @@
         "filter": "Filter",
         "group-by": "Group by",
         "sort": "Sort",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "noErrorData": "There is no error data to show"
     }
 }
