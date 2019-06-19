@@ -787,7 +787,6 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
       List<String> listIdDataSetSchema = new ArrayList<>();
-      // allTableValues = sanitizeTableValues(allTableValues);
       for (TableValue tableValue : allTableValues) {
         listIdDataSetSchema.add(tableValue.getIdTableSchema());
 
@@ -851,10 +850,6 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
             datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
-    /*
-     * List<RecordValidation> recordValidations = recordValidationRepository
-     * .findRecordValidationsByIdDatasetAndIdTableSchema(datasetId, tableValue.getIdTableSchema());
-     */
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setTotalRecords(countRecords);
@@ -863,25 +858,8 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecordsWithWarnings = countWarningRecordValidations + countWarningFieldValidations;
     Long totalTableErrors = totalRecordsWithErrors + totalRecordsWithWarnings;
 
-    // Record validations
-    /*
-     * for (RecordValidation recordValidation : recordValidations) { if (TypeErrorEnum.ERROR ==
-     * recordValidation.getValidation().getLevelError()) { totalRecordsWithErrors++;
-     * totalTableErrors++; } if (TypeErrorEnum.WARNING ==
-     * recordValidation.getValidation().getLevelError()) { totalRecordsWithWarnings++;
-     * totalTableErrors++; } }
-     */
-    // Table validations
+
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
-    /*
-     * List<FieldValidation> fieldValidations = fieldValidationRepository
-     * .findFieldValidationsByIdDatasetAndIdTableSchema(datasetId, tableValue.getIdTableSchema());
-     * for (FieldValidation fieldValidation : fieldValidations) { if (TypeErrorEnum.ERROR ==
-     * fieldValidation.getValidation().getLevelError()) { totalRecordsWithErrors++;
-     * totalTableErrors++; } if (TypeErrorEnum.WARNING ==
-     * fieldValidation.getValidation().getLevelError()) { totalRecordsWithWarnings++;
-     * totalTableErrors++; } }
-     */
 
     tableStats.setNameTableSchema(mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
     tableStats.setTotalErrors(totalTableErrors);
@@ -890,28 +868,6 @@ public class DatasetServiceImpl implements DatasetService {
     tableStats.setTableErrors(totalTableErrors > 0 ? true : false);
 
     return tableStats;
-
-  }
-
-
-  private List<TableValue> sanitizeTableValues(List<TableValue> tables) {
-
-    List<TableValue> sanitizedTables = new ArrayList<>();
-    Set<String> processedTables = new HashSet<>();
-    for (TableValue tableValue : tables) {
-      if (!processedTables.contains(tableValue.getIdTableSchema())) {
-        processedTables.add(tableValue.getIdTableSchema());
-        sanitizedTables.add(tableValue);
-      } else {
-        for (int i = 0; i < sanitizedTables.size(); i++) {
-          if (sanitizedTables.get(i).getIdTableSchema().equals(tableValue.getIdTableSchema())) {
-            sanitizedTables.get(i).getRecords().addAll(tableValue.getRecords());
-            break;
-          }
-        }
-      }
-    }
-    return sanitizedTables;
 
   }
 

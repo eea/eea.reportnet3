@@ -550,10 +550,6 @@ public class DatasetServiceTest {
     schema.setTableSchemas(tableSchemas);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    when(recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(recordValidations);
-    when(fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(fieldValidations);
 
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
@@ -600,10 +596,7 @@ public class DatasetServiceTest {
     schema.setTableSchemas(tableSchemas);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    when(recordValidationRepository.findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(recordValidations);
-    when(fieldValidationRepository.findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.any(),
-        Mockito.any())).thenReturn(fieldValidations);
+
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
