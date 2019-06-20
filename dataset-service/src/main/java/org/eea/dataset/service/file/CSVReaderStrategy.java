@@ -177,10 +177,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> headers, final String idTableSchema) throws InvalidFileException {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && values.size() != 1 && !"".equals(values.get(0))) {
-      if (headers.size() != values.size()) {
-        // if the headers rows is not the same number of fields the format file is not valid
-        throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-      }
       addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema);
     }
 
@@ -295,12 +291,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers) {
     final List<FieldVO> fields = new ArrayList<>();
-    values.size();
     int contAux = 0;
     for (final String value : values) {
       final FieldVO field = new FieldVO();
-      field.setIdFieldSchema(headers.get(contAux).getId());
-      field.setType(headers.get(contAux).getType());
+      if (contAux < headers.size()) {
+        field.setIdFieldSchema(headers.get(contAux).getId());
+        field.setType(headers.get(contAux).getType());
+      }
       field.setValue(value);
       fields.add(field);
       contAux++;
