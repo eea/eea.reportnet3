@@ -18,11 +18,10 @@ const DataViewer = (props) => {
     const contextReporterDataSet = useContext(ReporterDataSetContext);
     const [importDialogVisible, setImportDialogVisible] = useState(false);    
     const [totalRecords, setTotalRecords] = useState(0);
-    const [fetchedData, setFetchedData] = useState([]);    
-    const [linkedErrorData, setLinkedErrorData] = useState((props.linkedErrorData && props.linkedErrorData.length>0) ? props.linkedErrorData : []);
+    const [fetchedData, setFetchedData] = useState([]);        
     const [loading, setLoading] = useState(false);
     const [numRows, setNumRows] = useState(10);
-    const [firstRow, setFirstRow] = useState(0);
+    const [firstRow, setFirstRow] = useState((props.positionIdObject && props.positionIdObject !== null) ? Math.floor(props.positionIdObject/numRows)*numRows : 0);
     const [sortOrder, setSortOrder] = useState();   
     const [sortField,setSortField] = useState();
     const [columns, setColumns] = useState([]); 
@@ -33,7 +32,12 @@ const DataViewer = (props) => {
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     useEffect(() =>{            
-        console.log("Setting column options...");      
+        console.log("Setting column options...");     
+
+        if(firstRow !== props.positionIdObject){
+          setFirstRow(Math.floor(props.positionIdObject/numRows)*numRows)
+        }
+
         let colOpt = [];
         for(let col of cols) {  
           colOpt.push({label: col.header, value: col});
@@ -41,13 +45,13 @@ const DataViewer = (props) => {
         setColOptions(colOpt);
   
         console.log('Fetching data...');
-        fetchDataHandler(null, sortOrder, firstRow, numRows);   
+        fetchDataHandler(null, sortOrder, Math.floor(props.positionIdObject/numRows)*numRows, numRows);  
         
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
         setCols(inmTableSchemaColumns);
 
-      }, []);
+      }, [props.positionIdObject]);
   
       useEffect(()=>{         
         // let visibilityIcon = (<div className="TableDiv">
@@ -93,7 +97,7 @@ const DataViewer = (props) => {
       }
   
       const onRefreshClickHandler = () => {
-        contextReporterDataSet.setLinkedErrorDataHandler(setLinkedErrorData([]));
+        contextReporterDataSet.setPageHandler(setFirstRow(0));
         fetchDataHandler(null, sortOrder, firstRow, numRows);  
       }
 
@@ -175,7 +179,7 @@ const validationsTemplate = (fetchedData, column) => {
     let message = "";
     validations.forEach(validation =>
       validation.message
-        ? (message += validation.message + '<br/>')
+        ? (message += "- " + validation.message + '\n')
         : ""
     );
 
@@ -206,20 +210,20 @@ const validationsTemplate = (fetchedData, column) => {
 
     return <CustomIconToolTip levelError={levelError} message={message} />;
   } else {
-    return <CustomIconToolTip levelError={null} message={null} />;
+    return;
   }
 };
 
 //Template for Field validation
 const dataTemplate = (rowData, column) =>{
     let row = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-  if (row !== null && row.fieldValidations!==null) {
+  if (row !== null && row && row.fieldValidations!==null) {
     const validations = row.fieldValidations.map(
       val => val.validation
     );
     let message = [];
     validations.forEach(validation =>
-      validation.message ? (message += validation.message +"<br/>") : ""
+      validation.message ? (message += "- " + validation.message + '\n') : ""
     );
     let levelError = "";
     let lvlFlag = 0;
@@ -245,10 +249,10 @@ const dataTemplate = (rowData, column) =>{
       }
     });
   
-      return <div style={{'display':'flex','alignItems':'center'}}> {row.fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message}/></div>;
+      return <div style={{'display':'flex','alignItems':'center'}}> {(row)? row.fieldData[column.field] : null} <CustomIconToolTip levelError={levelError} message={message}/></div>;
     }
     else{
-      return <div style={{'display':'flex','alignItems':'center'}}>{row.fieldData[column.field]}</div>;
+      return <div style={{'display':'flex','alignItems':'center'}}>{(row)? row.fieldData[column.field] : null}</div>;
     }
   }
 
@@ -310,7 +314,7 @@ const dataTemplate = (rowData, column) =>{
                 <CustomButton label="Sort" icon="9" />   
             </Toolbar> */}
             <div className={styles.Table}>
-              <DataTable value={(linkedErrorData && linkedErrorData.length>0) ? linkedErrorData : fetchedData} paginatorRight={totalCount}
+            <DataTable value={fetchedData} paginatorRight={totalCount}
                        resizableColumns={true} reorderableColumns={true}
                        paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
                        rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 

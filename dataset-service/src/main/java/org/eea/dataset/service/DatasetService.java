@@ -91,21 +91,18 @@ public interface DatasetService {
       TableCollectionVO tableCollections) throws EEAException;
 
 
+
   /**
-   * Gets the table from any object id.
+   * Gets the position from any object id.
    *
    * @param id the id
    * @param idDataset the id dataset
-   * @param pageable the pageable
    * @param type the type
-   *
-   * @return the table from any object id
-   *
+   * @return the position from any object id
    * @throws EEAException the EEA exception
    */
-
-  ValidationLinkVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
-      TypeEntityEnum type) throws EEAException;
+  ValidationLinkVO getPositionFromAnyObjectId(Long id, Long idDataset, TypeEntityEnum type)
+      throws EEAException;
 
 
   /**

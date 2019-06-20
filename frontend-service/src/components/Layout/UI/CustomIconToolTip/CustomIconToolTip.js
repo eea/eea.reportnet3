@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
-import ReactTooltip from 'react-tooltip';
 
-//import './CustomIconToolTip.css';
+import {Button} from 'primereact/button';
+import './CustomIconToolTip.css';
 
 export default function CustomIconToolTip(props) {
   let validationIcon = '';
@@ -31,14 +31,16 @@ export default function CustomIconToolTip(props) {
     default:
       break;
   }
+  const myStyles = { 
+    padding: "0px !important",
+    margin:"0px !important",
+    borderColor: "transparent",
+    color: iconColor, 
+    float: "right", 
+    backgroundColor: "transparent" }
+  
 
   return (
-    <span>
-      <span  data-tip={props.message} data-iscapture="true" style={{float:"right", whiteSpace: "pre-line"}}>
-        <i className={validationIcon} style={{ color: iconColor, float: "right" }} />
-      </span>
-
-      <ReactTooltip place='right' type='dark' effect='solid' multiline={true}/>
-    </span>
+    <Button type="button" icon={validationIcon} tooltip={props.message} style={myStyles} /> 
   );
 }
