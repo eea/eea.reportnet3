@@ -1,8 +1,10 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -40,7 +42,18 @@ public class RecordVO implements Serializable {
    */
   private Long datasetPartitionId;
 
+  /**
+   * The validations.
+   */
+  private List<RecordValidationVO> recordValidations = new ArrayList<RecordValidationVO>();
+
+  /**
+   * The sort criteria.
+   */
   private String sortCriteria;
+
+  /** The level error. */
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.

@@ -11,14 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 
 /**
  * The Class Record.
@@ -30,33 +29,12 @@ import org.eea.dataset.persistence.data.SortFieldsHelper;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
-  /**
-   * Inits the sort fields.
-   */
-  @PostLoad
-  public void initSortFields() {
-    String sortingField = SortFieldsHelper.getSortingField();
-    if (sortingField != null && !sortingField.isEmpty()) {
-      //it could happen that the value could not have been set a idFieldSchema
-      //in this case sortCriteria will be set to Null
-      this.sortCriteria = null;
-      if (fields.size() > 0) {
-        for (FieldValue fv : fields) {
-          if (sortingField.equals(fv.getIdFieldSchema())) {
-            this.sortCriteria = fv.getValue();
-            break;
-          }
-        }
-      }
-    }
-  }
 
   /**
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "record_sequence_generator",
-      sequenceName = "record_sequence",
+  @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
       allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
@@ -87,8 +65,20 @@ public class RecordValue {
   @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<FieldValue> fields;
 
+  /**
+   * The record validations.
+   */
+  @OneToMany(mappedBy = "recordValue", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<RecordValidation> recordValidations;
+
+  /**
+   * The sort criteria.
+   */
   @Transient
   private String sortCriteria;
+
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.

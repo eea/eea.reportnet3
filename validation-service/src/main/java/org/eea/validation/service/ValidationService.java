@@ -2,66 +2,80 @@ package org.eea.validation.service;
 
 
 import java.util.List;
-import java.util.Map;
-import org.eea.validation.model.rules.Rule;
-import org.eea.validation.repository.DataSetSchemaRepository;
-import org.kie.api.KieBase;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.eea.exception.EEAException;
+import org.eea.multitenancy.DatasetId;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.kie.api.runtime.KieSession;
 
 /**
  * The Class ValidationService.
  */
-@Service
-public class ValidationService {
+public interface ValidationService {
 
 
   /**
-   * Gets the element lenght.
+   * Validate data set data.
    *
-   * @return the element lenght
+   * @param datasetId the dataset id
+   *
+   * @throws EEAException the EEA exception
    */
-  public void getElementLenght() {
-    /*
-     *  to be done in sprint 2
-     */
-  }
+  void validateDataSetData(@DatasetId Long datasetId) throws EEAException;
+
 
   /**
-   * Gets the rules.
+   * Run dataset validations.
    *
-   * @param rules the rules
-   * @return the rules
+   * @param dataset the dataset
+   * @param kieSession the kie session
+   *
+   * @return the list
    */
-  public List<Map<String, String>> getRules(Rule rules) {
-    return null;
-  }
+  List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
   /**
-   * Sets the new rules.
+   * Run table validations.
    *
-   * @param newRules the new new rules
+   * @param list the list
+   * @param kieSession the kie session
+   *
+   * @return the list
    */
-  public void setNewRules(Rule newRules) {
-    /*
-     *  to be done in sprint 2
-     */
-  }
+  List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
 
-  // Object convertToObjectId(Object id) {
-  // if (id instanceof String && ObjectId.isValid(id)) {
-  // return new ObjectId(id);
-  // }
-  // return id;
   /**
-   * Load new rules.
+   * Run record validations.
    *
-   * @param rules the rules
-   * @return the kie base
+   * @param recordsPaged the records paged
+   * @param kieSession the kie session
+   *
+   * @return the list
    */
-  // }
-  public KieBase loadNewRules(Rule rules) {
-    return null;
-  }
+  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
+      KieSession kieSession);
+
+  /**
+   * Run field validations.
+   *
+   * @param fields the fields
+   * @param kieSession the kie session
+   *
+   * @return the list
+   */
+  List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
+
+  /**
+   * Delete all validation.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteAllValidation(@DatasetId Long datasetId);
 
 }

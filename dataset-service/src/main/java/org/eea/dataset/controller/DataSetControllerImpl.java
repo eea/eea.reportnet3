@@ -7,11 +7,17 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
+import org.eea.dataset.service.file.FileTreatmentHelper;
+import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.ValidationLinkVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,6 +60,12 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
+
+  @Autowired
+  private LoadValidationsHelper loadValidationsHelper;
 
   /**
    * Gets the data tables values.
@@ -101,13 +114,19 @@ public class DataSetControllerImpl implements DatasetController {
    * Update dataset.
    *
    * @param dataset the dataset
-   *
-   * @return the data set VO
    */
   @Override
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetVO updateDataset(@RequestBody final DataSetVO dataset) {
-    return null;
+  public void updateDataset(@RequestBody final DataSetVO dataset) {
+    if (dataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    try {
+      datasetService.updateDataset(dataset.getId(), dataset);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+
+    }
   }
 
   /**
@@ -130,6 +149,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param file the file
+   * @param idTableSchema the id table schema
    */
 
   @Override
@@ -152,7 +172,7 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(this.datasetService, datasetId, fileName, is, idTableSchema);
+      callable = new LoadDataCallable(fileTreatmentHelper, datasetId, fileName, is, idTableSchema);
       executor.submit(callable);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException e) {
@@ -179,8 +199,11 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
+   * Load dataset schema.
+   *
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
+   * @param tableCollection the table collection
    */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
@@ -196,6 +219,141 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
     }
 
+  }
+
+
+  /**
+   * Gets the table from any object id.
+   *
+   * @param id the id
+   * @param idDataset the id dataset
+   * @param pageSize the page size
+   * @param type the type
+   *
+   * @return the table from any object id
+   */
+  @Override
+  @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") Long id,
+      @RequestParam(value = "datasetId", required = true) Long idDataset,
+      @RequestParam(value = "type", required = true) TypeEntityEnum type) {
+
+    ValidationLinkVO result = null;
+    if (id == null || idDataset == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    try {
+      result = datasetService.getPositionFromAnyObjectId(id, idDataset, type);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+
+    return result;
+  }
+
+
+  /**
+   * Gets the by id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the dataset
+   */
+  @Override
+  @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  @Deprecated
+  public DataSetVO getById(Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    DataSetVO result = null;
+    try {
+      result = datasetService.getById(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
+
+
+  /**
+   * Gets the data flow id by id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the data flow id by id
+   */
+  @Override
+  public Long getDataFlowIdById(Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    Long result = null;
+    try {
+      result = datasetService.getDataFlowIdById(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
+
+
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the statistics by id
+   */
+  @Override
+  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
+
+    StatisticsVO statistics = null;
+    try {
+      statistics = datasetService.getStatistics(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return statistics;
+  }
+
+
+  /**
+   * Gets the failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   *
+   * @return the failed validations by id dataset
+   */
+  @Override
+  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
+      @PathVariable("id") Long datasetId,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
+
+    FailedValidationsDatasetVO validations = null;
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    try {
+      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return validations;
   }
 
 }

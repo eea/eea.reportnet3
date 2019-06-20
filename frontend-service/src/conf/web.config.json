@@ -2,7 +2,29 @@
     "api":{
         "protocol": "http://",
         "url": "localhost",
-        "port": ":8030",                
+        "port": ":8010",                
         "ip": "127.0.0.1"
+    },
+    "dataSchemaAPI":{
+        "url":"/dataschema/dataflow/"
+    },
+    "dataviewerAPI":{
+        "url":"/dataset/TableValueDataset/"
+    },
+    "validationViewerAPI":{
+        "url":"/dataset/findPositionFromAnyObject/"
+    },
+    "loadStatisticsAPI":{
+        "url":"/dataset/loadStatistics/"
+    },
+    "loadDatasetDataAPI":{
+        "url":"/dataset/1/loadDatasetData/"
+    },
+    "listValidationsAPI":{
+        "url": "/dataset/listValidations/"
+    },
+    "loadDataTableAPI":{
+        "url":"/dataset/1/loadTableData/"
     }
+    
 }

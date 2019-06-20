@@ -1,9 +1,7 @@
-/**
- * 
- */
 package org.eea.dataset.persistence.metabase.repository;
 
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -19,6 +17,7 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    * @param datasetId the dataset id
    * @return the long
    */
+  @Query("SELECT d.dataflowId FROM DataSetMetabase d where d.id = ?1")
   Long findDataflowIdById(Long datasetId);
 
 }

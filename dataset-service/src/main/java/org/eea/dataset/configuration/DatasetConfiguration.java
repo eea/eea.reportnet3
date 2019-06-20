@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
-import org.eea.dataset.multitenancy.MultiTenantDataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.multitenancy.MultiTenantDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -41,11 +40,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 public class DatasetConfiguration implements WebMvcConfigurer {
 
-
-  @Override
-  public void addCorsMappings(final CorsRegistry registry) {
-    registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE");
-  }
 
   /**
    * The dll.
@@ -66,10 +60,35 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String createClobPropertie;
 
   /**
+   * The batch size.
+   */
+  @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
+  private String batch_Size;
+
+  /**
+   * The show sql propertie
+   */
+  @Value("${spring.jpa.hibernate.flushMode}")
+  private String flushMode;
+
+
+  /**
    * The show sql propertie
    */
   @Value("${spring.jpa.hibernate.show-sql}")
   private String showSql;
+
+  /**
+   * The stats.
+   */
+  @Value("${spring.jpa.properties.hibernate.order_updates}")
+  private String orderUpdates;
+
+  /**
+   * The order.
+   */
+  @Value("${spring.jpa.properties.hibernate.order_inserts}")
+  private String orderInserts;
 
 
   /**
@@ -145,6 +164,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
+
     dataSetsEM.setJpaProperties(additionalProperties());
     return dataSetsEM;
   }
@@ -159,7 +179,11 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
     properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
+    properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
     properties.setProperty("hibernate.show_sql", showSql);
+    properties.setProperty("hibernate.flushMode", flushMode);
+    properties.setProperty("hibernate.order_updates", orderUpdates);
+    properties.setProperty("hibernate.order_inserts", orderInserts);
     return properties;
   }
 

@@ -1,79 +1,42 @@
-import React, { useState, useContext } from 'react'; //, { useContext }
+import React, { useContext } from 'react';
 import DataViewer from '../../../../containers/DataSets/DataViewer/DataViewer';
 import { TabView, TabPanel } from 'primereact/tabview';
-import {Dialog} from 'primereact/dialog';
-import {CustomFileUpload} from '../CustomFileUpload/CustomFileUpload';
-
-import styles from './TabsSchema.module.css';
 import ResourcesContext from '../../../Context/ResourcesContext';
 
+
+import styles from './TabsSchema.module.css';
+
 const TabsSchema = (props) => {
-    const [importDialogVisible, setImportDialogVisible] = useState(false);
     const resources = useContext(ResourcesContext);
-
-      const customButtons = [
-        {
-            label: resources.messages["import"],
-            icon: "0",
-            group: "left",
-            disabled: false,
-            clickHandler: () => setImportDialogVisible(true)
-        },{
-          label: resources.messages["visibility"],
-          icon: "6",
-          group: "left",
-          disabled: true,
-          clickHandler: null
-        },{
-            label: resources.messages["filter"],
-            icon: "7",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },{
-            label: resources.messages["groupBy"],
-            icon: "8",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },{
-            label: resources.messages["sort"],
-            icon: "9",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },{
-            label: resources.messages["refresh"],
-            icon: "11",
-            group: "right",
-            disabled: false,
-            clickHandler: props.onRefresh
-        }
-    ];
-
     
     let tabs = (props.tables && props.tableSchemaColumns)?
         props.tables.map((table, i) => {
             return (
-                // rightIcon={resources.icons["warning"]}
-                <TabPanel header={table.name} key={table.name}>
+                //TODO: Refactorizar para no renderizar siempre DataViewer sino pasárselo como composición de componentes. Así se podrá reutilizar
+                //TabsSchema para cualquier visualización de datos
+                <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? resources.icons["warning"] : null}>
                     <div className={styles.TabsSchema}>
-                        <DataViewer key={table.id} id={table.id} name={table.name} customButtons={customButtons} 
-                                    tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}/>
-                        <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
-                                className={styles.Dialog} dismissableMask={false} onHide={() => setImportDialogVisible(false)} >
-                            <CustomFileUpload mode="advanced" name="file" url={`http://127.0.0.1:8030/dataset/1/loadTableData/${table.id}`}
-                                                onUpload={() => setImportDialogVisible(false)} 
-                                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
-                                                fileLimit={1} className={styles.FileUpload}  /> 
-                        </Dialog>  
+                        <DataViewer key={table.id} id={table.id} name={table.name} customButtons={(props.customButtons)?props.customButtons:null} 
+                                    tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}
+                                    urlViewer={props.urlViewer}
+                                    positionIdObject={props.positionIdObject}/>                        
                     </div>
                 </TabPanel>
             );
         })
         : null;
+    const filterActiveIndex = (idTableSchema) =>{
+        //TODO: Refactorizar este apaño.
+        if (Number.isInteger(idTableSchema)){
+            return (tabs) ? props.activeIndex : 0;
+        }
+        else{
+            return (tabs) ?  tabs.findIndex(t => t.key === idTableSchema) : 0;
+        }
+    }
+
     return (
-        <TabView>
+        <TabView activeIndex={(props.activeIndex) ? filterActiveIndex(props.activeIndex) : 0} onTabChange={props.onTabChangeHandler}>
             {tabs}
         </TabView>
     );

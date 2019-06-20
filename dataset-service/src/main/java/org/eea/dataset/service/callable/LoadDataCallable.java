@@ -2,15 +2,12 @@ package org.eea.dataset.service.callable;
 
 import java.io.InputStream;
 import java.util.concurrent.Callable;
-import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.FileTreatmentHelper;
 
 /**
  * The type Load data callable.
  */
 public class LoadDataCallable implements Callable<Void> {
-
-  /** The dataset service. */
-  private final DatasetService datasetService;
 
   /** The file name. */
   private final String fileName;
@@ -21,24 +18,29 @@ public class LoadDataCallable implements Callable<Void> {
   /** The is. */
   private final InputStream is;
 
+
   /** The id table schema. */
   private final String idTableSchema;
+
+  /** The file treatment helper. */
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /**
    * Instantiates a new Load data callable.
    *
-   * @param datasetService the dataset service
+   * @param fileTreatmentHelper the file treatment helper
    * @param dataSetId the data set id
    * @param fileName the file
    * @param is the is
+   * @param idTableSchema the id table schema
    */
-  public LoadDataCallable(final DatasetService datasetService, final Long dataSetId,
+  public LoadDataCallable(final FileTreatmentHelper fileTreatmentHelper, final Long dataSetId,
       final String fileName, InputStream is, final String idTableSchema) {
-    this.datasetService = datasetService;
     this.fileName = fileName;
     this.datasetId = dataSetId;
     this.is = is;
     this.idTableSchema = idTableSchema;
+    this.fileTreatmentHelper = fileTreatmentHelper;
   }
 
   /**
@@ -49,7 +51,7 @@ public class LoadDataCallable implements Callable<Void> {
    */
   @Override
   public Void call() throws Exception {
-    datasetService.processFile(datasetId, fileName, is, idTableSchema);
+    fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
     return null;
   }
 }

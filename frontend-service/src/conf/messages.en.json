@@ -28,10 +28,18 @@
         "deleteDatasetHeader": "Delete dataset",
         "yes": "Yes",
         "no": "No",
+        "validateDataSet": "Validate dataset",
+        "validateDataSetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
+        "origin": "Origin",
+        "levelError": "Level error",
+        "errorMessage": "Message",
+        "typeEntity": "Entity",
+        "loading": "Loading...",
         "visibility": "Visibility",
         "filter": "Filter",
-        "groupBy": "Group by",
+        "group-by": "Group by",
         "sort": "Sort",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "noErrorData": "There is no error data to show"
     }
 }

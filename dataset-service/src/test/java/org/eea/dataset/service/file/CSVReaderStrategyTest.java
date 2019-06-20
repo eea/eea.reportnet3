@@ -94,7 +94,7 @@ public class CSVReaderStrategyTest {
     when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
     DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "");
-    assertNotNull(result);
+    assertNotNull("is null", result);
   }
 
 

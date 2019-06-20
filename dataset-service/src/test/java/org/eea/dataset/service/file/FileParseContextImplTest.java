@@ -52,7 +52,7 @@ public class FileParseContextImplTest {
         .thenReturn(new DataSetVO());
     DataSetVO result =
         fileParseContext.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    assertNotNull(result);
+    assertNotNull("is null", result);
   }
 
 }
