@@ -32,7 +32,12 @@ const DataViewer = (props) => {
 
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     useEffect(() =>{            
-        console.log("Setting column options...");      
+        console.log("Setting column options...");     
+
+        if(firstRow !== props.positionIdObject){
+          setFirstRow(Math.floor(props.positionIdObject/numRows)*numRows)
+        }
+
         let colOpt = [];
         for(let col of cols) {  
           colOpt.push({label: col.header, value: col});
@@ -40,13 +45,13 @@ const DataViewer = (props) => {
         setColOptions(colOpt);
   
         console.log('Fetching data...');
-        fetchDataHandler(null, sortOrder, firstRow, numRows);   
+        fetchDataHandler(null, sortOrder, Math.floor(props.positionIdObject/numRows)*numRows, numRows);  
         
         console.log("Filtering data...");
         const inmTableSchemaColumns = [...props.tableSchemaColumns];
         setCols(inmTableSchemaColumns);
 
-      }, [firstRow]);
+      }, [props.positionIdObject]);
   
       useEffect(()=>{         
         // let visibilityIcon = (<div className="TableDiv">
@@ -174,7 +179,7 @@ const validationsTemplate = (fetchedData, column) => {
     let message = "";
     validations.forEach(validation =>
       validation.message
-        ? (message += validation.message + '\n')
+        ? (message += "- " + validation.message + '\n')
         : ""
     );
 
@@ -205,7 +210,7 @@ const validationsTemplate = (fetchedData, column) => {
 
     return <CustomIconToolTip levelError={levelError} message={message} />;
   } else {
-    return <CustomIconToolTip levelError={null} message={null} />;
+    return;
   }
 };
 
@@ -218,7 +223,7 @@ const dataTemplate = (rowData, column) =>{
     );
     let message = [];
     validations.forEach(validation =>
-      validation.message ? (message += validation.message +"\n") : ""
+      validation.message ? (message += "- " + validation.message + '\n') : ""
     );
     let levelError = "";
     let lvlFlag = 0;

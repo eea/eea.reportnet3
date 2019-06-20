@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
-import styles from './CustomIconToolTip.module.css';
+
+import {Button} from 'primereact/button';
+import './CustomIconToolTip.css';
 
 export default function CustomIconToolTip(props) {
   let validationIcon = '';
@@ -29,27 +31,16 @@ export default function CustomIconToolTip(props) {
     default:
       break;
   }
-
-  const parseTooltipMessage = () => {
-    if(props.message!==null){
-      let splittedMessage = props.message.split('\n');
-      splittedMessage.pop();
-      if(splittedMessage.length>1){
-        return <ul>{splittedMessage.map((m,i)=><li key={i}>{m}</li>)}</ul>;
-      }
-      else{
-        return props.message;
-      }
-    }
-    return "";
-  } 
+  const myStyles = { 
+    padding: "0px !important",
+    margin:"0px !important",
+    borderColor: "transparent",
+    color: iconColor, 
+    float: "right", 
+    backgroundColor: "transparent" }
+  
 
   return (
-    <span>
-      <span className={styles.tooltip} style={{float:"right", whiteSpace: "pre-line"}}>
-        <i className={validationIcon} style={{ color: iconColor, float: "right" }} />
-        <span className={styles.tooltiptext}>{parseTooltipMessage()}</span>
-      </span>
-    </span>
+    <Button type="button" icon={validationIcon} tooltip={props.message} style={myStyles} /> 
   );
 }

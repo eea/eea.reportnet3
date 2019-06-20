@@ -159,9 +159,9 @@ const ValidationViewer = (props) => {
               );
     
               dataPromise
-              .then(res => {
-                contextReporterDataSet.setPageHandler(res.data.position); 
+              .then(res => {                
                 contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+                contextReporterDataSet.setPageHandler(res.data.position); 
                 contextReporterDataSet.validationsVisibleHandler();
               })
               .catch(error => {
@@ -169,9 +169,9 @@ const ValidationViewer = (props) => {
                 return error;
               });   
             break;
-          case "TABLE":              
-              contextReporterDataSet.setPageHandler(0);    
+          case "TABLE":     
               contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+              contextReporterDataSet.setPageHandler(0);    
               contextReporterDataSet.validationsVisibleHandler();
               break;              
           default:
