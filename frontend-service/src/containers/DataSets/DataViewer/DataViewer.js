@@ -213,7 +213,7 @@ const validationsTemplate = (fetchedData, column) => {
 //Template for Field validation
 const dataTemplate = (rowData, column) =>{
     let row = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-  if (row !== null && row.fieldValidations!==null) {
+  if (row !== null && row && row.fieldValidations!==null) {
     const validations = row.fieldValidations.map(
       val => val.validation
     );
@@ -245,10 +245,10 @@ const dataTemplate = (rowData, column) =>{
       }
     });
   
-      return <div style={{'display':'flex','alignItems':'center'}}> {row.fieldData[column.field]} <CustomIconToolTip levelError={levelError} message={message}/></div>;
+      return <div style={{'display':'flex','alignItems':'center'}}> {(row)? row.fieldData[column.field] : null} <CustomIconToolTip levelError={levelError} message={message}/></div>;
     }
     else{
-      return <div style={{'display':'flex','alignItems':'center'}}>{row.fieldData[column.field]}</div>;
+      return <div style={{'display':'flex','alignItems':'center'}}>{(row)? row.fieldData[column.field] : null}</div>;
     }
   }
 
