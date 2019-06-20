@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.util.HashSet;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -75,5 +76,50 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
       + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1")
   List<RecordValidation> findRecordValidationsByIdDataset(Long datasetId);
+
+
+  /**
+   * Find record id with validations.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the hash set
+   */
+  @Query("SELECT fv.record.id from FieldValue fv WHERE fv.fieldValidations IS NOT EMPTY "
+      + " AND fv.record.tableValue.datasetId.id=?1 and fv.record.tableValue.idTableSchema=?2")
+  HashSet<Long> findRecordIdWithValidations(Long datasetId, String idTableSchema);
+
+
+  /**
+   * Find record id from record with validations by level error.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param typeError the type error
+   * @return the hash set
+   */
+  @Query("SELECT rv.recordValue.id FROM RecordValidation rv  "
+      + " WHERE rv.recordValue.tableValue.datasetId.id=:datasetId "
+      + " AND rv.recordValue.tableValue.idTableSchema=:idTableSchema "
+      + " AND rv.validation.levelError=:typeError")
+  HashSet<Long> findRecordIdFromRecordWithValidationsByLevelError(
+      @Param("datasetId") Long datasetId, @Param("idTableSchema") String idTableSchema,
+      @Param("typeError") TypeErrorEnum typeError);
+
+
+  /**
+   * Find record id from field with validations by level error.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param typeError the type error
+   * @return the hash set
+   */
+  @Query("SELECT fv.fieldValue.record.id FROM FieldValidation fv  "
+      + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=:datasetId "
+      + " AND fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema "
+      + " AND fv.validation.levelError=:typeError")
+  HashSet<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
+      @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
 }

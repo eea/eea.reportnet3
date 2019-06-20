@@ -43,6 +43,7 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
+import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -422,7 +423,7 @@ public class DatasetServiceImpl implements DatasetService {
    * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
    *
    * @param datasetId the dataset id
-   * @param mongoID the mongo ID
+   * @param idTableSchema the mongo ID
    * @param pageable the pageable
    * @param idFieldSchema the id field schema
    * @param asc the asc
@@ -433,9 +434,18 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public TableVO getTableValuesById(final Long datasetId, final String mongoID,
+  public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
       final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
-    List<RecordValue> records = retrieveRecordValue(mongoID, idFieldSchema);
+    List<RecordValue> records = null;
+    if (StringUtils.isBlank(idFieldSchema)) {
+      records = recordRepository.findByTableValueNoOrder(idTableSchema);
+    } else {
+      SortField sortField = new SortField();
+      sortField.setFieldName(idFieldSchema);
+      sortField.setAsc(asc);
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, sortField);
+    }
+
     if (records == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -443,46 +453,24 @@ public class DatasetServiceImpl implements DatasetService {
     if (records.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}, tableSchema {}", datasetId, mongoID);
+      LOG.info("No records founded in datasetId {}", datasetId);
 
     } else {
-      // Records retrieved,
-      // 1º need to remove duplicated data
-      List<RecordValue> sanitizeRecords = this.sanitizeRecords(records);
-      // 2º sort sanitized data
-      Optional.ofNullable(idFieldSchema).ifPresent(field -> {
-        sanitizeRecords.sort((RecordValue v1, RecordValue v2) -> {
-          String sortCriteria1 = v1.getSortCriteria();
-          String sortCriteria2 = v2.getSortCriteria();
-          // process the sort criteria
-          // it could happen that some values has no sortCriteria due to a matching error
-          // during the load process. If this is the case we need to ensure that sort logic does not
-          // fail
-          int sort = 0;
-          if (null == sortCriteria1) {
-            if (null != sortCriteria2) {
-              sort = -1;
-            }
-          } else {
-            if (null != sortCriteria2) {
-              sort = asc ? sortCriteria1.compareTo(sortCriteria2)
-                  : sortCriteria1.compareTo(sortCriteria2) * -1;
-            } else {
-              sort = 1;
-            }
-          }
-          return sort;
-        });
-      });
-      // 3º calculate first and last index to create the page to retrieve sorted data
+
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex =
-          (pageable.getPageNumber() + 1) * pageable.getPageSize() > sanitizeRecords.size()
-              ? sanitizeRecords.size()
-              : ((pageable.getPageNumber() + 1) * pageable.getPageSize());
-      // 4º map to VO the records of the calculated page
-      List<RecordVO> recordVOs =
-          recordNoValidationMapper.entityListToClass(sanitizeRecords.subList(initIndex, endIndex));
+      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size()
+          ? records.size()
+          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      List<RecordValue> pagedRecords = records.subList(initIndex, endIndex);
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(pagedRecords);
+      result.setRecords(recordVOs);
+      result.setTotalRecords(Long.valueOf(records.size()));
+
+      LOG.info("Total records found in datasetId {}: {}. Now in page {}, {} records by page",
+          datasetId, recordVOs.size(), pageable.getPageNumber(), pageable.getPageSize());
+      if (StringUtils.isNotBlank(idFieldSchema)) {
+        LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
+      }
 
       // 5º retrieve validations to set them into the final result
       List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
@@ -511,16 +499,9 @@ public class DatasetServiceImpl implements DatasetService {
                   .orElse(TypeErrorEnum.WARNING));
         }
       });
-      result.setRecords(recordVOs);
-      result.setTotalRecords(Long.valueOf(sanitizeRecords.size()));
-      LOG.info(
-          "Total records founded in datasetId {} tableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, mongoID, sanitizeRecords.size(), pageable.getPageNumber(),
-          pageable.getPageSize());
-      if (StringUtils.isNotBlank(idFieldSchema)) {
-        LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
-      }
+
     }
+
     return result;
   }
 
@@ -535,6 +516,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @return the list
    */
+  @Deprecated
   private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
     Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
     List<RecordValue> records = null;
@@ -602,6 +584,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
+  @Deprecated
   public DataSetVO getById(Long datasetId) throws EEAException {
 
     DatasetValue datasetValue = new DatasetValue();
@@ -840,32 +823,41 @@ public class DatasetServiceImpl implements DatasetService {
   private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId,
       Map<String, String> mapIdNameDatasetSchema) {
 
+    HashSet<Long> recordIdsFromRecordWithValidationError =
+        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    HashSet<Long> recordIdsFromRecordWithValidationWarning =
+        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
+    HashSet<Long> recordIdsFromFieldWithValidationError =
+        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    HashSet<Long> recordIdsFromFieldWithValidationWarning =
+        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
+    Set<Long> idsErrors = new HashSet<>();
+    idsErrors.addAll(recordIdsFromRecordWithValidationError);
+    idsErrors.addAll(recordIdsFromFieldWithValidationError);
+
+    Set<Long> idsWarnings = new HashSet<>();
+    idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
+    idsWarnings.addAll(recordIdsFromFieldWithValidationWarning);
+
+    idsWarnings.removeAll(idsErrors);
+
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
-
-    Long countErrorRecordValidations =
-        recordValidationRepository.countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
-
-    Long countWarningRecordValidations =
-        recordValidationRepository.countRecordValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
-
-    Long countErrorFieldValidations =
-        fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
-
-    Long countWarningFieldValidations =
-        fieldValidationRepository.countFieldValidationsByIdDatasetAndIdTableSchemaAndTypeError(
-            datasetId, tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setTotalRecords(countRecords);
 
-    Long totalRecordsWithErrors = countErrorRecordValidations + countErrorFieldValidations;
-    Long totalRecordsWithWarnings = countWarningRecordValidations + countWarningFieldValidations;
+    Long totalRecordsWithErrors = Long.valueOf(idsErrors.size());
+    Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
     Long totalTableErrors = totalRecordsWithErrors + totalRecordsWithWarnings;
-
 
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
 

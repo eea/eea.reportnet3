@@ -31,7 +31,7 @@ const DashBoard = () =>{
             setDashBoardTitle(res.data.nameDataSetSchema);
             res.data.tables.forEach(t => {
                 tabStatisticNames.push(t.nameTableSchema);
-                tabStatisticValues.push([t.totalRecords-(t.totalRecordsWithErrors+t.totalRecordsWithErrors),t.totalRecordsWithWarnings,t.totalRecordsWithErrors]);
+                tabStatisticValues.push([t.totalRecords-(t.totalRecordsWithErrors+t.totalRecordsWithWarnings),t.totalRecordsWithWarnings,t.totalRecordsWithErrors]);
             });
             //Transpose value matrix and delete undefined elements to fit Chart data structure
             const transposedValues = Object.keys(tabStatisticValues).map(c =>
