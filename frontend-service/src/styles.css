@@ -3968,3 +3968,7 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 }
 
 /* Add your customizations of theme here */
+
+.p-datatable-resizable .p-datatable-thead>tr>th, .p-datatable-resizable .p-datatable-tfoot>tr>td, .p-datatable-resizable .p-datatable-tbody>tr>td{
+  overflow: visible;
+}
