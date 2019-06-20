@@ -45,7 +45,7 @@ function boolean isText( String s ){
     try {
         Pattern pat = Pattern.compile("[^a-zA-Z0-9 ._-]$");
        	Matcher mat = pat.matcher(s);
-        if(mat.find()){
+        if(mat.find()){ 
         	return true;
         }else{
         	return false;
