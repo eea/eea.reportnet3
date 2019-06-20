@@ -19,6 +19,12 @@ public class ValidationLinkVO implements Serializable {
    */
   private static final long serialVersionUID = 7490180881347461296L;
   /** The page. */
-  private ValidationLinkContentVO page;
+  // private ValidationLinkContentVO page;
+
+  private Long position;
+
+  private String nameTableSchema;
+
+  private String idTableSchema;
 
 }

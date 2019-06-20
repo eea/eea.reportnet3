@@ -118,10 +118,9 @@ public interface DatasetController {
    * @param type the type
    * @return the table from any object id
    */
-  @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ValidationLinkVO getTableFromAnyObjectId(@PathVariable("id") Long id,
+  @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) TypeEntityEnum type);
 
 

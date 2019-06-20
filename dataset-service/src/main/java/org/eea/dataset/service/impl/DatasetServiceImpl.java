@@ -68,7 +68,6 @@ import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkContentVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -458,9 +457,9 @@ public class DatasetServiceImpl implements DatasetService {
     } else {
 
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size()
-          ? records.size()
-          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      int endIndex =
+          (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records.size()
+              : (pageable.getPageNumber() + 1) * pageable.getPageSize();
       List<RecordValue> pagedRecords = records.subList(initIndex, endIndex);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(pagedRecords);
       result.setRecords(recordVOs);
@@ -634,33 +633,29 @@ public class DatasetServiceImpl implements DatasetService {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
 
+
   /**
-   * Gets the table from any object id.
+   * Gets the position from any object id.
    *
    * @param id the id
    * @param idDataset the id dataset
-   * @param pageable the pageable
    * @param type the type
-   *
-   * @return the table from any object id
-   *
+   * @return the position from any object id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public ValidationLinkVO getTableFromAnyObjectId(Long id, Long idDataset, Pageable pageable,
-      TypeEntityEnum type) throws EEAException {
+  public ValidationLinkVO getPositionFromAnyObjectId(Long id, Long idDataset, TypeEntityEnum type)
+      throws EEAException {
 
     ValidationLinkVO validationLink = new ValidationLinkVO();
     // TYPE 1 table; 2 record; 3 field
-    TableVO tableVO = new TableVO();
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
 
     // TABLE
     if (TypeEntityEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
-      tableVO = tableNoRecordMapper.entityToClass(table);
       records = table.getRecords();
       if (records != null && !records.isEmpty()) {
         record = records.get(0);
@@ -670,7 +665,6 @@ public class DatasetServiceImpl implements DatasetService {
     // RECORD
     if (TypeEntityEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      tableVO = tableNoRecordMapper.entityToClass(record.getTableValue());
       records = record.getTableValue().getRecords();
     }
 
@@ -679,70 +673,36 @@ public class DatasetServiceImpl implements DatasetService {
 
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
-        tableVO = tableNoRecordMapper.entityToClass(field.getRecord().getTableValue());
         records = field.getRecord().getTableValue().getRecords();
         record = field.getRecord();
       }
     }
-    validationLink.setPage(this.processTable(tableVO, records, record, pageable));
+
+    if (records != null && !records.isEmpty()) {
+      records = this.sanitizeRecords(records);
+      int recordPosition = records.indexOf(record);
+
+      validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
+      validationLink.setPosition(Long.valueOf(recordPosition));
+
+
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
+          new ObjectId(record.getTableValue().getDatasetId().getIdDatasetSchema()));
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        if (validationLink.getIdTableSchema().equals(tableSchema.getIdTableSchema().toString())) {
+          validationLink.setNameTableSchema(tableSchema.getNameTableSchema());
+          break;
+        }
+      }
+    }
+
     LOG.info(
-        "Validation error with id {} clicked in dataset {}. Redirect to page {} from table schema {}, with a page size of {}",
-        id, idDataset, validationLink.getPage().getNumPage(),
-        validationLink.getPage().getTable().getIdTableSchema(), pageable.getPageSize());
+        "Validation error with idObject {} clicked in dataset {}. The position is {} from table schema {}",
+        id, idDataset, validationLink.getPosition(), validationLink.getIdTableSchema());
+
     return validationLink;
   }
 
-
-  private ValidationLinkContentVO processTable(TableVO table, List<RecordValue> records,
-      RecordValue recordValue, Pageable pageable) {
-
-    if (table == null) {
-      table = new TableVO();
-    }
-    // PAGINATION
-    records = this.sanitizeRecords(records);
-    int recordPosition = records.indexOf(recordValue);
-    int tamPage = 20;
-    if (pageable.getPageSize() != 0) {
-      tamPage = pageable.getPageSize();
-    }
-    int pageNumberFounded = recordPosition / tamPage;
-
-    int initIndex = pageNumberFounded * pageable.getPageSize();
-    int endIndex = (pageable.getPageNumber() + 1) * tamPage > records.size() ? records.size()
-        : ((pageNumberFounded + 1) * tamPage);
-
-    // RECORD AND FIELDS VALIDATION
-    List<RecordVO> recordVOs =
-        recordNoValidationMapper.entityListToClass(records.subList(initIndex, endIndex));
-    List<Long> recordIds = recordVOs.stream().map(RecordVO::getId).collect(Collectors.toList());
-    Map<Long, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
-    Map<Long, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
-    recordVOs.stream().forEach(record -> {
-      record.getFields().stream().forEach(field -> {
-        field.setFieldValidations(
-            this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId())));
-      });
-      record.setRecordValidations(
-          this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId())));
-
-    });
-
-    // TABLE VALIDATIONS
-    List<TableValidation> tableValidations =
-        tableValidationRepository.findByTableValue_IdTableSchema(table.getIdTableSchema());
-    table.setTableValidations(this.tableValidationMapper.entityListToClass(tableValidations));
-
-    table.setRecords(recordVOs);
-    table.setTotalRecords(Long.valueOf(records.size()));
-
-    ValidationLinkContentVO valLink = new ValidationLinkContentVO();
-    valLink.setNumPage(pageNumberFounded + 1);
-    valLink.setTable(table);
-
-    return valLink;
-
-  }
 
 
   /**

@@ -420,34 +420,34 @@ public class DataSetControllerImplTest {
   }
 
   @Test
-  public void testGetTableFromAnyObjectId() throws Exception {
+  public void testGetPositionFromAnyObjectId() throws Exception {
 
-    when(datasetService.getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(new ValidationLinkVO());
-    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
-    Mockito.verify(datasetService, times(1)).getTableFromAnyObjectId(Mockito.any(), Mockito.any(),
+    when(datasetService.getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new ValidationLinkVO());
+    dataSetControllerImpl.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
+    Mockito.verify(datasetService, times(1)).getPositionFromAnyObjectId(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetTableFromAnyObjectIdException() throws Exception {
-    dataSetControllerImpl.getTableFromAnyObjectId(null, null, 10, null);
+  public void testGetPositionFromAnyObjectIdException() throws Exception {
+    dataSetControllerImpl.getPositionFromAnyObjectId(null, null, null);
   }
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetTableFromAnyObjectIdException2() throws Exception {
+  public void testGetPositionFromAnyObjectIdException2() throws Exception {
 
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
-        .getTableFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getTableFromAnyObjectId(1L, 1L, 10, TypeEntityEnum.TABLE);
+        .getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
   }
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetTableFromAnyObjectIdException3() throws Exception {
-    dataSetControllerImpl.getTableFromAnyObjectId(1L, null, 10, null);
+  public void testGetPositionFromAnyObjectIdException3() throws Exception {
+    dataSetControllerImpl.getPositionFromAnyObjectId(1L, null, null);
   }
 
 

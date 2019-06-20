@@ -229,10 +229,9 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the table from any object id
    */
   @Override
-  @GetMapping(value = "loadTableFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ValidationLinkVO getTableFromAnyObjectId(@PathVariable("id") Long id,
+  @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "type", required = true) TypeEntityEnum type) {
 
     ValidationLinkVO result = null;
@@ -242,8 +241,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     try {
-      Pageable pageable = PageRequest.of(1, pageSize);
-      result = datasetService.getTableFromAnyObjectId(id, idDataset, pageable, type);
+      result = datasetService.getPositionFromAnyObjectId(id, idDataset, type);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
