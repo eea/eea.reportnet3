@@ -69,7 +69,6 @@ public class LoadValidationsHelper {
    *
    * @throws EEAException the EEA exception
    */
-
   public FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
       String headerField, Boolean asc) throws EEAException {
 
@@ -128,7 +127,6 @@ public class LoadValidationsHelper {
    * @param dataset the dataset
    * @param mapNameTableSchema the map name table schema
    * @return the list
-   * @throws InterruptedException the interrupted exception
    */
   private List<ErrorsValidationVO> processErrors(DatasetValue dataset,
       Map<String, String> mapNameTableSchema) {
