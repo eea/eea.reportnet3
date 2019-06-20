@@ -175,7 +175,7 @@ const validationsTemplate = (fetchedData, column) => {
     let message = "";
     validations.forEach(validation =>
       validation.message
-        ? (message += validation.message + '<br/>')
+        ? (message += validation.message + '\n')
         : ""
     );
 
@@ -219,7 +219,7 @@ const dataTemplate = (rowData, column) =>{
     );
     let message = [];
     validations.forEach(validation =>
-      validation.message ? (message += validation.message +"<br/>") : ""
+      validation.message ? (message += validation.message +"\n") : ""
     );
     let levelError = "";
     let lvlFlag = 0;

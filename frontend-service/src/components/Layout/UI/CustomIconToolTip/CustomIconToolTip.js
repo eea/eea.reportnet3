@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
-import ReactTooltip from 'react-tooltip';
 
 //import './CustomIconToolTip.css';
 
@@ -32,13 +31,26 @@ export default function CustomIconToolTip(props) {
       break;
   }
 
+  const parseTooltipMessage = () => {
+    if(props.message!==null){
+      let splittedMessage = props.message.split('\n');
+      splittedMessage.pop();
+      if(splittedMessage.length>1){
+        return <ul>{splittedMessage.map((m,i)=><li key={i}>{m}</li>)}</ul>;
+      }
+      else{
+        return props.message;
+      }
+    }
+    return "";
+  } 
+
   return (
     <span>
-      <span  data-tip={props.message} data-iscapture="true" style={{float:"right", whiteSpace: "pre-line"}}>
+      <span className="tooltip" style={{float:"right", whiteSpace: "pre-line"}}>
         <i className={validationIcon} style={{ color: iconColor, float: "right" }} />
+        <span className="tooltiptext">{parseTooltipMessage()}</span>
       </span>
-
-      <ReactTooltip place='right' type='dark' effect='solid' multiline={true}/>
     </span>
   );
 }
