@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
-
-//import './CustomIconToolTip.css';
+import styles from './CustomIconToolTip.module.css';
 
 export default function CustomIconToolTip(props) {
   let validationIcon = '';
@@ -47,9 +46,9 @@ export default function CustomIconToolTip(props) {
 
   return (
     <span>
-      <span className="tooltip" style={{float:"right", whiteSpace: "pre-line"}}>
+      <span className={styles.tooltip} style={{float:"right", whiteSpace: "pre-line"}}>
         <i className={validationIcon} style={{ color: iconColor, float: "right" }} />
-        <span className="tooltiptext">{parseTooltipMessage()}</span>
+        <span className={styles.tooltiptext}>{parseTooltipMessage()}</span>
       </span>
     </span>
   );
