@@ -988,6 +988,13 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the dataset valueby id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset valueby id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public DatasetValue getDatasetValuebyId(final Long datasetId) throws EEAException {
     if (datasetId == null) {
@@ -997,6 +1004,14 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the find by id data set schema.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the find by id data set schema
+   * @throws EEAException the EEA exception
+   */
   @Override
   public DataSetSchema getfindByIdDataSetSchema(Long datasetId, ObjectId datasetSchemaId)
       throws EEAException {
