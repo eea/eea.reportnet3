@@ -14,17 +14,16 @@ import lombok.ToString;
 @ToString
 public class ValidationLinkVO implements Serializable {
 
-  /**
-   * 
-   */
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 7490180881347461296L;
-  /** The page. */
-  // private ValidationLinkContentVO page;
 
+  /** The position. */
   private Long position;
 
+  /** The name table schema. */
   private String nameTableSchema;
 
+  /** The id table schema. */
   private String idTableSchema;
 
 }
