@@ -2,7 +2,7 @@
     "api":{
         "protocol": "http://",
         "url": "localhost",
-        "port": ":8030",                
+        "port": ":8010",                
         "ip": "127.0.0.1"
     },
     "dataSchemaAPI":{
