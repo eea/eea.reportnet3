@@ -20,7 +20,7 @@
         "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "ERROR",
         "message": "Row is duplicated",
-        "typeEntity": "ROW",
+        "typeEntity": "RECORD",
         "validationDate": "string"
       },
       {
@@ -140,7 +140,7 @@
         "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "ERROR",
         "message": "Row is duplicated",
-        "typeEntity": "ROW",
+        "typeEntity": "RECORD",
         "validationDate": "string"
       },
       {
@@ -260,7 +260,7 @@
         "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "ERROR",
         "message": "Row is duplicated",
-        "typeEntity": "ROW",
+        "typeEntity": "RECORD",
         "validationDate": "string"
       },
       {
@@ -380,7 +380,7 @@
         "nameTableSchema": "BWQD_2006_IdentifiedBW",
         "levelError": "ERROR",
         "message": "Row is duplicated",
-        "typeEntity": "ROW",
+        "typeEntity": "RECORD",
         "validationDate": "string"
       },
       {
