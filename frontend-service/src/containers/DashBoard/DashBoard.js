@@ -6,7 +6,7 @@ import styles from './DashBoard.module.css';
 import config from '../../conf/web.config.json';
 import ResourcesContext from '../../components/Context/ResourcesContext';
 
-const DashBoard = () =>{
+const DashBoard = (props) =>{
     const [dashBoardData, setDashBoardData] = useState({});
     const [dashBoardOptions, setDashBoardOptions] = useState({});
     const [dashBoardTitle, setDashBoardTitle] = useState("");
@@ -14,90 +14,91 @@ const DashBoard = () =>{
 
     useEffect(() => {   
     
-    //'/jsons/error-statistics.json'
-    const dataPromise = HTTPRequester.get(
-      {
-        url: `${config.loadStatisticsAPI.url}1`,
-        queryString: {}
-      }
-    );
-
-    //Parse JSON to array statistic values
-    dataPromise
-    .then(res =>{
-        if(res.data.tables !== null){
-            const tabStatisticNames = [];
-            const tabStatisticValues = [];
-            setDashBoardTitle(res.data.nameDataSetSchema);
-            res.data.tables.forEach(t => {
-                tabStatisticNames.push(t.nameTableSchema);
-                tabStatisticValues.push([t.totalRecords-(t.totalRecordsWithErrors+t.totalRecordsWithWarnings),t.totalRecordsWithWarnings,t.totalRecordsWithErrors]);
+        //TODO: Darle una vuelta a esto. ¿Props en el useEffect? Y el if es cutre a más no poder.
+        if(props.refresh){
+            //'/jsons/error-statistics.json'
+            const dataPromise = HTTPRequester.get(
+            {
+                url: `${config.loadStatisticsAPI.url}1`,
+                queryString: {}
             });
-            //Transpose value matrix and delete undefined elements to fit Chart data structure
-            const transposedValues = Object.keys(tabStatisticValues).map(c =>
-            tabStatisticValues.map(r => r[c])
-        ).filter(t=>t[0]!==undefined);
+
+            //Parse JSON to array statistic values
+            dataPromise
+            .then(res =>{
+                if(res.data.tables !== null){
+                    const tabStatisticNames = [];
+                    const tabStatisticValues = [];
+                    setDashBoardTitle(res.data.nameDataSetSchema);
+                    res.data.tables.forEach(t => {
+                        tabStatisticNames.push(t.nameTableSchema);
+                        tabStatisticValues.push([t.totalRecords-(t.totalRecordsWithErrors+t.totalRecordsWithWarnings),t.totalRecordsWithWarnings,t.totalRecordsWithErrors]);
+                    });
+                    //Transpose value matrix and delete undefined elements to fit Chart data structure
+                    const transposedValues = Object.keys(tabStatisticValues).map(c =>
+                    tabStatisticValues.map(r => r[c])
+                ).filter(t=>t[0]!==undefined);
 
 
-        setDashBoardData({
-            labels: tabStatisticNames,
-            datasets: [
-                {
-                    label: 'Correct',
-                    backgroundColor: '#004494',
-                    data: getPercentage(transposedValues)[0],
-                    totalData: tabStatisticValues
-                },
-                {
-                    label: 'Warning',
-                    backgroundColor: '#ffd617',
-                    data: getPercentage(transposedValues)[1],
-                    totalData: tabStatisticValues
-                },
-                {
-                label: 'Error',
-                backgroundColor: '#DA2131',
-                data: getPercentage(transposedValues)[2],
-                totalData: tabStatisticValues
-            }
-            ]});
-    
-        setDashBoardOptions({
-            tooltips: {
-            mode: 'index',        
-            callbacks: {
-                label: (tooltipItems, data) => `${data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems["index"]][tooltipItems.datasetIndex]} (${tooltipItems.yLabel} %)`}
-            },
-            responsive: true,
-            scales: {
-                xAxes: [{
-                    stacked: true,
-                    scaleLabel: {
-                        display:true,
-                        labelString: 'Tables'
+                setDashBoardData({
+                    labels: tabStatisticNames,
+                    datasets: [
+                        {
+                            label: 'Correct',
+                            backgroundColor: '#004494',
+                            data: getPercentage(transposedValues)[0],
+                            totalData: tabStatisticValues
+                        },
+                        {
+                            label: 'Warning',
+                            backgroundColor: '#ffd617',
+                            data: getPercentage(transposedValues)[1],
+                            totalData: tabStatisticValues
+                        },
+                        {
+                        label: 'Error',
+                        backgroundColor: '#DA2131',
+                        data: getPercentage(transposedValues)[2],
+                        totalData: tabStatisticValues
                     }
-                }],
-                yAxes: [{
-                    stacked: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Percentage'
+                    ]});
+            
+                setDashBoardOptions({
+                    tooltips: {
+                    mode: 'index',        
+                    callbacks: {
+                        label: (tooltipItems, data) => `${data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems["index"]][tooltipItems.datasetIndex]} (${tooltipItems.yLabel} %)`}
                     },
-                    ticks: {
-                    // Include a % sign in the ticks
-                    callback: (value, index, values) => `${value} %`
+                    responsive: true,
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                            scaleLabel: {
+                                display:true,
+                                labelString: 'Tables'
+                            }
+                        }],
+                        yAxes: [{
+                            stacked: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Percentage'
+                            },
+                            ticks: {
+                            // Include a % sign in the ticks
+                            callback: (value, index, values) => `${value} %`
+                        }
+                        }]
+                    }});
                 }
-                }]
-            }});
+            })
+            .catch(error=>{
+                console.log(error);
+                return error
+            })
         }
-    })
-    .catch(error=>{
-        console.log(error);
-        return error
-    })
     
-    
-}, []);
+}, [props.refresh]);
 
     const getPercentage = (valArr) =>{  
         let total = valArr.reduce((arr1, arr2) =>
