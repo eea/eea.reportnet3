@@ -11,15 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 
 /**
  * The Class Record.
@@ -31,28 +29,6 @@ import lombok.ToString;
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
 
-  /**
-   * Inits the sort fields.
-   */
-  @PostLoad
-  public void initSortFields() {
-    String sortingField = SortFieldsHelper.getSortingField();
-    if (sortingField != null && !sortingField.isEmpty()) {
-      // it could happen that the value could not have been set a idFieldSchema
-      // in this case sortCriteria will be set to Null
-      this.sortCriteria = null;
-      if (fields.size() > 0) {
-        for (FieldValue fv : fields) {
-          if (sortingField.equals(fv.getIdFieldSchema())) {
-            this.sortCriteria = fv.getValue();
-            break;
-          }
-        }
-      }
-    }
-
-
-  }
 
   /**
    * The id.

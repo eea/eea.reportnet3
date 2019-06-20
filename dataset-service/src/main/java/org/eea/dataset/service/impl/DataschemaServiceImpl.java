@@ -132,21 +132,26 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
 
+      // for (int w = i; w < 20; w++) {
       RuleRecord ruleRecord = new RuleRecord();
       List<String> listaStrinsRuleRecord = new ArrayList<String>();
-      listaStrinsRuleRecord.add(VALIDATION_WARNING);
-      listaStrinsRuleRecord.add(WARNING);
       ruleRecord.setRuleId(new ObjectId());
       ruleRecord.setDataFlowId(1L);
       ruleRecord.setScope(TypeEntityEnum.RECORD);
       ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition(NULL);
-      ruleRecord.setRuleName("RecordRule_" + i);
-      listaStrinsRuleRecord.add(VALIDATION_WARNING);
-      listaStrinsRuleRecord.add(GENERAL_WARNING);
+      ruleRecord.setWhenCondition("id == null");
+      ruleRecord.setRuleName("RecordRule_" + i + "_");
+      // if (w % 2 == 0) {
+      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL");
+      listaStrinsRuleRecord.add(GENERAL_ERROR);
+      // } else {
+      // listaStrinsRuleRecord.add("WARNING IN THAT RECORD LEVEL");
+      // listaStrinsRuleRecord.add(GENERAL_WARNING);
+      // }
       ruleRecord.setThenCondition(listaStrinsRuleRecord);
       ruleRecordList.add(ruleRecord);
 
+      // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
@@ -180,18 +185,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
 
       List<RuleField> ruleField = new ArrayList<RuleField>();
-      // RuleField rule = new RuleField();
-      // rule.setRuleId(new ObjectId());
-      // rule.setDataFlowId(1L);
-      // rule.setIdFieldSchema(idFieldSchema);
-      // rule.setWhenCondition(NULL);
-      // rule.setRuleName("FieldRule_" + i + "." + j);
-      // List<String> listaMsgValidation = new ArrayList<String>();
-      // listaMsgValidation.add(VALIDATION_WARNING);
-      // listaMsgValidation.add(GENERAL_ERROR);
-      // rule.setThenCondition(listaMsgValidation);
-      // ruleField.add(rule);
-      // rule.setScope(TypeEntityEnum.FIELD);
+      RuleField rule = new RuleField();
+      rule.setRuleId(new ObjectId());
+      rule.setDataFlowId(1L);
+      rule.setIdFieldSchema(idFieldSchema);
+      rule.setWhenCondition("!isBlank(value)");
+      rule.setRuleName("FieldRule_" + i + "." + j);
+      List<String> listaMsgValidation = new ArrayList<String>();
+      listaMsgValidation.add("that character should be field");
+      listaMsgValidation.add(GENERAL_WARNING);
+      rule.setThenCondition(listaMsgValidation);
+      ruleField.add(rule);
+      rule.setScope(TypeEntityEnum.FIELD);
 
       RuleField rule2 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<String>();
@@ -202,7 +207,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("isText(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
-          listaMsgTypeValidation.add("that text have invalid caracteres or is empty");
+          listaMsgTypeValidation.add("that text have invalid caracteres");
           listaMsgTypeValidation.add("ERROR");
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);

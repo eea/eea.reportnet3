@@ -266,6 +266,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @RequestMapping(value = "{id}", method = RequestMethod.GET)
+  @Deprecated
   public DataSetVO getById(Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

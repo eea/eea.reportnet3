@@ -3,14 +3,18 @@ package org.eea.validation.service.impl;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.transaction.Transactional;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -19,6 +23,7 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
@@ -241,17 +246,70 @@ public class ValidationServiceImpl implements ValidationService {
 
       // Execute field rules validation
       recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+        Boolean haPasado = false;
+        Boolean error = false;
         if (null != row.getRecordValidations()) {
-          row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+          for (int i = 0; i < row.getFields().size(); i++) {
             List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
-            if (null != field.getFieldValidations()) {
-              field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
-                fieldValue.setFieldValue(field);
-              });
-              // Save results to the db
+
+            for (int a = 0; a < row.getFields().size() && error != true; a++) {
+              if (null != row.getFields().get(a).getFieldValidations()) {
+                for (int b = 0; b < row.getFields().get(a).getFieldValidations().size()
+                    && error != true; b++) {
+                  if (row.getFields().get(a).getFieldValidations().get(b).getValidation()
+                      .getLevelError().equals(TypeErrorEnum.ERROR)) {
+                    error = true;
+                  }
+                }
+              }
+            }
+            if (null != row.getFields().get(i).getFieldValidations()) {
+
+              if (haPasado == false) {
+                RecordValidation recordVal = new RecordValidation();
+                Validation validation = new Validation();
+                validation
+                    .setLevelError(error == true ? TypeErrorEnum.ERROR : TypeErrorEnum.WARNING);
+                validation.setMessage(error == true ? "ONE OR MORE FIELDS HAVE ERRORS"
+                    : "ONE OR MORE FIELDS HAVE WARNINGS");
+                validation.setIdRule(new ObjectId().toString());
+                validation.setTypeEntity(TypeEntityEnum.RECORD);
+                validation.setValidationDate(new Date().toString());
+                recordVal.setValidation(validation);
+                recordVal.setRecordValue(row.getFields().get(i).getRecord());
+                row.getRecordValidations().add(recordVal);
+
+              }
+              haPasado = true;
+              for (int w = 0; w < row.getFields().get(i).getFieldValidations().size(); w++) {
+                row.getFields().get(i).getFieldValidations().get(w)
+                    .setFieldValue(row.getFields().get(i));
+              }
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
-          });
+          }
+
+          // row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+          // List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
+          // if (null != field.getFieldValidations()) {
+          //
+          // RecordValidation recordVal = new RecordValidation();
+          // Validation validation = new Validation();
+          // validation.setLevelError(TypeErrorEnum.ERROR);
+          // validation.setMessage("ERROR IN ");
+          // validation.setTypeEntity(TypeEntityEnum.RECORD);
+          // validation.setValidationDate(new Date().toString());
+          // recordVal.setValidation(validation);
+          // recordVal.setRecordValue(field.getRecord());
+          // row.getRecordValidations().add(recordVal);
+          //
+          // field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
+          // fieldValue.setFieldValue(field);
+          // });
+          // // Save results to the db
+          // validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
+          // }
+          // });
         }
       });
     }

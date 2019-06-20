@@ -12,7 +12,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface RecordRepository.
  */
-public interface RecordRepository extends PagingAndSortingRepository<RecordValue, Integer> {
+public interface RecordRepository extends PagingAndSortingRepository<RecordValue, Integer>,
+    RecordExtendedQueriesRepository {
 
   /**
    * Find by table value id.
@@ -46,12 +47,12 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   List<RecordValue> findByTableValueIdTableSchema(@Param("idTableSchema") String idTableSchema);
 
 
-
   /**
    * Find by id and table value dataset id id.
    *
    * @param id the id
    * @param idDataset the id dataset
+   *
    * @return the record value
    */
   RecordValue findByIdAndTableValue_DatasetId_Id(Long id, Long idDataset);

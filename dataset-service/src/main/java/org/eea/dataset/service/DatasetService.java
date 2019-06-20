@@ -117,6 +117,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
+  @Deprecated
   DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
 
   /**

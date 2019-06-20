@@ -14,7 +14,7 @@ import org.eea.interfaces.vo.validation.*;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;
 import java.util.regex.*;
-
+import org.apache.commons.lang3.StringUtils;
 
 
 
@@ -32,6 +32,7 @@ end
 end template
 
 function boolean isValid( String s ){
+
     try {
         Double.valueOf( s );
         return true;
@@ -42,9 +43,9 @@ function boolean isValid( String s ){
  
 function boolean isText( String s ){
     try {
-        Pattern pat = Pattern.compile("[^a-zA-Z0-9]$");
+        Pattern pat = Pattern.compile("[^a-zA-Z0-9 ._-]$");
        	Matcher mat = pat.matcher(s);
-        if(mat.find()){
+        if(mat.find()){ 
         	return true;
         }else{
         	return false;
@@ -54,6 +55,14 @@ function boolean isText( String s ){
     }
  }
  
+function boolean isBlank(String s){
+
+	if(StringUtils.isBlank(s)){
+		return false;
+	}else{
+		return true;
+	}
+} 
 function boolean isDateYYYYMMDD( String s ){
     try {
         Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
@@ -69,21 +78,23 @@ function boolean isDateYYYYMMDD( String s ){
  }
  
  function boolean isCordenateLat( String s ){
-	
-	String numberDouble =  s.replaceAll(".", ",");
-   if(isValid(numberDouble)){
-    	if(Double.valueOf(numberDouble) >= -90 && Double.valueOf(numberDouble) <= 90){
+   if (s.contains(",")){
+   	s = s.replace(",",".");
+   }
+   if(isValid(s)){
+    	if(Double.valueOf(s) >= -90 && Double.valueOf(s) <= 90){
 		   return true;   	
     	}
     	return false;
    }
    return false;
  }  
-function boolean isCordenateLong( String s ){
-	
-	String numberDouble =  s.replaceAll(".", ",");
-   if(isValid(numberDouble)){
-    	if(Double.valueOf(numberDouble) >= -180 && Double.valueOf(numberDouble) <= 180){
+function boolean isCordenateLong( String s ){	
+   if (s.contains(",")){
+   	s = s.replace(",",".");
+   }
+   if(isValid(s)){
+    	if(Double.valueOf(s) >= -180 && Double.valueOf(s) <= 180){
 		   return true;   	
     	}
     	return false;

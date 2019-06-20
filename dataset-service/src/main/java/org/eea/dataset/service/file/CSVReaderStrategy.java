@@ -64,15 +64,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
     this.parseCommon = parseCommon;
   }
 
+
   /**
    * Parses the file.
    *
    * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
-   *
+   * @param idTableSchema the id table schema
    * @return the data set VO
-   *
    * @throws InvalidFileException the invalid file exception
    */
   @Override
@@ -82,15 +82,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
     return readLines(inputStream, dataflowId, partitionId, idTableSchema);
   }
 
+
   /**
    * Read lines.
    *
    * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
-   *
+   * @param idTableSchema the id table schema
    * @return the data set VO
-   *
    * @throws InvalidFileException the invalid file exception
    */
   private DataSetVO readLines(final InputStream inputStream, final Long dataflowId,
@@ -115,16 +115,16 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<String> firstLine = Arrays.asList(reader.readNext());
 
       // if first line is empty throw an error
-      firstLineEmpty(firstLine);
+      lineEmpty(firstLine);
 
       // Get the headers
-      List<FieldSchemaVO> headers = setHeaders(firstLine);
+      List<FieldSchemaVO> headers = setHeaders(firstLine, idTableSchema, dataSetSchema);
 
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
-        tableVO = sanitizeAndCreateDataSet(partitionId, line, tableVO, tables, values,
-            dataSetSchema, headers, idTableSchema);
+        sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, dataSetSchema, headers,
+            idTableSchema);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -141,48 +141,52 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
   }
 
-  private void firstLineEmpty(List<String> firstLine) throws InvalidFileException {
-    if (null != firstLine && !firstLine.isEmpty() && firstLine.size() == 1
-        && firstLine.get(0).isEmpty()) {
-      // if the line is white then skip it
+
+  /**
+   * Line empty.
+   *
+   * @param firstLine the first line
+   * @throws InvalidFileException the invalid file exception
+   */
+  private void lineEmpty(List<String> firstLine) throws InvalidFileException {
+    // if the array is size one and their content is empty means that the line is empty
+    if (null == firstLine || firstLine.isEmpty()
+        || (firstLine.size() == 1 && "".equals(firstLine.get(0)))) {
+      // throw an error if firstLine is empty, we need a header.
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
+
     }
   }
+
+
 
   /**
    * Sanitize and create data set.
    *
    * @param partitionId the partition id
-   * @param line the line
    * @param tableVO the table VO
    * @param tables the tables
    * @param values the values
    * @param dataSetSchema the data set schema
    * @param headers the headers
-   *
-   * @return the table VO
-   *
+   * @param idTableSchema the id table schema
    * @throws InvalidFileException the invalid file exception
    */
-  private TableVO sanitizeAndCreateDataSet(final Long partitionId, final String[] line,
-      TableVO tableVO, final List<TableVO> tables, final List<String> values,
-      DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers, final String idTableSchema) {
-    if (null != values && !values.isEmpty()) {
-      // if the line is white then skip it
-      if (line.length == 1 && line[0].isEmpty()) {
-        return tableVO;
-      }
-      tableVO = createTableVO(tableVO, tables, values, partitionId, dataSetSchema, headers,
-          idTableSchema);
+  private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
+      final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
+      List<FieldSchemaVO> headers, final String idTableSchema) throws InvalidFileException {
+    // if the line is white then skip it
+    if (null != values && !values.isEmpty() && values.size() != 1 && !"".equals(values.get(0))) {
+      addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema);
     }
-    return tableVO;
+
   }
+
 
   /**
    * Inits the reader.
    *
    * @param buf the buf
-   *
    * @return the CSV reader
    */
   private CSVReader initReader(final Reader buf) {
@@ -192,26 +196,39 @@ public class CSVReaderStrategy implements ReaderStrategy {
     return new CSVReaderBuilder(buf).withCSVParser(csvParser).build();
   }
 
+
   /**
    * Sets the headers.
    *
    * @param values the values
-   *
+   * @param idTableSchema the id table schema
+   * @param dataSetSchema the data set schema
    * @return the list
    */
-  private List<FieldSchemaVO> setHeaders(final List<String> values) {
+  private List<FieldSchemaVO> setHeaders(final List<String> values, final String idTableSchema,
+      DataSetSchemaVO dataSetSchema) {
     List<FieldSchemaVO> headers = new ArrayList<>();
 
     for (final String value : values) {
+
       final FieldSchemaVO header = new FieldSchemaVO();
+      if (idTableSchema != null) {
+        final FieldSchemaVO fieldSchema =
+            parseCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
+        if (null != fieldSchema) {
+          header.setId(fieldSchema.getId());
+          header.setType(fieldSchema.getType());
+        }
+      }
       header.setName(value);
       headers.add(header);
     }
     return headers;
   }
 
+
   /**
-   * Creates the table VO.
+   * Adds the record to table.
    *
    * @param tableVO the table VO
    * @param tables the tables
@@ -219,12 +236,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param dataSetSchema the data set schema
    * @param headers the headers
-   *
-   * @return the table VO
-   *
-   * @throws InvalidFileException the invalid file exception
+   * @param idTableSchema the id table schema
    */
-  private TableVO createTableVO(TableVO tableVO, final List<TableVO> tables,
+  private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema) {
     // Create object Table and set the attributes
@@ -239,58 +253,50 @@ public class CSVReaderStrategy implements ReaderStrategy {
       tableVO.getRecords().addAll(
           createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), dataSetSchema, headers));
     }
-    return tableVO;
   }
+
+
 
   /**
    * Creates the records VO.
    *
    * @param values the values
    * @param partitionId the partition id
-   * @param idTablaSchema the id tabla schema
+   * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
    * @param headers the headers
-   *
    * @return the list
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
-      final String idTablaSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers) {
+      final String idTableSchema, DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
-    if (null != idTablaSchema) {
-      record.setIdRecordSchema(parseCommon.findIdRecord(idTablaSchema, dataSetSchema));
+    if (null != idTableSchema) {
+      record.setIdRecordSchema(parseCommon.findIdRecord(idTableSchema, dataSetSchema));
     }
-    record.setFields(createFieldsVO(values, idTablaSchema, dataSetSchema, headers));
+    record.setFields(createFieldsVO(values, headers));
     record.setDatasetPartitionId(partitionId);
     records.add(record);
     return records;
   }
 
+
+
   /**
    * Creates the fields VO.
    *
    * @param values the values
-   * @param idTablaSchema the id tabla schema
-   * @param dataSetSchema the data set schema
    * @param headers the headers
-   *
    * @return the list
    */
-  private List<FieldVO> createFieldsVO(final List<String> values, final String idTablaSchema,
-      DataSetSchemaVO dataSetSchema, List<FieldSchemaVO> headers) {
+  private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers) {
     final List<FieldVO> fields = new ArrayList<>();
-    values.size();
     int contAux = 0;
     for (final String value : values) {
       final FieldVO field = new FieldVO();
-      if (idTablaSchema != null) {
-        final FieldSchemaVO fieldSchema = parseCommon
-            .findIdFieldSchema(headers.get(contAux).getName(), idTablaSchema, dataSetSchema);
-        if (fieldSchema != null) {
-          headers.get(contAux).setId(fieldSchema.getId());
-          field.setIdFieldSchema(fieldSchema.getId());
-          field.setType(fieldSchema.getType());
-        }
+      if (contAux < headers.size()) {
+        field.setIdFieldSchema(headers.get(contAux).getId());
+        field.setType(headers.get(contAux).getType());
       }
       field.setValue(value);
       fields.add(field);
