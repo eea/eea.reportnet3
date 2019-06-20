@@ -146,7 +146,7 @@ const ValidationViewer = (props) => {
         //http://localhost:8030/dataset/loadTableFromAnyObject/901?datasetId=1&pageSize=2&type=FIELD
         switch (event.data.typeEntity) {
           case "FIELD":
-          case "ROW":
+          case "RECORD":
               let queryString = {
                 datasetId: props.idDataSet,
                 pageSize: numRows,
