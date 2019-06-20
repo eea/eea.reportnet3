@@ -148,8 +148,7 @@ const ValidationViewer = (props) => {
           case "FIELD":
           case "RECORD":
               let queryString = {
-                datasetId: props.idDataSet,
-                pageSize: numRows,
+                datasetId: props.idDataSet,                
                 type: event.data.typeEntity
               }
               const dataPromise = HTTPRequester.get(
@@ -161,18 +160,19 @@ const ValidationViewer = (props) => {
     
               dataPromise
               .then(res => {
-                contextReporterDataSet.validationsVisibleHandler();
+                contextReporterDataSet.setPageHandler(res.data.position); 
                 contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-                contextReporterDataSet.setLinkedErrorDataHandler(filterLinkedDataResponse(res.data.page.table));
+                contextReporterDataSet.validationsVisibleHandler();
               })
               .catch(error => {
                 console.log(error);
                 return error;
               });   
             break;
-          case "TABLE":
-              contextReporterDataSet.validationsVisibleHandler();
+          case "TABLE":              
+              contextReporterDataSet.setPageHandler(0);    
               contextReporterDataSet.setTabHandler(event.data.idTableSchema);
+              contextReporterDataSet.validationsVisibleHandler();
               break;              
           default:
               //contextReporterDataSet.validationsVisibleHandler();

@@ -26,7 +26,6 @@ const ReporterDataSet = () => {
   //const [validationError, setValidationError] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [linkedErrorData, setLinkedErrorData] = useState([]);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
@@ -34,6 +33,7 @@ const ReporterDataSet = () => {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
+  const [positionIdObject, setPositionIdObject] = useState(0);
 
   const home = {icon: resources.icons["home"], url: '#'};
 
@@ -178,6 +178,11 @@ const ReporterDataSet = () => {
     );
   }
   
+  const onTabChangeHandler = (idTableSchema) =>{
+    setActiveIndex(idTableSchema.index);
+    setPositionIdObject(0);
+  }
+
   
   return (
     <div className="titleDiv">
@@ -192,14 +197,14 @@ const ReporterDataSet = () => {
                     {
                       validationsVisibleHandler: null,
                       setTabHandler: null,
-                      setLinkedErrorDataHandler: (linkedData)=>{ setLinkedErrorData(linkedData) }
+                      setPageHandler: (posIdObject)=>{ setPositionIdObject(posIdObject) }
                     }}>    
           <TabsSchema tables={tableSchema} 
                       tableSchemaColumns={tableSchemaColumns} 
                       urlViewer={`${config.dataviewerAPI.url}1`}
                       activeIndex={activeIndex}
-                      linkedErrorData={linkedErrorData}
-                      onTabChangeHandler={(idTableSchema)=>{setActiveIndex(idTableSchema.index) }}
+                      positionIdObject={positionIdObject}
+                      onTabChangeHandler={(idTableSchema) => onTabChangeHandler(idTableSchema)}                    
                       /> 
         </ReporterDataSetContext.Provider>               
         <Dialog visible={dashDialogVisible} 
@@ -215,7 +220,7 @@ const ReporterDataSet = () => {
                     {
                       validationsVisibleHandler:()=>{setVisibleHandler(setValidationsVisible, false)},
                       setTabHandler: (idTableSchema)=>{ setActiveIndex(idTableSchema) },
-                      setLinkedErrorDataHandler: (linkedData)=>{ setLinkedErrorData(linkedData) }
+                      setPageHandler: (posIdObject)=>{ setPositionIdObject(posIdObject)}
                     }}>     
           <Dialog visible={validationsVisible} 
                   onHide={()=>setVisibleHandler(setValidationsVisible, false)} 

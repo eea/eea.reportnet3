@@ -12,7 +12,7 @@
         "url":"/dataset/TableValueDataset/"
     },
     "validationViewerAPI":{
-        "url":"/dataset/loadTableFromAnyObject/"
+        "url":"/dataset/findPositionFromAnyObject/"
     },
     "loadStatisticsAPI":{
         "url":"/dataset/loadStatistics/"
