@@ -132,26 +132,26 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
 
-      for (int w = i; w < 20; w++) {
-        RuleRecord ruleRecord = new RuleRecord();
-        List<String> listaStrinsRuleRecord = new ArrayList<String>();
-        ruleRecord.setRuleId(new ObjectId());
-        ruleRecord.setDataFlowId(1L);
-        ruleRecord.setScope(TypeEntityEnum.RECORD);
-        ruleRecord.setIdRecordSchema(idRecordSchema);
-        ruleRecord.setWhenCondition("id == null");
-        ruleRecord.setRuleName("RecordRule_" + i + "_" + w);
-        if (w % 2 == 0) {
-          listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL");
-          listaStrinsRuleRecord.add(GENERAL_ERROR);
-        } else {
-          listaStrinsRuleRecord.add("WARNING IN THAT RECORD LEVEL");
-          listaStrinsRuleRecord.add(GENERAL_WARNING);
-        }
-        ruleRecord.setThenCondition(listaStrinsRuleRecord);
-        ruleRecordList.add(ruleRecord);
+      // for (int w = i; w < 20; w++) {
+      RuleRecord ruleRecord = new RuleRecord();
+      List<String> listaStrinsRuleRecord = new ArrayList<String>();
+      ruleRecord.setRuleId(new ObjectId());
+      ruleRecord.setDataFlowId(1L);
+      ruleRecord.setScope(TypeEntityEnum.RECORD);
+      ruleRecord.setIdRecordSchema(idRecordSchema);
+      ruleRecord.setWhenCondition("id == null");
+      ruleRecord.setRuleName("RecordRule_" + i + "_");
+      // if (w % 2 == 0) {
+      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL");
+      listaStrinsRuleRecord.add(GENERAL_ERROR);
+      // } else {
+      // listaStrinsRuleRecord.add("WARNING IN THAT RECORD LEVEL");
+      // listaStrinsRuleRecord.add(GENERAL_WARNING);
+      // }
+      ruleRecord.setThenCondition(listaStrinsRuleRecord);
+      ruleRecordList.add(ruleRecord);
 
-      }
+      // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
