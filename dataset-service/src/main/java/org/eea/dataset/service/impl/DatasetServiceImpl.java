@@ -19,8 +19,6 @@ import org.eea.dataset.mapper.DataSetTablesMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
-import org.eea.dataset.mapper.TableNoRecordMapper;
-import org.eea.dataset.mapper.TableValidationMapper;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -65,7 +63,6 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
-import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,22 +195,10 @@ public class DatasetServiceImpl implements DatasetService {
   private RecordValidationMapper recordValidationMapper;
 
   /**
-   * The record no validation.
-   */
-  @Autowired
-  private TableNoRecordMapper tableNoRecordMapper;
-
-  /**
    * The table validation repository.
    */
   @Autowired
   private TableValidationRepository tableValidationRepository;
-
-  /**
-   * The table validation mapper.
-   */
-  @Autowired
-  private TableValidationMapper tableValidationMapper;
 
   /**
    * Creates the removeDatasetData dataset.
@@ -882,7 +867,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public List<ErrorsValidationVO> getFieldErrors(Long datasetId,
       Map<String, String> mapNameTableSchema) {
-    String connection = TenantResolver.getTenantName();
     List<FieldValidation> fieldValidations =
         fieldValidationRepository.findFieldValidationsByIdDataset(datasetId);
     List<ErrorsValidationVO> errors = new ArrayList<>();
