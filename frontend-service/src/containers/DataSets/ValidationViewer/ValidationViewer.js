@@ -175,7 +175,7 @@ const ValidationViewer = (props) => {
               contextReporterDataSet.setTabHandler(event.data.idTableSchema);
               break;              
           default:
-              contextReporterDataSet.validationsVisibleHandler();
+              //contextReporterDataSet.validationsVisibleHandler();
             break;
         }        
       }      
