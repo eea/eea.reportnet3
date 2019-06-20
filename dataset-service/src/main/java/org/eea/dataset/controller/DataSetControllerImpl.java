@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.file.FileTreatmentHelper;
+import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -62,6 +63,9 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
+
+  @Autowired
+  private LoadValidationsHelper loadValidationsHelper;
 
   /**
    * Gets the data tables values.
@@ -345,7 +349,7 @@ public class DataSetControllerImpl implements DatasetController {
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = PageRequest.of(pageNum, pageSize);
     try {
-      validations = datasetService.getListValidations(datasetId, pageable, fields, asc);
+      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

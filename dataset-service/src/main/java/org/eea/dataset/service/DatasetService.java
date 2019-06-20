@@ -2,9 +2,14 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -149,20 +154,63 @@ public interface DatasetService {
    */
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
-
   /**
-   * Gets the list validations.
+   * Gets the field errors.
    *
    * @param datasetId the dataset id
-   * @param pageable the pageable
-   * @param field the field
-   * @param asc the asc
+   * @param mapNameTableSchema the map name table schema
+   * @return the field errors
+   */
+  List<ErrorsValidationVO> getFieldErrors(@DatasetId Long datasetId,
+      Map<String, String> mapNameTableSchema);
+
+  /**
+   * Gets the record errors.
    *
-   * @return the list validations
+   * @param datasetId the dataset id
+   * @param mapNameTableSchema the map name table schema
+   * @return the record errors
+   */
+  List<ErrorsValidationVO> getRecordErrors(@DatasetId Long datasetId,
+      Map<String, String> mapNameTableSchema);
+
+  /**
+   * Gets the table errors.
    *
+   * @param datasetId the dataset id
+   * @param mapNameTableSchema the map name table schema
+   * @return the table errors
+   */
+  List<ErrorsValidationVO> getTableErrors(@DatasetId Long datasetId,
+      Map<String, String> mapNameTableSchema);
+
+  /**
+   * Gets the dataset errors.
+   *
+   * @param dataset the dataset
+   * @param mapNameTableSchema the map name table schema
+   * @return the dataset errors
+   */
+  List<ErrorsValidationVO> getDatasetErrors(DatasetValue dataset,
+      Map<String, String> mapNameTableSchema);
+
+  /**
+   * Gets the datase valuetby id.
+   *
+   * @param datasetId the dataset id
+   * @return the datase valuetby id
    * @throws EEAException the EEA exception
    */
-  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
-      String field, Boolean asc) throws EEAException;
+  DatasetValue getDatasetValuebyId(@DatasetId Long datasetId) throws EEAException;
 
+  /**
+   * Gets the find by id data set schema.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the find by id data set schema
+   * @throws EEAException the EEA exception
+   */
+  DataSetSchema getfindByIdDataSetSchema(@DatasetId Long datasetId, ObjectId datasetSchemaId)
+      throws EEAException;
 }

@@ -42,7 +42,7 @@ function boolean isValid( String s ){
  
 function boolean isText( String s ){
     try {
-        Pattern pat = Pattern.compile("[^a-zA-Z0-9$]");
+        Pattern pat = Pattern.compile("[^a-zA-Z0-9]$");
        	Matcher mat = pat.matcher(s);
         if(mat.find()){
         	return true;
