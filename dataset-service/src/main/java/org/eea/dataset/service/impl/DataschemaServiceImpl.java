@@ -192,7 +192,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rule.setWhenCondition("!isBlank(value)");
       rule.setRuleName("FieldRule_" + i + "." + j);
       List<String> listaMsgValidation = new ArrayList<String>();
-      listaMsgValidation.add("that character should be field");
+      listaMsgValidation.add("that field must be filled");
       listaMsgValidation.add(GENERAL_WARNING);
       rule.setThenCondition(listaMsgValidation);
       ruleField.add(rule);
