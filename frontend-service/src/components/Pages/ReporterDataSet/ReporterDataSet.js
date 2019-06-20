@@ -208,7 +208,7 @@ const ReporterDataSet = () => {
                 maximizable 
                 dismissableMask={true} 
                 style={{width:'80%'}}>
-                <Dashboard/>
+                <Dashboard refresh={dashDialogVisible}/>
         </Dialog>   
             {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
         <ReporterDataSetContext.Provider value={
