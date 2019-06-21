@@ -6,6 +6,7 @@
         "export": "Export",
         "create": "Create",
         "delete": "Delete",
+        "deleteDataset": "Delete dataset",
         "events": "Events",
         "validate": "Validate",
         "showValidations": "Show Validations",
@@ -18,7 +19,7 @@
         "copyrightPrivacy": "Privacy policy",
         "copyrightLegal": "Legal notice",
         "copyrightContact": "Contact",
-        "titleDataset": "Data Set: R3 Demo Dataflow",
+        "titleDataset": "Data Set:",
         "titleDashboard": "Error/Warning dashboard",
         "titleValidations": "Validations",
         "titleHeader": "Reportnet",
@@ -40,6 +41,9 @@
         "group-by": "Group by",
         "sort": "Sort",
         "refresh": "Refresh",
-        "noErrorData": "There is no error data to show"
+        "noErrorData": "There is no error data to show",
+        "datasetLoadingTitle": "DataSchema Loading",
+        "datasetLoadingMessage": "The DataSchema ",
+        "datasetLoading": " is loading..."
     }
 }

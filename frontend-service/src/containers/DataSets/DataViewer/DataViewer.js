@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import styles from './DataViewer.module.css';
 import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
 // import { MultiSelect } from 'primereact/multiselect';
@@ -7,6 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import {Dialog} from 'primereact/dialog';
 import {CustomFileUpload} from '../../../components/Layout/UI/CustomFileUpload/CustomFileUpload';
+import {Growl} from 'primereact/growl';
 import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';
 import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 import ResourcesContext from '../../../components/Context/ResourcesContext';
@@ -30,6 +31,7 @@ const DataViewer = (props) => {
     const [colOptions,setColOptions] = useState([{}]); 
     const resources = useContext(ResourcesContext);      
 
+    let growlRef = useRef();
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     useEffect(() =>{            
         console.log("Setting column options...");     
@@ -263,7 +265,14 @@ const dataTemplate = (rowData, column) =>{
           group: "left",
           disabled: false,
           clickHandler: () => setImportDialogVisible(true)
-      },
+        },
+        {
+          label: resources.messages["delete"],
+          icon: "2",
+          group: "left",
+          disabled: true,
+          clickHandler: null
+        },
         {
             label: resources.messages["visibility"],
             icon: "6",
@@ -296,10 +305,27 @@ const dataTemplate = (rowData, column) =>{
             label: resources.messages["refresh"],
             icon: "11",
             group: "right",
-            disabled: false,
+            disabled: true,
             clickHandler: onRefreshClickHandler
         }
       ];
+
+      const onHideHandler = () => {
+        setImportDialogVisible(false);        
+      }
+
+      const onUploadHandler = () => {
+        setImportDialogVisible(false);
+
+        const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{props.name}</strong>{resources.messages["datasetLoading"]}</span> 
+
+        growlRef.current.show({
+          severity: 'info', 
+          summary: resources.messages["datasetLoadingTitle"], 
+          detail: detailContent, 
+          life: '5000'
+        });
+      }
 
       let totalCount = <span>Total: {totalRecords} rows</span>;
 
@@ -322,10 +348,11 @@ const dataTemplate = (rowData, column) =>{
                     {columns}
                 </DataTable>
             </div>
+            <Growl ref={growlRef} />
             <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
-                                className={styles.Dialog} dismissableMask={false} onHide={() => setImportDialogVisible(false)} >
+                                className={styles.Dialog} dismissableMask={false} onHide={onHideHandler} >
                             <CustomFileUpload mode="advanced" name="file" url={`${config.api.protocol}${config.api.url}${config.api.port}${config.loadDataTableAPI.url}${props.id}`}
-                                                onUpload={() => setImportDialogVisible(false)} 
+                                                onUpload={onUploadHandler} 
                                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                                 fileLimit={1} className={styles.FileUpload}  /> 
                         </Dialog>
