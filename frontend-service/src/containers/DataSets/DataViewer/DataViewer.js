@@ -97,7 +97,6 @@ const DataViewer = (props) => {
       }
   
       const onRefreshClickHandler = () => {
-        contextReporterDataSet.setPageHandler(setFirstRow(0));
         fetchDataHandler(null, sortOrder, firstRow, numRows);  
       }
 
