@@ -3,7 +3,8 @@ import config from '../../conf/web.config.json';
 
 const HTTPRequester = (function () {
 
-  const baseURL = `${config.api.protocol}${config.api.url}${config.api.port}`;
+  //const baseURL = `${config.api.protocol}${config.api.url}${config.api.port}`;
+  const baseURL = window.env.API_URL;
   //TODO: Existe axios-hook para usar hooks. Posible mejora.
   //Maps object queryString to 'key=value' format. Checks if queryString is undefined or empty object
   const mapQueryString = (queryString) => (!queryString) ? "" : (Object.entries(
