@@ -46,10 +46,10 @@ const ReportingDataFlow = () => {
 						<DataFlowColumn />
 					</div>
 					<div className="rep-col-12 rep-col-sm-8">
-						<div className="ecl-row">
+						<div className="rep-row">
 							<p className={styles.title}>{jsonDataSchema.nameDataSetSchema}</p>
 						</div>
-						<div className="ecl-row">
+						<div className="rep-row">
 							<Button label="DO" className="p-button-warning" />
 							<SplitButtonNE label="NE" className="p-button-primary" />
 						</div>
