@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
 
 import {Button} from 'primereact/button';
-import './CustomIconToolTip.css';
+import style from './CustomIconToolTip.module.css';
 
 export default function CustomIconToolTip(props) {
   let validationIcon = '';
@@ -41,6 +41,6 @@ export default function CustomIconToolTip(props) {
   
 
   return (
-    <Button type="button" icon={validationIcon} tooltip={props.message} style={myStyles} /> 
+    <Button type="button" icon={validationIcon} tooltip={props.message} style={style.myStyles} /> 
   );
 }

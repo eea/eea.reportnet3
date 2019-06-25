@@ -18,6 +18,7 @@ const App = () => {
 					<Switch>
 						<Route exact path="/" component={ReportingDataFlow} />
 						<Route exact path="/dataFlow" component={DataFlowTasks} />
+						<Route exact path="/ReporterDataSet" component={ReporterDataSet} />
 						
 					</Switch>
 				</Router>
