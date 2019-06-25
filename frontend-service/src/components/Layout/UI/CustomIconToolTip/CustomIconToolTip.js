@@ -31,16 +31,12 @@ export default function CustomIconToolTip(props) {
     default:
       break;
   }
-  const myStyles = { 
-    padding: "0px !important",
-    margin:"0px !important",
-    borderColor: "transparent",
-    color: iconColor, 
-    float: "right", 
-    backgroundColor: "transparent" }
+  const iconColorStyle = {  
+    color: iconColor
+  }
   
 
   return (
-    <Button type="button" icon={validationIcon} tooltip={props.message} style={style.myStyles} /> 
+    <Button type="button" icon={validationIcon} tooltip={props.message} style={`${style.buttonCustom} ${iconColorStyle}`} /> 
   );
 }
