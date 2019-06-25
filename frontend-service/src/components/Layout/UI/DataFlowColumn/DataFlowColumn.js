@@ -1,7 +1,8 @@
 import React from "react";
-import styles from "./DataFlowColumn.module.css";
-import IconComponent from "../icon-component";
 import { Button } from "primereact/button";
+import { IconComponent } from "./duck";
+import config from "./duck/config";
+import styles from "./DataFlowColumn.module.css";
 
 const DataFlowColumn = props => {
 	const { navTitle, dataFlowTitle } = props;
@@ -20,11 +21,11 @@ const DataFlowColumn = props => {
 			</div>
 			<div className="navSection">
 				<h4 className={styles.title}>
-					<IconComponent icon="pi-shopping-cart" />
+					<IconComponent icon={config.icons.shoppingCart} />
 					{dataFlowTitle}
 				</h4>
 				<Button
-					icon="pi pi-plus"
+					icon={config.icons.plus}
 					label="Suscribe to a data flow"
 					className="p-button-primary"
 				/>

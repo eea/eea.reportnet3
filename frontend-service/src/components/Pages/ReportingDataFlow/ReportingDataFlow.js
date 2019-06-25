@@ -11,6 +11,7 @@ import ResourcesContext from "../../Context/ResourcesContext";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import IconComponent from "../../Layout/UI/icon-component";
+import config from "../../../conf";
 
 const ReportingDataFlow = () => {
 	const resources = useContext(ResourcesContext);
@@ -50,7 +51,7 @@ const ReportingDataFlow = () => {
 						/>
 						<div className={`${styles.pageContent} rep-col-12 rep-col-sm-8`}>
 							<h2 className={styles.title}>
-								<IconComponent icon="pi-shopping-cart" />
+								<IconComponent icon={config.icons.shoppingCart} />
 								{nameDataSetSchema}
 							</h2>
 
