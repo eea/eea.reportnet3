@@ -18,6 +18,9 @@
         "user": "pi pi-user",
         "validate": "pi pi-check-circle",
         "warning": "pi pi-exclamation-triangle",
-        "banned": "pi pi-ban"
+        "banned": "pi pi-ban",
+        "clone": "pi pi-clone",
+        "share": "pi pi-share-alt",
+        "comment": "pi pi-comment"
     }
 }
