@@ -1,3 +1,17 @@
 .title {
-    border-bottom: 1px solid pink;
+	border-bottom: 1px solid #ccc;
+	width: 100%;
+}
+.pageContent {
+}
+.buttonsWrapper {
+	display: flex;
+	flex-direction: row;
+}
+.buttonsWrapper button {
+	width: 100px;
+	height: 100px;
+}
+.buttonsWrapper button .p-button-text {
+	font-size: 2rem;
 }

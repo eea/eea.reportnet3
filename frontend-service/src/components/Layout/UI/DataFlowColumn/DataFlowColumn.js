@@ -1,41 +1,36 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React from "react";
+import styles from "./DataFlowColumn.module.css";
+import IconComponent from "../icon-component";
+import { Button } from "primereact/button";
 
-import jsonDataSchema from '../../../../assets/jsons/datosDataSchema3.json';
-//import jsonDataSchemaErrors from '../../../../assets/jsons/errorsDataSchema.json';
-//import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
-import styles from './DataFlowColumn.module.css';
-import ResourcesContext from '../../../Context/ResourcesContext';
-
-const DataFlowColumn = () => {
-  const resources = useContext(ResourcesContext);  
-
-  return (
-    <div>
-        <div className="rep-row">
-            <div className="rep-col-12">
-                <p className={styles.title}>Title</p>
-            </div>
-            <div className="rep-col-12">
-                <input
-                    type="text"
-                    id=""
-                    /* onKeyUp="" */
-                    className="subscribe-df__input rep-col-12"
-                    placeholder="Search data flows"
-                    title="Type a DataFlow name"
-                />
-            </div>
-        </div>
-        <div className="rep-row">
-            <div className="rep-col-12">
-                <p className={styles.title}>{jsonDataSchema.nameDataSetSchema}</p>
-            </div>
-            <div className="rep-col-12">
-                <button>This is going to be a subscribe button</button>
-            </div>
-        </div>
-    </div>
-  );
-}
+const DataFlowColumn = props => {
+	const { navTitle, dataFlowTitle } = props;
+	return (
+		<div className="nav rep-col-12 rep-col-sm-3">
+			<h2 className={styles.title}>{navTitle}</h2>
+			<div className="navSection">
+				<input
+					type="text"
+					id=""
+					/* onKeyUp="" */
+					className=""
+					placeholder="Search data flows"
+					title="Type a DataFlow name"
+				/>
+			</div>
+			<div className="navSection">
+				<h4 className={styles.title}>
+					<IconComponent icon="pi-shopping-cart" />
+					{dataFlowTitle}
+				</h4>
+				<Button
+					icon="pi pi-plus"
+					label="Suscribe to a data flow"
+					className="p-button-primary"
+				/>
+			</div>
+		</div>
+	);
+};
 
 export default DataFlowColumn;

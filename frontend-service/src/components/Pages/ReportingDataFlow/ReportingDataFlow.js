@@ -3,7 +3,6 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { SplitButton } from "primereact/splitbutton";
 import { SplitButtonNE } from "../../Layout/UI/SplitButtonNE/SplitButtonNE";
-import Title from "../../Layout/Title/Title";
 import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json";
 //import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
@@ -11,6 +10,7 @@ import styles from "./ReportingDataFlow.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
+import IconComponent from "../../Layout/UI/icon-component";
 
 const ReportingDataFlow = () => {
 	const resources = useContext(ResourcesContext);
@@ -34,24 +34,36 @@ const ReportingDataFlow = () => {
 		{ label: "Delete", icon: "pi pi-fw pi-trash" }
 	];
 
+	const { nameDataSetSchema } = jsonDataSchema;
+
 	return (
 		<div>
 			<MainLayout>
 				<div className="titleDiv">
 					<BreadCrumb model={breadCrumbItems} home={home} />
-					<Title title={resources.messages["titleDFReporting"]} />
 				</div>
-				<div className="rep-row">
-					<div className="rep-col-12 rep-col-sm-2">
-						<DataFlowColumn />
-					</div>
-					<div className="rep-col-12 rep-col-sm-8">
-						<div className="rep-row">
-							<p className={styles.title}>{jsonDataSchema.nameDataSetSchema}</p>
-						</div>
-						<div className="rep-row">
-							<Button label="DO" className="p-button-warning" />
-							<SplitButtonNE label="NE" className="p-button-primary" />
+				<div className="rep-container">
+					<div className="rep-row">
+						<DataFlowColumn
+							navTitle="data flows"
+							dataFlowTitle={nameDataSetSchema}
+						/>
+						<div className={`${styles.pageContent} rep-col-12 rep-col-sm-8`}>
+							<h2 className={styles.title}>
+								<IconComponent icon="pi-shopping-cart" />
+								{nameDataSetSchema}
+							</h2>
+
+							<div className={`${styles.buttonsWrapper}`}>
+								<div>
+									<Button label="DO" className="p-button-warning" />
+									<p className="caption">Documents</p>
+								</div>
+								<div>
+									<SplitButtonNE label="NE" className="p-button-primary" />
+									<p className="caption">New dataset</p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
