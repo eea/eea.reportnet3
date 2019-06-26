@@ -50,3 +50,7 @@
 td >.tooltip>span.tooltiptext{
   overflow: visible !important;
 }
+
+.p-button:enabled:focus { 
+  box-shadow: none !important;
+}

@@ -37,6 +37,7 @@ export default function CustomIconToolTip(props) {
     borderColor: "transparent",
     color: iconColor, 
     float: "right", 
+    marginLeft: "auto",
     backgroundColor: "transparent" }
   
 
