@@ -85,8 +85,7 @@ const ReporterDataSet = () => {
           });        
         }));
 
-        //#region Button inicialization
-              
+        //#region Button inicialization              
         setCustomButtons([
           {
             label: resources.messages["export"],
@@ -137,7 +136,7 @@ const ReporterDataSet = () => {
             clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
           }
         ]);
-        //#endregion Button inicialization
+        //#end region Button inicialization
 
       });     
     })
