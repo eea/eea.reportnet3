@@ -7,6 +7,7 @@ import ResourcesContext from "./components/Context/ResourcesContext";
 import langResources from "./conf/messages.en.json";
 import iconsResources from "./conf/prime.icons.json";
 import ReportingDataFlow from "./components/Pages/ReportingDataFlow/ReportingDataFlow";
+import DocumentationDataSet from "./components/Pages/DocumentationDataSet/DocumentationDataSet";
 import DataFlowTasks from './components/Pages/DataFlowTasks/DataFlowTasks'
 
 const App = () => {
@@ -18,8 +19,8 @@ const App = () => {
 					<Switch>
 						<Route exact path="/" component={ReportingDataFlow} />
 						<Route exact path="/dataFlow" component={DataFlowTasks} />
-						<Route exact path="/ReporterDataSet" component={ReporterDataSet} />
-						
+						<Route exact path="/reporterDataSet" component={ReporterDataSet} />						
+						<Route exact path="/documentationDataSet" component={DocumentationDataSet} />						
 					</Switch>
 				</Router>
 			</ResourcesContext.Provider>
