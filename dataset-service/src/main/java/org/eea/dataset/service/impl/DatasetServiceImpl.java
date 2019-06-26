@@ -427,7 +427,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (records.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}", datasetId);
+      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
     } else {
 
@@ -440,8 +440,10 @@ public class DatasetServiceImpl implements DatasetService {
       result.setRecords(recordVOs);
       result.setTotalRecords(Long.valueOf(records.size()));
 
-      LOG.info("Total records found in datasetId {}: {}. Now in page {}, {} records by page",
-          datasetId, recordVOs.size(), pageable.getPageNumber(), pageable.getPageSize());
+      LOG.info(
+          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
+          datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
+          pageable.getPageSize());
       if (StringUtils.isNotBlank(idFieldSchema)) {
         LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
       }
@@ -485,6 +487,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
+   * @deprecated this method is deprecated
    * @param idTableSchema the id table schema
    * @param idFieldSchema the id field schema
    *
@@ -550,6 +553,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Gets the by id.
    *
+   * @deprecated this method is deprecated
    * @param datasetId the dataset id
    *
    * @return the by id
@@ -738,6 +742,18 @@ public class DatasetServiceImpl implements DatasetService {
           stats.setDatasetErrors(true);
         }
       }
+
+      // Ordering to show stats tables as they are shown on the dataset
+      List<TableStatisticsVO> orderedStats = new ArrayList<>();
+      schema.getTableSchemas().stream().forEach(tableSchema -> {
+        stats.getTables().stream().forEach(table -> {
+          if (tableSchema.getIdTableSchema().toString().equals(table.getIdTableSchema())) {
+            orderedStats.add(table);
+          }
+        });
+      });
+      stats.setTables(orderedStats);
+
       LOG.info("Statistics received from datasetId {}.", datasetId);
     } else {
       LOG_ERROR.error("No dataset founded to show statistics. DatasetId:{}", datasetId);
@@ -758,19 +774,19 @@ public class DatasetServiceImpl implements DatasetService {
   private TableStatisticsVO processTableStats(TableValue tableValue, Long datasetId,
       Map<String, String> mapIdNameDatasetSchema) {
 
-    HashSet<Long> recordIdsFromRecordWithValidationError =
+    Set<Long> recordIdsFromRecordWithValidationError =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
 
-    HashSet<Long> recordIdsFromRecordWithValidationWarning =
+    Set<Long> recordIdsFromRecordWithValidationWarning =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
-    HashSet<Long> recordIdsFromFieldWithValidationError =
+    Set<Long> recordIdsFromFieldWithValidationError =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
 
-    HashSet<Long> recordIdsFromFieldWithValidationWarning =
+    Set<Long> recordIdsFromFieldWithValidationWarning =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
