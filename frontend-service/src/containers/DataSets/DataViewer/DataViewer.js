@@ -135,6 +135,8 @@ const DataViewer = (props) => {
           }
         );        
         dataPromise.then(response =>{
+          console.log("Datos recibidos");
+          console.log(response.data);
           filterDataResponse(response.data);          
           if(response.data.totalRecords!==totalRecords){
             setTotalRecords(response.data.totalRecords);
