@@ -314,10 +314,18 @@ const dataTemplate = (rowData, column) =>{
         setImportDialogVisible(false);        
       }
 
+      const editLargeStringWithDots = (string, length) => {
+        if (string.length > length)
+          { return string.substring(0,length).concat("..."); }
+        else
+          { return string; }
+      }
+
       const onUploadHandler = () => {
         setImportDialogVisible(false);
 
-        const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{props.name}</strong>{resources.messages["datasetLoading"]}</span> 
+        const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{editLargeStringWithDots(props.name, 22)}</strong>{resources.messages["datasetLoading"]}</span> 
+        // const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{props.name}</strong>{resources.messages["datasetLoading"]}</span> 
 
         growlRef.current.show({
           severity: 'info', 
