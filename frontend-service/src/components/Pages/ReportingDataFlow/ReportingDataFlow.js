@@ -56,7 +56,7 @@ const ReportingDataFlow = () => {
 
 							<div className={`${styles.buttonsWrapper}`}>
 								<div>
-									<Button label="DO" className="p-button-warning" />
+									<Button label="DO" className="p-button-warning" onClick={() => {window.location.href = "/documentation-data-set";}} />
 									<p className="caption">Documents</p>
 								</div>
 								<div>
