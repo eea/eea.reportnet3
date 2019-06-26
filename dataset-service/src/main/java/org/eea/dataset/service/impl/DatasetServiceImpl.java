@@ -379,6 +379,18 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Delete table by schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Transactional
+  public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
+    tableRepository.deleteByIdTableSchema(idTableSchema);
+  }
+
+  /**
    * Delete import data.
    *
    * @param dataSetId the data set id

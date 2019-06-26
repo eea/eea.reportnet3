@@ -211,4 +211,12 @@ public interface DatasetService {
    */
   DataSetSchema getfindByIdDataSetSchema(@DatasetId Long datasetId, ObjectId datasetSchemaId)
       throws EEAException;
+
+  /**
+   * Delete table by schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   */
+  void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
 }

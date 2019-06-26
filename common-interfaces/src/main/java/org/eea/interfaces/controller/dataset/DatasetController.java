@@ -171,4 +171,8 @@ public interface DatasetController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
 
+
+  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  void deleteImportTable(Long dataSetId, String idTableSchema);
+
 }
