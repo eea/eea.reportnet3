@@ -57,8 +57,14 @@ const ReportingDataFlow = () => {
 							</h2>
 
 							<div className={`${styles.buttonsWrapper}`}>
-								<div className={styles.buttonwrapper}>
-									<Button label="DO" className="p-button-warning" />
+								<div>
+									<Button
+										label="DO"
+										className="p-button-warning"
+										onClick={() => {
+											window.location.href = "/documentation-data-set";
+										}}
+									/>
 									<p className="caption">Documents</p>
 								</div>
 								<div className={styles.buttonwrapper}>

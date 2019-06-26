@@ -49,7 +49,7 @@ export class SplitButtonNE extends SplitButton {
 	}
 
 	save() {
-		window.location.href = "/ReporterDataSet";
+		window.location.href = "/reporter-data-set";
 	}
 
 	render() {
