@@ -379,7 +379,8 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void insertRecords(final Long datasetId, final List<RecordVO> records) {
+  public void insertRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
