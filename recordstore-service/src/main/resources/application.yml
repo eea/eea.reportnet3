@@ -3,8 +3,3 @@ server:
 spring:
   application:
     name: recordstore
-  datasource:
-    url: ${RECORDSTORE_CONNECTION_STRING:jdbc:postgresql://localhost/datasets}
-    username: ${RECORDSTORE_CONNECTION_USER:root}
-    password: ${RECORDSTORE_CONNECTION_PASSWORD:root}
-    driverClassName: org.postgresql.Driver

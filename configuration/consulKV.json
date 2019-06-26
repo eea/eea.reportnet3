@@ -292,6 +292,22 @@
     "value": "JHtET0NLRVJfU0VSVkVSX1VSTDp0Y3A6Ly9sb2NhbGhvc3Q6MjM3NX0="
   },
   {
+    "key": "config/recordstore/spring.datasource.url",
+    "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
+  },
+  {
+    "key": "config/recordstore/spring.datasource.username",
+    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.password",
+    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.driverClassName",
+    "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
     "key": "config/apiGateway/feign.client.config.default.connectTimeout",
     "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
   },
