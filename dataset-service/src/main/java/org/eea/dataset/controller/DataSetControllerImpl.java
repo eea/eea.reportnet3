@@ -399,7 +399,8 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  public void deleteImportTable(final Long dataSetId, final String idTableSchema) {
+  public void deleteImportTable(@PathVariable("id") final Long dataSetId,
+      @PathVariable("idTableSchema") final String idTableSchema) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
