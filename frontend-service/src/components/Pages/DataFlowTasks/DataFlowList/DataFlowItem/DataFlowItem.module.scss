@@ -1,0 +1,112 @@
+.container {
+    margin: 50px;
+    border: 2px solid gray;
+    background-color: #F5F5F5;
+}
+
+.subscribe__title{
+    text-transform: uppercase;
+    color: #404040;
+}
+.subscribe__btn{
+    background-color: white;
+    border: 2px solid gray;
+    border-radius: 5px;
+    color: inherit;  
+    font: inherit;  
+    padding: 5px 15px;
+   
+    
+}
+.wrap_card_component {
+
+    &:last-child {
+        margin-bottom: 5rem;
+    }
+}
+
+.card_component {
+
+    border: 2px solid #2e2e2e;
+    background-color: #f5f5f5;
+
+    margin: 0;
+    margin-bottom: 1em;
+    padding: 1rem;
+
+    &:last-child {
+        margin-bottom: 5rem;
+    }
+
+    &_icon {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        i {
+            background-color: yellow;
+            font-size: 3em !important;
+            align-self: center;            
+            border-radius: 50px;
+            padding: 5px;
+           
+        }
+       
+    }
+
+    &_content {
+        width: 100%;
+
+        p {
+            margin: 0;
+        }
+
+        &_date {
+            color: gray;
+            font-size: 0.9em;
+        }
+
+        &_title {
+            margin: 0.3em 0 !important;
+            font-size: 1.5em;
+        }
+    }
+
+    &_btn {
+        width: 100%;
+        align-self: center;
+        align-items: center;
+        text-align: center;
+        .rep_button {
+            background-color: #004494;
+            color: #fff;
+            border: 0px;           
+            margin: 2px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;           
+            border-width: 0;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            display: inline-block;
+            font: normal normal 400 1rem/1.25rem Arial,sans-serif;
+            font-weight: 600;
+            margin: 0;
+            padding: .75rem 1rem;
+            text-decoration: none;
+
+            &:hover{
+                cursor: pointer;
+                background-color: #fff;
+                border: 2px solid #004494;
+                color: #004494;
+                padding: calc(.75rem - 2px) calc(1rem - 2px);
+            }
+        }
+
+        i {
+            font-size: 2.5em !important;
+            color: #004494;
+            fill: #004494;
+        }
+    }
+}

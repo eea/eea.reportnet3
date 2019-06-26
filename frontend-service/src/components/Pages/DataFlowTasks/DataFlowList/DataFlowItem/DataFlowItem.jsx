@@ -1,34 +1,35 @@
 import React from "react";
 import IconComponent from "../../../../Layout/UI/icon-component";
 import primeIcons from "../../../../../conf/prime.icons";
+import styles from './DataFlowItem.module.scss'
 
 const DataFlowItem = props => {
 	const { itemContent, listType } = props;
 	return (
-		<div className="card-component-df rep-row ">
-			<div className="card-component-df-icon rep-col-xs-12 rep-col-md-1 ">
-				<IconComponent icon={`${primeIcons.icons.clone}`} />
+		<div className={`${styles.container} rep-row`}>
+			<div className={`${styles.card_component_icon} rep-col-xs-12 rep-col-md-1 `}>
+				<IconComponent icon={`${primeIcons.icons.clone}`} className={`${styles.card_component_icon_i}`}/>
 			</div>
 
-			<div className="card-component-df-content rep-col-xs-12 rep-col-md-11 rep-col-xl-9">
-				<div className="card-component-df-content-date">
+			<div className={`${styles.card_component_content} rep-col-xs-12 rep-col-md-11 rep-col-xl-9`}>
+				<div className={`${styles.card_component_content_date}`}>
 					<span>{itemContent.date}</span>
 				</div>
-				<p className="card-component-df-content-title">{itemContent.title}</p>
+				<p className={`${styles.card_component_content_title}`}>{itemContent.title}</p>
 
 				<p>{itemContent.description}</p>
 			</div>
 
-			<div className="card-component-df-btn rep-col-xs-12 rep-col-xl-2">
+			<div className={`${styles.card_component_btn} rep-col-xs-12 rep-col-xl-2`}>
 				{listType === "pending" ? (
 					<>
-						<button type="button" className="rep-button rep-button--primary">
+						<button type="button" className={`${styles.rep_button}`}>
 							Accept
 						</button>
 
 						<button
 							type="button"
-							className="rep-button rep-button--primary"
+							className={`${styles.rep_button}`}
 							disabled
 						>
 							Reject
