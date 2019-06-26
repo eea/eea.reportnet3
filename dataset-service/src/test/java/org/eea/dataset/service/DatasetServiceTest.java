@@ -943,4 +943,11 @@ public class DatasetServiceTest {
     datasetService.getfindByIdDataSetSchema(1L, null);
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
+
+  @Test
+  public void testDeleteTableData() throws Exception {
+    doNothing().when(tableRepository).deleteByIdTableSchema(Mockito.any());
+    datasetService.deleteTableBySchema("", 1L);
+    Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
+  }
 }
