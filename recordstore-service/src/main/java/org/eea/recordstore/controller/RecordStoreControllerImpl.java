@@ -8,6 +8,7 @@ import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,8 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/recordstore")
 public class RecordStoreControllerImpl implements RecordStoreController {
 
-  /** The record store service. */
+  /**
+   * The record store service.
+   */
   @Autowired
+  @Qualifier("jdbcRecordStoreServiceImpl")
   private RecordStoreService recordStoreService;
 
   /**
@@ -58,7 +62,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName);
-      LOG.info("Dataset with name {} created",datasetName);
+      LOG.info("Dataset with name {} created", datasetName);
     } catch (final DockerAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       // TODO Error control
@@ -69,6 +73,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * Gets the connection to dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection to dataset
    */
   @Override
