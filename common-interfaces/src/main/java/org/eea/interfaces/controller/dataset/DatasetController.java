@@ -196,7 +196,6 @@ public interface DatasetController {
   void updateRecords(@PathVariable("id") Long datasetId,
       @RequestParam(value = "records", required = true) List<RecordVO> records);
 
-
   /**
    * Delete records.
    *
@@ -208,5 +207,14 @@ public interface DatasetController {
   void deleteRecords(@PathVariable("id") Long datasetId,
       @RequestParam(value = "recordIds", required = true) List<Long> recordIds);
 
+  /**
+   * Delete import table.
+   *
+   * @param dataSetId the data set id
+   * @param idTableSchema the id table schema
+   */
+  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  void deleteImportTable(@PathVariable("id") Long dataSetId,
+      @PathVariable("idTableSchema") String idTableSchema);
 
 }

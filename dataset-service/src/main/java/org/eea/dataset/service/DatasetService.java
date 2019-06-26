@@ -230,4 +230,13 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
+  
+  /**
+   * Delete table by schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   */
+  void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
+
 }

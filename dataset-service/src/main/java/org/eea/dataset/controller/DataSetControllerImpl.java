@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.callable.DeleteTableCallable;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.callable.UpdateRecordHelper;
 import org.eea.dataset.service.file.FileTreatmentHelper;
@@ -422,4 +423,26 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Delete import table.
+   *
+   * @param dataSetId the data set id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  public void deleteImportTable(final Long dataSetId, final String idTableSchema) {
+    if (dataSetId == null || dataSetId < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    final DeleteTableCallable callable =
+        new DeleteTableCallable(this.datasetService, idTableSchema, dataSetId);
+    try {
+      executor.submit(callable);
+    } finally {
+      executor.shutdown();
+    }
+  }
 }
