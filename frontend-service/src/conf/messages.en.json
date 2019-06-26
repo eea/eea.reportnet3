@@ -6,7 +6,7 @@
         "export": "Export",
         "create": "Create",
         "delete": "Delete",
-        "deleteDataset": "Delete dataset",
+        "deleteDatasetData": "Delete dataset data",
         "events": "Events",
         "validate": "Validate",
         "showValidations": "Show Validations",

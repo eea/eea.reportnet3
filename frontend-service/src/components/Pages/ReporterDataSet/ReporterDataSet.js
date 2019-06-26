@@ -98,7 +98,7 @@ const ReporterDataSet = () => {
             clickHandler: null
           },
           {
-            label: resources.messages["deleteDataset"],
+            label: resources.messages["deleteDatasetData"],
             icon: "2",
             group: "left",
             disabled: false,
@@ -222,7 +222,7 @@ const ReporterDataSet = () => {
                     {
                       validationsVisibleHandler:()=>{setVisibleHandler(setValidationsVisible, false)},
                       setTabHandler: (idTableSchema)=>{ setActiveIndex(idTableSchema) },
-                      setPageHandler: (posIdObject)=>{ setPositionIdObject(posIdObject)}
+                      setPageHandler: (posIdObject)=>{ setPositionIdObject(posIdObject) }
                     }}>     
           <Dialog visible={validationsVisible} 
                   onHide={()=>setVisibleHandler(setValidationsVisible, false)} 
