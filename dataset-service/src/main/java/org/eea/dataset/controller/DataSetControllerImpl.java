@@ -2,11 +2,13 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
+import org.eea.dataset.service.callable.UpdateRecordHelper;
 import org.eea.dataset.service.file.FileTreatmentHelper;
 import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -14,6 +16,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -66,6 +69,9 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
+
+  @Autowired
+  UpdateRecordHelper updateRecordHelper;
 
   /**
    * Gets the data tables values.
@@ -354,6 +360,66 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return validations;
+  }
+
+  /**
+   * Update records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
+  @Override
+  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<RecordVO> records) {
+    if (datasetId == null || records == null || records.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      updateRecordHelper.executeUpdateProcess(datasetId, records);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Delete records.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   */
+  @Override
+  public void deleteRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<Long> recordIds) {
+    if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      updateRecordHelper.executeDeleteProcess(datasetId, recordIds);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Insert records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
+  @Override
+  public void insertRecords(final Long datasetId, final List<RecordVO> records) {
+    if (datasetId == null || records == null || records.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      updateRecordHelper.executeCreateProcess(datasetId, records);
+      datasetService.updateRecords(datasetId, records);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
 }

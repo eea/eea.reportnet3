@@ -3,8 +3,10 @@
  */
 package org.eea.interfaces.controller.dataset;
 
+import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -170,5 +172,41 @@ public interface DatasetController {
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+
+
+  /**
+   * Insert records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
+  @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void insertRecords(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "records", required = true) List<RecordVO> records);
+
+  /**
+   * Update record.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
+  @RequestMapping(value = "/{id}/updateRecord", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateRecords(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "records", required = true) List<RecordVO> records);
+
+
+  /**
+   * Delete records.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   */
+  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteRecords(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "recordIds", required = true) List<Long> recordIds);
+
 
 }

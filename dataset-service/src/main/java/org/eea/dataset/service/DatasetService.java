@@ -10,6 +10,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -211,4 +212,22 @@ public interface DatasetService {
    */
   DataSetSchema getfindByIdDataSetSchema(@DatasetId Long datasetId, ObjectId datasetSchemaId)
       throws EEAException;
+
+  /**
+   * Update record.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   * @throws EEAException the EEA exception
+   */
+  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
+
+  /**
+   * Delete.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   * @throws EEAException the EEA exception
+   */
+  void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
 }
