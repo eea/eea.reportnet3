@@ -48,19 +48,20 @@ const ReportingDataFlow = () => {
 						<DataFlowColumn
 							navTitle="data flows"
 							dataFlowTitle={nameDataSetSchema}
+							search={true}
 						/>
-						<div className={`${styles.pageContent} rep-col-12 rep-col-sm-8`}>
+						<div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
 							<h2 className={styles.title}>
 								<IconComponent icon={config.icons.shoppingCart} />
 								{nameDataSetSchema}
 							</h2>
 
 							<div className={`${styles.buttonsWrapper}`}>
-								<div>
+								<div className={styles.buttonwrapper}>
 									<Button label="DO" className="p-button-warning" />
 									<p className="caption">Documents</p>
 								</div>
-								<div>
+								<div className={styles.buttonwrapper}>
 									<SplitButtonNE label="NE" className="p-button-primary" />
 									<p className="caption">New dataset</p>
 								</div>

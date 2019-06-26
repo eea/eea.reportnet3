@@ -9,9 +9,22 @@
 	flex-direction: row;
 }
 .buttonsWrapper button {
-	width: 100px;
-	height: 100px;
 }
-.buttonsWrapper button .p-button-text {
+.buttonsWrapper button :global .p-button-text {
 	font-size: 2rem;
+	padding: 2rem !important;
+}
+.buttonsWrapper :global .p-splitbutton-menubutton {
+	right: 1em;
+}
+.buttonsWrapper :global .p-button-icon-left {
+	bottom: 0px !important;
+	top: auto !important;
+}
+
+.buttonwrapper {
+	margin-left: 1rem;
+}
+.buttonWrapper:nth-last-of-type(2) {
+	margin-left: 0px;
 }
