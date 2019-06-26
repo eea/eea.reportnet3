@@ -701,4 +701,11 @@ public class DatasetServiceTest {
         .findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any());
 
   }
+
+  @Test
+  public void testDeleteTableData() throws Exception {
+    doNothing().when(tableRepository).deleteByIdTableSchema(Mockito.any());
+    datasetService.deleteTableBySchema("", 1L);
+    Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
+  }
 }

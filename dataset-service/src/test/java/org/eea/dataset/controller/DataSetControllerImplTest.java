@@ -383,6 +383,11 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getDataFlowIdById(null);
   }
 
+  /**
+   * Test update dataset success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testUpdateDatasetSuccess() throws Exception {
     doNothing().when(datasetService).updateDataset(Mockito.any(), Mockito.any());
@@ -390,6 +395,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update dataset error.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateDatasetError() throws Exception {
     doThrow(new EEAException()).when(datasetService).updateDataset(Mockito.any(), Mockito.any());
@@ -397,11 +407,21 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update dataset exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateDatasetException() throws Exception {
     dataSetControllerImpl.updateDataset(null);
   }
 
+  /**
+   * Test load statistics.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testLoadStatistics() throws Exception {
     when(datasetService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
@@ -411,6 +431,11 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Test load statistics exception.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testLoadStatisticsException() throws Exception {
     doThrow(new EEAException()).when(datasetService).getStatistics(Mockito.any());
@@ -419,6 +444,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
   }
 
+  /**
+   * Test get position from any object id.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetPositionFromAnyObjectId() throws Exception {
 
@@ -430,12 +460,22 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Test get position from any object id exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException() throws Exception {
     dataSetControllerImpl.getPositionFromAnyObjectId(null, null, null);
   }
 
 
+  /**
+   * Test get position from any object id exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException2() throws Exception {
 
@@ -445,30 +485,47 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Test get position from any object id exception 3.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException3() throws Exception {
     dataSetControllerImpl.getPositionFromAnyObjectId(1L, null, null);
   }
 
 
-  // @Test
-  // public void testListValidations() throws Exception {
-  //
-  // dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
-  // Mockito.verify(datasetService, times(1)).getListValidations(Mockito.any(), Mockito.any(),
-  // Mockito.any(), Mockito.any());
-  // }
+  /**
+   * Test delete import table.
+   */
+  public void testDeleteImportTable() {
+    doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
+    dataSetControllerImpl.deleteImportTable(1L, "");
+    Mockito.verify(datasetService, times(1)).deleteTableBySchema(Mockito.any(), Mockito.any());
 
-  // @Test
-  // public void testListValidationsException() throws Exception {
-  //
-  // doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-  // .getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-  // dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
-  // Mockito.verify(datasetService, times(1)).getListValidations(Mockito.any(), Mockito.any(),
-  // Mockito.any(), Mockito.any());
-  // }
+  }
 
 
+  /**
+   * Test delete import table throw non provided.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableThrowNonProvided() throws Exception {
+    dataSetControllerImpl.deleteImportTable(null, "");
+  }
+
+
+  /**
+   * Test delete import table throw invalid.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableThrowInvalid() throws Exception {
+    dataSetControllerImpl.deleteImportTable(-2L, "");
+  }
 
 }
