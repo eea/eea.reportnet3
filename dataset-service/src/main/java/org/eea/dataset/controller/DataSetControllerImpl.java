@@ -11,12 +11,10 @@ import org.eea.dataset.service.callable.DeleteTableCallable;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.callable.UpdateRecordHelper;
 import org.eea.dataset.service.file.FileTreatmentHelper;
-import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -67,9 +65,6 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
-
-  @Autowired
-  private LoadValidationsHelper loadValidationsHelper;
 
   @Autowired
   UpdateRecordHelper updateRecordHelper;
@@ -331,37 +326,6 @@ public class DataSetControllerImpl implements DatasetController {
     return statistics;
   }
 
-
-  /**
-   * Gets the failed validations by id dataset.
-   *
-   * @param datasetId the dataset id
-   * @param pageNum the page num
-   * @param pageSize the page size
-   * @param fields the fields
-   * @param asc the asc
-   *
-   * @return the failed validations by id dataset
-   */
-  @Override
-  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
-      @PathVariable("id") Long datasetId,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
-
-    FailedValidationsDatasetVO validations = null;
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
-    try {
-      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-
-    return validations;
-  }
 
   /**
    * Update records.

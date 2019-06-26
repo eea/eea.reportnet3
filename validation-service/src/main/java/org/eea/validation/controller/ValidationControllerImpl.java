@@ -3,15 +3,23 @@ package org.eea.validation.controller;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +32,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class ValidationControllerImpl implements ValidationController {
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * The validation service.
    */
   @Autowired
@@ -33,6 +46,10 @@ public class ValidationControllerImpl implements ValidationController {
   /** The validation helper. */
   @Autowired
   private ValidationHelper validationHelper;
+
+
+  @Autowired
+  private LoadValidationsHelper loadValidationsHelper;
 
   /**
    * Validate data set data.
@@ -59,6 +76,37 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
+  }
+
+  /**
+   * Gets the failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param fields the fields
+   * @param asc the asc
+   *
+   * @return the failed validations by id dataset
+   */
+  @Override
+  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
+      @PathVariable("id") Long datasetId,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
+
+    FailedValidationsDatasetVO validations = null;
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    try {
+      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return validations;
   }
 
 }

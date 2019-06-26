@@ -27,7 +27,6 @@ import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
@@ -35,7 +34,6 @@ import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -53,7 +51,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
@@ -199,11 +196,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /**
-   * The table validation repository.
-   */
-  @Autowired
-  private TableValidationRepository tableValidationRepository;
 
   /**
    * Creates the removeDatasetData dataset.
@@ -872,172 +864,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-
-
-  /**
-   * Gets the field errors.
-   *
-   * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   * @return the field errors
-   */
-  @Override
-  public List<ErrorsValidationVO> getFieldErrors(final Long datasetId,
-      final Map<String, String> mapNameTableSchema) {
-    List<FieldValidation> fieldValidations =
-        fieldValidationRepository.findFieldValidationsByIdDataset(datasetId);
-    List<ErrorsValidationVO> errors = new ArrayList<>();
-    for (FieldValidation fieldValidation : fieldValidations) {
-
-      ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(fieldValidation.getFieldValue().getId());
-      error.setIdValidation(fieldValidation.getValidation().getId());
-      error.setLevelError(fieldValidation.getValidation().getLevelError().name());
-      error.setMessage(fieldValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema
-          .get(fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema()));
-
-      error.setIdTableSchema(
-          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
-
-      error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(fieldValidation.getValidation().getValidationDate());
-
-      errors.add(error);
-    }
-    return errors;
-  }
-
-
-  /**
-   * Gets the record errors.
-   *
-   * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   * @return the record errors
-   */
-  @Override
-  public List<ErrorsValidationVO> getRecordErrors(final Long datasetId,
-      final Map<String, String> mapNameTableSchema) {
-    List<RecordValidation> recordValidations =
-        recordValidationRepository.findRecordValidationsByIdDataset(datasetId);
-    List<ErrorsValidationVO> errors = new ArrayList<>();
-    for (RecordValidation recordValidation : recordValidations) {
-
-      ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(recordValidation.getRecordValue().getId());
-      error.setIdValidation(recordValidation.getValidation().getId());
-      error.setLevelError(recordValidation.getValidation().getLevelError().name());
-      error.setMessage(recordValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema
-          .get(recordValidation.getRecordValue().getTableValue().getIdTableSchema()));
-
-      error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
-
-      error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(recordValidation.getValidation().getValidationDate());
-
-      errors.add(error);
-    }
-    return errors;
-  }
-
-
-  /**
-   * Gets the table errors.
-   *
-   * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   * @return the table errors
-   */
-  @Override
-  public List<ErrorsValidationVO> getTableErrors(final Long datasetId,
-      final Map<String, String> mapNameTableSchema) {
-    List<TableValidation> tableValidations =
-        tableValidationRepository.findTableValidationsByIdDataset(datasetId);
-    List<ErrorsValidationVO> errors = new ArrayList<>();
-    for (TableValidation tableValidation : tableValidations) {
-
-      ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(tableValidation.getTableValue().getId());
-      error.setIdValidation(tableValidation.getValidation().getId());
-      error.setLevelError(tableValidation.getValidation().getLevelError().name());
-      error.setMessage(tableValidation.getValidation().getMessage());
-      error.setNameTableSchema(
-          mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema()));
-
-      error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
-
-      error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(tableValidation.getValidation().getValidationDate());
-
-      errors.add(error);
-    }
-    return errors;
-  }
-
-
-  /**
-   * Gets the dataset errors.
-   *
-   * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
-   * @return the dataset errors
-   */
-  @Override
-  public List<ErrorsValidationVO> getDatasetErrors(final DatasetValue dataset,
-      final Map<String, String> mapNameTableSchema) {
-    List<ErrorsValidationVO> errors = new ArrayList<>();
-    for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
-      ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(datasetValidation.getDatasetValue().getId());
-      error.setIdValidation(datasetValidation.getValidation().getId());
-      error.setLevelError(datasetValidation.getValidation().getLevelError().name());
-      error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema.get(dataset.getIdDatasetSchema()));
-      error.setIdTableSchema(dataset.getIdDatasetSchema());
-      error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(datasetValidation.getValidation().getValidationDate());
-
-      errors.add(error);
-    }
-    return errors;
-  }
-
-
-  /**
-   * Gets the dataset valueby id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset valueby id
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public DatasetValue getDatasetValuebyId(final Long datasetId) throws EEAException {
-    if (datasetId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    return datasetRepository.findById(datasetId).orElse(new DatasetValue());
-  }
-
-
-  /**
-   * Gets the find by id data set schema.
-   *
-   * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
-   * @return the find by id data set schema
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public DataSetSchema getfindByIdDataSetSchema(final Long datasetId,
-      final ObjectId datasetSchemaId) throws EEAException {
-    if (datasetId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
-  }
-
   /**
    * Update records.
    *
@@ -1055,7 +881,6 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
     recordRepository.saveAll(recordValue);
   }
-
 
   /**
    * Delete.

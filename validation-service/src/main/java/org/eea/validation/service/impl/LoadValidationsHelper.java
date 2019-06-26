@@ -1,4 +1,4 @@
-package org.eea.dataset.service.validation;
+package org.eea.validation.service.impl;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -16,13 +16,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.callable.LoadErrorsCallable;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +44,10 @@ public class LoadValidationsHelper {
    */
   private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelper.class);
 
-  /** The dataset service. */
+  /** The validation service. */
   @Autowired
-  @Qualifier("proxyDatasetService")
-  private DatasetService datasetService;
+  @Qualifier("proxyValidationService")
+  private ValidationService validationService;
 
   /**
    * Instantiates a new file loader helper.
@@ -72,12 +71,12 @@ public class LoadValidationsHelper {
   public FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
       String headerField, Boolean asc) throws EEAException {
 
-    DatasetValue dataset = datasetService.getDatasetValuebyId(datasetId);
+    DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
     FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
     validation.setErrors(new ArrayList<>());
     validation.setIdDatasetSchema(dataset.getIdDatasetSchema());
     validation.setIdDataset(datasetId);
-    DataSetSchema schema = datasetService.getfindByIdDataSetSchema(datasetId,
+    DataSetSchema schema = validationService.getfindByIdDataSetSchema(datasetId,
         new ObjectId(dataset.getIdDatasetSchema()));
     validation.setNameDataSetSchema(schema.getNameDataSetSchema());
     Map<String, String> mapNameTableSchema = new HashMap<>();
@@ -138,7 +137,7 @@ public class LoadValidationsHelper {
     try {
       for (int i = 0; i < 4; i++) {
         LoadErrorsCallable task =
-            new LoadErrorsCallable(datasetService, dataset, mapNameTableSchema, i);
+            new LoadErrorsCallable(validationService, dataset, mapNameTableSchema, i);
         Future<List<ErrorsValidationVO>> result = es.submit(task);
         futures.add(result);
       }

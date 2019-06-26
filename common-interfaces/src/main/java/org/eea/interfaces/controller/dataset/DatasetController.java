@@ -5,7 +5,6 @@ package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -154,25 +153,6 @@ public interface DatasetController {
    */
   @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
-
-
-  /**
-   * Gets the failed validations by id dataset.
-   *
-   * @param datasetId the dataset id
-   * @param pageNum the page num
-   * @param pageSize the page size
-   * @param fields the fields
-   * @param asc the asc
-   * @return the failed validations by id dataset
-   */
-  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
-
 
   /**
    * Insert records.

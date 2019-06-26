@@ -1,23 +1,22 @@
-package org.eea.dataset.service.validation;
+package org.eea.validation.service.impl;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.data.domain.DatasetValidation;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValidation;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValidation;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValidation;
-import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.domain.Validation;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +39,7 @@ public class LoadValidationsHelperTest {
 
   /** The dataset service. */
   @Mock
-  private DatasetServiceImpl datasetService;
+  private ValidationServiceImpl datasetService;
 
   /** The pageable. */
   @Mock
