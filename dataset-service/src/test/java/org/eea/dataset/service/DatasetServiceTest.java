@@ -708,4 +708,39 @@ public class DatasetServiceTest {
     datasetService.deleteTableBySchema("", 1L);
     Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
   }
+
+  @Test(expected = EEAException.class)
+  public void updateRecordsNullTest() throws Exception {
+    datasetService.updateRecords(null, new ArrayList<RecordVO>());
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateRecordsNull2Test() throws Exception {
+    datasetService.updateRecords(1L, null);
+  }
+
+  @Test
+  public void updateRecordsTest() throws Exception {
+    when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.saveAll(Mockito.any())).thenReturn(recordValues);
+    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void deleteRecordsNullTest() throws Exception {
+    datasetService.deleteRecords(null, new ArrayList<Long>());
+  }
+
+  @Test(expected = EEAException.class)
+  public void deleteRecordsNull2Test() throws Exception {
+    datasetService.deleteRecords(1L, null);
+  }
+
+  @Test
+  public void deleteRecordsTest() throws Exception {
+    doNothing().when(recordRepository).deleteRecordsWithIds(Mockito.any());
+    datasetService.deleteRecords(1L, new ArrayList<Long>());
+    Mockito.verify(recordRepository, times(1)).deleteRecordsWithIds(Mockito.any());
+  }
 }

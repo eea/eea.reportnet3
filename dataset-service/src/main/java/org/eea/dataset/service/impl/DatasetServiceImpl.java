@@ -875,7 +875,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void updateRecords(final Long datasetId, final List<RecordVO> records)
       throws EEAException {
-    if (records == null) {
+    if (datasetId == null || records == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
@@ -892,7 +892,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteRecords(final Long datasetId, final List<Long> recordIds) throws EEAException {
-    if (recordIds == null) {
+    if (datasetId == null || recordIds == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
     recordRepository.deleteRecordsWithIds(recordIds);

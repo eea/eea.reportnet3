@@ -570,7 +570,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public DataSetSchema getfindByIdDataSetSchema(final Long datasetId,
       final ObjectId datasetSchemaId) throws EEAException {
-    if (datasetId == null) {
+    if (datasetId == null || datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);

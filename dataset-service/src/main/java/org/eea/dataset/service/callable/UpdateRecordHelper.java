@@ -63,7 +63,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     datasetService.updateRecords(datasetId, records);
     LOG.info("Records have been created");
     // after the records have been saved, an event is sent to notify it
-    releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);
+    releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
 
 
@@ -76,7 +76,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   public void executeDeleteProcess(Long datasetId, List<Long> recordIds) throws EEAException {
     datasetService.deleteRecords(datasetId, recordIds);
-    LOG.info("Records have been created");
+    LOG.info("Records have been deleted");
     // after the records have been deleted, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);
 

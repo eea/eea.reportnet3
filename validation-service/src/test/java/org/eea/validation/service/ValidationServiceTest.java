@@ -48,7 +48,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The Class ValidationServiceTest.
@@ -122,7 +121,8 @@ public class ValidationServiceTest {
   @Mock
   private FieldValidationRepository validationFieldRepository;
 
-  @Autowired
+  /** The schemas repository. */
+  @Mock
   private SchemasRepository schemasRepository;
 
   /**
@@ -576,10 +576,16 @@ public class ValidationServiceTest {
     validationServiceImpl.getfindByIdDataSetSchema(null, null);
   }
 
+  @Test(expected = EEAException.class)
+  public void getfindByIdDataSetSchemaTestNullException() throws EEAException {
+    validationServiceImpl.getfindByIdDataSetSchema(1L, null);
+  }
+
   @Test
   public void getfindByIdDataSetSchemaTestSuccess() throws EEAException {
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
-    validationServiceImpl.getfindByIdDataSetSchema(1L, null);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any(ObjectId.class)))
+        .thenReturn(new DataSetSchema());
+    validationServiceImpl.getfindByIdDataSetSchema(1L, new ObjectId("5cf0e9b3b793310e9ceca190"));
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 }

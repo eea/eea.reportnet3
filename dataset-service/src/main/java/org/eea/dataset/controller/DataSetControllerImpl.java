@@ -355,6 +355,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param recordIds the record ids
    */
   @Override
+  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<Long> recordIds) {
     if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
@@ -375,6 +377,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param records the records
    */
   @Override
+  @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public void insertRecords(final Long datasetId, final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
