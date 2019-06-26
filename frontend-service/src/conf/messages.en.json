@@ -42,8 +42,8 @@
         "sort": "Sort",
         "refresh": "Refresh",
         "noErrorData": "There is no error data to show",
-        "datasetLoadingTitle": "DataSchema Loading",
-        "datasetLoadingMessage": "The DataSchema ",
+        "datasetLoadingTitle": "Data Loading",
+        "datasetLoadingMessage": "The table ",
         "datasetLoading": " is loading..."
     }
 }
