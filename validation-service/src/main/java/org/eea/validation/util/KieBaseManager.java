@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -73,14 +74,17 @@ public class KieBaseManager {
             SchemasDrools.ID_RECORD_SCHEMA.getValue(), ruleRecord.getWhenCondition(),
             ruleRecord.getThenCondition().get(0), ruleRecord.getThenCondition().get(1)));
       });
-      tableSchema.getRecordSchema().getFieldSchema().stream().forEach(fieldSchema -> {
-        fieldSchema.getRuleField().forEach(ruleField -> {
-          ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
-              ruleField.getRuleId().toString(), TypeValidation.FIELD,
-              SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
-              ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1)));
-        });
-      });
+      tableSchema.getRecordSchema().getFieldSchema().stream()
+          .filter(fieldSchema -> fieldSchema.getIdFieldSchema() != null
+              && StringUtils.isNotBlank(fieldSchema.getIdFieldSchema().toString()))
+          .forEach(fieldSchema -> {
+            fieldSchema.getRuleField().forEach(ruleField -> {
+              ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
+                  ruleField.getRuleId().toString(), TypeValidation.FIELD,
+                  SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
+                  ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1)));
+            });
+          });
     });
 
     ObjectDataCompiler compiler = new ObjectDataCompiler();

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
+import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -159,7 +160,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession) {
-    fields.stream().forEach(field -> kieSession.insert(field));
+    fields.stream()
+        .filter(field -> field.getIdFieldSchema() != null
+            && StringUtils.isNotBlank(field.getIdFieldSchema()))
+        .forEach(field -> kieSession.insert(field));
     kieSession.fireAllRules();
     return null == fields.get(0).getFieldValidations()
         || fields.get(0).getFieldValidations().isEmpty() ? new ArrayList<>()
