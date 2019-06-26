@@ -49,11 +49,7 @@ export class SplitButtonNE extends SplitButton {
 	}
 
 	save() {
-		this.growl.show({
-			severity: "success",
-			summary: "Success",
-			detail: "Data Saved"
-		});
+		window.location.href = "/ReporterDataSet";
 	}
 
 	render() {
