@@ -237,9 +237,11 @@ public class ValidationServiceImpl implements ValidationService {
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
       validatedFields.stream().forEach(row -> {
         List<TypeErrorEnum> errorsList = new ArrayList<>();
+        List<String> orig = new ArrayList<>();
         row.getFields().stream().filter(field -> null != field.getFieldValidations())
             .forEach(field -> {
               field.getFieldValidations().stream().forEach(fval -> {
+                orig.add(fval.getValidation().getOriginName());
                 if (fval.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
                   errorsList.add(TypeErrorEnum.ERROR);
                 } else {
@@ -255,7 +257,7 @@ public class ValidationServiceImpl implements ValidationService {
             validation.setMessage("ONE OR MORE FIELDS HAVE ERRORS");
           } else {
             if (errorsList.contains(TypeErrorEnum.WARNING)
-                && !errorsList.contains(TypeErrorEnum.WARNING)) {
+                && !errorsList.contains(TypeErrorEnum.ERROR)) {
               validation.setLevelError(TypeErrorEnum.WARNING);
               validation.setMessage("ONE OR MORE FIELDS HAVE WARNINGS");
             } else {
@@ -265,6 +267,7 @@ public class ValidationServiceImpl implements ValidationService {
           validation.setIdRule(new ObjectId().toString());
           validation.setTypeEntity(TypeEntityEnum.RECORD);
           validation.setValidationDate(new Date().toString());
+          validation.setOriginName(orig.get(0));
           recordVal.setValidation(validation);
           recordVal.setRecordValue(row);
           row.getRecordValidations().add(recordVal);
@@ -314,13 +317,11 @@ public class ValidationServiceImpl implements ValidationService {
               field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
                 fieldValue.setFieldValue(field);
               });
-
-                validation.setOriginName(row.getFields().get(i).getFieldValidations().get(0)
-                    .getValidation().getOriginName());
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           });
         }
+
       });
     }
   }
