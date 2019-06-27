@@ -2,8 +2,8 @@ import React from "react";
 import { SplitButton } from "primereact/splitbutton";
 
 export class SplitButtonNE extends SplitButton {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		this.state = {
 			items: [
 				{
@@ -49,7 +49,7 @@ export class SplitButtonNE extends SplitButton {
 	}
 
 	save() {
-		window.location.href = "/reporter-data-set";
+		this.props.handleRedirect("/reporter-data-set");
 	}
 
 	render() {

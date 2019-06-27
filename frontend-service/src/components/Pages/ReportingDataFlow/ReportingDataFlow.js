@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { withRouter } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { SplitButton } from "primereact/splitbutton";
@@ -13,35 +14,44 @@ import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import IconComponent from "../../Layout/UI/icon-component";
 import config from "../../../conf";
 
-const ReportingDataFlow = () => {
+const ReportingDataFlow = props => {
 	const resources = useContext(ResourcesContext);
-	const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+	/* const [breadCrumbItems, setBreadCrumbItems] = useState([]); */
+	const [redirect, setRedirect] = useState(false);
+	const [redirectTo, setRedirectTo] = useState("");
 
 	console.log("ReportingDataFlow Render...");
 
-	const home = { icon: resources.icons["home"], url: "#" };
+	const home = { icon: resources.icons["home"], url: "/" };
 
-	useEffect(() => {
+	/* useEffect(() => {
 		console.log("ReportingDataFlow useEffect");
 
 		setBreadCrumbItems([
 			{ label: resources.messages["AcceptedDF"], url: "#" },
 			{ label: resources.messages["DFReporting"], url: "#" }
 		]);
-	}, [resources.messages]);
+	}, [resources.messages]); */
 
-	let items = [
+	/* let items = [
 		{ label: "New", icon: "pi pi-fw pi-plus" },
 		{ label: "Delete", icon: "pi pi-fw pi-trash" }
-	];
+	]; */
 
 	const { nameDataSetSchema } = jsonDataSchema;
+
+	const handleRedirect = target => {
+		props.history.push(target);
+	};
 
 	return (
 		<div>
 			<MainLayout>
 				<div className="titleDiv">
-					<BreadCrumb model={breadCrumbItems} home={home} />
+					<BreadCrumb
+						model={[{ label: "Reporting data flow", url: "" }]}
+						home={home}
+					/>
 				</div>
 				<div className="rep-container">
 					<div className="rep-row">
@@ -61,14 +71,18 @@ const ReportingDataFlow = () => {
 									<Button
 										label="DO"
 										className="p-button-warning"
-										onClick={() => {
-											window.location.href = "/documentation-data-set";
+										onClick={e => {
+											handleRedirect("/documentation-data-set");
 										}}
 									/>
 									<p className="caption">Documents</p>
 								</div>
 								<div className={styles.buttonwrapper}>
-									<SplitButtonNE label="NE" className="p-button-primary" />
+									<SplitButtonNE
+										label="NE"
+										className="p-button-primary"
+										handleRedirect={handleRedirect}
+									/>
 									<p className="caption">New dataset</p>
 								</div>
 							</div>
@@ -80,4 +94,4 @@ const ReportingDataFlow = () => {
 	);
 };
 
-export default ReportingDataFlow;
+export default withRouter(ReportingDataFlow);
