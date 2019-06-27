@@ -40,6 +40,9 @@
         "group-by": "Group by",
         "sort": "Sort",
         "refresh": "Refresh",
-        "noErrorData": "There is no error data to show"
+        "noErrorData": "There is no error data to show",
+        "close": "Close",
+        "subscribeButton": "Active open data flows",
+        "subscribeDataFlow": "No open data flow to show"
     }
 }
