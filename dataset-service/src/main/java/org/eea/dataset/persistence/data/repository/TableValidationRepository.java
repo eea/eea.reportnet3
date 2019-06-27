@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 
-
 /**
  * The Interface TableValidationRepository.
  */
@@ -16,10 +15,12 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    * Find table validations by id dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the list
    */
-  @Query("SELECT tval FROM TableValidation tval INNER JOIN FETCH tval.validation INNER JOIN tval.tableValue tv "
-      + "WHERE tv.datasetId.id=?1")
+  @Query(
+      "SELECT tval FROM TableValidation tval INNER JOIN FETCH tval.validation INNER JOIN tval.tableValue tv "
+          + "WHERE tv.datasetId.id=?1")
   List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
 
 
@@ -27,8 +28,13 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    * Find by table value id table schema.
    *
    * @param idTableSchema the id table schema
+   *
    * @return the list
    */
   List<TableValidation> findByTableValue_IdTableSchema(String idTableSchema);
+
+  @Query(
+      "SELECT tv FROM TableValidation tv  WHERE tv.validation.id in(:ids) ")
+  List<TableValidation> findByValidationIds(List<Long> ids);
 
 }
