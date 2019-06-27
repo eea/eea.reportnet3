@@ -16,7 +16,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
@@ -97,10 +97,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   /**
    * Reset dataset database.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Override
-  public void resetDatasetDatabase() throws DockerAccessException {
+  public void resetDatasetDatabase() throws RecordStoreAccessException {
     // TODO REMOVE THIS PART, THIS IS ONLY FOR TESTING PURPOSES
     final Container oldContainer = dockerInterfaceService.getContainer("crunchy-postgres");
     if (null != oldContainer) {
@@ -131,7 +131,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
           + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
     } catch (final InterruptedException e) {
       LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
-      throw new DockerAccessException(
+      throw new RecordStoreAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
           e);
 
@@ -143,10 +143,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetName the dataset name
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Override
-  public void createEmptyDataSet(final String datasetName) throws DockerAccessException {
+  public void createEmptyDataSet(final String datasetName) throws RecordStoreAccessException {
     // line to run a crunchy container
     // docker run -d -e PG_DATABASE=datasets -e PG_PRIMARY_PORT=5432 -e PG_MODE=primary -e
     // PG_USER=root -e PG_PASSWORD=root -e PGPASSWORD=root -e PG_PRIMARY_USER=root -e
@@ -167,7 +167,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
     } catch (final IOException e) {
       LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
-      throw new DockerAccessException(
+      throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
     }
@@ -178,7 +178,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
             "-U", userPostgreDb, "-p", "5432", "-d", "datasets", "-c", command);
       } catch (final InterruptedException e) {
         LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
-        throw new DockerAccessException(String
+        throw new RecordStoreAccessException(String
             .format("Error executing docker command to create the dataset. %s", e.getMessage()), e);
 
       }
@@ -215,11 +215,11 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @return the connection data for dataset
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Override
   public ConnectionDataVO getConnectionDataForDataset(final String datasetName)
-      throws DockerAccessException {
+      throws RecordStoreAccessException {
     final List<String> datasets = getAllDataSetsName();
     ConnectionDataVO result = new ConnectionDataVO();
     for (final String dataset : datasets) {
@@ -237,10 +237,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @return the connection data for dataset
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Override
-  public List<ConnectionDataVO> getConnectionDataForDataset() throws DockerAccessException {
+  public List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException {
     final List<String> datasets = getAllDataSetsName();
     final List<ConnectionDataVO> result = new ArrayList<>();
     for (final String dataset : datasets) {
@@ -256,9 +256,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @return the all data sets name
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
-  private List<String> getAllDataSetsName() throws DockerAccessException {
+  private List<String> getAllDataSetsName() throws RecordStoreAccessException {
     final List<String> datasets = new ArrayList<>();
     final Container container = dockerInterfaceService.getContainer(containerName);
 
@@ -276,7 +276,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       }
     } catch (final InterruptedException e) {
       LOG_ERROR.error("Error executing docker command to create the dataset. {}", e.getMessage());
-      throw new DockerAccessException(
+      throw new RecordStoreAccessException(
           String.format("Error executing docker command to create the dataset. %s", e.getMessage()),
           e);
 

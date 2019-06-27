@@ -4,7 +4,7 @@ package org.eea.recordstore.exception;
 /**
  * The Class DockerAccessException.
  */
-public class DockerAccessException extends Exception {
+public class RecordStoreAccessException extends Exception {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -5550710134695719559L;
@@ -12,7 +12,7 @@ public class DockerAccessException extends Exception {
   /**
    * Instantiates a new docker access exception.
    */
-  public DockerAccessException() {
+  public RecordStoreAccessException() {
     super();
   }
 
@@ -21,7 +21,7 @@ public class DockerAccessException extends Exception {
    *
    * @param message the message
    */
-  public DockerAccessException(String message) {
+  public RecordStoreAccessException(String message) {
     super(message);
   }
 
@@ -32,7 +32,7 @@ public class DockerAccessException extends Exception {
    * @param message the message
    * @param cause the cause
    */
-  public DockerAccessException(String message, Throwable cause) {
+  public RecordStoreAccessException(String message, Throwable cause) {
     super(message, cause);
   }
 
@@ -42,7 +42,7 @@ public class DockerAccessException extends Exception {
    *
    * @param cause the cause
    */
-  public DockerAccessException(Throwable cause) {
+  public RecordStoreAccessException(Throwable cause) {
     super(cause);
   }
 
@@ -55,7 +55,7 @@ public class DockerAccessException extends Exception {
    * @param enableSuppression the enable suppression
    * @param writableStackTrace the writable stack trace
    */
-  protected DockerAccessException(String message, Throwable cause, boolean enableSuppression,
+  protected RecordStoreAccessException(String message, Throwable cause, boolean enableSuppression,
       boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }

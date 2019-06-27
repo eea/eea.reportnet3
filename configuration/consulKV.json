@@ -223,6 +223,10 @@
     "key": "config/recordstore/management.endpoints.web.exposure.include",
     "value": "Kg=="
   },
+   {
+    "key": "config/recordstore/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
   {
     "key": "config/recordstore/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
@@ -267,10 +271,7 @@
     "key": "config/recordstore/dockerContainerName",
     "value": "JHtET0NFUl9DT05UQUlORVJfTkFNRTpjcnVuY2h5LXBvc3RncmVzfQ=="
   },
-  {
-    "key": "config/recordstore/ipPostgre",
-    "value": "JHtSRUNPUkRTVE9SRV9JUDpsb2NhbGhvc3R9"
-  },
+ 
   {
     "key": "config/recordstore/userPostgre",
     "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="

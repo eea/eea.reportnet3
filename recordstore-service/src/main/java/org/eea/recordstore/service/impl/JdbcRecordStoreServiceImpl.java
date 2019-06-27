@@ -15,7 +15,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +38,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Autowired
   private KafkaSender kafkaSender;
-  /**
-   * The ip postgre db.
-   */
-  @Value("${ipPostgre}")
-  private String ipPostgreDb;
+
 
   /**
    * The user postgre db.
@@ -82,12 +78,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
   @Override
-  public void resetDatasetDatabase() throws DockerAccessException {
+  public void resetDatasetDatabase() throws RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
   @Override
-  public void createEmptyDataSet(String datasetName) throws DockerAccessException {
+  public void createEmptyDataSet(String datasetName) throws RecordStoreAccessException {
     final ClassLoader classLoader = this.getClass().getClassLoader();
     final File fileInitCommands =
         new File(classLoader.getResource("datasetInitCommands.txt").getFile());
@@ -100,7 +96,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     } catch (final IOException e) {
       LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
-      throw new DockerAccessException(
+      throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
     }
@@ -126,7 +122,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   @Override
   public ConnectionDataVO getConnectionDataForDataset(String datasetName)
-      throws DockerAccessException {
+      throws RecordStoreAccessException {
     final List<String> datasets = getAllDataSetsName(datasetName);
     ConnectionDataVO result = new ConnectionDataVO();
     for (final String dataset : datasets) {
@@ -140,7 +136,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public List<ConnectionDataVO> getConnectionDataForDataset() throws DockerAccessException {
+  public List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException {
     final List<String> datasets = getAllDataSetsName("");
     List<ConnectionDataVO> result = new ArrayList<>();
     for (final String dataset : datasets) {
@@ -171,28 +167,26 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @return the all data sets name
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
-  private List<String> getAllDataSetsName(String datasetName) throws DockerAccessException {
+  private List<String> getAllDataSetsName(String datasetName) throws RecordStoreAccessException {
 
-    return jdbcTemplate
-        .query(sqlGetDatasetsName, new PreparedStatementSetter() {
-          @Override
-          public void setValues(PreparedStatement ps)
-              throws SQLException {
-            ps.setString(1, datasetName);
-            ps.setString(2, datasetName);
-          }
-        }, new ResultSetExtractor<List<String>>() {
-          @Override
-          public List<String> extractData(ResultSet resultSet) throws SQLException,
-              DataAccessException {
-            List<String> datasets = new ArrayList<>();
-            while (resultSet.next()) {
-              datasets.add(resultSet.getString(1));
-            }
-            return datasets;
-          }
-        });
+    return jdbcTemplate.query(sqlGetDatasetsName, new PreparedStatementSetter() {
+      @Override
+      public void setValues(PreparedStatement ps) throws SQLException {
+        ps.setString(1, datasetName);
+        ps.setString(2, datasetName);
+      }
+    }, new ResultSetExtractor<List<String>>() {
+      @Override
+      public List<String> extractData(ResultSet resultSet)
+          throws SQLException, DataAccessException {
+        List<String> datasets = new ArrayList<>();
+        while (resultSet.next()) {
+          datasets.add(resultSet.getString(1));
+        }
+        return datasets;
+      }
+    });
   }
 }
