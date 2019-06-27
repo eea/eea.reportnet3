@@ -162,8 +162,8 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void insertRecords(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "records", required = true) List<RecordVO> records);
+  void insertRecords(@PathVariable("id") final Long datasetId,
+      @PathVariable("idTableSchema") final String idTableSchema, List<RecordVO> records);
 
   /**
    * Update record.
@@ -196,5 +196,6 @@ public interface DatasetController {
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
   void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema);
+
 
 }
