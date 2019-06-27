@@ -8,7 +8,7 @@ import langResources from "./conf/messages.en.json";
 import iconsResources from "./conf/prime.icons.json";
 import ReportingDataFlow from "./components/Pages/ReportingDataFlow/ReportingDataFlow";
 import DocumentationDataSet from "./components/Pages/DocumentationDataSet/DocumentationDataSet";
-import DataFlowTasks from './components/Pages/DataFlowTasks/DataFlowTasks'
+import DataFlowTasks from "./components/Pages/DataFlowTasks/DataFlowTasks";
 
 const App = () => {
 	const [resources] = useState({ ...langResources, ...iconsResources });
@@ -18,15 +18,17 @@ const App = () => {
 				<Router>
 					<Switch>
 						<Route exact path="/" component={DataFlowTasks} />
-						<Route exact path="/reporting-data-flow" component={ReportingDataFlow} />
-						<Route exact path="/reporter-data-set" component={ReporterDataSet} />						
-						<Route exact path="/documentation-data-set" component={DocumentationDataSet} />						
+						<Route path="/reporting-data-flow" component={ReportingDataFlow} />
+						<Route path="/reporter-data-set" component={ReporterDataSet} />
+						<Route
+							path="/documentation-data-set"
+							component={DocumentationDataSet}
+						/>
 					</Switch>
 				</Router>
 			</ResourcesContext.Provider>
 		</div>
 	);
 };
-
 
 export default App;
