@@ -1013,26 +1013,20 @@ public class DatasetServiceImpl implements DatasetService {
     DataSetSchema schema =
         schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
     validation.setNameDataSetSchema(schema.getNameDataSetSchema());
-    Map<String, String> mapNameTableSchema = new HashMap<>();
-    for (int i = 0; i < schema.getTableSchemas().size(); i++) {
-      mapNameTableSchema.put(schema.getTableSchemas().get(i).getIdTableSchema().toString(),
-          schema.getTableSchemas().get(i).getNameTableSchema());
-    }
-    mapNameTableSchema.put(schema.getIdDataSetSchema().toString(), schema.getNameDataSetSchema());
 
     Page<Validation> validationStream = validationRepository.findAll(pageable);
     List<Validation> validations = validationStream.get().collect(Collectors.toList());
-    List<Long> idValidations = validations.stream().map(Validation::getId)
-        .collect(Collectors.toList());
+    List<Long> idValidations =
+        validations.stream().map(Validation::getId).collect(Collectors.toList());
 
-    List<DatasetValidation> datasetValidations = this.datasetValidationRepository
-        .findByValidationIds(idValidations);
-    List<TableValidation> tableValidations = this.tableValidationRepository
-        .findByValidationIds(idValidations);
-    List<RecordValidation> recordValidations = this.recordValidationRepository
-        .findByValidationIds(idValidations);
-    List<FieldValidation> fieldValidations = this.fieldValidationRepository
-        .findByValidationIds(idValidations);
+    List<DatasetValidation> datasetValidations =
+        this.datasetValidationRepository.findByValidationIds(idValidations);
+    List<TableValidation> tableValidations =
+        this.tableValidationRepository.findByValidationIds(idValidations);
+    List<RecordValidation> recordValidations =
+        this.recordValidationRepository.findByValidationIds(idValidations);
+    List<FieldValidation> fieldValidations =
+        this.fieldValidationRepository.findByValidationIds(idValidations);
 
     List<ErrorsValidationVO> errors = new ArrayList<>();
 
@@ -1043,7 +1037,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setIdValidation(datasetValidation.getValidation().getId());
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema.get(dataset.getIdDatasetSchema()));
+      error.setNameTableSchema(datasetValidation.getValidation().getOriginName());
       error.setIdTableSchema(dataset.getIdDatasetSchema());
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
@@ -1058,8 +1052,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setIdValidation(tableValidation.getValidation().getId());
       error.setLevelError(tableValidation.getValidation().getLevelError().name());
       error.setMessage(tableValidation.getValidation().getMessage());
-      error.setNameTableSchema(
-          mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema()));
+      error.setNameTableSchema(tableValidation.getValidation().getOriginName());
 
       error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
 
@@ -1075,8 +1068,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setIdValidation(recordValidation.getValidation().getId());
       error.setLevelError(recordValidation.getValidation().getLevelError().name());
       error.setMessage(recordValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema
-          .get(recordValidation.getRecordValue().getTableValue().getIdTableSchema()));
+      error.setNameTableSchema(recordValidation.getValidation().getOriginName());
 
       error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
 
@@ -1094,8 +1086,7 @@ public class DatasetServiceImpl implements DatasetService {
       error.setIdValidation(fieldValidation.getValidation().getId());
       error.setLevelError(fieldValidation.getValidation().getLevelError().name());
       error.setMessage(fieldValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema
-          .get(fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema()));
+      error.setNameTableSchema(fieldValidation.getValidation().getOriginName());
 
       error.setIdTableSchema(
           fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());

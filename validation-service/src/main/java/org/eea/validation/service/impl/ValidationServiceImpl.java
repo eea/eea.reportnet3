@@ -277,6 +277,8 @@ public class ValidationServiceImpl implements ValidationService {
                 validation.setMessage(error == true ? "ONE OR MORE FIELDS HAVE ERRORS"
                     : "ONE OR MORE FIELDS HAVE WARNINGS");
                 validation.setIdRule(new ObjectId().toString());
+                validation.setOriginName(row.getFields().get(i).getFieldValidations().get(0)
+                    .getValidation().getOriginName());
                 validation.setTypeEntity(TypeEntityEnum.RECORD);
                 validation.setValidationDate(new Date().toString());
                 recordVal.setValidation(validation);

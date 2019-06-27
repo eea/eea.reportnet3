@@ -20,9 +20,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @return the list
    */
-  @Query(
-      "SELECT rv FROM RecordValidation rv INNER JOIN FETCH rv.validation INNER JOIN FETCH rv.recordValue record "
-          + "WHERE record.id in (:recordIds)")
+  @Query("SELECT rv FROM RecordValidation rv INNER JOIN FETCH rv.validation INNER JOIN FETCH rv.recordValue record "
+      + "WHERE record.id in (:recordIds)")
   List<RecordValidation> findByRecordValueIdIn(@Param("recordIds") List<Long> recordIds);
 
 
@@ -34,9 +33,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @return the list
    */
-  @Query(
-      "SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
-          + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.id=?2")
+  @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
+      + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.id=?2")
   List<RecordValidation> findRecordValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
 
 
@@ -48,9 +46,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @return the list
    */
-  @Query(
-      "SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
-          + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.idTableSchema=?2")
+  @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
+      + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1 and tab.idTableSchema=?2")
   List<RecordValidation> findRecordValidationsByIdDatasetAndIdTableSchema(Long datasetId,
       String idTableSchema);
 
@@ -78,9 +75,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @return the list
    */
-  @Query(
-      "SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
-          + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1")
+  @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
+      + "INNER JOIN rv.tableValue tab WHERE tab.datasetId.id=?1")
   List<RecordValidation> findRecordValidationsByIdDataset(Long datasetId);
 
 
@@ -131,7 +127,6 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   HashSet<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
       @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
-  @Query(
-      "SELECT rv FROM RecordValidation rv  WHERE rv.validation.id in(:ids) ")
-  List<RecordValidation> findByValidationIds(List<Long> ids);
+  @Query("SELECT rv FROM RecordValidation rv  WHERE rv.validation.id in(:ids) ")
+  List<RecordValidation> findByValidationIds(@Param("ids") List<Long> ids);
 }

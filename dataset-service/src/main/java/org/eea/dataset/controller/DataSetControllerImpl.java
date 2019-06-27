@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -40,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -346,7 +346,7 @@ public class DataSetControllerImpl implements DatasetController {
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
     if (StringUtils.isNotBlank(fields)) {
-
+      fields = fields.replace("nameTableSchema", "originName");
       Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
       PageRequest.of(pageNum, pageSize, order);
       pageable = PageRequest.of(pageNum, pageSize, order);

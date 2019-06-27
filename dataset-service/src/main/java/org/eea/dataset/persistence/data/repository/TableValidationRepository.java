@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 
 /**
@@ -18,9 +19,8 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    *
    * @return the list
    */
-  @Query(
-      "SELECT tval FROM TableValidation tval INNER JOIN FETCH tval.validation INNER JOIN tval.tableValue tv "
-          + "WHERE tv.datasetId.id=?1")
+  @Query("SELECT tval FROM TableValidation tval INNER JOIN FETCH tval.validation INNER JOIN tval.tableValue tv "
+      + "WHERE tv.datasetId.id=?1")
   List<TableValidation> findTableValidationsByIdDataset(Long datasetId);
 
 
@@ -33,8 +33,7 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    */
   List<TableValidation> findByTableValue_IdTableSchema(String idTableSchema);
 
-  @Query(
-      "SELECT tv FROM TableValidation tv  WHERE tv.validation.id in(:ids) ")
-  List<TableValidation> findByValidationIds(List<Long> ids);
+  @Query("SELECT tv FROM TableValidation tv  WHERE tv.validation.id in(:ids) ")
+  List<TableValidation> findByValidationIds(@Param("ids") List<Long> ids);
 
 }
