@@ -4,6 +4,9 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 
+/**
+ * The Interface RecordExtendedQueriesRepository.
+ */
 public interface RecordExtendedQueriesRepository {
 
   /**

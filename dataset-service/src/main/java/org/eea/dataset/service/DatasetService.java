@@ -108,6 +108,7 @@ public interface DatasetService {
   /**
    * Gets the dataset by id.
    *
+   * @deprecated this deprecated
    * @param datasetId the dataset id
    *
    * @return the by id
