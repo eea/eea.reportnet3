@@ -50,16 +50,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
 
-  private static String GENERAL_WARNING = "WARNING";
-  private static String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-  private static String GENERAL_ERROR = "ERROR";
-  private static String STRING_WARNING =
+  private static final String GENERAL_WARNING = "WARNING";
+  private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
+  private static final String GENERAL_ERROR = "ERROR";
+  private static final String STRING_WARNING =
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
-  private static String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-  private static String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-  private static String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-  private static String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-  private static String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
+  private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
+  private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
+  private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
+  private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
+  private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
   private static final String WARNING = "WARNING";
 
