@@ -44,8 +44,17 @@ public class ValidationHelper {
    * @throws EEAException the EEA exception
    */
   public void executeValidation(final Long datasetId) throws EEAException {
-    LOG.info("Validating dataset");
+
+    LOG.info("Deleting all Validations");
+    validationService.deleteAllValidation(datasetId);
+    LOG.info("Validating Fields");
     validationService.validateDataSetData(datasetId);
+    LOG.info("Validating Records");
+    validationService.validateRecord(datasetId);
+    LOG.info("Validating Tables");
+    // validationService.validateTable(datasetId);
+    LOG.info("Validating Dataset");
+    // validationService.validateDataSet(datasetId);
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }

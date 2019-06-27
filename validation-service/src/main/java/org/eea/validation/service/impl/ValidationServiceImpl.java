@@ -191,6 +191,91 @@ public class ValidationServiceImpl implements ValidationService {
     return kieSession;
   }
 
+
+
+  @Override
+  @Transactional
+  public void validateDataSet(Long datasetId) throws EEAException {
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    // Get the session for the rules validation
+    KieSession session = loadRulesKnowledgeBase(dataflowId);
+  }
+
+  @Override
+  @Transactional
+  public void validateTable(Long datasetId) throws EEAException {
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    // Get the session for the rules validation
+    KieSession session = loadRulesKnowledgeBase(dataflowId);
+  }
+
+  @Override
+  @Transactional
+  public void validateRecord(Long datasetId) throws EEAException {
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    // Get the session for the rules validation
+    // KieSession session = loadRulesKnowledgeBase(dataflowId);
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    dataset.getTableValues().stream().forEach(table -> {
+      List<RecordValidation> recordValList = new ArrayList<RecordValidation>();
+      List<RecordValue> validatedFields =
+          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
+      validatedFields.stream().forEach(row -> {
+        List<TypeErrorEnum> errorsList = new ArrayList<>();
+        row.getFields().stream().filter(field -> null != field.getFieldValidations())
+            .forEach(field -> {
+              field.getFieldValidations().stream().forEach(fval -> {
+                if (fval.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+                  errorsList.add(TypeErrorEnum.ERROR);
+                } else {
+                  errorsList.add(TypeErrorEnum.WARNING);
+                }
+              });
+            });
+        if (null != errorsList) {
+          RecordValidation recordVal = new RecordValidation();
+          Validation validation = new Validation();
+          if (errorsList.contains(TypeErrorEnum.ERROR)) {
+            validation.setLevelError(TypeErrorEnum.ERROR);
+            validation.setMessage("ONE OR MORE FIELDS HAVE ERRORS");
+          } else {
+            if (errorsList.contains(TypeErrorEnum.WARNING)
+                && !errorsList.contains(TypeErrorEnum.WARNING)) {
+              validation.setLevelError(TypeErrorEnum.WARNING);
+              validation.setMessage("ONE OR MORE FIELDS HAVE WARNINGS");
+            } else {
+              return;
+            }
+          }
+          validation.setIdRule(new ObjectId().toString());
+          validation.setTypeEntity(TypeEntityEnum.RECORD);
+          validation.setValidationDate(new Date().toString());
+          recordVal.setValidation(validation);
+          recordVal.setRecordValue(row);
+          row.getRecordValidations().add(recordVal);
+          recordValList.add(recordVal);
+        }
+      });
+      validationRecordRepository.saveAll((Iterable<RecordValidation>) recordValList);
+    });
+  }
+
+
   /**
    * Validate data set data.
    *
@@ -206,12 +291,11 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataflowId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
     // Get the session for the rules validation
     KieSession session = loadRulesKnowledgeBase(dataflowId);
 
     // Remove previous validations
-    datasetRepository.deleteValidationTable();
+
 
     // Dataset and TablesValue validations
     // read Dataset Data
@@ -221,14 +305,14 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     // Execute rules validation
-    List<DatasetValidation> resultDataset = executeDatasetValidations(session, dataset);
+    // List<DatasetValidation> resultDataset = executeDatasetValidations(session, dataset);
     // Save results to the db
-    validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
+    // validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
 
     // Execute tables validation
-    List<TableValidation> resultTable = executeTableValidations(session, dataset);
+    // List<TableValidation> resultTable = executeTableValidations(session, dataset);
     // Save results to the db
-    validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
+    // validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
 
     // Records validation
     for (TableValue tableValue : dataset.getTableValues()) {
@@ -238,11 +322,11 @@ public class ValidationServiceImpl implements ValidationService {
           sanitizeRecords(recordRepository.findAllRecordsByTableValueId(tableId));
 
       // Execute record rules validation
-      List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);
+      // List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);
       // Assign ID Records and Fields
-      populateRecordValidations(recordsByTable);
+      // populateRecordValidations(recordsByTable);
       // Save results to the db
-      validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
+      // validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
 
       // Execute field rules validation
       recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
@@ -387,6 +471,21 @@ public class ValidationServiceImpl implements ValidationService {
       if (!processedRecords.contains(recordValue.getId())) {
         processedRecords.add(recordValue.getId());
         recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
+        sanitizedRecords.add(recordValue);
+      }
+
+    }
+    return sanitizedRecords;
+
+  }
+
+  private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
+    List<RecordValue> sanitizedRecords = new ArrayList<>();
+    Set<Long> processedRecords = new HashSet<>();
+    for (RecordValue recordValue : records) {
+      if (!processedRecords.contains(recordValue.getId())) {
+        processedRecords.add(recordValue.getId());
+        // recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
         sanitizedRecords.add(recordValue);
       }
 

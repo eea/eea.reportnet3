@@ -78,4 +78,13 @@ public interface ValidationService {
    */
   void deleteAllValidation(@DatasetId Long datasetId);
 
+
+  void validateDataSet(@DatasetId Long datasetId) throws EEAException;
+
+
+  void validateTable(@DatasetId Long datasetId) throws EEAException;
+
+
+  void validateRecord(@DatasetId Long datasetId) throws EEAException;
+
 }
