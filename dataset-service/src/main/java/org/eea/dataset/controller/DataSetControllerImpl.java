@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.file.FileTreatmentHelper;
-import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,8 +64,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
-  @Autowired
-  private LoadValidationsHelper loadValidationsHelper;
 
   /**
    * Gets the data tables values.
@@ -346,14 +344,17 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
 
     FailedValidationsDatasetVO validations = null;
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
-    try {
-      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+    Pageable pageable = null;
+    if (StringUtils.isNotBlank(fields)) {
+      fields = fields.replace("nameTableSchema", "originName");
+      Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
+      PageRequest.of(pageNum, pageSize, order);
+      pageable = PageRequest.of(pageNum, pageSize, order);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize);
     }
 
-    return validations;
+    return datasetService.getListValidations(datasetId, pageable, fields, asc);
   }
 
 }

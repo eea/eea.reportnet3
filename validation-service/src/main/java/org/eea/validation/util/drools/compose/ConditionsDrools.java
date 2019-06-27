@@ -15,10 +15,13 @@ public enum ConditionsDrools {
   TYPE_FAIL_VALIDATION("typeFailValidation"),
   /** The dataflowrule. */
   RULE_ID("ruleid"),
-
+  /** The schema name. */
   SCHEMA_NAME("schemaName"),
   /** The dataschema id. */
-  DATASCHEMA_ID("dataSchemaId");
+  DATASCHEMA_ID("dataSchemaId"),
+  /** The origin name. */
+  ORIGIN_NAME("originName");
+
 
   /** The value. */
   private final String value;

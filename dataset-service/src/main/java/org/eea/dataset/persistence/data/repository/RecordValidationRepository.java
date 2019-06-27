@@ -25,12 +25,12 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   List<RecordValidation> findByRecordValueIdIn(@Param("recordIds") List<Long> recordIds);
 
 
-
   /**
    * Find record validations by id dataset and id table.
    *
    * @param datasetId the dataset id
    * @param idTable the id table
+   *
    * @return the list
    */
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
@@ -38,12 +38,12 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   List<RecordValidation> findRecordValidationsByIdDatasetAndIdTable(Long datasetId, Long idTable);
 
 
-
   /**
    * Find record validations by id dataset and id table schema.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   *
    * @return the list
    */
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
@@ -58,6 +58,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param typeError the type error
+   *
    * @return the long
    */
   @Query("SELECT COUNT (rv.id) FROM RecordValidation rv  "
@@ -71,6 +72,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    * Find record validations by id dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the list
    */
   @Query("SELECT rval FROM RecordValidation rval INNER JOIN FETCH rval.validation INNER JOIN rval.recordValue rv "
@@ -83,6 +85,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   *
    * @return the hash set
    */
   @Query("SELECT fv.record.id from FieldValue fv WHERE fv.fieldValidations IS NOT EMPTY "
@@ -96,6 +99,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param typeError the type error
+   *
    * @return the hash set
    */
   @Query("SELECT rv.recordValue.id FROM RecordValidation rv  "
@@ -113,6 +117,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param typeError the type error
+   *
    * @return the hash set
    */
   @Query("SELECT fv.fieldValue.record.id FROM FieldValidation fv  "
@@ -122,4 +127,6 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   HashSet<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
       @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
+  @Query("SELECT rv FROM RecordValidation rv  WHERE rv.validation.id in(:ids) ")
+  List<RecordValidation> findByValidationIds(@Param("ids") List<Long> ids);
 }

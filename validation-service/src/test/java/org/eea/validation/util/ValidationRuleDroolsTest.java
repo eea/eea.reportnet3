@@ -24,22 +24,26 @@ public class ValidationRuleDroolsTest {
 
   @Test
   public void testDataset() {
-    validationRuleDrools.fillValidation(new DatasetValue(), "ERROR DATASET", "ERROR", "12312ASDA");
+    validationRuleDrools.fillValidation(new DatasetValue(), "ERROR DATASET", "ERROR", "12312ASDA",
+        "1234");
   }
 
   @Test
   public void testTable() {
-    validationRuleDrools.fillValidation(new TableValue(), "ERROR TABLE", "ERROR", "12312ASDA");
+    validationRuleDrools.fillValidation(new TableValue(), "ERROR TABLE", "ERROR", "12312ASDA",
+        "1234");
   }
 
   @Test
   public void testRecord() {
-    validationRuleDrools.fillValidation(new RecordValue(), "ERROR RECORD", "ERROR", "12312ASDA");
+    validationRuleDrools.fillValidation(new RecordValue(), "ERROR RECORD", "ERROR", "12312ASDA",
+        "1234");
   }
 
   @Test
   public void testField() {
-    validationRuleDrools.fillValidation(new FieldValue(), "ERROR FIELD", "ERROR", "12312ASDA");
+    validationRuleDrools.fillValidation(new FieldValue(), "ERROR FIELD", "ERROR", "12312ASDA",
+        "1234");
   }
 
 }

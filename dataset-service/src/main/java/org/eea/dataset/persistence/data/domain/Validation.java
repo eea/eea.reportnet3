@@ -68,5 +68,7 @@ public class Validation {
   @Enumerated(EnumType.STRING)
   private TypeEntityEnum typeEntity;
 
+  @Column(name = "ORIGIN_NAME")
+  private String originName;
 
 }

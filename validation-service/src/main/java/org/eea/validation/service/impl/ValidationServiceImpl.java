@@ -315,6 +315,8 @@ public class ValidationServiceImpl implements ValidationService {
                 fieldValue.setFieldValue(field);
               });
 
+                validation.setOriginName(row.getFields().get(i).getFieldValidations().get(0)
+                    .getValidation().getOriginName());
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           });
