@@ -379,13 +379,14 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void insertRecords(@PathVariable("id"), final Long datasetId, @PathVariable("idTableSchema") final String idTableSchema
+  public void insertRecords(@PathVariable("id") final Long datasetId,
+      @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     try {
-      updateRecordHelper.executeCreateProcess(datasetId, records);
+      updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }

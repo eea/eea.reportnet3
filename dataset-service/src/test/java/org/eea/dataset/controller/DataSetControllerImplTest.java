@@ -606,30 +606,32 @@ public class DataSetControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.insertRecords(null, new ArrayList<RecordVO>());
+    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<RecordVO>());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNull() throws Exception {
-    dataSetControllerImpl.insertRecords(-2L, null);
+    dataSetControllerImpl.insertRecords(-2L, "id", null);
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsEmpty() throws Exception {
-    dataSetControllerImpl.insertRecords(1L, new ArrayList<RecordVO>());
+    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<RecordVO>());
   }
 
   @Test
   public void testinsertRecordsSuccess() throws Exception {
-    doNothing().when(updateRecordHelper).executeCreateProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.insertRecords(1L, records);
-    Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.any(), Mockito.any());
+    doNothing().when(updateRecordHelper).executeCreateProcess(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.insertRecords(1L, "id", records);
+    Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testinsertRecordsNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.insertRecords(1L, records);
+        Mockito.any(), Mockito.any());
+    dataSetControllerImpl.insertRecords(1L, "id", records);
   }
 }
