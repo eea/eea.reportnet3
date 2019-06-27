@@ -294,28 +294,6 @@ public class ValidationServiceImpl implements ValidationService {
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           }
-
-          // row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-          // List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
-          // if (null != field.getFieldValidations()) {
-          //
-          // RecordValidation recordVal = new RecordValidation();
-          // Validation validation = new Validation();
-          // validation.setLevelError(TypeErrorEnum.ERROR);
-          // validation.setMessage("ERROR IN ");
-          // validation.setTypeEntity(TypeEntityEnum.RECORD);
-          // validation.setValidationDate(new Date().toString());
-          // recordVal.setValidation(validation);
-          // recordVal.setRecordValue(field.getRecord());
-          // row.getRecordValidations().add(recordVal);
-          //
-          // field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
-          // fieldValue.setFieldValue(field);
-          // });
-          // // Save results to the db
-          // validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
-          // }
-          // });
         }
       });
     }
