@@ -195,6 +195,87 @@ public class ValidationServiceImpl implements ValidationService {
     return kieSession;
   }
 
+
+
+  @Override
+  @Transactional
+  public void validateDataSet(Long datasetId) throws EEAException {
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+  }
+
+  @Override
+  @Transactional
+  public void validateTable(Long datasetId) throws EEAException {
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+  }
+
+  @Override
+  @Transactional
+  public void validateRecord(Long datasetId) throws EEAException {
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    dataset.getTableValues().stream().forEach(table -> {
+      List<RecordValidation> recordValList = new ArrayList<RecordValidation>();
+      List<RecordValue> validatedFields =
+          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
+      validatedFields.stream().forEach(row -> {
+        List<TypeErrorEnum> errorsList = new ArrayList<>();
+        row.getFields().stream().filter(field -> null != field.getFieldValidations())
+            .forEach(field -> {
+              field.getFieldValidations().stream().forEach(fval -> {
+                if (fval.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+                  errorsList.add(TypeErrorEnum.ERROR);
+                } else {
+                  errorsList.add(TypeErrorEnum.WARNING);
+                }
+              });
+            });
+        if (null != errorsList) {
+          RecordValidation recordVal = new RecordValidation();
+          Validation validation = new Validation();
+          if (errorsList.contains(TypeErrorEnum.ERROR)) {
+            validation.setLevelError(TypeErrorEnum.ERROR);
+            validation.setMessage("ONE OR MORE FIELDS HAVE ERRORS");
+          } else {
+            if (errorsList.contains(TypeErrorEnum.WARNING)
+                && !errorsList.contains(TypeErrorEnum.WARNING)) {
+              validation.setLevelError(TypeErrorEnum.WARNING);
+              validation.setMessage("ONE OR MORE FIELDS HAVE WARNINGS");
+            } else {
+              return;
+            }
+          }
+          validation.setIdRule(new ObjectId().toString());
+          validation.setTypeEntity(TypeEntityEnum.RECORD);
+          validation.setValidationDate(new Date().toString());
+          recordVal.setValidation(validation);
+          recordVal.setRecordValue(row);
+          row.getRecordValidations().add(recordVal);
+          recordValList.add(recordVal);
+        }
+      });
+      validationRecordRepository.saveAll((Iterable<RecordValidation>) recordValList);
+    });
+  }
+
+
   /**
    * Validate data set data.
    *
@@ -204,120 +285,45 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateDataSetData(Long datasetId) throws EEAException {
+  public void validateFields(Long datasetId) throws EEAException {
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     if (dataflowId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
     // Get the session for the rules validation
     KieSession session = loadRulesKnowledgeBase(dataflowId);
 
-    // Remove previous validations
-    datasetRepository.deleteValidationTable();
-
-    // Dataset and TablesValue validations
-    // read Dataset Data
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-
-    // Execute rules validation
-    List<DatasetValidation> resultDataset = executeDatasetValidations(session, dataset);
-    // Save results to the db
-    validationDatasetRepository.saveAll((Iterable<DatasetValidation>) resultDataset);
-
-    // Execute tables validation
-    List<TableValidation> resultTable = executeTableValidations(session, dataset);
-    // Save results to the db
-    validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
-
-    // Records validation
+    // Records
     for (TableValue tableValue : dataset.getTableValues()) {
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
           sanitizeRecords(recordRepository.findAllRecordsByTableValueId(tableId));
 
-      // Execute record rules validation
-      List<RecordValidation> resultRecord = runRecordValidations(recordsByTable, session);
-      // Assign ID Records and Fields
-      populateRecordValidations(recordsByTable);
-      // Save results to the db
-      validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecord);
-
       // Execute field rules validation
       recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
-        Boolean haPasado = false;
-        Boolean error = false;
         if (null != row.getRecordValidations()) {
-          for (int i = 0; i < row.getFields().size(); i++) {
+          row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
             List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
+            if (null != field.getFieldValidations()) {
+              field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
+                fieldValue.setFieldValue(field);
+              });
 
-            for (int a = 0; a < row.getFields().size() && error != true; a++) {
-              if (null != row.getFields().get(a).getFieldValidations()) {
-                for (int b = 0; b < row.getFields().get(a).getFieldValidations().size()
-                    && error != true; b++) {
-                  if (row.getFields().get(a).getFieldValidations().get(b).getValidation()
-                      .getLevelError().equals(TypeErrorEnum.ERROR)) {
-                    error = true;
-                  }
-                }
-              }
-            }
-            if (null != row.getFields().get(i).getFieldValidations()) {
-
-              if (haPasado == false) {
-                RecordValidation recordVal = new RecordValidation();
-                Validation validation = new Validation();
-                validation
-                    .setLevelError(error == true ? TypeErrorEnum.ERROR : TypeErrorEnum.WARNING);
-                validation.setMessage(error == true ? "ONE OR MORE FIELDS HAVE ERRORS"
-                    : "ONE OR MORE FIELDS HAVE WARNINGS");
-                validation.setIdRule(new ObjectId().toString());
-                validation.setTypeEntity(TypeEntityEnum.RECORD);
-                validation.setValidationDate(new Date().toString());
-                recordVal.setValidation(validation);
-                recordVal.setRecordValue(row.getFields().get(i).getRecord());
-                row.getRecordValidations().add(recordVal);
-
-              }
-              haPasado = true;
-              for (int w = 0; w < row.getFields().get(i).getFieldValidations().size(); w++) {
-                row.getFields().get(i).getFieldValidations().get(w)
-                    .setFieldValue(row.getFields().get(i));
-              }
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
-          }
-
-          // row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-          // List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
-          // if (null != field.getFieldValidations()) {
-          //
-          // RecordValidation recordVal = new RecordValidation();
-          // Validation validation = new Validation();
-          // validation.setLevelError(TypeErrorEnum.ERROR);
-          // validation.setMessage("ERROR IN ");
-          // validation.setTypeEntity(TypeEntityEnum.RECORD);
-          // validation.setValidationDate(new Date().toString());
-          // recordVal.setValidation(validation);
-          // recordVal.setRecordValue(field.getRecord());
-          // row.getRecordValidations().add(recordVal);
-          //
-          // field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
-          // fieldValue.setFieldValue(field);
-          // });
-          // // Save results to the db
-          // validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
-          // }
-          // });
+          });
         }
       });
     }
   }
+
+
 
   /**
    * Populate record validations.
@@ -367,7 +373,6 @@ public class ValidationServiceImpl implements ValidationService {
       DatasetValue dataset) {
     List<DatasetValidation> resultDataset = runDatasetValidations(dataset, session);
     // Asign ID Dataset
-
     if (null != resultDataset && !resultDataset.isEmpty()) {
       resultDataset.stream().forEach(datasetValue -> {
         datasetValue.setDatasetValue(dataset);
@@ -397,6 +402,18 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return sanitizedRecords;
 
+  }
+
+  private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
+    List<RecordValue> sanitizedRecords = new ArrayList<>();
+    Set<Long> processedRecords = new HashSet<>();
+    for (RecordValue recordValue : records) {
+      if (!processedRecords.contains(recordValue.getId())) {
+        processedRecords.add(recordValue.getId());
+        sanitizedRecords.add(recordValue);
+      }
+    }
+    return sanitizedRecords;
   }
 
   /**

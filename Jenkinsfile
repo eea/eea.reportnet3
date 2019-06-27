@@ -97,7 +97,7 @@ pipeline {
         
         stage('Install in Nexus') {
             when {
-                branch 'develop' 
+                branch 'develop1' 
             }
             parallel {
                 stage('Install in JAVA repository') {
@@ -119,7 +119,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'develop' 
+                branch 'develop1' 
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
@@ -205,7 +205,7 @@ pipeline {
                         script {
                             echo 'ReportNet 3.0 Frontend'
                             def app
-                            app = docker.build("k8s-swi001:5000/frontend-service:3.0.0", " ./frontend-service/")
+                            app = docker.build("k8s-swi001:5000/reportnet-frontend-service:3.0", " ./frontend-service/")
                             app.push()                    
                         }
                     }

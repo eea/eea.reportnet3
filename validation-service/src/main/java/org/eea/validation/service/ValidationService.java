@@ -27,7 +27,7 @@ public interface ValidationService {
    *
    * @throws EEAException the EEA exception
    */
-  void validateDataSetData(@DatasetId Long datasetId) throws EEAException;
+  void validateFields(@DatasetId Long datasetId) throws EEAException;
 
 
   /**
@@ -77,5 +77,14 @@ public interface ValidationService {
    * @param datasetId the dataset id
    */
   void deleteAllValidation(@DatasetId Long datasetId);
+
+
+  void validateDataSet(@DatasetId Long datasetId) throws EEAException;
+
+
+  void validateTable(@DatasetId Long datasetId) throws EEAException;
+
+
+  void validateRecord(@DatasetId Long datasetId) throws EEAException;
 
 }
