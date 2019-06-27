@@ -48,7 +48,7 @@ public class ValidationHelper {
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Validating Fields");
-    validationService.validateDataSetData(datasetId);
+    validationService.validateFields(datasetId);
     LOG.info("Validating Records");
     validationService.validateRecord(datasetId);
     LOG.info("Validating Tables");

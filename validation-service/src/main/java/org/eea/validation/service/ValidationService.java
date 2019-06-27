@@ -27,7 +27,7 @@ public interface ValidationService {
    *
    * @throws EEAException the EEA exception
    */
-  void validateDataSetData(@DatasetId Long datasetId) throws EEAException;
+  void validateFields(@DatasetId Long datasetId) throws EEAException;
 
 
   /**
