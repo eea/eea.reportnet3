@@ -628,14 +628,13 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException {
 
     ValidationLinkVO validationLink = new ValidationLinkVO();
-    // TYPE 1 table; 2 record; 3 field
     RecordValue record = new RecordValue();
     List<RecordValue> records = new ArrayList<>();
 
     // TABLE
     if (TypeEntityEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
-      records = table.getRecords();
+      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema());
       if (records != null && !records.isEmpty()) {
         record = records.get(0);
       }
@@ -644,7 +643,7 @@ public class DatasetServiceImpl implements DatasetService {
     // RECORD
     if (TypeEntityEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      records = record.getTableValue().getRecords();
+      records = recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema());
     }
 
     // FIELD
@@ -652,18 +651,17 @@ public class DatasetServiceImpl implements DatasetService {
 
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
-        records = field.getRecord().getTableValue().getRecords();
         record = field.getRecord();
+        records =
+            recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema());
       }
     }
 
     if (records != null && !records.isEmpty()) {
-      records = this.sanitizeRecords(records);
       int recordPosition = records.indexOf(record);
 
       validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
       validationLink.setPosition(Long.valueOf(recordPosition));
-
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
           new ObjectId(record.getTableValue().getDatasetId().getIdDatasetSchema()));
