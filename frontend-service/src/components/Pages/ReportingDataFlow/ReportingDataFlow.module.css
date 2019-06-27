@@ -15,7 +15,14 @@
 	padding: 2rem !important;
 }
 .buttonsWrapper :global .p-splitbutton-menubutton {
-	right: 1em;
+	right: 2em;
+	position: absolute;
+	height: 20px;
+	right: 0;
+	bottom: 0;
+}
+.buttonsWrapper :global .p-splitbutton-menubutton:enabled:focus {
+	box-shadow: none;
 }
 .buttonsWrapper :global .p-button-icon-left {
 	bottom: 0px !important;
