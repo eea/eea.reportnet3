@@ -7,18 +7,27 @@ public enum ConditionsDrools {
 
   /** The datasetvo. */
   TYPE_VALIDATION("typevalidation"),
+
   /** The fieldvo. */
   WHEN_CONDITION("whencondition"),
+
   /** The recordvo. */
   MESSAGE_FAIL_VALIDATION("messageFailValidation"),
+
   /** The tablevo. */
   TYPE_FAIL_VALIDATION("typeFailValidation"),
+
   /** The dataflowrule. */
   RULE_ID("ruleid"),
 
+  /** The schema name. */
   SCHEMA_NAME("schemaName"),
+
   /** The dataschema id. */
-  DATASCHEMA_ID("dataSchemaId");
+  DATASCHEMA_ID("dataSchemaId"),
+
+  /** The origin name. */
+  ORIGIN_NAME("originName");
 
   /** The value. */
   private final String value;

@@ -1,5 +1,6 @@
 package org.eea.validation.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -98,8 +100,21 @@ public class ValidationControllerImpl implements ValidationController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
 
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
     FailedValidationsDatasetVO validations = null;
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    Pageable pageable = null;
+    if (StringUtils.isNotBlank(fields)) {
+      fields = fields.replace("nameTableSchema", "originName");
+      Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
+      PageRequest.of(pageNum, pageSize, order);
+      pageable = PageRequest.of(pageNum, pageSize, order);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize);
+    }
     try {
       validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
     } catch (EEAException e) {

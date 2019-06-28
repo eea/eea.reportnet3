@@ -6,6 +6,7 @@ typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
+originName
 
 package src.main.resources
 
@@ -24,7 +25,7 @@ dialect "java"
   when
     dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});
   then
-   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}");
+   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{originName}");
 
 
 end

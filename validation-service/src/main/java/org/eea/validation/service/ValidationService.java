@@ -2,7 +2,6 @@ package org.eea.validation.service;
 
 
 import java.util.List;
-import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
@@ -87,41 +86,38 @@ public interface ValidationService {
    * Gets the field errors.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
+   * @param idValidations the id validations
    * @return the field errors
    */
-  List<ErrorsValidationVO> getFieldErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  List<ErrorsValidationVO> getFieldErrors(@DatasetId Long datasetId, List<Long> idValidations);
 
   /**
    * Gets the record errors.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
+   * @param idValidations the id validations
    * @return the record errors
    */
-  List<ErrorsValidationVO> getRecordErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  List<ErrorsValidationVO> getRecordErrors(@DatasetId Long datasetId, List<Long> idValidations);
 
   /**
    * Gets the table errors.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
+   * @param idValidations the id validations
    * @return the table errors
    */
-  List<ErrorsValidationVO> getTableErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  List<ErrorsValidationVO> getTableErrors(@DatasetId Long datasetId, List<Long> idValidations);
 
   /**
    * Gets the dataset errors.
    *
-   * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
    * @return the dataset errors
    */
-  List<ErrorsValidationVO> getDatasetErrors(DatasetValue dataset,
-      Map<String, String> mapNameTableSchema);
+  List<ErrorsValidationVO> getDatasetErrors(@DatasetId Long datasetId, DatasetValue dataset,
+      List<Long> idValidations);
 
   /**
    * Gets the datase valuetby id.

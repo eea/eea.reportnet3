@@ -122,4 +122,13 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   HashSet<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
       @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
+
+  /**
+   * Find by validation ids.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Query("SELECT rv FROM RecordValidation rv  WHERE rv.validation.id in(:ids) ")
+  List<RecordValidation> findByValidationIds(@Param("ids") List<Long> ids);
 }

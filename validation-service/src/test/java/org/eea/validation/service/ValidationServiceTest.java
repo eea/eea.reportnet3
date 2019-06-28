@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -124,6 +123,10 @@ public class ValidationServiceTest {
   /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
+
+  /** The dataset validation repository. */
+  @Mock
+  private ValidationDatasetRepository datasetValidationRepository;
 
   /**
    * The dataset value.
@@ -439,9 +442,8 @@ public class ValidationServiceTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    when(validationFieldRepository.findFieldValidationsByIdDataset(Mockito.any()))
-        .thenReturn(fieldValidations);
-    assertNotNull("error", validationServiceImpl.getFieldErrors(1L, new HashMap<String, String>()));
+    when(validationFieldRepository.findByValidationIds(Mockito.any())).thenReturn(fieldValidations);
+    assertNotNull("error", validationServiceImpl.getFieldErrors(1L, new ArrayList<Long>()));
   }
 
   @Test
@@ -477,10 +479,9 @@ public class ValidationServiceTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    when(validationRecordRepository.findRecordValidationsByIdDataset(Mockito.any()))
+    when(validationRecordRepository.findByValidationIds(Mockito.any()))
         .thenReturn(recordValidations);
-    assertNotNull("error",
-        validationServiceImpl.getRecordErrors(1L, new HashMap<String, String>()));
+    assertNotNull("error", validationServiceImpl.getRecordErrors(1L, new ArrayList<Long>()));
   }
 
   @Test
@@ -516,9 +517,8 @@ public class ValidationServiceTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    when(validationTableRepository.findTableValidationsByIdDataset(Mockito.any()))
-        .thenReturn(tableValidations);
-    assertNotNull("error", validationServiceImpl.getTableErrors(1L, new HashMap<String, String>()));
+    when(validationTableRepository.findByValidationIds(Mockito.any())).thenReturn(tableValidations);
+    assertNotNull("error", validationServiceImpl.getTableErrors(1L, new ArrayList<Long>()));
   }
 
   @Test
@@ -554,8 +554,11 @@ public class ValidationServiceTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    when(datasetValidationRepository.findByValidationIds(Mockito.any()))
+        .thenReturn(datasetValidations);
+
     assertNotNull("error",
-        validationServiceImpl.getDatasetErrors(datasetValue, new HashMap<String, String>()));
+        validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<Long>()));
   }
 
 

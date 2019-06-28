@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.transaction.Transactional;
@@ -81,7 +80,7 @@ public class ValidationServiceImpl implements ValidationService {
    * The validation table repository.
    */
   @Autowired
-  private TableValidationRepository validationTableRepository;
+  private TableValidationRepository tableValidationRepository;
 
   /**
    * The validation field repository.
@@ -110,6 +109,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private DataSetControllerZuul datasetController;
+
+  /** The dataset validation repository. */
+  @Autowired
+  private ValidationDatasetRepository datasetValidationRepository;
 
 
   /**
@@ -240,7 +243,7 @@ public class ValidationServiceImpl implements ValidationService {
     // Execute tables validation
     List<TableValidation> resultTable = executeTableValidations(session, dataset);
     // Save results to the db
-    validationTableRepository.saveAll((Iterable<TableValidation>) resultTable);
+    tableValidationRepository.saveAll((Iterable<TableValidation>) resultTable);
 
     // Records validation
     for (TableValue tableValue : dataset.getTableValues()) {
@@ -258,7 +261,7 @@ public class ValidationServiceImpl implements ValidationService {
 
       // Execute field rules validation
       recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
-        Boolean haPasado = false;
+        Boolean hasPassed = false;
         Boolean error = false;
         if (null != row.getRecordValidations()) {
           for (int i = 0; i < row.getFields().size(); i++) {
@@ -277,7 +280,7 @@ public class ValidationServiceImpl implements ValidationService {
             }
             if (null != row.getFields().get(i).getFieldValidations()) {
 
-              if (haPasado == false) {
+              if (hasPassed == false) {
                 RecordValidation recordVal = new RecordValidation();
                 Validation validation = new Validation();
                 validation
@@ -285,6 +288,8 @@ public class ValidationServiceImpl implements ValidationService {
                 validation.setMessage(error == true ? "ONE OR MORE FIELDS HAVE ERRORS"
                     : "ONE OR MORE FIELDS HAVE WARNINGS");
                 validation.setIdRule(new ObjectId().toString());
+                validation.setOriginName(row.getFields().get(i).getFieldValidations().get(0)
+                    .getValidation().getOriginName());
                 validation.setTypeEntity(TypeEntityEnum.RECORD);
                 validation.setValidationDate(new Date().toString());
                 recordVal.setValidation(validation);
@@ -292,7 +297,7 @@ public class ValidationServiceImpl implements ValidationService {
                 row.getRecordValidations().add(recordVal);
 
               }
-              haPasado = true;
+              hasPassed = true;
               for (int w = 0; w < row.getFields().get(i).getFieldValidations().size(); w++) {
                 row.getFields().get(i).getFieldValidations().get(w)
                     .setFieldValue(row.getFields().get(i));
@@ -300,28 +305,6 @@ public class ValidationServiceImpl implements ValidationService {
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           }
-
-          // row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-          // List<FieldValidation> resultFields = runFieldValidations(row.getFields(), session);
-          // if (null != field.getFieldValidations()) {
-          //
-          // RecordValidation recordVal = new RecordValidation();
-          // Validation validation = new Validation();
-          // validation.setLevelError(TypeErrorEnum.ERROR);
-          // validation.setMessage("ERROR IN ");
-          // validation.setTypeEntity(TypeEntityEnum.RECORD);
-          // validation.setValidationDate(new Date().toString());
-          // recordVal.setValidation(validation);
-          // recordVal.setRecordValue(field.getRecord());
-          // row.getRecordValidations().add(recordVal);
-          //
-          // field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
-          // fieldValue.setFieldValue(field);
-          // });
-          // // Save results to the db
-          // validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
-          // }
-          // });
         }
       });
     }
@@ -427,9 +410,9 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<ErrorsValidationVO> getFieldErrors(final Long datasetId,
-      final Map<String, String> mapNameTableSchema) {
+      final List<Long> idValidations) {
     List<FieldValidation> fieldValidations =
-        validationFieldRepository.findFieldValidationsByIdDataset(datasetId);
+        validationFieldRepository.findByValidationIds(idValidations);
     List<ErrorsValidationVO> errors = new ArrayList<>();
     for (FieldValidation fieldValidation : fieldValidations) {
 
@@ -438,8 +421,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(fieldValidation.getValidation().getId());
       error.setLevelError(fieldValidation.getValidation().getLevelError().name());
       error.setMessage(fieldValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema
-          .get(fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema()));
+      error.setNameTableSchema(fieldValidation.getValidation().getOriginName());
 
       error.setIdTableSchema(
           fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
@@ -462,9 +444,9 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<ErrorsValidationVO> getRecordErrors(final Long datasetId,
-      final Map<String, String> mapNameTableSchema) {
+      final List<Long> idValidations) {
     List<RecordValidation> recordValidations =
-        validationRecordRepository.findRecordValidationsByIdDataset(datasetId);
+        validationRecordRepository.findByValidationIds(idValidations);
     List<ErrorsValidationVO> errors = new ArrayList<>();
     for (RecordValidation recordValidation : recordValidations) {
 
@@ -473,8 +455,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(recordValidation.getValidation().getId());
       error.setLevelError(recordValidation.getValidation().getLevelError().name());
       error.setMessage(recordValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema
-          .get(recordValidation.getRecordValue().getTableValue().getIdTableSchema()));
+      error.setNameTableSchema(recordValidation.getValidation().getOriginName());
 
       error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
 
@@ -496,9 +477,9 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<ErrorsValidationVO> getTableErrors(final Long datasetId,
-      final Map<String, String> mapNameTableSchema) {
+      final List<Long> idValidations) {
     List<TableValidation> tableValidations =
-        validationTableRepository.findTableValidationsByIdDataset(datasetId);
+        tableValidationRepository.findByValidationIds(idValidations);
     List<ErrorsValidationVO> errors = new ArrayList<>();
     for (TableValidation tableValidation : tableValidations) {
 
@@ -507,8 +488,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setIdValidation(tableValidation.getValidation().getId());
       error.setLevelError(tableValidation.getValidation().getLevelError().name());
       error.setMessage(tableValidation.getValidation().getMessage());
-      error.setNameTableSchema(
-          mapNameTableSchema.get(tableValidation.getTableValue().getIdTableSchema()));
+      error.setNameTableSchema(tableValidation.getValidation().getOriginName());
 
       error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
 
@@ -524,21 +504,24 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Gets the dataset errors.
    *
+   * @param datasetId the dataset id
    * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
+   * @param idValidations the id validations
    * @return the dataset errors
    */
   @Override
-  public List<ErrorsValidationVO> getDatasetErrors(final DatasetValue dataset,
-      final Map<String, String> mapNameTableSchema) {
+  public List<ErrorsValidationVO> getDatasetErrors(final Long datasetId, final DatasetValue dataset,
+      final List<Long> idValidations) {
     List<ErrorsValidationVO> errors = new ArrayList<>();
-    for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
+    List<DatasetValidation> datasetValidations =
+        datasetValidationRepository.findByValidationIds(idValidations);
+    for (DatasetValidation datasetValidation : datasetValidations) {
       ErrorsValidationVO error = new ErrorsValidationVO();
       error.setIdObject(datasetValidation.getDatasetValue().getId());
       error.setIdValidation(datasetValidation.getValidation().getId());
       error.setLevelError(datasetValidation.getValidation().getLevelError().name());
       error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(mapNameTableSchema.get(dataset.getIdDatasetSchema()));
+      error.setNameTableSchema(datasetValidation.getValidation().getOriginName());
       error.setIdTableSchema(dataset.getIdDatasetSchema());
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
@@ -579,4 +562,5 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
   }
+
 }

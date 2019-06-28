@@ -2,7 +2,6 @@ package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -22,8 +21,8 @@ public class LoadErrorsCallable implements Callable<List<ErrorsValidationVO>> {
   /** The dataset. */
   private DatasetValue dataset;
 
-  /** The map name table schema. */
-  private Map<String, String> mapNameTableSchema;
+  /** The id validations. */
+  private List<Long> idValidations;
 
   /** The thread. */
   private int thread;
@@ -34,16 +33,16 @@ public class LoadErrorsCallable implements Callable<List<ErrorsValidationVO>> {
    *
    * @param validationService the validation service
    * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
+   * @param idValidations the id validations
    * @param thread the thread
    */
-  public LoadErrorsCallable(final ValidationService validationService, final DatasetValue dataset,
-      final Map<String, String> mapNameTableSchema, int thread) {
+  public LoadErrorsCallable(final ValidationService validationService, DatasetValue dataset,
+      List<Long> idValidations, int thread) {
     this.validationService = validationService;
-    this.dataset = dataset;
-    this.datasetId = dataset.getId();
-    this.mapNameTableSchema = mapNameTableSchema;
     this.thread = thread;
+    this.datasetId = dataset.getId();
+    this.dataset = dataset;
+    this.idValidations = idValidations;
   }
 
   /**
@@ -57,16 +56,16 @@ public class LoadErrorsCallable implements Callable<List<ErrorsValidationVO>> {
     List<ErrorsValidationVO> result = new ArrayList<>();
     switch (thread) {
       case 0:
-        result = validationService.getDatasetErrors(dataset, mapNameTableSchema);
+        result = validationService.getDatasetErrors(datasetId, dataset, idValidations);
         break;
       case 1:
-        result = validationService.getTableErrors(datasetId, mapNameTableSchema);
+        result = validationService.getTableErrors(datasetId, idValidations);
         break;
       case 2:
-        result = validationService.getRecordErrors(datasetId, mapNameTableSchema);
+        result = validationService.getRecordErrors(datasetId, idValidations);
         break;
       case 3:
-        result = validationService.getFieldErrors(datasetId, mapNameTableSchema);
+        result = validationService.getFieldErrors(datasetId, idValidations);
         break;
       default:
         break;

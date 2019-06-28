@@ -26,11 +26,12 @@ public class ValidationRuleDrools {
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
+   * @param originName the origin name
    */
   public static void fillValidation(DatasetValue dataSetValue, String message, String typeError,
-      String ruleId) {
+      String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.DATASET);
+        createValidationObject(message, typeError, ruleId, TypeEntityEnum.DATASET, originName);
     DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setValidation(newValidation);
     if (null == dataSetValue.getDatasetValidations()) {
@@ -46,11 +47,12 @@ public class ValidationRuleDrools {
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
+   * @param originName the origin name
    */
   public static void fillValidation(TableValue tableValue, String message, String typeError,
-      String ruleId) {
+      String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.TABLE);
+        createValidationObject(message, typeError, ruleId, TypeEntityEnum.TABLE, originName);
     TableValidation tableValidation = new TableValidation();
     tableValidation.setValidation(newValidation);
     if (null == tableValue.getTableValidations()) {
@@ -66,11 +68,12 @@ public class ValidationRuleDrools {
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
+   * @param originName the origin name
    */
   public static void fillValidation(FieldValue fieldValue, String message, String typeError,
-      String ruleId) {
+      String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.FIELD);
+        createValidationObject(message, typeError, ruleId, TypeEntityEnum.FIELD, originName);
     FieldValidation fieldValidation = new FieldValidation();
     fieldValidation.setValidation(newValidation);
     if (null == fieldValue.getFieldValidations()) {
@@ -87,11 +90,12 @@ public class ValidationRuleDrools {
    * @param message the message
    * @param typeError the type error
    * @param ruleId the rule id
+   * @param originName the origin name
    */
   public static void fillValidation(RecordValue recordValue, String message, String typeError,
-      String ruleId) {
+      String ruleId, String originName) {
     Validation newValidation =
-        createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD);
+        createValidationObject(message, typeError, ruleId, TypeEntityEnum.RECORD, originName);
     RecordValidation recordValidation = new RecordValidation();
     recordValidation.setValidation(newValidation);
     if (null == recordValue.getRecordValidations()) {
@@ -107,10 +111,11 @@ public class ValidationRuleDrools {
    * @param typeError the type error
    * @param ruleId the rule id
    * @param typeEntityEnum the type entity enum
+   * @param originName the origin name
    * @return the validation VO
    */
   private static Validation createValidationObject(String message, String typeError, String ruleId,
-      TypeEntityEnum typeEntityEnum) {
+      TypeEntityEnum typeEntityEnum, String originName) {
     Validation newValidation = new Validation();
     newValidation.setLevelError(
         typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
@@ -118,6 +123,7 @@ public class ValidationRuleDrools {
     newValidation.setIdRule(ruleId);
     newValidation.setValidationDate(new Date().toString());
     newValidation.setTypeEntity(typeEntityEnum);
+    newValidation.setOriginName(originName);
     return newValidation;
   }
 
