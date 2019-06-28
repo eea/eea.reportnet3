@@ -9,6 +9,7 @@ import iconsResources from "./conf/prime.icons.json";
 import ReportingDataFlow from "./components/Pages/ReportingDataFlow/ReportingDataFlow";
 import DocumentationDataSet from "./components/Pages/DocumentationDataSet/DocumentationDataSet";
 import DataFlowTasks from "./components/Pages/DataFlowTasks/DataFlowTasks";
+import DataFlowsCompleted from "./components/Pages/DataFlowTasks/DataFlowsCompleted";
 
 const App = () => {
 	const [resources] = useState({ ...langResources, ...iconsResources });
@@ -23,6 +24,10 @@ const App = () => {
 						<Route
 							path="/documentation-data-set"
 							component={DocumentationDataSet}
+						/>
+						<Route
+							path="/data-flow-completed"
+							component={DataFlowsCompleted}
 						/>
 					</Switch>
 				</Router>
