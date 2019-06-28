@@ -14,6 +14,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
@@ -26,11 +27,13 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
+import org.eea.validation.persistence.data.repository.RecordValidationRepository;
+import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
-import org.eea.validation.persistence.data.repository.ValidationFieldRepository;
-import org.eea.validation.persistence.data.repository.ValidationRecordRepository;
-import org.eea.validation.persistence.data.repository.ValidationTableRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.kie.api.runtime.KieSession;
@@ -65,7 +68,7 @@ public class ValidationServiceImpl implements ValidationService {
    * The validation record repository.
    */
   @Autowired
-  private ValidationRecordRepository validationRecordRepository;
+  private RecordValidationRepository validationRecordRepository;
 
   /**
    * The validation dataset repository.
@@ -77,13 +80,13 @@ public class ValidationServiceImpl implements ValidationService {
    * The validation table repository.
    */
   @Autowired
-  private ValidationTableRepository validationTableRepository;
+  private TableValidationRepository tableValidationRepository;
 
   /**
    * The validation field repository.
    */
   @Autowired
-  private ValidationFieldRepository validationFieldRepository;
+  private FieldValidationRepository validationFieldRepository;
 
   /**
    * The dataset repository.
@@ -97,18 +100,21 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
+
   /**
    * The dataset controller.
    */
   @Autowired
   private DataSetControllerZuul datasetController;
 
-
   /**
    * Gets the element lenght.
    *
    * @param dataset the dataset
-   *
+   * @param kieSession the kie session
    * @return the element lenght
    */
   @Override
@@ -123,7 +129,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Run table validations.
    *
    * @param tableValues the table values
-   *
+   * @param kieSession the kie session
    * @return the list
    */
   @Override
@@ -140,7 +146,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Run record validations.
    *
    * @param records the records
-   *
+   * @param kieSession the kie session
    * @return the list
    */
   @Override
@@ -158,7 +164,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Run field validations.
    *
    * @param fields the fields
-   *
+   * @param kieSession the kie session
    * @return the list
    */
   @Override
@@ -177,11 +183,9 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Load rules knowledge base.
    *
-   * @param dataflowId the dataflow id
-   *
+   * @param datasetId the dataset id
    * @return the kie session
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    */
@@ -210,6 +214,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate data set.
    *
    * @param datasetId the dataset id
+   * @param kieSession the kie session
    * @throws EEAException the EEA exception
    */
   @Override
@@ -267,6 +272,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
+   * @param session the session
    * @throws EEAException the EEA exception
    */
   @Override
@@ -324,7 +330,7 @@ public class ValidationServiceImpl implements ValidationService {
         tableValList.add(tableVal);
       }
 
-      validationTableRepository.saveAll((Iterable<TableValidation>) tableValList);
+      tableValidationRepository.saveAll((Iterable<TableValidation>) tableValList);
     });
   }
 
@@ -332,6 +338,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate record.
    *
    * @param datasetId the dataset id
+   * @param session the session
    * @throws EEAException the EEA exception
    */
   @Override
@@ -405,8 +412,8 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   *
-   * @throws EEAException
+   * @param session the session
+   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
@@ -435,7 +442,6 @@ public class ValidationServiceImpl implements ValidationService {
             }
           });
         }
-
       });
     }
   }
@@ -531,6 +537,168 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void deleteAllValidation(Long datasetId) {
     datasetRepository.deleteValidationTable();
+  }
+
+  /**
+   * Gets the field errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the field errors
+   */
+  @Override
+  public List<ErrorsValidationVO> getFieldErrors(final Long datasetId,
+      final List<Long> idValidations) {
+    List<FieldValidation> fieldValidations =
+        validationFieldRepository.findByValidationIds(idValidations);
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+    for (FieldValidation fieldValidation : fieldValidations) {
+
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(fieldValidation.getFieldValue().getId());
+      error.setIdValidation(fieldValidation.getValidation().getId());
+      error.setLevelError(fieldValidation.getValidation().getLevelError().name());
+      error.setMessage(fieldValidation.getValidation().getMessage());
+      error.setNameTableSchema(fieldValidation.getValidation().getOriginName());
+
+      error.setIdTableSchema(
+          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
+
+      error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
+      error.setValidationDate(fieldValidation.getValidation().getValidationDate());
+
+      errors.add(error);
+    }
+    return errors;
+  }
+
+
+  /**
+   * Gets the record errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the record errors
+   */
+  @Override
+  public List<ErrorsValidationVO> getRecordErrors(final Long datasetId,
+      final List<Long> idValidations) {
+    List<RecordValidation> recordValidations =
+        validationRecordRepository.findByValidationIds(idValidations);
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+    for (RecordValidation recordValidation : recordValidations) {
+
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(recordValidation.getRecordValue().getId());
+      error.setIdValidation(recordValidation.getValidation().getId());
+      error.setLevelError(recordValidation.getValidation().getLevelError().name());
+      error.setMessage(recordValidation.getValidation().getMessage());
+      error.setNameTableSchema(recordValidation.getValidation().getOriginName());
+
+      error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+
+      error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
+      error.setValidationDate(recordValidation.getValidation().getValidationDate());
+
+      errors.add(error);
+    }
+    return errors;
+  }
+
+
+  /**
+   * Gets the table errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the table errors
+   */
+  @Override
+  public List<ErrorsValidationVO> getTableErrors(final Long datasetId,
+      final List<Long> idValidations) {
+    List<TableValidation> tableValidations =
+        tableValidationRepository.findByValidationIds(idValidations);
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+    for (TableValidation tableValidation : tableValidations) {
+
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(tableValidation.getTableValue().getId());
+      error.setIdValidation(tableValidation.getValidation().getId());
+      error.setLevelError(tableValidation.getValidation().getLevelError().name());
+      error.setMessage(tableValidation.getValidation().getMessage());
+      error.setNameTableSchema(tableValidation.getValidation().getOriginName());
+
+      error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
+
+      error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
+      error.setValidationDate(tableValidation.getValidation().getValidationDate());
+
+      errors.add(error);
+    }
+    return errors;
+  }
+
+
+  /**
+   * Gets the dataset errors.
+   *
+   * @param datasetId the dataset id
+   * @param dataset the dataset
+   * @param idValidations the id validations
+   * @return the dataset errors
+   */
+  @Override
+  public List<ErrorsValidationVO> getDatasetErrors(final Long datasetId, final DatasetValue dataset,
+      final List<Long> idValidations) {
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+    List<DatasetValidation> datasetValidations =
+        validationDatasetRepository.findByValidationIds(idValidations);
+    for (DatasetValidation datasetValidation : datasetValidations) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(datasetValidation.getDatasetValue().getId());
+      error.setIdValidation(datasetValidation.getValidation().getId());
+      error.setLevelError(datasetValidation.getValidation().getLevelError().name());
+      error.setMessage(datasetValidation.getValidation().getMessage());
+      error.setNameTableSchema(datasetValidation.getValidation().getOriginName());
+      error.setIdTableSchema(dataset.getIdDatasetSchema());
+      error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
+      error.setValidationDate(datasetValidation.getValidation().getValidationDate());
+
+      errors.add(error);
+    }
+    return errors;
+  }
+
+  /**
+   * Gets the dataset valueby id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset valueby id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DatasetValue getDatasetValuebyId(final Long datasetId) throws EEAException {
+    if (datasetId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return datasetRepository.findById(datasetId).orElse(new DatasetValue());
+  }
+
+  /**
+   * Gets the find by id data set schema.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the find by id data set schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataSetSchema getfindByIdDataSetSchema(final Long datasetId,
+      final ObjectId datasetSchemaId) throws EEAException {
+    if (datasetId == null || datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
   }
 
 }
