@@ -8,7 +8,7 @@ const DataFlowItem = props => {
 	return (
 		<div
 			className={
-				listType === "accepted"
+				listType === "accepted" || listType === "completed"
 					? `${styles.container} ${styles.accepted}`
 					: `${styles.container}`
 			}
