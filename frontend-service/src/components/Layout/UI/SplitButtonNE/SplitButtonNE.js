@@ -59,6 +59,7 @@ export class SplitButtonNE extends SplitButton {
 				icon=""
 				onClick={this.save}
 				model={this.state.items}
+				className="p-button-primary"
 			/>
 		);
 	}

@@ -1,5 +1,4 @@
 import React, { useEffect, useContext, useState } from "react";
-
 import styles from "./DataFlowTasks.module.scss";
 
 import DataFlaws from "../../../assets/jsons/DataFlaws.json";
@@ -53,7 +52,10 @@ const DataFlowTasks = () => {
 			/>
 			<div className="rep-container">
 				<div className="rep-row">
-					<DataFlowColumn navTitle="data flows" search={false} />
+					<DataFlowColumn
+						navTitle={resources.messages["dataFlow"]}
+						search={false}
+					/>
 					<div className="subscribe-df rep-col-xs-12 rep-col-md-9">
 						<TabMenu
 							model={tabMenuItems}
@@ -63,14 +65,14 @@ const DataFlowTasks = () => {
 						<DataFlowList
 							listContent={pendingDataFlows}
 							listType="pending"
-							listTitle="Pending data flows"
-							listDescription="You are required to accept and report data to these data flows"
+							listTitle={resources.messages["pendingDataFlowTitle"]}
+							listDescription={resources.messages["pendingDataFlowText"]}
 						/>
 						<DataFlowList
 							listContent={acceptetDataFlows}
 							listType="accepted"
-							listTitle="My data flows"
-							listDescription="Please proceed to report before deadline"
+							listTitle={resources.messages["acceptedDataFlowTitle"]}
+							listDescription={resources.messages["acceptedDataFlowText"]}
 						/>
 					</div>
 				</div>

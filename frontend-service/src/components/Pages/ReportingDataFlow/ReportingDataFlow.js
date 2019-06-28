@@ -49,14 +49,14 @@ const ReportingDataFlow = props => {
 			<MainLayout>
 				<div className="titleDiv">
 					<BreadCrumb
-						model={[{ label: "Reporting data flow", url: "" }]}
+						model={[{ label: resources.messages["reportingDataFlow"], url: "#" },]}
 						home={home}
 					/>
 				</div>
 				<div className="rep-container">
 					<div className="rep-row">
 						<DataFlowColumn
-							navTitle="data flows"
+							navTitle={resources.messages['dataFlow']}
 							dataFlowTitle={nameDataSetSchema}
 							search={true}
 						/>
@@ -69,21 +69,19 @@ const ReportingDataFlow = props => {
 							<div className={`${styles.buttonsWrapper}`}>
 								<div>
 									<Button
-										label="DO"
+										label={resources.messages["do"]}
 										className="p-button-warning"
 										onClick={e => {
 											handleRedirect("/documentation-data-set");
 										}}
 									/>
-									<p className="caption">Documents</p>
+									<p className="caption">{resources.messages['documents']}</p>
 								</div>
 								<div className={styles.buttonwrapper}>
 									<SplitButtonNE
-										label="NE"
-										className="p-button-primary"
 										handleRedirect={handleRedirect}
 									/>
-									<p className="caption">New dataset</p>
+									<p className="caption">{resources.messages['newDataset']}</p>
 								</div>
 							</div>
 						</div>

@@ -59,8 +59,8 @@ const DocumentationDataSet = () => {
     //Bread Crumbs settings
     useEffect(()=>{
         setBreadCrumbItems( [
-            {label: resources.messages["newDataset"], url: '#'},
-            {label: resources.messages["viewData"], url: '#'}
+            {label: resources.messages["reportingDataFlow"], url: '/reporting-data-flow'},
+            {label: resources.messages["documents"], url: '#'}
         ]); 
     } , [] );
 
@@ -78,7 +78,7 @@ const DocumentationDataSet = () => {
            
             <TabView>
                 
-                <TabPanel header="Documents">
+                <TabPanel header={resources.messages['documents']}>
                       
                     <ButtonsBar buttons={customButtons} />
                 
@@ -89,27 +89,27 @@ const DocumentationDataSet = () => {
                         <Column
                         columnResizeMode="expand"
                         field="title"
-                        header="Title"
+                        header={resources.messages['title']}
                         filter={false}
                         filterMatchMode="contains"
                         />
                         <Column
                         field="description"
-                        header="Description"
+                        header={resources.messages['description']}
                         filter={false}
                         filterMatchMode="contains"
                         />
 
                         <Column
                         field="category"
-                        header="Category"
+                        header={resources.messages['category']}
                         filter={false}
                         filterMatchMode="contains"
                         />
                         <Column
                         body={actionTemplate} style={{textAlign:'center', width: '8em'}}
                         field="url"
-                        header="Url"
+                        header={resources.messages['url']}
                         filter={false}
                         filterMatchMode="contains"
                         />
@@ -120,7 +120,7 @@ const DocumentationDataSet = () => {
                     <DataTable value={file}>{cols}</DataTable>
                 </TabPanel>
                 
-                <TabPanel header="Web links">
+                <TabPanel header={resources.messages['webLinks']}>
                     {
 
                     <DataTable value={file} autoLayout={true}>
@@ -128,14 +128,14 @@ const DocumentationDataSet = () => {
                         <Column
                         columnResizeMode="expand"
                         field="title"
-                        header="Title"
+                        header={resources.messages['title']}
                         filter={false}
                         filterMatchMode="contains"
                         />
                        
                         <Column
                         field="url"
-                        header="Url"
+                        header={resources.messages['url']}
                         filter={false}
                         filterMatchMode="contains"
                         />
