@@ -6,7 +6,6 @@ import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import ResourcesContext from "../../Context/ResourcesContext";
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
-//import ResourcesContext from '../../Context/ResourcesContext';
 
 const DataFlowsCompleted = () => {
 	const resources = useContext(ResourcesContext);
@@ -30,8 +29,8 @@ const DataFlowsCompleted = () => {
 						<DataFlowList
 							listContent={completedDataFlows}
 							listType="completed"
-							listTitle={resources.messages["pendingDataFlowTitle"]}
-							listDescription={resources.messages["pendingDataFlowText"]}
+							listTitle={resources.messages["completedDataFlowTitle"]}
+							listDescription={resources.messages["completedDataFlowText"]}
 						/>						
 					</div>
 				</div>
