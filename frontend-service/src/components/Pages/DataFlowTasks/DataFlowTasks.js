@@ -35,10 +35,10 @@ const DataFlowTasks = () => {
 		const jsonMimic = DataFlaws;
 
 		const arrayPending = jsonMimic.filter(
-			jsonData => jsonData.dataFlowStatus === "0"
+			jsonData => jsonData.dataFlowStatus === "pending"
 		);
 		const arrayAccepted = jsonMimic.filter(
-			jsonData => jsonData.dataFlowStatus === "1"
+			jsonData => jsonData.dataFlowStatus === "accepted"
 		);
 
 		setPendingDataFlows([...arrayPending]);
