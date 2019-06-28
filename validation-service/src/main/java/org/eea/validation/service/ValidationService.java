@@ -24,10 +24,10 @@ public interface ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   *
+   * @param kieSession the kie session
    * @throws EEAException the EEA exception
    */
-  void validateFields(@DatasetId Long datasetId) throws EEAException;
+  void validateFields(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
 
 
   /**
@@ -79,12 +79,43 @@ public interface ValidationService {
   void deleteAllValidation(@DatasetId Long datasetId);
 
 
-  void validateDataSet(@DatasetId Long datasetId) throws EEAException;
+  /**
+   * Validate data set.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateDataSet(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
 
 
-  void validateTable(@DatasetId Long datasetId) throws EEAException;
+  /**
+   * Validate table.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateTable(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
 
 
-  void validateRecord(@DatasetId Long datasetId) throws EEAException;
+  /**
+   * Validate record.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateRecord(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Load rules knowledge base.
+   *
+   * @param datasetId the dataset id
+   * @return the kie session
+   * @throws EEAException the EEA exception
+   */
+  KieSession loadRulesKnowledgeBase(@DatasetId Long datasetId) throws EEAException;
 
 }

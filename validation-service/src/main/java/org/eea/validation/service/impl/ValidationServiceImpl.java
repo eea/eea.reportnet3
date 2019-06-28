@@ -146,7 +146,10 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public List<RecordValidation> runRecordValidations(List<RecordValue> records,
       KieSession kieSession) {
-    records.stream().forEach(record -> kieSession.insert(record));
+    records.stream()
+        .filter(record -> record.getIdRecordSchema() != null
+            && StringUtils.isNotBlank(record.getIdRecordSchema()))
+        .forEach(record -> kieSession.insert(record));
     kieSession.fireAllRules();
     return records.isEmpty() ? new ArrayList<>() : records.get(0).getRecordValidations();
   }
@@ -182,8 +185,14 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    */
-  public KieSession loadRulesKnowledgeBase(Long dataflowId) throws EEAException {
+  @Override
+  public KieSession loadRulesKnowledgeBase(Long datasetId) throws EEAException {
     KieSession kieSession;
+    // Get Dataflow id
+    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
     try {
       kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
     } catch (FileNotFoundException e) {
@@ -197,36 +206,138 @@ public class ValidationServiceImpl implements ValidationService {
 
 
 
+  /**
+   * Validate data set.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
-  public void validateDataSet(Long datasetId) throws EEAException {
-    // Get Dataflow id
-    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    if (dataflowId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+  public void validateDataSet(Long datasetId, KieSession kieSession) throws EEAException {
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    List<DatasetValidation> dataSetValList = new ArrayList<DatasetValidation>();
+    List<TypeErrorEnum> errorsList = new ArrayList<>();
+    List<String> orig = new ArrayList<>();
+
+    dataset.getTableValues().stream().filter(table -> null != table.getTableValidations())
+        .forEach(table -> {
+          table.getTableValidations().stream().forEach(tableVal -> {
+            orig.add("Dataset_" + tableVal.getTableValue().getDatasetId().getId().toString());
+            if (tableVal.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+              errorsList.add(TypeErrorEnum.ERROR);
+            } else {
+              errorsList.add(TypeErrorEnum.WARNING);
+            }
+          });
+        });
+    if (null != errorsList) {
+      DatasetValidation dataSetVal = new DatasetValidation();
+      Validation validation = new Validation();
+      if (errorsList.contains(TypeErrorEnum.ERROR)) {
+        validation.setLevelError(TypeErrorEnum.ERROR);
+        validation.setMessage("ONE OR MORE TABLES HAVE ERRORS");
+      } else {
+        if (errorsList.contains(TypeErrorEnum.WARNING)
+            && !errorsList.contains(TypeErrorEnum.ERROR)) {
+          validation.setLevelError(TypeErrorEnum.WARNING);
+          validation.setMessage("ONE OR MORE TABLES HAVE WARNINGS");
+        } else {
+          return;
+        }
+      }
+      validation.setIdRule(new ObjectId().toString());
+      validation.setTypeEntity(TypeEntityEnum.DATASET);
+      validation.setValidationDate(new Date().toString());
+      validation.setOriginName(orig.get(0));
+      dataSetVal.setValidation(validation);
+      dataSetVal.setDatasetValue(dataset);
+      dataset.getDatasetValidations().add(dataSetVal);
+      dataSetValList.add(dataSetVal);
     }
 
+    validationDatasetRepository.saveAll((Iterable<DatasetValidation>) dataSetValList);
   }
 
+  /**
+   * Validate table.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
-  public void validateTable(Long datasetId) throws EEAException {
-    // Get Dataflow id
-    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    if (dataflowId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
+  public void validateTable(Long datasetId, KieSession session) throws EEAException {
 
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    if (dataset == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    dataset.getTableValues().stream().forEach(table -> {
+      List<TableValidation> tableValList = new ArrayList<TableValidation>();
+
+      List<RecordValue> validatedRecords =
+          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
+
+      List<TypeErrorEnum> errorsList = new ArrayList<>();
+      List<String> orig = new ArrayList<>();
+
+      validatedRecords.stream().filter(row -> null != row.getRecordValidations()).forEach(row -> {
+
+
+        row.getRecordValidations().stream().forEach(rowVal -> {
+          orig.add(rowVal.getValidation().getOriginName());
+          if (rowVal.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+            errorsList.add(TypeErrorEnum.ERROR);
+          } else {
+            errorsList.add(TypeErrorEnum.WARNING);
+          }
+        });
+
+      });
+      if (null != errorsList) {
+        TableValidation tableVal = new TableValidation();
+        Validation validation = new Validation();
+        if (errorsList.contains(TypeErrorEnum.ERROR)) {
+          validation.setLevelError(TypeErrorEnum.ERROR);
+          validation.setMessage("ONE OR MORE RECORDS HAVE ERRORS");
+        } else {
+          if (errorsList.contains(TypeErrorEnum.WARNING)
+              && !errorsList.contains(TypeErrorEnum.ERROR)) {
+            validation.setLevelError(TypeErrorEnum.WARNING);
+            validation.setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
+          } else {
+            return;
+          }
+        }
+        validation.setIdRule(new ObjectId().toString());
+        validation.setTypeEntity(TypeEntityEnum.TABLE);
+        validation.setValidationDate(new Date().toString());
+        validation.setOriginName(orig.get(0));
+        tableVal.setValidation(validation);
+        tableVal.setTableValue(table);
+        table.getTableValidations().add(tableVal);
+        tableValList.add(tableVal);
+      }
+
+      validationTableRepository.saveAll((Iterable<TableValidation>) tableValList);
+    });
   }
 
+  /**
+   * Validate record.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
-  public void validateRecord(Long datasetId) throws EEAException {
-    // Get Dataflow id
-    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    if (dataflowId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
+  public void validateRecord(Long datasetId, KieSession session) throws EEAException {
+
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -273,11 +384,22 @@ public class ValidationServiceImpl implements ValidationService {
           row.getRecordValidations().add(recordVal);
           recordValList.add(recordVal);
         }
+
+      });
+
+      validatedFields.stream().filter(Objects::nonNull).forEach(row -> {
+        List<RecordValidation> resultRecords = runRecordValidations(validatedFields, session);
+        if (null != row.getRecordValidations()) {
+          row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
+            rowValidation.setRecordValue(row);
+          });
+          recordValList.addAll(resultRecords);
+        }
       });
       validationRecordRepository.saveAll((Iterable<RecordValidation>) recordValList);
     });
-  }
 
+  }
 
   /**
    * Validate data set data.
@@ -288,15 +410,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateFields(Long datasetId) throws EEAException {
-    // Get Dataflow id
-    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    if (dataflowId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    // Get the session for the rules validation
-    KieSession session = loadRulesKnowledgeBase(dataflowId);
-
+  public void validateFields(Long datasetId, KieSession session) throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -324,23 +438,6 @@ public class ValidationServiceImpl implements ValidationService {
 
       });
     }
-  }
-
-
-
-  /**
-   * Populate record validations.
-   *
-   * @param recordsByTable the records by table
-   */
-  private void populateRecordValidations(List<RecordValue> recordsByTable) {
-    recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
-      if (null != row.getRecordValidations()) {
-        row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValue -> {
-          rowValue.setRecordValue(row);
-        });
-      }
-    });
   }
 
   /**
@@ -407,6 +504,12 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
+  /**
+   * Sanitize records validations.
+   *
+   * @param records the records
+   * @return the list
+   */
   private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<Long> processedRecords = new HashSet<>();

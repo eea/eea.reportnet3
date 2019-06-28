@@ -243,6 +243,18 @@ public class ValidationServiceTest {
 
   }
 
+
+  /**
+   * Testvalidate record.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testValidateField() throws FileNotFoundException, EEAException {
+
+  }
+
   /**
    * Test validate data set data.
    *
@@ -250,7 +262,7 @@ public class ValidationServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testValidateDataSetData() throws FileNotFoundException, EEAException {
+  public void testValidateRecord() throws FileNotFoundException, EEAException {
 
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     KieHelper kieHelper = new KieHelper();
@@ -287,7 +299,7 @@ public class ValidationServiceTest {
 
     // when(validationFieldRepository.saveAll(Mockito.any())).thenReturn(null);
 
-    validationServiceImpl.validateFields(1L);
+    validationServiceImpl.validateFields(1L, kieSession);
 
   }
 
@@ -300,7 +312,7 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testValidateDataSetDataDataflowIdExcep() throws EEAException, FileNotFoundException {
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(null);
-    validationServiceImpl.validateFields(1L);
+    validationServiceImpl.validateFields(1L, kieSession);
   }
 
   /**
@@ -313,7 +325,7 @@ public class ValidationServiceTest {
   public void testValidateDataSetDataSessionExcep() throws FileNotFoundException, EEAException {
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(null);
-    validationServiceImpl.validateFields(1L);
+    validationServiceImpl.validateFields(1L, kieSession);
   }
 
   /**
@@ -329,7 +341,7 @@ public class ValidationServiceTest {
     KieBase kiebase = kieHelper.build();
     when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    validationServiceImpl.validateFields(1L);
+    validationServiceImpl.validateFields(1L, kieSession);
 
   }
 
