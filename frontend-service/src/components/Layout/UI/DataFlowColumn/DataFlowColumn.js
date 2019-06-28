@@ -38,8 +38,8 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
 						id=""
 						/* onKeyUp="" */
 						className=""
-						placeholder="Search data flows"
-						title="Type a DataFlow name"
+						placeholder={resources.messages["searchDataFlow"]}
+						title={resources.messages["typeDataFlowName"]}
 					/>
 				</div>
 			)}
@@ -53,7 +53,7 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
 
 				<Button
 					icon={config.icons.plus}
-					label="Suscribe to a data flow"
+					label={resources.messages['subscribeButton']}
 					className="p-button-primary"
 					onClick={() => {
 						setVisibleHandler(setSubscribeDialogVisible, true);
@@ -62,7 +62,7 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
 				<ConfirmDialog 	onConfirm={onConfirmSubscribeHandler}
 							onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
 							visible={subscribeDialogVisible}
-							header={resources.messages['subscribeButton']}
+							header={resources.messages['subscribeButtonTitle']}
 							maximizable={false}
 							labelConfirm={resources.messages["yes"]}
 							labelCancel={resources.messages["close"]}

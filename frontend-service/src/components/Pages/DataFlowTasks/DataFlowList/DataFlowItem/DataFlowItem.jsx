@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import IconComponent from "../../../../Layout/UI/icon-component";
 import primeIcons from "../../../../../conf/prime.icons";
 import styles from "./DataFlowItem.module.scss";
+import ResourcesContext from "../../../../Context/ResourcesContext";
 
 const DataFlowItem = props => {
+
+	const resources = useContext(ResourcesContext);
+
 	const { itemContent, listType } = props;
 	return (
 		<div
@@ -35,11 +39,11 @@ const DataFlowItem = props => {
 				{listType === "pending" ? (
 					<>
 						<button type="button" className={`${styles.rep_button}`}>
-							Accept
+							{resources.messages['accept']}
 						</button>
 
 						<button type="button" className={`${styles.rep_button}`} disabled>
-							Reject
+							{resources.messages['reject']}
 						</button>
 					</>
 				) : (

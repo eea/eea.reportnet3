@@ -1,13 +1,15 @@
-import React, { useEffect, /* useContext,*/ useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import styles from "./DataFlowTasks.module.scss";
 import DataFlowList from "./DataFlowList/DataFlowList";
 import DataFlaws from "../../../assets/jsons/DataFlaws.json";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
+import ResourcesContext from "../../Context/ResourcesContext";
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 //import ResourcesContext from '../../Context/ResourcesContext';
 
 const DataFlowTasks = () => {
+	const resources = useContext(ResourcesContext);
 	const [pendingDataFlows, setPendingDataFlows] = useState([]);
 	const [acceptetDataFlows, setAcceptedDataFlows] = useState([]);
 
@@ -34,19 +36,19 @@ const DataFlowTasks = () => {
 		<MainLayout>
 			<div className="rep-container">
 				<div className="rep-row">
-					<DataFlowColumn navTitle="data flows" search={false} />
+					<DataFlowColumn navTitle={resources.messages['dataFlow']} search={false} />
 					<div className="subscribe-df rep-col-xs-12 rep-col-md-9">
 						<DataFlowList
 							listContent={pendingDataFlows}
 							listType="pending"
-							listTitle="Pending data flows."
-							listDescription="You are required to accept and report data to these data flows"
+							listTitle={resources.messages["pendingDataFlowTitle"]}
+							listDescription={resources.messages["pendingDataFlowText"]}
 						/>
 						<DataFlowList
 							listContent={acceptetDataFlows}
 							listType="accepted"
-							listTitle="My data flows."
-							listDescription="Please proceed to report before deadline"
+							listTitle={resources.messages["acceptedDataFlowTitle"]}
+							listDescription={resources.messages["acceptedDataFlowText"]}
 						/>
 					</div>
 				</div>
