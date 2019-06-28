@@ -43,7 +43,7 @@ public interface ValidationController {
    * @param asc the asc
    * @return the failed validations by id dataset
    */
-  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   FailedValidationsDatasetVO getFailedValidationsByIdDataset(@PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,

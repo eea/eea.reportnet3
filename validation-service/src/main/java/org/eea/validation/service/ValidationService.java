@@ -82,15 +82,33 @@ public interface ValidationService {
   void deleteAllValidation(@DatasetId Long datasetId);
 
 
+  /**
+   * Validate data set.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
   void validateDataSet(@DatasetId Long datasetId) throws EEAException;
 
 
+  /**
+   * Validate table.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
   void validateTable(@DatasetId Long datasetId) throws EEAException;
 
 
+  /**
+   * Validate record.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
   void validateRecord(@DatasetId Long datasetId) throws EEAException;
-  
-  
+
+
   /**
    * Gets the field errors.
    *
@@ -122,6 +140,7 @@ public interface ValidationService {
    * Gets the dataset errors.
    *
    * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param idValidations the id validations
    * @return the dataset errors
    */

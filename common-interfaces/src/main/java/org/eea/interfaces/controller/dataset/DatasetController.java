@@ -158,12 +158,14 @@ public interface DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @param records the records
    */
   @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void insertRecords(@PathVariable("id") final Long datasetId,
-      @PathVariable("idTableSchema") final String idTableSchema, List<RecordVO> records);
+      @PathVariable("idTableSchema") final String idTableSchema,
+      @RequestParam(value = "records", required = true) List<RecordVO> records);
 
   /**
    * Update record.

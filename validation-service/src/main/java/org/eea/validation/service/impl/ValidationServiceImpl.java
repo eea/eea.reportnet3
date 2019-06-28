@@ -71,12 +71,6 @@ public class ValidationServiceImpl implements ValidationService {
   private RecordValidationRepository validationRecordRepository;
 
   /**
-   * The validation dataset repository.
-   */
-  @Autowired
-  private ValidationDatasetRepository validationDatasetRepository;
-
-  /**
    * The validation table repository.
    */
   @Autowired
@@ -186,10 +180,8 @@ public class ValidationServiceImpl implements ValidationService {
    * Load rules knowledge base.
    *
    * @param dataflowId the dataflow id
-   *
    * @return the kie session
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    */
@@ -337,22 +329,6 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
 
-
-  /**
-   * Populate record validations.
-   *
-   * @param recordsByTable the records by table
-   */
-  private void populateRecordValidations(List<RecordValue> recordsByTable) {
-    recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
-      if (null != row.getRecordValidations()) {
-        row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValue -> {
-          rowValue.setRecordValue(row);
-        });
-      }
-    });
-  }
-
   /**
    * Execute table validations.
    *
@@ -417,6 +393,12 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
+  /**
+   * Sanitize records validations.
+   *
+   * @param records the records
+   * @return the list
+   */
   private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<Long> processedRecords = new HashSet<>();

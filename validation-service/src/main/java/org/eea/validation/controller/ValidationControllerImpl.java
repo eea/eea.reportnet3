@@ -99,12 +99,10 @@ public class ValidationControllerImpl implements ValidationController {
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
-
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
     if (StringUtils.isNotBlank(fields)) {
