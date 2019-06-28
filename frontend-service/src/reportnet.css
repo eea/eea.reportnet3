@@ -30,6 +30,9 @@ body {
 	margin: 0px;
 }
 
+#root {
+}
+
 .headline-m {
 	font-size: 40px;
 	font-weight: bold;

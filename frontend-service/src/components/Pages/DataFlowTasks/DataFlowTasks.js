@@ -1,25 +1,23 @@
 import React, { useEffect, useContext, useState } from "react";
 import styles from "./DataFlowTasks.module.scss";
 
-import DataFlaws from "../../../assets/jsons/DataFlaws.json";
 import ResourcesContext from "../../Context/ResourcesContext";
-
-import DataFlowList from "./DataFlowList/DataFlowList";
 
 import { BreadCrumb } from "primereact/breadcrumb";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import { TabMenu } from "primereact/tabmenu";
+import DataFlowsPendingAccepted from "./DataFlowsPendingAccepted";
+import DataFlowsCompleted from "./DataFlowsCompleted";
 
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 //import ResourcesContext from '../../Context/ResourcesContext';
 
 const DataFlowTasks = () => {
 	const resources = useContext(ResourcesContext);
-	const [pendingDataFlows, setPendingDataFlows] = useState([]);
-	const [acceptetDataFlows, setAcceptedDataFlows] = useState([]);
+
 	const [tabMenuItems, setTabMenuItems] = useState([
-		{ label: "Pendding" },
+		{ label: "pending" },
 		{ label: "completed" }
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
@@ -29,20 +27,7 @@ const DataFlowTasks = () => {
   // This is here just for example purpose 
   const home = {icon: resources.icons["home"], url: '#'}; */
 
-	useEffect(() => {
-		//GET JSON    --->   TODO implement this function with real API call
-		const jsonMimic = DataFlaws;
-
-		const arrayPending = jsonMimic.filter(
-			jsonData => jsonData.dataFlowStatus === "pending"
-		);
-		const arrayAccepted = jsonMimic.filter(
-			jsonData => jsonData.dataFlowStatus === "accepted"
-		);
-
-		setPendingDataFlows([...arrayPending]);
-		setAcceptedDataFlows([...arrayAccepted]);
-	}, []);
+	console.log("tabMenuActiveItem", tabMenuActiveItem);
 
 	return (
 		<MainLayout>
@@ -62,18 +47,11 @@ const DataFlowTasks = () => {
 							activeItem={tabMenuActiveItem}
 							onTabChange={e => setTabMenuActiveItem(e.value)}
 						/>
-						<DataFlowList
-							listContent={pendingDataFlows}
-							listType="pending"
-							listTitle={resources.messages["pendingDataFlowTitle"]}
-							listDescription={resources.messages["pendingDataFlowText"]}
-						/>
-						<DataFlowList
-							listContent={acceptetDataFlows}
-							listType="accepted"
-							listTitle={resources.messages["acceptedDataFlowTitle"]}
-							listDescription={resources.messages["acceptedDataFlowText"]}
-						/>
+						{tabMenuActiveItem.label === "pending" ? (
+							<DataFlowsPendingAccepted />
+						) : (
+							<DataFlowsCompleted />
+						)}
 					</div>
 				</div>
 			</div>

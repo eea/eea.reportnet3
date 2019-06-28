@@ -14,7 +14,7 @@ import DataFlowsCompleted from "./components/Pages/DataFlowTasks/DataFlowsComple
 const App = () => {
 	const [resources] = useState({ ...langResources, ...iconsResources });
 	return (
-		<div className={styles.App}>
+		<div className={styles.app}>
 			<ResourcesContext.Provider value={resources}>
 				<Router>
 					<Switch>
@@ -25,10 +25,7 @@ const App = () => {
 							path="/documentation-data-set"
 							component={DocumentationDataSet}
 						/>
-						<Route
-							path="/data-flow-completed"
-							component={DataFlowsCompleted}
-						/>
+						<Route path="/data-flow-completed" component={DataFlowsCompleted} />
 					</Switch>
 				</Router>
 			</ResourcesContext.Provider>
