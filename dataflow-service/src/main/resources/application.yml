@@ -3,3 +3,30 @@ server:
 spring:
   application:
     name: dataflow
+  jpa:
+    hibernate:
+      #use create if you are going to create the schema for the first time
+      ddl-auto: update
+      flushMode: commit
+      metabase:
+        ddl-auto: update
+      show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        order_updates: true
+        order_inserts: true
+        jdbc:
+          batch_size: ${DATASET_BACH_JPA_SIZE:100}
+          lob:
+            non_contextual_creation: true
+    database: postgresql
+  datasource:
+    metasource:
+      url: jdbc:postgresql://localhost/metabase
+      username: root
+      password: root
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        connection-timeout: 60000
+        maximum-pool-size: 5

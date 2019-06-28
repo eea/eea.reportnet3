@@ -1,8 +1,10 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,26 +13,8 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
-/**
- * Gets the datasets.
- *
- * @return the datasets
- */
 @Getter
-
-/**
- * Sets the datasets.
- *
- * @param datasets the new datasets
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class DataFlowVO implements Serializable {
 
@@ -42,6 +26,15 @@ public class DataFlowVO implements Serializable {
 
   /** The datasets. */
   private List<DataSetVO> datasets;
+
+  private String description;
+
+  private String name;
+
+  private Date deadlineDate;
+
+
+  private TypeStatusEnum status;
 
   /**
    * Equals.
@@ -68,7 +61,7 @@ public class DataFlowVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, datasets);
+    return Objects.hash(id, description, name, deadlineDate, status, datasets);
   }
 
 }
