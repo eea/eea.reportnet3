@@ -22,7 +22,10 @@ public enum EventType {
   LOAD_DATA_COMPLETED_EVENT("Hello-Kafka2", "load_data_completed_key"),
 
   /** The load record completed event. */
-  RECORD_UPDATED_COMPLETED_EVENT("Hello-Kafka2", "upload_record_completed_key");
+  RECORD_UPDATED_COMPLETED_EVENT("Hello-Kafka2", "upload_record_completed_key"),
+
+  /** The record created completed event. */
+  RECORD_CREATED_COMPLETED_EVENT("Hello-Kafka2", "created_record_completed_key");
 
   /** The topic. */
   private String topic;

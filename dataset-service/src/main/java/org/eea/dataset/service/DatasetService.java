@@ -3,11 +3,9 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -152,60 +150,32 @@ public interface DatasetService {
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
   /**
-   * Gets the field errors.
+   * Update record.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
+   * @param records the records
+   * @throws EEAException the EEA exception
    *
-   * @return the field errors
+   *
+   *
    */
-  List<ErrorsValidationVO> getFieldErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
   /**
-   * Gets the record errors.
+   * Delete.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   *
-   * @return the record errors
+   * @param recordIds the record ids
+   * @throws EEAException the EEA exception
    */
-  List<ErrorsValidationVO> getRecordErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
 
   /**
-   * Gets the table errors.
+   * Delete table by schema.
    *
+   * @param idTableSchema the id table schema
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   *
-   * @return the table errors
    */
-  List<ErrorsValidationVO> getTableErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
 
-  /**
-   * Gets the dataset errors.
-   *
-   * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
-   *
-   * @return the dataset errors
-   */
-  List<ErrorsValidationVO> getDatasetErrors(DatasetValue dataset,
-      Map<String, String> mapNameTableSchema);
-
-
-  /**
-   * Gets list validations.
-   *
-   * @param datasetId the dataset id
-   * @param pageable the pageable
-   * @param fields the fields
-   * @param asc the asc
-   *
-   * @return the list validations
-   */
-  FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
-      String fields, Boolean asc);
 }

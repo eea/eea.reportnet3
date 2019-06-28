@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 /**
@@ -71,4 +72,15 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    */
   @Query("SELECT DISTINCT TV.id FROM TableValue TV WHERE TV.idTableSchema=?1 ")
   Long findIdByIdTableSchema(String idTableSchema);
+
+
+  /**
+   * Delete by id table schema.
+   *
+   * @param idTableSchema the id table schema
+   */
+  @Modifying
+  @Query("delete from TableValue d where d.idTableSchema=?1")
+  void deleteByIdTableSchema(String idTableSchema);
+
 }
