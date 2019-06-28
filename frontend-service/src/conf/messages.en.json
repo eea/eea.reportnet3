@@ -52,6 +52,8 @@
         "pendingDataFlowText": "You are required to accept and report data to these data flows",
         "acceptedDataFlowTitle": "My data flows",
         "acceptedDataFlowText": "Please proceed to report before deadline",
+        "completedDataFlowTitle": "Completed data flows",
+        "completedDataFlowText": "This are the completed data flows",
         "accept": "Accept",
         "reject": "Reject",
         "reportingDataFlow": "Reporting data flow",
