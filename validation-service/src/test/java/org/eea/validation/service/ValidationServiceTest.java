@@ -136,14 +136,32 @@ public class ValidationServiceTest {
    * The dataset value.
    */
   private DatasetValue datasetValue;
+
+  /** The field value. */
   private FieldValue fieldValue;
+
+  /** The record value. */
   private RecordValue recordValue;
+
+  /** The record values. */
   private ArrayList<RecordValue> recordValues;
+
+  /** The table value. */
   private TableValue tableValue;
+
+  /** The table values. */
   private ArrayList<TableValue> tableValues;
+
+  /** The data set VO. */
   private DataSetVO dataSetVO;
+
+  /** The table V os. */
   private ArrayList<TableVO> tableVOs;
+
+  /** The table VO. */
   private TableVO tableVO;
+
+  /** The validation. */
   private Validation validation;
 
   /**
@@ -366,7 +384,6 @@ public class ValidationServiceTest {
   /**
    * Test validate data set data session excep.
    *
-   * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -402,6 +419,12 @@ public class ValidationServiceTest {
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
+  /**
+   * Test load rules knowledge base throw error exception.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrowErrorException()
       throws FileNotFoundException, EEAException {
@@ -411,6 +434,12 @@ public class ValidationServiceTest {
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
+  /**
+   * Test load rules knowledge base throw error null.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrowErrorNull()
       throws FileNotFoundException, EEAException {
@@ -430,6 +459,12 @@ public class ValidationServiceTest {
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();
   }
 
+  /**
+   * Gets the field errors test.
+   *
+   * @return the field errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getFieldErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -467,6 +502,12 @@ public class ValidationServiceTest {
     assertNotNull("error", validationServiceImpl.getFieldErrors(1L, new ArrayList<Long>()));
   }
 
+  /**
+   * Gets the record errors test.
+   *
+   * @return the record errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getRecordErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -505,6 +546,12 @@ public class ValidationServiceTest {
     assertNotNull("error", validationServiceImpl.getRecordErrors(1L, new ArrayList<Long>()));
   }
 
+  /**
+   * Gets the table errors test.
+   *
+   * @return the table errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getTableErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -542,6 +589,12 @@ public class ValidationServiceTest {
     assertNotNull("error", validationServiceImpl.getTableErrors(1L, new ArrayList<Long>()));
   }
 
+  /**
+   * Gets the dataset errors test.
+   *
+   * @return the dataset errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getDatasetErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -581,11 +634,23 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Gets the dataset valueby id test exception.
+   *
+   * @return the dataset valueby id test exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getDatasetValuebyIdTestException() throws EEAException {
     validationServiceImpl.getDatasetValuebyId(null);
   }
 
+  /**
+   * Gets the dataset valueby id test success.
+   *
+   * @return the dataset valueby id test success
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getDatasetValuebyIdTestSuccess() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
@@ -593,16 +658,34 @@ public class ValidationServiceTest {
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
 
+  /**
+   * Gets the find by id data set schema test exception.
+   *
+   * @return the find by id data set schema test exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getfindByIdDataSetSchemaTestException() throws EEAException {
     validationServiceImpl.getfindByIdDataSetSchema(null, null);
   }
 
+  /**
+   * Gets the find by id data set schema test null exception.
+   *
+   * @return the find by id data set schema test null exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getfindByIdDataSetSchemaTestNullException() throws EEAException {
     validationServiceImpl.getfindByIdDataSetSchema(1L, null);
   }
 
+  /**
+   * Gets the find by id data set schema test success.
+   *
+   * @return the find by id data set schema test success
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getfindByIdDataSetSchemaTestSuccess() throws EEAException {
     when(schemasRepository.findByIdDataSetSchema(Mockito.any(ObjectId.class)))
@@ -611,6 +694,11 @@ public class ValidationServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Gets the dataset errors.
+   *
+   * @return the dataset errors
+   */
   @Test
   public void getDatasetErrors() {
     datasetValue.getDatasetValidations().get(0).getValidation()
