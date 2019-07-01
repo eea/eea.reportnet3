@@ -14,9 +14,7 @@ const HTTPRequester = (function () {
   const HTTPRequesterAPI = {
     /* AXIOS */
     get: (options) => {
-      // Make a request for a user with a given ID and QueryString
-      return axios.get(
-          `${baseURL}${options.url}${mapQueryString(options.queryString)}`);
+      return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`);
     },
     post: (options) => {
       return axios.post(`${baseURL}${options.url}`, options.data);
@@ -26,9 +24,6 @@ const HTTPRequester = (function () {
     },
     delete: (options) => {
       return axios.delete(`${baseURL}${options.url}`, options.data);
-    },
-    put: (options) => {
-      return axios.put(`${baseURL}${options.url}`, options.data);
     }
   }
   return HTTPRequesterAPI
