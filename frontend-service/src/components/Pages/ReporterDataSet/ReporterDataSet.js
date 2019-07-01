@@ -21,6 +21,7 @@ import ReporterDataSetContext from '../../Context/ReporterDataSetContext';
 
 const ReporterDataSet = () => {
   const resources = useContext(ResourcesContext);  
+  const [datasetTitle, setDatasetTitle] = useState("");
   const [customButtons, setCustomButtons] = useState([]);
   const [breadCrumbItems,setBreadCrumbItems] = useState([]);
   //const [validationError, setValidationError] = useState(false);
@@ -57,6 +58,7 @@ const ReporterDataSet = () => {
     ); 
     dataPromise.then(response =>{
       //'/jsons/error-statistics.json'
+      setDatasetTitle(response.data.nameDataSetSchema);
       const dataPromiseError = HTTPRequesterAPI.get(
         {
           url: `${config.loadStatisticsAPI.url}1`,
@@ -96,7 +98,7 @@ const ReporterDataSet = () => {
             clickHandler: null
           },
           {
-            label: resources.messages["delete"],
+            label: resources.messages["deleteDatasetData"],
             icon: "2",
             group: "left",
             disabled: false,
@@ -187,7 +189,7 @@ const ReporterDataSet = () => {
   return (
     <div className="titleDiv">
         <BreadCrumb model={breadCrumbItems} home={home}/>
-        <Title title={resources.messages["titleDataset"]}/> 
+        <Title title={`${resources.messages["titleDataset"]}${datasetTitle}`}/> 
         <div className={styles.ButtonsBar}>      
           <ButtonsBar buttons={customButtons} />
         </div>
@@ -220,7 +222,7 @@ const ReporterDataSet = () => {
                     {
                       validationsVisibleHandler:()=>{setVisibleHandler(setValidationsVisible, false)},
                       setTabHandler: (idTableSchema)=>{ setActiveIndex(idTableSchema) },
-                      setPageHandler: (posIdObject)=>{ setPositionIdObject(posIdObject)}
+                      setPageHandler: (posIdObject)=>{ setPositionIdObject(posIdObject) }
                     }}>     
           <Dialog visible={validationsVisible} 
                   onHide={()=>setVisibleHandler(setValidationsVisible, false)} 

@@ -686,11 +686,8 @@ public class DatasetServiceTest {
     tableSchemas.add(tableSchema);
     schema.setTableSchemas(tableSchemas);
 
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-
-
     datasetService.getPositionFromAnyObjectId(1L, 1L, TypeEntityEnum.TABLE);
-    Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
+    Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
 
   }
 
