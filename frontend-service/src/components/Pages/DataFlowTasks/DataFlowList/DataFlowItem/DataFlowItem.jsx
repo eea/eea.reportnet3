@@ -9,11 +9,14 @@ const DataFlowItem = props => {
 
 	const resources = useContext(ResourcesContext);
 
-	const { itemContent, listType, id } = props;
-	const layout = ({ children }) => {
+	const { itemContent, listType } = props;
+	console.log('itemContent', itemContent)
+	const layout = (children ) => {
 		if(listType !== "pending"){
-			return (<Link to={`/repoting-data-flow/${id}`}>{children}</Link>)
+			return (<Link to={`/repoting-data-flow/${itemContent.id}`}>{children}</Link>)
+
 		}
+		console.log('children', children)
 		   return <>{children}</>
 	}
 	
@@ -26,6 +29,7 @@ const DataFlowItem = props => {
 					: `${styles.container}`
 			}
 		>
+			{console.log('listType', listType)}
 			<div className={`${styles.card_component_icon}`}>
 				<IconComponent
 					icon={`${primeIcons.icons.clone}`}
