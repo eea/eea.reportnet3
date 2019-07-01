@@ -9,6 +9,7 @@ import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import { TabMenu } from "primereact/tabmenu";
 import DataFlowsPendingAccepted from "./DataFlowsPendingAccepted";
 import DataFlowsCompleted from "./DataFlowsCompleted";
+import DataFlowList from "./DataFlowList/DataFlowList";
 import DataFlawsCompleted from "../../../assets/jsons/DataFlawsCompleted.json";
 import DataFlaws from "../../../assets/jsons/DataFlaws.json";
 
@@ -32,14 +33,31 @@ const DataFlowTasks = () => {
 	const home = {icon: resources.icons["home"], url: '#'}; */
 
 	useEffect(() => {
+		const result = DataFlaws;
+		const listData = [];
 		if (tabMenuActiveItem.label === "pending") {
-			setTabData(DataFlaws);
-			setActiveTab("pending");
+			listData.push({
+				listContent: result.filter(data => data.dataFlowStatus === "pending"),
+				listType: "pending",
+				listTitle: resources.messages["pendingDataFlowTitle"],
+				listDescription: resources.messages["pendingDataFlowText"]
+			});
+			listData.push({
+				listContent: result.filter(data => data.dataFlowStatus === "accepted"),
+				listType: "accepted",
+				listTitle: resources.messages["acceptedDataFlowTitle"],
+				listDescription: resources.messages["acceptedDataFlowText"]
+			});
 		} else {
-			setTabData(DataFlawsCompleted);
-			setActiveTab("completed");
+			listData.push({
+				listContent: result.filter(data => data.dataFlowStatus === "completed"),
+				listType: "completed",
+				listTitle: resources.messages["completedDataFlowTitle"],
+				listDescription: resources.messages["completedDataFlowText"]
+			});
 		}
-	}, [tabMenuActiveItem]);
+		setTabData(listData);
+	}, [resources.messages, tabMenuActiveItem]);
 
 	return (
 		<MainLayout>
@@ -59,12 +77,9 @@ const DataFlowTasks = () => {
 							activeItem={tabMenuActiveItem}
 							onTabChange={e => setTabMenuActiveItem(e.value)}
 						/>
-						{console.log("tabMenuActiveItem:", tabMenuActiveItem, tabData)}
-						{activeTab === "pending" && tabData.length > 0 ? (
-							<DataFlowsPendingAccepted listData={tabData} />
-						) : (
-							<DataFlowsCompleted listData={tabData} />
-						)}
+						{tabData.map((data, i) => (
+							<DataFlowList {...data} key={i} />
+						))}
 					</div>
 				</div>
 			</div>
