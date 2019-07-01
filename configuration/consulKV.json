@@ -223,10 +223,6 @@
     "key": "config/recordstore/management.endpoints.web.exposure.include",
     "value": "Kg=="
   },
-   {
-    "key": "config/recordstore/management.endpoint.health.show-details",
-    "value": "YWx3YXlz"
-  },
   {
     "key": "config/recordstore/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
@@ -271,7 +267,10 @@
     "key": "config/recordstore/dockerContainerName",
     "value": "JHtET0NFUl9DT05UQUlORVJfTkFNRTpjcnVuY2h5LXBvc3RncmVzfQ=="
   },
- 
+  {
+    "key": "config/recordstore/ipPostgre",
+    "value": "JHtSRUNPUkRTVE9SRV9JUDpsb2NhbGhvc3R9"
+  },
   {
     "key": "config/recordstore/userPostgre",
     "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
@@ -511,6 +510,124 @@
   {
     "key": "config/apiGateway/ribbon.retryableStatusCodes",
     "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
+  },
+   {
+    "key": "config/validation/mongodb.hibernate.ddl-auto",
+    "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/validation/mongodb.primary.host",
+    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
+  },
+  {
+    "key": "config/validation/mongodb.primary.port",
+    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
+  },
+  {
+    "key": "config/validation/mongodb.primary.username",
+    "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/validation/mongodb.primary.password",
+    "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.url",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.connection-timeout",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.maximum-pool-size",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.username",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
+  },
+  {
+    "key": "config/validation/spring.datasource.password",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
+  },
+  {
+    "key": "config/validation/spring.datasource.driver-class-name",
+    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+
+  {
+    "key": "config/validation/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/validation/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/validation/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/validation/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/validation/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/validation/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/validation/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/validation/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/validation/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.order_updates",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.order_inserts",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.jdbc.batch_size",
+    "value": "JHtEQVRBU0VUX0JBQ0hfSlBBX1NJWkU6MTAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.hibernate.flushMode",
+    "value": "Y29tbWl0"
   },
   {
     "key": "config/validation/kafka.bootstrapAddress",
