@@ -447,48 +447,6 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   /**
-   * Execute table validations.
-   *
-   * @param session the session
-   * @param dataset the dataset
-   *
-   * @return the list
-   */
-  private List<TableValidation> executeTableValidations(KieSession session, DatasetValue dataset) {
-    List<TableValidation> resultTable = runTableValidations(dataset.getTableValues(), session);
-    // Asign ID Table
-    dataset.getTableValues().stream().forEach(table -> {
-      if (null != table.getTableValidations()) {
-        table.getTableValidations().stream().forEach(tableValue -> {
-          tableValue.setTableValue(table);
-        });
-      }
-    });
-    return resultTable;
-  }
-
-  /**
-   * Execute dataset validations.
-   *
-   * @param session the session
-   * @param dataset the dataset
-   *
-   * @return the list
-   */
-  private List<DatasetValidation> executeDatasetValidations(KieSession session,
-      DatasetValue dataset) {
-    List<DatasetValidation> resultDataset = runDatasetValidations(dataset, session);
-    // Asign ID Dataset
-    if (null != resultDataset && !resultDataset.isEmpty()) {
-      resultDataset.stream().forEach(datasetValue -> {
-        datasetValue.setDatasetValue(dataset);
-      });
-    }
-    return resultDataset;
-  }
-
-
-  /**
    * Sanitize records.
    *
    * @param records the records
