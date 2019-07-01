@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -245,6 +246,12 @@ public class ValidationServiceTest {
         validationServiceImpl.runRecordValidations(records, kieSession));
     assertEquals("failed", new ArrayList<RecordValue>(),
         validationServiceImpl.runRecordValidations(new ArrayList<>(), kieSession));
+    records.get(0).setIdRecordSchema("12312412");
+    assertEquals("failed", records.get(0).getRecordValidations(),
+        validationServiceImpl.runRecordValidations(records, kieSession));
+    records.get(0).setIdRecordSchema("");
+    assertEquals("failed", records.get(0).getRecordValidations(),
+        validationServiceImpl.runRecordValidations(records, kieSession));
   }
 
   /**
@@ -257,7 +264,6 @@ public class ValidationServiceTest {
     validationServiceImpl.runFieldValidations(fields, kieSession);
     assertEquals("failed", new ArrayList<FieldValidation>(),
         validationServiceImpl.runFieldValidations(fields, kieSession));
-
     fields.remove(0);
     FieldValue fieldValue = new FieldValue();
     fieldValue.setFieldValidations(new ArrayList<>());
@@ -270,6 +276,12 @@ public class ValidationServiceTest {
     fieldValidations.add(new FieldValidation());
     fieldValue.setFieldValidations(fieldValidations);
     fields.add(fieldValue);
+    assertEquals("failed", fields.get(0).getFieldValidations(),
+        validationServiceImpl.runFieldValidations(fields, kieSession));
+    fields.get(0).setIdFieldSchema("");
+    assertEquals("failed", fields.get(0).getFieldValidations(),
+        validationServiceImpl.runFieldValidations(fields, kieSession));
+    fields.get(0).setIdFieldSchema("12312");
     assertEquals("failed", fields.get(0).getFieldValidations(),
         validationServiceImpl.runFieldValidations(fields, kieSession));
   }
@@ -407,6 +419,24 @@ public class ValidationServiceTest {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
     when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
+    validationServiceImpl.loadRulesKnowledgeBase(1L);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testLoadRulesKnowledgeBaseThrowErrorException()
+      throws FileNotFoundException, EEAException {
+    KieHelper kieHelper = new KieHelper();
+    KieBase kiebase = kieHelper.build();
+    when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(123L);
+    validationServiceImpl.loadRulesKnowledgeBase(1L);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testLoadRulesKnowledgeBaseThrowErrorNull()
+      throws FileNotFoundException, EEAException {
+    KieHelper kieHelper = new KieHelper();
+    KieBase kiebase = kieHelper.build();
+    when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(null);
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
@@ -602,4 +632,16 @@ public class ValidationServiceTest {
     validationServiceImpl.getfindByIdDataSetSchema(1L, new ObjectId("5cf0e9b3b793310e9ceca190"));
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
+
+  @Test
+  public void getDatasetErrors() {
+    datasetValue.getDatasetValidations().get(0).getValidation()
+        .setTypeEntity(TypeEntityEnum.DATASET);
+    datasetValue.getDatasetValidations().get(0).getValidation()
+        .setValidationDate(new Date().toString());
+    when(validationDatasetRepository.findByValidationIds(Mockito.any()))
+        .thenReturn(datasetValue.getDatasetValidations());
+    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList());
+  }
+
 }
