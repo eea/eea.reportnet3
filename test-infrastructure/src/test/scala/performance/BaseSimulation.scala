@@ -19,13 +19,14 @@ import scala.collection.mutable.{ListBuffer, Map => MMap}
 
 class BaseSimulation extends Simulation {
 
+  val configLoadTestFile = sys.env("LOAD_TEST_PATH");
   val reader = new FileInputStream(new File("C:\\proyectos\\EEA\\desarrollo\\repornet\\test-infrastructure\\src\\test\\scala\\resources\\load_test.yml"));
   val mapper = new ObjectMapper(new YAMLFactory())
   mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   val config: GatlingConfig = mapper.readValue(reader, classOf[GatlingConfig])
-  //val url = sys.env("URL_BASE");
-  val url = "http://localhost:8090";
+  val url = sys.env("URL_BASE");
+  //val url = "http://localhost:8090";
   val httpProtocol = http
     .baseURL(url) // Here is the root for all relative URLs
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8") // Here are the common headers
