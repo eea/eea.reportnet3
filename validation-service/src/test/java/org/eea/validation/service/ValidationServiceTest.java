@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.validation.service;
 
 import static org.junit.Assert.assertEquals;
@@ -361,27 +364,14 @@ public class ValidationServiceTest {
   }
 
   /**
-   * Test validate data set data dataflow id excep.
-   *
-   * @throws EEAException the EEA exception
-   * @throws FileNotFoundException the file not found exception
-   */
-  @Test(expected = EEAException.class)
-  public void testValidateDataSetDataDataflowIdExcep() throws EEAException, FileNotFoundException {
-    when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(null);
-    validationServiceImpl.validateFields(1L, kieSession);
-  }
-
-  /**
    * Test validate data set data session excep.
    *
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
-  public void testValidateDataSetDataSessionExcep() throws FileNotFoundException, EEAException {
-    when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(null);
+  public void testValidateDataSetDataSessionExcep() throws EEAException {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     validationServiceImpl.validateFields(1L, kieSession);
   }
 
@@ -391,13 +381,9 @@ public class ValidationServiceTest {
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
-  public void testValidateDataSetDataExcep() throws FileNotFoundException, EEAException {
-    when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    KieHelper kieHelper = new KieHelper();
-    KieBase kiebase = kieHelper.build();
-    when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+  @Test
+  public void testValidateFieldsSuccess() throws FileNotFoundException, EEAException {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     validationServiceImpl.validateFields(1L, kieSession);
 
   }
