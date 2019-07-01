@@ -71,7 +71,7 @@ const DataFlowTasks = () => {
 						navTitle={resources.messages["dataFlow"]}
 						search={false}
 					/>
-					<div className="subscribe-df rep-col-xs-12 rep-col-md-9">
+					<div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
 						<TabMenu
 							model={tabMenuItems}
 							activeItem={tabMenuActiveItem}
