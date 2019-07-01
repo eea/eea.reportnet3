@@ -1,5 +1,6 @@
 package org.eea.dataflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
@@ -53,8 +54,22 @@ public class DataflowServiceImpl implements DataflowService {
 
   @Override
   public List<DataFlowVO> getCompleted(Pageable pageable) throws EEAException {
-    // TODO Auto-generated method stub
-    return null;
+
+    List<Dataflow> dataflows = dataflowRepository.findCompleted();
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+    if (!dataflows.isEmpty()) {
+      int initIndex = pageable.getPageNumber() * pageable.getPageSize();
+      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > dataflows.size()
+          ? dataflows.size()
+          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      List<Dataflow> pagedDataflows = dataflows.subList(initIndex, endIndex);
+
+      dataflowVOs = dataflowMapper.entityListToClass(pagedDataflows);
+
+    }
+
+    return dataflowVOs;
   }
+
 
 }

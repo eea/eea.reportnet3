@@ -15,7 +15,11 @@ public interface DataflowRepository extends JpaRepository<Dataflow, Long> {
 
   List<Dataflow> findByStatus(TypeStatusEnum status);
 
-  @Query("SELECT df from Dataflow df WHERE df.status in('PENDING','ACCEPTED')")
+  @Query("SELECT df from Dataflow df WHERE df.status in('PENDING','ACCEPTED') ORDER BY df.deadlineDate ASC")
   List<Dataflow> findPendingAccepted();
+
+
+  @Query("SELECT df from Dataflow df WHERE df.status='COMPLETED' ORDER BY df.deadlineDate ASC")
+  List<Dataflow> findCompleted();
 
 }

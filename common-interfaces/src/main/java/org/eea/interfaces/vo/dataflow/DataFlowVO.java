@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,8 +34,9 @@ public class DataFlowVO implements Serializable {
 
   private Date deadlineDate;
 
-
   private TypeStatusEnum status;
+
+  private List<DocumentVO> documents;
 
   /**
    * Equals.
