@@ -9,6 +9,8 @@ import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import { TabMenu } from "primereact/tabmenu";
 import DataFlowsPendingAccepted from "./DataFlowsPendingAccepted";
 import DataFlowsCompleted from "./DataFlowsCompleted";
+import DataFlawsCompleted from "../../../assets/jsons/DataFlawsCompleted.json";
+import DataFlaws from "../../../assets/jsons/DataFlaws.json";
 
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 //import ResourcesContext from '../../Context/ResourcesContext';
@@ -21,13 +23,23 @@ const DataFlowTasks = () => {
 		{ label: "completed" }
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
+	const [activeTab, setActiveTab] = useState("pending");
+	const [tabData, setTabData] = useState([]);
 	const home = { icon: resources.icons["home"], url: "/" };
 
 	/*   const resources = useContext(ResourcesContext);  
   // This is here just for example purpose 
-  const home = {icon: resources.icons["home"], url: '#'}; */
+	const home = {icon: resources.icons["home"], url: '#'}; */
 
-	console.log("tabMenuActiveItem", tabMenuActiveItem);
+	useEffect(() => {
+		if (tabMenuActiveItem.label === "pending") {
+			setTabData(DataFlaws);
+			setActiveTab("pending");
+		} else {
+			setTabData(DataFlawsCompleted);
+			setActiveTab("completed");
+		}
+	}, [tabMenuActiveItem]);
 
 	return (
 		<MainLayout>
@@ -47,10 +59,11 @@ const DataFlowTasks = () => {
 							activeItem={tabMenuActiveItem}
 							onTabChange={e => setTabMenuActiveItem(e.value)}
 						/>
-						{tabMenuActiveItem.label === "pending" ? (
-							<DataFlowsPendingAccepted />
+						{console.log("tabMenuActiveItem:", tabMenuActiveItem, tabData)}
+						{activeTab === "pending" && tabData.length > 0 ? (
+							<DataFlowsPendingAccepted listData={tabData} />
 						) : (
-							<DataFlowsCompleted />
+							<DataFlowsCompleted listData={tabData} />
 						)}
 					</div>
 				</div>

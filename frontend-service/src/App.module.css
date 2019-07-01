@@ -51,6 +51,7 @@ h2 {
 	color: #404040;
 }
 .app {
+	min-height: 100%;
 }
 
 /* cyrillic-ext */

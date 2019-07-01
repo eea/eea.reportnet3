@@ -1,36 +1,25 @@
 import React, { useEffect, useContext, useState, Fragment } from "react";
-import DataFlaws from "../../../assets/jsons/DataFlaws.json";
 import ResourcesContext from "../../Context/ResourcesContext";
 
 import DataFlowList from "./DataFlowList/DataFlowList";
-import { ProgressSpinner } from "primereact/progressspinner";
 
-const DataFlowsPendingAccepted = () => {
+const DataFlowsPendingAccepted = props => {
+	const { listData } = props;
 	const resources = useContext(ResourcesContext);
 	const [pendingDataFlows, setPendingDataFlows] = useState([]);
 	const [acceptetDataFlows, setAcceptedDataFlows] = useState([]);
-	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		//GET JSON    --->   TODO implement this function with real API call
-		const jsonMimic = DataFlaws;
-
-		const arrayPending = jsonMimic.filter(
+		const arrayPending = listData.filter(
 			jsonData => jsonData.dataFlowStatus === "pending"
 		);
-		const arrayAccepted = jsonMimic.filter(
+		const arrayAccepted = listData.filter(
 			jsonData => jsonData.dataFlowStatus === "accepted"
 		);
-		setTimeout(() => {
-			setPendingDataFlows([...arrayPending]);
-			setAcceptedDataFlows([...arrayAccepted]);
-			setLoading(false);
-		}, 2000);
-	}, []);
 
-	if (loading) {
-		return <ProgressSpinner />;
-	}
+		setPendingDataFlows([...arrayPending]);
+		setAcceptedDataFlows([...arrayAccepted]);
+	}, [listData]);
 
 	return (
 		<Fragment>
