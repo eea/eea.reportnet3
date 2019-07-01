@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.recordstore.service.impl.RecordStoreServiceImpl;
 import org.junit.Before;
@@ -67,10 +67,10 @@ public class RecordStoreControllerImplTest {
   /**
    * Test create empty data set.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void testCreateEmptyDataSet() throws DockerAccessException {
+  public void testCreateEmptyDataSet() throws RecordStoreAccessException {
     recordStoreControllerImpl.createEmptyDataset(TEST);
     Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any());
   }
@@ -78,11 +78,11 @@ public class RecordStoreControllerImplTest {
   /**
    * Test create empty data set exception.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void testCreateEmptyDataSetException() throws DockerAccessException {
-    doThrow(new DockerAccessException()).when(recordStoreService).createEmptyDataSet(TEST);
+  public void testCreateEmptyDataSetException() throws RecordStoreAccessException {
+    doThrow(new RecordStoreAccessException()).when(recordStoreService).createEmptyDataSet(TEST);
     recordStoreControllerImpl.createEmptyDataset(TEST);
     Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any());
   }
@@ -90,10 +90,10 @@ public class RecordStoreControllerImplTest {
   /**
    * Reste data set data base test.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void resteDataSetDataBaseTest() throws DockerAccessException {
+  public void resteDataSetDataBaseTest() throws RecordStoreAccessException {
     recordStoreControllerImpl.resteDataSetDataBase();
     Mockito.verify(recordStoreService, times(1)).resetDatasetDatabase();
   }
@@ -101,11 +101,11 @@ public class RecordStoreControllerImplTest {
   /**
    * Reste data set data base test exception.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void resteDataSetDataBaseTestException() throws DockerAccessException {
-    doThrow(new DockerAccessException()).when(recordStoreService).resetDatasetDatabase();
+  public void resteDataSetDataBaseTestException() throws RecordStoreAccessException {
+    doThrow(new RecordStoreAccessException()).when(recordStoreService).resetDatasetDatabase();
     recordStoreControllerImpl.resteDataSetDataBase();
     Mockito.verify(recordStoreService, times(1)).resetDatasetDatabase();
   }
@@ -114,10 +114,10 @@ public class RecordStoreControllerImplTest {
    * Gets the connection to dataset test.
    *
    * @return the connection to dataset test
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void getConnectionToDatasetTest() throws DockerAccessException {
+  public void getConnectionToDatasetTest() throws RecordStoreAccessException {
     ConnectionDataVO expectedResult = new ConnectionDataVO();
     Mockito.when(recordStoreService.getConnectionDataForDataset(TEST)).thenReturn(expectedResult);
     ConnectionDataVO result = recordStoreControllerImpl.getConnectionToDataset(TEST);
@@ -128,11 +128,11 @@ public class RecordStoreControllerImplTest {
    * Gets the connection to dataset test exception.
    *
    * @return the connection to dataset test exception
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void getConnectionToDatasetTestException() throws DockerAccessException {
-    doThrow(new DockerAccessException()).when(recordStoreService).getConnectionDataForDataset(TEST);
+  public void getConnectionToDatasetTestException() throws RecordStoreAccessException {
+    doThrow(new RecordStoreAccessException()).when(recordStoreService).getConnectionDataForDataset(TEST);
     ConnectionDataVO result = recordStoreControllerImpl.getConnectionToDataset(TEST);
     assertNull(FAILED, result);
   }
@@ -142,10 +142,10 @@ public class RecordStoreControllerImplTest {
    * Gets the data set connections test.
    *
    * @return the data set connections test
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void getDataSetConnectionsTest() throws DockerAccessException {
+  public void getDataSetConnectionsTest() throws RecordStoreAccessException {
     List<ConnectionDataVO> expectedResult = new ArrayList<>();
     expectedResult.add(new ConnectionDataVO());
     Mockito.when(recordStoreService.getConnectionDataForDataset()).thenReturn(expectedResult);
@@ -157,11 +157,11 @@ public class RecordStoreControllerImplTest {
    * Gets the data set connections test exception.
    *
    * @return the data set connections test exception
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void getDataSetConnectionsTestException() throws DockerAccessException {
-    doThrow(new DockerAccessException()).when(recordStoreService).getConnectionDataForDataset();
+  public void getDataSetConnectionsTestException() throws RecordStoreAccessException {
+    doThrow(new RecordStoreAccessException()).when(recordStoreService).getConnectionDataForDataset();
     List<ConnectionDataVO> result = recordStoreControllerImpl.getDataSetConnections();
     assertNull(FAILED, result);
   }

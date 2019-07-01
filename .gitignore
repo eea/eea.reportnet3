@@ -4063,3 +4063,16 @@ frontend-service/frontend-service/src/node/node_modules/npm/html/favicon.ico
 frontend-service/frontend-service/src/node/node_modules/npm/html/dochead.html
 frontend-service/frontend-service/src/node/node_modules/npm/html/docfoot.html
 frontend-service/frontend-service/src/node/node_modules/npm/html/doc/misc/semver.html
+validation-service/.factorypath
+recordstore-service/.factorypath
+recordstore-service/.cache-main
+inspire-harvester/.factorypath
+dataset-service/.factorypath
+dataflow-service/.factorypath
+communication-service/.factorypath
+common-utitlities/.factorypath
+api-gateway/.factorypath
+indexsearch-service/.factorypath
+document-container-service/.factorypath
+common-interfaces/.factorypath
+collaboration-service/.factorypath

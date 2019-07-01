@@ -2,7 +2,7 @@ package org.eea.recordstore.service;
 
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 
 /**
  * The interface Record store service.
@@ -14,20 +14,20 @@ public interface RecordStoreService {
   /**
    * Reset dataset database.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @deprecated (pending to remove)
    */
   @Deprecated
-  void resetDatasetDatabase() throws DockerAccessException;
+  void resetDatasetDatabase() throws RecordStoreAccessException;
 
   /**
    * Create empty data set.
    *
    * @param datasetName the dataset name
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
-  void createEmptyDataSet(String datasetName) throws DockerAccessException;
+  void createEmptyDataSet(String datasetName) throws RecordStoreAccessException;
 
   /**
    * Create data set from other.
@@ -44,16 +44,16 @@ public interface RecordStoreService {
    *
    * @return the connection data for dataset
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
-  ConnectionDataVO getConnectionDataForDataset(String datasetName) throws DockerAccessException;
+  ConnectionDataVO getConnectionDataForDataset(String datasetName) throws RecordStoreAccessException;
 
   /**
    * Gets connection data for dataset.
    *
    * @return the connection data for dataset
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
-  List<ConnectionDataVO> getConnectionDataForDataset() throws DockerAccessException;
+  List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException;
 }
