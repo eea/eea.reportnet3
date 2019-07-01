@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.validation.service;
 
 import static org.junit.Assert.assertEquals;
@@ -133,14 +136,32 @@ public class ValidationServiceTest {
    * The dataset value.
    */
   private DatasetValue datasetValue;
+
+  /** The field value. */
   private FieldValue fieldValue;
+
+  /** The record value. */
   private RecordValue recordValue;
+
+  /** The record values. */
   private ArrayList<RecordValue> recordValues;
+
+  /** The table value. */
   private TableValue tableValue;
+
+  /** The table values. */
   private ArrayList<TableValue> tableValues;
+
+  /** The data set VO. */
   private DataSetVO dataSetVO;
+
+  /** The table V os. */
   private ArrayList<TableVO> tableVOs;
+
+  /** The table VO. */
   private TableVO tableVO;
+
+  /** The validation. */
   private Validation validation;
 
   /**
@@ -317,79 +338,100 @@ public class ValidationServiceTest {
 
   }
 
+  @Test(expected = EEAException.class)
+  public void testValidateRecordException() throws EEAException {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    validationServiceImpl.validateRecord(1L, kieSession);
+  }
+
   /**
    * Test validate data set data.
    *
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  // @Test
-  // public void testValidateRecord() throws FileNotFoundException, EEAException {
-  //
-  // when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-  // KieHelper kieHelper = new KieHelper();
-  // KieBase kiebase = kieHelper.build();
-  // when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
-  // when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-  // // when(validationDatasetRepository.saveAll(Mockito.any())).thenReturn(null);
-  // // when(validationTableRepository.saveAll(Mockito.any())).thenReturn(null);
-  // Validation validation = new Validation();
-  // validation.setId(1L);
-  // List<RecordValue> records = new ArrayList<>();
-  // RecordValue recordValue = new RecordValue();
-  // recordValue.setId(1L);
-  // recordValue.setRecordValidations(new ArrayList<>());
-  // List<FieldValue> fields = new ArrayList<>();
-  // FieldValue fieldValue = new FieldValue();
-  // List<FieldValidation> fieldValidations = new ArrayList<>();
-  // FieldValidation fieldValidation = new FieldValidation();
-  // fieldValidation.setValidation(validation);
-  // fieldValidations.add(fieldValidation);
-  // fieldValue.setFieldValidations(fieldValidations);
-  // fieldValue.setId(1L);
-  // fields.add(fieldValue);
-  // List<RecordValidation> recordValidations = new ArrayList<>();
-  // RecordValidation recordValidation = new RecordValidation();
-  // recordValidation.setId(1l);
-  // recordValidation.setValidation(validation);
-  // recordValidations.add(recordValidation);
-  // recordValue.setFields(fields);
-  // recordValue.setRecordValidations(recordValidations);
-  // records.add(recordValue);
-  // when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-  // // when(validationRecordRepository.saveAll(Mockito.any())).thenReturn(null);
-  //
-  // // when(validationFieldRepository.saveAll(Mockito.any())).thenReturn(null);
-  //
-  // validationServiceImpl.validateFields(1L, kieSession);
-  //
-  // }
+  @Test
+  public void testValidateRecord() throws FileNotFoundException, EEAException {
 
-  /**
-   * Test validate data set data dataflow id excep.
-   *
-   * @throws EEAException the EEA exception
-   * @throws FileNotFoundException the file not found exception
-   */
-  // @Test(expected = EEAException.class)
-  // public void testValidateDataSetDataDataflowIdExcep() throws EEAException, FileNotFoundException
-  // {
-  // when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(null);
-  // validationServiceImpl.validateFields(1L, kieSession);
-  // }
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    Validation validation = new Validation();
+    validation.setId(1L);
+    validation.setLevelError(TypeErrorEnum.ERROR);
+    Validation validation2 = new Validation();
+    validation2.setId(2L);
+    validation2.setLevelError(TypeErrorEnum.WARNING);
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    recordValue.setId(1L);
+    recordValue.setRecordValidations(new ArrayList<>());
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setValidation(validation);
+    fieldValidations.add(fieldValidation);
+    FieldValidation fieldValidation2 = new FieldValidation();
+    fieldValidation2.setValidation(validation2);
+    fieldValidations.add(fieldValidation2);
+    fieldValue.setFieldValidations(fieldValidations);
+    fieldValue.setId(1L);
+    fields.add(fieldValue);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1l);
+    recordValidation.setValidation(validation2);
+    recordValidations.add(recordValidation);
+    recordValue.setFields(fields);
+    recordValue.setRecordValidations(recordValidations);
+    records.add(recordValue);
+    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    validationServiceImpl.validateRecord(1L, kieSession);
+
+  }
+
+  @Test
+  public void testValidateRecordWarningPart() throws FileNotFoundException, EEAException {
+
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    Validation validation = new Validation();
+    validation.setId(1L);
+    validation.setLevelError(TypeErrorEnum.WARNING);
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    recordValue.setId(1L);
+    recordValue.setRecordValidations(new ArrayList<>());
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setValidation(validation);
+    fieldValidations.add(fieldValidation);
+    fieldValue.setFieldValidations(fieldValidations);
+    fieldValue.setId(1L);
+    fields.add(fieldValue);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1l);
+    recordValidation.setValidation(validation);
+    recordValidations.add(recordValidation);
+    recordValue.setFields(fields);
+    recordValue.setRecordValidations(recordValidations);
+    records.add(recordValue);
+    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    validationServiceImpl.validateRecord(1L, kieSession);
+
+  }
 
   /**
    * Test validate data set data session excep.
    *
-   * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  // @Test(expected = EEAException.class)
-  // public void testValidateDataSetDataSessionExcep() throws FileNotFoundException, EEAException {
-  // when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-  // when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(null);
-  // validationServiceImpl.validateFields(1L, kieSession);
-  // }
+  @Test(expected = EEAException.class)
+  public void testValidateDataSetDataSessionExcep() throws EEAException {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    validationServiceImpl.validateFields(1L, kieSession);
+  }
 
   /**
    * Test validate data set data dataset excep.
@@ -397,16 +439,39 @@ public class ValidationServiceTest {
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  // @Test(expected = EEAException.class)
-  // public void testValidateDataSetDataExcep() throws FileNotFoundException, EEAException {
-  // when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-  // KieHelper kieHelper = new KieHelper();
-  // KieBase kiebase = kieHelper.build();
-  // when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
-  // when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-  // validationServiceImpl.validateFields(1L, kieSession);
-  //
-  // }
+  @Test
+  public void testValidateFieldsSuccess() throws EEAException {
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    recordValue.setId(1L);
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValue.setId(1L);
+    fieldValue.setLevelError(TypeErrorEnum.WARNING);
+    validation.setId(1L);
+    validation.setTypeEntity(TypeEntityEnum.DATASET);
+    fieldValidation.setValidation(validation);
+    fieldValidation.setFieldValue(fieldValue);
+    fieldValidation.setId(1L);
+    fieldValidations.add(fieldValidation);
+    fieldValue.setFieldValidations(fieldValidations);
+    fields.add(fieldValue);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1l);
+    recordValidation.setValidation(validation);
+    recordValidations.add(recordValidation);
+    recordValue.setFields(fields);
+    recordValue.setRecordValidations(recordValidations);
+    records.add(recordValue);
+    datasetValue.getTableValues().get(0).setId(1L);
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    validationServiceImpl.validateFields(1L, kieSession);
+
+  }
 
   /**
    * Test load rules knowledge base.
@@ -422,6 +487,12 @@ public class ValidationServiceTest {
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
+  /**
+   * Test load rules knowledge base throw error exception.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrowErrorException()
       throws FileNotFoundException, EEAException {
@@ -431,6 +502,12 @@ public class ValidationServiceTest {
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
+  /**
+   * Test load rules knowledge base throw error null.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrowErrorNull()
       throws FileNotFoundException, EEAException {
@@ -450,6 +527,12 @@ public class ValidationServiceTest {
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();
   }
 
+  /**
+   * Gets the field errors test.
+   *
+   * @return the field errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getFieldErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -487,6 +570,12 @@ public class ValidationServiceTest {
     assertNotNull("error", validationServiceImpl.getFieldErrors(1L, new ArrayList<Long>()));
   }
 
+  /**
+   * Gets the record errors test.
+   *
+   * @return the record errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getRecordErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -525,6 +614,12 @@ public class ValidationServiceTest {
     assertNotNull("error", validationServiceImpl.getRecordErrors(1L, new ArrayList<Long>()));
   }
 
+  /**
+   * Gets the table errors test.
+   *
+   * @return the table errors test
+   * @throws Exception the exception
+   */
   @Test
   public void getTableErrorsTest() throws Exception {
     TableValidation tableValidation = new TableValidation();
@@ -562,52 +657,68 @@ public class ValidationServiceTest {
     assertNotNull("error", validationServiceImpl.getTableErrors(1L, new ArrayList<Long>()));
   }
 
-  // @Test
-  // public void getDatasetErrorsTest() throws Exception {
-  // TableValidation tableValidation = new TableValidation();
-  // tableValidation.setId(1L);
-  // tableValidation.setTableValue(tableValue);
-  // validation.setId(1L);
-  // validation.setLevelError(TypeErrorEnum.ERROR);
-  // validation.setTypeEntity(TypeEntityEnum.TABLE);
-  // tableValidation.setValidation(validation);
-  // List<TableValidation> tableValidations = new ArrayList<>();
-  // tableValidations.add(tableValidation);
-  // RecordValidation recordValidation = new RecordValidation();
-  // recordValidation.setRecordValue(recordValue);
-  // recordValidation.setValidation(validation);
-  // List<RecordValidation> recordValidations = new ArrayList<>();
-  // recordValidations.add(recordValidation);
-  // DatasetValidation datasetValidation = new DatasetValidation();
-  // datasetValidation.setValidation(validation);
-  // datasetValidation.setDatasetValue(datasetValue);
-  // List<DatasetValidation> datasetValidations = new ArrayList<>();
-  // datasetValidations.add(datasetValidation);
-  // datasetValue.setDatasetValidations(datasetValidations);
-  // FieldValidation fieldValidation = new FieldValidation();
-  // recordValue.setTableValue(tableValue);
-  // fieldValue.setRecord(recordValue);
-  // fieldValidation.setFieldValue(fieldValue);
-  // fieldValidation.setValidation(validation);
-  // List<FieldValidation> fieldValidations = new ArrayList<>();
-  // fieldValidations.add(fieldValidation);
-  //
-  // DataSetSchema schema = new DataSetSchema();
-  // schema.setTableSchemas(new ArrayList<>());
-  // schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-  // when(datasetValidationRepository.findByValidationIds(Mockito.any()))
-  // .thenReturn(datasetValidations);
-  //
-  // assertNotNull("error",
-  // validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<Long>()));
-  // }
+  /**
+   * Gets the dataset errors test.
+   *
+   * @return the dataset errors test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getDatasetErrorsTest() throws Exception {
+    TableValidation tableValidation = new TableValidation();
+    tableValidation.setId(1L);
+    tableValidation.setTableValue(tableValue);
+    validation.setId(1L);
+    validation.setLevelError(TypeErrorEnum.ERROR);
+    validation.setTypeEntity(TypeEntityEnum.TABLE);
+    tableValidation.setValidation(validation);
+    List<TableValidation> tableValidations = new ArrayList<>();
+    tableValidations.add(tableValidation);
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setRecordValue(recordValue);
+    recordValidation.setValidation(validation);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    recordValidations.add(recordValidation);
+    DatasetValidation datasetValidation = new DatasetValidation();
+    datasetValidation.setValidation(validation);
+    datasetValidation.setDatasetValue(datasetValue);
+    List<DatasetValidation> datasetValidations = new ArrayList<>();
+    datasetValidations.add(datasetValidation);
+    datasetValue.setDatasetValidations(datasetValidations);
+    FieldValidation fieldValidation = new FieldValidation();
+    recordValue.setTableValue(tableValue);
+    fieldValue.setRecord(recordValue);
+    fieldValidation.setFieldValue(fieldValue);
+    fieldValidation.setValidation(validation);
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    fieldValidations.add(fieldValidation);
+
+    DataSetSchema schema = new DataSetSchema();
+    schema.setTableSchemas(new ArrayList<>());
+    schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+
+    assertNotNull("error",
+        validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<Long>()));
+  }
 
 
+  /**
+   * Gets the dataset valueby id test exception.
+   *
+   * @return the dataset valueby id test exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getDatasetValuebyIdTestException() throws EEAException {
     validationServiceImpl.getDatasetValuebyId(null);
   }
 
+  /**
+   * Gets the dataset valueby id test success.
+   *
+   * @return the dataset valueby id test success
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getDatasetValuebyIdTestSuccess() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
@@ -615,16 +726,34 @@ public class ValidationServiceTest {
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
 
+  /**
+   * Gets the find by id data set schema test exception.
+   *
+   * @return the find by id data set schema test exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getfindByIdDataSetSchemaTestException() throws EEAException {
     validationServiceImpl.getfindByIdDataSetSchema(null, null);
   }
 
+  /**
+   * Gets the find by id data set schema test null exception.
+   *
+   * @return the find by id data set schema test null exception
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void getfindByIdDataSetSchemaTestNullException() throws EEAException {
     validationServiceImpl.getfindByIdDataSetSchema(1L, null);
   }
 
+  /**
+   * Gets the find by id data set schema test success.
+   *
+   * @return the find by id data set schema test success
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getfindByIdDataSetSchemaTestSuccess() throws EEAException {
     when(schemasRepository.findByIdDataSetSchema(Mockito.any(ObjectId.class)))
@@ -633,6 +762,11 @@ public class ValidationServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
+  /**
+   * Gets the dataset errors.
+   *
+   * @return the dataset errors
+   */
   @Test
   public void getDatasetErrors() {
     datasetValue.getDatasetValidations().get(0).getValidation()

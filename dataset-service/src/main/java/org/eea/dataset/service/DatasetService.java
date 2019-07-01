@@ -6,7 +6,6 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -38,7 +37,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(Long datasetId, String fileName, InputStream is, String idTableSchema)
+  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
       throws EEAException, IOException;
 
 
@@ -47,7 +46,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    */
-  void deleteDataSchema(String datasetId);
+  void deleteDataSchema(@DatasetId String datasetId);
 
 
   /**
@@ -98,8 +97,8 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  ValidationLinkVO getPositionFromAnyObjectId(Long id, Long idDataset, TypeEntityEnum type)
-      throws EEAException;
+  ValidationLinkVO getPositionFromAnyObjectId(Long id, @DatasetId Long idDataset,
+      TypeEntityEnum type) throws EEAException;
 
 
   /**
