@@ -3,13 +3,22 @@ import IconComponent from "../../../../Layout/UI/icon-component";
 import primeIcons from "../../../../../conf/prime.icons";
 import styles from "./DataFlowItem.module.scss";
 import ResourcesContext from "../../../../Context/ResourcesContext";
+import {Link} from 'react-router-dom';
 
 const DataFlowItem = props => {
 
 	const resources = useContext(ResourcesContext);
 
-	const { itemContent, listType } = props;
-	return (
+	const { itemContent, listType, id } = props;
+	const layout = ({ children }) => {
+		if(listType !== "pending"){
+			return (<Link to={`/repoting-data-flow/${id}`}>{children}</Link>)
+		}
+		   return <>{children}</>
+	}
+	
+	return layout(	
+		
 		<div
 			className={
 				listType === "accepted" || listType === "completed"
@@ -36,6 +45,7 @@ const DataFlowItem = props => {
 			</div>
 
 			<div className={`${styles.card_component_btn}`}>
+
 				{listType === "pending" ? (
 					<>
 						<button type="button" className={`${styles.rep_button}`}>
@@ -54,7 +64,10 @@ const DataFlowItem = props => {
 				)}
 			</div>
 		</div>
-	);
+	
+	)
+		
+	
 };
 
 export default DataFlowItem;

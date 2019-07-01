@@ -11,7 +11,7 @@ const DataFlowList = props => {
 			</div>
 			{listContent.map(item => {
 				return (
-					<DataFlowItem key={item.id} itemContent={item} listType={listType} />
+					<DataFlowItem key={item.id} itemContent={item} listType={listType} id={item.id} />
 				);
 			})}
 		</div>

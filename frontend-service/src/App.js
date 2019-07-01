@@ -20,12 +20,13 @@ const App = () => {
 					<Switch>
 						<Route exact path="/" component={DataFlowTasks} />
 						<Route path="/reporting-data-flow" component={ReportingDataFlow} />
+						<Route path="/reporting-data-flow/:id" component={ReportingDataFlow} />
 						<Route path="/reporter-data-set" component={ReporterDataSet} />
 						<Route
 							path="/documentation-data-set"
 							component={DocumentationDataSet}
 						/>
-						<Route path="/data-flow-completed" component={DataFlowsCompleted} />
+						
 					</Switch>
 				</Router>
 			</ResourcesContext.Provider>
