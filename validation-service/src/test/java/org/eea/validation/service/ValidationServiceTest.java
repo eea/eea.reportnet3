@@ -320,6 +320,12 @@ public class ValidationServiceTest {
 
   }
 
+  @Test(expected = EEAException.class)
+  public void testValidateRecordException() throws EEAException {
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    validationServiceImpl.validateRecord(1L, kieSession);
+  }
+
   /**
    * Test validate data set data.
    *
@@ -333,6 +339,45 @@ public class ValidationServiceTest {
     Validation validation = new Validation();
     validation.setId(1L);
     validation.setLevelError(TypeErrorEnum.ERROR);
+    Validation validation2 = new Validation();
+    validation2.setId(2L);
+    validation2.setLevelError(TypeErrorEnum.WARNING);
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    recordValue.setId(1L);
+    recordValue.setRecordValidations(new ArrayList<>());
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setValidation(validation);
+    fieldValidations.add(fieldValidation);
+    FieldValidation fieldValidation2 = new FieldValidation();
+    fieldValidation2.setValidation(validation2);
+    fieldValidations.add(fieldValidation2);
+    fieldValue.setFieldValidations(fieldValidations);
+    fieldValue.setId(1L);
+    fields.add(fieldValue);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1l);
+    recordValidation.setValidation(validation2);
+    recordValidations.add(recordValidation);
+    recordValue.setFields(fields);
+    recordValue.setRecordValidations(recordValidations);
+    records.add(recordValue);
+    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    validationServiceImpl.validateRecord(1L, kieSession);
+
+  }
+
+  @Test
+  public void testValidateRecordWarningPart() throws FileNotFoundException, EEAException {
+
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    Validation validation = new Validation();
+    validation.setId(1L);
+    validation.setLevelError(TypeErrorEnum.WARNING);
     List<RecordValue> records = new ArrayList<>();
     RecordValue recordValue = new RecordValue();
     recordValue.setId(1L);
@@ -355,10 +400,6 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    // when(validationRecordRepository.saveAll(Mockito.any())).thenReturn(null);
-
-    // when(validationFieldRepository.saveAll(Mockito.any())).thenReturn(null);
-
     validationServiceImpl.validateRecord(1L, kieSession);
 
   }
@@ -382,8 +423,35 @@ public class ValidationServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testValidateFieldsSuccess() throws FileNotFoundException, EEAException {
+  public void testValidateFieldsSuccess() throws EEAException {
+    List<RecordValue> records = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    recordValue.setId(1L);
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValue.setId(1L);
+    fieldValue.setLevelError(TypeErrorEnum.WARNING);
+    validation.setId(1L);
+    validation.setTypeEntity(TypeEntityEnum.DATASET);
+    fieldValidation.setValidation(validation);
+    fieldValidation.setFieldValue(fieldValue);
+    fieldValidation.setId(1L);
+    fieldValidations.add(fieldValidation);
+    fieldValue.setFieldValidations(fieldValidations);
+    fields.add(fieldValue);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setId(1l);
+    recordValidation.setValidation(validation);
+    recordValidations.add(recordValidation);
+    recordValue.setFields(fields);
+    recordValue.setRecordValidations(recordValidations);
+    records.add(recordValue);
+    datasetValue.getTableValues().get(0).setId(1L);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateFields(1L, kieSession);
 
   }
