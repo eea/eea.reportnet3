@@ -1,6 +1,6 @@
 .Footer {
-	/* 	position: fixed;
-	bottom: 0px; */
+	position: absolute;
+	bottom: 0;
 	text-align: center;
 	background-color: var(--bluebg-color);
 	color: white;
