@@ -2,11 +2,8 @@ package org.eea.validation.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.kafka.io.KafkaSender;
@@ -52,30 +49,8 @@ public class ValidationControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataExceptionBadIdTest() throws EEAException {
-    doThrow(new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID)).when(validationHelper)
-        .executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataExceptionDatasetNotFoundTest() throws EEAException {
-    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(validationHelper)
-        .executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataExceptionInternalErrorTest() throws EEAException {
-    doThrow(new EEAException("")).when(validationHelper).executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-  }
-
-  @Test
   public void validateDataSetDataTest() throws EEAException {
-    doNothing().when(validationHelper).executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
+    validationController.validateDataSetData(null);
   }
 
   @Test
