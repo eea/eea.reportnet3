@@ -1,11 +1,14 @@
 package org.eea.validation.controller;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.service.impl.LoadValidationCallable;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
@@ -66,16 +69,14 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    LoadValidationCallable callable = null;
     try {
-      validationHelper.executeValidation(datasetId);
-    } catch (EEAException e) {
-      if (e.getMessage().equals(EEAErrorMessage.DATASET_INCORRECT_ID)) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-      }
-      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-      }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      // validationHelper.executeValidation(datasetId);
+      callable = new LoadValidationCallable(validationHelper, datasetId);
+      executor.submit(callable);
+    } finally {
+      executor.shutdown();
     }
 
   }
