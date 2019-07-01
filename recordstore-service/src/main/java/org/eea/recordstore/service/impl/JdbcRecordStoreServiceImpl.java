@@ -121,8 +121,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public ConnectionDataVO getConnectionDataForDataset(String datasetName)
-      throws RecordStoreAccessException {
+  public ConnectionDataVO getConnectionDataForDataset(String datasetName) {
     final List<String> datasets = getAllDataSetsName(datasetName);
     ConnectionDataVO result = new ConnectionDataVO();
     for (final String dataset : datasets) {
@@ -136,7 +135,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException {
+  public List<ConnectionDataVO> getConnectionDataForDataset() {
     final List<String> datasets = getAllDataSetsName("");
     List<ConnectionDataVO> result = new ArrayList<>();
     for (final String dataset : datasets) {
@@ -169,7 +168,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @throws RecordStoreAccessException the docker access exception
    */
-  private List<String> getAllDataSetsName(String datasetName) throws RecordStoreAccessException {
+  private List<String> getAllDataSetsName(String datasetName) {
 
     return jdbcTemplate.query(sqlGetDatasetsName, new PreparedStatementSetter() {
       @Override
