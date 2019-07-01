@@ -233,7 +233,7 @@ public class ValidationServiceImpl implements ValidationService {
         .forEach(table -> {
           table.getTableValidations().stream().forEach(tableVal -> {
             orig.add("Dataset_" + tableVal.getTableValue().getDatasetId().getId().toString());
-            if (tableVal.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+            if (TypeErrorEnum.ERROR.equals(tableVal.getValidation().getLevelError())) {
               errorsList.add(TypeErrorEnum.ERROR);
             } else {
               errorsList.add(TypeErrorEnum.WARNING);
@@ -297,7 +297,7 @@ public class ValidationServiceImpl implements ValidationService {
 
         row.getRecordValidations().stream().forEach(rowVal -> {
           orig.add(rowVal.getValidation().getOriginName());
-          if (rowVal.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+          if (TypeErrorEnum.ERROR.equals(rowVal.getValidation().getLevelError())) {
             errorsList.add(TypeErrorEnum.ERROR);
           } else {
             errorsList.add(TypeErrorEnum.WARNING);
@@ -360,7 +360,7 @@ public class ValidationServiceImpl implements ValidationService {
             .forEach(field -> {
               field.getFieldValidations().stream().forEach(fval -> {
                 orig.add(fval.getValidation().getOriginName());
-                if (fval.getValidation().getLevelError().equals(TypeErrorEnum.ERROR)) {
+                if (TypeErrorEnum.ERROR.equals(fval.getValidation().getLevelError())) {
                   errorsList.add(TypeErrorEnum.ERROR);
                 } else {
                   errorsList.add(TypeErrorEnum.WARNING);
