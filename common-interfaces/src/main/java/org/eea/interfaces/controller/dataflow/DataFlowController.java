@@ -36,20 +36,38 @@ public interface DataFlowController {
   DataFlowVO findById(@PathVariable("id") Long id);
 
 
+  /**
+   * Find by status.
+   *
+   * @param status the status
+   * @return the list
+   */
   @RequestMapping(value = "/status/{status}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findByStatus(TypeStatusEnum status);
 
 
+  /**
+   * Find pending accepted.
+   *
+   * @return the list
+   */
   @RequestMapping(value = "/pending_accepted", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findPendingAccepted();
 
 
+  /**
+   * Find completed.
+   *
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @return the list
+   */
   @RequestMapping(value = "/completed", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findCompleted(
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize);
+      @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
 
 }
