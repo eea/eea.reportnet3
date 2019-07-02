@@ -47,6 +47,10 @@ const ReportingDataFlow = ({ history, match }) => {
 				<div className="titleDiv">
 					<BreadCrumb
 						model={[
+							{
+								label: resources.messages["dataFlowTask"],
+								url: "data-flow-task/"
+							},
 							{ label: resources.messages["reportingDataFlow"], url: "#" }
 						]}
 						home={home}
