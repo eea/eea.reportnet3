@@ -105,16 +105,16 @@ public class LoadValidationsHelper {
 
     List<ErrorsValidationVO> errors = new ArrayList<>();
 
-    Future<List<ErrorsValidationVO>> datasetErrors =
-        validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
-    Future<List<ErrorsValidationVO>> tableErrors =
-        validationService.getTableErrors(dataset.getId(), idValidations);
-    Future<List<ErrorsValidationVO>> recordErrors =
-        validationService.getRecordErrors(dataset.getId(), idValidations);
-    Future<List<ErrorsValidationVO>> fieldErrors =
-        validationService.getFieldErrors(dataset.getId(), idValidations);
-
     try {
+      Future<List<ErrorsValidationVO>> datasetErrors =
+          validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
+      Future<List<ErrorsValidationVO>> tableErrors =
+          validationService.getTableErrors(dataset.getId(), idValidations);
+      Future<List<ErrorsValidationVO>> recordErrors =
+          validationService.getRecordErrors(dataset.getId(), idValidations);
+      Future<List<ErrorsValidationVO>> fieldErrors =
+          validationService.getFieldErrors(dataset.getId(), idValidations);
+
       errors.addAll(datasetErrors.get());
       errors.addAll(tableErrors.get());
       errors.addAll(recordErrors.get());
