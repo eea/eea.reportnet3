@@ -162,10 +162,13 @@ pipeline {
                             app = docker.build("k8s-swi001:5000/inspire-harvester:3.0", "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 .")
                             app.push()                    
                         }
+                        echo 'Recordstore Service'
+                        sh('mkdir recordstore-service/target/dependency')
+                        sh('(cd recordstore-service/target/dependency; tar -zxf ../recordstore-service-3.0-SNAPSHOT.jar)')                        
                         script {
-                            echo 'Recordstore Service'
+                            
                             def app
-                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg DEPENDENCY=recordstore-service/target/dependnecy --build-arg MS_PORT=8090 .Dockerfile_new")
                             app.push()                    
                         }
                         script {
