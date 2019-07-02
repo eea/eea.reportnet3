@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.callable.UpdateRecordHelper;
+import org.eea.dataset.service.file.FileTreatmentHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -57,6 +58,9 @@ public class DataSetControllerImplTest {
 
   @Mock
   UpdateRecordHelper updateRecordHelper;
+
+  @Mock
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /**
    * Inits the mocks.
@@ -126,6 +130,8 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess2() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+    doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 

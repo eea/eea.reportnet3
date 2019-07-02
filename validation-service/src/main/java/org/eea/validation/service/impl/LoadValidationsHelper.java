@@ -3,10 +3,7 @@ package org.eea.validation.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
@@ -96,34 +93,36 @@ public class LoadValidationsHelper {
 
   }
 
+
   /**
    * Process errors.
    *
+   * @param idValidations the id validations
    * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
    * @return the list
    */
   private List<ErrorsValidationVO> processErrors(List<Long> idValidations, DatasetValue dataset) {
 
     List<ErrorsValidationVO> errors = new ArrayList<>();
 
-    ExecutorService es = Executors.newCachedThreadPool();
-    List<Future<List<ErrorsValidationVO>>> futures = new ArrayList<>();
+    Future<List<ErrorsValidationVO>> datasetErrors =
+        validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
+    Future<List<ErrorsValidationVO>> tableErrors =
+        validationService.getTableErrors(dataset.getId(), idValidations);
+    Future<List<ErrorsValidationVO>> recordErrors =
+        validationService.getRecordErrors(dataset.getId(), idValidations);
+    Future<List<ErrorsValidationVO>> fieldErrors =
+        validationService.getFieldErrors(dataset.getId(), idValidations);
+
     try {
-      for (int i = 0; i < 4; i++) {
-        LoadErrorsCallable task =
-            new LoadErrorsCallable(validationService, dataset, idValidations, i);
-        Future<List<ErrorsValidationVO>> result = es.submit(task);
-        futures.add(result);
-      }
-      es.shutdown();
-      es.awaitTermination(1, TimeUnit.MINUTES);
-      for (Future<List<ErrorsValidationVO>> future : futures) {
-        errors.addAll(future.get());
-      }
+      errors.addAll(datasetErrors.get());
+      errors.addAll(tableErrors.get());
+      errors.addAll(recordErrors.get());
+      errors.addAll(fieldErrors.get());
     } catch (InterruptedException | ExecutionException e) {
       LOG_ERROR.error("Error obtaining the errors ", e);
     }
+
     return errors;
   }
 }

@@ -2,6 +2,7 @@ package org.eea.validation.service;
 
 
 import java.util.List;
+import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
@@ -128,7 +129,8 @@ public interface ValidationService {
    * @param idValidations the id validations
    * @return the record errors
    */
-  List<ErrorsValidationVO> getRecordErrors(@DatasetId Long datasetId, List<Long> idValidations);
+  Future<List<ErrorsValidationVO>> getRecordErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
 
   /**
    * Gets the table errors.
@@ -137,7 +139,8 @@ public interface ValidationService {
    * @param idValidations the id validations
    * @return the table errors
    */
-  List<ErrorsValidationVO> getTableErrors(@DatasetId Long datasetId, List<Long> idValidations);
+  Future<List<ErrorsValidationVO>> getTableErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
 
   /**
    * Gets the dataset errors.
@@ -147,7 +150,7 @@ public interface ValidationService {
    * @param idValidations the id validations
    * @return the dataset errors
    */
-  List<ErrorsValidationVO> getDatasetErrors(@DatasetId Long datasetId, DatasetValue dataset,
+  Future<List<ErrorsValidationVO>> getDatasetErrors(@DatasetId Long datasetId, DatasetValue dataset,
       List<Long> idValidations);
 
   /**
@@ -178,6 +181,6 @@ public interface ValidationService {
    * @param idValidations the id validations
    * @return the field errors
    */
-  List<ErrorsValidationVO> getFieldErrors(Long datasetId, List<Long> idValidations);
+  Future<List<ErrorsValidationVO>> getFieldErrors(Long datasetId, List<Long> idValidations);
 
 }

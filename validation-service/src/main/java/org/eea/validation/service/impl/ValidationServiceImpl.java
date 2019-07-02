@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -40,6 +41,8 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 /**
@@ -505,7 +508,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the field errors
    */
   @Override
-  public List<ErrorsValidationVO> getFieldErrors(final Long datasetId,
+  @Async
+  public Future<List<ErrorsValidationVO>> getFieldErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<FieldValidation> fieldValidations =
         validationFieldRepository.findByValidationIds(idValidations);
@@ -527,7 +531,8 @@ public class ValidationServiceImpl implements ValidationService {
 
       errors.add(error);
     }
-    return errors;
+
+    return new AsyncResult<>(errors);
   }
 
 
@@ -539,7 +544,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the record errors
    */
   @Override
-  public List<ErrorsValidationVO> getRecordErrors(final Long datasetId,
+  @Async
+  public Future<List<ErrorsValidationVO>> getRecordErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<RecordValidation> recordValidations =
         validationRecordRepository.findByValidationIds(idValidations);
@@ -560,7 +566,8 @@ public class ValidationServiceImpl implements ValidationService {
 
       errors.add(error);
     }
-    return errors;
+
+    return new AsyncResult<>(errors);
   }
 
 
@@ -572,7 +579,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the table errors
    */
   @Override
-  public List<ErrorsValidationVO> getTableErrors(final Long datasetId,
+  @Async
+  public Future<List<ErrorsValidationVO>> getTableErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<TableValidation> tableValidations =
         tableValidationRepository.findByValidationIds(idValidations);
@@ -593,7 +601,8 @@ public class ValidationServiceImpl implements ValidationService {
 
       errors.add(error);
     }
-    return errors;
+
+    return new AsyncResult<>(errors);
   }
 
 
@@ -606,8 +615,9 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the dataset errors
    */
   @Override
-  public List<ErrorsValidationVO> getDatasetErrors(final Long datasetId, final DatasetValue dataset,
-      final List<Long> idValidations) {
+  @Async
+  public Future<List<ErrorsValidationVO>> getDatasetErrors(final Long datasetId,
+      final DatasetValue dataset, final List<Long> idValidations) {
     List<ErrorsValidationVO> errors = new ArrayList<>();
     List<DatasetValidation> datasetValidations =
         validationDatasetRepository.findByValidationIds(idValidations);
@@ -624,7 +634,8 @@ public class ValidationServiceImpl implements ValidationService {
 
       errors.add(error);
     }
-    return errors;
+
+    return new AsyncResult<>(errors);
   }
 
   /**

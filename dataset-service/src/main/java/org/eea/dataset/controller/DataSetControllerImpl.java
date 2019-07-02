@@ -3,12 +3,8 @@ package org.eea.dataset.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.callable.DeleteTableCallable;
-import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.callable.UpdateRecordHelper;
 import org.eea.dataset.service.file.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -27,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,6 +51,12 @@ public class DataSetControllerImpl implements DatasetController {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
 
   /**
    * The dataset service.
@@ -170,18 +171,13 @@ public class DataSetControllerImpl implements DatasetController {
     }
     // extract the filename
     String fileName = file.getOriginalFilename();
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    LoadDataCallable callable = null;
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(fileTreatmentHelper, datasetId, fileName, is, idTableSchema);
-      executor.submit(callable);
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
       // NOPMD this cannot be avoid since Callable throws Exception in
-    } catch (IOException e) {
+    } catch (IOException | EEAException | InterruptedException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    } finally {
-      executor.shutdown();
     }
 
   }
@@ -406,14 +402,11 @@ public class DataSetControllerImpl implements DatasetController {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    } else if (idTableSchema == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    final DeleteTableCallable callable =
-        new DeleteTableCallable(this.datasetService, idTableSchema, dataSetId);
-    try {
-      executor.submit(callable);
-    } finally {
-      executor.shutdown();
-    }
+    LOG.info("executing delete");
+    datasetService.deleteTableBySchema(idTableSchema, dataSetId);
   }
 }

@@ -30,6 +30,8 @@ public final class EEAErrorMessage {
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
+  public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
+
   /** The Constant EXECUTION_ERROR. */
   public static final String EXECUTION_ERROR = "Runtime error";
 
