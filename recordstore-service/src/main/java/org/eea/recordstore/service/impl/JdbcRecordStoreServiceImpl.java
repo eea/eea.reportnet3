@@ -1,7 +1,10 @@
 package org.eea.recordstore.service.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -87,20 +90,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   @Override
   public void createEmptyDataSet(String datasetName) throws RecordStoreAccessException {
-    final File fileInitCommands;
-    try {
-      fileInitCommands = resourceFile.getFile();
-    } catch (IOException e) {
-      LOG_ERROR.error("Error accesing file datasetInitCommands.txt creating dataset ", e);
-      throw new RecordStoreAccessException(
-          "Error accesing file datasetInitCommands.txt creating dataset", e);
-    }
+    final InputStream is;
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
-    try (final Stream<String> stream = Files.lines(fileInitCommands.toPath())) {
-
-      stream.forEach(commands::add);
+    try (BufferedReader br
+        = new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        commands.add(line);
+      }
 
     } catch (final IOException e) {
       LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
