@@ -87,14 +87,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   @Override
   public void createEmptyDataSet(String datasetName) throws RecordStoreAccessException {
-    final ClassLoader classLoader = this.getClass().getClassLoader();
     final File fileInitCommands;
     try {
       fileInitCommands = resourceFile.getFile();
     } catch (IOException e) {
-      LOG_ERROR.error("Errror accesing file datasetInitCommands.txt creating dataset ", e);
+      LOG_ERROR.error("Error accesing file datasetInitCommands.txt creating dataset ", e);
       throw new RecordStoreAccessException(
-          "Errror accesing file datasetInitCommands.txt creating dataset", e);
+          "Error accesing file datasetInitCommands.txt creating dataset", e);
     }
 
     final List<String> commands = new ArrayList<>();
