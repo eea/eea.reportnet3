@@ -102,19 +102,21 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+
   /**
    * Find pending accepted.
    *
+   * @param userId the user id
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/pending_accepted", method = RequestMethod.GET,
+  @RequestMapping(value = "/pendingaccepted/{userId}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findPendingAccepted() {
+  public List<DataFlowVO> findPendingAccepted(Long userId) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
     try {
-      dataflows = dataflowService.getPendingAccepted();
+      dataflows = dataflowService.getPendingAccepted(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

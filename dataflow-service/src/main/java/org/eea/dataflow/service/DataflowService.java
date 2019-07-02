@@ -30,13 +30,15 @@ public interface DataflowService {
    */
   List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException;
 
+
   /**
    * Gets the pending accepted.
    *
+   * @param userId the user id
    * @return the pending accepted
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getPendingAccepted() throws EEAException;
+  List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException;
 
   /**
    * Gets the completed.

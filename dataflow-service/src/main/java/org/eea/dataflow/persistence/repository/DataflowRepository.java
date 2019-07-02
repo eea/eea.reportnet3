@@ -15,17 +15,42 @@ import org.springframework.data.repository.query.Param;
 public interface DataflowRepository extends JpaRepository<Dataflow, Long> {
 
 
+  /**
+   * Find by status.
+   *
+   * @param status the status
+   * @return the list
+   */
   List<Dataflow> findByStatus(TypeStatusEnum status);
 
-  @Query("SELECT df from Dataflow df WHERE df.status in('PENDING','ACCEPTED') ORDER BY df.deadlineDate ASC")
-  List<Dataflow> findPendingAccepted();
+  /**
+   * Find pending accepted.
+   *
+   * @param userIdRequester the user id requester
+   * @return the list
+   */
+  @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType in ('PENDING','ACCEPTED') "
+      + " AND ur.userRequester = :idRequester ORDER BY df.deadlineDate ASC")
+  List<Dataflow> findPendingAccepted(@Param("idRequester") Long userIdRequester);
 
 
+  /**
+   * Find completed.
+   *
+   * @return the list
+   */
   @Query("SELECT df from Dataflow df WHERE df.status='COMPLETED' ORDER BY df.deadlineDate ASC")
   List<Dataflow> findCompleted();
 
 
 
+  /**
+   * Find by status and user requester.
+   *
+   * @param typeRequest the type request
+   * @param userIdRequester the user id requester
+   * @return the list
+   */
   @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType = :type "
       + " AND ur.userRequester = :idRequester ORDER BY df.deadlineDate ASC")
   List<Dataflow> findByStatusAndUserRequester(@Param("type") TypeRequestEnum typeRequest,

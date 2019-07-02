@@ -49,16 +49,6 @@ public interface DataFlowController {
 
 
   /**
-   * Find pending accepted.
-   *
-   * @return the list
-   */
-  @RequestMapping(value = "/pending_accepted", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findPendingAccepted();
-
-
-  /**
    * Find completed.
    *
    * @param pageNum the page num
@@ -72,10 +62,28 @@ public interface DataFlowController {
       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
 
 
+  /**
+   * Find user dataflows by status.
+   *
+   * @param userId the user id
+   * @param type the type
+   * @return the list
+   */
   @RequestMapping(value = "/{userId}/request/{type}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findUserDataflowsByStatus(@PathVariable(value = "userId") Long userId,
       @PathVariable(value = "type") TypeRequestEnum type);
 
+
+
+  /**
+   * Find pending accepted.
+   *
+   * @param userId the user id
+   * @return the list
+   */
+  @RequestMapping(value = "/pendingaccepted/{userId}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findPendingAccepted(@PathVariable(value = "userId") Long userId);
 
 }

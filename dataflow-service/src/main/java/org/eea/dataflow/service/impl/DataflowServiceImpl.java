@@ -64,16 +64,18 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowMapper.entityListToClass(dataflows);
   }
 
+
   /**
    * Gets the pending accepted.
    *
+   * @param userId the user id
    * @return the pending accepted
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingAccepted() throws EEAException {
+  public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
 
-    List<Dataflow> dataflows = dataflowRepository.findPendingAccepted();
+    List<Dataflow> dataflows = dataflowRepository.findPendingAccepted(userId);
     return dataflowMapper.entityListToClass(dataflows);
 
   }

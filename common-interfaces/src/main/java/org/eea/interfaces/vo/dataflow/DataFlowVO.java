@@ -14,8 +14,26 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
+
+/**
+ * Gets the documents.
+ *
+ * @return the documents
+ */
 @Getter
+
+/**
+ * Sets the documents.
+ *
+ * @param documents the new documents
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class DataFlowVO implements Serializable {
 
@@ -28,14 +46,19 @@ public class DataFlowVO implements Serializable {
   /** The datasets. */
   private List<DataSetVO> datasets;
 
+  /** The description. */
   private String description;
 
+  /** The name. */
   private String name;
 
+  /** The deadline date. */
   private Date deadlineDate;
 
+  /** The status. */
   private TypeStatusEnum status;
 
+  /** The documents. */
   private List<DocumentVO> documents;
 
   /**
