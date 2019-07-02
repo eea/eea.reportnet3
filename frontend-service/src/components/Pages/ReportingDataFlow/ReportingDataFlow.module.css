@@ -9,6 +9,7 @@
 	flex-direction: row;
 }
 .buttonsWrapper button {
+	border-radius: 20px !important;
 }
 .buttonsWrapper button :global .p-button-text {
 	font-size: 2rem;
@@ -20,13 +21,14 @@
 	height: 20px;
 	right: 0;
 	bottom: 0;
+	border-radius: 0px 0px 20px 0px !important;
 }
 .buttonsWrapper :global .p-splitbutton-menubutton:enabled:focus {
 	box-shadow: none;
 }
 .buttonsWrapper :global .p-button-icon-left {
-	bottom: 0px !important;
-	top: auto !important;
+	bottom: 0px;
+	top: auto;
 }
 
 .buttonwrapper {
@@ -34,4 +36,9 @@
 }
 .buttonWrapper:nth-last-of-type(2) {
 	margin-left: 0px;
+}
+
+.caption {
+	text-align: center;
+	text-transform: capitalize;
 }

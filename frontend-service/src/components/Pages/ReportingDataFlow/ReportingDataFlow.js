@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { SplitButton } from "primereact/splitbutton";
-import { SplitButtonNE } from "../../Layout/UI/SplitButtonNE/SplitButtonNE";
 import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json";
 //import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
@@ -18,6 +17,7 @@ const ReportingDataFlow = ({ history, match }) => {
 	/* const [breadCrumbItems, setBreadCrumbItems] = useState([]); */
 	const [redirect, setRedirect] = useState(false);
 	const [redirectTo, setRedirectTo] = useState("");
+	const [splitOptions, setSplitOptions] = useState([]);
 
 	const home = { icon: resources.icons["home"], url: "/" };
 
@@ -34,6 +34,27 @@ const ReportingDataFlow = ({ history, match }) => {
 		{ label: "New", icon: "pi pi-fw pi-plus" },
 		{ label: "Delete", icon: "pi pi-fw pi-trash" }
 	]; */
+
+	useEffect(() => {
+		setSplitOptions([
+			{
+				label: "Release to data collection",
+				icon: "pi pi-unlock"
+			},
+			{
+				label: "Import from file",
+				icon: "pi pi-upload"
+			},
+			{
+				label: "Duplicate",
+				icon: "pi pi-copy"
+			},
+			{
+				label: "Properties",
+				icon: "pi pi-info-circle"
+			}
+		]);
+	}, [])
 
 	const { nameDataSetSchema } = jsonDataSchema;
 
@@ -76,11 +97,11 @@ const ReportingDataFlow = ({ history, match }) => {
 											);
 										}}
 									/>
-									<p className="caption">{resources.messages["documents"]}</p>
+									<p className={styles.caption}>{resources.messages["documents"]}</p>
 								</div>
 								<div className={styles.buttonwrapper}>
-									<SplitButtonNE handleRedirect={handleRedirect} />
-									<p className="caption">{resources.messages["newDataset"]}</p>
+									<SplitButton label={resources.messages['ds']} model={splitOptions} handleRedirect={handleRedirect} />
+									<p className={styles.caption}>{resources.messages["dataSet"]}</p>
 								</div>
 							</div>
 						</div>
