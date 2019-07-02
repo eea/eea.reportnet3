@@ -138,9 +138,6 @@ pipeline {
             parallel {
                 stage('Build Microservices') {
                     steps {
-                        input(message: 'Do you like Java?', ok: 'Yes', 
-                            parameters: [booleanParam(defaultValue: true, 
-                            description: 'If you like Java, just push the button',name: 'Yes?')])
                         script {
                             echo 'Dataflow Service'
                             def app
@@ -168,7 +165,7 @@ pipeline {
                         script {
                             echo 'Recordstore Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./Dockerfile_new")
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
                             app.push()                    
                         }
                         script {
