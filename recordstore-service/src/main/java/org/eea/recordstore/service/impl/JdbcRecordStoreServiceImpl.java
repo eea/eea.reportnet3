@@ -96,10 +96,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     // read file into stream, try-with-resources
     try (BufferedReader br
         = new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
-      String line;
-      while ((line = br.readLine()) != null) {
-        commands.add(line);
-      }
+
+      br.lines().forEach(commands::add);
 
     } catch (final IOException e) {
       LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
