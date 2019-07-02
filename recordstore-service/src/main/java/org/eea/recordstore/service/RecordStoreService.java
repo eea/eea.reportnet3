@@ -1,5 +1,6 @@
 package org.eea.recordstore.service;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -8,7 +9,6 @@ import org.eea.recordstore.exception.RecordStoreAccessException;
  * The interface Record store service.
  */
 public interface RecordStoreService {
-
 
 
   /**
@@ -46,7 +46,8 @@ public interface RecordStoreService {
    *
    * @throws RecordStoreAccessException the docker access exception
    */
-  ConnectionDataVO getConnectionDataForDataset(String datasetName) throws RecordStoreAccessException;
+  ConnectionDataVO getConnectionDataForDataset(String datasetName)
+      throws RecordStoreAccessException;
 
   /**
    * Gets connection data for dataset.

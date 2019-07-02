@@ -11,17 +11,22 @@ import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.test.util.ReflectionTestUtils;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class JdbcRecordStoreServiceImplTest {
 
   @InjectMocks
@@ -32,10 +37,15 @@ public class JdbcRecordStoreServiceImplTest {
   @Mock
   private KafkaSender kafkaSender;
 
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
+
+    ReflectionTestUtils.setField(jdbcRecordStoreService, "resourceFile",
+        new ClassPathResource("datasetInitCommands.txt"));
     ReflectionTestUtils.setField(jdbcRecordStoreService, "userPostgreDb", "root");
+
     ReflectionTestUtils.setField(jdbcRecordStoreService, "passPostgreDb", "root");
     ReflectionTestUtils.setField(jdbcRecordStoreService, "connStringPostgre",
         "jdbc:postgresql://localhost/datasets");

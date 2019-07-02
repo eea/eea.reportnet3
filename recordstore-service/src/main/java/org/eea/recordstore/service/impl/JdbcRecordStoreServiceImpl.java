@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.springframework.core.io.Resource;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -66,6 +67,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
+  @Value("classpath:datasetInitCommands.txt")
+  private Resource resourceFile;
 
   /**
    * The Constant LOG_ERROR.
@@ -85,8 +88,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createEmptyDataSet(String datasetName) throws RecordStoreAccessException {
     final ClassLoader classLoader = this.getClass().getClassLoader();
-    final File fileInitCommands =
-        new File(classLoader.getResource("datasetInitCommands.txt").getFile());
+    final File fileInitCommands;
+    try {
+      fileInitCommands = resourceFile.getFile();
+    } catch (IOException e) {
+      LOG_ERROR.error("Errror accesing file datasetInitCommands.txt creating dataset ", e);
+      throw new RecordStoreAccessException(
+          "Errror accesing file datasetInitCommands.txt creating dataset", e);
+    }
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
