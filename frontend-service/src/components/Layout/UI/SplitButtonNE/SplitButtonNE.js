@@ -9,38 +9,38 @@ export class SplitButtonNE extends SplitButton {
 				{
 					label: "Release to data collection",
 					icon: "pi pi-unlock",
-					command: e => {
+					/* command: e => {
 						this.growl.show({
 							severity: "success",
 							summary: "Updated",
 							detail: "Data Updated"
 						});
-					}
+					} */
 				},
 				{
 					label: "Import from file",
 					icon: "pi pi-upload",
-					command: e => {
+					/* command: e => {
 						this.growl.show({
 							severity: "success",
 							summary: "Delete",
 							detail: "Data Deleted"
 						});
-					}
+					} */
 				},
 				{
 					label: "Duplicate",
 					icon: "pi pi-copy",
-					command: e => {
+					/* command: e => {
 						window.location.href = "https://facebook.github.io/react/";
-					}
+					} */
 				},
 				{
 					label: "Properties",
 					icon: "pi pi-info-circle",
-					command: e => {
+					/* command: e => {
 						window.location.hash = "/fileupload";
-					}
+					} */
 				}
 			]
 		};
