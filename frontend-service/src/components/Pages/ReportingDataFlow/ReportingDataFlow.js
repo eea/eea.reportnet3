@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import { withRouter } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { SplitButton } from "primereact/splitbutton";
@@ -14,13 +13,11 @@ import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import IconComponent from "../../Layout/UI/icon-component";
 import config from "../../../conf";
 
-const ReportingDataFlow = props => {
+const ReportingDataFlow = ({ history, match }) => {
 	const resources = useContext(ResourcesContext);
 	/* const [breadCrumbItems, setBreadCrumbItems] = useState([]); */
 	const [redirect, setRedirect] = useState(false);
 	const [redirectTo, setRedirectTo] = useState("");
-
-	console.log("ReportingDataFlow Render...");
 
 	const home = { icon: resources.icons["home"], url: "/" };
 
@@ -41,7 +38,7 @@ const ReportingDataFlow = props => {
 	const { nameDataSetSchema } = jsonDataSchema;
 
 	const handleRedirect = target => {
-		props.history.push(target);
+		history.push(target);
 	};
 
 	return (
@@ -49,14 +46,16 @@ const ReportingDataFlow = props => {
 			<MainLayout>
 				<div className="titleDiv">
 					<BreadCrumb
-						model={[{ label: resources.messages["reportingDataFlow"], url: "#" },]}
+						model={[
+							{ label: resources.messages["reportingDataFlow"], url: "#" }
+						]}
 						home={home}
 					/>
 				</div>
 				<div className="rep-container">
 					<div className="rep-row">
 						<DataFlowColumn
-							navTitle={resources.messages['dataFlow']}
+							navTitle={resources.messages["dataFlow"]}
 							dataFlowTitle={nameDataSetSchema}
 							search={true}
 						/>
@@ -72,16 +71,16 @@ const ReportingDataFlow = props => {
 										label={resources.messages["do"]}
 										className="p-button-warning"
 										onClick={e => {
-											handleRedirect("/documentation-data-set");
+											handleRedirect(
+												`/documentation-data-set/${match.params.id}`
+											);
 										}}
 									/>
-									<p className="caption">{resources.messages['documents']}</p>
+									<p className="caption">{resources.messages["documents"]}</p>
 								</div>
 								<div className={styles.buttonwrapper}>
-									<SplitButtonNE
-										handleRedirect={handleRedirect}
-									/>
-									<p className="caption">{resources.messages['newDataset']}</p>
+									<SplitButtonNE handleRedirect={handleRedirect} />
+									<p className="caption">{resources.messages["newDataset"]}</p>
 								</div>
 							</div>
 						</div>
@@ -92,4 +91,4 @@ const ReportingDataFlow = props => {
 	);
 };
 
-export default withRouter(ReportingDataFlow);
+export default ReportingDataFlow;
