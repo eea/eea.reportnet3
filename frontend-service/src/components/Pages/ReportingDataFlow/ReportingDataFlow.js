@@ -7,6 +7,7 @@ import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json";
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from "./ReportingDataFlow.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
+import primeIcons from "../../../conf/prime.icons";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import IconComponent from "../../Layout/UI/icon-component";
@@ -21,37 +22,23 @@ const ReportingDataFlow = ({ history, match }) => {
 
 	const home = { icon: resources.icons["home"], url: "/" };
 
-	/* useEffect(() => {
-		console.log("ReportingDataFlow useEffect");
-
-		setBreadCrumbItems([
-			{ label: resources.messages["AcceptedDF"], url: "#" },
-			{ label: resources.messages["DFReporting"], url: "#" }
-		]);
-	}, [resources.messages]); */
-
-	/* let items = [
-		{ label: "New", icon: "pi pi-fw pi-plus" },
-		{ label: "Delete", icon: "pi pi-fw pi-trash" }
-	]; */
-
 	useEffect(() => {
 		setSplitOptions([
 			{
-				label: "Release to data collection",
-				icon: "pi pi-unlock"
+				label: resources.messages["releaseDataCollection"],
+				icon: primeIcons.icons.archive
 			},
 			{
-				label: "Import from file",
-				icon: "pi pi-upload"
+				label: resources.messages['importFromFile'],
+				icon: primeIcons.icons.import
 			},
 			{
-				label: "Duplicate",
-				icon: "pi pi-copy"
+				label: resources.messages["duplicate"],
+				icon: primeIcons.icons.clone
 			},
 			{
-				label: "Properties",
-				icon: "pi pi-info-circle"
+				label: resources.messages["properties"],
+				icon: primeIcons.icons.info
 			}
 		]);
 	}, [])
