@@ -44,6 +44,10 @@ public final class EEAErrorMessage {
 
   public static final String PARTITION_ID_NOTFOUND = "Partition not found";
 
+  public static final String DATAFLOW_INCORRECT_ID = "Dataflow Id incorrect";
+
+  public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
+
   /**
    * Instantiates a new EEA error message.
    */

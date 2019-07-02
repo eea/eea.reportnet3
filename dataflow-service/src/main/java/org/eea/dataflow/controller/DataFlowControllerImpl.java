@@ -1,14 +1,26 @@
 package org.eea.dataflow.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.eea.dataflow.service.DataflowService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -23,6 +35,10 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+
+  @Autowired
+  private DataflowService dataflowService;
+
   /**
    * Find by id.
    *
@@ -34,8 +50,17 @@ public class DataFlowControllerImpl implements DataFlowController {
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {
-    final DataFlowVO result = new DataFlowVO();
-    result.setId(id);
+
+    if (id == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    DataFlowVO result = null;
+    try {
+      result = dataflowService.getById(id);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
     return result;
   }
 
@@ -53,4 +78,69 @@ public class DataFlowControllerImpl implements DataFlowController {
     LOG_ERROR.error(errorMessage);
     return result;
   }
+
+  @Override
+  @RequestMapping(value = "/status/{status}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findByStatus(TypeStatusEnum status) {
+
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    try {
+      dataflows = dataflowService.getByStatus(status);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+
+  }
+
+
+  @Override
+  @RequestMapping(value = "/pending_accepted", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findPendingAccepted() {
+
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    try {
+      dataflows = dataflowService.getPendingAccepted();
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+
+  }
+
+
+  @Override
+  @RequestMapping(value = "/completed", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findCompleted(Integer pageNum, Integer pageSize) {
+
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    try {
+      dataflows = dataflowService.getCompleted(pageable);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+
+
+  }
+
+  @Override
+  @RequestMapping(value = "/{userId}/request/{type}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findUserDataflowsByStatus(Long userId, TypeRequestEnum type) {
+
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    try {
+      dataflows = dataflowService.getPendingByUser(userId, type);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+
+  }
+
 }
