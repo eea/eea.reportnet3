@@ -131,6 +131,8 @@ public class ValidationServiceTest {
   /** The dataset validation repository. */
   @Mock
   private ValidationDatasetRepository datasetValidationRepository;
+
+  /** The table validation repository. */
   @Mock
   private TableValidationRepository tableValidationRepository;
   /**
@@ -344,6 +346,11 @@ public class ValidationServiceTest {
 
   }
 
+  /**
+   * Test validate record exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void testValidateRecordException() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
@@ -395,6 +402,12 @@ public class ValidationServiceTest {
 
   }
 
+  /**
+   * Test validate record warning part.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testValidateRecordWarningPart() throws FileNotFoundException, EEAException {
 
@@ -442,7 +455,6 @@ public class ValidationServiceTest {
   /**
    * Test validate data set data dataset excep.
    *
-   * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
   @Test
@@ -785,11 +797,21 @@ public class ValidationServiceTest {
     validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList());
   }
 
+  /**
+   * Validate data set error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void validateDataSetError() throws EEAException {
     validationServiceImpl.validateDataSet(1L, kieSession);
   }
 
+  /**
+   * Validate data error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void validateDataError() throws EEAException {
     datasetValue.getTableValues().get(0).getTableValidations().get(0).getValidation()
@@ -798,17 +820,32 @@ public class ValidationServiceTest {
     validationServiceImpl.validateDataSet(1L, kieSession);
   }
 
+  /**
+   * Validate data warning.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void validateDataWarning() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     validationServiceImpl.validateDataSet(1L, kieSession);
   }
 
+  /**
+   * Validate table throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void validateTableThrow() throws EEAException {
     validationServiceImpl.validateTable(1L, kieSession);
   }
 
+  /**
+   * Validate table error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void validateTableError() throws EEAException {
     Validation validation = new Validation();
@@ -847,6 +884,11 @@ public class ValidationServiceTest {
     validationServiceImpl.validateTable(1L, kieSession);
   }
 
+  /**
+   * Validate table warning.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void validateTableWarning() throws EEAException {
     Validation validation = new Validation();
