@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext } from "react";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { SplitButton } from "primereact/splitbutton";
-import { SplitButtonNE } from "../../Layout/UI/SplitButtonNE/SplitButtonNE";
 import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json";
 //import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
 //import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 import styles from "./ReportingDataFlow.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
+import primeIcons from "../../../conf/prime.icons";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import IconComponent from "../../Layout/UI/icon-component";
@@ -18,22 +18,30 @@ const ReportingDataFlow = ({ history, match }) => {
 	/* const [breadCrumbItems, setBreadCrumbItems] = useState([]); */
 	const [redirect, setRedirect] = useState(false);
 	const [redirectTo, setRedirectTo] = useState("");
+	const [splitOptions, setSplitOptions] = useState([]);
 
 	const home = { icon: resources.icons["home"], url: "/" };
 
-	/* useEffect(() => {
-		console.log("ReportingDataFlow useEffect");
-
-		setBreadCrumbItems([
-			{ label: resources.messages["AcceptedDF"], url: "#" },
-			{ label: resources.messages["DFReporting"], url: "#" }
+	useEffect(() => {
+		setSplitOptions([
+			{
+				label: resources.messages["releaseDataCollection"],
+				icon: primeIcons.icons.archive
+			},
+			{
+				label: resources.messages['importFromFile'],
+				icon: primeIcons.icons.import
+			},
+			{
+				label: resources.messages["duplicate"],
+				icon: primeIcons.icons.clone
+			},
+			{
+				label: resources.messages["properties"],
+				icon: primeIcons.icons.info
+			}
 		]);
-	}, [resources.messages]); */
-
-	/* let items = [
-		{ label: "New", icon: "pi pi-fw pi-plus" },
-		{ label: "Delete", icon: "pi pi-fw pi-trash" }
-	]; */
+	}, [])
 
 	const { nameDataSetSchema } = jsonDataSchema;
 
@@ -47,6 +55,10 @@ const ReportingDataFlow = ({ history, match }) => {
 				<div className="titleDiv">
 					<BreadCrumb
 						model={[
+							{
+								label: resources.messages["dataFlowTask"],
+								url: "data-flow-task/"
+							},
 							{ label: resources.messages["reportingDataFlow"], url: "#" }
 						]}
 						home={home}
@@ -76,11 +88,11 @@ const ReportingDataFlow = ({ history, match }) => {
 											);
 										}}
 									/>
-									<p className="caption">{resources.messages["documents"]}</p>
+									<p className={styles.caption}>{resources.messages["documents"]}</p>
 								</div>
 								<div className={styles.buttonwrapper}>
-									<SplitButtonNE handleRedirect={handleRedirect} />
-									<p className="caption">{resources.messages["newDataset"]}</p>
+									<SplitButton label={resources.messages['ds']} model={splitOptions} handleRedirect={handleRedirect} />
+									<p className={styles.caption}>{resources.messages["dataSet"]}</p>
 								</div>
 							</div>
 						</div>
