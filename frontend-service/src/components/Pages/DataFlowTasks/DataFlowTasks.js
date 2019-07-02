@@ -23,8 +23,8 @@ const DataFlowTasks = () => {
 	const resources = useContext(ResourcesContext);
 
 	const [tabMenuItems, setTabMenuItems] = useState([
-		{ label: "pending" },
-		{ label: "completed" }
+		{ label: "pending", className: styles.flow_tab },
+		{ label: "completed", className: styles.flow_tab }
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 	const [tabData, setTabData] = useState([]);
