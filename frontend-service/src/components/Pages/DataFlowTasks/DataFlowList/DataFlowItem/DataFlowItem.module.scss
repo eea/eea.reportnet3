@@ -7,11 +7,20 @@
 	align-items: center;
 	padding: 1rem 0px;
 	margin-bottom: 1.5rem;
+	a{
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		color: var(--gray75)
+	}
 	&.accepted {
 		.card_component {
 			&_btn {
 				padding-left: 2rem;
 			}
+		}
+		&:last-child {
+			margin-bottom: 8rem;
 		}
 	}
 	&:last-child {

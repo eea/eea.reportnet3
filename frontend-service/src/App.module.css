@@ -52,7 +52,7 @@ h2 {
 }
 .app {
 	position: relative;
-	min-height: 97.7vh;
+	min-height: 100vh;
 }
 
 /* cyrillic-ext */
