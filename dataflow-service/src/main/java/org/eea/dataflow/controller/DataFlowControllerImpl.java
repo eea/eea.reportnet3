@@ -36,6 +36,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
+  /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
 
@@ -79,6 +80,12 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
+  /**
+   * Find by status.
+   *
+   * @param status the status
+   * @return the list
+   */
   @Override
   @RequestMapping(value = "/status/{status}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -95,6 +102,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  /**
+   * Find pending accepted.
+   *
+   * @return the list
+   */
   @Override
   @RequestMapping(value = "/pending_accepted", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -111,6 +123,13 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  /**
+   * Find completed.
+   *
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @return the list
+   */
   @Override
   @RequestMapping(value = "/completed", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -128,6 +147,13 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   }
 
+  /**
+   * Find user dataflows by status.
+   *
+   * @param userId the user id
+   * @param type the type
+   * @return the list
+   */
   @Override
   @RequestMapping(value = "/{userId}/request/{type}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)

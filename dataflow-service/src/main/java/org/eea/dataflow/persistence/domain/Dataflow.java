@@ -48,12 +48,15 @@ public class Dataflow {
   @Column(name = "DESCRIPTION")
   private String description;
 
+  /** The deadline date. */
   @Column(name = "DEADLINE_DATE")
   private Date deadlineDate;
 
+  /** The creation date. */
   @Column(name = "CREATION_DATE")
   private Date creationDate;
 
+  /** The status. */
   @Column(name = "STATUS")
   @Enumerated(EnumType.STRING)
   private TypeStatusEnum status;
@@ -70,9 +73,11 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Document> documents;
 
+  /** The weblinks. */
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Weblink> weblinks;
 
+  /** The user requests. */
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))

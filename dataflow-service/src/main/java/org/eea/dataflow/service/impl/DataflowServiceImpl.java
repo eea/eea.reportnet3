@@ -16,16 +16,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class DataflowServiceImpl.
+ */
 @Service("dataflowService")
 public class DataflowServiceImpl implements DataflowService {
 
 
+  /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
 
+  /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
 
+  /**
+   * Gets the by id.
+   *
+   * @param id the id
+   * @return the by id
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public DataFlowVO getById(Long id) throws EEAException {
@@ -38,6 +50,13 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowMapper.entityToClass(result);
   }
 
+  /**
+   * Gets the by status.
+   *
+   * @param status the status
+   * @return the by status
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException {
 
@@ -45,6 +64,12 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowMapper.entityListToClass(dataflows);
   }
 
+  /**
+   * Gets the pending accepted.
+   *
+   * @return the pending accepted
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<DataFlowVO> getPendingAccepted() throws EEAException {
 
@@ -53,6 +78,13 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
+  /**
+   * Gets the completed.
+   *
+   * @param pageable the pageable
+   * @return the completed
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<DataFlowVO> getCompleted(Pageable pageable) throws EEAException {
 
@@ -72,6 +104,14 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVOs;
   }
 
+  /**
+   * Gets the pending by user.
+   *
+   * @param userId the user id
+   * @param type the type
+   * @return the pending by user
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
 

@@ -16,6 +16,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class UserRequest.
+ */
 @Entity
 @Getter
 @Setter
@@ -23,21 +26,26 @@ import lombok.ToString;
 @Table(name = "USER_REQUEST")
 public class UserRequest {
 
+  /** The id. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The user requester. */
   @Column(name = "USER_REQUESTER")
   private Long userRequester;
 
+  /** The user requested. */
   @Column(name = "USER_REQUESTED")
   private Long userRequested;
 
+  /** The request type. */
   @Column(name = "REQUEST_TYPE")
   @Enumerated(EnumType.STRING)
   private TypeRequestEnum requestType;
 
+  /** The dataflows. */
   @ManyToMany(mappedBy = "userRequests")
   private Set<Dataflow> dataflows = new HashSet<>();
 
