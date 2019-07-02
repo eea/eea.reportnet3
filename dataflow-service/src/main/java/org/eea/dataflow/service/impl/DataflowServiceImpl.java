@@ -10,6 +10,7 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +70,14 @@ public class DataflowServiceImpl implements DataflowService {
     }
 
     return dataflowVOs;
+  }
+
+  @Override
+  public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
+
+    List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
+    return dataflowMapper.entityListToClass(dataflows);
+
   }
 
 

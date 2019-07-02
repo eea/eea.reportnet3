@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -69,5 +70,12 @@ public interface DataFlowController {
   List<DataFlowVO> findCompleted(
       @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
+
+
+  @RequestMapping(value = "/{userId}/request/{type}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findUserDataflowsByStatus(@PathVariable(value = "userId") Long userId,
+      @PathVariable(value = "type") TypeRequestEnum type);
+
 
 }

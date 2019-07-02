@@ -7,6 +7,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +125,21 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return dataflows;
 
+
+  }
+
+  @Override
+  @RequestMapping(value = "/{userId}/request/{type}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findUserDataflowsByStatus(Long userId, TypeRequestEnum type) {
+
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    try {
+      dataflows = dataflowService.getPendingByUser(userId, type);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
 
   }
 
