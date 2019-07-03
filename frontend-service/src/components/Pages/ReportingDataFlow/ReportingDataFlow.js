@@ -29,7 +29,7 @@ const ReportingDataFlow = ({ history, match }) => {
 				icon: primeIcons.icons.archive
 			},
 			{
-				label: resources.messages['importFromFile'],
+				label: resources.messages["importFromFile"],
 				icon: primeIcons.icons.import
 			},
 			{
@@ -41,7 +41,7 @@ const ReportingDataFlow = ({ history, match }) => {
 				icon: primeIcons.icons.info
 			}
 		]);
-	}, [])
+	}, [resources.messages]);
 
 	const { nameDataSetSchema } = jsonDataSchema;
 
@@ -57,9 +57,9 @@ const ReportingDataFlow = ({ history, match }) => {
 						model={[
 							{
 								label: resources.messages["dataFlowTask"],
-								url: "data-flow-task/"
+								url: "/data-flow-task/"
 							},
-							{ label: resources.messages["reportingDataFlow"], url: "#" }
+							{ label: resources.messages["reportingDataFlow"] }
 						]}
 						home={home}
 					/>
@@ -88,11 +88,19 @@ const ReportingDataFlow = ({ history, match }) => {
 											);
 										}}
 									/>
-									<p className={styles.caption}>{resources.messages["documents"]}</p>
+									<p className={styles.caption}>
+										{resources.messages["documents"]}
+									</p>
 								</div>
 								<div className={styles.buttonwrapper}>
-									<SplitButton label={resources.messages['ds']} model={splitOptions} handleRedirect={handleRedirect} />
-									<p className={styles.caption}>{resources.messages["dataSet"]}</p>
+									<SplitButton
+										label={resources.messages["ds"]}
+										model={splitOptions}
+										handleRedirect={handleRedirect}
+									/>
+									<p className={styles.caption}>
+										{resources.messages["dataSet"]}
+									</p>
 								</div>
 							</div>
 						</div>
