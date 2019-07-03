@@ -38,7 +38,7 @@ public class DataFlowServiceImplTest {
 
   @Before
   public void initMocks() {
-    dataflows = new ArrayList();
+    dataflows = new ArrayList<>();
     dataflows.add(new Dataflow());
     pageable = PageRequest.of(1, 1);
     MockitoAnnotations.initMocks(this);
@@ -59,44 +59,44 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getByStatus() throws EEAException {
-    when(dataflowRepository.findByStatus(Mockito.any())).thenReturn(new ArrayList());
+    when(dataflowRepository.findByStatus(Mockito.any())).thenReturn(new ArrayList<>());
     dataflowServiceImpl.getByStatus(Mockito.any());
-    assertEquals("fail", new ArrayList(), dataflowServiceImpl.getByStatus(Mockito.any()));
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getByStatus(Mockito.any()));
   }
 
   @Test
   public void getPendingAccepted() throws EEAException {
-    when(dataflowRepository.findPendingAccepted(Mockito.any())).thenReturn(new ArrayList());
+    when(dataflowRepository.findPendingAccepted(Mockito.any())).thenReturn(new ArrayList<>());
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
-    assertEquals("fail", new ArrayList(), dataflowServiceImpl.getPendingAccepted(Mockito.any()));
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getPendingAccepted(Mockito.any()));
   }
 
   @Test
   public void getPendingByUser() throws EEAException {
     when(dataflowRepository.findByStatusAndUserRequester(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList());
+        .thenReturn(new ArrayList<>());
     dataflowServiceImpl.getPendingByUser(Mockito.any(), Mockito.any());
-    assertEquals("fail", new ArrayList(),
+    assertEquals("fail", new ArrayList<>(),
         dataflowServiceImpl.getPendingByUser(Mockito.any(), Mockito.any()));
   }
 
   @Test
   public void getCompletedEmpty() throws EEAException {
-    when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(new ArrayList());
+    when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(new ArrayList<>());
     dataflowServiceImpl.getCompleted(1L, Mockito.any());
-    assertEquals("fail", new ArrayList(), dataflowServiceImpl.getCompleted(1L, Mockito.any()));
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, Mockito.any()));
   }
 
   @Test
   public void getCompleted() throws EEAException {
     when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList(), dataflowServiceImpl.getCompleted(1L, pageable));
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
     dataflows.add(new Dataflow());
     dataflows.add(new Dataflow());
     when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList(), dataflowServiceImpl.getCompleted(1L, pageable));
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
   }
 
 }
