@@ -1,23 +1,24 @@
-package org.eea.dataset.service.validation;
+package org.eea.validation.service.impl;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.data.domain.DatasetValidation;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValidation;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValidation;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValidation;
-import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.domain.Validation;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.repository.ValidationRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 /**
  * The Class LoadValidationsHelperTest.
@@ -40,10 +44,12 @@ public class LoadValidationsHelperTest {
 
   /** The dataset service. */
   @Mock
-  private DatasetServiceImpl datasetService;
+  private ValidationServiceImpl validationService;
+
+  @Mock
+  private ValidationRepository validationRepository;
 
   /** The pageable. */
-  @Mock
   private Pageable pageable;
 
   /** The table value. */
@@ -60,6 +66,7 @@ public class LoadValidationsHelperTest {
 
   /** The field value. */
   private FieldValue fieldValue;
+
 
   /**
    * Inits the mocks.
@@ -81,6 +88,7 @@ public class LoadValidationsHelperTest {
     datasetValue.setDatasetValidations(new ArrayList<>());
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
+    pageable = PageRequest.of(1, 10);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -123,10 +131,23 @@ public class LoadValidationsHelperTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    when(datasetService.getDatasetValuebyId(Mockito.any())).thenReturn(datasetValue);
-    when(datasetService.getfindByIdDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(schema);
+    when(validationService.getDatasetValuebyId(Mockito.any())).thenReturn(datasetValue);
+    when(validationService.getfindByIdDataSetSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(schema);
+    Page<Validation> pageValidation = Page.empty(pageable);
+    when(validationRepository.findAll(Mockito.any(Pageable.class))).thenReturn(pageValidation);
+    when(validationRepository.count()).thenReturn(10L);
+    when(validationService.getDatasetErrors(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new AsyncResult<>(new HashMap<>()));
+    when(validationService.getTableErrors(Mockito.any(), Mockito.any()))
+        .thenReturn(new AsyncResult<>(new HashMap<>()));
+    when(validationService.getRecordErrors(Mockito.any(), Mockito.any()))
+        .thenReturn(new AsyncResult<>(new HashMap<>()));
+    when(validationService.getFieldErrors(Mockito.any(), Mockito.any()))
+        .thenReturn(new AsyncResult<>(new HashMap<>()));
+
     loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false);
-    Mockito.verify(datasetService, times(1)).getDatasetValuebyId(Mockito.any());
+    Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
 
   }
 }

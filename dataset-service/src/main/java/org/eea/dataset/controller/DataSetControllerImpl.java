@@ -2,18 +2,16 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.callable.LoadDataCallable;
+import org.eea.dataset.service.callable.UpdateRecordHelper;
 import org.eea.dataset.service.file.FileTreatmentHelper;
-import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -54,6 +52,12 @@ public class DataSetControllerImpl implements DatasetController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
+
   /**
    * The dataset service.
    */
@@ -67,7 +71,7 @@ public class DataSetControllerImpl implements DatasetController {
 
   /** The load validations helper. */
   @Autowired
-  private LoadValidationsHelper loadValidationsHelper;
+  UpdateRecordHelper updateRecordHelper;
 
   /**
    * Gets the data tables values.
@@ -169,18 +173,13 @@ public class DataSetControllerImpl implements DatasetController {
     }
     // extract the filename
     String fileName = file.getOriginalFilename();
-    final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-    LoadDataCallable callable = null;
     // extract the file content
     try {
       InputStream is = file.getInputStream();
-      callable = new LoadDataCallable(fileTreatmentHelper, datasetId, fileName, is, idTableSchema);
-      executor.submit(callable);
+      fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
       // NOPMD this cannot be avoid since Callable throws Exception in
-    } catch (IOException e) {
+    } catch (IOException | EEAException | InterruptedException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    } finally {
-      executor.shutdown();
     }
 
   }
@@ -327,34 +326,88 @@ public class DataSetControllerImpl implements DatasetController {
 
 
   /**
-   * Gets the failed validations by id dataset.
+   * Update records.
    *
    * @param datasetId the dataset id
-   * @param pageNum the page num
-   * @param pageSize the page size
-   * @param fields the fields
-   * @param asc the asc
-   *
-   * @return the failed validations by id dataset
+   * @param records the records
    */
   @Override
-  @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
-      @PathVariable("id") Long datasetId,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
-
-    FailedValidationsDatasetVO validations = null;
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
-    try {
-      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+  @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<RecordVO> records) {
+    if (datasetId == null || records == null || records.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
-
-    return validations;
+    try {
+      updateRecordHelper.executeUpdateProcess(datasetId, records);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
+
+  /**
+   * Delete records.
+   *
+   * @param datasetId the dataset id
+   * @param recordIds the record ids
+   */
+  @Override
+  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteRecords(@PathVariable("id") final Long datasetId,
+      @RequestBody final List<Long> recordIds) {
+    if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      updateRecordHelper.executeDeleteProcess(datasetId, recordIds);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Insert records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   */
+  @Override
+  @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void insertRecords(@PathVariable("id") final Long datasetId,
+      @PathVariable("idTableSchema") final String idTableSchema,
+      @RequestBody final List<RecordVO> records) {
+    if (datasetId == null || records == null || records.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    try {
+      updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Delete import table.
+   *
+   * @param dataSetId the data set id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  public void deleteImportTable(@PathVariable("id") final Long dataSetId,
+      @PathVariable("idTableSchema") final String idTableSchema) {
+    if (dataSetId == null || dataSetId < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    } else if (idTableSchema == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+    LOG.info("executing delete");
+    datasetService.deleteTableBySchema(idTableSchema, dataSetId);
+  }
 }

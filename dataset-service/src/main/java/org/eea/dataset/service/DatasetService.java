@@ -3,13 +3,9 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import org.bson.types.ObjectId;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -41,7 +37,7 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(Long datasetId, String fileName, InputStream is, String idTableSchema)
+  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
       throws EEAException, IOException;
 
 
@@ -50,7 +46,7 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    */
-  void deleteDataSchema(String datasetId);
+  void deleteDataSchema(@DatasetId String datasetId);
 
 
   /**
@@ -86,10 +82,8 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollections) throws EEAException;
-
 
 
   /**
@@ -98,11 +92,13 @@ public interface DatasetService {
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
+   *
    * @return the position from any object id
+   *
    * @throws EEAException the EEA exception
    */
-  ValidationLinkVO getPositionFromAnyObjectId(Long id, Long idDataset, TypeEntityEnum type)
-      throws EEAException;
+  ValidationLinkVO getPositionFromAnyObjectId(Long id, @DatasetId Long idDataset,
+      TypeEntityEnum type) throws EEAException;
 
 
   /**
@@ -154,62 +150,32 @@ public interface DatasetService {
   StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
 
   /**
-   * Gets the field errors.
+   * Update record.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   * @return the field errors
+   * @param records the records
+   * @throws EEAException the EEA exception
+   *
+   *
+   *
    */
-  List<ErrorsValidationVO> getFieldErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
+  void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
   /**
-   * Gets the record errors.
+   * Delete.
    *
    * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   * @return the record errors
-   */
-  List<ErrorsValidationVO> getRecordErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
-
-  /**
-   * Gets the table errors.
-   *
-   * @param datasetId the dataset id
-   * @param mapNameTableSchema the map name table schema
-   * @return the table errors
-   */
-  List<ErrorsValidationVO> getTableErrors(@DatasetId Long datasetId,
-      Map<String, String> mapNameTableSchema);
-
-  /**
-   * Gets the dataset errors.
-   *
-   * @param dataset the dataset
-   * @param mapNameTableSchema the map name table schema
-   * @return the dataset errors
-   */
-  List<ErrorsValidationVO> getDatasetErrors(DatasetValue dataset,
-      Map<String, String> mapNameTableSchema);
-
-  /**
-   * Gets the datase valuetby id.
-   *
-   * @param datasetId the dataset id
-   * @return the datase valuetby id
+   * @param recordIds the record ids
    * @throws EEAException the EEA exception
    */
-  DatasetValue getDatasetValuebyId(@DatasetId Long datasetId) throws EEAException;
+  void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
 
   /**
-   * Gets the find by id data set schema.
+   * Delete table by schema.
    *
+   * @param idTableSchema the id table schema
    * @param datasetId the dataset id
-   * @param datasetSchemaId the dataset schema id
-   * @return the find by id data set schema
-   * @throws EEAException the EEA exception
    */
-  DataSetSchema getfindByIdDataSetSchema(@DatasetId Long datasetId, ObjectId datasetSchemaId)
-      throws EEAException;
+  void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
+
 }
