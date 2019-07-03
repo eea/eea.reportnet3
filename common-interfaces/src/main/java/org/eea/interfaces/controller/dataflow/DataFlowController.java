@@ -55,9 +55,9 @@ public interface DataFlowController {
    * @param pageSize the page size
    * @return the list
    */
-  @RequestMapping(value = "/completed", method = RequestMethod.GET,
+  @RequestMapping(value = "/{userId}/completed", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findCompleted(
+  List<DataFlowVO> findCompleted(@PathVariable(value = "userId") Long userId,
       @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
 

@@ -40,14 +40,16 @@ public interface DataflowService {
    */
   List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException;
 
+
   /**
    * Gets the completed.
    *
+   * @param userId the user id
    * @param pageable the pageable
    * @return the completed
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getCompleted(Pageable pageable) throws EEAException;
+  List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException;
 
 
   /**

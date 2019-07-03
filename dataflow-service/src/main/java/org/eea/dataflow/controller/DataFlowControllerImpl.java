@@ -125,22 +125,24 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+
   /**
    * Find completed.
    *
+   * @param userId the user id
    * @param pageNum the page num
    * @param pageSize the page size
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/completed", method = RequestMethod.GET,
+  @RequestMapping(value = "/{userId}/completed", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findCompleted(Integer pageNum, Integer pageSize) {
+  public List<DataFlowVO> findCompleted(Long userId, Integer pageNum, Integer pageSize) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
     Pageable pageable = PageRequest.of(pageNum, pageSize);
     try {
-      dataflows = dataflowService.getCompleted(pageable);
+      dataflows = dataflowService.getCompleted(userId, pageable);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
