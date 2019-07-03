@@ -96,7 +96,11 @@ const ReportingDataFlow = ({ history, match }) => {
 									<SplitButton
 										label={resources.messages["ds"]}
 										model={splitOptions}
-										handleRedirect={handleRedirect}
+										onClick={e => {
+											handleRedirect(
+												`/reporter-data-set/${match.params.id}`
+											);
+										}}
 									/>
 									<p className={styles.caption}>
 										{resources.messages["dataSet"]}
