@@ -14,6 +14,7 @@ import ResourcesContext from "../../../components/Context/ResourcesContext";
 import HTTPRequester from "../../../services/HTTPRequester/HTTPRequester";
 import config from "../../../conf/web.config.json";
 import ConfirmDialog from "../../../components/Layout/UI/ConfirmDialog/ConfirmDialog";
+import SnapshotSlideBar from "../SnapshotSlideBar/SnapshotSlideBar";
 
 const DataViewer = props => {
 	const contextReporterDataSet = useContext(ReporterDataSetContext);
@@ -36,6 +37,7 @@ const DataViewer = props => {
 	const resources = useContext(ResourcesContext);
 	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 	const [isDataDeleted, setIsDataDeleted] = useState(false);
+	const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
 
 	let growlRef = useRef();
 
@@ -113,6 +115,7 @@ const DataViewer = props => {
 	};
 
 	const onConfirmDeleteHandler = () => {
+		/* TODO HARDCODE */
 		let idDataSet = 1;
 		setDeleteDialogVisible(false);
 		HTTPRequester.delete({
@@ -165,8 +168,8 @@ const DataViewer = props => {
 
 		// props.urlViewer
 		const dataPromise = HTTPRequester.get({
-			url: props.urlViewer,
-			/* url: "/jsons/response_dataset_values2.json", */
+			/* url: props.urlViewer, */
+			url: "/jsons/response_dataset_values2.json",
 			queryString: queryString
 		});
 		dataPromise
@@ -355,6 +358,13 @@ const DataViewer = props => {
 			group: "right",
 			disabled: true,
 			clickHandler: onRefreshClickHandler
+		},
+		{
+			label: resources.messages["snapshots"],
+			icon: "12",
+			group: "right",
+			disabled: false,
+			clickHandler: () => setSnapshotIsVisible(true)
 		}
 	];
 
@@ -462,6 +472,7 @@ const DataViewer = props => {
 					{resources.messages["deleteDatasetConfirm"]}
 				</ConfirmDialog>
 			</ReporterDataSetContext.Provider>
+			<SnapshotSlideBar isVisible={snapshotIsVisible} setIsVisible={setSnapshotIsVisible}/>
 		</div>
 	);
 };

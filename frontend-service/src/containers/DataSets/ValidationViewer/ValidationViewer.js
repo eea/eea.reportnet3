@@ -98,6 +98,7 @@ const ValidationViewer = (props) => {
 
         const dataPromise = HTTPRequester.get(
           {
+            /* TODO HARDCODE  */
             url:`${config.listValidationsAPI.url}1`,
             queryString: queryString
           }

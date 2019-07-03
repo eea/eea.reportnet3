@@ -40,6 +40,7 @@
 		"group-by": "Group by",
 		"sort": "Sort",
 		"refresh": "Refresh",
+		"snapshots": "Snapshots",
 		"noErrorData": "There is no error data to show",
 		"searchDataFlow": "Search data flows",
 		"typeDataFlowName": "Type a DataFlow name",
