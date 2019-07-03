@@ -1,7 +1,9 @@
 package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -82,8 +84,11 @@ public class LoadValidationsHelper {
         validations.stream().map(Validation::getId).collect(Collectors.toList());
 
     // PROCESS LIST OF ERRORS VALIDATIONS
-    List<ErrorsValidationVO> errors = processErrors(idValidations, dataset);
-    validation.setErrors(errors);
+    Map<Long, ErrorsValidationVO> errors = processErrors(idValidations, dataset);
+
+    validation
+        .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
+
     validation.setTotalErrors(validationRepository.count());
     LOG.info(
         "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
@@ -101,24 +106,25 @@ public class LoadValidationsHelper {
    * @param dataset the dataset
    * @return the list
    */
-  private List<ErrorsValidationVO> processErrors(List<Long> idValidations, DatasetValue dataset) {
+  private Map<Long, ErrorsValidationVO> processErrors(List<Long> idValidations,
+      DatasetValue dataset) {
 
-    List<ErrorsValidationVO> errors = new ArrayList<>();
+    Map<Long, ErrorsValidationVO> errors = new HashMap<>();
 
     try {
-      Future<List<ErrorsValidationVO>> datasetErrors =
+      Future<Map<Long, ErrorsValidationVO>> datasetErrors =
           validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
-      Future<List<ErrorsValidationVO>> tableErrors =
+      Future<Map<Long, ErrorsValidationVO>> tableErrors =
           validationService.getTableErrors(dataset.getId(), idValidations);
-      Future<List<ErrorsValidationVO>> recordErrors =
+      Future<Map<Long, ErrorsValidationVO>> recordErrors =
           validationService.getRecordErrors(dataset.getId(), idValidations);
-      Future<List<ErrorsValidationVO>> fieldErrors =
+      Future<Map<Long, ErrorsValidationVO>> fieldErrors =
           validationService.getFieldErrors(dataset.getId(), idValidations);
 
-      errors.addAll(datasetErrors.get());
-      errors.addAll(tableErrors.get());
-      errors.addAll(recordErrors.get());
-      errors.addAll(fieldErrors.get());
+      errors.putAll(datasetErrors.get());
+      errors.putAll(tableErrors.get());
+      errors.putAll(recordErrors.get());
+      errors.putAll(fieldErrors.get());
     } catch (InterruptedException | ExecutionException e) {
       LOG_ERROR.error("Error obtaining the errors ", e);
     }
