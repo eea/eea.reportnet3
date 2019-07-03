@@ -2,8 +2,9 @@
 	"icons": {
 		"archive": "pi pi-file",
 		"banned": "pi pi-ban",
-		"check": "pi pi-check",
 		"cancel": "pi pi-times",
+		"camera": "pi pi-camera",
+		"check": "pi pi-check",
 		"clock": "pi pi-clock",
 		"clone": "pi pi-clone",
 		"comment": "pi pi-comment",

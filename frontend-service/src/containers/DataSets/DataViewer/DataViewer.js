@@ -360,7 +360,7 @@ const DataViewer = props => {
 		},
 		{
 			label: resources.messages["snapshots"],
-			icon: "3",
+			icon: "12",
 			group: "right",
 			disabled: false,
 			clickHandler: () => setSnapshotIsVisible(true)
