@@ -1,47 +1,44 @@
-import React, { useContext } from 'react';
-import ResourcesContext from '../../../Context/ResourcesContext';
+import React, { useContext } from "react";
+import ResourcesContext from "../../../Context/ResourcesContext";
 
-import {Button} from 'primereact/button';
-import './CustomIconToolTip.css';
+import { Button } from "primereact/button";
+import styles from "./CustomIconToolTip.module.css";
 
 export default function CustomIconToolTip(props) {
-  let validationIcon = '';
-  let iconColor = '';
+	console.log("props", props);
+	let validationIcon = "";
+	let iconColor = "";
 
-  const resources = useContext(ResourcesContext);
+	const resources = useContext(ResourcesContext);
 
+	switch (props.levelError) {
+		case "WARNING":
+			validationIcon = resources.icons["warning"];
+			iconColor = "#ffd617";
+			break;
+		case "ERROR":
+			validationIcon = resources.icons["warning"];
+			iconColor = "#da2131";
+			break;
+		case "BLOCKER":
+			validationIcon = resources.icons["banned"];
+			iconColor = "#da2131";
+			break;
+		case "":
+			validationIcon = "";
+			iconColor = "";
+			break;
+		default:
+			break;
+	}
 
-  switch (props.levelError) {
-    case 'WARNING':
-      validationIcon = resources.icons['warning'];
-      iconColor = '#ffd617';
-      break;
-    case 'ERROR':
-      validationIcon = resources.icons['warning'];
-      iconColor = '#da2131';
-      break;
-    case 'BLOCKER':
-      validationIcon = resources.icons['banned'];
-      iconColor = '#da2131';
-      break;
-    case '':
-      validationIcon = '';
-      iconColor = '';
-      break;
-    default:
-      break;
-  }
-  const myStyles = { 
-    padding: "0px !important",
-    margin:"0px !important",
-    borderColor: "transparent",
-    color: iconColor, 
-    float: "right", 
-    marginLeft: "auto",
-    backgroundColor: "transparent" }
-  
-
-  return (
-    <Button type="button" icon={validationIcon} tooltip={props.message} style={myStyles} /> 
-  );
+	return (
+		<Button
+			type="button"
+			icon={validationIcon}
+			tooltip={props.message}
+			className={styles.buttonCustom}
+			style={{ color: `${iconColor}` }}
+		/>
+	);
 }
