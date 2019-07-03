@@ -19,6 +19,7 @@ const DashBoard = (props) =>{
             //'/jsons/error-statistics.json'
             const dataPromise = HTTPRequester.get(
             {
+                /* TODO HARDCODE */
                 url: `${config.loadStatisticsAPI.url}1`,
                 queryString: {}
             });

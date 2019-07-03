@@ -115,6 +115,7 @@ const DataViewer = props => {
 	};
 
 	const onConfirmDeleteHandler = () => {
+		/* TODO HARDCODE */
 		let idDataSet = 1;
 		setDeleteDialogVisible(false);
 		HTTPRequester.delete({

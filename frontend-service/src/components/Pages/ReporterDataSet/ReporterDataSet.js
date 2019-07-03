@@ -163,6 +163,7 @@ const ReporterDataSet = () => {
 	};
 
 	const onConfirmDeleteHandler = () => {
+		/* TODO HARDCODE */
 		let idDataSet = 1;
 		setDeleteDialogVisible(false);
 		HTTPRequesterAPI.delete({
@@ -174,6 +175,7 @@ const ReporterDataSet = () => {
 	};
 
 	const onConfirmValidateHandler = () => {
+		/* TODO HARDCODE */
 		let idDataSet = 1;
 		setValidateDialogVisible(false);
 		HTTPRequesterAPI.update({
@@ -208,6 +210,7 @@ const ReporterDataSet = () => {
 				<TabsSchema
 					tables={tableSchema}
 					tableSchemaColumns={tableSchemaColumns}
+					/* TODO HARDCODE */
 					urlViewer={`${config.dataviewerAPI.url}1`}
 					activeIndex={activeIndex}
 					positionIdObject={positionIdObject}
@@ -248,6 +251,7 @@ const ReporterDataSet = () => {
 					dismissableMask={true}
 					style={{ width: "80%" }}
 				>
+					{/*  TODO HARDCODE  */}
 					<ValidationViewer idDataSet={1} />
 				</Dialog>
 			</ReporterDataSetContext.Provider>
