@@ -11,9 +11,9 @@ import {Growl} from 'primereact/growl';
 import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';
 import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
 import ResourcesContext from '../../../components/Context/ResourcesContext';
-
 import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester';
 import config from '../../../conf/web.config.json';
+import ConfirmDialog from '../../../components/Layout/UI/ConfirmDialog/ConfirmDialog';
 
 const DataViewer = (props) => {
     const contextReporterDataSet = useContext(ReporterDataSetContext);
@@ -29,9 +29,17 @@ const DataViewer = (props) => {
     const [cols, setCols] = useState(props.tableSchemaColumns); 
     const [header] = useState();
     const [colOptions,setColOptions] = useState([{}]); 
-    const resources = useContext(ResourcesContext);      
+    const resources = useContext(ResourcesContext);  
+    const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+    const [isDataDeleted, setIsDataDeleted] = useState(false);
 
     let growlRef = useRef();
+    
+    useEffect(() => {
+    	console.log('deleted', isDataDeleted);
+    	setFetchedData([]);
+    }, [isDataDeleted])
+    
     //TODO: Render se está ejecutando dos veces. Mirar por qué.
     useEffect(() =>{            
         console.log("Setting column options...");     
@@ -90,6 +98,24 @@ const DataViewer = (props) => {
         setFirstRow(event.first);        
         fetchDataHandler(sortField, sortOrder, event.first, event.rows); 
       }
+
+      const onConfirmDeleteHandler = () =>{
+        let idDataSet = 1;
+        setDeleteDialogVisible(false);
+        HTTPRequester.delete(
+          {
+            url:'/dataset/'+ idDataSet + '/deleteImportTable/'+ props.id,
+            queryString: {}
+          }
+        )
+        .then(res=>{
+          setIsDataDeleted(true);
+        });
+      }
+      
+      const setVisibleHandler = (fnUseState, visible) =>{
+    	    fnUseState(visible);
+    	  }
   
       const onSortHandler = (event)=>{      
         console.log("Sorting...");
@@ -270,8 +296,8 @@ const dataTemplate = (rowData, column) =>{
           label: resources.messages["delete"],
           icon: "2",
           group: "left",
-          disabled: true,
-          clickHandler: null
+          disabled: false,
+          clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
         },
         {
             label: resources.messages["visibility"],
@@ -363,7 +389,20 @@ const dataTemplate = (rowData, column) =>{
                                                 onUpload={onUploadHandler} 
                                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                                 fileLimit={1} className={styles.FileUpload}  /> 
-                        </Dialog>
+            </Dialog>
+                
+                <ReporterDataSetContext.Provider> 
+                <ConfirmDialog onConfirm={onConfirmDeleteHandler} 
+                               onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
+                               visible={deleteDialogVisible} 
+                               header={resources.messages["deleteDatasetHeader"]} 
+                               maximizable={false} 
+                               labelConfirm={resources.messages["yes"]}  
+                               labelCancel={resources.messages["no"]}>
+                               {resources.messages["deleteDatasetConfirm"]}
+                </ConfirmDialog>
+                </ReporterDataSetContext.Provider>
+            
         </div>
     );
 }

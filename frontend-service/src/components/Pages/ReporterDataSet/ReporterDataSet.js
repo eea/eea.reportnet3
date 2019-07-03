@@ -206,7 +206,7 @@ const ReporterDataSet = () => {
                       urlViewer={`${config.dataviewerAPI.url}1`}
                       activeIndex={activeIndex}
                       positionIdObject={positionIdObject}
-                      onTabChangeHandler={(idTableSchema) => onTabChangeHandler(idTableSchema)}                    
+                      onTabChangeHandler={(idTableSchema) => onTabChangeHandler(idTableSchema)}
                       /> 
         </ReporterDataSetContext.Provider>               
         <Dialog visible={dashDialogVisible} 
