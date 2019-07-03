@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.docker.DockerClientBuilderBean;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.junit.Before;
@@ -141,10 +141,10 @@ public class DockerInterfaceServiceImplTest {
   /**
    * Test create container.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void testCreateContainer() throws DockerAccessException {
+  public void testCreateContainer() throws RecordStoreAccessException {
     List<Container> listContainers = new ArrayList<>();
     listContainers.add(new Container());
     when(dockerClient.dockerClient()).thenReturn(docker);
@@ -167,12 +167,12 @@ public class DockerInterfaceServiceImplTest {
   /**
    * Test execute command inside container.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
   @Test
   public void testExecuteCommandInsideContainer()
-      throws DockerAccessException, InterruptedException {
+      throws RecordStoreAccessException, InterruptedException {
     when(dockerClient.dockerClient()).thenReturn(docker);
     when(docker.execCreateCmd(Mockito.any())).thenReturn(execCreateCmd);
     when(execCreateCmd.withAttachStdout(Mockito.any())).thenReturn(execCreateCmd);
@@ -192,11 +192,11 @@ public class DockerInterfaceServiceImplTest {
   /**
    * Test get connection.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
   @Test
-  public void testGetConnection() throws DockerAccessException, InterruptedException {
+  public void testGetConnection() throws RecordStoreAccessException, InterruptedException {
     List<String> resultExpected = new ArrayList<>();
     commonWhens();
     when(execStartResultCallback.awaitCompletion()).thenReturn(execStartResultCallback);
@@ -206,11 +206,11 @@ public class DockerInterfaceServiceImplTest {
   /**
    * Test get connection exception.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
   @Test
-  public void testGetConnectionException() throws DockerAccessException, InterruptedException {
+  public void testGetConnectionException() throws RecordStoreAccessException, InterruptedException {
     List<String> resultExpected = new ArrayList<>();
     commonWhens();
     doThrow(new InterruptedException()).when(execStartResultCallback).awaitCompletion();
@@ -246,11 +246,11 @@ public class DockerInterfaceServiceImplTest {
   /**
    * Test stop and remove container.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
   @Test
-  public void testStopAndRemoveContainer() throws DockerAccessException, InterruptedException {
+  public void testStopAndRemoveContainer() throws RecordStoreAccessException, InterruptedException {
     when(dockerClient.dockerClient()).thenReturn(docker);
     when(docker.stopContainerCmd(Mockito.any())).thenReturn(stopContainerCmd);
     when(dockerClient.dockerClient()).thenReturn(docker);

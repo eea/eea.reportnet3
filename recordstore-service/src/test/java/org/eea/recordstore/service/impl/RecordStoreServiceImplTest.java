@@ -9,7 +9,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.controller.RecordStoreControllerImpl;
 import org.eea.recordstore.docker.DockerClientBuilderBean;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.junit.Before;
@@ -96,10 +96,10 @@ public class RecordStoreServiceImplTest {
   /**
    * Test create dataset.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void testCreateDataset() throws DockerAccessException {
+  public void testCreateDataset() throws RecordStoreAccessException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     recordStoreServiceImpl.createEmptyDataSet(DATASET);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
@@ -109,11 +109,11 @@ public class RecordStoreServiceImplTest {
   /**
    * Test create dataset exception.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
-  @Test(expected = DockerAccessException.class)
-  public void testCreateDatasetException() throws DockerAccessException, InterruptedException {
+  @Test(expected = RecordStoreAccessException.class)
+  public void testCreateDatasetException() throws RecordStoreAccessException, InterruptedException {
     doThrow(new InterruptedException()).when(dockerInterfaceService).executeCommandInsideContainer(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -123,10 +123,10 @@ public class RecordStoreServiceImplTest {
   /**
    * Test reset dataset database.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test
-  public void testResetDatasetDatabase() throws DockerAccessException {
+  public void testResetDatasetDatabase() throws RecordStoreAccessException {
     Mockito.when(dockerInterfaceService.getContainer(Mockito.any())).thenReturn(new Container());
     recordStoreServiceImpl.resetDatasetDatabase();
     Mockito.verify(dockerInterfaceService, times(1)).getContainer(Mockito.any());
@@ -135,12 +135,12 @@ public class RecordStoreServiceImplTest {
   /**
    * Test reset dataset database exception.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
-  @Test(expected = DockerAccessException.class)
+  @Test(expected = RecordStoreAccessException.class)
   public void testResetDatasetDatabaseException()
-      throws DockerAccessException, InterruptedException {
+      throws RecordStoreAccessException, InterruptedException {
     doThrow(new InterruptedException()).when(dockerInterfaceService)
         .executeCommandInsideContainer(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     recordStoreServiceImpl.resetDatasetDatabase();
@@ -149,11 +149,11 @@ public class RecordStoreServiceImplTest {
   /**
    * Test connection data.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
   @Test
-  public void testConnectionData() throws DockerAccessException, InterruptedException {
+  public void testConnectionData() throws RecordStoreAccessException, InterruptedException {
     byte[] input = DATASET.getBytes();
     Mockito
         .when(dockerInterfaceService.executeCommandInsideContainer(Mockito.any(), Mockito.any(),
@@ -168,11 +168,11 @@ public class RecordStoreServiceImplTest {
   /**
    * Test connection data exception.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
-  @Test(expected = DockerAccessException.class)
-  public void testConnectionDataException() throws DockerAccessException, InterruptedException {
+  @Test(expected = RecordStoreAccessException.class)
+  public void testConnectionDataException() throws RecordStoreAccessException, InterruptedException {
     doThrow(new InterruptedException()).when(dockerInterfaceService).executeCommandInsideContainer(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -183,11 +183,11 @@ public class RecordStoreServiceImplTest {
   /**
    * Test connection data 2.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    * @throws InterruptedException the interrupted exception
    */
   @Test
-  public void testConnectionData2() throws DockerAccessException, InterruptedException {
+  public void testConnectionData2() throws RecordStoreAccessException, InterruptedException {
     byte[] input = DATASET.getBytes();
     Mockito
         .when(dockerInterfaceService.executeCommandInsideContainer(Mockito.any(), Mockito.any(),
@@ -201,10 +201,10 @@ public class RecordStoreServiceImplTest {
   /**
    * Test create data set from another.
    *
-   * @throws DockerAccessException the docker access exception
+   * @throws RecordStoreAccessException the docker access exception
    */
   @Test(expected = UnsupportedOperationException.class)
-  public void testCreateDataSetFromAnother() throws DockerAccessException {
+  public void testCreateDataSetFromAnother() throws RecordStoreAccessException {
     recordStoreServiceImpl.createDataSetFromOther(DATASET, DATASET);
   }
 

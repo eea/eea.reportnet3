@@ -1,493 +1,636 @@
 [
-		{		
-                "key": "config/dataset/mongodb.hibernate.ddl-auto",
-                "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
-        },
-		{
-                "key": "config/dataset/mongodb.primary.host",
-                "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
-        },
-		{
-                "key": "config/dataset/mongodb.primary.port",
-                "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
-        },
-		{
-                "key": "config/dataset/mongodb.primary.username",
-                "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
-        },
-		{
-                "key": "config/dataset/mongodb.primary.password",
-                "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
-        },
-		{
-                "key": "config/dataset/spring.jpa.hibernate.ddl-auto",
-                "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
-        },
-		{
-                "key": "config/dataset/spring.jpa.hibernate.metabase.ddl-auto",
-                "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
-        },
-		{
-                "key": "config/dataset/spring.jpa.properties.hibernate.dialect",
-                "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
-        },
-		{
-                "key": "config/dataset/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
-                "value": "dHJ1ZQ=="
-        },
-		{
-                "key": "config/dataset/spring.datasource.metasource.url",
-                "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
-        },
-		{
-                "key": "config/dataset/spring.datasource.metasource.hikari.connection-timeout",
-                "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
-        },
-		{
-                "key": "config/dataset/spring.datasource.metasource.hikari.maximum-pool-size",
-                "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
-        },
-		{
-                "key": "config/dataset/spring.datasource.metasource.username",
-                "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
-        },
-		{
-                "key": "config/dataset/spring.datasource.metasource.password",
-                "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
-        },
-		{
-                "key": "config/dataset/spring.datasource.metasource.driver-class-name",
-                "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
-        },
-		{
-                "key": "config/dataset/dataset.loadDataDelimiter",
-                "value": "fA=="
-        },
-		{
-                "key": "config/dataset/spring.jpa.hibernate.show-sql",
-                "value": "JHtTSE9XX1NRTDpmYWxzZX0="
-        },
-		{
-				"key": "config/dataset/management.endpoints.web.exposure.include",
-                "value": "Kg=="
-		},
-		{
-				"key": "config/dataset/management.endpoint.health.show-details",
-                "value": "YWx3YXlz"
-		},
-		{
-				"key": "config/dataset/spring.sleuth.sampler.probability",
-                "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
-		},
-		{
-				"key": "config/dataset/spring.sleuth.web.skipPattern",
-                "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
-		},
-		{
-				"key": "config/dataset/feign.client.config.default.connectTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/dataset/feign.client.config.default.readTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/dataset/feign.client.config.default.loggerLevel",
-                "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
-		},
-		{
-				"key": "config/dataset/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
-                "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
-		},
-		{
-				"key": "config/dataset/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-                "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
-		},
-		{
-				"key": "config/dataset/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
-                "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
-		},
-		{
-				"key": "config/dataset/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		},
-		
-		{
-                "key": "config/dataflow/spring.jpa.hibernate.ddl-auto",
-                "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
-        },
-		{
-                "key": "config/dataflow/spring.jpa.properties.hibernate.dialect",
-                "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
-        },
-		{
-                "key": "config/dataflow/spring.jpa.properties.hibernate.order_updates",
-                "value": "dHJ1ZQ=="
-        },
-		{
-                "key": "config/dataflow/spring.jpa.properties.hibernate.order_inserts",
-                "value": "dHJ1ZQ=="
-        },
-		{
-                "key": "config/dataflow/spring.jpa.properties.hibernate.jdbc.batch_size",
-                "value": "JHtEQVRBU0VUX0JBQ0hfSlBBX1NJWkU6MTAwfQ=="
-        },
-		{
-                "key": "config/dataflow/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
-                "value": "dHJ1ZQ=="
-        },
-		{
-                "key": "config/dataflow/spring.datasource.url",
-                "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
-        },
-		{
-                "key": "config/dataflow/spring.datasource.hikari.connection-timeout",
-                "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
-        },
-		{
-                "key": "config/dataflow/spring.datasource.hikari.maximum-pool-size",
-                "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
-        },
-		{
-                "key": "config/dataflow/spring.datasource.username",
-                "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
-        },
-		{
-                "key": "config/dataflow/spring.datasource.password",
-                "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
-        },
-		{
-                "key": "config/dataflow/spring.datasource.driver-class-name",
-                "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
-        },
-		{
-				"key": "config/dataflow/management.endpoints.web.exposure.include",
-                "value": "Kg=="
-		},
-		{
-				"key": "config/dataflow/management.endpoint.health.show-details",
-                "value": "YWx3YXlz"
-		},
-		{
-				"key": "config/dataflow/spring.sleuth.sampler.probability",
-                "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
-		},
-		{
-				"key": "config/dataflow/spring.sleuth.web.skipPattern",
-                "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
-		},
-		{
-				"key": "config/dataflow/feign.client.config.default.connectTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/dataflow/feign.client.config.default.readTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/dataflow/feign.client.config.default.loggerLevel",
-                "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
-		},
-		{
-				"key": "config/dataflow/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
-                "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
-		},
-		{
-				"key": "config/dataflow/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-                "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
-		},
-		{
-				"key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
-                "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
-		},
-		{
-				"key": "config/dataflow/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		},
-		{
-				"key": "config/recordstore/management.endpoints.web.exposure.include",
-                "value": "Kg=="
-		},
-		
-		{
-				"key": "config/recordstore/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		},
-		{
-				"key": "config/recordstore/spring.sleuth.sampler.probability",
-                "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
-		},
-		{
-				"key": "config/recordstore/spring.sleuth.web.skipPattern",
-                "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
-		},
-		{
-				"key": "config/recordstore/feign.client.config.default.connectTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/recordstore/feign.client.config.default.readTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/recordstore/feign.client.config.default.loggerLevel",
-                "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
-		},
-		{
-				"key": "config/recordstore/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
-                "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
-		},
-		{
-				"key": "config/recordstore/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-                "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
-		},
-		{
-				"key": "config/recordstore/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
-                "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
-		},
-		{
-				"key": "config/recordstore/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		},
-		{
-				"key": "config/recordstore/dockerContainerName",
-                "value": "JHtET0NFUl9DT05UQUlORVJfTkFNRTpjcnVuY2h5LXBvc3RncmVzfQ=="
-		},
-		{
-				"key": "config/recordstore/ipPostgre",
-                "value": "JHtSRUNPUkRTVE9SRV9JUDpsb2NhbGhvc3R9"
-		},
-		{
-				"key": "config/recordstore/userPostgre",
-                "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
-		},
-		{
-				"key": "config/recordstore/passwordPostgre",
-                "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
-		},
-		{
-				"key": "config/recordstore/connStringPostgree",
-                "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
-		},
-		{
-				"key": "config/recordstore/sqlGetAllDatasetsName",
-                "value": "JHtSRUNPUkRTVE9SRV9RVUVSWV9HRVRfQUxMX0RBVEFTRVRfU0NIRU1BOnNlbGVjdCAqIGZyb20gcGdfbmFtZXNwYWNlIHdoZXJlIG5zcG5hbWUgbGlrZSAnZGF0YXNldCUnfQ=="
-		},
-		{
-				"key": "config/recordstore/dockerServerUrl",
-                "value": "JHtET0NLRVJfU0VSVkVSX1VSTDp0Y3A6Ly9sb2NhbGhvc3Q6MjM3NX0="
-		},
-		{
-				"key": "config/apiGateway/feign.client.config.default.connectTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/apiGateway/feign.client.config.default.readTimeout",
-                "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
-		},
-		{
-				"key": "config/apiGateway/feign.client.config.default.loggerLevel",
-                "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
-		},
-		
-		{
-				"key": "config/apiGateway/management.endpoints.web.exposure.include",
-                "value": "Kg=="
-		},
-		{
-				"key": "config/apiGateway/management.endpoint.health.show-details",
-                "value": "YWx3YXlz"
-		},
-		{
-				"key": "config/apiGateway/spring.sleuth.sampler.probability",
-                "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
-		},
-		{
-				"key": "config/apiGateway/spring.sleuth.web.skipPattern",
-                "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
-		},
-		
-		{
-				"key": "config/apiGateway/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
-                "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
-		},
-		{
-				"key": "config/apiGateway/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
-                "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
-		},
-		{
-				"key": "config/apiGateway/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
-                "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
-		},
-		{
-				"key": "config/apiGateway/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataflow.path",
-                "value": "L2RhdGFmbG93Lyoq"
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataflow.serviceId",
-                "value": "ZGF0YWZsb3c="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataflow.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataset.path",
-                "value": "L2RhdGFzZXQvKio="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataset.serviceId",
-                "value": "ZGF0YXNldA=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataset.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataschema.path",
-                "value": "L2RhdGFzY2hlbWEvKio="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataschema.serviceId",
-                "value": "ZGF0YXNldA=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.dataschema.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.collaboration.path",
-                "value": "L2NvbGxhYm9yYXRpb24vKio="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.collaboration.serviceId",
-                "value": "Y29sbGFib3JhdGlvbg=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.collaboration.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.communication.path",
-                "value": "L2NvbW11bmljYXRpb24vKio="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.communication.serviceId",
-                "value": "Y29tbXVuaWNhdGlvbg=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.communication.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.document.path",
-                "value": "L2RvY3VtZW50Lyoq"
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.document.serviceId",
-                "value": "ZG9jdW1lbnQ="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.document.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.indexSearch.path",
-                "value": "L2luZGV4U2VhcmNoLyoq"
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.indexSearch.serviceId",
-                "value": "aW5kZXhTZWFyY2g="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.indexSearch.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.inspireHarvester.path",
-                "value": "L2luc3BpcmVIYXJ2ZXN0ZXIvKio="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.inspireHarvester.serviceId",
-                "value": "aW5zcGlyZUhhcnZlc3Rlcg=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.inspireHarvester.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.recordstore.path",
-                "value": "L3JlY29yZHN0b3JlLyoq"
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.recordstore.serviceId",
-                "value": "cmVjb3Jkc3RvcmU="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.recordstore.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.validation.path",
-                "value": "L3ZhbGlkYXRpb24vKio="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.validation.serviceId",
-                "value": "dmFsaWRhdGlvbg=="
-		},
-		{
-				"key": "config/apiGateway/zuul.routes.validation.stripPrefix",
-                "value": "ZmFsc2U="
-		},
-		{
-				"key": "config/apiGateway/zuul.retryable",
-                "value": "dHJ1ZQ=="
-		},
-		{
-				"key": "config/apiGateway/ribbon.ConnectTimeout",
-                "value": "JHtSSUJCT05fQ09OTkVDVF9USU1FT1VUOjEwMDB9"
-		},
-		{
-				"key": "config/apiGateway/ribbon.ReadTimeout",
-                "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjEwMDB9"
-		},
-		{
-				"key": "config/apiGateway/ribbon.MaxTotalHttpConnections",
-                "value": "JHtSSUJCT05fTUFYX0hUVFBfQ09OTkVDVElPTjoxMDB9"
-		},
-		{
-				"key": "config/apiGateway/ribbon.MaxConnectionsPerHost",
-                "value": "JHtSSUJCT05fTUFYX0NPTk5FQ1RJT05fUEVSX0hPU1Q6MTAwfQ=="
-		},
-		{
-				"key": "config/apiGateway/ribbon.MaxAutoRetries",
-                "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUlk6MH0="
-		},
-		{
-				"key": "config/apiGateway/ribbon.MaxAutoRetriesNextServer",
-                "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUllfTkVYVF9TRVJWRVI6Mn0="
-		},
-		{
-				"key": "config/apiGateway/ribbon.ServerListRefreshInterval",
-                "value": "JHtSSUJCT05fU0VSVkVSX0xJU1RfUkVGUkVTSF9JTlRFUlZBTDoyMDAwfQ=="
-		},
-		{
-				"key": "config/apiGateway/ribbon.OkToRetryOnAllOperations",
-                "value": "JHtSSUJCT05fT0tfUkVUUllfQUxMX09QRVJBVElPTjp0cnVlfQ=="
-		},
-		{
-				"key": "config/apiGateway/ribbon.retryableStatusCodes",
-                "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
-		},
-		{
-				"key": "config/validation/kafka.bootstrapAddress",
-                "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-		}
-		
-		
-		
+  {
+    "key": "config/dataset/mongodb.hibernate.ddl-auto",
+    "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/dataset/mongodb.primary.host",
+    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
+  },
+  {
+    "key": "config/dataset/mongodb.primary.port",
+    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
+  },
+  {
+    "key": "config/dataset/mongodb.primary.username",
+    "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/dataset/mongodb.primary.password",
+    "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/dataset/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/dataset/spring.jpa.hibernate.metabase.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/dataset/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/dataset/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/dataset/spring.datasource.metasource.url",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+  },
+  {
+    "key": "config/dataset/spring.datasource.metasource.hikari.connection-timeout",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
+  },
+  {
+    "key": "config/dataset/spring.datasource.metasource.hikari.maximum-pool-size",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
+  },
+  {
+    "key": "config/dataset/spring.datasource.metasource.username",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
+  },
+  {
+    "key": "config/dataset/spring.datasource.metasource.password",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
+  },
+  {
+    "key": "config/dataset/spring.datasource.metasource.driver-class-name",
+    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
+    "key": "config/dataset/dataset.loadDataDelimiter",
+    "value": "fA=="
+  },
+  {
+    "key": "config/dataset/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/dataset/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/dataset/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/dataset/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/dataset/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/dataset/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/dataset/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/dataset/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/dataset/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/dataset/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/dataset/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/dataset/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/dataset/spring.jpa.properties.hibernate.order_updates",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/dataset/spring.jpa.properties.hibernate.order_inserts",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/dataset/spring.jpa.properties.hibernate.jdbc.batch_size",
+    "value": "JHtEQVRBU0VUX0JBQ0hfSlBBX1NJWkU6MTAwfQ=="
+  },
+  {
+    "key": "config/dataset/spring.jpa.hibernate.flushMode",
+    "value": "Y29tbWl0"
+  },
+  {
+    "key": "config/dataflow/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/dataflow/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/dataflow/spring.jpa.properties.hibernate.order_updates",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/dataflow/spring.jpa.properties.hibernate.order_inserts",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/dataflow/spring.jpa.properties.hibernate.jdbc.batch_size",
+    "value": "JHtEQVRBU0VUX0JBQ0hfSlBBX1NJWkU6MTAwfQ=="
+  },
+  {
+    "key": "config/dataflow/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/dataflow/spring.datasource.url",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+  },
+  {
+    "key": "config/dataflow/spring.datasource.hikari.connection-timeout",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
+  },
+  {
+    "key": "config/dataflow/spring.datasource.hikari.maximum-pool-size",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
+  },
+  {
+    "key": "config/dataflow/spring.datasource.username",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
+  },
+  {
+    "key": "config/dataflow/spring.datasource.password",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
+  },
+  {
+    "key": "config/dataflow/spring.datasource.driver-class-name",
+    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
+    "key": "config/dataflow/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/dataflow/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/dataflow/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/dataflow/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/dataflow/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/dataflow/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/dataflow/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/dataflow/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/dataflow/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/dataflow/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/dataflow/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/recordstore/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/recordstore/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/recordstore/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/recordstore/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/recordstore/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/recordstore/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/recordstore/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/recordstore/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/recordstore/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/recordstore/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/recordstore/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/recordstore/dockerContainerName",
+    "value": "JHtET0NFUl9DT05UQUlORVJfTkFNRTpjcnVuY2h5LXBvc3RncmVzfQ=="
+  },
+  {
+    "key": "config/recordstore/ipPostgre",
+    "value": "JHtSRUNPUkRTVE9SRV9JUDpsb2NhbGhvc3R9"
+  },
+  {
+    "key": "config/recordstore/userPostgre",
+    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/passwordPostgre",
+    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/connStringPostgree",
+    "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
+  },
+  {
+    "key": "config/recordstore/sqlGetAllDatasetsName",
+    "value": "c2VsZWN0ICogZnJvbSBwZ19uYW1lc3BhY2Ugd2hlcmUgKD8gPSAnJyBhbmQgbnNwbmFtZSBsaWtlICdkYXRhc2V0JScpIG9yIChuc3BuYW1lID0gPyk7"
+  },
+  {
+    "key": "config/recordstore/dockerServerUrl",
+    "value": "JHtET0NLRVJfU0VSVkVSX1VSTDp0Y3A6Ly9sb2NhbGhvc3Q6MjM3NX0="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.url",
+    "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
+  },
+  {
+    "key": "config/recordstore/spring.datasource.username",
+    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.password",
+    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.driverClassName",
+    "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
+    "key": "config/apiGateway/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/apiGateway/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/apiGateway/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/apiGateway/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/apiGateway/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/apiGateway/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/apiGateway/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/apiGateway/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataflow.path",
+    "value": "L2RhdGFmbG93Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataflow.serviceId",
+    "value": "ZGF0YWZsb3c="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataflow.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataset.path",
+    "value": "L2RhdGFzZXQvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataset.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataset.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataschema.path",
+    "value": "L2RhdGFzY2hlbWEvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataschema.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.dataschema.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.collaboration.path",
+    "value": "L2NvbGxhYm9yYXRpb24vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.collaboration.serviceId",
+    "value": "Y29sbGFib3JhdGlvbg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.collaboration.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.communication.path",
+    "value": "L2NvbW11bmljYXRpb24vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.communication.serviceId",
+    "value": "Y29tbXVuaWNhdGlvbg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.communication.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.document.path",
+    "value": "L2RvY3VtZW50Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.document.serviceId",
+    "value": "ZG9jdW1lbnQ="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.document.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.indexSearch.path",
+    "value": "L2luZGV4U2VhcmNoLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.indexSearch.serviceId",
+    "value": "aW5kZXhTZWFyY2g="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.indexSearch.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.inspireHarvester.path",
+    "value": "L2luc3BpcmVIYXJ2ZXN0ZXIvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.inspireHarvester.serviceId",
+    "value": "aW5zcGlyZUhhcnZlc3Rlcg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.inspireHarvester.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.recordstore.path",
+    "value": "L3JlY29yZHN0b3JlLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.recordstore.serviceId",
+    "value": "cmVjb3Jkc3RvcmU="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.recordstore.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.validation.path",
+    "value": "L3ZhbGlkYXRpb24vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.validation.serviceId",
+    "value": "dmFsaWRhdGlvbg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.validation.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.retryable",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/apiGateway/ribbon.ConnectTimeout",
+    "value": "JHtSSUJCT05fQ09OTkVDVF9USU1FT1VUOjEwMDB9"
+  },
+  {
+    "key": "config/apiGateway/ribbon.ReadTimeout",
+    "value": "JHtSSUJCT05fUkVBRF9USU1FT1VUOjEwMDB9"
+  },
+  {
+    "key": "config/apiGateway/ribbon.MaxTotalHttpConnections",
+    "value": "JHtSSUJCT05fTUFYX0hUVFBfQ09OTkVDVElPTjoxMDB9"
+  },
+  {
+    "key": "config/apiGateway/ribbon.MaxConnectionsPerHost",
+    "value": "JHtSSUJCT05fTUFYX0NPTk5FQ1RJT05fUEVSX0hPU1Q6MTAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/ribbon.MaxAutoRetries",
+    "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUlk6MH0="
+  },
+  {
+    "key": "config/apiGateway/ribbon.MaxAutoRetriesNextServer",
+    "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUllfTkVYVF9TRVJWRVI6Mn0="
+  },
+  {
+    "key": "config/apiGateway/ribbon.ServerListRefreshInterval",
+    "value": "JHtSSUJCT05fU0VSVkVSX0xJU1RfUkVGUkVTSF9JTlRFUlZBTDoyMDAwfQ=="
+  },
+  {
+    "key": "config/apiGateway/ribbon.OkToRetryOnAllOperations",
+    "value": "JHtSSUJCT05fT0tfUkVUUllfQUxMX09QRVJBVElPTjp0cnVlfQ=="
+  },
+  {
+    "key": "config/apiGateway/ribbon.retryableStatusCodes",
+    "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
+  },
+   {
+    "key": "config/validation/mongodb.hibernate.ddl-auto",
+    "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/validation/mongodb.primary.host",
+    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
+  },
+  {
+    "key": "config/validation/mongodb.primary.port",
+    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
+  },
+  {
+    "key": "config/validation/mongodb.primary.username",
+    "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/validation/mongodb.primary.password",
+    "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.url",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.connection-timeout",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.maximum-pool-size",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.username",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
+  },
+  {
+    "key": "config/validation/spring.datasource.password",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
+  },
+  {
+    "key": "config/validation/spring.datasource.driver-class-name",
+    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+
+  {
+    "key": "config/validation/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/validation/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/validation/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/validation/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/validation/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/validation/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/validation/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/validation/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/validation/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.order_updates",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.order_inserts",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.properties.hibernate.jdbc.batch_size",
+    "value": "JHtEQVRBU0VUX0JBQ0hfSlBBX1NJWkU6MTAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.jpa.hibernate.flushMode",
+    "value": "Y29tbWl0"
+  },
+  {
+    "key": "config/validation/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  }
 ]

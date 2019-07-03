@@ -5,7 +5,6 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
@@ -31,7 +30,7 @@ public class DockerClientBuilderBean {
    *
    * @return the docker client
    */
-  @Bean
+  // @Bean
   public DockerClient dockerClient() {
     return DockerClientBuilder.getInstance(dockerServerUrl).build();
   }

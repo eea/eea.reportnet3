@@ -3,7 +3,7 @@ package org.eea.recordstore.controller;
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/recordstore")
 public class RecordStoreControllerImpl implements RecordStoreController {
 
-  /** The record store service. */
+  /**
+   * The record store service.
+   */
   @Autowired
   private RecordStoreService recordStoreService;
 
@@ -42,7 +44,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void resteDataSetDataBase() {
     try {
       recordStoreService.resetDatasetDatabase();
-    } catch (final DockerAccessException e) {
+    } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
     }
   }
@@ -58,8 +60,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName);
-      LOG.info("Dataset with name {} created",datasetName);
-    } catch (final DockerAccessException e) {
+      LOG.info("Dataset with name {} created", datasetName);
+    } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
       // TODO Error control
     }
@@ -69,6 +71,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * Gets the connection to dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection to dataset
    */
   @Override
@@ -78,7 +81,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     ConnectionDataVO vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
-    } catch (final DockerAccessException e) {
+    } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
@@ -95,7 +98,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     List<ConnectionDataVO> vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset();
-    } catch (final DockerAccessException e) {
+    } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
