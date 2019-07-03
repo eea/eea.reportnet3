@@ -1,54 +1,4 @@
 {
-<<<<<<< HEAD
-    "messages" : {
-        "newDataset": "New Dataset",
-        "viewData": "View data",
-        "import": "Import",
-        "export": "Export",
-        "create": "Create",
-        "delete": "Delete",
-        "deleteDatasetData": "Delete dataset data",
-        "events": "Events",
-        "validate": "Validate",
-        "showValidations": "Show Validations",
-        "dashboards": "Dashboards",
-        "unknownUsername": "User",
-        "copyrightAbout": "About the Commission's new web presence",
-        "copyrightLanguage": "Language policy",
-        "copyrightResources": "Resources for partners",
-        "copyrightCookies": "Cookies",
-        "copyrightPrivacy": "Privacy policy",
-        "copyrightLegal": "Legal notice",
-        "copyrightContact": "Contact",
-        "titleDataset": "Data Set:",
-        "titleDashboard": "Error/Warning dashboard",
-        "titleValidations": "Validations",
-        "titleHeader": "Reportnet",
-        "uploadDataset": "Upload your Dataset",
-        "selectFile": "Select or drag here your dataset (.csv)",
-        "deleteDatasetConfirm": "Are you sure you want to delete the dataset data?",
-        "deleteDatasetHeader": "Delete dataset data",
-        "yes": "Yes",
-        "no": "No",
-        "validateDataSet": "Validate dataset",
-        "validateDataSetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
-        "origin": "Origin",
-        "levelError": "Level error",
-        "errorMessage": "Message",
-        "typeEntity": "Entity",
-        "loading": "Loading...",
-        "visibility": "Visibility",
-        "filter": "Filter",
-        "group-by": "Group by",
-        "sort": "Sort",
-        "refresh": "Refresh",
-        "noErrorData": "There is no error data to show",
-        "datasetLoadingTitle": "Data Loading",
-        "datasetLoadingMessage": "The table ",
-        "datasetLoading": " is loading..."
-    }
-}
-=======
 	"messages": {
 		"newDataset": "New Dataset",
 		"viewData": "View data",
@@ -108,12 +58,12 @@
 		"reject": "Reject",
 		"reportingDataFlow": "Reporting data flow",
 		"do": "DO",
-        "ds": "DS",
-        "dataSet": "Dataset",
-        "releaseDataCollection": "Release to data collection",
-        "importFromFile": "Import from file",
-        "duplicate": "Duplicate",
-        "properties": "Properties",
+		"ds": "DS",
+		"dataSet": "Dataset",
+		"releaseDataCollection": "Release to data collection",
+		"importFromFile": "Import from file",
+		"duplicate": "Duplicate",
+		"properties": "Properties",
 		"documents": "Documents",
 		"webLinks": "Web Links",
 		"title": "Title",
@@ -127,4 +77,3 @@
 		"appName": "Reportnet 3.0"
 	}
 }
->>>>>>> REP-FE-RoutingTest

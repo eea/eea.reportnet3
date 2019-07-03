@@ -1,410 +1,469 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import styles from './DataViewer.module.css';
-import ButtonsBar from '../../../components/Layout/UI/ButtonsBar/ButtonsBar';
+import React, { useState, useEffect, useContext, useRef } from "react";
+import styles from "./DataViewer.module.css";
+import ButtonsBar from "../../../components/Layout/UI/ButtonsBar/ButtonsBar";
 // import { MultiSelect } from 'primereact/multiselect';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import {Dialog} from 'primereact/dialog';
-import {CustomFileUpload} from '../../../components/Layout/UI/CustomFileUpload/CustomFileUpload';
-import {Growl} from 'primereact/growl';
-import CustomIconToolTip from '../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip';
-import ReporterDataSetContext from '../../../components/Context/ReporterDataSetContext';
-import ResourcesContext from '../../../components/Context/ResourcesContext';
-import HTTPRequester from '../../../services/HTTPRequester/HTTPRequester';
-import config from '../../../conf/web.config.json';
-import ConfirmDialog from '../../../components/Layout/UI/ConfirmDialog/ConfirmDialog';
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Dialog } from "primereact/dialog";
+import { CustomFileUpload } from "../../../components/Layout/UI/CustomFileUpload/CustomFileUpload";
+import { Growl } from "primereact/growl";
+import CustomIconToolTip from "../../../components/Layout/UI/CustomIconToolTip/CustomIconToolTip";
+import ReporterDataSetContext from "../../../components/Context/ReporterDataSetContext";
+import ResourcesContext from "../../../components/Context/ResourcesContext";
+import HTTPRequester from "../../../services/HTTPRequester/HTTPRequester";
+import config from "../../../conf/web.config.json";
+import ConfirmDialog from "../../../components/Layout/UI/ConfirmDialog/ConfirmDialog";
 
-const DataViewer = (props) => {
-    const contextReporterDataSet = useContext(ReporterDataSetContext);
-    const [importDialogVisible, setImportDialogVisible] = useState(false);    
-    const [totalRecords, setTotalRecords] = useState(0);
-    const [fetchedData, setFetchedData] = useState([]);        
-    const [loading, setLoading] = useState(false);
-    const [numRows, setNumRows] = useState(10);
-    const [firstRow, setFirstRow] = useState((props.positionIdObject && props.positionIdObject !== null) ? Math.floor(props.positionIdObject/numRows)*numRows : 0);
-    const [sortOrder, setSortOrder] = useState();   
-    const [sortField,setSortField] = useState();
-    const [columns, setColumns] = useState([]); 
-    const [cols, setCols] = useState(props.tableSchemaColumns); 
-    const [header] = useState();
-    const [colOptions,setColOptions] = useState([{}]); 
-    const resources = useContext(ResourcesContext);  
-    const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-    const [isDataDeleted, setIsDataDeleted] = useState(false);
+const DataViewer = props => {
+	const contextReporterDataSet = useContext(ReporterDataSetContext);
+	const [importDialogVisible, setImportDialogVisible] = useState(false);
+	const [totalRecords, setTotalRecords] = useState(0);
+	const [fetchedData, setFetchedData] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [numRows, setNumRows] = useState(10);
+	const [firstRow, setFirstRow] = useState(
+		props.positionIdObject && props.positionIdObject !== null
+			? Math.floor(props.positionIdObject / numRows) * numRows
+			: 0
+	);
+	const [sortOrder, setSortOrder] = useState();
+	const [sortField, setSortField] = useState();
+	const [columns, setColumns] = useState([]);
+	const [cols, setCols] = useState(props.tableSchemaColumns);
+	const [header] = useState();
+	const [colOptions, setColOptions] = useState([{}]);
+	const resources = useContext(ResourcesContext);
+	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+	const [isDataDeleted, setIsDataDeleted] = useState(false);
 
-    let growlRef = useRef();
-    
-    useEffect(() => {
-    	console.log('deleted', isDataDeleted);
-    	setFetchedData([]);
-    }, [isDataDeleted])
-    
-    //TODO: Render se está ejecutando dos veces. Mirar por qué.
-    useEffect(() =>{            
-        console.log("Setting column options...");     
+	let growlRef = useRef();
 
-        if(firstRow !== props.positionIdObject){
-          setFirstRow(Math.floor(props.positionIdObject/numRows)*numRows)
-        }
+	useEffect(() => {
+		console.log("deleted", isDataDeleted);
+		setFetchedData([]);
+	}, [isDataDeleted]);
 
-        let colOpt = [];
-        for(let col of cols) {  
-          colOpt.push({label: col.header, value: col});
-        }              
-        setColOptions(colOpt);
-  
-        console.log('Fetching data...');
-        fetchDataHandler(null, sortOrder, Math.floor(props.positionIdObject/numRows)*numRows, numRows);  
-        
-        console.log("Filtering data...");
-        const inmTableSchemaColumns = [...props.tableSchemaColumns];
-        setCols(inmTableSchemaColumns);
+	//TODO: Render se está ejecutando dos veces. Mirar por qué.
+	useEffect(() => {
+		console.log("Setting column options...");
 
-      }, [props.positionIdObject]);
-  
-      useEffect(()=>{         
-        // let visibilityIcon = (<div className="TableDiv">
-        //     <span className="pi pi-eye" style={{zoom:2}}></span> 
-        //     <span className="my-multiselected-empty-token">Visibility</span>
-        //   </div>
-        // );
-        // let headerArr = <div className="TableDiv">
-        //     <i className="pi pi-eye"></i>
-        //     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
-        // </div>;
-        // setHeader(headerArr);
-        
-        let columnsArr = cols.map(col => (
-          <Column
-            sortable={true}
-            key={col.field}
-            field={col.field}
-            header={col.header}
-            body={dataTemplate}
-          />
-        ));
-        let validationCol = (
-          <Column key="recordValidation" field="validations" header="" body={validationsTemplate} style={{width: "15px"}} />
-        );
-        let newColumnsArr = [validationCol].concat(columnsArr);
-        setColumns(newColumnsArr); 
-  
-      }, [cols, colOptions]);
-      
-      const onChangePageHandler = (event)=>{     
-        console.log('Refetching data...');                
-        setNumRows(event.rows);
-        setFirstRow(event.first);        
-        fetchDataHandler(sortField, sortOrder, event.first, event.rows); 
-      }
+		if (firstRow !== props.positionIdObject) {
+			setFirstRow(Math.floor(props.positionIdObject / numRows) * numRows);
+		}
 
-      const onConfirmDeleteHandler = () =>{
-        let idDataSet = 1;
-        setDeleteDialogVisible(false);
-        HTTPRequester.delete(
-          {
-            url:'/dataset/'+ idDataSet + '/deleteImportTable/'+ props.id,
-            queryString: {}
-          }
-        )
-        .then(res=>{
-          setIsDataDeleted(true);
-        });
-      }
-      
-      const setVisibleHandler = (fnUseState, visible) =>{
-    	    fnUseState(visible);
-    	  }
-  
-      const onSortHandler = (event)=>{      
-        console.log("Sorting...");
-        setSortOrder(event.sortOrder);  
-        setSortField(event.sortField);    
-        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);       
-      }
-  
-      const onRefreshClickHandler = () => {
-        fetchDataHandler(null, sortOrder, firstRow, numRows);  
-      }
+		let colOpt = [];
+		for (let col of cols) {
+			colOpt.push({ label: col.header, value: col });
+		}
+		setColOptions(colOpt);
 
-      // const onColumnToggleHandler = (event) =>{
-      //   console.log("OnColumnToggle...");
-      //   setCols(event.value);
-      //   setColOptions(colOptions);
-      // }
-  
-      // useEffect(()=>{
-      //   console.log("Fetching new data...");
-      // console.log(fetchedData);
-      // },[fetchedData]);
+		console.log("Fetching data...");
+		fetchDataHandler(
+			null,
+			sortOrder,
+			Math.floor(props.positionIdObject / numRows) * numRows,
+			numRows
+		);
 
-      const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
-        setLoading(true);
+		console.log("Filtering data...");
+		const inmTableSchemaColumns = [...props.tableSchemaColumns];
+		setCols(inmTableSchemaColumns);
+	}, [props.positionIdObject]);
 
-        let queryString = {
-          idTableSchema: props.id,
-          pageNum: Math.floor(fRow / nRows),
-          pageSize: nRows
-        }
+	useEffect(() => {
+		// let visibilityIcon = (<div className="TableDiv">
+		//     <span className="pi pi-eye" style={{zoom:2}}></span>
+		//     <span className="my-multiselected-empty-token">Visibility</span>
+		//   </div>
+		// );
+		// let headerArr = <div className="TableDiv">
+		//     <i className="pi pi-eye"></i>
+		//     <MultiSelect value={cols} options={colOptions} tooltip="Filter columns" onChange={onColumnToggleHandler} style={{width:'10%'}} placeholder={visibilityIcon} filter={true} fixedPlaceholder={true}/>
+		// </div>;
+		// setHeader(headerArr);
 
-        if (sField !== undefined && sField !== null) {
-          queryString.fields = sField;
-          queryString.asc = sOrder === -1 ? 0 : 1;
-        }
+		let columnsArr = cols.map(col => (
+			<Column
+				sortable={true}
+				key={col.field}
+				field={col.field}
+				header={col.header}
+				body={dataTemplate}
+			/>
+		));
+		let validationCol = (
+			<Column
+				key="recordValidation"
+				field="validations"
+				header=""
+				body={validationsTemplate}
+				style={{ width: "15px" }}
+			/>
+		);
+		let newColumnsArr = [validationCol].concat(columnsArr);
+		setColumns(newColumnsArr);
+	}, [cols, colOptions]);
 
-        // props.urlViewer
-        const dataPromise = HTTPRequester.get(
-          {
-            url: props.urlViewer,
-            queryString: queryString
-          }
-        );        
-        dataPromise.then(response =>{
-          filterDataResponse(response.data);          
-          if(response.data.totalRecords!==totalRecords){
-            setTotalRecords(response.data.totalRecords);
-          }
-        
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log(error);
-          return error;
-        });
-      }
+	const onChangePageHandler = event => {
+		console.log("Refetching data...");
+		setNumRows(event.rows);
+		setFirstRow(event.first);
+		fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+	};
 
-      const filterDataResponse = (data) =>{
+	const onConfirmDeleteHandler = () => {
+		let idDataSet = 1;
+		setDeleteDialogVisible(false);
+		HTTPRequester.delete({
+			url: "/dataset/" + idDataSet + "/deleteImportTable/" + props.id,
+			queryString: {}
+		}).then(res => {
+			setIsDataDeleted(true);
+		});
+	};
 
-        //TODO: Refactorizar
-        const dataFiltered = data.records.map(record => {
-          const recordValidations = record.recordValidations;
-          const arrayDataFields = record.fields.map(field => {
-            return { 
-              fieldData: {[field.idFieldSchema]: field.value},
-              fieldValidations : field.fieldValidations
-             };
-          });
-          const arrayDataAndValidations = {
-            dataRow: arrayDataFields,
-            recordValidations
-          };
-    
-          return arrayDataAndValidations;
-        });    
-       
-        setFetchedData(dataFiltered);
-      };
+	const setVisibleHandler = (fnUseState, visible) => {
+		fnUseState(visible);
+	};
 
-//Template for Record validation
-const validationsTemplate = (fetchedData, column) => {
-  if (fetchedData.recordValidations) {
-    const validations = fetchedData.recordValidations.map(
-      val => val.validation
-    );
+	const onSortHandler = event => {
+		console.log("Sorting...");
+		setSortOrder(event.sortOrder);
+		setSortField(event.sortField);
+		fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+	};
 
-    let message = "";
-    validations.forEach(validation =>
-      validation.message
-        ? (message += "- " + validation.message + '\n')
-        : ""
-    );
+	const onRefreshClickHandler = () => {
+		fetchDataHandler(null, sortOrder, firstRow, numRows);
+	};
 
-    let levelError = "";
-    let lvlFlag = 0;
+	// const onColumnToggleHandler = (event) =>{
+	//   console.log("OnColumnToggle...");
+	//   setCols(event.value);
+	//   setColOptions(colOptions);
+	// }
 
-    validations.forEach(validation => {
-      if (validation.levelError === "WARNING") {
-        const wNum = 1;
-        if (wNum > lvlFlag) {
-          lvlFlag = wNum;
-          levelError = "WARNING";
-        }
-      } else if (validation.levelError === "ERROR") {
-        const eNum = 2;
-        if (eNum > lvlFlag) {
-          lvlFlag = eNum;
-          levelError = "ERROR";
-        }
-      } else if (validation.levelError === "BLOCKER") {
-        const bNum = 2;
-        if (bNum > lvlFlag) {
-          lvlFlag = bNum;
-          levelError = "BLOCKER";
-        }
-      }
-    });
+	// useEffect(()=>{
+	//   console.log("Fetching new data...");
+	// console.log(fetchedData);
+	// },[fetchedData]);
 
-    return <CustomIconToolTip levelError={levelError} message={message} />;
-  } else {
-    return;
-  }
-};
+	const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
+		setLoading(true);
 
-//Template for Field validation
-const dataTemplate = (rowData, column) =>{
-    let row = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-  if (row !== null && row && row.fieldValidations!==null) {
-    const validations = row.fieldValidations.map(
-      val => val.validation
-    );
-    let message = [];
-    validations.forEach(validation =>
-      validation.message ? (message += "- " + validation.message + '\n') : ""
-    );
-    let levelError = "";
-    let lvlFlag = 0;
-    validations.forEach(validation => {
-      if (validation.levelError === "WARNING") {
-        const wNum = 1;
-        if (wNum > lvlFlag) {
-          lvlFlag = wNum;
-          levelError = "WARNING";
-        }
-      } else if (validation.levelError === "ERROR") {
-        const eNum = 2;
-        if (eNum > lvlFlag) {
-          lvlFlag = eNum;
-          levelError = "ERROR";
-        }
-      } else if (validation.levelError === "BLOCKER") {
-        const bNum = 2;
-        if (bNum > lvlFlag) {
-          lvlFlag = bNum;
-          levelError = "BLOCKER";
-        }
-      }
-    });
-  
-      return <div style={{'display':'flex','alignItems':'center'}}> {(row)? row.fieldData[column.field] : null} <CustomIconToolTip levelError={levelError} message={message}/></div>;
-    }
-    else{
-      return <div style={{'display':'flex','alignItems':'center'}}>{(row)? row.fieldData[column.field] : null}</div>;
-    }
-  }
+		let queryString = {
+			idTableSchema: props.id,
+			pageNum: Math.floor(fRow / nRows),
+			pageSize: nRows
+		};
 
-      //TODO: Textos + iconos + ver si deben estar aquí.
-      const customButtons = [
-        {
-          label: resources.messages["import"],
-          icon: "0",
-          group: "left",
-          disabled: false,
-          clickHandler: () => setImportDialogVisible(true)
-        },
-        {
-          label: resources.messages["delete"],
-          icon: "2",
-          group: "left",
-          disabled: false,
-          clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
-        },
-        {
-            label: resources.messages["visibility"],
-            icon: "6",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },
-        {
-            label: resources.messages["filter"],
-            icon: "7",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },
-        {
-            label: resources.messages["group-by"],
-            icon: "8",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },
-        {
-            label: resources.messages["sort"],
-            icon: "9",
-            group: "left",
-            disabled: true,
-            clickHandler: null
-        },
-        {
-            label: resources.messages["refresh"],
-            icon: "11",
-            group: "right",
-            disabled: true,
-            clickHandler: onRefreshClickHandler
-        }
-      ];
+		if (sField !== undefined && sField !== null) {
+			queryString.fields = sField;
+			queryString.asc = sOrder === -1 ? 0 : 1;
+		}
 
-      const onHideHandler = () => {
-        setImportDialogVisible(false);        
-      }
+		// props.urlViewer
+		const dataPromise = HTTPRequester.get({
+			url: props.urlViewer,
+			/* url: "/jsons/response_dataset_values2.json", */
+			queryString: queryString
+		});
+		dataPromise
+			.then(response => {
+				filterDataResponse(response.data);
+				if (response.data.totalRecords !== totalRecords) {
+					setTotalRecords(response.data.totalRecords);
+				}
 
-      const editLargeStringWithDots = (string, length) => {
-        if (string.length > length)
-          { return string.substring(0,length).concat("..."); }
-        else
-          { return string; }
-      }
+				setLoading(false);
+			})
+			.catch(error => {
+				console.log(error);
+				return error;
+			});
+	};
 
-      const onUploadHandler = () => {
-        setImportDialogVisible(false);
+	const filterDataResponse = data => {
+		//TODO: Refactorizar
+		const dataFiltered = data.records.map(record => {
+			const recordValidations = record.recordValidations;
+			const arrayDataFields = record.fields.map(field => {
+				return {
+					fieldData: { [field.idFieldSchema]: field.value },
+					fieldValidations: field.fieldValidations
+				};
+			});
+			const arrayDataAndValidations = {
+				dataRow: arrayDataFields,
+				recordValidations
+			};
 
-        const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{editLargeStringWithDots(props.name, 22)}</strong>{resources.messages["datasetLoading"]}</span> 
-        // const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{props.name}</strong>{resources.messages["datasetLoading"]}</span> 
+			return arrayDataAndValidations;
+		});
 
-        growlRef.current.show({
-          severity: 'info', 
-          summary: resources.messages["datasetLoadingTitle"], 
-          detail: detailContent, 
-          life: '5000'
-        });
-      }
+		setFetchedData(dataFiltered);
+	};
 
-      let totalCount = <span>Total: {totalRecords} rows</span>;
+	//Template for Record validation
+	const validationsTemplate = (fetchedData, column) => {
+		if (fetchedData.recordValidations) {
+			const validations = fetchedData.recordValidations.map(
+				val => val.validation
+			);
 
-    return (
-        <div>
-          <ButtonsBar buttons={(props.customButtons)?props.customButtons:customButtons} />
-            {/* <Toolbar>
+			let message = "";
+			validations.forEach(validation =>
+				validation.message ? (message += "- " + validation.message + "\n") : ""
+			);
+
+			let levelError = "";
+			let lvlFlag = 0;
+
+			validations.forEach(validation => {
+				if (validation.levelError === "WARNING") {
+					const wNum = 1;
+					if (wNum > lvlFlag) {
+						lvlFlag = wNum;
+						levelError = "WARNING";
+					}
+				} else if (validation.levelError === "ERROR") {
+					const eNum = 2;
+					if (eNum > lvlFlag) {
+						lvlFlag = eNum;
+						levelError = "ERROR";
+					}
+				} else if (validation.levelError === "BLOCKER") {
+					const bNum = 2;
+					if (bNum > lvlFlag) {
+						lvlFlag = bNum;
+						levelError = "BLOCKER";
+					}
+				}
+			});
+
+			return <CustomIconToolTip levelError={levelError} message={message} />;
+		} else {
+			return;
+		}
+	};
+
+	//Template for Field validation
+	const dataTemplate = (rowData, column) => {
+		let row = rowData.dataRow.filter(
+			r => Object.keys(r.fieldData)[0] === column.field
+		)[0];
+		if (row !== null && row && row.fieldValidations !== null) {
+			const validations = row.fieldValidations.map(val => val.validation);
+			let message = [];
+			validations.forEach(validation =>
+				validation.message ? (message += "- " + validation.message + "\n") : ""
+			);
+			let levelError = "";
+			let lvlFlag = 0;
+			validations.forEach(validation => {
+				if (validation.levelError === "WARNING") {
+					const wNum = 1;
+					if (wNum > lvlFlag) {
+						lvlFlag = wNum;
+						levelError = "WARNING";
+					}
+				} else if (validation.levelError === "ERROR") {
+					const eNum = 2;
+					if (eNum > lvlFlag) {
+						lvlFlag = eNum;
+						levelError = "ERROR";
+					}
+				} else if (validation.levelError === "BLOCKER") {
+					const bNum = 2;
+					if (bNum > lvlFlag) {
+						lvlFlag = bNum;
+						levelError = "BLOCKER";
+					}
+				}
+			});
+
+			return (
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between"
+					}}
+				>
+					{" "}
+					{row ? row.fieldData[column.field] : null}{" "}
+					<CustomIconToolTip levelError={levelError} message={message} />
+				</div>
+			);
+		} else {
+			return (
+				<div style={{ display: "flex", alignItems: "center" }}>
+					{row ? row.fieldData[column.field] : null}
+				</div>
+			);
+		}
+	};
+
+	//TODO: Textos + iconos + ver si deben estar aquí.
+	const customButtons = [
+		{
+			label: resources.messages["import"],
+			icon: "0",
+			group: "left",
+			disabled: false,
+			clickHandler: () => setImportDialogVisible(true)
+		},
+		{
+			label: resources.messages["delete"],
+			icon: "2",
+			group: "left",
+			disabled: false,
+			clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+		},
+		{
+			label: resources.messages["visibility"],
+			icon: "6",
+			group: "left",
+			disabled: true,
+			clickHandler: null
+		},
+		{
+			label: resources.messages["filter"],
+			icon: "7",
+			group: "left",
+			disabled: true,
+			clickHandler: null
+		},
+		{
+			label: resources.messages["group-by"],
+			icon: "8",
+			group: "left",
+			disabled: true,
+			clickHandler: null
+		},
+		{
+			label: resources.messages["sort"],
+			icon: "9",
+			group: "left",
+			disabled: true,
+			clickHandler: null
+		},
+		{
+			label: resources.messages["refresh"],
+			icon: "11",
+			group: "right",
+			disabled: true,
+			clickHandler: onRefreshClickHandler
+		}
+	];
+
+	const onHideHandler = () => {
+		setImportDialogVisible(false);
+	};
+
+	const editLargeStringWithDots = (string, length) => {
+		if (string.length > length) {
+			return string.substring(0, length).concat("...");
+		} else {
+			return string;
+		}
+	};
+
+	const onUploadHandler = () => {
+		setImportDialogVisible(false);
+
+		const detailContent = (
+			<span>
+				{resources.messages["datasetLoadingMessage"]}
+				<strong>{editLargeStringWithDots(props.name, 22)}</strong>
+				{resources.messages["datasetLoading"]}
+			</span>
+		);
+		// const detailContent = <span>{resources.messages["datasetLoadingMessage"]}<strong>{props.name}</strong>{resources.messages["datasetLoading"]}</span>
+
+		growlRef.current.show({
+			severity: "info",
+			summary: resources.messages["datasetLoadingTitle"],
+			detail: detailContent,
+			life: "5000"
+		});
+	};
+
+	let totalCount = <span>Total: {totalRecords} rows</span>;
+
+	return (
+		<div>
+			<ButtonsBar
+				buttons={props.customButtons ? props.customButtons : customButtons}
+			/>
+			{/* <Toolbar>
                 <CustomButton label="Visibility" icon="6" />                
                 <CustomButton label="Filter" icon="7" />   
                 <CustomButton label="Group by" icon="8" />   
                 <CustomButton label="Sort" icon="9" />   
             </Toolbar> */}
-            <div className={styles.Table}>
-            <DataTable value={fetchedData} paginatorRight={totalCount}
-                       resizableColumns={true} reorderableColumns={true}
-                       paginator={true} rows={numRows} first={firstRow} onPage={onChangePageHandler} 
-                       rowsPerPageOptions={[5, 10, 20, 100]} lazy={true} 
-                       loading={loading} totalRecords={totalRecords} sortable={true}
-                       onSort={onSortHandler} header={header} sortField={sortField} sortOrder={sortOrder} autoLayout={true}>
-                    {columns}
-                </DataTable>
-            </div>
-            <Growl ref={growlRef} />
-            <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
-                                className={styles.Dialog} dismissableMask={false} onHide={onHideHandler} >
-                            <CustomFileUpload mode="advanced" name="file" url={`${config.api.protocol}${config.api.url}${config.api.port}${config.loadDataTableAPI.url}${props.id}`}
-                                                onUpload={onUploadHandler} 
-                                                multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
-                                                fileLimit={1} className={styles.FileUpload}  /> 
-            </Dialog>
-                
-                <ReporterDataSetContext.Provider> 
-                <ConfirmDialog onConfirm={onConfirmDeleteHandler} 
-                               onHide={()=>setVisibleHandler(setDeleteDialogVisible,false)} 
-                               visible={deleteDialogVisible} 
-                               header={resources.messages["deleteDatasetHeader"]} 
-                               maximizable={false} 
-                               labelConfirm={resources.messages["yes"]}  
-                               labelCancel={resources.messages["no"]}>
-                               {resources.messages["deleteDatasetConfirm"]}
-                </ConfirmDialog>
-                </ReporterDataSetContext.Provider>
-            
-        </div>
-    );
-}
+			<div className={styles.Table}>
+				<DataTable
+					value={fetchedData}
+					paginatorRight={totalCount}
+					resizableColumns={true}
+					reorderableColumns={true}
+					paginator={true}
+					rows={numRows}
+					first={firstRow}
+					onPage={onChangePageHandler}
+					rowsPerPageOptions={[5, 10, 20, 100]}
+					lazy={true}
+					loading={loading}
+					totalRecords={totalRecords}
+					sortable={true}
+					onSort={onSortHandler}
+					header={header}
+					sortField={sortField}
+					sortOrder={sortOrder}
+					autoLayout={true}
+				>
+					{columns}
+				</DataTable>
+			</div>
+			<Growl ref={growlRef} />
+			<Dialog
+				header={resources.messages["uploadDataset"]}
+				visible={importDialogVisible}
+				className={styles.Dialog}
+				dismissableMask={false}
+				onHide={onHideHandler}
+			>
+				<CustomFileUpload
+					mode="advanced"
+					name="file"
+					url={`${config.api.protocol}${config.api.url}${config.api.port}${
+						config.loadDataTableAPI.url
+					}${props.id}`}
+					onUpload={onUploadHandler}
+					multiple={false}
+					chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
+					fileLimit={1}
+					className={styles.FileUpload}
+				/>
+			</Dialog>
+
+			<ReporterDataSetContext.Provider>
+				<ConfirmDialog
+					onConfirm={onConfirmDeleteHandler}
+					onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
+					visible={deleteDialogVisible}
+					header={resources.messages["deleteDatasetHeader"]}
+					maximizable={false}
+					labelConfirm={resources.messages["yes"]}
+					labelCancel={resources.messages["no"]}
+				>
+					{resources.messages["deleteDatasetConfirm"]}
+				</ConfirmDialog>
+			</ReporterDataSetContext.Provider>
+		</div>
+	);
+};
 
 export default React.memo(DataViewer);
