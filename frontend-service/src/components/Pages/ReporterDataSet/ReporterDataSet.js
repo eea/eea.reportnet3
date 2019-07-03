@@ -12,6 +12,7 @@ import ConfirmDialog from "../../Layout/UI/ConfirmDialog/ConfirmDialog";
 import ValidationViewer from "../../../containers/DataSets/ValidationViewer/ValidationViewer";
 import Dashboard from "../../../containers/DashBoard/DashBoard";
 
+import MainLayout from "../../Layout/main-layout.component";
 import config from "../../../conf/web.config.json";
 import HTTPRequesterAPI from "../../../services/HTTPRequester/HTTPRequester";
 import styles from "./ReporterDataSet.module.css";
@@ -35,14 +36,15 @@ const ReporterDataSet = () => {
 	const [activeIndex, setActiveIndex] = useState();
 	const [positionIdObject, setPositionIdObject] = useState(0);
 
-	const home = { icon: resources.icons["home"], url: "#" };
+	const home = { icon: resources.icons["home"], url: "/" };
 
 	useEffect(() => {
 		console.log("ReporterDataSet useEffect");
 
 		setBreadCrumbItems([
-			{ label: resources.messages["newDataset"], url: "#" },
-			{ label: resources.messages["viewData"], url: "#" }
+			{ label: resources.messages["dataFlowTask"], url: "/data-flow-task/" },
+			{ label: resources.messages["reportingDataFlow"], url: "#" },
+			{ label: resources.messages["viewData"] }
 		]);
 
 		//Fetch DataSchema(JSON)
@@ -190,6 +192,7 @@ const ReporterDataSet = () => {
 	};
 
 	return (
+		<MainLayout>
 		<div className="titleDiv">
 			<BreadCrumb model={breadCrumbItems} home={home} />
 			<Title title={`${resources.messages["titleDataset"]}${datasetTitle}`} />
@@ -278,6 +281,7 @@ const ReporterDataSet = () => {
 				{resources.messages["validateDataSetConfirm"]}
 			</ConfirmDialog>
 		</div>
+		</MainLayout>
 	);
 };
 export default ReporterDataSet;
