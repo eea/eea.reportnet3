@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import ResourcesContext from '../../../Context/ResourcesContext';
 
 import {Button} from 'primereact/button';
-import './CustomIconToolTip.css';
+import style from './CustomIconToolTip.module.css';
 
 export default function CustomIconToolTip(props) {
   let validationIcon = '';
@@ -31,6 +31,7 @@ export default function CustomIconToolTip(props) {
     default:
       break;
   }
+<<<<<<< HEAD
   const myStyles = { 
     padding: "0px !important",
     margin:"0px !important",
@@ -39,9 +40,14 @@ export default function CustomIconToolTip(props) {
     float: "right", 
     marginLeft: "auto",
     backgroundColor: "transparent" }
+=======
+  const iconColorStyle = {  
+    color: iconColor
+  }
+>>>>>>> REP-FE-RoutingTest
   
 
   return (
-    <Button type="button" icon={validationIcon} tooltip={props.message} style={myStyles} /> 
+    <Button type="button" icon={validationIcon} tooltip={props.message} style={`${style.buttonCustom} ${iconColorStyle}`} /> 
   );
 }

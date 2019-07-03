@@ -51,6 +51,15 @@ td >.tooltip>span.tooltiptext{
   overflow: visible !important;
 }
 
+<<<<<<< HEAD:frontend-service/src/components/Layout/UI/CustomIconToolTip/CustomIconToolTip.css
 .p-button:enabled:focus { 
   box-shadow: none !important;
+=======
+.buttonCustom{
+  padding: 0px !important;
+  margin:0px !important;
+  border-color: transparent;   
+  float: right;
+  background-color: transparent;
+>>>>>>> REP-FE-RoutingTest:frontend-service/src/components/Layout/UI/CustomIconToolTip/CustomIconToolTip.module.css
 }

@@ -3454,6 +3454,7 @@ body .p-megamenu .p-menuitem-link:hover .p-menuitem-icon,
 body .p-slidemenu .p-menuitem-link:hover .p-menuitem-icon {
   color: #404040;
 }
+
 body .p-menu .p-menuitem-link:focus,
 body .p-menubar .p-menuitem-link:focus,
 body .p-tieredmenu .p-menuitem-link:focus,
@@ -3709,9 +3710,9 @@ body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-icon 
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link:focus {
   outline: 0 none;
   outline-offset: 0;
-  -webkit-box-shadow: 0 0 0 0.2em #004494;
+/*   -webkit-box-shadow: 0 0 0 0.2em #004494;
   -moz-box-shadow: 0 0 0 0.2em #004494;
-  box-shadow: 0 0 0 0.2em #004494;
+  box-shadow: 0 0 0 0.2em #004494; */
 }
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover .p-menuitem-link {
   background-color: #dbdbdb;

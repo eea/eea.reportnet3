@@ -1,0 +1,67 @@
+[
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "nombre del archivo",
+    "description": " libero quasi aliquam laudantium minima ullam reprehenderit neque error eligendi eius voluptatum",
+    "category": "pdf",
+    "url": "http://placehold.com/daycore_lorem_sint.pdf",
+    "val": "true",
+    "validations":{
+      "id": 0,
+      "idRule": "string",
+      "levelError": "BLOCKER",
+      "message": "Blocked! Have to check this Row",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  },
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "Numele archivului",
+    "description": "anim ea commodo anim",
+    "category": "txt",
+    "url": "http://placehold.com/daycore_lorem_sint.txt",
+    "validations":{
+      "id": 2,
+      "idRule": "string",
+      "levelError": "WARNING",
+      "message": "Warning! Have to check this Row",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  },
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "Nazvanie faila",
+    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    "category": "xml",
+    "url": "http://placehold.com/daycore_lorem_sint.xml",
+    "validations":{
+      "id": 1,
+      "idRule": "string",
+      "levelError": "",
+      "message": "Error! Have to check this Row",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  },
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "File name",
+    "description": "Optio excepturi tempore numquam deserunt doloremque laborum iusto.",
+    "category": "pdf",
+    "url": "http://placehold.com/daycore_lorem_sint.pdf",
+    "validations":{
+      "id": 0,
+      "idRule": "string",
+      "levelError": "ERROR",
+      "message": "Error! Have to check this Row.",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  }
+]
