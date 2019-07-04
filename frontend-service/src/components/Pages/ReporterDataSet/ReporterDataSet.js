@@ -193,94 +193,100 @@ const ReporterDataSet = () => {
 
 	return (
 		<MainLayout>
-		<div className="titleDiv">
 			<BreadCrumb model={breadCrumbItems} home={home} />
-			<Title title={`${resources.messages["titleDataset"]}${datasetTitle}`} />
-			<div className={styles.ButtonsBar}>
-				<ButtonsBar buttons={customButtons} />
-			</div>
-			{/*TODO: Loading spinner --> En el Suspense
+
+			<div className="rep-container">
+				<div className="titleDiv">
+					<Title
+						title={`${resources.messages["titleDataset"]}${datasetTitle}`}
+					/>
+				</div>
+				<div className={styles.ButtonsBar}>
+					<ButtonsBar buttons={customButtons} />
+				</div>
+
+				{/*TODO: Loading spinner --> En el Suspense
         ¿LinkedErrorData mejor pasar por props o tirar de context?*/}
-			<ReporterDataSetContext.Provider
-				value={{
-					validationsVisibleHandler: null,
-					setTabHandler: null,
-					setPageHandler: posIdObject => {
-						setPositionIdObject(posIdObject);
-					}
-				}}
-			>
-				<TabsSchema
-					tables={tableSchema}
-					tableSchemaColumns={tableSchemaColumns}
-					/* TODO HARDCODE */
-					urlViewer={`${config.dataviewerAPI.url}1`}
-					activeIndex={activeIndex}
-					positionIdObject={positionIdObject}
-					onTabChangeHandler={idTableSchema =>
-						onTabChangeHandler(idTableSchema)
-					}
-				/>
-			</ReporterDataSetContext.Provider>
-			<Dialog
-				visible={dashDialogVisible}
-				onHide={() => setVisibleHandler(setDashDialogVisible, false)}
-				header={resources.messages["titleDashboard"]}
-				maximizable
-				dismissableMask={true}
-				style={{ width: "80%" }}
-			>
-				<Dashboard refresh={dashDialogVisible} />
-			</Dialog>
-			{/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
-			<ReporterDataSetContext.Provider
-				value={{
-					validationsVisibleHandler: () => {
-						setVisibleHandler(setValidationsVisible, false);
-					},
-					setTabHandler: idTableSchema => {
-						setActiveIndex(idTableSchema);
-					},
-					setPageHandler: posIdObject => {
-						setPositionIdObject(posIdObject);
-					}
-				}}
-			>
+				<ReporterDataSetContext.Provider
+					value={{
+						validationsVisibleHandler: null,
+						setTabHandler: null,
+						setPageHandler: posIdObject => {
+							setPositionIdObject(posIdObject);
+						}
+					}}
+				>
+					<TabsSchema
+						tables={tableSchema}
+						tableSchemaColumns={tableSchemaColumns}
+						/* TODO HARDCODE */
+						urlViewer={`${config.dataviewerAPI.url}1`}
+						activeIndex={activeIndex}
+						positionIdObject={positionIdObject}
+						onTabChangeHandler={idTableSchema =>
+							onTabChangeHandler(idTableSchema)
+						}
+					/>
+				</ReporterDataSetContext.Provider>
 				<Dialog
-					visible={validationsVisible}
-					onHide={() => setVisibleHandler(setValidationsVisible, false)}
-					header={resources.messages["titleValidations"]}
+					visible={dashDialogVisible}
+					onHide={() => setVisibleHandler(setDashDialogVisible, false)}
+					header={resources.messages["titleDashboard"]}
 					maximizable
 					dismissableMask={true}
 					style={{ width: "80%" }}
 				>
-					{/*  TODO HARDCODE  */}
-					<ValidationViewer idDataSet={1} />
+					<Dashboard refresh={dashDialogVisible} />
 				</Dialog>
-			</ReporterDataSetContext.Provider>
-			<ConfirmDialog
-				onConfirm={onConfirmDeleteHandler}
-				onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
-				visible={deleteDialogVisible}
-				header={resources.messages["deleteDatasetHeader"]}
-				maximizable={false}
-				labelConfirm={resources.messages["yes"]}
-				labelCancel={resources.messages["no"]}
-			>
-				{resources.messages["deleteDatasetConfirm"]}
-			</ConfirmDialog>
-			<ConfirmDialog
-				onConfirm={onConfirmValidateHandler}
-				onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
-				visible={validateDialogVisible}
-				header={resources.messages["validateDataSet"]}
-				maximizable={false}
-				labelConfirm={resources.messages["yes"]}
-				labelCancel={resources.messages["no"]}
-			>
-				{resources.messages["validateDataSetConfirm"]}
-			</ConfirmDialog>
-		</div>
+				{/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
+				<ReporterDataSetContext.Provider
+					value={{
+						validationsVisibleHandler: () => {
+							setVisibleHandler(setValidationsVisible, false);
+						},
+						setTabHandler: idTableSchema => {
+							setActiveIndex(idTableSchema);
+						},
+						setPageHandler: posIdObject => {
+							setPositionIdObject(posIdObject);
+						}
+					}}
+				>
+					<Dialog
+						visible={validationsVisible}
+						onHide={() => setVisibleHandler(setValidationsVisible, false)}
+						header={resources.messages["titleValidations"]}
+						maximizable
+						dismissableMask={true}
+						style={{ width: "80%" }}
+					>
+						{/*  TODO HARDCODE  */}
+						<ValidationViewer idDataSet={1} />
+					</Dialog>
+				</ReporterDataSetContext.Provider>
+				<ConfirmDialog
+					onConfirm={onConfirmDeleteHandler}
+					onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
+					visible={deleteDialogVisible}
+					header={resources.messages["deleteDatasetHeader"]}
+					maximizable={false}
+					labelConfirm={resources.messages["yes"]}
+					labelCancel={resources.messages["no"]}
+				>
+					{resources.messages["deleteDatasetConfirm"]}
+				</ConfirmDialog>
+				<ConfirmDialog
+					onConfirm={onConfirmValidateHandler}
+					onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
+					visible={validateDialogVisible}
+					header={resources.messages["validateDataSet"]}
+					maximizable={false}
+					labelConfirm={resources.messages["yes"]}
+					labelCancel={resources.messages["no"]}
+				>
+					{resources.messages["validateDataSetConfirm"]}
+				</ConfirmDialog>
+			</div>
 		</MainLayout>
 	);
 };

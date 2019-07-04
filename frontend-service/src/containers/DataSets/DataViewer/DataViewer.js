@@ -472,7 +472,10 @@ const DataViewer = props => {
 					{resources.messages["deleteDatasetConfirm"]}
 				</ConfirmDialog>
 			</ReporterDataSetContext.Provider>
-			<SnapshotSlideBar isVisible={snapshotIsVisible} setIsVisible={setSnapshotIsVisible}/>
+			<SnapshotSlideBar
+				isVisible={snapshotIsVisible}
+				setIsVisible={setSnapshotIsVisible}
+			/>
 		</div>
 	);
 };
