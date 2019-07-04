@@ -415,13 +415,14 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    when(recordRepository.findByTableValueNoOrder(Mockito.any())).thenReturn(null);
+    when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any())).thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
   public void testGetTableValuesById() throws Exception {
-    when(recordRepository.findByTableValueNoOrder(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);

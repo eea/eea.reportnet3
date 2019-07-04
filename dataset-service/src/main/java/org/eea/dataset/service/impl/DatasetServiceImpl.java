@@ -423,13 +423,14 @@ public class DatasetServiceImpl implements DatasetService {
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
       final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
     List<RecordValue> records = null;
+    Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
     if (StringUtils.isBlank(idFieldSchema)) {
-      records = recordRepository.findByTableValueNoOrder(idTableSchema);
+      records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
     } else {
       SortField sortField = new SortField();
       sortField.setFieldName(idFieldSchema);
       sortField.setAsc(asc);
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, sortField);
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
     }
 
     if (records == null) {
@@ -443,14 +444,14 @@ public class DatasetServiceImpl implements DatasetService {
 
     } else {
 
-      int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex =
-          (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records.size()
-              : (pageable.getPageNumber() + 1) * pageable.getPageSize();
-      List<RecordValue> pagedRecords = records.subList(initIndex, endIndex);
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(pagedRecords);
+      // int initIndex = pageable.getPageNumber() * pageable.getPageSize();
+      // int endIndex =
+      // (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records.size()
+      // : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+      // List<RecordValue> pagedRecords = records.subList(initIndex, endIndex);
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       result.setRecords(recordVOs);
-      result.setTotalRecords(Long.valueOf(records.size()));
+      result.setTotalRecords(totalRecords);
 
       LOG.info(
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
@@ -648,7 +649,7 @@ public class DatasetServiceImpl implements DatasetService {
     // TABLE
     if (TypeEntityEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
-      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema());
+      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
       if (records != null && !records.isEmpty()) {
         record = records.get(0);
       }
@@ -657,7 +658,8 @@ public class DatasetServiceImpl implements DatasetService {
     // RECORD
     if (TypeEntityEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      records = recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema());
+      records =
+          recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
     }
 
     // FIELD
@@ -666,8 +668,8 @@ public class DatasetServiceImpl implements DatasetService {
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
         record = field.getRecord();
-        records =
-            recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema());
+        records = recordRepository
+            .findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
       }
     }
 

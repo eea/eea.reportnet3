@@ -3,6 +3,7 @@ package org.eea.dataset.persistence.data.repository;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The Interface RecordExtendedQueriesRepository.
@@ -17,15 +18,17 @@ public interface RecordExtendedQueriesRepository {
    *
    * @return the list
    */
-  List<RecordValue> findByTableValueWithOrder(String idTableSchema, SortField... sortFields);
+  List<RecordValue> findByTableValueWithOrder(String idTableSchema, Pageable pageable,
+      SortField... sortFields);
+
 
   /**
-   * Find by table value no order list.
+   * Find by table value no order.
    *
    * @param idTableSchema the id table schema
-   *
+   * @param pageable the pageable
    * @return the list
    */
-  List<RecordValue> findByTableValueNoOrder(String idTableSchema);
+  List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable);
 
 }
