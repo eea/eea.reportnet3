@@ -4,15 +4,16 @@ import java.util.List;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 
 /**
  * The interface Dataflow repository.
  */
-public interface DataflowRepository extends JpaRepository<Dataflow, Long> {
+public interface DataflowRepository
+    extends PagingAndSortingRepository<Dataflow, Long>, DataflowExtendedRepository {
 
 
   /**
@@ -38,12 +39,16 @@ public interface DataflowRepository extends JpaRepository<Dataflow, Long> {
   /**
    * Find completed.
    *
+   * @param typeRequest the type request
    * @param userIdRequester the user id requester
    * @return the list
    */
-  @Query("SELECT df from Dataflow df INNER JOIN FETCH df.userRequests ur WHERE ur.requestType = 'ACCEPTED' "
-      + " AND ur.userRequester = :idRequester AND df.status = 'COMPLETED' ORDER BY df.deadlineDate ASC")
-  List<Dataflow> findCompleted(@Param("idRequester") Long userIdRequester);
+  /*
+   * @Query("SELECT df from Dataflow df INNER JOIN FETCH df.userRequests ur WHERE ur.requestType = 'ACCEPTED' "
+   * +
+   * " AND ur.userRequester = :idRequester AND df.status = 'COMPLETED' ORDER BY df.deadlineDate ASC"
+   * ) List<Dataflow> findCompleted(@Param("idRequester") Long userIdRequester);
+   */
 
 
 

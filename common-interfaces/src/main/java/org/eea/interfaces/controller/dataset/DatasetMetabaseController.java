@@ -4,9 +4,8 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * The Interface DatasetMetabaseController.
@@ -28,8 +27,7 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataSetMetabaseVO> findDataSetIdByDataflowId(final @PathVariable("id") Long idDataflow);
 
 

@@ -6,8 +6,8 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,8 +29,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataSetMetabaseVO> findDataSetIdByDataflowId(Long idDataflow) {
 
     return datasetMetabaseService.getDataSetIdByDataflowId(idDataflow);

@@ -16,9 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -49,8 +49,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand(fallbackMethod = "errorHandler")
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
     if (id == null) {
@@ -89,8 +88,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/status/{status}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findByStatus(TypeStatusEnum status) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -112,8 +110,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/pendingaccepted/{userId}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findPendingAccepted(Long userId) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -138,8 +135,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/{userId}/completed", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{userId}/completed", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findCompleted(Long userId, Integer pageNum, Integer pageSize) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
@@ -162,8 +158,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  @RequestMapping(value = "/{userId}/request/{type}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{userId}/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findUserDataflowsByStatus(Long userId, TypeRequestEnum type) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();

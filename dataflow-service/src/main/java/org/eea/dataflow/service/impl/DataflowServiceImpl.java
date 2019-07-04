@@ -109,13 +109,13 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException {
 
-    List<Dataflow> dataflows = dataflowRepository.findCompleted(userId);
+    List<Dataflow> dataflows = dataflowRepository.findCompleted(userId, pageable);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
     if (!dataflows.isEmpty()) {
       int initIndex = pageable.getPageNumber() * pageable.getPageSize();
       int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > dataflows.size()
           ? dataflows.size()
-          : (pageable.getPageNumber() + 1) * pageable.getPageSize();
+          : ((pageable.getPageNumber() + 1) * pageable.getPageSize());
       List<Dataflow> pagedDataflows = dataflows.subList(initIndex, endIndex);
 
       dataflowVOs = dataflowNoContentMapper.entityListToClass(pagedDataflows);

@@ -98,6 +98,7 @@ public class DataFlowControllerImplTest {
   public void testfindByStatusThrows() throws EEAException {
     when(dataflowService.getByStatus(Mockito.any())).thenThrow(EEAException.class);
     dataFlowControllerImpl.findByStatus(Mockito.any());
+    Mockito.verify(dataflowService, times(1)).getByStatus(Mockito.any());
   }
 
   /**
@@ -121,6 +122,7 @@ public class DataFlowControllerImplTest {
   public void findPendingAcceptedThrows() throws EEAException {
     when(dataflowService.getPendingAccepted(Mockito.any())).thenThrow(EEAException.class);
     dataFlowControllerImpl.findPendingAccepted(Mockito.any());
+    Mockito.verify(dataflowService, times(1)).getPendingAccepted(Mockito.any());
   }
 
   /**
@@ -144,6 +146,7 @@ public class DataFlowControllerImplTest {
   public void findCompletedThrows() throws EEAException {
     when(dataflowService.getCompleted(Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
     dataFlowControllerImpl.findCompleted(1L, 1, 1);
+    Mockito.verify(dataflowService, times(1)).getCompleted(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -169,6 +172,7 @@ public class DataFlowControllerImplTest {
     when(dataflowService.getPendingByUser(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     dataFlowControllerImpl.findUserDataflowsByStatus(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).getPendingByUser(Mockito.any(), Mockito.any());
   }
 
   /**

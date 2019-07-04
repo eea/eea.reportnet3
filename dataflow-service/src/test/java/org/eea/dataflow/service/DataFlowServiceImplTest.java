@@ -10,7 +10,7 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class DataFlowServiceImplTest {
 
   /** The dataset controller. */
   @Mock
-  private DataSetControllerZuul datasetController;
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -87,7 +87,7 @@ public class DataFlowServiceImplTest {
   public void getById() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetController.findDataSetIdByDataflowId(1L)).thenReturn(new ArrayList<>());
+    when(datasetMetabaseController.findDataSetIdByDataflowId(1L)).thenReturn(new ArrayList<>());
     dataflowServiceImpl.getById(1L);
     dataFlowVO.setDatasets(new ArrayList<>());
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
@@ -143,9 +143,10 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getCompletedEmpty() throws EEAException {
-    when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(new ArrayList<>());
-    dataflowServiceImpl.getCompleted(1L, Mockito.any());
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, Mockito.any()));
+    when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    dataflowServiceImpl.getCompleted(1L, pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
   }
 
   /**
@@ -156,12 +157,12 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getCompleted() throws EEAException {
-    when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(dataflows);
+    when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted(1L, pageable);
     assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
     dataflows.add(new Dataflow());
     dataflows.add(new Dataflow());
-    when(dataflowRepository.findCompleted(Mockito.any())).thenReturn(dataflows);
+    when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted(1L, pageable);
     assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
   }
