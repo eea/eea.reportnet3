@@ -7,7 +7,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -37,13 +39,21 @@ public class DataSetControllerImplTest {
    * The data set controller impl.
    */
   @InjectMocks
-  DataSetControllerImpl dataSetControllerImpl;
+  private DataSetControllerImpl dataSetControllerImpl;
 
   /**
    * The dataset service.
    */
   @Mock
-  DatasetServiceImpl datasetService;
+  private DatasetServiceImpl datasetService;
+
+  /** The dataset metabase service. */
+  @Mock
+  private DatasetMetabaseServiceImpl datasetMetabaseService;
+
+  /** The load validations helper. */
+  @Mock
+  private LoadValidationsHelper loadValidationsHelper;
 
   /**
    * Inits the mocks.
@@ -383,6 +393,11 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getDataFlowIdById(null);
   }
 
+  /**
+   * Test update dataset success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testUpdateDatasetSuccess() throws Exception {
     doNothing().when(datasetService).updateDataset(Mockito.any(), Mockito.any());
@@ -390,6 +405,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update dataset error.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateDatasetError() throws Exception {
     doThrow(new EEAException()).when(datasetService).updateDataset(Mockito.any(), Mockito.any());
@@ -397,11 +417,21 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).updateDataset(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update dataset exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateDatasetException() throws Exception {
     dataSetControllerImpl.updateDataset(null);
   }
 
+  /**
+   * Test load statistics.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testLoadStatistics() throws Exception {
     when(datasetService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
@@ -411,6 +441,11 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Test load statistics exception.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testLoadStatisticsException() throws Exception {
     doThrow(new EEAException()).when(datasetService).getStatistics(Mockito.any());
@@ -419,6 +454,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).getStatistics(Mockito.any());
   }
 
+  /**
+   * Test get position from any object id.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetPositionFromAnyObjectId() throws Exception {
 
@@ -430,12 +470,22 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Test get position from any object id exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException() throws Exception {
     dataSetControllerImpl.getPositionFromAnyObjectId(null, null, null);
   }
 
 
+  /**
+   * Test get position from any object id exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException2() throws Exception {
 
@@ -445,29 +495,49 @@ public class DataSetControllerImplTest {
   }
 
 
+  /**
+   * Test get position from any object id exception 3.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException3() throws Exception {
     dataSetControllerImpl.getPositionFromAnyObjectId(1L, null, null);
   }
 
 
-  // @Test
-  // public void testListValidations() throws Exception {
-  //
-  // dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
-  // Mockito.verify(datasetService, times(1)).getListValidations(Mockito.any(), Mockito.any(),
-  // Mockito.any(), Mockito.any());
-  // }
+  /**
+   * Find data set id by dataflow id.
+   */
 
-  // @Test
-  // public void testListValidationsException() throws Exception {
-  //
-  // doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-  // .getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-  // dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
-  // Mockito.verify(datasetService, times(1)).getListValidations(Mockito.any(), Mockito.any(),
-  // Mockito.any(), Mockito.any());
-  // }
+
+  /**
+   * Test list validations.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testListValidations() throws Exception {
+
+    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
+    Mockito.verify(loadValidationsHelper, times(1)).getListValidations(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Test list validations exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testListValidationsException() throws Exception {
+
+    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(loadValidationsHelper)
+        .getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
+    Mockito.verify(loadValidationsHelper, times(1)).getListValidations(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
 
 
 
