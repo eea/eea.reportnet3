@@ -67,6 +67,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -415,13 +416,14 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    when(recordRepository.findByTableValueNoOrder(Mockito.any())).thenReturn(null);
+    when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any())).thenReturn(null);
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
   }
 
   @Test
   public void testGetTableValuesById() throws Exception {
-    when(recordRepository.findByTableValueNoOrder(Mockito.any())).thenReturn(recordValues);
+    when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, true);
@@ -430,9 +432,9 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesById2() throws Exception {
-    when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any()))
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
+    when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
-    when(pageable.getPageSize()).thenReturn(1);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
     ArrayList<FieldVO> fields = new ArrayList<>();
@@ -447,12 +449,14 @@ public class DatasetServiceTest {
     RecordValidation recValidation = new RecordValidation();
     recValidation.setRecordValue(new RecordValue());
     recV.add(recValidation);
+    pageable = PageRequest.of(0, 1);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    datasetService.getTableValuesById(1L, "mongoId", pageable, "123", true);
+    datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
+        new ObjectId().toString(), true);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 
