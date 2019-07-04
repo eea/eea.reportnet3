@@ -3,6 +3,8 @@
  */
 package org.eea.interfaces.controller.dataset;
 
+import java.util.List;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -170,5 +172,15 @@ public interface DatasetController {
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+
+
+  /**
+   * Find data set id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findDataSetIdByDataflowId(final @PathVariable("id") Long idDataflow);
 
 }

@@ -30,7 +30,7 @@ public interface DataflowRepository extends JpaRepository<Dataflow, Long> {
    * @return the list
    */
   @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType in ('PENDING','ACCEPTED') "
-      + " AND ur.userRequester = :idRequester ORDER BY df.deadlineDate ASC")
+      + " AND ur.userRequester = :idRequester AND df.status not in ('COMPLETED') ORDER BY df.deadlineDate ASC")
   List<Dataflow> findPendingAccepted(@Param("idRequester") Long userIdRequester);
 
 

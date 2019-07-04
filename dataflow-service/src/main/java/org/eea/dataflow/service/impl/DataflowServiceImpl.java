@@ -10,11 +10,10 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,9 +37,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-
+  /** The dataset controller. */
   @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseController;
+  private DataSetControllerZuul datasetController;
 
 
 
@@ -60,11 +59,11 @@ public class DataflowServiceImpl implements DataflowService {
     }
     Dataflow result = dataflowRepository.findById(id).orElse(null);
 
-    List<DataSetVO> datasets = datasetMetabaseController.findDataSetIdByDataflowId(id);
+    DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
 
+    dataflowVO.setDatasets(datasetController.findDataSetIdByDataflowId(id));
 
-
-    return dataflowMapper.entityToClass(result);
+    return dataflowVO;
   }
 
   /**

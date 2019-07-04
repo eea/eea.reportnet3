@@ -2,9 +2,11 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.LoadDataCallable;
 import org.eea.dataset.service.file.FileTreatmentHelper;
@@ -12,6 +14,7 @@ import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -68,6 +71,9 @@ public class DataSetControllerImpl implements DatasetController {
   /** The load validations helper. */
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
 
   /**
    * Gets the data tables values.
@@ -355,6 +361,22 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return validations;
+  }
+
+
+
+  /**
+   * Find data set id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataSetMetabaseVO> findDataSetIdByDataflowId(Long idDataflow) {
+
+    return datasetMetabaseService.getDataSetIdByDataflowId(idDataflow);
+
   }
 
 }
