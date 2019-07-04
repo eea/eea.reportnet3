@@ -1,6 +1,11 @@
 package org.eea.dataset.service.file;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -23,6 +28,10 @@ public class ParseCommon {
    */
   @Autowired
   private DatasetSchemaService dataSetSchemaService;
+
+
+  @Autowired
+  private RecordRepository recordRepository;
 
   /**
    * The Constant LOG.
@@ -113,6 +122,50 @@ public class ParseCommon {
       dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId);
     }
     return dataSetSchema;
+  }
+
+  public String getTableName(String idTableSchema, DataSetSchemaVO dataSetSchema) {
+    TableSchemaVO table = findTableSchema(idTableSchema, dataSetSchema);
+    return table != null ? table.getNameTableSchema() : idTableSchema;
+  }
+
+  public List<FieldSchemaVO> getFieldSchemas(String idTableSchema, DataSetSchemaVO dataSetSchema) {
+    TableSchemaVO table = findTableSchema(idTableSchema, dataSetSchema);
+    return table != null && table.getRecordSchema() != null
+        ? table.getRecordSchema().getFieldSchema()
+        : null;
+  }
+
+  public List<RecordValue> getRecordValues(String idTableSchema) {
+    return sanitizeRecords(recordRepository.findByTableValueIdTableSchema(idTableSchema));
+  }
+
+
+  // public String[] getListFieldsValues(String idTableSchema, DataSetSchemaVO dataSetSchema) {
+  // List<FieldValue> fieldValues;
+  // getFieldSchemas(idTableSchema, dataSetSchema).stream().forEach(fieldSchema -> {
+  // List<FieldValue> taka = fieldRepository.findByIdFieldSchema(fieldSchema.getId());
+  // });
+  //
+  // }
+
+  // public List<FieldValue> getListFieldsValues() {
+  //
+  // }
+
+  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
+    List<RecordValue> sanitizedRecords = new ArrayList<>();
+    Set<Long> processedRecords = new HashSet<>();
+    for (RecordValue recordValue : records) {
+      if (!processedRecords.contains(recordValue.getId())) {
+        processedRecords.add(recordValue.getId());
+        recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
+        sanitizedRecords.add(recordValue);
+      }
+
+    }
+    return sanitizedRecords;
+
   }
 
 
