@@ -11,6 +11,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,10 @@ public class DataFlowServiceImplTest {
   /** The dataset controller. */
   @Mock
   private DataSetControllerZuul datasetController;
+
+  /** The dataset metabase controller. */
+  @Mock
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -87,7 +92,7 @@ public class DataFlowServiceImplTest {
   public void getById() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetController.findDataSetIdByDataflowId(1L)).thenReturn(new ArrayList<>());
+    when(datasetMetabaseController.findDataSetIdByDataflowId(1L)).thenReturn(new ArrayList<>());
     dataflowServiceImpl.getById(1L);
     dataFlowVO.setDatasets(new ArrayList<>());
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
