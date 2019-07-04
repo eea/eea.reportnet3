@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from "react";
+import {withRouter} from 'react-router-dom';
 import styles from "./DataViewer.module.css";
 import ButtonsBar from "../../../components/Layout/UI/ButtonsBar/ButtonsBar";
 // import { MultiSelect } from 'primereact/multiselect';
@@ -17,6 +18,7 @@ import ConfirmDialog from "../../../components/Layout/UI/ConfirmDialog/ConfirmDi
 import SnapshotSlideBar from "../SnapshotSlideBar/SnapshotSlideBar";
 
 const DataViewer = props => {
+	const { match:{params: {id : idDataSet}} } = props;
 	const contextReporterDataSet = useContext(ReporterDataSetContext);
 	const [importDialogVisible, setImportDialogVisible] = useState(false);
 	const [totalRecords, setTotalRecords] = useState(0);
@@ -114,12 +116,10 @@ const DataViewer = props => {
 		fetchDataHandler(sortField, sortOrder, event.first, event.rows);
 	};
 
-	const onConfirmDeleteHandler = () => {
-		/* TODO HARDCODE */
-		let idDataSet = 1;
+	const onConfirmDeleteHandler = () => {	
 		setDeleteDialogVisible(false);
 		HTTPRequester.delete({
-			url: "/dataset/" + idDataSet + "/deleteImportTable/" + props.id,
+			url: `/dataset/${idDataSet}/deleteImportTable/${props.id}`,
 			queryString: {}
 		}).then(res => {
 			setIsDataDeleted(true);
@@ -480,4 +480,4 @@ const DataViewer = props => {
 	);
 };
 
-export default React.memo(DataViewer);
+export default  withRouter(React.memo(DataViewer));

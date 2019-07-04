@@ -19,7 +19,8 @@ import styles from "./ReporterDataSet.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
 import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
-const ReporterDataSet = () => {
+const ReporterDataSet = ({match}) => {
+	const { params: {id : idDataSet} } = match;
 	const resources = useContext(ResourcesContext);
 	const [datasetTitle, setDatasetTitle] = useState("");
 	const [customButtons, setCustomButtons] = useState([]);
@@ -165,23 +166,19 @@ const ReporterDataSet = () => {
 	};
 
 	const onConfirmDeleteHandler = () => {
-		/* TODO HARDCODE */
-		let idDataSet = 1;
 		setDeleteDialogVisible(false);
-		HTTPRequesterAPI.delete({
-			url: "/dataset/" + idDataSet + "/deleteImportData",
+		HTTPRequesterAPI.delete({			
+			url: `/dataset/${idDataSet}/deleteImportData`,
 			queryString: {}
 		}).then(res => {
 			setIsDataDeleted(true);
 		});
 	};
 
-	const onConfirmValidateHandler = () => {
-		/* TODO HARDCODE */
-		let idDataSet = 1;
+	const onConfirmValidateHandler = () => {		
 		setValidateDialogVisible(false);
 		HTTPRequesterAPI.update({
-			url: "/validation/dataset/" + idDataSet,
+			url: `/validation/dataset/${idDataSet}`,
 			queryString: {}
 		});
 	};
@@ -218,9 +215,8 @@ const ReporterDataSet = () => {
 				>
 					<TabsSchema
 						tables={tableSchema}
-						tableSchemaColumns={tableSchemaColumns}
-						/* TODO HARDCODE */
-						urlViewer={`${config.dataviewerAPI.url}1`}
+						tableSchemaColumns={tableSchemaColumns}						
+						urlViewer={`${config.dataviewerAPI.url}${idDataSet}`}
 						activeIndex={activeIndex}
 						positionIdObject={positionIdObject}
 						onTabChangeHandler={idTableSchema =>
@@ -260,8 +256,7 @@ const ReporterDataSet = () => {
 						dismissableMask={true}
 						style={{ width: "80%" }}
 					>
-						{/*  TODO HARDCODE  */}
-						<ValidationViewer idDataSet={1} />
+						<ValidationViewer idDataSet={idDataSet} />
 					</Dialog>
 				</ReporterDataSetContext.Provider>
 				<ConfirmDialog

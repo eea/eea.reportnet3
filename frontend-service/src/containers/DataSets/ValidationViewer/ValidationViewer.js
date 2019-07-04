@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, Suspense, useContext } from 'react';
+import {withRouter} from 'react-router-dom';
 // import { MultiSelect } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -15,7 +16,8 @@ import config from '../../../conf/web.config.json';
 
 
 const ValidationViewer = (props) => {
-  const resources = useContext(ResourcesContext);
+    const {match:{params:{id: idDataSet}}} = props;
+    const resources = useContext(ResourcesContext);
     const contextReporterDataSet = useContext(ReporterDataSetContext);
     const [totalRecords, setTotalRecords] = useState(0);
     const [fetchedData, setFetchedData] = useState([]);
@@ -98,8 +100,7 @@ const ValidationViewer = (props) => {
 
         const dataPromise = HTTPRequester.get(
           {
-            /* TODO HARDCODE  */
-            url:`${config.listValidationsAPI.url}1`,
+            url:`${config.listValidationsAPI.url}${idDataSet}`,
             queryString: queryString
           }
         );
@@ -246,4 +247,4 @@ ValidationViewer.propTypes = {
   customButtons: PropTypes.array
 };
 
-export default React.memo(ValidationViewer);
+export default withRouter(React.memo(ValidationViewer));

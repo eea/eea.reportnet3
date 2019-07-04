@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import {withRouter} from 'react-router-dom';
 import {Chart} from 'primereact/chart';
 
 import HTTPRequester from '../../services/HTTPRequester/HTTPRequester';
@@ -7,6 +8,7 @@ import config from '../../conf/web.config.json';
 import ResourcesContext from '../../components/Context/ResourcesContext';
 
 const DashBoard = (props) =>{
+    const {match:{params:{id: idDataSet}}} = props;
     const [dashBoardData, setDashBoardData] = useState({});
     const [dashBoardOptions, setDashBoardOptions] = useState({});
     const [dashBoardTitle, setDashBoardTitle] = useState("");
@@ -19,8 +21,7 @@ const DashBoard = (props) =>{
             //'/jsons/error-statistics.json'
             const dataPromise = HTTPRequester.get(
             {
-                /* TODO HARDCODE */
-                url: `${config.loadStatisticsAPI.url}1`,
+                url: `${config.loadStatisticsAPI.url}${idDataSet}`,
                 queryString: {}
             });
 
@@ -121,4 +122,4 @@ const DashBoard = (props) =>{
     );
 }
 
-export default React.memo(DashBoard);
+export default withRouter(React.memo(DashBoard));
