@@ -168,8 +168,8 @@ const DataViewer = props => {
 
 		// props.urlViewer
 		const dataPromise = HTTPRequester.get({
-			/* url: props.urlViewer, */
-			url: "/jsons/response_dataset_values2.json",
+			url: props.urlViewer,
+			/* url: "/jsons/response_dataset_values2.json", */
 			queryString: queryString
 		});
 		dataPromise

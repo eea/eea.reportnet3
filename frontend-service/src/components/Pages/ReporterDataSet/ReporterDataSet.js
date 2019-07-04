@@ -52,8 +52,8 @@ const ReporterDataSet = () => {
 
 		//`${config.dataSchemaAPI.url}1`
 		const dataPromise = HTTPRequesterAPI.get({
-			/* url: `${config.dataSchemaAPI.url}1`, */
-			url: "/jsons/datosDataSchema2.json",
+			url: `${config.dataSchemaAPI.url}1`,
+			/* url: "/jsons/datosDataSchema2.json", */
 			queryString: {}
 		});
 		dataPromise
@@ -61,8 +61,8 @@ const ReporterDataSet = () => {
 				//'/jsons/error-statistics.json'
 				setDatasetTitle(response.data.nameDataSetSchema);
 				const dataPromiseError = HTTPRequesterAPI.get({
-					/* url: `${config.loadStatisticsAPI.url}1`, */
-					url: "/jsons/error-statistics.json",
+					url: `${config.loadStatisticsAPI.url}1`,
+					/* url: "/jsons/error-statistics.json", */
 					queryString: {}
 				});
 
