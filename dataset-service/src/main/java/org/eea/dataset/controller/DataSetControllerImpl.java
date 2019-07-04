@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import javax.ws.rs.Produces;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.callable.UpdateRecordHelper;
@@ -23,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -410,4 +413,24 @@ public class DataSetControllerImpl implements DatasetController {
     LOG.info("executing delete");
     datasetService.deleteTableBySchema(idTableSchema, dataSetId);
   }
+
+
+  @Override
+  @GetMapping("/exportFile")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  // public Response exportFile(Long datasetId, String idTableSchema) throws Exception {
+  public ResponseEntity exportFile() throws Exception {
+    // QUITAR HARDCODEOS
+    String file = datasetService.exportFile(1L, "csv", null, "5d0b8c1347e812844ce34038");
+
+    // set file name and content type
+    String filename = "users.csv";
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "test.csv");
+    return new ResponseEntity(file.getBytes(), httpHeaders, HttpStatus.OK);
+  }
+
+
+
 }

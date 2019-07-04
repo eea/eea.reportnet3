@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -177,5 +178,17 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
+
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param response the response
+   * @throws EEAException
+   * @throws IOException
+   */
+  String exportFile(Long datasetId, String mimeType, HttpServletResponse response,
+      String idTableSchema) throws EEAException, IOException;
 
 }

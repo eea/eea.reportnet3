@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -198,6 +199,10 @@ public interface DatasetController {
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
   void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema);
+
+  // ResponseEntity exportFile(Long datasetId, String idTableSchema) throws Exception;
+
+  ResponseEntity exportFile() throws Exception;
 
 
 }

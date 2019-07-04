@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -45,6 +46,8 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.interfaces.IFileExportContext;
+import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
@@ -160,6 +163,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private IFileParserFactory fileParserFactory;
+
+  @Autowired
+  private IFileExportFactory fileExportFactory;
+
 
   /**
    * The field repository.
@@ -914,5 +921,29 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
     recordRepository.deleteRecordsWithIds(recordIds);
+  }
+
+  @Override
+  @Transactional
+  public String exportFile(Long datasetId, String mimeType, HttpServletResponse response,
+      final String idTableSchema) throws EEAException, IOException {
+    final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+    if (partition == null) {
+      throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+    }
+    // Get the dataFlowId from the metabase
+    final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
+    // create the right file parser for the file type
+
+    // CSVWriter csvWriter = new CSVWriter(response.getWriter(), CSVWriter.DEFAULT_SEPARATOR,
+    // CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+    // CSVWriter.DEFAULT_LINE_END);
+    //
+    // String[] headerRecord = {"Name", "Email", "Phone", "Country"};
+    // csvWriter.writeNext(headerRecord);
+
+    final IFileExportContext context = fileExportFactory.createContext(mimeType, response);
+    return context.fileWriter(datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
+
   }
 }
