@@ -10,7 +10,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -37,9 +37,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /** The dataset controller. */
+
+  /** The dataset metabase controller. */
   @Autowired
-  private DataSetControllerZuul datasetController;
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
 
 
@@ -61,7 +62,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
 
-    dataflowVO.setDatasets(datasetController.findDataSetIdByDataflowId(id));
+    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
 
     return dataflowVO;
   }

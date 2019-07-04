@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data flow controller.
@@ -47,7 +48,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the data flow VO
    */
   @Override
-  // @HystrixCommand(fallbackMethod = "errorHandler")
+  @HystrixCommand(fallbackMethod = "errorHandler")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {

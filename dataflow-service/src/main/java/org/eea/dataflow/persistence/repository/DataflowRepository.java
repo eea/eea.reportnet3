@@ -41,7 +41,7 @@ public interface DataflowRepository extends JpaRepository<Dataflow, Long> {
    * @param userIdRequester the user id requester
    * @return the list
    */
-  @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType = 'ACCEPTED' "
+  @Query("SELECT df from Dataflow df INNER JOIN FETCH df.userRequests ur WHERE ur.requestType = 'ACCEPTED' "
       + " AND ur.userRequester = :idRequester AND df.status = 'COMPLETED' ORDER BY df.deadlineDate ASC")
   List<Dataflow> findCompleted(@Param("idRequester") Long userIdRequester);
 
