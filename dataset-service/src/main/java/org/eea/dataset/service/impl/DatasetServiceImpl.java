@@ -444,11 +444,6 @@ public class DatasetServiceImpl implements DatasetService {
 
     } else {
 
-      // int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      // int endIndex =
-      // (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records.size()
-      // : (pageable.getPageNumber() + 1) * pageable.getPageSize();
-      // List<RecordValue> pagedRecords = records.subList(initIndex, endIndex);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       result.setRecords(recordVOs);
       result.setTotalRecords(totalRecords);

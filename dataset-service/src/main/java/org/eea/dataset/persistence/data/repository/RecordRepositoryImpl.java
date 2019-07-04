@@ -85,7 +85,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
 
   /**
-   * Find by table value no order.
+   * Find by table value no order. Allows null pageable and in that case all de records will be
+   * retrieved
    *
    * @param idTableSchema the id table schema
    * @param pageable the pageable
