@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
+import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,16 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowMapper dataflowMapper;
 
+  /** The dataflow no content mapper. */
+  @Autowired
+  private DataflowNoContentMapper dataflowNoContentMapper;
+
+
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+
+
   /**
    * Gets the by id.
    *
@@ -46,6 +59,10 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Dataflow result = dataflowRepository.findById(id).orElse(null);
+
+    List<DataSetVO> datasets = datasetMetabaseController.findDataSetIdByDataflowId(id);
+
+
 
     return dataflowMapper.entityToClass(result);
   }
@@ -76,7 +93,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findPendingAccepted(userId);
-    return dataflowMapper.entityListToClass(dataflows);
+    return dataflowNoContentMapper.entityListToClass(dataflows);
 
   }
 
@@ -101,7 +118,7 @@ public class DataflowServiceImpl implements DataflowService {
           : (pageable.getPageNumber() + 1) * pageable.getPageSize();
       List<Dataflow> pagedDataflows = dataflows.subList(initIndex, endIndex);
 
-      dataflowVOs = dataflowMapper.entityListToClass(pagedDataflows);
+      dataflowVOs = dataflowNoContentMapper.entityListToClass(pagedDataflows);
 
     }
 
@@ -120,7 +137,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
-    return dataflowMapper.entityListToClass(dataflows);
+    return dataflowNoContentMapper.entityListToClass(dataflows);
 
   }
 

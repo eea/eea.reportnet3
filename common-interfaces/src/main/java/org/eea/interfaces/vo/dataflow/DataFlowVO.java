@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,16 +17,16 @@ import lombok.ToString;
  */
 
 /**
- * Gets the documents.
+ * Gets the weblinks.
  *
- * @return the documents
+ * @return the weblinks
  */
 @Getter
 
 /**
- * Sets the documents.
+ * Sets the weblinks.
  *
- * @param documents the new documents
+ * @param weblinks the new weblinks
  */
 @Setter
 
@@ -55,11 +56,17 @@ public class DataFlowVO implements Serializable {
   /** The deadline date. */
   private Date deadlineDate;
 
+  /** The deadline date. */
+  private Date creationDate;
+
   /** The status. */
   private TypeStatusEnum status;
 
   /** The documents. */
   private List<DocumentVO> documents;
+
+  /** The weblinks. */
+  private List<WeblinkVO> weblinks;
 
   /**
    * Equals.

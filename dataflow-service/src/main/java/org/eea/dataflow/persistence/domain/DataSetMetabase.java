@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eea.dataset.persistence.metabase.domain;
+package org.eea.dataflow.persistence.domain;
 
 import java.util.Date;
 import java.util.List;
@@ -14,6 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -45,10 +47,6 @@ public class DataSetMetabase {
   @Column(name = "DATASET_NAME")
   private String dataSetName;
 
-  /** The dataflow id. */
-  @Column(name = "DataflowId")
-  private Long dataflowId;
-
   /** The creation date. */
   @Column(name = "DATE_CREATION")
   private Date creationDate;
@@ -68,6 +66,11 @@ public class DataSetMetabase {
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;
+
+  /** The dataflow. */
+  @ManyToOne
+  @JoinColumn(name = "DATAFLOW_ID")
+  private Dataflow dataflow;
 
   /**
    * Hash code.

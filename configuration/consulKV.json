@@ -388,6 +388,18 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
+    "value": "L2RhdGFzZXRtZXRhYmFzZS8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.collaboration.path",
     "value": "L2NvbGxhYm9yYXRpb24vKio="
   },
@@ -511,7 +523,7 @@
     "key": "config/apiGateway/ribbon.retryableStatusCodes",
     "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
   },
-   {
+  {
     "key": "config/validation/mongodb.hibernate.ddl-auto",
     "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -535,7 +547,6 @@
     "key": "config/validation/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
-  
   {
     "key": "config/validation/spring.jpa.properties.hibernate.dialect",
     "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
@@ -568,7 +579,6 @@
     "key": "config/validation/spring.datasource.driver-class-name",
     "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
-
   {
     "key": "config/validation/spring.jpa.hibernate.show-sql",
     "value": "JHtTSE9XX1NRTDpmYWxzZX0="
@@ -632,5 +642,17 @@
   {
     "key": "config/validation/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+    {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
+    "value": "L2RhdGFzY2hlbWEvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]
