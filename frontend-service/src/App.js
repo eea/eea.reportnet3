@@ -24,7 +24,7 @@ const App = () => {
 							path="/reporting-data-flow/:id"
 							component={ReportingDataFlow}
 						/>
-						<Route path="/reporter-data-set" component={ReporterDataSet} />
+						<Route path="/reporter-data-set/:id" component={ReporterDataSet} />
 						<Route
 							path="/documentation-data-set/:id"
 							component={DocumentationDataSet}
