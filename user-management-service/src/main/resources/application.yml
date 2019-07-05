@@ -1,0 +1,9 @@
+server:
+  port: 9010
+spring:
+  application:
+    name: ums
+eea:
+  security:
+    secret: ${SECURITY_TOKEN_SECRET:JWTSuperSecretKey}
+    expiration-time: ${SECURITY_TOKEN_EXPIRATION_TIME:604800000}
