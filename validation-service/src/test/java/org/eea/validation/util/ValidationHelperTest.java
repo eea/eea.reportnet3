@@ -39,7 +39,7 @@ public class ValidationHelperTest {
 
   @Test
   public void testKafkaHelper() throws EEAException {
-    doNothing().when(validationService).validateDataSetData(Mockito.any());
+    doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any());
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
     validationHelper.executeValidation(1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),

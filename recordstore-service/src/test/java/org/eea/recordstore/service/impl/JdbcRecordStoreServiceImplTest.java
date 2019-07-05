@@ -1,14 +1,11 @@
 package org.eea.recordstore.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import org.junit.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -64,7 +58,7 @@ public class JdbcRecordStoreServiceImplTest {
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("");
     Mockito.verify(kafkaSender, Mockito.times(1)).sendMessage(Mockito.any());
-    Mockito.verify(jdbcTemplate, Mockito.times(69)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(72)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -76,9 +70,8 @@ public class JdbcRecordStoreServiceImplTest {
   public void getConnectionDataForDataset() throws RecordStoreAccessException {
     List<String> datasets = new ArrayList<>();
     datasets.add("dataset_1");
-    Mockito.when(jdbcTemplate
-        .query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class), Mockito.any(
-            ResultSetExtractor.class))).thenReturn(datasets);
+    Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
+        Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
     List<ConnectionDataVO> connections = jdbcRecordStoreService.getConnectionDataForDataset();
     Assert.assertNotNull("Error: Null connections", connections);
@@ -91,15 +84,12 @@ public class JdbcRecordStoreServiceImplTest {
   public void getConnectionDataForDataset1() throws RecordStoreAccessException {
     List<String> datasets = new ArrayList<>();
     datasets.add("dataset_1");
-    Mockito.when(jdbcTemplate
-        .query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class), Mockito.any(
-            ResultSetExtractor.class))).thenReturn(datasets);
+    Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
+        Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    ConnectionDataVO connection = jdbcRecordStoreService
-        .getConnectionDataForDataset("dataset_1");
+    ConnectionDataVO connection = jdbcRecordStoreService.getConnectionDataForDataset("dataset_1");
     Assert.assertNotNull("Error: Null connections", connection);
-    Assert.assertEquals("Error: wrong name of connection", "dataset_1",
-        connection.getSchema());
+    Assert.assertEquals("Error: wrong name of connection", "dataset_1", connection.getSchema());
   }
 
 

@@ -1,11 +1,13 @@
 package org.eea.validation.controller;
 
-import static org.mockito.Mockito.doNothing;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import org.eea.exception.EEAErrorMessage;
+import static org.mockito.Mockito.when;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,8 +31,14 @@ public class ValidationControllerImplTest {
   @Mock
   private KafkaSender kafkaSender;
 
+  @Mock
+  private LoadValidationsHelper loadValidationsHelper;
+
+  private FailedValidationsDatasetVO failedValidationsDatasetVO;
+
   @Before
   public void initMocks() {
+    failedValidationsDatasetVO = new FailedValidationsDatasetVO();
     MockitoAnnotations.initMocks(this);
   }
 
@@ -41,30 +49,45 @@ public class ValidationControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataExceptionBadIdTest() throws EEAException {
-    doThrow(new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID)).when(validationHelper)
-        .executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataExceptionDatasetNotFoundTest() throws EEAException {
-    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(validationHelper)
-        .executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataExceptionInternalErrorTest() throws EEAException {
-    doThrow(new EEAException("")).when(validationHelper).executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
+  public void validateDataSetDataTest() throws EEAException {
+    validationController.validateDataSetData(null);
   }
 
   @Test
-  public void validateDataSetDataTest() throws EEAException {
-    doNothing().when(validationHelper).executeValidation(Mockito.any());
-    validationController.validateDataSetData(1L);
-    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
+  public void getFailedValidationsByIdDatasetSuccessEmptyFieldsTest() throws EEAException {
+    when(loadValidationsHelper.getListValidations(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(failedValidationsDatasetVO);
+    assertEquals("result not equals to expected", failedValidationsDatasetVO,
+        validationController.getFailedValidationsByIdDataset(1L, 1, 10, null, null));
+  }
+
+  @Test
+  public void getFailedValidationsByIdDatasetSuccessFieldsFilledTest() throws EEAException {
+    when(loadValidationsHelper.getListValidations(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(failedValidationsDatasetVO);
+    assertEquals("result not equals to expected", failedValidationsDatasetVO,
+        validationController.getFailedValidationsByIdDataset(1L, 1, 10, "id", true));
+  }
+
+  @Test
+  public void getFailedValidationsByIdDatasetSuccessFieldsFilledDescTest() throws EEAException {
+    when(loadValidationsHelper.getListValidations(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(failedValidationsDatasetVO);
+    assertEquals("result not equals to expected", failedValidationsDatasetVO,
+        validationController.getFailedValidationsByIdDataset(1L, 1, 10, "id", false));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getFailedValidationsByIdDatasetExceptionTest() throws EEAException {
+    validationController.getFailedValidationsByIdDataset(null, 1, 10, null, null);
+  }
+
+  @Test
+  public void getFailedValidationsByIdDatasetEEAExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(loadValidationsHelper).getListValidations(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    assertNull("result is not null",
+        validationController.getFailedValidationsByIdDataset(1L, 1, 10, null, null));
   }
 
 }

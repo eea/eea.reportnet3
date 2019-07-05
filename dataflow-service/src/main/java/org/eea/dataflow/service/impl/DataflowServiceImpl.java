@@ -121,14 +121,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<Dataflow> dataflows = dataflowRepository.findCompleted(userId, pageable);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
     if (!dataflows.isEmpty()) {
-      int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > dataflows.size()
-          ? dataflows.size()
-          : ((pageable.getPageNumber() + 1) * pageable.getPageSize());
-      List<Dataflow> pagedDataflows = dataflows.subList(initIndex, endIndex);
-
-      dataflowVOs = dataflowNoContentMapper.entityListToClass(pagedDataflows);
-
+      dataflowVOs = dataflowNoContentMapper.entityListToClass(dataflows);
     }
     LOG.info("Get the dataflows completed of the user id: {}. {} per page, current page {}", userId,
         pageable.getPageSize(), pageable.getPageNumber());
