@@ -49,12 +49,14 @@ const DataFlowTasks = () => {
 		if (tabMenuActiveItem.tabKey === "pending") {
 			c.listKeys.push("pending");
 			c.listKeys.push("accepted");
-			c.apiUrl = `${config.loadDataFlowTaskPendingAcceptedAPI}${c.userId}`;
+			c.apiUrl = `${config.loadDataFlowTaskPendingAcceptedAPI.url}${c.userId}`;
 			c.queryString = {};
 		} else {
 			c.listKeys.push("completed");
 			c.apiUrl = "";
 		}
+		console.log("config", config);
+		console.log("c", c);
 		//http://localhost:8020/dataflow/pendingaccepted/2
 		//http://localhost:8020/dataflow/2/completed?pageNum=0&pageSize=20
 		HTTPRequesterAPI.get({
