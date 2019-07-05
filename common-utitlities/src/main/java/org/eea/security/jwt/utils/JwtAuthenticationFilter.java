@@ -1,4 +1,4 @@
-package org.eea.ums.utils;
+package org.eea.security.jwt.utils;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;

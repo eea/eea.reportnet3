@@ -1,4 +1,4 @@
-package org.eea.ums.utils;
+package org.eea.security.jwt.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,14 +24,12 @@ public class EeaUserDetails implements UserDetails {
     EeaUserDetails principal = new EeaUserDetails();
     principal.setUsername(username);
     principal.setPassword(username);
-    SimpleGrantedAuthority roleRequestor = new SimpleGrantedAuthority("ROLE_REQUESTOR");
-    SimpleGrantedAuthority roleProvider = new SimpleGrantedAuthority("ROLE_PROVIDER");
-    SimpleGrantedAuthority roleSteward = new SimpleGrantedAuthority("ROLE_STEWARD");
     List<GrantedAuthority> authorities = new ArrayList<>();
-    authorities.add(roleProvider);
-    authorities.add(roleRequestor);
-    authorities.add(roleSteward);
+    authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
+    authorities.add(new SimpleGrantedAuthority("ROLE_STEWARD"));
+    authorities.add(new SimpleGrantedAuthority("ROLE_REQUESTOR"));
     principal.setAuthorities(authorities);
+
     return principal;
   }
 

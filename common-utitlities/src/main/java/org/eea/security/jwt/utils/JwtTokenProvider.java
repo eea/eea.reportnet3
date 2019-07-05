@@ -1,4 +1,4 @@
-package org.eea.ums.utils;
+package org.eea.security.jwt.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

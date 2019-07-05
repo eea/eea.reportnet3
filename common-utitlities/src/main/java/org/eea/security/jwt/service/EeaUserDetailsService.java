@@ -1,10 +1,9 @@
-package org.eea.ums.service;
+package org.eea.security.jwt.service;
 
-import org.eea.ums.utils.EeaUserDetails;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 /**
  * The type Eea user details service.

@@ -1,7 +1,7 @@
 package org.eea.ums.service.impl;
 
+import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.ums.service.EeaJwtService;
-import org.eea.ums.utils.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

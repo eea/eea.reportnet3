@@ -1,13 +1,15 @@
-package org.eea.ums.configuration;
+package org.eea.security.jwt.configuration;
 
 
-import org.eea.ums.service.EeaUserDetailsService;
-import org.eea.ums.utils.JwtAuthenticationEntryPoint;
-import org.eea.ums.utils.JwtAuthenticationFilter;
+import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
+import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
+import org.eea.security.jwt.utils.JwtAuthenticationFilter;
+import org.eea.security.jwt.service.EeaUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,12 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
@@ -34,7 +31,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
     jsr250Enabled = true,
     prePostEnabled = true
 )
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+@ComponentScan("org.eea.security.jwt")
+public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 //  @Autowired
 //  CustomUserDetailsService customUserDetailsService;
@@ -80,9 +78,29 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
         .antMatchers("/actuator/**", "/", "/user/generateToken")
         .permitAll()
-        .antMatchers("/user/test-security").authenticated()
-    ;
+    //.antMatchers("/user/test-security").hasRole("PROVIDER")
 
+    ;
+    String[] authenticatedRequest = getAuthenticatedRequest();
+    if (null != authenticatedRequest && authenticatedRequest.length > 0) {
+      http.authorizeRequests().antMatchers(authenticatedRequest).authenticated();
+    }
+    String[] permitedRequest = getPermitedRequest();
+    if (null != permitedRequest && permitedRequest.length > 0) {
+      http.authorizeRequests().antMatchers(permitedRequest).authenticated();
+    }
+
+    List<Pair<String[], String>> roleProtectedRequest = getRoleProtectedRequest();
+    if (null != roleProtectedRequest && roleProtectedRequest.size() > 0) {
+      roleProtectedRequest.stream().forEach(pair -> {
+        try {
+          http.authorizeRequests().antMatchers(pair.getLeft()).hasRole(pair.getRight());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      });
+
+    }
     // Add our custom JWT security filter
     http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -97,4 +115,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   }
 
+  /**
+   * Get authenticated request string [ ].
+   *
+   * @return the string [ ]
+   */
+  protected abstract String[] getAuthenticatedRequest();
+
+  /**
+   * Get permited request string [ ].
+   *
+   * @return the string [ ]
+   */
+  protected abstract String[] getPermitedRequest();
+
+  /**
+   * Gets role protected request.
+   *
+   * @return the role protected request
+   */
+  protected abstract List<Pair<String[], String>> getRoleProtectedRequest();
 }
