@@ -423,13 +423,14 @@ public class DatasetServiceImpl implements DatasetService {
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
       final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
     List<RecordValue> records = null;
+    Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
     if (StringUtils.isBlank(idFieldSchema)) {
-      records = recordRepository.findByTableValueNoOrder(idTableSchema);
+      records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
     } else {
       SortField sortField = new SortField();
       sortField.setFieldName(idFieldSchema);
       sortField.setAsc(asc);
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, sortField);
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
     }
 
     if (records == null) {
@@ -439,21 +440,18 @@ public class DatasetServiceImpl implements DatasetService {
     if (records.isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}", datasetId);
+      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
     } else {
 
-      int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex =
-          (pageable.getPageNumber() + 1) * pageable.getPageSize() > records.size() ? records.size()
-              : (pageable.getPageNumber() + 1) * pageable.getPageSize();
-      List<RecordValue> pagedRecords = records.subList(initIndex, endIndex);
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(pagedRecords);
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
       result.setRecords(recordVOs);
-      result.setTotalRecords(Long.valueOf(records.size()));
+      result.setTotalRecords(totalRecords);
 
-      LOG.info("Total records found in datasetId {}: {}. Now in page {}, {} records by page",
-          datasetId, recordVOs.size(), pageable.getPageNumber(), pageable.getPageSize());
+      LOG.info(
+          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
+          datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
+          pageable.getPageSize());
       if (StringUtils.isNotBlank(idFieldSchema)) {
         LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
       }
@@ -497,6 +495,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
+   * @deprecated this method is deprecated
    * @param idTableSchema the id table schema
    * @param idFieldSchema the id field schema
    *
@@ -562,6 +561,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Gets the by id.
    *
+   * @deprecated this method is deprecated
    * @param datasetId the dataset id
    *
    * @return the by id
@@ -644,7 +644,7 @@ public class DatasetServiceImpl implements DatasetService {
     // TABLE
     if (TypeEntityEnum.TABLE == type) {
       TableValue table = tableRepository.findByIdAndDatasetId_Id(id, idDataset);
-      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema());
+      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
       if (records != null && !records.isEmpty()) {
         record = records.get(0);
       }
@@ -653,7 +653,8 @@ public class DatasetServiceImpl implements DatasetService {
     // RECORD
     if (TypeEntityEnum.RECORD == type) {
       record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      records = recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema());
+      records =
+          recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
     }
 
     // FIELD
@@ -662,8 +663,8 @@ public class DatasetServiceImpl implements DatasetService {
       FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
       if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
         record = field.getRecord();
-        records =
-            recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema());
+        records = recordRepository
+            .findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
       }
     }
 
@@ -749,6 +750,18 @@ public class DatasetServiceImpl implements DatasetService {
           stats.setDatasetErrors(true);
         }
       }
+
+      // Ordering to show stats tables as they are shown on the dataset
+      List<TableStatisticsVO> orderedStats = new ArrayList<>();
+      schema.getTableSchemas().stream().forEach(tableSchema -> {
+        stats.getTables().stream().forEach(table -> {
+          if (tableSchema.getIdTableSchema().toString().equals(table.getIdTableSchema())) {
+            orderedStats.add(table);
+          }
+        });
+      });
+      stats.setTables(orderedStats);
+
       LOG.info("Statistics received from datasetId {}.", datasetId);
     } else {
       LOG_ERROR.error("No dataset founded to show statistics. DatasetId:{}", datasetId);
@@ -769,19 +782,19 @@ public class DatasetServiceImpl implements DatasetService {
   private TableStatisticsVO processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
 
-    HashSet<Long> recordIdsFromRecordWithValidationError =
+    Set<Long> recordIdsFromRecordWithValidationError =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
 
-    HashSet<Long> recordIdsFromRecordWithValidationWarning =
+    Set<Long> recordIdsFromRecordWithValidationWarning =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
-    HashSet<Long> recordIdsFromFieldWithValidationError =
+    Set<Long> recordIdsFromFieldWithValidationError =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
 
-    HashSet<Long> recordIdsFromFieldWithValidationWarning =
+    Set<Long> recordIdsFromFieldWithValidationWarning =
         recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 

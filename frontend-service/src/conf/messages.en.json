@@ -49,6 +49,8 @@
 		"subscribeDataFlow": "No open data flow to show",
 		"close": "Close",
 		"dataFlow": "Data Flow",
+		"dataFlowAcceptedPendingTab": "Pending & Accepted",
+		"dataFlowCompletedTab": "Completed",
 		"pendingDataFlowTitle": "Pending data flows",
 		"pendingDataFlowText": "You are required to accept and report data to these data flows",
 		"acceptedDataFlowTitle": "My data flows",

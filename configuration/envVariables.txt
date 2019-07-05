@@ -27,6 +27,7 @@ ${DOCER_CONTAINER_NAME:crunchy-postgres}
 ${RECORDSTORE_IP:localhost}
 ${RECORDSTORE_USERNAME:root}
 ${RECORDSTORE_PASSWORD:root}
+${RECORDSTORE_DRIVER_CLASS:org.postgresql.Driver}
 ${RECORDSTORE_CONNECTION_STRING:jdbc:postgresql://localhost/datasets}
 ${RECORDSTORE_QUERY_GET_ALL_DATASET_SCHEMA:select * from pg_namespace where nspname like 'dataset%'}
 

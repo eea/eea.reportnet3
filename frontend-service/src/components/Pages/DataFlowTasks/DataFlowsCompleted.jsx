@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import styles from "./DataFlowTasks.module.scss";
 import DataFlowList from "./DataFlowList/DataFlowList";
-import DataFlaws from "../../../assets/jsons/DataFlaws.json";
+import DataFlaws from "../../../assets/jsons/DataFlaws2.json";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import ResourcesContext from "../../Context/ResourcesContext";

@@ -4,8 +4,10 @@ package org.eea.validation.service.impl;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -509,11 +511,11 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Async
-  public Future<List<ErrorsValidationVO>> getFieldErrors(final Long datasetId,
+  public Future<Map<Long, ErrorsValidationVO>> getFieldErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<FieldValidation> fieldValidations =
         validationFieldRepository.findByValidationIds(idValidations);
-    List<ErrorsValidationVO> errors = new ArrayList<>();
+    Map<Long, ErrorsValidationVO> errors = new HashMap<>();
     for (FieldValidation fieldValidation : fieldValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
@@ -529,7 +531,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(fieldValidation.getValidation().getValidationDate());
 
-      errors.add(error);
+      errors.put(fieldValidation.getValidation().getId(), error);
     }
 
     return new AsyncResult<>(errors);
@@ -545,11 +547,11 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Async
-  public Future<List<ErrorsValidationVO>> getRecordErrors(final Long datasetId,
+  public Future<Map<Long, ErrorsValidationVO>> getRecordErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<RecordValidation> recordValidations =
         validationRecordRepository.findByValidationIds(idValidations);
-    List<ErrorsValidationVO> errors = new ArrayList<>();
+    Map<Long, ErrorsValidationVO> errors = new HashMap<>();
     for (RecordValidation recordValidation : recordValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
@@ -564,7 +566,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(recordValidation.getValidation().getValidationDate());
 
-      errors.add(error);
+      errors.put(recordValidation.getValidation().getId(), error);
     }
 
     return new AsyncResult<>(errors);
@@ -580,11 +582,11 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Async
-  public Future<List<ErrorsValidationVO>> getTableErrors(final Long datasetId,
+  public Future<Map<Long, ErrorsValidationVO>> getTableErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<TableValidation> tableValidations =
         tableValidationRepository.findByValidationIds(idValidations);
-    List<ErrorsValidationVO> errors = new ArrayList<>();
+    Map<Long, ErrorsValidationVO> errors = new HashMap<>();
     for (TableValidation tableValidation : tableValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
@@ -599,7 +601,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(tableValidation.getValidation().getValidationDate());
 
-      errors.add(error);
+      errors.put(tableValidation.getValidation().getId(), error);
     }
 
     return new AsyncResult<>(errors);
@@ -616,9 +618,9 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Async
-  public Future<List<ErrorsValidationVO>> getDatasetErrors(final Long datasetId,
+  public Future<Map<Long, ErrorsValidationVO>> getDatasetErrors(final Long datasetId,
       final DatasetValue dataset, final List<Long> idValidations) {
-    List<ErrorsValidationVO> errors = new ArrayList<>();
+    Map<Long, ErrorsValidationVO> errors = new HashMap<>();
     List<DatasetValidation> datasetValidations =
         validationDatasetRepository.findByValidationIds(idValidations);
     for (DatasetValidation datasetValidation : datasetValidations) {
@@ -632,7 +634,7 @@ public class ValidationServiceImpl implements ValidationService {
       error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(datasetValidation.getValidation().getValidationDate());
 
-      errors.add(error);
+      errors.put(datasetValidation.getValidation().getId(), error);
     }
 
     return new AsyncResult<>(errors);

@@ -9,7 +9,6 @@ const DataFlowItem = props => {
 	const resources = useContext(ResourcesContext);
 
 	const { itemContent, listType } = props;
-	console.log("itemContent", itemContent);
 	const layout = children => {
 		return (
 			<div
@@ -20,7 +19,12 @@ const DataFlowItem = props => {
 				}
 			>
 				{listType === "accepted" ? (
-					<Link to={`/reporting-data-flow/${itemContent.id}`}>{children}</Link>
+					<Link
+						className={styles.containerLink}
+						to={`/reporting-data-flow/${itemContent.id}`}
+					>
+						{children}
+					</Link>
 				) : (
 					<>{children}</>
 				)}
@@ -39,10 +43,10 @@ const DataFlowItem = props => {
 
 			<div className={`${styles.card_component_content} `}>
 				<div className={`${styles.card_component_content_date}`}>
-					<span>{itemContent.date}</span>
+					<span>{itemContent.deadlineDate}</span>
 				</div>
 				<h3 className={`${styles.card_component_content_title}`}>
-					{itemContent.title}
+					{itemContent.name}
 				</h3>
 
 				<p>{itemContent.description}</p>
@@ -61,8 +65,12 @@ const DataFlowItem = props => {
 					</>
 				) : (
 					<>
-						<IconComponent icon={`${primeIcons.icons.comment}`} />
-						<IconComponent icon={`${primeIcons.icons.share}`} />
+						<a className={styles.btn} href="#">
+							<IconComponent icon={`${primeIcons.icons.comment}`} />
+						</a>
+						<a className={styles.btn} href="http://">
+							<IconComponent icon={`${primeIcons.icons.share}`} />
+						</a>
 					</>
 				)}
 			</div>

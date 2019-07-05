@@ -37,3 +37,5 @@ hystrix:
       circuitBreaker:
         requestVolumeThreshold: 2
         sleepWindowInMilliseconds: 10000
+kafka:
+  bootstrapAddress: ${KAFKA_BOOTSTRAP_URL:localhost:9092}
