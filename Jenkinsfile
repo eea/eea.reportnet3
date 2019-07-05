@@ -171,7 +171,7 @@ pipeline {
                         script {
                             echo 'Validation Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=9000 .")
+                            app = docker.build("k8s-swi001:5000/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8015 .")
                             app.push()                    
                         }
                         script {
