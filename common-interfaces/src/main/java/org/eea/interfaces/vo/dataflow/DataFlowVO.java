@@ -16,25 +16,8 @@ import lombok.ToString;
  * The type Data flow vo.
  */
 
-/**
- * Gets the weblinks.
- *
- * @return the weblinks
- */
 @Getter
-
-/**
- * Sets the weblinks.
- *
- * @param weblinks the new weblinks
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class DataFlowVO implements Serializable {
 

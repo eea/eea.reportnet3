@@ -110,6 +110,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findPendingAccepted(Long userId) {
 
@@ -135,6 +136,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/{userId}/completed", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findCompleted(Long userId, Integer pageNum, Integer pageSize) {
 

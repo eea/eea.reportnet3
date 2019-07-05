@@ -643,7 +643,7 @@
     "key": "config/validation/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
-    {
+  {
     "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
     "value": "L2RhdGFzY2hlbWEvKio="
   },
@@ -654,5 +654,25 @@
   {
     "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/dataflow/spring.jpa.hibernate.metabase.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+   {
+    "key": "config/dataflow/spring.datasource.metasource.url",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+  },
+   {
+    "key": "config/dataflow/spring.datasource.metasource.username",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
+  },
+  {
+    "key": "config/dataflow/spring.datasource.metasource.password",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
+  },
+  {
+    "key": "config/dataflow/spring.datasource.metasource.driver-class-name",
+    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   }
 ]

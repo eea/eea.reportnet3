@@ -14,6 +14,8 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,11 @@ public class DataflowServiceImpl implements DataflowService {
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
+
 
   /**
    * Gets the by id.
@@ -63,6 +70,7 @@ public class DataflowServiceImpl implements DataflowService {
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
 
     dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
+    LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
   }
@@ -93,6 +101,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findPendingAccepted(userId);
+    LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
     return dataflowNoContentMapper.entityListToClass(dataflows);
 
   }
@@ -121,6 +130,8 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVOs = dataflowNoContentMapper.entityListToClass(pagedDataflows);
 
     }
+    LOG.info("Get the dataflows completed of the user id: {}. {} per page, current page {}", userId,
+        pageable.getPageSize(), pageable.getPageNumber());
 
     return dataflowVOs;
   }
@@ -137,6 +148,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
+    LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
     return dataflowNoContentMapper.entityListToClass(dataflows);
 
   }

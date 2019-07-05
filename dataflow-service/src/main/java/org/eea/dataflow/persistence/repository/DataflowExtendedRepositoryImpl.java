@@ -17,7 +17,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private EntityManager entityManager;
 
   /** The Constant QUERY_FIND_COMPLETED. */
-  private final static String QUERY_FIND_COMPLETED =
+  private static final String QUERY_FIND_COMPLETED =
       "SELECT df from Dataflow df INNER JOIN df.userRequests ur WHERE ur.requestType = 'ACCEPTED' "
           + " AND ur.userRequester = :idRequester AND df.status = 'COMPLETED' ORDER BY df.deadlineDate ASC";
 
