@@ -65,9 +65,11 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The file treatment helper. */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The load validations helper. */
   @Autowired
   UpdateRecordHelper updateRecordHelper;
 
@@ -226,9 +228,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param id the id
    * @param idDataset the id dataset
-   * @param pageSize the page size
    * @param type the type
-   *
    * @return the table from any object id
    */
   @Override
@@ -254,12 +254,13 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+
   /**
    * Gets the by id.
    *
+   * @deprecated this method is deprecated
    * @param datasetId the dataset id
-   *
-   * @return the dataset
+   * @return the by id
    */
   @Override
   @RequestMapping(value = "{id}", method = RequestMethod.GET)
