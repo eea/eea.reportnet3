@@ -28,7 +28,12 @@ const DataFlowTasks = () => {
 			className: styles.flow_tab,
 			tabKey: "pending"
 		},
-		{ label: "completed", className: styles.flow_tab, tabKey: "completed" }
+		{
+			label: "Completed",
+			className: styles.flow_tab,
+			disabled: true,
+			tabKey: "completed"
+		}
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 	const [tabData, setTabData] = useState([]);
