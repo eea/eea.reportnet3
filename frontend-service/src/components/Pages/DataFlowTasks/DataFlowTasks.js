@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState } from "react";
 
 import ResourcesContext from "../../Context/ResourcesContext";
 
-import DataFlaws from "../../../assets/jsons/DataFlaws.json";
+import DataFlaws from "../../../assets/jsons/DataFlaws2.json";
 
 import styles from "./DataFlowTasks.module.scss";
 
@@ -23,8 +23,12 @@ const DataFlowTasks = () => {
 	const resources = useContext(ResourcesContext);
 
 	const [tabMenuItems, setTabMenuItems] = useState([
-		{ label: "pending", className: styles.flow_tab },
-		{ label: "completed", className: styles.flow_tab }
+		{
+			label: "Pending / Accepted",
+			className: styles.flow_tab,
+			tabKey: "pending"
+		},
+		{ label: "completed", className: styles.flow_tab, tabKey: "completed" }
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 	const [tabData, setTabData] = useState([]);
@@ -33,7 +37,7 @@ const DataFlowTasks = () => {
 	useEffect(() => {
 		const result = DataFlaws;
 		const listKeys = [];
-		if (tabMenuActiveItem.label === "pending") {
+		if (tabMenuActiveItem.tabKey === "pending") {
 			listKeys.push("pending");
 			listKeys.push("accepted");
 		} else {
@@ -42,7 +46,7 @@ const DataFlowTasks = () => {
 		setTabData(
 			listKeys.map(key => {
 				return {
-					listContent: result.filter(data => data.dataFlowStatus === key),
+					listContent: result.filter(data => data.status.toLowerCase() === key),
 					listType: key,
 					listTitle: resources.messages[`${key}DataFlowTitle`],
 					listDescription: resources.messages[`${key}DataFlowText`]
