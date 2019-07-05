@@ -2,9 +2,14 @@ package org.eea.dataset.service.file;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.opencsv.CSVWriter;
@@ -63,37 +68,29 @@ public class CSVWriterStrategy implements WriterStrategy {
       throws InvalidFileException, IOException {
     LOG.info("starting csv file writter");
 
-    // DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
-    //
-    // // CSVWriter csvWriter = new CSVWriter(response.getWriter(), CSVWriter.DEFAULT_SEPARATOR,
-    // // CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-    // // CSVWriter.DEFAULT_LINE_END);
-    //
-    // List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
-    //
-    //
-    //
-    // Map<String, String[]> fields = new HashMap<>();
-    // fieldSchemas.stream().forEach(fieldSchema -> {
-    // fieldSchema.getId();
-    //
-    //
-    // // fields.put(fieldSchema.getName(), );
-    // });
-    // // write all users to csv file
-    // // String[] headerRecord = {"Name", "Email", "Phone", "Country"};
-    // // csvWriter.writeNext(headerRecord);
-    // // writer.write(new DataSetVO());
+    DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
 
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter =
-        new CSVWriter(writer, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.NO_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
 
-    String[] headerRecord = {"Name", "Email", "Phone", "Country"};
-    csvWriter.writeNext(headerRecord);
-    csvWriter.writeNext(headerRecord);// RESTO DE ELEMENTOS
+    List<RecordValue> records = parseCommon.getRecordValues(idTableSchema);
+    List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
+    List<String> headers = new ArrayList<>();
+    fieldSchemas.stream().forEach(fieldSchema -> headers.add(fieldSchema.getName()));
+    csvWriter.writeNext(headers.stream().toArray(String[]::new));
+    for (RecordValue recordValue : records) {
+      List<String> fieldsList = new ArrayList<>();
+      fieldSchemas.stream().forEach(fieldSchema -> {
+        recordValue.getFields().stream().forEach(field -> {
+          if (fieldSchema.getId().equals(field.getIdFieldSchema()))
+            fieldsList.add(field.getValue());
+        });
+      });
+      csvWriter.writeNext(fieldsList.stream().toArray(String[]::new));
+    }
+
 
     // UNA VEZ LEIDO VOLCAMOS A STRING
     String csv = writer.getBuffer().toString();

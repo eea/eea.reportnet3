@@ -188,7 +188,9 @@ public interface DatasetService {
    * @throws EEAException
    * @throws IOException
    */
-  String exportFile(Long datasetId, String mimeType, HttpServletResponse response,
+  String exportFile(@DatasetId Long datasetId, String mimeType, HttpServletResponse response,
       String idTableSchema) throws EEAException, IOException;
+
+  String getFileName(@DatasetId Long datasetId, String mimeType, String idTableSchema);
 
 }

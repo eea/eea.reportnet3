@@ -176,7 +176,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema) throws InvalidFileException {
     // if the line is white then skip it
-    if (null != values && !values.isEmpty() && values.size() != 1 && !"".equals(values.get(0))) {
+    if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
       addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema);
     }
 

@@ -933,17 +933,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // Get the dataFlowId from the metabase
     final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
-    // create the right file parser for the file type
-
-    // CSVWriter csvWriter = new CSVWriter(response.getWriter(), CSVWriter.DEFAULT_SEPARATOR,
-    // CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-    // CSVWriter.DEFAULT_LINE_END);
-    //
-    // String[] headerRecord = {"Name", "Email", "Phone", "Country"};
-    // csvWriter.writeNext(headerRecord);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType, response);
     return context.fileWriter(datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
+
+  }
+
+  @Override
+  public String getFileName(Long datasetId, String mimeType, String idTableSchema) {
 
   }
 }

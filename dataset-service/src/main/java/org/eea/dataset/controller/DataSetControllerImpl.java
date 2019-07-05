@@ -421,7 +421,7 @@ public class DataSetControllerImpl implements DatasetController {
   // public Response exportFile(Long datasetId, String idTableSchema) throws Exception {
   public ResponseEntity exportFile() throws Exception {
     // QUITAR HARDCODEOS
-    String file = datasetService.exportFile(1L, "csv", null, "5d0b8c1347e812844ce34038");
+    String file = datasetService.exportFile(1L, "csv", null, "5d0b8c1347e812844ce340ad");
 
     // set file name and content type
     String filename = "users.csv";
