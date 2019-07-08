@@ -20,7 +20,7 @@ public class UmsSecurityConfiguration extends SecurityConfiguration {
 
   @Override
   protected String[] getPermitedRequest() {
-    return new String[0];
+    return new String[]{"/user/generateToken/*"};
   }
 
   @Override

@@ -20,42 +20,9 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider {
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  @Value("${eea.security.secret}")
+  //TODO Pending on decide what engine will be done to generate JWT (Declare o Keycloak)
+  @Value("${eea.security.secret:JWTSuperSecretKey}")
   private String jwtSecret;
-
-  @Value("${eea.security.expiration-time}")
-  private int jwtExpirationInMs;
-
-  public String generateToken(Authentication authentication) {
-
-    //TODO OJO ESTE UserDetails es el token. Hay que hacer una clase que implemente UserDetails para dar soporte
-    //TODO REVISAR https://www.callicoder.com/spring-boot-spring-security-jwt-mysql-react-app-part-2/
-    EeaUserDetails userPrincipal = (EeaUserDetails) authentication.getPrincipal();
-
-    Date now = new Date();
-    Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
-    return Jwts.builder()
-        .setSubject(userPrincipal.getUsername())
-        .setIssuedAt(new Date())
-        .setExpiration(expiryDate)
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
-        .compact();
-  }
-
-  public String generateToken(String username, String password) {
-
-    Date now = new Date();
-    Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
-    return Jwts.builder()
-        .setSubject(username)
-        .setIssuedAt(new Date())
-        .setExpiration(expiryDate)
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
-        .compact();
-  }
 
   public String getUserIdFromJWT(String token) {
     Claims claims = Jwts.parser()

@@ -76,7 +76,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
-        .antMatchers("/actuator/**", "/", "/user/generateToken")
+        .antMatchers("/actuator/**")
         .permitAll()
     //.antMatchers("/user/test-security").hasRole("PROVIDER")
 
@@ -87,7 +87,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
     }
     String[] permitedRequest = getPermitedRequest();
     if (null != permitedRequest && permitedRequest.length > 0) {
-      http.authorizeRequests().antMatchers(permitedRequest).authenticated();
+      http.authorizeRequests().antMatchers(permitedRequest).permitAll();
     }
 
     List<Pair<String[], String>> roleProtectedRequest = getRoleProtectedRequest();
