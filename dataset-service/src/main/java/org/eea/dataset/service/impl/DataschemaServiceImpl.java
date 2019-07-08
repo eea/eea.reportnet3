@@ -50,16 +50,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
 
-  private static String GENERAL_WARNING = "WARNING";
-  private static String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-  private static String GENERAL_ERROR = "ERROR";
-  private static String STRING_WARNING =
+  private static final String GENERAL_WARNING = "WARNING";
+  private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
+  private static final String GENERAL_ERROR = "ERROR";
+  private static final String STRING_WARNING =
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
-  private static String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-  private static String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-  private static String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-  private static String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-  private static String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
+  private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
+  private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
+  private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
+  private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
+  private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
   private static final String WARNING = "WARNING";
 
@@ -132,30 +132,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
 
-      // for (int w = i; w < 20; w++) {
-      RuleRecord ruleRecord = new RuleRecord();
-      List<String> listaStrinsRuleRecord = new ArrayList<String>();
-      ruleRecord.setRuleId(new ObjectId());
-      ruleRecord.setDataFlowId(1L);
-      ruleRecord.setScope(TypeEntityEnum.RECORD);
-      ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition("id == null");
-      ruleRecord.setRuleName("RecordRule_" + i + "_");
-      // if (w % 2 == 0) {
-      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL");
-      listaStrinsRuleRecord.add(GENERAL_ERROR);
-      // } else {
-      // listaStrinsRuleRecord.add("WARNING IN THAT RECORD LEVEL");
-      // listaStrinsRuleRecord.add(GENERAL_WARNING);
-      // }
-      ruleRecord.setThenCondition(listaStrinsRuleRecord);
-      ruleRecordList.add(ruleRecord);
+
 
       // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
       createRuleFields(i, table, recordSchema, fieldSchemas, headersSize);
+
+
+      RuleRecord ruleRecord = new RuleRecord();
+      List<String> listaStrinsRuleRecord = new ArrayList<String>();
+      ruleRecord.setRuleId(new ObjectId());
+      ruleRecord.setDataFlowId(1L);
+      ruleRecord.setScope(TypeEntityEnum.RECORD);
+      ruleRecord.setIdRecordSchema(idRecordSchema);
+      ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
+      ruleRecord.setRuleName("RecordRule_" + i + "_");
+      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
+      listaStrinsRuleRecord.add(GENERAL_ERROR);
+      ruleRecord.setThenCondition(listaStrinsRuleRecord);
+      ruleRecordList.add(ruleRecord);
 
       recordSchema.setRuleRecord(ruleRecordList);
       recordSchema.setFieldSchema(fieldSchemas);

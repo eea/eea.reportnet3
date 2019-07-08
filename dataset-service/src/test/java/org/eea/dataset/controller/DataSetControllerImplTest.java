@@ -7,12 +7,15 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
+import java.util.ArrayList;
+import java.util.List;
+import org.eea.dataset.service.callable.UpdateRecordHelper;
+import org.eea.dataset.service.file.FileTreatmentHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
-import org.eea.dataset.service.validation.LoadValidationsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -39,27 +42,35 @@ public class DataSetControllerImplTest {
    * The data set controller impl.
    */
   @InjectMocks
-  private DataSetControllerImpl dataSetControllerImpl;
+  DataSetControllerImpl dataSetControllerImpl;
 
   /**
    * The dataset service.
    */
   @Mock
-  private DatasetServiceImpl datasetService;
+  DatasetServiceImpl datasetService;
 
-  /** The dataset metabase service. */
-  @Mock
-  private DatasetMetabaseServiceImpl datasetMetabaseService;
+  /** The records. */
+  List<RecordVO> records;
 
-  /** The load validations helper. */
+  /** The record ids. */
+  List<Long> recordIds;
+
   @Mock
-  private LoadValidationsHelper loadValidationsHelper;
+  UpdateRecordHelper updateRecordHelper;
+
+  @Mock
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    records = new ArrayList<>();
+    records.add(new RecordVO());
+    recordIds = new ArrayList<>();
+    recordIds.add(1L);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -119,6 +130,8 @@ public class DataSetControllerImplTest {
   public void testLoadDatasetDataSuccess2() throws Exception {
     final EEAMockMultipartFile file =
         new EEAMockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes(), false);
+    doNothing().when(fileTreatmentHelper).executeFileProcess(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataSetControllerImpl.loadTableData(1L, file, "example");
   }
 
@@ -507,38 +520,124 @@ public class DataSetControllerImplTest {
 
 
   /**
-   * Find data set id by dataflow id.
+   * Test delete import table.
    */
+  public void testDeleteImportTable() {
+    doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
+    dataSetControllerImpl.deleteImportTable(1L, "");
+    Mockito.verify(datasetService, times(1)).deleteTableBySchema(Mockito.any(), Mockito.any());
 
-
-  /**
-   * Test list validations.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testListValidations() throws Exception {
-
-    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
-    Mockito.verify(loadValidationsHelper, times(1)).getListValidations(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Test list validations exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testListValidationsException() throws Exception {
-
-    doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(loadValidationsHelper)
-        .getListValidations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getFailedValidationsByIdDataset(1L, 0, 20, null, false);
-    Mockito.verify(loadValidationsHelper, times(1)).getListValidations(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
   }
 
 
+  /**
+   * Test delete import table throw non provided.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableThrowNonProvided() throws Exception {
+    dataSetControllerImpl.deleteImportTable(null, "");
+  }
 
+
+  /**
+   * Test delete import table throw invalid.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableThrowInvalid() throws Exception {
+    dataSetControllerImpl.deleteImportTable(-2L, "");
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateRecordsNullEntry() throws Exception {
+    dataSetControllerImpl.updateRecords(null, new ArrayList<RecordVO>());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateRecordsNull() throws Exception {
+    dataSetControllerImpl.updateRecords(-2L, null);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateRecordsEmpty() throws Exception {
+    dataSetControllerImpl.updateRecords(1L, new ArrayList<RecordVO>());
+  }
+
+  @Test
+  public void testupdateRecordsSuccess() throws Exception {
+    doNothing().when(updateRecordHelper).executeUpdateProcess(Mockito.any(), Mockito.any());
+    dataSetControllerImpl.updateRecords(1L, records);
+    Mockito.verify(updateRecordHelper, times(1)).executeUpdateProcess(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateRecordsNotFoundException() throws Exception {
+    doThrow(new EEAException()).when(updateRecordHelper).executeUpdateProcess(Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.updateRecords(1L, records);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testdeleteRecordsNullEntry() throws Exception {
+    dataSetControllerImpl.deleteRecords(null, new ArrayList<Long>());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testdeleteRecordsNull() throws Exception {
+    dataSetControllerImpl.deleteRecords(-2L, null);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testdeleteRecordsEmpty() throws Exception {
+    dataSetControllerImpl.deleteRecords(1L, new ArrayList<Long>());
+  }
+
+  @Test
+  public void testdeleteRecordsSuccess() throws Exception {
+    doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
+    dataSetControllerImpl.deleteRecords(1L, recordIds);
+    Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testdeleteRecordsNotFoundException() throws Exception {
+    doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.deleteRecords(1L, recordIds);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testinsertRecordsNullEntry() throws Exception {
+    dataSetControllerImpl.insertRecords(null, "id", new ArrayList<RecordVO>());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testinsertRecordsNull() throws Exception {
+    dataSetControllerImpl.insertRecords(-2L, "id", null);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testinsertRecordsEmpty() throws Exception {
+    dataSetControllerImpl.insertRecords(1L, "id", new ArrayList<RecordVO>());
+  }
+
+  @Test
+  public void testinsertRecordsSuccess() throws Exception {
+    doNothing().when(updateRecordHelper).executeCreateProcess(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.insertRecords(1L, "id", records);
+    Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testinsertRecordsNotFoundException() throws Exception {
+    doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    dataSetControllerImpl.insertRecords(1L, "id", records);
+  }
 }

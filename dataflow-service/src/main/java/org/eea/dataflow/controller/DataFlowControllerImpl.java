@@ -81,6 +81,37 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
+
+  /**
+   * Error handler list.
+   *
+   * @param userId the user id
+   * @return the list
+   */
+  public static List<DataFlowVO> errorHandlerList(final Long userId) {
+    final String errorMessage =
+        String.format("User id: %d has problems to retrieve dataflows", userId);
+    final List<DataFlowVO> results = new ArrayList<>();
+    LOG_ERROR.error(errorMessage);
+    return results;
+  }
+
+  /**
+   * Error handler list completed.
+   *
+   * @param userId the user id
+   * @return the list
+   */
+  public static List<DataFlowVO> errorHandlerListCompleted(final Long userId, final Integer pageNum,
+      final Integer pageSize) {
+    final String errorMessage = String.format(
+        "User id: %d has problems to retrieve dataflows completed, form page %d with pageSize of %d",
+        userId, pageNum, pageSize);
+    final List<DataFlowVO> results = new ArrayList<>();
+    LOG_ERROR.error(errorMessage);
+    return results;
+  }
+
   /**
    * Find by status.
    *
@@ -110,7 +141,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(fallbackMethod = "errorHandlerList")
   @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findPendingAccepted(Long userId) {
 
@@ -136,7 +167,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(fallbackMethod = "errorHandlerListCompleted")
   @GetMapping(value = "/{userId}/completed", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findCompleted(Long userId, Integer pageNum, Integer pageSize) {
 

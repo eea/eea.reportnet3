@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -51,6 +52,7 @@ public class FileTreatmentHelper {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws InterruptedException the interrupted exception
    */
+  @Async
   public void executeFileProcess(final Long datasetId, final String fileName, final InputStream is,
       String idTableSchema) throws EEAException, IOException, InterruptedException {
     LOG.info("Processing file");

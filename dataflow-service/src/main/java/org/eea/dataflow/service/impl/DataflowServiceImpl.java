@@ -7,6 +7,7 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowWithRequestType;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -38,7 +39,6 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
-
 
   /** The dataset metabase controller. */
   @Autowired
@@ -100,10 +100,22 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
 
-    List<Dataflow> dataflows = dataflowRepository.findPendingAccepted(userId);
+    List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
+    List<Dataflow> dfs = new ArrayList<>();
     LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
-    return dataflowNoContentMapper.entityListToClass(dataflows);
-
+    for (DataflowWithRequestType df : dataflows) {
+      dfs.add(df.getDataflow());
+    }
+    List<DataFlowVO> dataflowVOs = dataflowNoContentMapper.entityListToClass(dfs);
+    // Adding the user request type to the VO (pending/accepted/rejected)
+    for (DataflowWithRequestType df : dataflows) {
+      for (int i = 0; i < dataflowVOs.size(); i++) {
+        if (df.getDataflow().getId().equals(dataflowVOs.get(i).getId())) {
+          dataflowVOs.get(i).setUserRequestStatus(df.getTypeRequestEnum());
+        }
+      }
+    }
+    return dataflowVOs;
   }
 
 
@@ -121,14 +133,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<Dataflow> dataflows = dataflowRepository.findCompleted(userId, pageable);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
     if (!dataflows.isEmpty()) {
-      int initIndex = pageable.getPageNumber() * pageable.getPageSize();
-      int endIndex = (pageable.getPageNumber() + 1) * pageable.getPageSize() > dataflows.size()
-          ? dataflows.size()
-          : ((pageable.getPageNumber() + 1) * pageable.getPageSize());
-      List<Dataflow> pagedDataflows = dataflows.subList(initIndex, endIndex);
-
-      dataflowVOs = dataflowNoContentMapper.entityListToClass(pagedDataflows);
-
+      dataflowVOs = dataflowNoContentMapper.entityListToClass(dataflows);
     }
     LOG.info("Get the dataflows completed of the user id: {}. {} per page, current page {}", userId,
         pageable.getPageSize(), pageable.getPageNumber());

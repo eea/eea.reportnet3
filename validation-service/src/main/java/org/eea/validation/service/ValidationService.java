@@ -2,7 +2,11 @@ package org.eea.validation.service;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -12,6 +16,7 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.kie.api.runtime.KieSession;
 
 /**
@@ -24,10 +29,10 @@ public interface ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   *
+   * @param kieSession the kie session
    * @throws EEAException the EEA exception
    */
-  void validateDataSetData(@DatasetId Long datasetId) throws EEAException;
+  void validateFields(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
 
 
   /**
@@ -77,5 +82,106 @@ public interface ValidationService {
    * @param datasetId the dataset id
    */
   void deleteAllValidation(@DatasetId Long datasetId);
+
+
+  /**
+   * Validate data set.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateDataSet(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Validate table.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateTable(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Validate record.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateRecord(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Load rules knowledge base.
+   *
+   * @param datasetId the dataset id
+   * @return the kie session
+   * @throws EEAException the EEA exception
+   */
+  KieSession loadRulesKnowledgeBase(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Gets the record errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the record errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getRecordErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
+
+  /**
+   * Gets the table errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the table errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getTableErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
+
+  /**
+   * Gets the dataset errors.
+   *
+   * @param datasetId the dataset id
+   * @param dataset the dataset
+   * @param idValidations the id validations
+   * @return the dataset errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getDatasetErrors(@DatasetId Long datasetId,
+      DatasetValue dataset, List<Long> idValidations);
+
+  /**
+   * Gets the datase valuetby id.
+   *
+   * @param datasetId the dataset id
+   * @return the datase valuetby id
+   * @throws EEAException the EEA exception
+   */
+  DatasetValue getDatasetValuebyId(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Gets the find by id data set schema.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the find by id data set schema
+   * @throws EEAException the EEA exception
+   */
+  DataSetSchema getfindByIdDataSetSchema(@DatasetId Long datasetId, ObjectId datasetSchemaId)
+      throws EEAException;
+
+
+  /**
+   * Gets the field errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the field errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getFieldErrors(Long datasetId, List<Long> idValidations);
 
 }

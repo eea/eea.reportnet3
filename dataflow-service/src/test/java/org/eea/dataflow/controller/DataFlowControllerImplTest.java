@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -86,6 +87,26 @@ public class DataFlowControllerImplTest {
   public void testErrorHandler() {
     dataflowVO.setId(-1L);
     assertEquals("fail", dataflowVO, DataFlowControllerImpl.errorHandler(1L));
+  }
+
+  /**
+   * Test error handler list.
+   */
+  @Test
+  public void testErrorHandlerList() {
+    dataflowVO.setId(-1L);
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerList(1L));
+  }
+
+  /**
+   * Test error handler list completed.
+   */
+  @Test
+  public void testErrorHandlerListCompleted() {
+    dataflowVO.setId(-1L);
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerListCompleted(1L, 0, 10));
   }
 
 

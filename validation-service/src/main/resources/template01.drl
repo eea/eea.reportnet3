@@ -6,7 +6,7 @@ typevalidation
 whencondition
 messageFailValidation
 typeFailValidation
-
+originName
 package src.main.resources
 
 import org.eea.validation.persistence.data.domain.*;
@@ -24,7 +24,7 @@ dialect "java"
   when
     dataValidate : @{typevalidation}(@{schemaName}.equals("@{dataSchemaId}") && @{whencondition});
   then
-   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}");
+   ValidationRuleDrools.fillValidation(dataValidate, "@{messageFailValidation}","@{typeFailValidation}","@{ruleid}","@{originName}");
 
 
 end

@@ -32,18 +32,18 @@ pipeline {
                         }
                     }
                 }
-                stage('Compile NPM') {
-                    steps {
-                        sh '''
-                            npm install frontend-service/
-                        '''                                
-                    }
-                    post {
-                        failure {
-                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                        }                        
-                    }
-                }
+           //     stage('Compile NPM') {
+           //         steps {
+           //             sh '''
+           //                 npm install frontend-service/
+             //           '''                                
+              //      }
+               //     post {
+                 //       failure {
+                  //          slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                    //    }                        
+                    //}
+              //  }
             }
         }
         stage('Static Code Analysis') {
@@ -162,13 +162,10 @@ pipeline {
                             app = docker.build("k8s-swi001:5000/inspire-harvester:3.0", "--build-arg JAR_FILE=inspire-harvester/target/inspire-harvester-3.0-SNAPSHOT.jar --build-arg MS_PORT=8050 .")
                             app.push()                    
                         }
-                        echo 'Recordstore Service'
-                        sh('mkdir recordstore-service/target/dependency')
-                        sh('(cd recordstore-service/target/dependency; tar -zxf ../recordstore-service-3.0-SNAPSHOT.jar)')                        
                         script {
-                            
+                            echo 'Recordstore Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg DEPENDENCY=recordstore-service/target/dependnecy --build-arg MS_PORT=8090 .Dockerfile_new")
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
                             app.push()                    
                         }
                         script {

@@ -21,7 +21,7 @@
         "url":"/dataset/1/loadDatasetData/"
     },
     "listValidationsAPI":{
-        "url": "/dataset/listValidations/"
+        "url": "/validation/listValidations/"
     },
     "loadDataTableAPI":{
         "url":"/dataset/1/loadTableData/"

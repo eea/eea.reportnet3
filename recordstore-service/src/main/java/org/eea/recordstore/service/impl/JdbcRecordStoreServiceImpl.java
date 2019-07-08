@@ -107,6 +107,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
     for (String command : commands) {
       command = command.replace("%dataset_name%", datasetName);
+      command = command.replace("%user%", userPostgreDb);
       jdbcTemplate.execute(command);
     }
 

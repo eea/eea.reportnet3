@@ -30,6 +30,8 @@ public final class EEAErrorMessage {
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
+  public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
+
   /** The Constant EXECUTION_ERROR. */
   public static final String EXECUTION_ERROR = "Runtime error";
 
@@ -42,6 +44,7 @@ public final class EEAErrorMessage {
   /** The Constant FILE_NOT_FOUND. */
   public static final String RECORD_NOTFOUND = "Record not found";
 
+  /** The Constant PARTITION_ID_NOTFOUND. */
   public static final String PARTITION_ID_NOTFOUND = "Partition not found";
 
   public static final String DATAFLOW_INCORRECT_ID = "Dataflow Id incorrect";
