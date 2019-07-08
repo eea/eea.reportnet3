@@ -32,18 +32,18 @@ pipeline {
                         }
                     }
                 }
-           //     stage('Compile NPM') {
-           //         steps {
-           //             sh '''
-           //                 npm install frontend-service/
-             //           '''                                
-              //      }
-               //     post {
-                 //       failure {
-                  //          slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                    //    }                        
-                    //}
-              //  }
+                stage('Compile NPM') {
+                    steps {
+                        sh '''
+                            npm install frontend-service/
+                        '''                                
+                    }
+                    post {
+                        failure {
+                            slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'Build FAILED - NPM Compilation Error in branch ' + env.BRANCH_NAME.replace('/', '_'), token: 'HRvukH8087RNW9NYQ3fd6jtM'
+                        }                        
+                    }
+                }
             }
         }
         stage('Static Code Analysis') {
@@ -171,7 +171,7 @@ pipeline {
                         script {
                             echo 'Validation Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=9000 .")
+                            app = docker.build("k8s-swi001:5000/validation-service:1.0", "--build-arg JAR_FILE=validation-service/target/validation-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8015 .")
                             app.push()                    
                         }
                         script {
