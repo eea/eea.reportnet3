@@ -1,6 +1,7 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -208,4 +209,33 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.findUserDataflowsByStatus(Mockito.any(), Mockito.any());
     assertEquals("fail", new ArrayList<>(), dataflowService.getPendingAccepted(Mockito.any()));
   }
+
+
+  /**
+   * Update user request.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateUserRequest() throws EEAException {
+    Mockito.doNothing().when(dataflowService).updateUserRequestStatus(Mockito.any(), Mockito.any());
+
+    dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).updateUserRequestStatus(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Update user request throws.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateUserRequestThrows() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).updateUserRequestStatus(Mockito.any(),
+        Mockito.any());
+
+    dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).updateUserRequestStatus(Mockito.any(), Mockito.any());
+  }
+
 }

@@ -62,4 +62,7 @@ public interface DataflowService {
    */
   List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException;
 
+
+  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
+
 }

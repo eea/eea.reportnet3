@@ -55,6 +55,9 @@ public class DataFlowVO implements Serializable {
   /** The user request status. */
   private TypeRequestEnum userRequestStatus;
 
+  /** The request id. */
+  private Long requestId;
+
   /**
    * Equals.
    *

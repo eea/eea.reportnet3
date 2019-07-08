@@ -6,8 +6,9 @@ import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
-import org.eea.dataflow.persistence.repository.DataflowWithRequestType;
+import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -31,6 +32,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
+
+  /** The user request repository. */
+  @Autowired
+  private UserRequestRepository userRequestRepository;
 
   /** The dataflow mapper. */
   @Autowired
@@ -112,6 +117,7 @@ public class DataflowServiceImpl implements DataflowService {
       for (int i = 0; i < dataflowVOs.size(); i++) {
         if (df.getDataflow().getId().equals(dataflowVOs.get(i).getId())) {
           dataflowVOs.get(i).setUserRequestStatus(df.getTypeRequestEnum());
+          dataflowVOs.get(i).setRequestId(df.getRequestId());
         }
       }
     }
@@ -156,6 +162,21 @@ public class DataflowServiceImpl implements DataflowService {
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
     return dataflowNoContentMapper.entityListToClass(dataflows);
 
+  }
+
+  /**
+   * Update user request status.
+   *
+   * @param userRequestId the user request id
+   * @param type the type
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
+      throws EEAException {
+
+    userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
+    LOG.info("Update the request status of the requestId: {}. New status: {}", userRequestId, type);
   }
 
 

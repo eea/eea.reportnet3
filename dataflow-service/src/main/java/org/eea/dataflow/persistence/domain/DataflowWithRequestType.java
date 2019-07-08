@@ -1,6 +1,5 @@
-package org.eea.dataflow.persistence.repository;
+package org.eea.dataflow.persistence.domain;
 
-import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 
 
@@ -22,4 +21,12 @@ public interface DataflowWithRequestType {
    * @return the type request enum
    */
   TypeRequestEnum getTypeRequestEnum();
+
+
+  /**
+   * Gets the request id.
+   *
+   * @return the request id
+   */
+  Long getRequestId();
 }

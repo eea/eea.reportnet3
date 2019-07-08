@@ -1,6 +1,7 @@
 package org.eea.dataflow.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +9,12 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +39,11 @@ public class DataFlowServiceImplTest {
   /** The dataflow repository. */
   @Mock
   private DataflowRepository dataflowRepository;
+
+
+  /** The user request repository. */
+  @Mock
+  private UserRequestRepository userRequestRepository;
 
   /** The dataflow mapper. */
   @Mock
@@ -165,6 +173,21 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted(1L, pageable);
     assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+  }
+
+
+  /**
+   * Update user request status.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateUserRequestStatus() throws EEAException {
+    Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
+        Mockito.any());
+    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
+    Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
+        Mockito.any());
   }
 
 }

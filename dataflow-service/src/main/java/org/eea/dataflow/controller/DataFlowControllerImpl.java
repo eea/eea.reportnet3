@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -96,10 +97,13 @@ public class DataFlowControllerImpl implements DataFlowController {
     return results;
   }
 
+
   /**
    * Error handler list completed.
    *
    * @param userId the user id
+   * @param pageNum the page num
+   * @param pageSize the page size
    * @return the list
    */
   public static List<DataFlowVO> errorHandlerListCompleted(final Long userId, final Integer pageNum,
@@ -201,6 +205,26 @@ public class DataFlowControllerImpl implements DataFlowController {
       LOG_ERROR.error(e.getMessage());
     }
     return dataflows;
+
+  }
+
+  /**
+   * Update user request.
+   *
+   * @param idUserRequest the id user request
+   * @param type the type
+   */
+  @Override
+  @PutMapping(value = "/{idUserRequest}/updateStatusRequest",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateUserRequest(Long idUserRequest, TypeRequestEnum type) {
+
+    try {
+      dataflowService.updateUserRequestStatus(idUserRequest, type);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
 
   }
 

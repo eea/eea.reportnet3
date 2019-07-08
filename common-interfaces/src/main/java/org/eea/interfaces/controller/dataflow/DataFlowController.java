@@ -9,6 +9,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -48,6 +49,7 @@ public interface DataFlowController {
   /**
    * Find completed.
    *
+   * @param userId the user id
    * @param pageNum the page num
    * @param pageSize the page size
    * @return the list
@@ -79,5 +81,16 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findPendingAccepted(@PathVariable(value = "userId") Long userId);
+
+
+
+  /**
+   * Update user request.
+   *
+   * @param idUserRequest the id user request
+   */
+  @PutMapping(value = "/{idUserRequest}/updateStatusRequest",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest, TypeRequestEnum type);
 
 }
