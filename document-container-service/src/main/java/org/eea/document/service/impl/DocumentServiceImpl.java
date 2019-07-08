@@ -7,8 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.jcr.Binary;
-import javax.jcr.GuestCredentials;
 import javax.jcr.Node;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
@@ -17,7 +18,6 @@ import javax.jcr.SimpleCredentials;
 import javax.jcr.version.VersionManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.oak.Oak;
 import org.apache.jackrabbit.oak.jcr.Jcr;
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
@@ -26,11 +26,16 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
 import org.eea.exception.EEAException;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The type Document service.
@@ -53,50 +58,37 @@ public class DocumentServiceImpl implements DocumentService {
   /** The Constant ADMIN. */
   private static final String ADMIN = "admin";
 
+  @Autowired
+  KafkaSenderUtils kafkaSenderUtils;
+
   /** The demo exit location. */
   @Value(value = "C:/OutFiles/file.txt")
   private String demoExitLocation;
 
   /**
-   * test the connection.
-   *
-   * @throws EEAException the EEA exception
-   * @throws RepositoryException the repository exception
-   */
-  @Override
-  public void testLogging() throws EEAException, RepositoryException {
-    // Obtain the default repository location
-    Repository repository = JcrUtils.getRepository();
-    // login with guest credentials
-    Session session = repository.login(new GuestCredentials());
-    try {
-      // show a log message with the connection data
-      String user = session.getUserID();
-      String name = repository.getDescriptor(Repository.REP_NAME_DESC);
-      String msg = String.format("Logged in as %s to a %s repository.", user, name);
-      LOG.info(msg);
-    } finally {
-      session.logout();
-    }
-
-  }
-
-  /**
    * upload a file to the jackrabbit content repository.
+   *
+   * @param file the file
+   * @param dataFlowId the data flow id
    */
   @Override
   @Transactional
-  public void uploadDocument() {
+  @Async
+  public void uploadDocument(final MultipartFile file, final Long dataFlowId) {
     Session session = null;
     try {
       LOG.info("Adding the file...");
       // Initialize the session
       session = getSession();
       // Add a file node with the document (in this demo, hardcoded)
-      File fichero = new File(getClass().getClassLoader().getResource("file.txt").getFile());
-      addFileNode(session, "/test", fichero, ADMIN);
+      addFileNode(session, "/" + dataFlowId, file.getResource().getFile(), ADMIN);
 
-      LOG.info("Files added...");
+      LOG.info("File added...");
+      Map<String, Object> result = new HashMap<>();
+      result.put("dataflow_id", dataFlowId);
+      result.put("filename", file.getOriginalFilename());
+      kafkaSenderUtils.releaseKafkaEvent(EventType.LOAD_DOCUMENT_COMPLETED_EVENT, result);
+
     } catch (RepositoryException | IOException | EEAException e) {
       LOG.error(e.getMessage());
     } finally {
@@ -112,24 +104,21 @@ public class DocumentServiceImpl implements DocumentService {
    */
   @Override
   @Transactional
-  public void getDocument() throws EEAException {
+  public FileResponse getDocument(String documentName, Long dataFlowId) throws EEAException {
     Session session = null;
-    try (FileOutputStream fos = new FileOutputStream(demoExitLocation)) {
+    FileResponse fileResponse = null;
+    try (FileOutputStream fos = new FileOutputStream(documentName)) {
       session = getSession();
       // Initialize the session
       LOG.info("Fething the file...");
-      FileResponse fileResponse = getFileContents(session, "/test", "file.txt");
-      byte[] content = fileResponse.getBytes();
-      // downloading the file to the filesystem
-      if (content != null && content.length > 0) {
-        fos.write(content);
-        LOG.info("File fetch complete...");
-      }
+      // downloading the file to the controller
+      fileResponse = getFileContents(session, "/" + dataFlowId, documentName);
     } catch (RepositoryException | IOException e) {
       LOG.error(e.getMessage());
     } finally {
       cleanUp(session);
     }
+    return fileResponse;
   }
 
   /**

@@ -1,7 +1,11 @@
 package org.eea.interfaces.controller.document;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface Document controller.
@@ -17,28 +21,22 @@ public interface DocumentController {
   }
 
   /**
-   * log into jackrabbit.
-   *
-   * @throws Exception the exception
-   */
-  @GetMapping(value = "/testLog")
-  void testLogging();
-
-  /**
    * Upload document .
    *
-   * @throws Exception the exception
+   * @param file the file
+   * @param dataFlowId the data flow id
    */
-  @GetMapping(value = "/create")
-  void uploadDocument();
+  @PostMapping(value = "/upload/{dataFlowId}")
+  void uploadDocument(final MultipartFile file, final Long dataFlowId);
 
   /**
    * Download document .
    *
+   * @param documentName the document name
+   * @param dataFlowId the data flow id
    * @return the document
-   * @throws Exception the exception
    */
   @GetMapping
-  void getDocument();
+  ResponseEntity<Resource> getDocument(final String documentName, final Long dataFlowId);
 
 }
