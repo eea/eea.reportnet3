@@ -191,6 +191,17 @@ public interface DatasetService {
   String exportFile(@DatasetId Long datasetId, String mimeType, HttpServletResponse response,
       String idTableSchema) throws EEAException, IOException;
 
-  String getFileName(@DatasetId Long datasetId, String mimeType, String idTableSchema);
+
+  /**
+   * Gets the file name.
+   *
+   * @param mimeType the mime type
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the file name
+   * @throws EEAException the EEA exception
+   */
+  String getFileName(String mimeType, String idTableSchema, @DatasetId Long datasetId)
+      throws EEAException;
 
 }

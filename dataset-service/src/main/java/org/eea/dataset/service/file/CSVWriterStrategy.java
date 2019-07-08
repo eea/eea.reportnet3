@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -78,15 +79,22 @@ public class CSVWriterStrategy implements WriterStrategy {
     List<RecordValue> records = parseCommon.getRecordValues(idTableSchema);
     List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<String> headers = new ArrayList<>();
+
     fieldSchemas.stream().forEach(fieldSchema -> headers.add(fieldSchema.getName()));
     csvWriter.writeNext(headers.stream().toArray(String[]::new));
     for (RecordValue recordValue : records) {
       List<String> fieldsList = new ArrayList<>();
       fieldSchemas.stream().forEach(fieldSchema -> {
-        recordValue.getFields().stream().forEach(field -> {
-          if (fieldSchema.getId().equals(field.getIdFieldSchema()))
+        Boolean isWhite = true;
+        for (FieldValue field : recordValue.getFields()) {
+          if (fieldSchema.getId().equals(field.getIdFieldSchema())) {
             fieldsList.add(field.getValue());
-        });
+            isWhite = false;
+          }
+        }
+        if (isWhite) {
+          fieldsList.add("");
+        }
       });
       csvWriter.writeNext(fieldsList.stream().toArray(String[]::new));
     }

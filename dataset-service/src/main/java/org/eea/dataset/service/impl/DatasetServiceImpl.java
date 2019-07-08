@@ -46,6 +46,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.ParseCommon;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -63,6 +64,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +123,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private TableRepository tableRepository;
+
+  /** The parse common. */
+  @Autowired
+  private ParseCommon parseCommon;
 
   /**
    * The data set metabase repository.
@@ -940,7 +946,11 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
-  public String getFileName(Long datasetId, String mimeType, String idTableSchema) {
+  public String getFileName(String mimeType, String idTableSchema, Long datasetId)
+      throws EEAException {
+    final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
+    DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(datasetMetabase.getDataflowId());
+    return parseCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
 
   }
 }

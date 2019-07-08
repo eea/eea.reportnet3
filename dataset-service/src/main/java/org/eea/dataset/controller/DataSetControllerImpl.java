@@ -424,13 +424,11 @@ public class DataSetControllerImpl implements DatasetController {
     String file = datasetService.exportFile(1L, "csv", null, "5d0b8c1347e812844ce340ad");
 
     // set file name and content type
-    String filename = "users.csv";
+    String filename = datasetService.getFileName("csv", "5d0b8c1347e812844ce340ad", 1L);
 
     HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "test.csv");
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
     return new ResponseEntity(file.getBytes(), httpHeaders, HttpStatus.OK);
   }
-
-
 
 }
