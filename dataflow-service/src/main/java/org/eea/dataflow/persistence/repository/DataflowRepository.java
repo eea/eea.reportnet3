@@ -30,25 +30,9 @@ public interface DataflowRepository
    * @param userIdRequester the user id requester
    * @return the list
    */
-  @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType in ('PENDING','ACCEPTED') "
+  @Query("SELECT df as dataflow, ur.requestType as typeRequestEnum from Dataflow df JOIN df.userRequests ur WHERE ur.requestType in ('PENDING','ACCEPTED') "
       + " AND ur.userRequester = :idRequester AND df.status not in ('COMPLETED') ORDER BY df.deadlineDate ASC")
-  List<Dataflow> findPendingAccepted(@Param("idRequester") Long userIdRequester);
-
-
-
-  /**
-   * Find completed.
-   *
-   * @param typeRequest the type request
-   * @param userIdRequester the user id requester
-   * @return the list
-   */
-  /*
-   * @Query("SELECT df from Dataflow df INNER JOIN FETCH df.userRequests ur WHERE ur.requestType = 'ACCEPTED' "
-   * +
-   * " AND ur.userRequester = :idRequester AND df.status = 'COMPLETED' ORDER BY df.deadlineDate ASC"
-   * ) List<Dataflow> findCompleted(@Param("idRequester") Long userIdRequester);
-   */
+  List<DataflowWithRequestType> findPendingAccepted(@Param("idRequester") Long userIdRequester);
 
 
 

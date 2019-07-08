@@ -14,8 +14,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -67,10 +65,6 @@ public class DataSetMetabase {
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;
 
-  /** The dataflow. */
-  @ManyToOne
-  @JoinColumn(name = "DATAFLOW_ID")
-  private Dataflow dataflow;
 
   /**
    * Hash code.
