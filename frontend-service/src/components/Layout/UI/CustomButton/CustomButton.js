@@ -17,7 +17,8 @@ const CustomButton = (props) => {
         resources.icons["group-by"],
         resources.icons["sort"],
         resources.icons["validate"],
-        resources.icons["refresh"]
+        resources.icons["refresh"],
+        resources.icons["camera"]
     ];
 
     let disabledButton = props.disabled?true:false;
