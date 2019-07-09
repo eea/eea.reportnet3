@@ -83,6 +83,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       // Create a new dataset (DataSetVO)
       dataset = createDataSetVO(dataSetSchema, records, idTableSchema);
 
+      inputStream.close();
+
       LOG.info("Ending Excel file read");
 
       return dataset;
