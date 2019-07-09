@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -136,7 +137,45 @@ public class LoadValidationsHelperTest {
         .thenReturn(schema);
     Page<Validation> pageValidation = Page.empty(pageable);
     when(validationRepository.findAll(Mockito.any(Pageable.class))).thenReturn(pageValidation);
-    when(validationRepository.count()).thenReturn(10L);
+
+    loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false);
+    Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
+
+  }
+
+  @Test
+  public void processErrors() throws Exception {
+
+    TableValidation tableValidation = new TableValidation();
+    tableValidation.setId(1L);
+    tableValidation.setTableValue(tableValue);
+    validation.setId(1L);
+    validation.setLevelError(TypeErrorEnum.ERROR);
+    validation.setTypeEntity(TypeEntityEnum.TABLE);
+    tableValidation.setValidation(validation);
+    List<TableValidation> tableValidations = new ArrayList<>();
+    tableValidations.add(tableValidation);
+    RecordValidation recordValidation = new RecordValidation();
+    recordValidation.setRecordValue(recordValue);
+    recordValidation.setValidation(validation);
+    List<RecordValidation> recordValidations = new ArrayList<>();
+    recordValidations.add(recordValidation);
+    DatasetValidation datasetValidation = new DatasetValidation();
+    datasetValidation.setValidation(validation);
+    datasetValidation.setDatasetValue(datasetValue);
+    List<DatasetValidation> datasetValidations = new ArrayList<>();
+    datasetValidations.add(datasetValidation);
+    datasetValue.setDatasetValidations(datasetValidations);
+    FieldValidation fieldValidation = new FieldValidation();
+    recordValue.setTableValue(tableValue);
+    fieldValue.setRecord(recordValue);
+    fieldValidation.setFieldValue(fieldValue);
+    fieldValidation.setValidation(validation);
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    fieldValidations.add(fieldValidation);
+    List<Long> listLong = new ArrayList<>();
+    listLong.add(1L);
+    listLong.add(2L);
     when(validationService.getDatasetErrors(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new AsyncResult<>(new HashMap<>()));
     when(validationService.getTableErrors(Mockito.any(), Mockito.any()))
@@ -146,8 +185,9 @@ public class LoadValidationsHelperTest {
     when(validationService.getFieldErrors(Mockito.any(), Mockito.any()))
         .thenReturn(new AsyncResult<>(new HashMap<>()));
 
-    loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false);
-    Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
+    loadValidationsHelper.processErrors(listLong, datasetValue);
+    assertEquals("result not equals to expected", new HashMap<>(),
+        loadValidationsHelper.processErrors(listLong, datasetValue));
 
   }
 }
