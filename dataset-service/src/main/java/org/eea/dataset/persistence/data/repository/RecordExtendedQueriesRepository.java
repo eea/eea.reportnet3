@@ -10,16 +10,18 @@ import org.springframework.data.domain.Pageable;
  */
 public interface RecordExtendedQueriesRepository {
 
+
   /**
-   * Find by table value with order list.
+   * Find by table value with order.
    *
    * @param idTableSchema the id table schema
+   * @param pageable the pageable
    * @param sortFields the sort fields
-   *
    * @return the list
    */
   List<RecordValue> findByTableValueWithOrder(String idTableSchema, Pageable pageable,
       SortField... sortFields);
+
 
 
   /**

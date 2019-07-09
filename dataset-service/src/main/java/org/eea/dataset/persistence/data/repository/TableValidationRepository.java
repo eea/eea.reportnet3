@@ -33,6 +33,12 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    */
   List<TableValidation> findByTableValue_IdTableSchema(String idTableSchema);
 
+  /**
+   * Find by validation ids.
+   *
+   * @param ids the ids
+   * @return the list
+   */
   @Query("SELECT tv FROM TableValidation tv  WHERE tv.validation.id in(:ids) ")
   List<TableValidation> findByValidationIds(@Param("ids") List<Long> ids);
 
