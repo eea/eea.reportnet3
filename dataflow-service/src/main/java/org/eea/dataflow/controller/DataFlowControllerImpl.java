@@ -215,7 +215,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param type the type
    */
   @Override
-  @PutMapping(value = "/{idUserRequest}/updateStatusRequest",
+  @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUserRequest(Long idUserRequest, TypeRequestEnum type) {
 

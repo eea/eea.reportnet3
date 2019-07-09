@@ -89,7 +89,7 @@ public interface DataFlowController {
    *
    * @param idUserRequest the id user request
    */
-  @PutMapping(value = "/{idUserRequest}/updateStatusRequest",
+  @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest, TypeRequestEnum type);
 
