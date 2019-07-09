@@ -198,6 +198,4 @@ public interface DatasetController {
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
   void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema);
-
-
 }

@@ -177,5 +177,4 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
-
 }
