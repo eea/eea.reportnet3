@@ -1,10 +1,4 @@
 {
-	"api": {
-		"protocol": "http://",
-		"url": "localhost",
-		"port": ":8010",
-		"ip": "127.0.0.1"
-	},
 	"dataSchemaAPI": {
 		"url": "/dataschema/dataflow/"
 	},

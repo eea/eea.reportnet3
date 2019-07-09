@@ -318,7 +318,7 @@ const DataViewer = props => {
 			clickHandler: () => setImportDialogVisible(true)
 		},
 		{
-			label: resources.messages["delete"],
+			label: resources.messages["deleteTable"],
 			icon: "2",
 			group: "left",
 			disabled: false,
@@ -448,7 +448,7 @@ const DataViewer = props => {
 				<CustomFileUpload
 					mode="advanced"
 					name="file"
-					url={`${config.api.protocol}${config.api.url}${config.api.port}/dataset/${idDataSet}/loadTableData/${props.id}`}
+					url={`${window.env.API_URL}/dataset/${idDataSet}/loadTableData/${props.id}`}
 					onUpload={onUploadHandler}
 					multiple={false}
 					chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"

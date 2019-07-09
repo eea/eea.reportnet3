@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState } from "react";
 
 import ResourcesContext from "../../Context/ResourcesContext";
 
-import DataFlaws from "../../../assets/jsons/DataFlaws2.json";
+// import DataFlaws from "../../../assets/jsons/DataFlaws2.json";
 
 import styles from "./DataFlowTasks.module.scss";
 
@@ -69,7 +69,7 @@ const DataFlowTasks = () => {
 					c.listKeys.map(key => {
 						return {
 							listContent: response.data.filter(
-								data => data.status.toLowerCase() === key
+								data => data.userRequestStatus.toLowerCase() === key
 							),
 							listType: key,
 							listTitle: resources.messages[`${key}DataFlowTitle`],

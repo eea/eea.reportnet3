@@ -1,5 +1,5 @@
 import axios from 'axios';
-import config from '../../conf/web.config.json';
+// import config from '../../conf/web.config.json';
 
 const HTTPRequester = (function () {
 
