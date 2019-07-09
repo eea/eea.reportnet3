@@ -5,17 +5,25 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
+/**
+ * The Class WeblinkVO.
+ */
 @Getter
 @Setter
 @ToString
 public class WeblinkVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 4646157396217092042L;
 
+  /** The id. */
   private Long id;
 
+  /** The name. */
   private String name;
 
+  /** The url. */
   private String url;
 
 }

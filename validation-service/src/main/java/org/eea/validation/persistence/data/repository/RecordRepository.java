@@ -55,6 +55,12 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   List<RecordValue> findAllRecordsByTableValueId(@Param("id") Long tableId);
 
 
+  /**
+   * Find all records and fields by table value id.
+   *
+   * @param tableId the table id
+   * @return the list
+   */
   @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv WHERE tv.id = :id")
   List<RecordValue> findAllRecordsAndFieldsByTableValueId(@Param("id") Long tableId);
 

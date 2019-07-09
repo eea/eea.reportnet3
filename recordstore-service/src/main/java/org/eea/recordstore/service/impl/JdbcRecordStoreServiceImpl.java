@@ -1,11 +1,8 @@
 package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-import org.springframework.core.io.Resource;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -25,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -90,12 +86,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   @Override
   public void createEmptyDataSet(String datasetName) throws RecordStoreAccessException {
-    final InputStream is;
+
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
-    try (BufferedReader br
-        = new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
+    try (BufferedReader br =
+        new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
 
       br.lines().forEach(commands::add);
 

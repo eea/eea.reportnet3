@@ -88,6 +88,7 @@ public interface DataFlowController {
    * Update user request.
    *
    * @param idUserRequest the id user request
+   * @param type the type
    */
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
