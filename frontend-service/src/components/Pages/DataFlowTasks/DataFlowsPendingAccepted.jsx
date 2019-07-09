@@ -11,10 +11,10 @@ const DataFlowsPendingAccepted = props => {
 
 	useEffect(() => {
 		const arrayPending = listData.filter(
-			jsonData => jsonData.dataFlowStatus === "pending"
+			jsonData => jsonData.userRequestStatus === "pending"
 		);
 		const arrayAccepted = listData.filter(
-			jsonData => jsonData.dataFlowStatus === "accepted"
+			jsonData => jsonData.userRequestStatus === "accepted"
 		);
 
 		setPendingDataFlows([...arrayPending]);
