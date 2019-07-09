@@ -448,7 +448,7 @@ const DataViewer = props => {
 				<CustomFileUpload
 					mode="advanced"
 					name="file"
-					url={`${window.env.API_URL}/dataset/${idDataSet}/loadTableData/${props.id}`}
+					url={`${window.env.REACT_APP_BACKEND}/dataset/${idDataSet}/loadTableData/${props.id}`}
 					onUpload={onUploadHandler}
 					multiple={false}
 					chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
