@@ -13,14 +13,8 @@
   <artifactId>user-management-service</artifactId>
   <version>3.0-SNAPSHOT</version>
   <properties>
-    <jjwt.version>0.9.1</jjwt.version>
   </properties>
   <dependencies>
-    <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt</artifactId>
-      <version>${jjwt.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>

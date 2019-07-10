@@ -7,3 +7,10 @@ eea:
   security:
     secret: ${SECURITY_TOKEN_SECRET:JWTSuperSecretKey}
     expiration-time: ${SECURITY_TOKEN_EXPIRATION_TIME:30000}
+  keycloak:
+    realmName: ${KEYCLOAK_REAM_NAME:SpringBootKeycloak}
+    secret: ${KEYCLOAK_SECRET:dfd1e0cc-6244-48e0-b248-5061e2df10ce}
+    clientId: ${KEYCLOAK_CLIENT_ID:login-app}
+    host: ${KEYCLOAK_HOST:localhost:8080}
+    scheme: ${KEYCLOAK_SCHEME:http}
+    publicKey: ${KEYCLOAK_CLIENT_PUBLIC_KEY:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv0q5hycS1yugHmx6iRZWryWEKnyf/Ze04+0aAKefnAs5BOF7xmPqkGQ3Vegd8GbHPBuGsXEMzjN9ED4nubs5A/lLcqHVAKJF4DibNAkPbYK2szMe+d98e8/y8KWX2KseE0pSZAI0ujh5DnYgV5Q9w3s+OU+AG8hM/meTIJ9+3q162MjRLiZr/ctcougkIdWtoHl3SAfg49SwnPewqNxVqewsMkSRjgIJtRmmW/uiXdAFXoyvfDymvm/EE3SMWJStGBHKscmSqh03JAQiJ+zCNdpvS+S8PBS2LTD5x7UYCP0NKoUzaa65mnvcJKdXZSRgaqighNafQ5454LudDmfJTwIDAQAB}

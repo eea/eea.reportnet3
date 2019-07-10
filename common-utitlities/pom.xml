@@ -11,7 +11,6 @@
   <properties>
     <spring.version>5.1.5.RELEASE</spring.version>
     <spring.security.version>5.1.4.RELEASE</spring.security.version>
-    <jjwt.version>0.9.1</jjwt.version>
     <aspectj.version>1.9.2</aspectj.version>
 
   </properties>
@@ -87,9 +86,9 @@
       <version>${spring.security.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.jsonwebtoken</groupId>
-      <artifactId>jjwt</artifactId>
-      <version>${jjwt.version}</version>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+      <version>6.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.aspectj</groupId>
