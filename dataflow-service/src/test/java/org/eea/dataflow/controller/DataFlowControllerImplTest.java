@@ -238,4 +238,66 @@ public class DataFlowControllerImplTest {
     Mockito.verify(dataflowService, times(1)).updateUserRequestStatus(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Adds the contributor.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void addContributor() throws EEAException {
+    Mockito.doNothing().when(dataflowService).addContributorToDataflow(Mockito.any(),
+        Mockito.any());
+
+    dataFlowControllerImpl.addContributor(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).addContributorToDataflow(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Adds the contributor throws.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void addContributorThrows() throws EEAException {
+
+    doThrow(new EEAException()).when(dataflowService).addContributorToDataflow(Mockito.any(),
+        Mockito.any());
+
+    dataFlowControllerImpl.addContributor(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).addContributorToDataflow(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Removes the contributor.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void removeContributor() throws EEAException {
+    Mockito.doNothing().when(dataflowService).removeContributorFromDataflow(Mockito.any(),
+        Mockito.any());
+
+    dataFlowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).removeContributorFromDataflow(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Removes the contributor throws.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void removeContributorThrows() throws EEAException {
+
+    doThrow(new EEAException()).when(dataflowService).removeContributorFromDataflow(Mockito.any(),
+        Mockito.any());
+
+    dataFlowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowService, times(1)).removeContributorFromDataflow(Mockito.any(),
+        Mockito.any());
+  }
+
 }

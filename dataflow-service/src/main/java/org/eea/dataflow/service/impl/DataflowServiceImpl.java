@@ -5,8 +5,10 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
@@ -36,6 +38,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The user request repository. */
   @Autowired
   private UserRequestRepository userRequestRepository;
+
+  @Autowired
+  private ContributorRepository contributorRepository;
+
 
   /** The dataflow mapper. */
   @Autowired
@@ -177,6 +183,39 @@ public class DataflowServiceImpl implements DataflowService {
 
     userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
     LOG.info("Update the request status of the requestId: {}. New status: {}", userRequestId, type);
+  }
+
+  /**
+   * Adds the contributor to dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException {
+
+    Contributor contributor = new Contributor();
+    contributor.setUserId(idContributor);
+    Dataflow dataflow = dataflowRepository.findById(idDataflow).orElse(new Dataflow());
+    contributor.setDataflow(dataflow);
+
+    contributorRepository.save(contributor);
+  }
+
+  /**
+   * Removes the contributor from dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void removeContributorFromDataflow(Long idDataflow, Long idContributor)
+      throws EEAException {
+
+    contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
+
   }
 
 

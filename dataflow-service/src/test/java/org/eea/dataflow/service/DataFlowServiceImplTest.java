@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
@@ -44,6 +46,9 @@ public class DataFlowServiceImplTest {
   /** The user request repository. */
   @Mock
   private UserRequestRepository userRequestRepository;
+
+  @Mock
+  private ContributorRepository contributorRepository;
 
   /** The dataflow mapper. */
   @Mock
@@ -187,6 +192,33 @@ public class DataFlowServiceImplTest {
         Mockito.any());
     dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
     Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
+        Mockito.any());
+  }
+
+
+  /**
+   * Adds the contributor.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void addContributor() throws EEAException {
+    when(contributorRepository.save(Mockito.any())).thenReturn(new Contributor());
+    dataflowServiceImpl.addContributorToDataflow(1L, 1L);
+    Mockito.verify(contributorRepository, times(1)).save(Mockito.any());
+  }
+
+  /**
+   * Removes the contributor.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void removeContributor() throws EEAException {
+    Mockito.doNothing().when(contributorRepository).removeContributorFromDataset(Mockito.any(),
+        Mockito.any());
+    dataflowServiceImpl.removeContributorFromDataflow(1L, 1L);
+    Mockito.verify(contributorRepository, times(1)).removeContributorFromDataset(Mockito.any(),
         Mockito.any());
   }
 
