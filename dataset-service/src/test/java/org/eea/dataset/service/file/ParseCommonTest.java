@@ -3,10 +3,12 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -37,6 +39,10 @@ public class ParseCommonTest {
    */
   @Mock
   private DatasetSchemaService dataSetSchemaService;
+
+  /** The record repository. */
+  @Mock
+  private RecordRepository recordRepository;
 
   /**
    * The Constant ID.
@@ -121,4 +127,44 @@ public class ParseCommonTest {
     assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L));
   }
 
+
+  /**
+   * Gets the table name test.
+   *
+   * @return the table name test
+   */
+  @Test
+  public void getTableNameTest() {
+    parseCommon.getTableName(ID, dataset);
+  }
+
+  /**
+   * Gets the field schemas test.
+   *
+   * @return the field schemas test
+   */
+  @Test
+  public void getFieldSchemasTest() {
+    parseCommon.getFieldSchemas(ID, dataset);
+  }
+
+  /**
+   * Gets the record values test.
+   *
+   * @return the record values test
+   */
+  @Test
+  public void getRecordValuesTest() {
+    List<RecordValue> records = new ArrayList<>();
+    List<FieldValue> fields = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    record.setId(1L);
+    FieldValue fieldValue = new FieldValue();
+    fields.add(fieldValue);
+    record.setFields(fields);
+    records.add(record);
+
+    when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(records);
+    parseCommon.getRecordValues(ID);
+  }
 }

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
@@ -10,15 +13,14 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
- * The Class FileParserFactoryTest.
+ * The Class FileExportFactoryTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FileParserFactoryTest {
+public class FileExportFactoryTest {
 
-  /** The file parser factory. */
+  /** The file export factory. */
   @InjectMocks
-  private FileParserFactory fileParserFactory;
-
+  private FileExportFactory fileExportFactory;
 
   /**
    * Inits the mocks.
@@ -28,29 +30,17 @@ public class FileParserFactoryTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
-  /**
-   * Test create context csv.
-   */
-  @Test
-  public void testCreateContextCsv() {
-    assertNotNull("is null", fileParserFactory.createContext("csv"));
-  }
-
-  /**
-   * Test create context csv.
-   */
-  @Test
-  public void testCreateContextXml() {
-    assertNull("is null", fileParserFactory.createContext("xml"));
-  }
-
   /**
    * Test create context.
    */
   @Test
-  public void testCreateContext() {
-    assertNull("is null", fileParserFactory.createContext("xx"));
+  public void testCreateContextCsv() {
+    assertNotNull("is null", fileExportFactory.createContext("csv"));
+  }
+
+  @Test
+  public void testCreateContextXml() {
+    assertNull("is null", fileExportFactory.createContext("xml"));
   }
 
 }

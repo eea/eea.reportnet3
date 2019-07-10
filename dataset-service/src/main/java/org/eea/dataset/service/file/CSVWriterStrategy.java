@@ -97,10 +97,12 @@ public class CSVWriterStrategy implements WriterStrategy {
       List<String> fieldsList = new ArrayList<>();
       fieldSchemas.stream().forEach(fieldSchema -> {
         Boolean isWhite = true;
-        for (FieldValue field : recordValue.getFields()) {
-          if (fieldSchema.getId().equals(field.getIdFieldSchema())) {
-            fieldsList.add(field.getValue());
-            isWhite = false;
+        if (recordValue.getFields() != null) {
+          for (FieldValue field : recordValue.getFields()) {
+            if (fieldSchema.getId().equals(field.getIdFieldSchema())) {
+              fieldsList.add(field.getValue());
+              isWhite = false;
+            }
           }
         }
         if (isWhite) {

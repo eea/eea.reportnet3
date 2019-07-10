@@ -30,6 +30,7 @@ public class ParseCommon {
   private DatasetSchemaService dataSetSchemaService;
 
 
+  /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
@@ -124,11 +125,25 @@ public class ParseCommon {
     return dataSetSchema;
   }
 
+  /**
+   * Gets the table name.
+   *
+   * @param idTableSchema the id table schema
+   * @param dataSetSchema the data set schema
+   * @return the table name
+   */
   public String getTableName(String idTableSchema, DataSetSchemaVO dataSetSchema) {
     TableSchemaVO table = findTableSchema(idTableSchema, dataSetSchema);
     return table != null ? table.getNameTableSchema() : idTableSchema;
   }
 
+  /**
+   * Gets the field schemas.
+   *
+   * @param idTableSchema the id table schema
+   * @param dataSetSchema the data set schema
+   * @return the field schemas
+   */
   public List<FieldSchemaVO> getFieldSchemas(String idTableSchema, DataSetSchemaVO dataSetSchema) {
     TableSchemaVO table = findTableSchema(idTableSchema, dataSetSchema);
     return table != null && table.getRecordSchema() != null
@@ -136,23 +151,23 @@ public class ParseCommon {
         : null;
   }
 
+  /**
+   * Gets the record values.
+   *
+   * @param idTableSchema the id table schema
+   * @return the record values
+   */
   public List<RecordValue> getRecordValues(String idTableSchema) {
     return sanitizeRecords(recordRepository.findByTableValueIdTableSchema(idTableSchema));
   }
 
 
-  // public String[] getListFieldsValues(String idTableSchema, DataSetSchemaVO dataSetSchema) {
-  // List<FieldValue> fieldValues;
-  // getFieldSchemas(idTableSchema, dataSetSchema).stream().forEach(fieldSchema -> {
-  // List<FieldValue> taka = fieldRepository.findByIdFieldSchema(fieldSchema.getId());
-  // });
-  //
-  // }
-
-  // public List<FieldValue> getListFieldsValues() {
-  //
-  // }
-
+  /**
+   * Sanitize records.
+   *
+   * @param records the records
+   * @return the list
+   */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<Long> processedRecords = new HashSet<>();
