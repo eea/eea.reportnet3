@@ -359,7 +359,7 @@ const dataTemplate = (rowData, column) =>{
             <Growl ref={growlRef} />
             <Dialog header={resources.messages["uploadDataset"]} visible={importDialogVisible}
                                 className={styles.Dialog} dismissableMask={false} onHide={onHideHandler} >
-                            <CustomFileUpload mode="advanced" name="file" url={`${config.api.protocol}${config.api.url}${config.api.port}${config.loadDataTableAPI.url}${props.id}`}
+                            <CustomFileUpload mode="advanced" name="file" url={`${window.REACT_APP_BACKEND}${config.loadDataTableAPI.url}${props.id}`}
                                                 onUpload={onUploadHandler} 
                                                 multiple={false} chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
                                                 fileLimit={1} className={styles.FileUpload}  /> 
