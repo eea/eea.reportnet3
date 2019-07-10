@@ -26,7 +26,6 @@
     <module>common-interfaces</module>
     <module>common-utitlities</module>
     <module>document-container-service</module>
-    <module>test-infrastructure</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
