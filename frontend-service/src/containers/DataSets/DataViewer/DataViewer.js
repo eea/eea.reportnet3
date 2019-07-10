@@ -448,7 +448,7 @@ const DataViewer = props => {
 				<CustomFileUpload
 					mode="advanced"
 					name="file"
-					url={`${window.env.API_URL}/dataset/${idDataSet}/loadTableData/${props.id}`}
+					url={`${window.env.REACT_APP_BACKEND}/dataset/${idDataSet}/loadTableData/${props.id}`}
 					onUpload={onUploadHandler}
 					multiple={false}
 					chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
@@ -462,12 +462,12 @@ const DataViewer = props => {
 					onConfirm={onConfirmDeleteHandler}
 					onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
 					visible={deleteDialogVisible}
-					header={resources.messages["deleteDatasetHeader"]}
+					header={resources.messages["deleteDatasetTableHeader"]}
 					maximizable={false}
 					labelConfirm={resources.messages["yes"]}
 					labelCancel={resources.messages["no"]}
 				>
-					{resources.messages["deleteDatasetConfirm"]}
+					{resources.messages["deleteDatasetTableConfirm"]}
 				</ConfirmDialog>
 			</ReporterDataSetContext.Provider>
 			<SnapshotSlideBar
