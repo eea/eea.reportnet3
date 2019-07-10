@@ -462,12 +462,12 @@ const DataViewer = props => {
 					onConfirm={onConfirmDeleteHandler}
 					onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
 					visible={deleteDialogVisible}
-					header={resources.messages["deleteDatasetHeader"]}
+					header={resources.messages["deleteDatasetTableHeader"]}
 					maximizable={false}
 					labelConfirm={resources.messages["yes"]}
 					labelCancel={resources.messages["no"]}
 				>
-					{resources.messages["deleteDatasetConfirm"]}
+					{resources.messages["deleteDatasetTableConfirm"]}
 				</ConfirmDialog>
 			</ReporterDataSetContext.Provider>
 			<SnapshotSlideBar
