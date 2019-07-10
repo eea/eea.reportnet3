@@ -3,7 +3,6 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -188,8 +187,8 @@ public interface DatasetService {
    * @throws EEAException
    * @throws IOException
    */
-  String exportFile(@DatasetId Long datasetId, String mimeType, HttpServletResponse response,
-      String idTableSchema) throws EEAException, IOException;
+  String exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
+      throws EEAException, IOException;
 
 
   /**

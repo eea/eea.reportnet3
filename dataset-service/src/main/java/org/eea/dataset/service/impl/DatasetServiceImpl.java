@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -931,16 +930,19 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   @Transactional
-  public String exportFile(Long datasetId, String mimeType, HttpServletResponse response,
-      final String idTableSchema) throws EEAException, IOException {
+  public String exportFile(Long datasetId, String mimeType, final String idTableSchema)
+      throws EEAException, IOException {
+    // Get the partition
     final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+
     if (partition == null) {
       throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
     }
     // Get the dataFlowId from the metabase
     final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
 
-    final IFileExportContext context = fileExportFactory.createContext(mimeType, response);
+    final IFileExportContext context = fileExportFactory.createContext(mimeType);
+    LOG.info("End of exportFile");
     return context.fileWriter(datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
 
   }

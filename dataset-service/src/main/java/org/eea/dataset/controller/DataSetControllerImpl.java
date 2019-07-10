@@ -418,10 +418,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  // public Response exportFile(Long datasetId, String idTableSchema) throws Exception {
-  public ResponseEntity exportFile() throws Exception {
-    // QUITAR HARDCODEOS
-    String file = datasetService.exportFile(1L, "csv", null, "5d0b8c1347e812844ce340ad");
+  public ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType)
+      throws Exception {
+    LOG.info("Init the export controller");
+    String file = datasetService.exportFile(1L, mimeType, idTableSchema);
 
     // set file name and content type
     String filename = datasetService.getFileName("csv", "5d0b8c1347e812844ce340ad", 1L);

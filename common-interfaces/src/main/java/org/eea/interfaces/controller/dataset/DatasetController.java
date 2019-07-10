@@ -200,9 +200,10 @@ public interface DatasetController {
   void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema);
 
-  // ResponseEntity exportFile(Long datasetId, String idTableSchema) throws Exception;
 
-  ResponseEntity exportFile() throws Exception;
+  // ResponseEntity exportFile() throws Exception;
+
+  ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType) throws Exception;
 
 
 }

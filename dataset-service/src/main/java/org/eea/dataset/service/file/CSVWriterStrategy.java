@@ -44,11 +44,10 @@ public class CSVWriterStrategy implements WriterStrategy {
   private HttpServletResponse response;
 
 
-  public CSVWriterStrategy(char delimiter, ParseCommon parseCommon, HttpServletResponse response) {
+  public CSVWriterStrategy(char delimiter, ParseCommon parseCommon) {
     super();
     this.delimiter = delimiter;
     this.parseCommon = parseCommon;
-    this.response = response;
   }
 
 
@@ -72,10 +71,22 @@ public class CSVWriterStrategy implements WriterStrategy {
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
 
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, '|', CSVWriter.NO_QUOTE_CHARACTER,
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.NO_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
+    setLines(idTableSchema, dataSetSchema, csvWriter);
 
+    // UNA VEZ LEIDO VOLCAMOS A STRING
+    String csv = writer.getBuffer().toString();
+
+    return csv;
+
+  }
+
+
+
+  private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
+      CSVWriter csvWriter) {
     List<RecordValue> records = parseCommon.getRecordValues(idTableSchema);
     List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<String> headers = new ArrayList<>();
@@ -98,14 +109,6 @@ public class CSVWriterStrategy implements WriterStrategy {
       });
       csvWriter.writeNext(fieldsList.stream().toArray(String[]::new));
     }
-
-
-    // UNA VEZ LEIDO VOLCAMOS A STRING
-    String csv = writer.getBuffer().toString();
-
-    return csv;
-
-    // return parseCommon.getTableName(idTableSchema, dataSetSchema);
   }
 
 

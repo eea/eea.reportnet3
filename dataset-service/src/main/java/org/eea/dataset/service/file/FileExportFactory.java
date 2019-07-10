@@ -1,6 +1,5 @@
 package org.eea.dataset.service.file;
 
-import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +30,12 @@ public class FileExportFactory implements IFileExportFactory {
    * @return the i file parse contextd
    */
   @Override
-  public IFileExportContext createContext(String mimeType, HttpServletResponse response) {
+  public IFileExportContext createContext(String mimeType) {
     FileExportContextImpl context = null;
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context =
-            new FileExportContextImpl(new CSVWriterStrategy(delimiter, parseCommon, response));
+        context = new FileExportContextImpl(new CSVWriterStrategy(delimiter, parseCommon));
         break;
       case "xml":
         // Fill it with the xml strategy
