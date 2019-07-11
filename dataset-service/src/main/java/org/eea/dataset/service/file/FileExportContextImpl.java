@@ -34,7 +34,7 @@ public class FileExportContextImpl implements IFileExportContext {
    * @throws IOException
    */
   @Override
-  public String fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
+  public byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
       throws InvalidFileException, IOException {
     return writerStrategy.writeFile(dataflowId, partitionId, idTableSchema);
   }

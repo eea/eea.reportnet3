@@ -930,7 +930,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Override
   @Transactional
-  public String exportFile(Long datasetId, String mimeType, final String idTableSchema)
+  public byte[] exportFile(Long datasetId, String mimeType, final String idTableSchema)
       throws EEAException, IOException {
     // Get the partition
     final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);

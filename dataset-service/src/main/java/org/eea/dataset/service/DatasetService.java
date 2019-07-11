@@ -187,7 +187,7 @@ public interface DatasetService {
    * @throws EEAException
    * @throws IOException
    */
-  String exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
+  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
       throws EEAException, IOException;
 
 

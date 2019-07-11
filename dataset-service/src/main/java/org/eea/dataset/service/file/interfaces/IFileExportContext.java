@@ -19,6 +19,6 @@ public interface IFileExportContext {
    * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  String fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
+  byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
       throws InvalidFileException, IOException;
 }

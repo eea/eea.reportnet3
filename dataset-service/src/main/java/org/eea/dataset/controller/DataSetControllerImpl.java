@@ -421,14 +421,14 @@ public class DataSetControllerImpl implements DatasetController {
   public ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType)
       throws Exception {
     LOG.info("Init the export controller");
-    String file = datasetService.exportFile(1L, mimeType, idTableSchema);
+    byte[] file = datasetService.exportFile(1L, mimeType, idTableSchema);
 
     // set file name and content type
-    String filename = datasetService.getFileName("csv", "5d0b8c1347e812844ce340ad", 1L);
+    String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
 
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-    return new ResponseEntity(file.getBytes(), httpHeaders, HttpStatus.OK);
+    return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
   }
 
 }

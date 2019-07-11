@@ -64,7 +64,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @throws IOException
    */
   @Override
-  public String writeFile(final Long dataflowId, final Long partitionId, final String idTableSchema)
+  public byte[] writeFile(final Long dataflowId, final Long partitionId, final String idTableSchema)
       throws InvalidFileException, IOException {
     LOG.info("starting csv file writter");
 
@@ -79,7 +79,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     // UNA VEZ LEIDO VOLCAMOS A STRING
     String csv = writer.getBuffer().toString();
 
-    return csv;
+    return csv.getBytes();
 
   }
 
