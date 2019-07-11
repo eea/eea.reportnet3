@@ -51,9 +51,10 @@ public class FileExportContextImplTest {
    */
   @Test
   public void testFileWriter() throws InvalidFileException, IOException {
+    byte[] expectedResult = "".getBytes();
     Mockito.when(writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn("");
-    assertEquals("", fileExportContextImpl.fileWriter(1L, 1L, ""));
+        .thenReturn(expectedResult);
+    assertEquals(expectedResult, fileExportContextImpl.fileWriter(1L, 1L, ""));
   }
 
 }

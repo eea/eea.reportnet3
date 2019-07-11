@@ -767,6 +767,7 @@ public class DatasetServiceTest {
 
   @Test
   public void exportFileTest() throws EEAException, IOException {
+    byte[] expectedResult = "".getBytes();
     DataSetMetabase dataset = new DataSetMetabase();
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     dataset.setDataflowId(1L);
@@ -775,8 +776,9 @@ public class DatasetServiceTest {
         Mockito.any())).thenReturn(Optional.of(partition));
     when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("");
-    assertEquals("not equals", "", datasetService.exportFile(1L, "csv", ""));
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(expectedResult);
+    assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
   }
 
   @Test

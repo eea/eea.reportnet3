@@ -644,7 +644,7 @@ public class DataSetControllerImplTest {
   @Test
   public void exportFile() throws Exception {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn("");
+        .thenReturn("".getBytes());
     dataSetControllerImpl.exportFile(1L, "id", "csv");
   }
 }
