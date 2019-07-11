@@ -1,10 +1,13 @@
 .userProfileCard div{
-    padding: 5px;
+    /* padding: 5px; */
     display: inline-block;  
 }
 
 .userProfile{
-    font-size: 0.8em;  
+    /* font-size: 0.8em;   */
+    display: inline;
+    margin: 10px;
+    vertical-align: middle;
 }
 
 .userProfile .avatar {
@@ -13,6 +16,11 @@
     border-radius: 50%;     
     vertical-align: middle;
   
+}
+
+i {
+    vertical-align: middle;
+    display: inline;
 }
 
 .logOut{
