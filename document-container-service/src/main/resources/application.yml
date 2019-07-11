@@ -3,7 +3,12 @@ server:
 spring:
   application:
     name: document
-
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 500MB
+        
+        
   cloud:
     consul:
       discovery:

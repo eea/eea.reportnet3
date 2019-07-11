@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.document;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,5 +39,15 @@ public interface DocumentController {
    */
   @GetMapping
   ResponseEntity<Resource> getDocument(final String documentName, final Long dataFlowId);
+
+  /**
+   * Delete document.
+   *
+   * @param documentName the document name
+   * @param dataFlowId the data flow id
+   * @throws Exception the exception
+   */
+  @DeleteMapping
+  void deleteDocument(final String documentName, final Long dataFlowId) throws Exception;
 
 }
