@@ -9,10 +9,10 @@ const Navigation = () => {
     return (           
       <div id="header" className={styles.header}>
         <div className={styles.headerLeft}>
-          <h1><a href="#home" className="appLogo" title={resources.messages["titleHeader"]}>
-              <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo}>
-              </img>{resources.messages["titleHeader"]}</a>
-          </h1>
+          <a href="#home" className={styles.appLogo} title={resources.messages["titleHeader"]}>
+            <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo}></img>
+            <h1 className={styles.appTitle}>{resources.messages["titleHeader"]}</h1>     
+          </a>
         </div>
         <div className={styles.headerRight}>
           <UserCard/>

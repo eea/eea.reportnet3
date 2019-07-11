@@ -6,12 +6,21 @@
 .header h1 {
 	margin-bottom: 0;
 	margin-top: 0;
+	color: #004494;
 }
 
 .appLogo {
 	vertical-align: middle;
+	text-align: center;
+    display: inline;
 }
 
+.appTitle{
+    vertical-align: middle;
+    text-align: center;
+    display: inline;
+    margin: 10px;
+}
 /* Float sections to the right and left */
 .headerRight {
 	float: right;
