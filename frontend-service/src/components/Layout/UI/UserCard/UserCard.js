@@ -9,12 +9,15 @@ const UserCard = () => {
         <div id="userProfile" className={styles.userProfileCard}>  
             <div className={styles.userProfile}>    
                 <a href="#userProfilePage" title="Edit user profile">
-                    <img className={styles.avatar} alt="User Profile" src="https://image.flaticon.com/icons/svg/149/149071.svg"/> User
+                    <img className={styles.avatar} alt="User Profile" 
+                         src="https://image.flaticon.com/icons/svg/149/149071.svg"/>
+                    <h5 className={styles.userProfile}>User</h5>
+                    <i className={resources.icons["logout"]}></i>
                 </a>
             </div>
-            <div className={styles.logOut}>
+            {/* <div className={styles.logOut}>
                 <a href="#logOut" title="Log out"><i className={resources.icons["logout"]}></i></a>
-            </div>
+            </div> */}
         </div>
     );
 }
