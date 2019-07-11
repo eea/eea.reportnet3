@@ -20,6 +20,10 @@ import lombok.NoArgsConstructor;
 /**
  * Instantiates a new CSV writer strategy.
  */
+
+/**
+ * Instantiates a new CSV writer strategy.
+ */
 @NoArgsConstructor
 public class CSVWriterStrategy implements WriterStrategy {
 
@@ -38,12 +42,20 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   private char delimiter;
 
+  /** The parse common. */
   private ParseCommon parseCommon;
 
 
+  /** The response. */
   private HttpServletResponse response;
 
 
+  /**
+   * Instantiates a new CSV writer strategy.
+   *
+   * @param delimiter the delimiter
+   * @param parseCommon the parse common
+   */
   public CSVWriterStrategy(char delimiter, ParseCommon parseCommon) {
     super();
     this.delimiter = delimiter;
@@ -55,13 +67,12 @@ public class CSVWriterStrategy implements WriterStrategy {
   /**
    * Parses the file.
    *
-   * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the data set VO
    * @throws InvalidFileException the invalid file exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public String writeFile(final Long dataflowId, final Long partitionId, final String idTableSchema)
@@ -70,13 +81,14 @@ public class CSVWriterStrategy implements WriterStrategy {
 
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
 
+    // Init the writer
     StringWriter writer = new StringWriter();
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.NO_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
     setLines(idTableSchema, dataSetSchema, csvWriter);
 
-    // UNA VEZ LEIDO VOLCAMOS A STRING
+    // once read we convert it to string
     String csv = writer.getBuffer().toString();
 
     return csv;
@@ -85,14 +97,23 @@ public class CSVWriterStrategy implements WriterStrategy {
 
 
 
+  /**
+   * Sets the lines.
+   *
+   * @param idTableSchema the id table schema
+   * @param dataSetSchema the data set schema
+   * @param csvWriter the csv writer
+   */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
       CSVWriter csvWriter) {
     List<RecordValue> records = parseCommon.getRecordValues(idTableSchema);
     List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<String> headers = new ArrayList<>();
 
+    // Writting the headers
     fieldSchemas.stream().forEach(fieldSchema -> headers.add(fieldSchema.getName()));
     csvWriter.writeNext(headers.stream().toArray(String[]::new));
+    // Writting the values
     for (RecordValue recordValue : records) {
       List<String> fieldsList = new ArrayList<>();
       fieldSchemas.stream().forEach(fieldSchema -> {
@@ -106,9 +127,11 @@ public class CSVWriterStrategy implements WriterStrategy {
           }
         }
         if (isWhite) {
+          // if the value does not exist we write a white space
           fieldsList.add("");
         }
       });
+      // Write Line
       csvWriter.writeNext(fieldsList.stream().toArray(String[]::new));
     }
   }

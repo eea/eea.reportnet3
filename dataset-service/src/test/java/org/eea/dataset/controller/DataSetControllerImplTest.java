@@ -640,4 +640,11 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any());
     dataSetControllerImpl.insertRecords(1L, "id", records);
   }
+
+  @Test
+  public void exportFile() throws Exception {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("");
+    dataSetControllerImpl.exportFile(1L, "id", "csv");
+  }
 }

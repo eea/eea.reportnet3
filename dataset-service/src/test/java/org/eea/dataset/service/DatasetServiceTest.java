@@ -47,6 +47,9 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
+import org.eea.dataset.service.file.ParseCommon;
+import org.eea.dataset.service.file.interfaces.IFileExportContext;
+import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -56,6 +59,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.junit.Assert;
@@ -158,6 +162,14 @@ public class DatasetServiceTest {
   @Mock
   private DatasetValidationRepository datasetValidationRepository;
 
+  @Mock
+  private IFileExportFactory fileExportFactory;
+
+  @Mock
+  private IFileExportContext contextExport;
+
+  @Mock
+  private ParseCommon parseCommon;
 
   private FieldValue fieldValue;
   private RecordValue recordValue;
@@ -752,4 +764,28 @@ public class DatasetServiceTest {
     datasetService.deleteRecords(1L, new ArrayList<Long>());
     Mockito.verify(recordRepository, times(1)).deleteRecordsWithIds(Mockito.any());
   }
+
+  @Test
+  public void exportFileTest() throws EEAException, IOException {
+    DataSetMetabase dataset = new DataSetMetabase();
+    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
+    dataset.setDataflowId(1L);
+    partition.setId(1L);
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
+        Mockito.any())).thenReturn(Optional.of(partition));
+    when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
+    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("");
+    assertEquals("not equals", "", datasetService.exportFile(1L, "csv", ""));
+  }
+
+  @Test
+  public void getFileNameTest() throws EEAException {
+    DataSetMetabase dataset = new DataSetMetabase();
+    when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
+    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(new DataSetSchemaVO());
+    when(parseCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
+    assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
+  }
+
 }

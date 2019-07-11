@@ -247,9 +247,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
-      if (partition == null) {
-        throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
-      }
+
       // Get the dataFlowId from the metabase
       final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
       // create the right file parser for the file type
@@ -308,6 +306,7 @@ public class DatasetServiceImpl implements DatasetService {
     final DataSetMetabase datasetMetabase =
         dataSetMetabaseRepository.findById(datasetId).orElse(null);
     if (datasetMetabase == null) {
+      LOG_ERROR.error(EEAErrorMessage.DATASET_NOTFOUND);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     return datasetMetabase;
@@ -329,7 +328,8 @@ public class DatasetServiceImpl implements DatasetService {
     final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
     if (partition == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+      LOG_ERROR.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
     }
     return partition;
   }
@@ -935,9 +935,6 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the partition
     final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
-    if (partition == null) {
-      throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
-    }
     // Get the dataFlowId from the metabase
     final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
 
