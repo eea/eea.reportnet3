@@ -1,7 +1,7 @@
 .header {
 	overflow: hidden;
 	background-color: #ffffff;
-	padding: 15px 0px;
+	padding: 0px 0px;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
