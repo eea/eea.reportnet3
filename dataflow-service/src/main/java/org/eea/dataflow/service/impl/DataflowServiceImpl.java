@@ -5,9 +5,12 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
-import org.eea.dataflow.persistence.repository.DataflowWithRequestType;
+import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -31,6 +34,14 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
+
+  /** The user request repository. */
+  @Autowired
+  private UserRequestRepository userRequestRepository;
+
+  @Autowired
+  private ContributorRepository contributorRepository;
+
 
   /** The dataflow mapper. */
   @Autowired
@@ -112,6 +123,7 @@ public class DataflowServiceImpl implements DataflowService {
       for (int i = 0; i < dataflowVOs.size(); i++) {
         if (df.getDataflow().getId().equals(dataflowVOs.get(i).getId())) {
           dataflowVOs.get(i).setUserRequestStatus(df.getTypeRequestEnum());
+          dataflowVOs.get(i).setRequestId(df.getRequestId());
         }
       }
     }
@@ -155,6 +167,54 @@ public class DataflowServiceImpl implements DataflowService {
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
     return dataflowNoContentMapper.entityListToClass(dataflows);
+
+  }
+
+  /**
+   * Update user request status.
+   *
+   * @param userRequestId the user request id
+   * @param type the type
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
+      throws EEAException {
+
+    userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
+    LOG.info("Update the request status of the requestId: {}. New status: {}", userRequestId, type);
+  }
+
+  /**
+   * Adds the contributor to dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException {
+
+    Contributor contributor = new Contributor();
+    contributor.setUserId(idContributor);
+    Dataflow dataflow = dataflowRepository.findById(idDataflow).orElse(new Dataflow());
+    contributor.setDataflow(dataflow);
+
+    contributorRepository.save(contributor);
+  }
+
+  /**
+   * Removes the contributor from dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void removeContributorFromDataflow(Long idDataflow, Long idContributor)
+      throws EEAException {
+
+    contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
 
   }
 

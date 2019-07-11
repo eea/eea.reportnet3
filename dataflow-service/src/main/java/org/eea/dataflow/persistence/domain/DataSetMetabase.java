@@ -45,6 +45,10 @@ public class DataSetMetabase {
   @Column(name = "DATASET_NAME")
   private String dataSetName;
 
+  /** The dataflow id. */
+  @Column(name = "DataflowId")
+  private Long dataflowId;
+
   /** The creation date. */
   @Column(name = "DATE_CREATION")
   private Date creationDate;

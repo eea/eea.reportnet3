@@ -28,7 +28,7 @@ public interface DatasetMetabaseController {
    * @return the list
    */
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataSetMetabaseVO> findDataSetIdByDataflowId(final @PathVariable("id") Long idDataflow);
+  List<DataSetMetabaseVO> findDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
 
 }

@@ -1,7 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.springframework.data.jpa.repository.Query;
@@ -87,7 +87,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    */
   @Query("SELECT fv.record.id from FieldValue fv WHERE fv.fieldValidations IS NOT EMPTY "
       + " AND fv.record.tableValue.datasetId.id=?1 and fv.record.tableValue.idTableSchema=?2")
-  HashSet<Long> findRecordIdWithValidations(Long datasetId, String idTableSchema);
+  Set<Long> findRecordIdWithValidations(Long datasetId, String idTableSchema);
 
 
   /**
@@ -102,9 +102,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " WHERE rv.recordValue.tableValue.datasetId.id=:datasetId "
       + " AND rv.recordValue.tableValue.idTableSchema=:idTableSchema "
       + " AND rv.validation.levelError=:typeError")
-  HashSet<Long> findRecordIdFromRecordWithValidationsByLevelError(
-      @Param("datasetId") Long datasetId, @Param("idTableSchema") String idTableSchema,
-      @Param("typeError") TypeErrorEnum typeError);
+  Set<Long> findRecordIdFromRecordWithValidationsByLevelError(@Param("datasetId") Long datasetId,
+      @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
 
   /**
@@ -119,7 +118,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=:datasetId "
       + " AND fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema "
       + " AND fv.validation.levelError=:typeError")
-  HashSet<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
+  Set<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
       @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
 

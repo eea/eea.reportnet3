@@ -53,9 +53,12 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_NOTFOUND. */
   public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
 
-  /** The Constant DOCUMENT_UPLOAD_ERROR. */
-  public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
+/** The Constant USER_REQUEST_NOTFOUND. */
+  public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
+ /** The Constant DOCUMENT_UPLOAD_ERROR. */
+  public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
+  
   /** The Constant DOCUMENT_DOWNLOAD_ERROR. */
   public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
 

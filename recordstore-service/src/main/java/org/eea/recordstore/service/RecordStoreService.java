@@ -1,6 +1,5 @@
 package org.eea.recordstore.service;
 
-import java.io.IOException;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
