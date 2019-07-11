@@ -75,8 +75,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public byte[] writeFile(final Long dataflowId, final Long partitionId, final String idTableSchema)
-      throws InvalidFileException, IOException {
+  public byte[] writeFile(final Long dataflowId, final Long partitionId,
+      final String idTableSchema) {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);

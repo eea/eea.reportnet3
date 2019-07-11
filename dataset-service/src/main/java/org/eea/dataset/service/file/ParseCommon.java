@@ -67,7 +67,7 @@ public class ParseCommon {
    *
    * @return the table schema
    */
-  private TableSchemaVO findTableSchema(String idTableSchema, DataSetSchemaVO dataSetSchema) {
+  public TableSchemaVO findTableSchema(String idTableSchema, DataSetSchemaVO dataSetSchema) {
     // Find the tableSchema of MongoDB
     List<TableSchemaVO> tablesSchema = null;
     if (null != dataSetSchema) {
@@ -82,7 +82,6 @@ public class ParseCommon {
     }
     return null;
   }
-
 
   /**
    * Find id field schema.

@@ -20,6 +20,5 @@ public interface WriterStrategy {
    * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  byte[] writeFile(Long dataflowId, Long partitionId, String idTableSchema)
-      throws InvalidFileException, IOException;
+  byte[] writeFile(Long dataflowId, Long partitionId, String idTableSchema);
 }
