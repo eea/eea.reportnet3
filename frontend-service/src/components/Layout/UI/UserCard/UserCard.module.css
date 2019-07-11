@@ -1,29 +1,31 @@
-.userProfileCard div{
-    /* padding: 5px; */
-    display: inline-block;  
+.userProfileCard div {
+	/* padding: 5px; */
+	display: inline-block;
 }
 
-.userProfile{
-    /* font-size: 0.8em;   */
-    display: inline;
-    margin: 10px;
-    vertical-align: middle;
+.userProfile {
+	padding: 10px;
+}
+.userProfile > a {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
 }
 
 .userProfile .avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;     
-    vertical-align: middle;
-  
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	vertical-align: middle;
 }
 
 i {
-    vertical-align: middle;
-    display: inline;
+	vertical-align: middle;
+	display: inline;
 }
 
-.logOut{
-    font-size: 18px;
-    vertical-align: middle;
+.logOut {
+	font-size: 18px;
+	vertical-align: middle;
 }
