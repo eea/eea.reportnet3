@@ -13,5 +13,9 @@
 }
 
 .warning > span {
-    color:red;
-  }
+  color:red;
+}
+
+:global .p-tabview.p-tabview-top {
+  padding-bottom: 80px;
+}
