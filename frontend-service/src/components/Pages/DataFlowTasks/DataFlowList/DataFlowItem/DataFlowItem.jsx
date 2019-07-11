@@ -46,7 +46,7 @@ const DataFlowItem = props => {
 
 			<div className={`${styles.card_component_content} `}>
 				<div className={`${styles.card_component_content_date}`}>
-					<span>{moment(itemContent.deadlineDate).format()}</span>
+					<span>{moment(itemContent.deadlineDate).format("YYYY-MM-DD")}</span>
 				</div>
 				<h3 className={`${styles.card_component_content_title}`}>
 					{itemContent.name}
