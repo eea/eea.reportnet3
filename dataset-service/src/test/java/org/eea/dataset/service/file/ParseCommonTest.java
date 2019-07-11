@@ -3,7 +3,6 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,6 +109,47 @@ public class ParseCommonTest {
   @Test
   public void testFindIdFieldSchemaNull() {
     assertNull("fail", parseCommon.findIdFieldSchema(null, null, dataset));
+  }
+
+  /**
+   * Gets the id table schema.
+   *
+   * @return the id table schema
+   */
+  @Test
+  public void getIdTableSchema() {
+    assertEquals("fail", dataset.getTableSchemas().get(0).getIdTableSchema(),
+        parseCommon.getIdTableSchema(ID, dataset));
+  }
+
+  /**
+   * Gets the id table schema null.
+   *
+   * @return the id table schema null
+   */
+  @Test
+  public void getIdTableSchemaNull() {
+    assertNull("fail", parseCommon.getIdTableSchema(null, dataset));
+  }
+
+  /**
+   * Gets the id table schema null 2.
+   *
+   * @return the id table schema null 2
+   */
+  @Test
+  public void getIdTableSchemaNull2() {
+    assertNull("fail", parseCommon.getIdTableSchema("2", dataset));
+  }
+
+  /**
+   * Gets the id table schema null 3.
+   *
+   * @return the id table schema null 3
+   */
+  @Test
+  public void getIdTableSchemaNull3() {
+    assertNull("fail", parseCommon.getIdTableSchema(ID, null));
   }
 
   /**

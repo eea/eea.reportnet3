@@ -28,13 +28,28 @@ public class FileParserFactoryTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
   /**
    * Test create context csv.
    */
   @Test
   public void testCreateContextCsv() {
     assertNotNull("is null", fileParserFactory.createContext("csv"));
+  }
+
+  /**
+   * Test create context xls.
+   */
+  @Test
+  public void testCreateContextXls() {
+    assertNotNull("is null", fileParserFactory.createContext("xls"));
+  }
+
+  /**
+   * Test create context xlsx.
+   */
+  @Test
+  public void testCreateContextXlsx() {
+    assertNotNull("is null", fileParserFactory.createContext("xlsx"));
   }
 
   /**

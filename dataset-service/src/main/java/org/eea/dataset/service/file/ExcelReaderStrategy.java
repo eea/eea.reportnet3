@@ -10,6 +10,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.eea.dataset.exception.InvalidFileException;
@@ -41,7 +42,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
   }
 
   /**
-   * Parses the file.
+   * Parses the file reading each sheet of the file and creating a table with the sheet's name.
+   * idTableSchema is not used in this method.
    *
    * @param inputStream the input stream
    * @param dataflowId the dataflow id
@@ -57,8 +59,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     LOG.info("Starting Excel file read");
 
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
-    List<FieldSchemaVO> headers;
-    List<RecordVO> records;
+
+    List<TableVO> tables;
     DataSetVO dataset;
 
     // Open Excel file
@@ -67,8 +69,45 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       // Initialize the data formatter for cells content
       DataFormatter dataFormatter = new DataFormatter();
 
-      // Get the row iterator from the first document's sheet
-      Iterator<Row> rowIterator = workbook.getSheetAt(0).rowIterator();
+      tables = readOverSheets(partitionId, dataSetSchema, workbook, dataFormatter);
+
+      // Create a new dataset (DataSetVO)
+      dataset = createDataSetVO(dataSetSchema, tables);
+
+      inputStream.close();
+
+      LOG.info("Ending Excel file read");
+
+      return dataset;
+
+    } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
+    }
+  }
+
+  /**
+   * Read over sheets.
+   *
+   * @param partitionId the partition id
+   * @param dataSetSchema the data set schema
+   * @param workbook the workbook
+   * @param dataFormatter the data formatter
+   * @return the list
+   */
+  private List<TableVO> readOverSheets(Long partitionId, DataSetSchemaVO dataSetSchema,
+      Workbook workbook, DataFormatter dataFormatter) {
+
+    List<TableVO> tables = new ArrayList<>();
+    String idTableSchema;
+    List<FieldSchemaVO> headers;
+    List<RecordVO> records;
+
+    for (Sheet sheet : workbook) {
+
+      idTableSchema = parseCommon.getIdTableSchema(sheet.getSheetName(), dataSetSchema);
+
+      // Get the row iterator
+      Iterator<Row> rowIterator = sheet.rowIterator();
 
       // Get the first row (it should contain headers)
       Row headersRow = rowIterator.next();
@@ -80,18 +119,10 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       records = readRecords(rowIterator, headers, dataFormatter, partitionId, idTableSchema,
           dataSetSchema);
 
-      // Create a new dataset (DataSetVO)
-      dataset = createDataSetVO(dataSetSchema, records, idTableSchema);
-
-      inputStream.close();
-
-      LOG.info("Ending Excel file read");
-
-      return dataset;
-
-    } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
-      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
+      tables.add(createTableVO(records, idTableSchema));
     }
+
+    return tables;
   }
 
   /**
@@ -118,10 +149,15 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       // Read and parse the cell content
       value = dataFormatter.formatCellValue(cell);
 
+      // Check if the cell is empty to stop adding headers
+      if (value.isEmpty()) {
+        break;
+      }
+
       // Search the FieldSchema with the given name (value)
       header = parseCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
 
-      // Create a new FieldSchema it wasn't found
+      // Create a new FieldSchema if it wasn't found
       if (header == null) {
         header = new FieldSchemaVO();
         header.setName(value);
@@ -156,6 +192,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     // Create a new record from each row
     while (rowIterator.hasNext()) {
 
+      boolean rowIsEmpty = true;
+
       // Get the next row
       Row recordRow = rowIterator.next();
       RecordVO record = new RecordVO();
@@ -168,16 +206,38 @@ public class ExcelReaderStrategy implements ReaderStrategy {
         field.setType(headers.get(i).getType());
         field.setValue(dataFormatter.formatCellValue(recordRow.getCell(i)));
         fields.add(field);
+        if (!field.getValue().isEmpty()) {
+          rowIsEmpty = false;
+        }
       }
 
-      // Create the new record
-      record.setFields(fields);
-      record.setIdRecordSchema(parseCommon.findIdRecord(idTableSchema, dataSetSchema));
-      record.setDatasetPartitionId(partitionId);
-      records.add(record);
+      // Create the new record if the entire row is not empty
+      if (!rowIsEmpty) {
+        record.setFields(fields);
+        record.setIdRecordSchema(parseCommon.findIdRecord(idTableSchema, dataSetSchema));
+        record.setDatasetPartitionId(partitionId);
+        records.add(record);
+      }
     }
 
     return records;
+  }
+
+  /**
+   * Creates the table VO.
+   *
+   * @param records the records
+   * @param idTableSchema the id table schema
+   * @return the table VO
+   */
+  private TableVO createTableVO(List<RecordVO> records, String idTableSchema) {
+
+    TableVO tableVO = new TableVO();
+
+    tableVO.setRecords(records);
+    tableVO.setIdTableSchema(idTableSchema);
+
+    return tableVO;
   }
 
   /**
@@ -188,21 +248,14 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param idTableSchema the id table schema
    * @return the data set VO
    */
-  private DataSetVO createDataSetVO(DataSetSchemaVO dataSetSchema, List<RecordVO> records,
-      String idTableSchema) {
+  private DataSetVO createDataSetVO(DataSetSchemaVO dataSetSchema, List<TableVO> tables) {
 
     LOG.info("Creating DataSetVO");
 
     DataSetVO dataset = new DataSetVO();
-    TableVO tableVO = new TableVO();
-    List<TableVO> tables = new ArrayList<>();
-
-    tableVO.setRecords(records);
-    tableVO.setIdTableSchema(idTableSchema);
-
-    tables.add(tableVO);
 
     dataset.setTableVO(tables);
+
     // Set the idDatasetSchema if the dataSetSchema exists
     if (dataSetSchema != null) {
       dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema());
