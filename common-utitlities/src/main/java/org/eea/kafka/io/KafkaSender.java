@@ -48,7 +48,8 @@ public class KafkaSender {
     final List<PartitionInfo> partitions = kafkaTemplate
         .partitionsFor(event.getEventType().getTopic());
     // partition = hash(message_key)%number_of_partitions
-    final Integer partitionId = event.getEventType().getKey().hashCode() % partitions.size();
+    final Integer partitionId = Math
+        .floorMod(event.getEventType().getKey().hashCode(), partitions.size());
 
     final Message<EEAEventVO> message =
         MessageBuilder.withPayload(event).setHeader(KafkaHeaders.PARTITION_ID, partitionId)
