@@ -15,6 +15,7 @@ import org.keycloak.TokenVerifier;
 import org.keycloak.TokenVerifier.TokenTypeCheck;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,31 +44,13 @@ public class JwtTokenProvider {
 
   }
 
-  public String getUserIdFromJWT(String token) {
-   /* Claims claims = Jwts.parser()
-        .setSigningKey(jwtSecret)
-        .parseClaimsJws(token)
-        .getBody();
 
-    return claims.getSubject();*/
-    return "user1";
-  }
+  public JsonWebToken retrieveToken(String authToken) throws VerificationException {
 
-  public boolean validateToken(String authToken) {
+    TokenVerifier token = TokenVerifier.create(authToken, AccessToken.class).publicKey(publicKey)
+        .withChecks(SUBJECT_EXISTS_CHECK,
+            IS_ACTIVE).verify();
 
-    boolean validated = false;
-    try {
-
-      TokenVerifier token = TokenVerifier.create(authToken, AccessToken.class).publicKey(publicKey)
-          .withChecks(SUBJECT_EXISTS_CHECK,
-              IS_ACTIVE)
-          .verify();
-
-      validated = true;
-    } catch (
-        VerificationException e) {
-      e.printStackTrace();
-    }
-    return validated;
+    return token.getToken();
   }
 }

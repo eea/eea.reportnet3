@@ -1,11 +1,16 @@
 package org.eea.security.jwt.utils;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +45,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
     try {
       String jwt = getJwtFromRequest(request);
-
-      if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+      AccessToken token = null;
+      if (StringUtils.hasText(jwt)
+          && (token = (AccessToken) tokenProvider.retrieveToken(jwt)) != null) {
         //TODO Se pueden obtener las authorities del jwt, pq de hecho, keycloak lo hará así
-        String username = tokenProvider.getUserIdFromJWT(jwt);
+        String username = token.getPreferredUsername();
+        Map<String, Object> otherClaims = token.getOtherClaims();
 
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        Set<String> roles = token.getRealmAccess().getRoles();
+        List<String> groups = (List<String>) otherClaims.get("user_groups");
+        if (null != groups && groups.size() > 0) {
+          groups.stream().map(group -> {
+            if (group.startsWith("/")) {
+              group = group.substring(1);
+            }
+            return group.toUpperCase();
+          }).forEach(roles::add);
+        }
+        UserDetails userDetails = EeaUserDetails.create(username, roles);
+
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userDetails, null, userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

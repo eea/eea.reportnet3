@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +26,25 @@ public class EeaUserDetails implements UserDetails {
     principal.setUsername(username);
     principal.setPassword(username);
     List<GrantedAuthority> authorities = new ArrayList<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
+    authorities.add(new SimpleGrantedAuthority("ROLE_STEWARD"));
+    authorities.add(new SimpleGrantedAuthority("ROLE_REQUESTOR"));
+    principal.setAuthorities(authorities);
+
+    return principal;
+  }
+
+  public static EeaUserDetails create(String username, Set<String> roles) {
+    EeaUserDetails principal = new EeaUserDetails();
+    principal.setUsername(username);
+    List<GrantedAuthority> authorities = new ArrayList<>();
+    roles.stream().forEach(role -> {
+      if (!role.startsWith("ROLE_")) {
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+      } else {
+        authorities.add(new SimpleGrantedAuthority(role));
+      }
+    });
     authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
     authorities.add(new SimpleGrantedAuthority("ROLE_STEWARD"));
     authorities.add(new SimpleGrantedAuthority("ROLE_REQUESTOR"));

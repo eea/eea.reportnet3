@@ -70,6 +70,7 @@ public class KeycloakConnectorService {
                 .buildAndExpand(uriParams).toString(),
             request,
             TokenInfo.class);
+
     return tokenInfo.getBody().getAccessToken();
 
   }
