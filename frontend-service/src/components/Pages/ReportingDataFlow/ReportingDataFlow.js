@@ -88,7 +88,7 @@ const ReportingDataFlow = ({ history, match }) => {
 			/>
 			<div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
 				<h2 className={styles.title}>
-					<IconComponent icon={config.icons.shoppingCart} />
+					<IconComponent icon={resources.icons["shoppingCart"]} />
 					{dataFlowData.name}
 				</h2>
 
