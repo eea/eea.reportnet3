@@ -19,9 +19,10 @@ import config from "../../../conf";
 //example of a namespace to messages keys
 const i18nKey = "app.components.pages.dataFlowTasks";
 
-const DataFlowTasks = () => {
+const DataFlowTasks = ({ match, history }) => {
 	const resources = useContext(ResourcesContext);
 
+	const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 	const [tabMenuItems, setTabMenuItems] = useState([
 		{
 			label: resources.messages["dataFlowAcceptedPendingTab"],
@@ -37,7 +38,10 @@ const DataFlowTasks = () => {
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 	const [tabData, setTabData] = useState([]);
-	const home = { icon: resources.icons["home"], url: "/" };
+	const home = {
+		icon: resources.icons["home"],
+		command: () => history.push("/")
+	};
 
 	useEffect(() => {
 		const c = {
@@ -84,10 +88,15 @@ const DataFlowTasks = () => {
 			});
 	}, [resources.messages, tabMenuActiveItem]);
 
+	//Bread Crumbs settings
+	useEffect(() => {
+		setBreadCrumbItems([{ label: resources.messages["dataFlowTask"] }]);
+	}, [history, match.params.id, resources.messages]);
+
 	return (
 		<MainLayout>
 			<BreadCrumb
-				model={[{ label: "Reporting data flow", url: "" }]}
+				model={breadCrumbItems}
 				home={home}
 			/>
 			<div className="rep-container">

@@ -19,7 +19,7 @@ import styles from "./ReporterDataSet.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
 import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
-const ReporterDataSet = ({match}) => {
+const ReporterDataSet = ({match, history}) => {
 	const { params: {id : idDataSet} } = match;
 	const resources = useContext(ResourcesContext);
 	const [datasetTitle, setDatasetTitle] = useState("");
@@ -37,14 +37,24 @@ const ReporterDataSet = ({match}) => {
 	const [activeIndex, setActiveIndex] = useState();
 	const [positionIdObject, setPositionIdObject] = useState(0);
 
-	const home = { icon: resources.icons["home"], url: "/" };
+	const home = {
+		icon: resources.icons["home"],
+		command: () => history.push("/")
+	};
 
 	useEffect(() => {
 		console.log("ReporterDataSet useEffect");
 
 		setBreadCrumbItems([
-			{ label: resources.messages["dataFlowTask"], url: "/data-flow-task/" },
-			{ label: resources.messages["reportingDataFlow"], url: "#" },
+			{
+			  label: resources.messages["dataFlowTask"],
+			  command: () => history.push("/data-flow-task")
+			},
+			{
+			  label: resources.messages["reportingDataFlow"],
+			  command: () =>
+				history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+			},
 			{ label: resources.messages["viewData"] }
 		]);
 
