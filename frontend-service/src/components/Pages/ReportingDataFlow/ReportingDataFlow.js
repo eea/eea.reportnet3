@@ -107,7 +107,7 @@ const ReportingDataFlow = ({ history, match }) => {
 						/>
 						<p className={styles.caption}>{resources.messages["documents"]}</p>
 					</div>
-					<div className={styles.buttonwrapper}>
+					<div className={styles.splitButtonWrapper}>
 						{dataFlowData.datasets.map(item => {
 							return (
 								<div className={`${styles.dataSetItem}`} key={item.id}>
