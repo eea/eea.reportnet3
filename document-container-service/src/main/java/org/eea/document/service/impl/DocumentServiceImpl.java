@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.jcr.Binary;
 import javax.jcr.Node;
 import javax.jcr.Repository;
@@ -24,6 +25,7 @@ import org.apache.jackrabbit.oak.plugins.document.DocumentBlobReferenceRetriever
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.apache.jackrabbit.oak.plugins.document.mongo.MongoDocumentNodeStoreBuilder;
 import org.apache.jackrabbit.oak.spi.blob.GarbageCollectableBlobStore;
+import org.apache.jackrabbit.oak.spi.cluster.ClusterRepositoryInfo;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
@@ -144,13 +146,11 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @throws EEAException the EEA exception
-   * @throws IOException
+   * @throws Exception
    */
   @Override
   @Modified
-  public void deleteDocument(String documentName, Long dataFlowId)
-      throws EEAException, IOException {
+  public void deleteDocument(String documentName, Long dataFlowId) throws Exception {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
@@ -161,21 +161,18 @@ public class DocumentServiceImpl implements DocumentService {
 
       // Delete a file node with the document
       deleteFileNode(session, dataFlowId.toString(), documentName);
-      session.save();
       LOG.info("File deleted...");
       sendKafkaNotification(documentName, dataFlowId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
     } catch (Exception e) {
       throw new EEAException(e);
     } finally {
       if (ns != null) {
+        ns.getVersionGarbageCollector().gc(0, TimeUnit.MILLISECONDS);
         MarkSweepGarbageCollector gc = new MarkSweepGarbageCollector(
             new DocumentBlobReferenceRetriever(ns), (GarbageCollectableBlobStore) ns.getBlobStore(),
-            (ThreadPoolExecutor) Executors.newFixedThreadPool(1), ADMIN, 5, -1,
-            "mongodb://" + "localhost" + ":" + PORT);
-        try {
-          gc.collectGarbage(false);
-        } catch (Exception e) {
-        }
+            (ThreadPoolExecutor) Executors.newFixedThreadPool(1), ns.getRoot().getPath(), 5, -1,
+            ClusterRepositoryInfo.getOrCreateId(ns));
+        gc.collectGarbage(false);
         ns.dispose();
       }
       cleanUp(session);
@@ -214,6 +211,7 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param filename the filename
    * @param dataFlowId the data flow id
+   * @param eventType the event type
    */
   private void sendKafkaNotification(final String filename, final Long dataFlowId,
       final EventType eventType) {
@@ -270,6 +268,15 @@ public class DocumentServiceImpl implements DocumentService {
     LOG.info("File Saved...");
   }
 
+  /**
+   * Delete file node.
+   *
+   * @param session the session
+   * @param relPath the rel path
+   * @param documentName the document name
+   * @throws RepositoryException the repository exception
+   * @throws EEAException the EEA exception
+   */
   private void deleteFileNode(final Session session, final String relPath,
       final String documentName) throws RepositoryException, EEAException {
     if (session == null) {
@@ -281,6 +288,7 @@ public class DocumentServiceImpl implements DocumentService {
       Node node = parentNode.getNode(documentName);
       if (node != null) {
         node.remove();
+        session.save();
       }
     } else {
       LOG.info("Node not exist!");
