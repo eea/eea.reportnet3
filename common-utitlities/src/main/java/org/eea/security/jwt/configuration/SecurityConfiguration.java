@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
     jsr250Enabled = true,
     prePostEnabled = true
 )
-@ComponentScan("org.eea.security.jwt")
+@ComponentScan("org.eea.security")
 public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 //  @Autowired
