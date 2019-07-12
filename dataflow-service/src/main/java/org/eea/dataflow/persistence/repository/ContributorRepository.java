@@ -16,7 +16,7 @@ public interface ContributorRepository extends PagingAndSortingRepository<Contri
   @Transactional
   @Modifying
   @Query(nativeQuery = true,
-      value = "DELETE FROM contributor WHERE user_id=:idUser AND dataflow_id=:idDataflow")
+      value = "DELETE FROM contributor WHERE user_id=:idUser AND dataflowId=:idDataflow")
   void removeContributorFromDataset(@Param("idDataflow") Long idDataflow,
       @Param("idUser") Long idContributor);
 

@@ -1,7 +1,6 @@
 package org.eea.dataflow.persistence.domain;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -79,9 +78,9 @@ public class Dataflow {
 
   /** The user requests. */
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
+  @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflowid"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))
-  private Set<UserRequest> userRequests = new HashSet<>();
+  private Set<UserRequest> userRequests;
 
   /**
    * Equals.
