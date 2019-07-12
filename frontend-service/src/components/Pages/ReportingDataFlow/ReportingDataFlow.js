@@ -93,21 +93,23 @@ const ReportingDataFlow = ({ history, match }) => {
 				</h2>
 
 				<div className={`${styles.buttonsWrapper}`}>
-					<div>
-						<Button
-							label={resources.messages["do"]}
-							className="p-button-warning"
-							onClick={e => {
-								handleRedirect(
-									`/reporting-data-flow/${
-										match.params.dataFlowId
-									}/documentation-data-set/`
-								);
-							}}
-						/>
-						<p className={styles.caption}>{resources.messages["documents"]}</p>
-					</div>
-					<div className={styles.buttonwrapper}>
+					<div className={styles.splitButtonWrapper}>
+						<div className={`${styles.dataSetItem}`}>
+							<Button
+								label={resources.messages["do"]}
+								className="p-button-warning"
+								onClick={e => {
+									handleRedirect(
+										`/reporting-data-flow/${
+											match.params.dataFlowId
+										}/documentation-data-set/`
+									);
+								}}
+							/>
+							<p className={styles.caption}>
+								{resources.messages["documents"]}
+							</p>
+						</div>
 						{dataFlowData.datasets.map(item => {
 							return (
 								<div className={`${styles.dataSetItem}`} key={item.id}>
