@@ -22,5 +22,8 @@
 	},
 	"loadDataFlowTaskPendingAcceptedAPI": {
 		"url": "/dataflow/pendingaccepted/"
+	},
+	"loadDatasetsByDataflowID": {
+		"url": "/dataflow/"
 	}
 }
