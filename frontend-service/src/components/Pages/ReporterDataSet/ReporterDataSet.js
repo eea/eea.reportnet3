@@ -20,7 +20,7 @@ import ResourcesContext from "../../Context/ResourcesContext";
 import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
 const ReporterDataSet = ({match, history}) => {
-	const { params: {id : idDataSet} } = match;
+	const { params: { dataSetId } } = match;
 	const resources = useContext(ResourcesContext);
 	const [datasetTitle, setDatasetTitle] = useState("");
 	const [customButtons, setCustomButtons] = useState([]);
@@ -63,7 +63,7 @@ const ReporterDataSet = ({match, history}) => {
 
 		//`${config.dataSchemaAPI.url}1`
 		const dataPromise = HTTPRequesterAPI.get({
-			url: `${config.dataSchemaAPI.url}${idDataSet}`,
+			url: `${config.dataSchemaAPI.url}${dataSetId}`,
 			/* url: "/jsons/datosDataSchema2.json", */
 			queryString: {}
 		});
@@ -72,7 +72,7 @@ const ReporterDataSet = ({match, history}) => {
 				//'/jsons/error-statistics.json'
 				setDatasetTitle(response.data.nameDataSetSchema);
 				const dataPromiseError = HTTPRequesterAPI.get({
-					url: `${config.loadStatisticsAPI.url}${idDataSet}`,
+					url: `${config.loadStatisticsAPI.url}${dataSetId}`,
 					/* url: "/jsons/error-statistics.json", */
 					queryString: {}
 				});
@@ -178,7 +178,7 @@ const ReporterDataSet = ({match, history}) => {
 	const onConfirmDeleteHandler = () => {
 		setDeleteDialogVisible(false);
 		HTTPRequesterAPI.delete({			
-			url: `/dataset/${idDataSet}/deleteImportData`,
+			url: `/dataset/${dataSetId}/deleteImportData`,
 			queryString: {}
 		}).then(res => {
 			setIsDataDeleted(true);
@@ -188,7 +188,7 @@ const ReporterDataSet = ({match, history}) => {
 	const onConfirmValidateHandler = () => {		
 		setValidateDialogVisible(false);
 		HTTPRequesterAPI.update({
-			url: `/validation/dataset/${idDataSet}`,
+			url: `/validation/dataset/${dataSetId}`,
 			queryString: {}
 		});
 	};
@@ -226,7 +226,7 @@ const ReporterDataSet = ({match, history}) => {
 					<TabsSchema
 						tables={tableSchema}
 						tableSchemaColumns={tableSchemaColumns}						
-						urlViewer={`${config.dataviewerAPI.url}${idDataSet}`}
+						urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
 						activeIndex={activeIndex}
 						positionIdObject={positionIdObject}
 						onTabChangeHandler={idTableSchema =>
@@ -266,7 +266,7 @@ const ReporterDataSet = ({match, history}) => {
 						dismissableMask={true}
 						style={{ width: "80%" }}
 					>
-						<ValidationViewer idDataSet={idDataSet} />
+						<ValidationViewer dataSetId={dataSetId} />
 					</Dialog>
 				</ReporterDataSetContext.Provider>
 				<ConfirmDialog

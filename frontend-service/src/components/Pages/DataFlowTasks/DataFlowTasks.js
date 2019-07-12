@@ -91,7 +91,7 @@ const DataFlowTasks = ({ match, history }) => {
 	//Bread Crumbs settings
 	useEffect(() => {
 		setBreadCrumbItems([{ label: resources.messages["dataFlowTask"] }]);
-	}, [history, match.params.id, resources.messages]);
+	}, [history, match.params.dataFlowId, resources.messages]);
 
 	return (
 		<MainLayout>

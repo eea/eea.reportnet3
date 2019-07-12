@@ -68,11 +68,11 @@ const DocumentationDataSet = ({ match, history }) => {
 			},
 			{
 				label: resources.messages["reportingDataFlow"],
-				command: () => history.push(`/reporting-data-flow/${match.params.id}`)
+				command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
 			},
 			{ label: resources.messages["documents"] }
 		]);
-	}, [history, match.params.id, resources.messages]);
+	}, [history, match.params.dataFlowId, resources.messages]);
 
     const actionTemplate = (rowData, column) =>{
        
