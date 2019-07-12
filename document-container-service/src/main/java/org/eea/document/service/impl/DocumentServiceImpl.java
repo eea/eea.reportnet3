@@ -216,7 +216,7 @@ public class DocumentServiceImpl implements DocumentService {
   private void sendKafkaNotification(final String filename, final Long dataFlowId,
       final EventType eventType) {
     Map<String, Object> result = new HashMap<>();
-    result.put("dataflowId", dataFlowId);
+    result.put("dataflow_id", dataFlowId);
     result.put("filename", filename);
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }

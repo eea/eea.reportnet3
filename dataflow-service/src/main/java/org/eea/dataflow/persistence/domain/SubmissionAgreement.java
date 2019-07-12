@@ -40,7 +40,7 @@ public class SubmissionAgreement {
 
   /** The dataflow. */
   @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "DATAFLOWID", referencedColumnName = "ID")
+  @JoinColumn(name = "DATAFLOW_ID", referencedColumnName = "ID")
   private Dataflow dataflow;
 
   /**

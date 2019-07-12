@@ -78,7 +78,7 @@ public class Dataflow {
 
   /** The user requests. */
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflowid"),
+  @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))
   private Set<UserRequest> userRequests;
 

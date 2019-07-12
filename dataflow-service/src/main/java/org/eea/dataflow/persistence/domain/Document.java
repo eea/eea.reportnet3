@@ -43,7 +43,7 @@ public class Document {
 
   /** The dataflow. */
   @ManyToOne
-  @JoinColumn(name = "DATAFLOWID")
+  @JoinColumn(name = "DATAFLOW_ID")
   private Dataflow dataflow;
 
   /**
