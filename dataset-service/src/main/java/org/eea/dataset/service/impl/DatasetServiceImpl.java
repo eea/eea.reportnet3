@@ -933,14 +933,14 @@ public class DatasetServiceImpl implements DatasetService {
   public byte[] exportFile(Long datasetId, String mimeType, final String idTableSchema)
       throws EEAException, IOException {
     // Get the partition
-    final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+    // final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
     // Get the dataFlowId from the metabase
     final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
+    return context.fileWriter(datasetMetabase.getDataflowId(), datasetId, idTableSchema);
 
   }
 

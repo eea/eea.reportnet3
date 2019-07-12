@@ -75,8 +75,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public byte[] writeFile(final Long dataflowId, final Long partitionId,
-      final String idTableSchema) {
+  public byte[] writeFile(final Long dataflowId, final Long datasetId, final String idTableSchema) {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
@@ -86,7 +85,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.NO_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
-    setLines(idTableSchema, dataSetSchema, csvWriter);
+    setLines(idTableSchema, dataSetSchema, csvWriter, datasetId);
 
     // once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -105,8 +104,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param csvWriter the csv writer
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
-      CSVWriter csvWriter) {
-    List<RecordValue> records = parseCommon.getRecordValues(idTableSchema);
+      CSVWriter csvWriter, Long datasetId) {
+    List<RecordValue> records = parseCommon.getRecordValues(datasetId, idTableSchema);
     List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<String> headers = new ArrayList<>();
 

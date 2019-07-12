@@ -165,6 +165,6 @@ public class ParseCommonTest {
     records.add(record);
 
     when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(records);
-    parseCommon.getRecordValues(ID);
+    parseCommon.getRecordValues(1L, ID);
   }
 }

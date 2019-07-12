@@ -13,12 +13,12 @@ public interface IFileExportContext {
    * File writer.
    *
    * @param dataflowId the dataflow id
-   * @param partitionId the partition id
+   * @param datasetId the partition id
    * @param idTableSchema the id table schema
    * @return the string
    * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
+  byte[] fileWriter(Long dataflowId, Long datasetId, String idTableSchema)
       throws InvalidFileException, IOException;
 }
