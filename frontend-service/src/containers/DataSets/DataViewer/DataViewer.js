@@ -18,7 +18,7 @@ import ConfirmDialog from "../../../components/Layout/UI/ConfirmDialog/ConfirmDi
 import SnapshotSlideBar from "../SnapshotSlideBar/SnapshotSlideBar";
 
 const DataViewer = props => {
-	const { match:{params: {id : idDataSet}} } = props;
+	const { match:{params: {id : dataSetId}} } = props;
 	const contextReporterDataSet = useContext(ReporterDataSetContext);
 	const [importDialogVisible, setImportDialogVisible] = useState(false);
 	const [totalRecords, setTotalRecords] = useState(0);
@@ -119,7 +119,7 @@ const DataViewer = props => {
 	const onConfirmDeleteHandler = () => {	
 		setDeleteDialogVisible(false);
 		HTTPRequester.delete({
-			url: `/dataset/${idDataSet}/deleteImportTable/${props.id}`,
+			url: `/dataset/${dataSetId}/deleteImportTable/${props.id}`,
 			queryString: {}
 		}).then(res => {
 			setIsDataDeleted(true);
@@ -448,7 +448,7 @@ const DataViewer = props => {
 				<CustomFileUpload
 					mode="advanced"
 					name="file"
-					url={`${window.env.REACT_APP_BACKEND}/dataset/${idDataSet}/loadTableData/${props.id}`}
+					url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`}
 					onUpload={onUploadHandler}
 					multiple={false}
 					chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
