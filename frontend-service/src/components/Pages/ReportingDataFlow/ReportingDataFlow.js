@@ -33,7 +33,7 @@ const ReportingDataFlow = ({ history, match }) => {
 
 	useEffect(() => {
 		HTTPRequesterAPI.get({
-			url: `${config.loadDatasetsByDataflowID.url}${match.params.id}`,
+			url: `${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`,
 			queryString: {}
 		})
 			.then(response => {
@@ -58,7 +58,7 @@ const ReportingDataFlow = ({ history, match }) => {
 				label: resources.messages["reportingDataFlow"]
 			}
 		]);
-	}, [history, match.params.id, resources.messages]);
+	}, [history, match.params.dataFlowId, resources.messages]);
 
 	const handleRedirect = target => {
 		history.push(target);
@@ -100,7 +100,7 @@ const ReportingDataFlow = ({ history, match }) => {
 							onClick={e => {
 								handleRedirect(
 									`/reporting-data-flow/${
-										match.params.id
+										match.params.dataFlowId
 									}/documentation-data-set/`
 								);
 							}}
@@ -134,7 +134,7 @@ const ReportingDataFlow = ({ history, match }) => {
 										onClick={e => {
 											handleRedirect(
 												`/reporting-data-flow/${
-													match.params.id
+													match.params.dataFlowId
 												}/reporter-data-set/${item.id}`
 											);
 										}}
