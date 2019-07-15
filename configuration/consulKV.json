@@ -153,7 +153,7 @@
   },
   {
     "key": "config/dataflow/spring.datasource.url",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3Q6NTQzMi9tZXRhYmFzZX0="
   },
   {
     "key": "config/dataflow/spring.datasource.hikari.connection-timeout",
@@ -376,6 +376,18 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
+    "value": "L2RhdGFzY2hlbWEvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.dataschema.path",
     "value": "L2RhdGFzY2hlbWEvKio="
   },
@@ -472,8 +484,24 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/apiGateway/zuul.routes.ums.path",
+    "value": "L3VzZXIvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.ums.serviceId",
+    "value": "dW1z"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.ums.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/apiGateway/zuul.retryable",
     "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/apiGateway/ribbon.MaxAutoRetries",
+    "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUlk6MH0="
   },
   {
     "key": "config/apiGateway/ribbon.ConnectTimeout",
@@ -492,10 +520,6 @@
     "value": "JHtSSUJCT05fTUFYX0NPTk5FQ1RJT05fUEVSX0hPU1Q6MTAwfQ=="
   },
   {
-    "key": "config/apiGateway/ribbon.MaxAutoRetries",
-    "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUlk6MH0="
-  },
-  {
     "key": "config/apiGateway/ribbon.MaxAutoRetriesNextServer",
     "value": "JHtSSUJCT05fTUFYX0FVVE9fUkVUUllfTkVYVF9TRVJWRVI6Mn0="
   },
@@ -511,7 +535,7 @@
     "key": "config/apiGateway/ribbon.retryableStatusCodes",
     "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
   },
-   {
+  {
     "key": "config/validation/mongodb.hibernate.ddl-auto",
     "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -535,7 +559,6 @@
     "key": "config/validation/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
-  
   {
     "key": "config/validation/spring.jpa.properties.hibernate.dialect",
     "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
@@ -568,7 +591,6 @@
     "key": "config/validation/spring.datasource.driver-class-name",
     "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
-
   {
     "key": "config/validation/spring.jpa.hibernate.show-sql",
     "value": "JHtTSE9XX1NRTDpmYWxzZX0="
@@ -631,6 +653,50 @@
   },
   {
     "key": "config/validation/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/ums/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/ums/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/ums/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/ums/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/ums/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/ums/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/ums/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/ums/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/ums/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/ums/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/ums/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   }
 ]
