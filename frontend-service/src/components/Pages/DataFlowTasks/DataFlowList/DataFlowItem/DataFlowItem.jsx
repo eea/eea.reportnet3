@@ -14,10 +14,10 @@ const DataFlowItem = props => {
 
 	const { itemContent, listType, dataFetch } = props;
 
-	const acceptDataFlow = () => {
+	const updateStatusDataFlow = (type) => {
 		const dataPromise = HTTPRequesterAPI.update({
-			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=ACCEPTED`,
-			data: {},
+			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=${type}`,
+			data: { id: itemContent.id },
 			queryString: {}
 		});
 
@@ -29,27 +29,7 @@ const DataFlowItem = props => {
 			})
 			.catch(error => {
 				//TODO create dialog mesage with error text
-				console.warn("ACCEPT ERROR =>  ", error);
-				return error;
-			});
-	};
-
-	const rejectDataFlow = () => {
-		//TODO Call to DB
-		const dataPromise = HTTPRequesterAPI.post({
-			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=REJECTED`,
-			data: {},
-			queryString: {}
-		});
-
-		dataPromise
-			.then(response => {
-				//TODO rerender DataFlowList component
-				console.log(response);
-			})
-			.catch(error => {
-				//TODO create dialog mesage with error text
-				console.warn("REJECT ERROR => ", error);
+				console.warn(`${type} ERROR =>  `, error);
 				return error;
 			});
 	};
@@ -103,7 +83,7 @@ const DataFlowItem = props => {
 						<button
 							type="button"
 							className={`${styles.rep_button}`}
-							onClick={() => acceptDataFlow()}
+							onClick={() => updateStatusDataFlow('ACCEPTED')}
 						>
 							{resources.messages["accept"]}
 						</button>
@@ -111,7 +91,7 @@ const DataFlowItem = props => {
 						<button
 							type="button"
 							className={`${styles.rep_button}`}
-							/* disabled */ onClick={() => rejectDataFlow()}
+							/* disabled */ onClick={() => updateStatusDataFlow('REJECTED')}
 						>
 							{resources.messages["reject"]}
 						</button>

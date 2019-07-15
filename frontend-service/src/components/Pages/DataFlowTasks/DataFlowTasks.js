@@ -10,6 +10,7 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import MainLayout from "../../Layout/main-layout.component";
 import DataFlowColumn from "../../Layout/UI/DataFlowColumn/DataFlowColumn";
 import { TabMenu } from "primereact/tabmenu";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 import DataFlowList from "./DataFlowList/DataFlowList";
 
@@ -38,12 +39,14 @@ const DataFlowTasks = ({ match, history }) => {
 	]);
 	const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 	const [tabData, setTabData] = useState([]);
+	const [loading, setLoading] = useState(true);
 	const home = {
 		icon: resources.icons["home"],
 		command: () => history.push("/")
 	};
 
 	const dataFetch = () => {
+		setLoading(true);
 		const c = {
 			listKeys: [],
 			apiUrl: "",
@@ -78,9 +81,11 @@ const DataFlowTasks = ({ match, history }) => {
 						};
 					})
 				);
+				setLoading(false);
 			})
 			.catch(error => {
 				console.log("error", error);
+				setLoading(false);
 				return error;
 			});
 	};
@@ -96,29 +101,39 @@ const DataFlowTasks = ({ match, history }) => {
 		setBreadCrumbItems([{ label: resources.messages["dataFlowTask"] }]);
 	}, [history, match.params.dataFlowId, resources.messages]);
 
-	return (
-		<MainLayout>
-			<BreadCrumb model={breadCrumbItems} home={home} />
-			<div className="rep-container">
-				<div className="rep-row">
-					<DataFlowColumn
-						navTitle={resources.messages["dataFlow"]}
-						search={false}
-					/>
-					<div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
-						<TabMenu
-							model={tabMenuItems}
-							activeItem={tabMenuActiveItem}
-							onTabChange={e => setTabMenuActiveItem(e.value)}
-						/>
-						{tabData.map((data, i) => (
-							<DataFlowList {...data} key={i} dataFetch={dataFetch} />
-							//TODO completed pagination
-						))}
-					</div>
+	const layout = children => {
+		return (
+			<MainLayout>
+				<div className="titleDiv">
+					<BreadCrumb model={breadCrumbItems} home={home} />
 				</div>
+				<div className="rep-container">{children}</div>
+			</MainLayout>
+		);
+	};
+
+	if (loading) {
+		return layout(<ProgressSpinner />);
+	}
+
+	return layout(
+		<div className="rep-row">
+			<DataFlowColumn
+				navTitle={resources.messages["dataFlow"]}
+				search={false}
+			/>
+			<div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
+				<TabMenu
+					model={tabMenuItems}
+					activeItem={tabMenuActiveItem}
+					onTabChange={e => setTabMenuActiveItem(e.value)}
+				/>
+				{tabData.map((data, i) => (
+					<DataFlowList {...data} key={i} dataFetch={dataFetch} />
+					//TODO completed pagination
+				))}
 			</div>
-		</MainLayout>
+		</div>
 	);
 };
 export default DataFlowTasks;
