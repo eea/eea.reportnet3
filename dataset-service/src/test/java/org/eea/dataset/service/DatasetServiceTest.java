@@ -771,9 +771,9 @@ public class DatasetServiceTest {
     DataSetMetabase dataset = new DataSetMetabase();
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     dataset.setDataflowId(1L);
-    partition.setId(1L);
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
-        Mockito.any())).thenReturn(Optional.of(partition));
+    // partition.setId(1L);
+    // when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
+    // Mockito.any())).thenReturn(Optional.of(partition));
     when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any()))

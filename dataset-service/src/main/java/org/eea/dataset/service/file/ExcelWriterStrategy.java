@@ -154,10 +154,17 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       HSSFRow row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();
+      int nextUnknownCellNumber = nHeaders;
 
-      for (int i = 0; i < nHeaders; i++) {
+      for (int i = 0; i < fields.size(); i++) {
         FieldValue field = fields.get(i);
-        row.createCell(mapa.get(field.getIdFieldSchema())).setCellValue(field.getValue());
+        Integer cellNumber = mapa.get(field.getIdFieldSchema());
+
+        if (cellNumber == null) {
+          cellNumber = nextUnknownCellNumber++;
+        }
+
+        row.createCell(cellNumber).setCellValue(field.getValue());
       }
     }
   }
@@ -190,12 +197,17 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       XSSFRow row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();
+      int nextUnknownCellNumber = nHeaders;
 
-      for (int i = 0; i < nHeaders; i++) {
+      for (int i = 0; i < fields.size(); i++) {
         FieldValue field = fields.get(i);
-        // Comprobar que el field contiene un idFieldSchema para posicionarlo donde corresponda
-        // (consultar la libreta con las anotaciones de JL)
-        row.createCell(mapa.get(field.getIdFieldSchema())).setCellValue(field.getValue());
+        Integer cellNumber = mapa.get(field.getIdFieldSchema());
+
+        if (cellNumber == null) {
+          cellNumber = nextUnknownCellNumber++;
+        }
+
+        row.createCell(cellNumber).setCellValue(field.getValue());
       }
     }
   }

@@ -421,7 +421,7 @@ public class DataSetControllerImpl implements DatasetController {
   public ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType)
       throws Exception {
     LOG.info("Init the export controller");
-    byte[] file = datasetService.exportFile(1L, mimeType, idTableSchema);
+    byte[] file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
 
     // set file name and content type
     String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
