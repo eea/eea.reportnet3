@@ -18,7 +18,7 @@ import ConfirmDialog from "../../../components/Layout/UI/ConfirmDialog/ConfirmDi
 import SnapshotSlideBar from "../SnapshotSlideBar/SnapshotSlideBar";
 
 const DataViewer = props => {
-	const { match:{params: {id : dataSetId}} } = props;
+	const { match:{params: { dataSetId }} } = props;
 	const contextReporterDataSet = useContext(ReporterDataSetContext);
 	const [importDialogVisible, setImportDialogVisible] = useState(false);
 	const [totalRecords, setTotalRecords] = useState(0);
