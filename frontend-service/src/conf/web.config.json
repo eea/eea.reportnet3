@@ -1,10 +1,4 @@
 {
-	"api": {
-		"protocol": "http://",
-		"url": "localhost",
-		"port": ":8010",
-		"ip": "127.0.0.1"
-	},
 	"dataSchemaAPI": {
 		"url": "/dataschema/dataflow/"
 	},
@@ -28,5 +22,8 @@
 	},
 	"loadDataFlowTaskPendingAcceptedAPI": {
 		"url": "/dataflow/pendingaccepted/"
+	},
+	"loadDatasetsByDataflowID": {
+		"url": "/dataflow/"
 	}
 }

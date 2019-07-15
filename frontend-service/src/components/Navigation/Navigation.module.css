@@ -1,24 +1,31 @@
 .header {
 	overflow: hidden;
 	background-color: #ffffff;
-	padding: 15px 0px;
+	padding: 0px 0px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	justify-items: center;
 }
 .header h1 {
 	margin-bottom: 0;
 	margin-top: 0;
+	color: #004494;
 }
 
 .appLogo {
 	vertical-align: middle;
+	text-align: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
 }
 
+.appTitle {
+	margin: 10px;
+}
 /* Float sections to the right and left */
-.headerRight {
-	float: right;
-}
-.headerLeft {
-	float: left;
-}
 
 /* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */
 @media screen and (max-width: 500px) {

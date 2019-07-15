@@ -30,14 +30,20 @@
 	bottom: 0px;
 	top: auto;
 }
-
-.buttonwrapper {
+.splitButtonWrapper {
 	margin-left: 1rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	flex-wrap: wrap;
 }
-.buttonWrapper:nth-last-of-type(2) {
+.splitButtonWrapper:nth-last-of-type(2) {
 	margin-left: 0px;
 }
-
+.splitButtonWrapper .dataSetItem {
+	margin-right: 1rem;
+}
 .caption {
 	text-align: center;
 	text-transform: capitalize;

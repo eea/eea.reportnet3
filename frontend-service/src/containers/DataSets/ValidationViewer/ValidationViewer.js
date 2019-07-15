@@ -102,7 +102,7 @@ const ValidationViewer = props => {
 		//http://localhost:8030/dataset/listValidations/1?asc=true&fields=typeEntity&pageNum=0&pageSize=20
 
 		let queryString = {
-			idDataSet: props.idDataSet,
+			dataSetId: props.dataSetId,
 			pageNum: Math.floor(fRow / nRows),
 			pageSize: nRows
 		};
@@ -113,7 +113,7 @@ const ValidationViewer = props => {
 		}
 
 		const dataPromise = HTTPRequester.get({
-			url: `${config.listValidationsAPI.url}${props.idDataSet}`,
+			url: `${config.listValidationsAPI.url}${props.dataSetId}`,
 			queryString: queryString
 		});
 		dataPromise
@@ -153,12 +153,12 @@ const ValidationViewer = props => {
 	};
 
 	const onRowSelectHandler = event => {
-		//http://localhost:8030/dataset/loadTableFromAnyObject/901?datasetId=1&pageSize=2&type=FIELD
+		//http://localhost:8030/dataset/loadTableFromAnyObject/901?dataSetId=1&pageSize=2&type=FIELD
 		switch (event.data.typeEntity) {
 			case "FIELD":
 			case "RECORD":
 				let queryString = {
-					datasetId: props.idDataSet,
+					dataSetId: props.dataSetId,
 					type: event.data.typeEntity
 				};
 				const dataPromise = HTTPRequester.get({

@@ -21,12 +21,16 @@ const App = () => {
 						<Route exact path="/" component={Login} />
 						<Route path="/data-flow-task/" component={DataFlowTasks} />
 						<Route
-							path="/reporting-data-flow/:id"
+              exact
+							path="/reporting-data-flow/:dataFlowId"
 							component={ReportingDataFlow}
 						/>
-						<Route path="/reporter-data-set/:id" component={ReporterDataSet} />
+            <Route 
+              path="/reporting-data-flow/:dataFlowId/reporter-data-set/:dataSetId" 
+              component={ReporterDataSet} 
+            />
 						<Route
-							path="/documentation-data-set/:id"
+							path="/reporting-data-flow/:dataFlowId/documentation-data-set/"
 							component={DocumentationDataSet}
 						/>
 					</Switch>

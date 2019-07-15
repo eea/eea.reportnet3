@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.document.DocumentVO;
@@ -50,6 +51,9 @@ public class DataFlowVO implements Serializable {
 
   /** The weblinks. */
   private List<WeblinkVO> weblinks;
+
+  /** The user request status. */
+  private TypeRequestEnum userRequestStatus;
 
   /**
    * Equals.

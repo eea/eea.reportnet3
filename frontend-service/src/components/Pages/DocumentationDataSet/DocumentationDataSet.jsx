@@ -11,7 +11,7 @@ import { Button } from "primereact/button";
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import IconComponent from '../../Layout/UI/icon-component';
 
-const DocumentationDataSet = () => {
+const DocumentationDataSet = ({ match, history }) => {
 
     const resources = useContext(ResourcesContext);  
 
@@ -20,7 +20,10 @@ const DocumentationDataSet = () => {
     const [breadCrumbItems,setBreadCrumbItems] = useState([]);
     const [customButtons, setCustomButtons] = useState([]);
 
-    const home = {icon: resources.icons["home"], url: '#'};
+    const home = {
+		icon: resources.icons["home"],
+		command: () => history.push("/")
+	};
 
     //Data Fetching
     useEffect(() => {
@@ -57,12 +60,19 @@ const DocumentationDataSet = () => {
     }, [file]);
 
     //Bread Crumbs settings
-    useEffect(()=>{
-        setBreadCrumbItems( [
-            {label: resources.messages["reportingDataFlow"], url: '/reporting-data-flow'},
-            {label: resources.messages["documents"], url: '#'}
-        ]); 
-    } , [] );
+	useEffect(() => {
+		setBreadCrumbItems([
+			{ 
+				label: resources.messages["dataFlowTask"], 
+				command: () => history.push('/data-flow-task')
+			},
+			{
+				label: resources.messages["reportingDataFlow"],
+				command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+			},
+			{ label: resources.messages["documents"] }
+		]);
+	}, [history, match.params.dataFlowId, resources.messages]);
 
     const actionTemplate = (rowData, column) =>{
        

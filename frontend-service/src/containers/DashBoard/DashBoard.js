@@ -8,7 +8,7 @@ import config from '../../conf/web.config.json';
 import ResourcesContext from '../../components/Context/ResourcesContext';
 
 const DashBoard = (props) =>{
-    const {match:{params:{id: idDataSet}}} = props;
+    const {match:{params: { dataSetId } }} = props;
     const [dashBoardData, setDashBoardData] = useState({});
     const [dashBoardOptions, setDashBoardOptions] = useState({});
     const [dashBoardTitle, setDashBoardTitle] = useState("");
@@ -21,7 +21,7 @@ const DashBoard = (props) =>{
             //'/jsons/error-statistics.json'
             const dataPromise = HTTPRequester.get(
             {
-                url: `${config.loadStatisticsAPI.url}${idDataSet}`,
+                url: `${config.loadStatisticsAPI.url}${dataSetId}`,
                 queryString: {}
             });
 

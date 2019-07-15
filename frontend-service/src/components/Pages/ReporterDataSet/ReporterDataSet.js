@@ -19,8 +19,8 @@ import styles from "./ReporterDataSet.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
 import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
-const ReporterDataSet = ({match}) => {
-	const { params: {id : idDataSet} } = match;
+const ReporterDataSet = ({match, history}) => {
+	const { params: { dataSetId } } = match;
 	const resources = useContext(ResourcesContext);
 	const [datasetTitle, setDatasetTitle] = useState("");
 	const [customButtons, setCustomButtons] = useState([]);
@@ -37,14 +37,24 @@ const ReporterDataSet = ({match}) => {
 	const [activeIndex, setActiveIndex] = useState();
 	const [positionIdObject, setPositionIdObject] = useState(0);
 
-	const home = { icon: resources.icons["home"], url: "/" };
+	const home = {
+		icon: resources.icons["home"],
+		command: () => history.push("/")
+	};
 
 	useEffect(() => {
 		console.log("ReporterDataSet useEffect");
 
 		setBreadCrumbItems([
-			{ label: resources.messages["dataFlowTask"], url: "/data-flow-task/" },
-			{ label: resources.messages["reportingDataFlow"], url: "#" },
+			{
+			  label: resources.messages["dataFlowTask"],
+			  command: () => history.push("/data-flow-task")
+			},
+			{
+			  label: resources.messages["reportingDataFlow"],
+			  command: () =>
+				history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+			},
 			{ label: resources.messages["viewData"] }
 		]);
 
@@ -53,7 +63,7 @@ const ReporterDataSet = ({match}) => {
 
 		//`${config.dataSchemaAPI.url}1`
 		const dataPromise = HTTPRequesterAPI.get({
-			url: `${config.dataSchemaAPI.url}${idDataSet}`,
+			url: `${config.dataSchemaAPI.url}${dataSetId}`,
 			/* url: "/jsons/datosDataSchema2.json", */
 			queryString: {}
 		});
@@ -62,7 +72,7 @@ const ReporterDataSet = ({match}) => {
 				//'/jsons/error-statistics.json'
 				setDatasetTitle(response.data.nameDataSetSchema);
 				const dataPromiseError = HTTPRequesterAPI.get({
-					url: `${config.loadStatisticsAPI.url}${idDataSet}`,
+					url: `${config.loadStatisticsAPI.url}${dataSetId}`,
 					/* url: "/jsons/error-statistics.json", */
 					queryString: {}
 				});
@@ -168,7 +178,7 @@ const ReporterDataSet = ({match}) => {
 	const onConfirmDeleteHandler = () => {
 		setDeleteDialogVisible(false);
 		HTTPRequesterAPI.delete({			
-			url: `/dataset/${idDataSet}/deleteImportData`,
+			url: `/dataset/${dataSetId}/deleteImportData`,
 			queryString: {}
 		}).then(res => {
 			setIsDataDeleted(true);
@@ -178,7 +188,7 @@ const ReporterDataSet = ({match}) => {
 	const onConfirmValidateHandler = () => {		
 		setValidateDialogVisible(false);
 		HTTPRequesterAPI.update({
-			url: `/validation/dataset/${idDataSet}`,
+			url: `/validation/dataset/${dataSetId}`,
 			queryString: {}
 		});
 	};
@@ -216,7 +226,7 @@ const ReporterDataSet = ({match}) => {
 					<TabsSchema
 						tables={tableSchema}
 						tableSchemaColumns={tableSchemaColumns}						
-						urlViewer={`${config.dataviewerAPI.url}${idDataSet}`}
+						urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
 						activeIndex={activeIndex}
 						positionIdObject={positionIdObject}
 						onTabChangeHandler={idTableSchema =>
@@ -256,7 +266,7 @@ const ReporterDataSet = ({match}) => {
 						dismissableMask={true}
 						style={{ width: "80%" }}
 					>
-						<ValidationViewer idDataSet={idDataSet} />
+						<ValidationViewer dataSetId={dataSetId} />
 					</Dialog>
 				</ReporterDataSetContext.Provider>
 				<ConfirmDialog

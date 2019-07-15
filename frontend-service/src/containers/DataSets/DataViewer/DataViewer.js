@@ -18,7 +18,7 @@ import ConfirmDialog from "../../../components/Layout/UI/ConfirmDialog/ConfirmDi
 import SnapshotSlideBar from "../SnapshotSlideBar/SnapshotSlideBar";
 
 const DataViewer = props => {
-	const { match:{params: {id : idDataSet}} } = props;
+	const { match:{params: {id : dataSetId}} } = props;
 	const contextReporterDataSet = useContext(ReporterDataSetContext);
 	const [importDialogVisible, setImportDialogVisible] = useState(false);
 	const [totalRecords, setTotalRecords] = useState(0);
@@ -119,7 +119,7 @@ const DataViewer = props => {
 	const onConfirmDeleteHandler = () => {	
 		setDeleteDialogVisible(false);
 		HTTPRequester.delete({
-			url: `/dataset/${idDataSet}/deleteImportTable/${props.id}`,
+			url: `/dataset/${dataSetId}/deleteImportTable/${props.id}`,
 			queryString: {}
 		}).then(res => {
 			setIsDataDeleted(true);
@@ -318,7 +318,7 @@ const DataViewer = props => {
 			clickHandler: () => setImportDialogVisible(true)
 		},
 		{
-			label: resources.messages["delete"],
+			label: resources.messages["deleteTable"],
 			icon: "2",
 			group: "left",
 			disabled: false,
@@ -448,7 +448,7 @@ const DataViewer = props => {
 				<CustomFileUpload
 					mode="advanced"
 					name="file"
-					url={`${config.api.protocol}${config.api.url}${config.api.port}/dataset/${idDataSet}/loadTableData/${props.id}`}
+					url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`}
 					onUpload={onUploadHandler}
 					multiple={false}
 					chooseLabel={resources.messages["selectFile"]} //allowTypes="/(\.|\/)(csv|doc)$/"
@@ -462,12 +462,12 @@ const DataViewer = props => {
 					onConfirm={onConfirmDeleteHandler}
 					onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
 					visible={deleteDialogVisible}
-					header={resources.messages["deleteDatasetHeader"]}
+					header={resources.messages["deleteDatasetTableHeader"]}
 					maximizable={false}
 					labelConfirm={resources.messages["yes"]}
 					labelCancel={resources.messages["no"]}
 				>
-					{resources.messages["deleteDatasetConfirm"]}
+					{resources.messages["deleteDatasetTableConfirm"]}
 				</ConfirmDialog>
 			</ReporterDataSetContext.Provider>
 			<SnapshotSlideBar

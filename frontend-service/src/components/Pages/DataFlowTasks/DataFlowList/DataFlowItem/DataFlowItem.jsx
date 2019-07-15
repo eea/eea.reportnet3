@@ -1,9 +1,12 @@
 import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import moment from "moment";
+
 import IconComponent from "../../../../Layout/UI/icon-component";
 import primeIcons from "../../../../../conf/prime.icons";
+
 import styles from "./DataFlowItem.module.scss";
 import ResourcesContext from "../../../../Context/ResourcesContext";
-import { Link } from "react-router-dom";
 
 const DataFlowItem = props => {
 	const resources = useContext(ResourcesContext);
@@ -43,7 +46,7 @@ const DataFlowItem = props => {
 
 			<div className={`${styles.card_component_content} `}>
 				<div className={`${styles.card_component_content_date}`}>
-					<span>{itemContent.deadlineDate}</span>
+					<span>{moment(itemContent.deadlineDate).format("YYYY-MM-DD")}</span>
 				</div>
 				<h3 className={`${styles.card_component_content_title}`}>
 					{itemContent.name}

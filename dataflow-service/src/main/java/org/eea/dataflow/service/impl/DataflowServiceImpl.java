@@ -7,6 +7,7 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowWithRequestType;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -38,7 +39,6 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
-
 
   /** The dataset metabase controller. */
   @Autowired
@@ -100,10 +100,22 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
 
-    List<Dataflow> dataflows = dataflowRepository.findPendingAccepted(userId);
+    List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
+    List<Dataflow> dfs = new ArrayList<>();
     LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
-    return dataflowNoContentMapper.entityListToClass(dataflows);
-
+    for (DataflowWithRequestType df : dataflows) {
+      dfs.add(df.getDataflow());
+    }
+    List<DataFlowVO> dataflowVOs = dataflowNoContentMapper.entityListToClass(dfs);
+    // Adding the user request type to the VO (pending/accepted/rejected)
+    for (DataflowWithRequestType df : dataflows) {
+      for (int i = 0; i < dataflowVOs.size(); i++) {
+        if (df.getDataflow().getId().equals(dataflowVOs.get(i).getId())) {
+          dataflowVOs.get(i).setUserRequestStatus(df.getTypeRequestEnum());
+        }
+      }
+    }
+    return dataflowVOs;
   }
 
 
