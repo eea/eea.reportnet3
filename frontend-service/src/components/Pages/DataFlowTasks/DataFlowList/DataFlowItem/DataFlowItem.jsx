@@ -7,11 +7,53 @@ import primeIcons from "../../../../../conf/prime.icons";
 
 import styles from "./DataFlowItem.module.scss";
 import ResourcesContext from "../../../../Context/ResourcesContext";
+import HTTPRequesterAPI from "../../../../../services/HTTPRequester/HTTPRequester";
 
 const DataFlowItem = props => {
 	const resources = useContext(ResourcesContext);
 
-	const { itemContent, listType } = props;
+	const { itemContent, listType, dataFetch } = props;
+
+	const acceptDataFlow = () => {
+		const dataPromise = HTTPRequesterAPI.update({
+			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=ACCEPTED`,
+			data: {},
+			queryString: {}
+		});
+
+		dataPromise
+			.then(response => {
+				//rerender DataFlowList component
+				dataFetch();
+				console.log(response);
+			})
+			.catch(error => {
+				//TODO create dialog mesage with error text
+				console.warn("ACCEPT ERROR =>  ", error);
+				return error;
+			});
+	};
+
+	const rejectDataFlow = () => {
+		//TODO Call to DB
+		const dataPromise = HTTPRequesterAPI.post({
+			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=REJECTED`,
+			data: {},
+			queryString: {}
+		});
+
+		dataPromise
+			.then(response => {
+				//TODO rerender DataFlowList component
+				console.log(response);
+			})
+			.catch(error => {
+				//TODO create dialog mesage with error text
+				console.warn("REJECT ERROR => ", error);
+				return error;
+			});
+	};
+
 	const layout = children => {
 		return (
 			<div
@@ -58,11 +100,19 @@ const DataFlowItem = props => {
 			<div className={`${styles.card_component_btn}`}>
 				{listType === "pending" ? (
 					<>
-						<button type="button" className={`${styles.rep_button}`}>
+						<button
+							type="button"
+							className={`${styles.rep_button}`}
+							onClick={() => acceptDataFlow()}
+						>
 							{resources.messages["accept"]}
 						</button>
 
-						<button type="button" className={`${styles.rep_button}`} disabled>
+						<button
+							type="button"
+							className={`${styles.rep_button}`}
+							/* disabled */ onClick={() => rejectDataFlow()}
+						>
 							{resources.messages["reject"]}
 						</button>
 					</>

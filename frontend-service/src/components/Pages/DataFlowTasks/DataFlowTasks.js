@@ -43,7 +43,7 @@ const DataFlowTasks = ({ match, history }) => {
 		command: () => history.push("/")
 	};
 
-	useEffect(() => {
+	const dataFetch = () => {
 		const c = {
 			listKeys: [],
 			apiUrl: "",
@@ -59,10 +59,7 @@ const DataFlowTasks = ({ match, history }) => {
 			c.listKeys.push("completed");
 			c.apiUrl = "";
 		}
-		console.log("config", config);
-		console.log("c", c);
-		//http://localhost:8020/dataflow/pendingaccepted/2
-		//http://localhost:8020/dataflow/2/completed?pageNum=0&pageSize=20
+
 		HTTPRequesterAPI.get({
 			url: c.apiUrl,
 			queryString: c.queryString
@@ -86,6 +83,12 @@ const DataFlowTasks = ({ match, history }) => {
 				console.log("error", error);
 				return error;
 			});
+	};
+
+	useEffect(() => {
+		console.log("Yahoooo! Rerendered");
+		dataFetch();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [resources.messages, tabMenuActiveItem]);
 
 	//Bread Crumbs settings
@@ -95,10 +98,7 @@ const DataFlowTasks = ({ match, history }) => {
 
 	return (
 		<MainLayout>
-			<BreadCrumb
-				model={breadCrumbItems}
-				home={home}
-			/>
+			<BreadCrumb model={breadCrumbItems} home={home} />
 			<div className="rep-container">
 				<div className="rep-row">
 					<DataFlowColumn
@@ -112,7 +112,7 @@ const DataFlowTasks = ({ match, history }) => {
 							onTabChange={e => setTabMenuActiveItem(e.value)}
 						/>
 						{tabData.map((data, i) => (
-							<DataFlowList {...data} key={i} />
+							<DataFlowList {...data} key={i} dataFetch={dataFetch} />
 							//TODO completed pagination
 						))}
 					</div>
