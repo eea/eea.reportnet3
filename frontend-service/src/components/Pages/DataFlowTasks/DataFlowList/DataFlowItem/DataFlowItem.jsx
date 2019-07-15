@@ -37,8 +37,8 @@ const DataFlowItem = props => {
 	const rejectDataFlow = () => {
 		//TODO Call to DB
 		const dataPromise = HTTPRequesterAPI.post({
-			url: "/TODO_reject_data_flow/",
-			data: { id: itemContent.id },
+			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=REJECTED`,
+			data: {},
 			queryString: {}
 		});
 
