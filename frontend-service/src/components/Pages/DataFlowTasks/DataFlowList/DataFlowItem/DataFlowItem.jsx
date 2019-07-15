@@ -38,7 +38,7 @@ const DataFlowItem = props => {
 		//TODO Call to DB
 		const dataPromise = HTTPRequesterAPI.post({
 			url: `/dataflow/updateStatusRequest/${itemContent.id}?type=REJECTED`,
-			data: {},
+			data: { id: itemContent.id },
 			queryString: {}
 		});
 
