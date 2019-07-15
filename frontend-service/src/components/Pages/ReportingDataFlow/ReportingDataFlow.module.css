@@ -15,6 +15,10 @@
 	font-size: 2rem;
 	padding: 2rem !important;
 }
+.dataSetItem :global .p-button.p-button-icon-only .p-button-text {
+	padding: 0px !important;
+	height: 0px !important;
+}
 .buttonsWrapper :global .p-splitbutton-menubutton {
 	right: 2em;
 	position: absolute;
