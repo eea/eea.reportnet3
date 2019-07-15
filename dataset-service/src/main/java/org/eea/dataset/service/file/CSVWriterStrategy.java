@@ -1,11 +1,11 @@
 package org.eea.dataset.service.file;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
@@ -16,6 +16,10 @@ import org.slf4j.LoggerFactory;
 import com.opencsv.CSVWriter;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * Instantiates a new CSV writer strategy.
+ */
 
 /**
  * Instantiates a new CSV writer strategy.
@@ -68,11 +72,9 @@ public class CSVWriterStrategy implements WriterStrategy {
    * Parses the file.
    *
    * @param dataflowId the dataflow id
-   * @param partitionId the partition id
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws InvalidFileException the invalid file exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public byte[] writeFile(final Long dataflowId, final Long datasetId, final String idTableSchema) {
@@ -102,37 +104,58 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
    * @param csvWriter the csv writer
+   * @param datasetId the dataset id
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
       CSVWriter csvWriter, Long datasetId) {
     List<RecordValue> records = parseCommon.getRecordValues(datasetId, idTableSchema);
     List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<String> headers = new ArrayList<>();
+    Map<String, Integer> indexMap = new HashMap<>();
 
     // Writting the headers
-    fieldSchemas.stream().forEach(fieldSchema -> headers.add(fieldSchema.getName()));
+    int nHeaders = 0;
+    for (FieldSchemaVO fieldSchema : fieldSchemas) {
+      headers.add(fieldSchema.getName());
+      indexMap.put(fieldSchema.getId(), nHeaders++);
+    }
+
     csvWriter.writeNext(headers.stream().toArray(String[]::new));
+
     // Writting the values
     for (RecordValue recordValue : records) {
-      List<String> fieldsList = new ArrayList<>();
-      fieldSchemas.stream().forEach(fieldSchema -> {
-        Boolean isWhite = true;
-        if (recordValue.getFields() != null) {
-          for (FieldValue field : recordValue.getFields()) {
-            if (fieldSchema.getId().equals(field.getIdFieldSchema())) {
-              fieldsList.add(field.getValue());
-              isWhite = false;
-            }
-          }
+      List<FieldValue> fields = recordValue.getFields();
+      List<String> unknownColumns = new ArrayList<>();
+      String[] fieldsToWrite = new String[nHeaders];
+      for (int i = 0; i < fields.size(); i++) {
+        FieldValue field = fields.get(i);
+        if (null != field.getIdFieldSchema()) {
+          fieldsToWrite[indexMap.get(field.getIdFieldSchema())] = field.getValue();
+        } else {
+          unknownColumns.add(field.getValue());
         }
-        if (isWhite) {
-          // if the value does not exist we write a white space
-          fieldsList.add("");
-        }
-      });
-      // Write Line
-      csvWriter.writeNext(fieldsList.stream().toArray(String[]::new));
+      }
+
+      csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite));
     }
+  }
+
+
+
+  /**
+   * Join output array.
+   *
+   * @param unknownColumns the unknown columns
+   * @param fieldsToWrite the fields to write
+   * @return the string[]
+   */
+  private String[] joinOutputArray(List<String> unknownColumns, String[] fieldsToWrite) {
+    String[] outputFields = new String[fieldsToWrite.length + unknownColumns.size()];
+
+    System.arraycopy(fieldsToWrite, 0, outputFields, 0, fieldsToWrite.length);
+    System.arraycopy(unknownColumns.stream().toArray(String[]::new), 0, outputFields,
+        fieldsToWrite.length, unknownColumns.size());
+    return outputFields;
   }
 
 

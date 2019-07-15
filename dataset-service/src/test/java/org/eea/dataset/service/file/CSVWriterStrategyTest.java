@@ -87,13 +87,15 @@ public class CSVWriterStrategyTest {
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
     List<FieldValue> fields = new ArrayList<>();
     RecordValue record = new RecordValue();
+    RecordValue record2 = new RecordValue();
     FieldValue fieldValue = new FieldValue();
     FieldSchemaVO fieldSchema = new FieldSchemaVO();
     fieldSchema.setId("");
     fields.add(fieldValue);
     record.setFields(fields);
+    record2.setFields(new ArrayList<>());
     records.add(record);
-    records.add(new RecordValue());
+    records.add(record2);
     fieldSchemas.add(fieldSchema);
     Mockito.when(parseCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
     Mockito.when(parseCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
