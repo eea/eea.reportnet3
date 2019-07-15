@@ -154,10 +154,17 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       HSSFRow row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();
+      int nextUnknownCellNumber = nHeaders;
 
-      for (int i = 0; i < nHeaders; i++) {
+      for (int i = 0; i < fields.size(); i++) {
         FieldValue field = fields.get(i);
-        row.createCell(mapa.get(field.getIdFieldSchema())).setCellValue(field.getValue());
+        Integer cellNumber = mapa.get(field.getIdFieldSchema());
+
+        if (cellNumber == null) {
+          cellNumber = nextUnknownCellNumber++;
+        }
+
+        row.createCell(cellNumber).setCellValue(field.getValue());
       }
     }
   }
@@ -174,14 +181,14 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     XSSFSheet sheet = workbook.createSheet(table.getNameTableSchema());
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
-    Map<String, Integer> mapa = new HashMap<>();
+    Map<String, Integer> indexMap = new HashMap<>();
 
     // Set headers
     int nHeaders = 0;
     XSSFRow rowhead = sheet.createRow(0);
     for (FieldSchemaVO fieldSchema : fieldSchemas) {
       rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName());
-      mapa.put(fieldSchema.getId(), nHeaders++);
+      indexMap.put(fieldSchema.getId(), nHeaders++);
     }
 
     // Set records
@@ -190,12 +197,17 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       XSSFRow row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();
+      int nextUnknownCellNumber = nHeaders;
 
-      for (int i = 0; i < nHeaders; i++) {
+      for (int i = 0; i < fields.size(); i++) {
         FieldValue field = fields.get(i);
-        // Comprobar que el field contiene un idFieldSchema para posicionarlo donde corresponda
-        // (consultar la libreta con las anotaciones de JL)
-        row.createCell(mapa.get(field.getIdFieldSchema())).setCellValue(field.getValue());
+        Integer cellNumber = indexMap.get(field.getIdFieldSchema());
+
+        if (cellNumber == null) {
+          cellNumber = nextUnknownCellNumber++;
+        }
+
+        row.createCell(cellNumber).setCellValue(field.getValue());
       }
     }
   }
