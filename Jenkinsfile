@@ -195,7 +195,7 @@ pipeline {
                         script {
                             echo 'Document Container Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9030 .")
+                            app = docker.build("k8s-swi001:5000/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
                             app.push()                    
                         }    
                     }

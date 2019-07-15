@@ -37,6 +37,10 @@ public class Document {
   @Column(name = "LANGUAGE")
   private String language;
 
+  /** The description. */
+  @Column(name = "DESCRIPTION")
+  private String description;
+
   /** The dataflow. */
   @ManyToOne
   @JoinColumn(name = "DATAFLOW_ID")
@@ -68,6 +72,6 @@ public class Document {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, language, dataflow);
+    return Objects.hash(id, name, language, description, dataflow);
   }
 }

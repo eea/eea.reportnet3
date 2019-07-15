@@ -62,4 +62,33 @@ public interface DataflowService {
    */
   List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException;
 
+
+  /**
+   * Update user request status.
+   *
+   * @param userRequestId the user request id
+   * @param type the type
+   * @throws EEAException the EEA exception
+   */
+  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
+
+
+  /**
+   * Adds the contributor to dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   * @throws EEAException the EEA exception
+   */
+  void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException;
+
+  /**
+   * Removes the contributor from dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   * @throws EEAException the EEA exception
+   */
+  void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
+
 }

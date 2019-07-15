@@ -1,6 +1,5 @@
 package org.eea.dataflow.persistence.domain;
 
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,6 +46,6 @@ public class UserRequest {
 
   /** The dataflows. */
   @ManyToMany(mappedBy = "userRequests")
-  private Set<Dataflow> dataflows = new HashSet<>();
+  private Set<Dataflow> dataflows;
 
 }

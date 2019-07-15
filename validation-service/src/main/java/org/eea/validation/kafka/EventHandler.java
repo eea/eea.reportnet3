@@ -53,7 +53,8 @@ public class EventHandler implements EEAEventHandler {
   public void processMessage(final EEAEventVO eeaEventVO) {
     LOG.info("ValidationService has received this message from Kafka {}", eeaEventVO);
 
-    if (EventType.LOAD_DATA_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
+    if (EventType.LOAD_DATA_COMPLETED_EVENT.equals(eeaEventVO.getEventType())
+        || EventType.DELETED_TABLE.equals(eeaEventVO.getEventType())) {
       Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
       try {
         validationHelper.executeValidation(datasetId);

@@ -7,8 +7,11 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -48,6 +51,7 @@ public interface DataFlowController {
   /**
    * Find completed.
    *
+   * @param userId the user id
    * @param pageNum the page num
    * @param pageSize the page size
    * @return the list
@@ -79,5 +83,38 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findPendingAccepted(@PathVariable(value = "userId") Long userId);
+
+
+
+  /**
+   * Update user request.
+   *
+   * @param idUserRequest the id user request
+   * @param type the type
+   */
+  @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest, TypeRequestEnum type);
+
+  /**
+   * Adds the contributor.
+   *
+   * @param idDataflow the id dataflow
+   * @param userId the user id
+   */
+  @PostMapping(value = "/{idDataflow}/contributor/add", produces = MediaType.APPLICATION_JSON_VALUE)
+  void addContributor(@PathVariable("idDataflow") Long idDataflow,
+      @RequestParam(value = "idContributor") Long userId);
+
+
+  /**
+   * Removes the contributor.
+   *
+   * @param idDataflow the id dataflow
+   * @param userId the user id
+   */
+  @DeleteMapping(value = "{idDataflow}/contributor/remove")
+  void removeContributor(@PathVariable("idDataflow") Long idDataflow,
+      @RequestParam(value = "idContributor") Long userId);
 
 }

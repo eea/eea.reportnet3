@@ -106,11 +106,13 @@ public class LoadValidationsHelper {
    * @param dataset the dataset
    * @return the list
    */
-  private Map<Long, ErrorsValidationVO> processErrors(List<Long> idValidations,
+  public Map<Long, ErrorsValidationVO> processErrors(List<Long> idValidations,
       DatasetValue dataset) {
 
     Map<Long, ErrorsValidationVO> errors = new HashMap<>();
-
+    if (null == idValidations || idValidations.isEmpty()) {
+      return errors;
+    }
     try {
       Future<Map<Long, ErrorsValidationVO>> datasetErrors =
           validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
