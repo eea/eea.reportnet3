@@ -164,7 +164,7 @@ const ValidationViewer = props => {
 			case "FIELD":
 			case "RECORD":
 				let queryString = {
-					dataSetId: props.dataSetId,
+					datasetId: props.dataSetId,
 					type: event.data.typeEntity
 				};
 				const dataPromise = HTTPRequester.get({
