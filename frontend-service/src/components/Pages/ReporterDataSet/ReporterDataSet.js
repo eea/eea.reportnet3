@@ -266,7 +266,7 @@ const ReporterDataSet = ({match, history}) => {
 						dismissableMask={true}
 						style={{ width: "80%" }}
 					>
-						<ValidationViewer dataSetId={dataSetId} />
+						<ValidationViewer dataSetId={dataSetId} visible={validationsVisible}/>
 					</Dialog>
 				</ReporterDataSetContext.Provider>
 				<ConfirmDialog

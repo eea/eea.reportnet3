@@ -76,6 +76,12 @@ const ValidationViewer = props => {
 		fetchDataHandler(null, sortOrder, firstRow, numRows);
 	}, []);
 
+  useEffect(() => {
+    if(props.visible){
+      fetchDataHandler(null, sortOrder, firstRow, numRows);      
+    }
+  }, [props.visible]);
+
 	const onChangePageHandler = event => {
 		console.log("Refetching data ValidationViewer...");
 		setNumRows(event.rows);
