@@ -1,6 +1,6 @@
 {
 	"dataSchemaAPI": {
-		"url": "/dataschema/dataflow/"
+		"url": "/dataschema/dataflow/{:dataFlowId}"
 	},
 	"dataviewerAPI": {
 		"url": "/dataset/TableValueDataset/"
