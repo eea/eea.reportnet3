@@ -61,7 +61,6 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -393,7 +392,6 @@ public class DatasetServiceImpl implements DatasetService {
   public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
     LOG.info("excuted delete table");
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.DELETED_TABLE, datasetId);
   }
 
   /**

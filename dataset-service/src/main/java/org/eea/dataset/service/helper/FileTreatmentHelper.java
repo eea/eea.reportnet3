@@ -1,4 +1,4 @@
-package org.eea.dataset.service.file;
+package org.eea.dataset.service.helper;
 
 import java.io.IOException;
 import java.io.InputStream;
