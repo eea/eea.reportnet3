@@ -26,8 +26,8 @@ const DataViewer = props => {
 	const [loading, setLoading] = useState(false);
 	const [numRows, setNumRows] = useState(10);
 	const [firstRow, setFirstRow] = useState(
-		props.positionIdObject && props.positionIdObject !== null
-			? Math.floor(props.positionIdObject / numRows) * numRows
+		props.positionIdRecord && props.positionIdRecord !== null
+			? Math.floor(props.positionIdRecord / numRows) * numRows
 			: 0
 	);
 	const [sortOrder, setSortOrder] = useState();
@@ -52,8 +52,8 @@ const DataViewer = props => {
 	useEffect(() => {
 		console.log("Setting column options...");
 
-		if (firstRow !== props.positionIdObject && props.positionIdObject!==0) {
-			setFirstRow(Math.floor(props.positionIdObject / numRows) * numRows);
+		if (firstRow !== props.positionIdRecord && props.positionIdRecord!==0) {
+			setFirstRow(Math.floor(props.positionIdRecord / numRows) * numRows);
 		}
 
 		let colOpt = [];
@@ -66,7 +66,7 @@ const DataViewer = props => {
 		fetchDataHandler(
 			null,
 			sortOrder,
-			Math.floor(props.positionIdObject / numRows) * numRows,
+			Math.floor(props.positionIdRecord / numRows) * numRows,
 			numRows
 		);
 
@@ -74,7 +74,7 @@ const DataViewer = props => {
     const inmTableSchemaColumns = [...props.tableSchemaColumns];
     inmTableSchemaColumns.push({table: inmTableSchemaColumns[0].table, field: "id", header: ""})
 		setCols(inmTableSchemaColumns);
-	}, [props.positionIdObject]);
+	}, [props.positionIdRecord]);
 
 	useEffect(() => {
 		// let visibilityIcon = (<div className="TableDiv">

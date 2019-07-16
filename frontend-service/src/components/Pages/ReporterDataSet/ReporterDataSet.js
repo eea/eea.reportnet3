@@ -38,7 +38,7 @@ const ReporterDataSet = ({ match, history }) => {
 	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 	const [isDataDeleted, setIsDataDeleted] = useState(false);
 	const [activeIndex, setActiveIndex] = useState();
-  const [positionIdObject, setPositionIdObject] = useState(0);
+  const [positionIdRecord, setPositionIdRecord] = useState(0);
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
 
 	const home = {
@@ -199,7 +199,7 @@ const ReporterDataSet = ({ match, history }) => {
 
 	const onTabChangeHandler = idTableSchema => {
 		setActiveIndex(idTableSchema.index);
-		setPositionIdObject(0);
+		setPositionIdRecord(0);
 	};
 
 	return (
@@ -222,8 +222,8 @@ const ReporterDataSet = ({ match, history }) => {
 					value={{
 						validationsVisibleHandler: null,
 						setTabHandler: null,
-						setPageHandler: posIdObject => {
-							setPositionIdObject(posIdObject);
+						setPageHandler: posIdRecord => {
+							setPositionIdRecord(posIdRecord);
             },
             setIdSelectedRowHandler: (selectedRowId)=> { 
               setIdSelectedRow(selectedRowId)
@@ -235,7 +235,7 @@ const ReporterDataSet = ({ match, history }) => {
 						tableSchemaColumns={tableSchemaColumns}
 						urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
 						activeIndex={activeIndex}
-						positionIdObject={positionIdObject}
+						positionIdRecord={positionIdRecord}
 						onTabChangeHandler={idTableSchema =>
 							onTabChangeHandler(idTableSchema)
             }
@@ -261,8 +261,8 @@ const ReporterDataSet = ({ match, history }) => {
 						setTabHandler: idTableSchema => {
 							setActiveIndex(idTableSchema);
 						},
-						setPageHandler: posIdObject => {
-							setPositionIdObject(posIdObject);
+						setPageHandler: posIdRecord => {
+							setPositionIdRecord(posIdRecord);
 						},
             setIdSelectedRowHandler: (selectedRowId)=> { 
               setIdSelectedRow(selectedRowId)

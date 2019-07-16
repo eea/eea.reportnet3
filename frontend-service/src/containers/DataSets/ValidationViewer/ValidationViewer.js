@@ -57,8 +57,8 @@ const ValidationViewer = props => {
 		));
 		columnsArr.push(
 			<Column
-				key="idObject"
-				field="idObject"
+				key="idRecord"
+				field="idRecord"
 				header=""
 				className={styles.VisibleHeader}
 			/>
@@ -168,7 +168,7 @@ const ValidationViewer = props => {
 					type: event.data.typeEntity
 				};
 				const dataPromise = HTTPRequester.get({
-					url: `${config.validationViewerAPI.url}${event.data.idObject}`,
+					url: `${config.validationViewerAPI.url}${event.data.idRecord}`,
 					queryString: queryString
 				});
 
