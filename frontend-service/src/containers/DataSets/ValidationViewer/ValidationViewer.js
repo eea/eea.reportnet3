@@ -175,8 +175,8 @@ const ValidationViewer = props => {
 				dataPromise
 					.then(res => {
 						contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-            contextReporterDataSet.setPageHandler(res.data.position);
-            contextReporterDataSet.setIdSelectedRowHandler(event.data.idObject);
+            			contextReporterDataSet.setPageHandler(res.data.position);
+            			contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
 						contextReporterDataSet.validationsVisibleHandler();
 					})
 					.catch(error => {
