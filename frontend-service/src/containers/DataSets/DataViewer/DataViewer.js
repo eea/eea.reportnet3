@@ -52,7 +52,7 @@ const DataViewer = props => {
 	useEffect(() => {
 		console.log("Setting column options...");
 
-		if (firstRow !== props.positionIdObject) {
+		if (firstRow !== props.positionIdObject && props.positionIdObject!==0) {
 			setFirstRow(Math.floor(props.positionIdObject / numRows) * numRows);
 		}
 
@@ -71,7 +71,8 @@ const DataViewer = props => {
 		);
 
 		console.log("Filtering data...");
-		const inmTableSchemaColumns = [...props.tableSchemaColumns];
+    const inmTableSchemaColumns = [...props.tableSchemaColumns];
+    inmTableSchemaColumns.push({table: inmTableSchemaColumns[0].table, field: "id", header: ""})
 		setCols(inmTableSchemaColumns);
 	}, [props.positionIdObject]);
 
@@ -87,15 +88,19 @@ const DataViewer = props => {
 		// </div>;
 		// setHeader(headerArr);
 
-		let columnsArr = cols.map(col => (
+    let columnsArr = cols.map(col => {
+      let sort = (col.field==="id")? false : true;
+      let visibleColumn = (col.field==="id")? styles.VisibleHeader : "";
+      return (
 			<Column
-				sortable={true}
+        sortable = {sort}
 				key={col.field}
 				field={col.field}
 				header={col.header}
-				body={dataTemplate}
+        body={dataTemplate}
+        className={visibleColumn}
 			/>
-		));
+		)});
 		let validationCol = (
 			<Column
 				key="recordValidation"
@@ -112,7 +117,9 @@ const DataViewer = props => {
 	const onChangePageHandler = event => {
 		console.log("Refetching data...");
 		setNumRows(event.rows);
-		setFirstRow(event.first);
+    setFirstRow(event.first);
+    contextReporterDataSet.setPageHandler(0);
+    contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(sortField, sortOrder, event.first, event.rows);
 	};
 
@@ -133,11 +140,14 @@ const DataViewer = props => {
 	const onSortHandler = event => {
 		console.log("Sorting...");
 		setSortOrder(event.sortOrder);
-		setSortField(event.sortField);
+    setSortField(event.sortField);
+    contextReporterDataSet.setPageHandler(0);
+    contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
 	};
 
 	const onRefreshClickHandler = () => {
+    contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(null, sortOrder, firstRow, numRows);
 	};
 
@@ -196,7 +206,8 @@ const DataViewer = props => {
 					fieldData: { [field.idFieldSchema]: field.value },
 					fieldValidations: field.fieldValidations
 				};
-			});
+      });
+      arrayDataFields.push({fieldData: {id: record.id}, fieldValidations:null});
 			const arrayDataAndValidations = {
 				dataRow: arrayDataFields,
 				recordValidations
@@ -284,7 +295,7 @@ const DataViewer = props => {
 						levelError = "BLOCKER";
 					}
 				}
-			});
+			});      
 
 			return (
 				<div
@@ -400,6 +411,12 @@ const DataViewer = props => {
 		});
 	};
 
+  const rowClassName = (rowData) => {
+    let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === "id")[0].fieldData.id;
+    console.log(rowData.dataRow, props.idSelectedRow)
+    return {'p-highlight' : (id === props.idSelectedRow)};
+  }
+  
 	let totalCount = <span>Total: {totalRecords} rows</span>;
 
 	return (
@@ -432,7 +449,8 @@ const DataViewer = props => {
 					header={header}
 					sortField={sortField}
 					sortOrder={sortOrder}
-					autoLayout={true}
+          autoLayout={true}
+          rowClassName={rowClassName}
 				>
 					{columns}
 				</DataTable>
