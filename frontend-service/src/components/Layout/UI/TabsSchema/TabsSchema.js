@@ -19,7 +19,7 @@ const TabsSchema = (props) => {
                         <DataViewer key={table.id} id={table.id} name={table.name} customButtons={(props.customButtons)?props.customButtons:null} 
                                     tableSchemaColumns={props.tableSchemaColumns.map(tab => tab.filter(t=>t.table===table.name)).filter(f=>f.length>0)[0]}
                                     urlViewer={props.urlViewer}
-                                    positionIdObject={props.positionIdObject}
+                                    positionIdRecord={props.positionIdRecord}
                                     idSelectedRow={props.idSelectedRow}/>                        
                     </div>
                 </TabPanel>
