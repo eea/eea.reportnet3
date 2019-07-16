@@ -18,6 +18,14 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @return the field value
    */
   FieldValue findByIdAndRecord_TableValue_DatasetId_Id(Long id, Long idDataset);
-  
+
+
+  /**
+   * Find first type by idfieldchema.
+   *
+   * @param idFieldSchema the id field schema
+   * @return the string
+   */
+  FieldValue findFirstTypeByIdFieldSchema(String idFieldSchema);
 
 }

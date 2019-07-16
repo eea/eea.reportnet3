@@ -15,5 +15,6 @@ public class SortField {
 
   private String fieldName;
   private Boolean asc;
+  private String typefield;
 
 }

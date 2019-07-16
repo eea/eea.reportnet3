@@ -3,6 +3,7 @@ package org.eea.dataset.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -427,10 +428,27 @@ public class DatasetServiceImpl implements DatasetService {
     if (StringUtils.isBlank(idFieldSchema)) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
     } else {
-      SortField sortField = new SortField();
-      sortField.setFieldName(idFieldSchema);
-      sortField.setAsc(asc);
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
+      if (idFieldSchema.contains(",")) {
+        List<String> idFieldSchemas = Arrays.asList(idFieldSchema.split(","));
+        SortField[] sortFields = new SortField[idFieldSchemas.size()];
+        for (int i = 0; i < idFieldSchemas.size(); i++) {
+          FieldValue typefield =
+              fieldRepository.findFirstTypeByIdFieldSchema(idFieldSchemas.get(i).toString());
+          SortField sortField = new SortField();
+          sortField.setFieldName(idFieldSchemas.get(i).toString());
+          sortField.setAsc(asc);
+          sortField.setTypefield(typefield.getType());
+          sortFields[i] = sortField;
+        }
+        records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortFields);
+      } else {
+        FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(idFieldSchema);
+        SortField sortField = new SortField();
+        sortField.setFieldName(idFieldSchema);
+        sortField.setAsc(asc);
+        sortField.setTypefield(typefield.getType());
+        records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
+      }
     }
 
     if (records == null) {

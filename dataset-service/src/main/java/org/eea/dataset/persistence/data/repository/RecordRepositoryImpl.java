@@ -26,14 +26,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * The Constant DEFAULT_SORT_CRITERIA.
    */
-  private static final String DEFAULT_SORT_CRITERIA = "' '";
+  private static final String DEFAULT_STRING_SORT_CRITERIA = "' '";
+
+  private static final String DEFAULT_NUMERIC_SORT_CRITERIA = "0";
 
   /**
    * The Constant SORT_QUERY.
    */
-  private final static String SORT_QUERY =
+  private final static String SORT_STRING_QUERY =
       "COALESCE(( select distinct fv.value from FieldValue fv where fv.record.id=rv.id and fv.idFieldSchema ='%s' ), "
-          + DEFAULT_SORT_CRITERIA + ") as order_criteria_%s";
+          + DEFAULT_STRING_SORT_CRITERIA + ") as order_criteria_%s";
+
+  /** The Constant SORT_NUMERIC_QUERY. */
+  private final static String SORT_NUMERIC_QUERY =
+      "COALESCE((select distinct case when is_numeric(fv.value) = true then CAST(fv.value as java.math.BigDecimal) when is_numeric( fv.value)=false then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
+          + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
   /**
    * The Constant MASTER_QUERY.
@@ -58,6 +65,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    *
    * @return the list
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<RecordValue> findByTableValueWithOrder(String idTableSchema, Pageable pageable,
       SortField... sortFields) {
@@ -68,10 +76,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     for (SortField field : sortFields) {
-      sortQueryBuilder.append(",")
-          .append(String.format(SORT_QUERY, field.getFieldName(), criteriaNumber)).append(" ");
-      directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-          .append(" ").append(field.getAsc() ? "asc" : "desc");
+      if (field.getTypefield().contentEquals("String")) {
+        sortQueryBuilder.append(",")
+            .append(String.format(SORT_STRING_QUERY, field.getFieldName(), criteriaNumber))
+            .append(" ");
+        directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+            .append(" ").append(field.getAsc() ? "asc" : "desc");
+      } else if (field.getTypefield().contentEquals("Integer")) {
+        sortQueryBuilder.append(",")
+            .append(String.format(SORT_NUMERIC_QUERY, field.getFieldName(), criteriaNumber))
+            .append(" ");
+        directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+            .append(" ").append(field.getAsc() ? "asc" : "desc");
+      }
     }
     Query query = entityManager.createQuery(String.format(MASTER_QUERY, sortQueryBuilder.toString(),
         directionQueryBuilder.toString().substring(1)));
