@@ -723,7 +723,11 @@ public class DatasetServiceImpl implements DatasetService {
 
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-      stats.setNameDataSetSchema(schema.getNameDataSetSchema());
+
+      DataSetMetabase datasetMb =
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+
+      stats.setNameDataSetSchema(datasetMb.getDataSetName());
       List<String> listIdsDataSetSchema = new ArrayList<>();
       Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
       for (TableSchema tableSchema : schema.getTableSchemas()) {

@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
@@ -67,7 +68,7 @@ public class LoadValidationsHelper {
    *
    * @throws EEAException the EEA exception
    */
-  public FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
+  public FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
       String headerField, Boolean asc) throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
