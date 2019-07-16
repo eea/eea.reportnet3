@@ -38,7 +38,8 @@ const ReporterDataSet = ({ match, history }) => {
 	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 	const [isDataDeleted, setIsDataDeleted] = useState(false);
 	const [activeIndex, setActiveIndex] = useState();
-	const [positionIdObject, setPositionIdObject] = useState(0);
+  const [positionIdObject, setPositionIdObject] = useState(0);
+  const [idSelectedRow, setIdSelectedRow] = useState(-1);
 
 	const home = {
 		icon: resources.icons["home"],
@@ -73,7 +74,6 @@ const ReporterDataSet = ({ match, history }) => {
 		dataPromise
 			.then(response => {
 				//'/jsons/error-statistics.json'
-				setDatasetTitle(response.data.nameDataSetSchema);
 				const dataPromiseError = HTTPRequesterAPI.get({
 					url: `${config.loadStatisticsAPI.url}${dataSetId}`,
 					/* url: "/jsons/error-statistics.json", */
@@ -82,6 +82,7 @@ const ReporterDataSet = ({ match, history }) => {
 
 				//Parse JSON to array statistic values
 				dataPromiseError.then(res => {
+          setDatasetTitle(res.data.nameDataSetSchema);
 					setTableSchema(
 						response.data.tableSchemas.map((item, i) => {
 							return {
@@ -223,7 +224,10 @@ const ReporterDataSet = ({ match, history }) => {
 						setTabHandler: null,
 						setPageHandler: posIdObject => {
 							setPositionIdObject(posIdObject);
-						}
+            },
+            setIdSelectedRowHandler: (selectedRowId)=> { 
+              setIdSelectedRow(selectedRowId)
+            }
 					}}
 				>
 					<TabsSchema
@@ -234,7 +238,8 @@ const ReporterDataSet = ({ match, history }) => {
 						positionIdObject={positionIdObject}
 						onTabChangeHandler={idTableSchema =>
 							onTabChangeHandler(idTableSchema)
-						}
+            }
+            idSelectedRow={idSelectedRow}
 					/>
 				</ReporterDataSetContext.Provider>
 				<Dialog
@@ -258,7 +263,10 @@ const ReporterDataSet = ({ match, history }) => {
 						},
 						setPageHandler: posIdObject => {
 							setPositionIdObject(posIdObject);
-						}
+						},
+            setIdSelectedRowHandler: (selectedRowId)=> { 
+              setIdSelectedRow(selectedRowId)
+            }
 					}}
 				>
 					<Dialog
