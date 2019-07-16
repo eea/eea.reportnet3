@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -88,7 +87,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
-        dataset.getTableSchemas() == null ? dataset.getTableSchemas() : new ArrayList<>();
+        dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
     TableSchemaVO table = parseCommon.findTableSchema(idTableSchema, dataset);
 
     // If the given idTableSchema exists, replace all tables with it
@@ -97,95 +96,62 @@ public class ExcelWriterStrategy implements WriterStrategy {
       tables.add(table);
     }
 
-    // Write to xls
-    if (mimeType.equals("xls")) {
-      LOG.info("Start writing xls file");
-      try (HSSFWorkbook workbook = new HSSFWorkbook()) {
-        for (TableSchemaVO tableSchema : tables) {
-          writeHSSFSheet(workbook, tableSchema, datasetId);
-        }
-        workbook.write(out);
-      } catch (IOException e) {
-        LOG_ERROR.error(e.getMessage());
-      }
-      // Write to xlsx
-    } else {
-      LOG.info("Start writing xlsx file");
-      try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-        for (TableSchemaVO tableSchema : tables) {
-          writeXSSFSheet(workbook, tableSchema, datasetId);
-        }
-        workbook.write(out);
-      } catch (IOException e) {
-        LOG_ERROR.error(e.getMessage());
-      }
-    }
+    try (Workbook workbook = createWorkbook()) {
 
-    LOG.info("Finish writing xlsx file");
+      LOG.info("Start writing {} file", mimeType);
+
+      // Add one sheet per table
+      for (TableSchemaVO tableSchema : tables) {
+        writeSheet(workbook, tableSchema, datasetId);
+      }
+
+      workbook.write(out);
+
+      LOG.info("Finish writing {} file", mimeType);
+
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
 
     return out.toByteArray();
   }
 
   /**
-   * Write HSSF sheet.
+   * Creates the correct Workbook object according to the file extension.
    *
-   * @param workbook the workbook
-   * @param table the table
+   * @return A new Workbook object.
+   * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void writeHSSFSheet(HSSFWorkbook workbook, TableSchemaVO table, Long datasetId) {
+  private Workbook createWorkbook() throws IOException {
 
-    LOG.info("Writing table " + table.getNameTableSchema());
-
-    HSSFSheet sheet = workbook.createSheet(table.getNameTableSchema());
-    List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
-    Map<String, Integer> mapa = new HashMap<>();
-
-    // Set headers
-    int nHeaders = 0;
-    HSSFRow rowhead = sheet.createRow(0);
-    for (FieldSchemaVO fieldSchema : fieldSchemas) {
-      rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName());
-      mapa.put(fieldSchema.getId(), nHeaders++);
-    }
-
-    // Set records
-    int nRow = 1;
-    for (RecordValue record : parseCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
-
-      HSSFRow row = sheet.createRow(nRow++);
-      List<FieldValue> fields = record.getFields();
-      int nextUnknownCellNumber = nHeaders;
-
-      for (int i = 0; i < fields.size(); i++) {
-        FieldValue field = fields.get(i);
-        Integer cellNumber = mapa.get(field.getIdFieldSchema());
-
-        if (cellNumber == null) {
-          cellNumber = nextUnknownCellNumber++;
-        }
-
-        row.createCell(cellNumber).setCellValue(field.getValue());
-      }
+    switch (mimeType) {
+      case "xls":
+        return new HSSFWorkbook();
+      case "xlsx":
+        return new XSSFWorkbook();
+      default:
+        throw new IOException("Unknow MIME type: " + mimeType);
     }
   }
 
   /**
-   * Write XSSF sheet.
+   * Writes a sheet containing a DataSet table into the given workbook.
    *
    * @param workbook the workbook
    * @param table the table
+   * @param datasetId the DataSet id
    */
-  public void writeXSSFSheet(XSSFWorkbook workbook, TableSchemaVO table, Long datasetId) {
+  private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId) {
 
-    LOG.info("Writing table " + table.getNameTableSchema());
-
-    XSSFSheet sheet = workbook.createSheet(table.getNameTableSchema());
+    Sheet sheet = workbook.createSheet(table.getNameTableSchema());
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
+
+    // Used to map each fieldValue with the correct fieldSchema
     Map<String, Integer> indexMap = new HashMap<>();
 
     // Set headers
     int nHeaders = 0;
-    XSSFRow rowhead = sheet.createRow(0);
+    Row rowhead = sheet.createRow(0);
     for (FieldSchemaVO fieldSchema : fieldSchemas) {
       rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
@@ -195,7 +161,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
     int nRow = 1;
     for (RecordValue record : parseCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
 
-      XSSFRow row = sheet.createRow(nRow++);
+      Row row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();
       int nextUnknownCellNumber = nHeaders;
 
@@ -211,4 +177,5 @@ public class ExcelWriterStrategy implements WriterStrategy {
       }
     }
   }
+
 }

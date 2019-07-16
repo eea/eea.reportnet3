@@ -40,7 +40,7 @@ public class FileExportContextImplTest {
    */
   @Test
   public void testFileExportContextImpl() {
-    FileExportContextImpl init = new FileExportContextImpl(writerStrategy);
+    new FileExportContextImpl(writerStrategy);
   }
 
   /**

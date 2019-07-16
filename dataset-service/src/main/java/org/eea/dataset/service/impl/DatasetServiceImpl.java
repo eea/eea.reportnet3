@@ -949,7 +949,8 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException {
     final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
     DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(datasetMetabase.getDataflowId());
-    return parseCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
+    return null == idTableSchema ? datasetMetabase.getDataSetName() + "." + mimeType
+        : parseCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
 
   }
 }
