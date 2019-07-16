@@ -4,6 +4,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
