@@ -391,7 +391,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
-    LOG.info("excuted delete table");
+    LOG.info("Executed delete table with id {}, from dataset {}", idTableSchema, datasetId);
   }
 
   /**
@@ -677,6 +677,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
       validationLink.setPosition(Long.valueOf(recordPosition));
+      validationLink.setIdRecord(record.getId());
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
           new ObjectId(record.getTableValue().getDatasetId().getIdDatasetSchema()));

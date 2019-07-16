@@ -51,9 +51,8 @@ public class DeleteHelper {
    * @throws InterruptedException the interrupted exception
    */
   @Async
-  public void executeDeleteProcess(final Long datasetId, String idTableSchema)
-      throws EEAException, IOException, InterruptedException {
-    LOG.info("Processing file");
+  public void executeDeleteProcess(final Long datasetId, String idTableSchema) throws EEAException {
+    LOG.info("Deleting table {} from dataset {}", idTableSchema, datasetId);
     datasetService.deleteTableBySchema(idTableSchema, datasetId);
 
     // after the table has been deleted, an event is sent to notify it
