@@ -168,15 +168,15 @@ const ValidationViewer = props => {
 					type: event.data.typeEntity
 				};
 				const dataPromise = HTTPRequester.get({
-					url: `${config.validationViewerAPI.url}${event.data.idRecord}`,
+					url: `${config.validationViewerAPI.url}${event.data.idObject}`,
 					queryString: queryString
 				});
 
 				dataPromise
 					.then(res => {
 						contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-            			contextReporterDataSet.setPageHandler(res.data.position);
-            			contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
+            contextReporterDataSet.setPageHandler(res.data.position);
+            contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
 						contextReporterDataSet.validationsVisibleHandler();
 					})
 					.catch(error => {
