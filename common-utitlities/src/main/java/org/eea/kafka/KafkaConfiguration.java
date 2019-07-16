@@ -50,6 +50,11 @@ public class KafkaConfiguration {
   private String groupId;
 
 
+  /**
+   * Kafka admin.
+   *
+   * @return the kafka admin
+   */
   @Bean
   public KafkaAdmin kafkaAdmin() {
     Map<String, Object> configs = new HashMap<>();

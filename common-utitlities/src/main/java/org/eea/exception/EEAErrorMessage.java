@@ -47,6 +47,21 @@ public final class EEAErrorMessage {
   /** The Constant PARTITION_ID_NOTFOUND. */
   public static final String PARTITION_ID_NOTFOUND = "Partition not found";
 
+  /** The Constant DATAFLOW_INCORRECT_ID. */
+  public static final String DATAFLOW_INCORRECT_ID = "Dataflow Id incorrect";
+
+  /** The Constant DATAFLOW_NOTFOUND. */
+  public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
+
+/** The Constant USER_REQUEST_NOTFOUND. */
+  public static final String USER_REQUEST_NOTFOUND = "User request not found";
+
+ /** The Constant DOCUMENT_UPLOAD_ERROR. */
+  public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
+  
+  /** The Constant DOCUMENT_DOWNLOAD_ERROR. */
+  public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
+
   /**
    * Instantiates a new EEA error message.
    */

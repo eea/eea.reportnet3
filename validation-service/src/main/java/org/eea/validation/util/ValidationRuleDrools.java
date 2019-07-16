@@ -120,7 +120,7 @@ public class ValidationRuleDrools {
       TypeEntityEnum typeEntityEnum, String originName) {
     Validation newValidation = new Validation();
     newValidation.setLevelError(
-        typeError.equalsIgnoreCase("warning") ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
+        "warning".equalsIgnoreCase(typeError) ? TypeErrorEnum.WARNING : TypeErrorEnum.ERROR);
     newValidation.setMessage(message);
     newValidation.setIdRule(ruleId);
     newValidation.setValidationDate(new Date().toString());

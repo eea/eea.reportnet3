@@ -42,7 +42,7 @@ public class DataSetMetabase {
   private Long id;
 
   /** The data set name. */
-  @Column(name = "DataSetName")
+  @Column(name = "DATASET_NAME")
   private String dataSetName;
 
   /** The dataflow id. */
