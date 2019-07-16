@@ -6,8 +6,8 @@ import ResourcesContext from '../../../Context/ResourcesContext';
 const CustomButton = (props) => {
     const resources = useContext(ResourcesContext);
     let icons = [
-        resources.icons["import"],
         resources.icons["export"],
+        resources.icons["import"],
         resources.icons["trash"],
         resources.icons["warning"],
         resources.icons["clock"],
