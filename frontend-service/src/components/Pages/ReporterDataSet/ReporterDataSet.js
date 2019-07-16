@@ -15,12 +15,15 @@ import Dashboard from "../../../containers/DashBoard/DashBoard";
 import MainLayout from "../../Layout/main-layout.component";
 import config from "../../../conf/web.config.json";
 import HTTPRequesterAPI from "../../../services/HTTPRequester/HTTPRequester";
+import getUrl from "../../../Utils/getUrl";
 import styles from "./ReporterDataSet.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
 import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
-const ReporterDataSet = ({match, history}) => {
-	const { params: { dataSetId } } = match;
+const ReporterDataSet = ({ match, history }) => {
+	const {
+		params: { dataFlowId, dataSetId }
+	} = match;
 	const resources = useContext(ResourcesContext);
 	const [datasetTitle, setDatasetTitle] = useState("");
 	const [customButtons, setCustomButtons] = useState([]);
@@ -47,13 +50,13 @@ const ReporterDataSet = ({match, history}) => {
 
 		setBreadCrumbItems([
 			{
-			  label: resources.messages["dataFlowTask"],
-			  command: () => history.push("/data-flow-task")
+				label: resources.messages["dataFlowTask"],
+				command: () => history.push("/data-flow-task")
 			},
 			{
-			  label: resources.messages["reportingDataFlow"],
-			  command: () =>
-				history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+				label: resources.messages["reportingDataFlow"],
+				command: () =>
+					history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
 			},
 			{ label: resources.messages["viewData"] }
 		]);
@@ -63,7 +66,7 @@ const ReporterDataSet = ({match, history}) => {
 
 		//`${config.dataSchemaAPI.url}1`
 		const dataPromise = HTTPRequesterAPI.get({
-			url: `${config.dataSchemaAPI.url}${dataSetId}`,
+			url: getUrl(config.dataSchemaAPI.url, { dataFlowId }),
 			/* url: "/jsons/datosDataSchema2.json", */
 			queryString: {}
 		});
@@ -177,7 +180,7 @@ const ReporterDataSet = ({match, history}) => {
 
 	const onConfirmDeleteHandler = () => {
 		setDeleteDialogVisible(false);
-		HTTPRequesterAPI.delete({			
+		HTTPRequesterAPI.delete({
 			url: `/dataset/${dataSetId}/deleteImportData`,
 			queryString: {}
 		}).then(res => {
@@ -185,7 +188,7 @@ const ReporterDataSet = ({match, history}) => {
 		});
 	};
 
-	const onConfirmValidateHandler = () => {		
+	const onConfirmValidateHandler = () => {
 		setValidateDialogVisible(false);
 		HTTPRequesterAPI.update({
 			url: `/validation/dataset/${dataSetId}`,
@@ -225,7 +228,7 @@ const ReporterDataSet = ({match, history}) => {
 				>
 					<TabsSchema
 						tables={tableSchema}
-						tableSchemaColumns={tableSchemaColumns}						
+						tableSchemaColumns={tableSchemaColumns}
 						urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
 						activeIndex={activeIndex}
 						positionIdObject={positionIdObject}
@@ -266,7 +269,10 @@ const ReporterDataSet = ({match, history}) => {
 						dismissableMask={true}
 						style={{ width: "80%" }}
 					>
-						<ValidationViewer dataSetId={dataSetId} visible={validationsVisible}/>
+						<ValidationViewer
+							dataSetId={dataSetId}
+							visible={validationsVisible}
+						/>
 					</Dialog>
 				</ReporterDataSetContext.Provider>
 				<ConfirmDialog
