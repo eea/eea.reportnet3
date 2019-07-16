@@ -441,6 +441,8 @@ public class DatasetServiceTest {
         .thenReturn(recordValues);
     List<RecordVO> recordVOs = new ArrayList<>();
     RecordVO recordVO = new RecordVO();
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType("String");
     ArrayList<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
     recordVO.setFields(fields);
@@ -459,8 +461,44 @@ public class DatasetServiceTest {
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
     datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
         new ObjectId().toString(), true);
+
+    Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
+  }
+
+  @Test
+  public void testGetTableValuesById3() throws Exception {
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
+    when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    List<RecordVO> recordVOs = new ArrayList<>();
+    RecordVO recordVO = new RecordVO();
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType("String");
+    ArrayList<FieldVO> fields = new ArrayList<>();
+    fields.add(new FieldVO());
+    recordVO.setFields(fields);
+    recordVOs.add(recordVO);
+    List<FieldValidation> fieldV = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setFieldValue(new FieldValue());
+    fieldV.add(fieldValidation);
+    List<RecordValidation> recV = new ArrayList<>();
+    RecordValidation recValidation = new RecordValidation();
+    recValidation.setRecordValue(new RecordValue());
+    recV.add(recValidation);
+    pageable = PageRequest.of(0, 1);
+    when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
+    when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
+    when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
+    when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
+    datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable,
+        new ObjectId().toString() + "," + new ObjectId().toString(), true);
+
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 

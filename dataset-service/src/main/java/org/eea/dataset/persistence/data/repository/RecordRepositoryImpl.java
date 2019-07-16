@@ -28,7 +28,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   private static final String DEFAULT_STRING_SORT_CRITERIA = "' '";
 
+  /** The Constant DEFAULT_NUMERIC_SORT_CRITERIA. */
   private static final String DEFAULT_NUMERIC_SORT_CRITERIA = "0";
+
+  /** The Constant DEFAULT_DATE_SORT_CRITERIA. */
+  private static final String DEFAULT_DATE_SORT_CRITERIA = "cast('01/01/1970' as java.sql.Date)";
 
   /**
    * The Constant SORT_QUERY.
@@ -39,8 +43,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant SORT_NUMERIC_QUERY. */
   private final static String SORT_NUMERIC_QUERY =
-      "COALESCE((select distinct case when is_numeric(fv.value) = true then CAST(fv.value as java.math.BigDecimal) when is_numeric( fv.value)=false then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
+      "COALESCE((select distinct case when is_numeric(fv.value) = true "
+          + "then CAST(fv.value as java.math.BigDecimal) when is_numeric( fv.value)=false "
+          + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
+
+  private final static String SORT_DATE_QUERY =
+      "COALESCE((select distinct case when is_date(fv.value) = true "
+          + "then CAST(fv.value as java.sql.Date) " + "when is_date( fv.value)=false "
+          + "then cast('01/01/1970' as java.sql.Date) " + "end from FieldValue fv "
+          + "where fv.record.id = rv.id and fv.idFieldSchema = '%s')," + DEFAULT_DATE_SORT_CRITERIA
+          + ") as order_criteria_%s ";
 
   /**
    * The Constant MASTER_QUERY.
@@ -76,15 +89,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     for (SortField field : sortFields) {
-      if (field.getTypefield().contentEquals("String")) {
+      if (field.getTypefield().contentEquals("Text")) {
         sortQueryBuilder.append(",")
             .append(String.format(SORT_STRING_QUERY, field.getFieldName(), criteriaNumber))
             .append(" ");
         directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
             .append(" ").append(field.getAsc() ? "asc" : "desc");
-      } else if (field.getTypefield().contentEquals("Integer")) {
+      } else if (field.getTypefield().contentEquals("Number")) {
         sortQueryBuilder.append(",")
             .append(String.format(SORT_NUMERIC_QUERY, field.getFieldName(), criteriaNumber))
+            .append(" ");
+        directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+            .append(" ").append(field.getAsc() ? "asc" : "desc");
+      } else if (field.getTypefield().contentEquals("Date")) {
+        sortQueryBuilder.append(",")
+            .append(String.format(SORT_DATE_QUERY, field.getFieldName(), criteriaNumber))
             .append(" ");
         directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
             .append(" ").append(field.getAsc() ? "asc" : "desc");
