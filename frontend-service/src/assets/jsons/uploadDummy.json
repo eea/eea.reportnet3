@@ -2,9 +2,10 @@
   {
     "_id": "5cf7e7be44b6eefdc908078f",
     "index": "0",
-    "title": "nombre del archivo",
-    "description": " libero quasi aliquam laudantium minima ullam reprehenderit neque error eligendi eius voluptatum",
+    "title": "First document",
+    "description": "Provides independent information on the environment.",
     "category": "pdf",
+    "language": "en",
     "url": "http://placehold.com/daycore_lorem_sint.pdf",
     "val": "true",
     "validations":{
@@ -19,9 +20,10 @@
   {
     "_id": "5cf7e7be44b6eefdc908078f",
     "index": "0",
-    "title": "Numele archivului",
-    "description": "anim ea commodo anim",
+    "title": "Segundo documento",
+    "description": "Información para aquellos involucrados en desarrollar, aplicar y evaluar las políticas ambientales.",
     "category": "txt",
+    "language": "es",
     "url": "http://placehold.com/daycore_lorem_sint.txt",
     "validations":{
       "id": 2,
@@ -35,9 +37,10 @@
   {
     "_id": "5cf7e7be44b6eefdc908078f",
     "index": "0",
-    "title": "Nazvanie faila",
-    "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    "title": "Third document",
+    "description": "Information of 33 member countries and six cooperating countries.",
     "category": "xml",
+    "language": "en",
     "url": "http://placehold.com/daycore_lorem_sint.xml",
     "validations":{
       "id": 1,
@@ -51,9 +54,10 @@
   {
     "_id": "5cf7e7be44b6eefdc908078f",
     "index": "0",
-    "title": "File name",
-    "description": "Optio excepturi tempore numquam deserunt doloremque laborum iusto.",
+    "title": "Last document",
+    "description": "The map only shows territories situated in and around Europe.",
     "category": "pdf",
+    "language": "en",
     "url": "http://placehold.com/daycore_lorem_sint.pdf",
     "validations":{
       "id": 0,

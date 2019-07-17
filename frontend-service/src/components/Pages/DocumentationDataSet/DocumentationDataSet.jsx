@@ -3,6 +3,7 @@ import styles from './DocumentationDataSet.module.scss';
 import MainLayout from '../../Layout/main-layout.component';
 import {BreadCrumb} from 'primereact/breadcrumb';
 import ResourcesContext from '../../Context/ResourcesContext';
+import uploadDummy from "../../../assets/jsons/uploadDummy";
 import { TabView, TabPanel } from "primereact/tabview";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -45,8 +46,8 @@ const DocumentationDataSet = ({ match, history }) => {
     //Data Fetching
     useEffect(() => {
         //TO DO change to real API call
-        HTTPRequesterAPI.get({
-            url: 'jsons/list-of-documents.json',
+        /* HTTPRequesterAPI.get({
+            url: '/jsons/list-of-documents.json',
             queryString: {}
         })
         .then(response => {
@@ -57,7 +58,8 @@ const DocumentationDataSet = ({ match, history }) => {
             setLoading(false);
             console.log("error", error);
             return error;
-        });
+        }); */
+        setFile(uploadDummy)
 
         //#region Button inicialization              
         setCustomButtons([
@@ -90,7 +92,7 @@ const DocumentationDataSet = ({ match, history }) => {
 
     const actionTemplate = (rowData, column) =>{
        
-        return <a href={rowData.url}> <IconComponent icon="pi pi-file"/></a>     
+        return <a href={rowData.url} target="_blank"> <IconComponent icon="pi pi-file"/></a>     
     }
     
     const layout = children => {
