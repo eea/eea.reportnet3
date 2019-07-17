@@ -118,9 +118,9 @@ const DataViewer = props => {
 		console.log("Refetching data...");
 		setNumRows(event.rows);
     setFirstRow(event.first);
-    contextReporterDataSet.setPageHandler(0);
+    contextReporterDataSet.setPageHandler(event.first);
     contextReporterDataSet.setIdSelectedRowHandler(-1);
-		fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+		//fetchDataHandler(sortField, sortOrder, event.first, event.rows);
 	};
 
 	const onConfirmDeleteHandler = () => {	
