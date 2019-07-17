@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class ParseCommon.
+ * The Class FileCommonUtils.
  */
 @Component
 public class FileCommonUtils {
@@ -177,6 +177,7 @@ public class FileCommonUtils {
   /**
    * Gets the record values.
    *
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @return the record values
    */
