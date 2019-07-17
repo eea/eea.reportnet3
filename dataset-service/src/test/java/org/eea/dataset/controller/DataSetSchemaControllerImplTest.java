@@ -13,6 +13,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class DataSetSchemaControllerImplTest {
 
   @Mock
   private SchemasRepository schemasRepository;
-  
+
   @Mock
   private DatasetSchemaController dataSchemaController;
 
@@ -71,8 +72,9 @@ public class DataSetSchemaControllerImplTest {
 
   @Test
   public void testFindDataSchemaByDataFlow() {
-    
-    when(dataSchemaController.findDataSchemaByDataflow(Mockito.any())).thenReturn(new DataSetSchemaVO());
+
+    when(dataSchemaController.findDataSchemaByDataflow(Mockito.any()))
+        .thenReturn(new DataSetSchemaVO());
     dataSchemaControllerImpl.findDataSchemaByDataflow(Mockito.any());
     dataSchemaController.findDataSchemaByDataflow(1L);
     Mockito.verify(dataSchemaController, times(1)).findDataSchemaByDataflow(Mockito.any());
@@ -83,14 +85,14 @@ public class DataSetSchemaControllerImplTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType("string");
+    field.setType(TypeData.TEXT);
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType("string");
+    field2.setType(TypeData.TEXT);
 
-    assertEquals("error, not equals",field,field2);
-  
+    assertEquals("error, not equals", field, field2);
+
 
     RecordSchema record = new RecordSchema();
     record.setNameSchema("test");
@@ -102,7 +104,7 @@ public class DataSetSchemaControllerImplTest {
     record2.setNameSchema("test");
     record2.setFieldSchema(listaFields);
 
-    assertEquals("error, not equals",record,record2);
+    assertEquals("error, not equals", record, record2);
 
     TableSchema table = new TableSchema();
     table.setNameTableSchema("test");
@@ -112,7 +114,7 @@ public class DataSetSchemaControllerImplTest {
     table2.setNameTableSchema("test");
     table2.setRecordSchema(record2);
 
-    assertEquals("error, not equals",table,table2);
+    assertEquals("error, not equals", table, table2);
 
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
@@ -127,7 +129,7 @@ public class DataSetSchemaControllerImplTest {
     schema2.setIdDataFlow(1L);
     schema2.setTableSchemas(listaTables);
 
-    assertEquals("error, not equals",schema,schema2);
+    assertEquals("error, not equals", schema, schema2);
 
 
   }

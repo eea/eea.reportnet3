@@ -10,6 +10,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -48,6 +49,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
+
+  private final static String SORT_COORDINATE_QUERY =
+      "COALESCE((select distinct case when is_double(fv.value) = true "
+          + "then CAST(fv.value as java.math.BigDecimal) when is_double( fv.value)=false "
+          + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
+          + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
+
+  /** The Constant SORT_DATE_QUERY. */
   private final static String SORT_DATE_QUERY =
       "COALESCE((select distinct case when is_date(fv.value) = true "
           + "then CAST(fv.value as java.sql.Date) " + "when is_date( fv.value)=false "
@@ -89,21 +98,28 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     for (SortField field : sortFields) {
-      if (field.getTypefield().contentEquals("Text")) {
+      if (field.getTypefield().equals(TypeData.COORDINATE_LAT)
+          || field.getTypefield().equals(TypeData.COORDINATE_LONG)) {
         sortQueryBuilder.append(",")
-            .append(String.format(SORT_STRING_QUERY, field.getFieldName(), criteriaNumber))
+            .append(String.format(SORT_COORDINATE_QUERY, field.getFieldName(), criteriaNumber))
             .append(" ");
         directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
             .append(" ").append(field.getAsc() ? "asc" : "desc");
-      } else if (field.getTypefield().contentEquals("Number")) {
+      } else if (field.getTypefield().equals(TypeData.NUMBER)) {
         sortQueryBuilder.append(",")
             .append(String.format(SORT_NUMERIC_QUERY, field.getFieldName(), criteriaNumber))
             .append(" ");
         directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
             .append(" ").append(field.getAsc() ? "asc" : "desc");
-      } else if (field.getTypefield().contentEquals("Date")) {
+      } else if (field.getTypefield().equals(TypeData.DATE)) {
         sortQueryBuilder.append(",")
             .append(String.format(SORT_DATE_QUERY, field.getFieldName(), criteriaNumber))
+            .append(" ");
+        directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+            .append(" ").append(field.getAsc() ? "asc" : "desc");
+      } else {
+        sortQueryBuilder.append(",")
+            .append(String.format(SORT_STRING_QUERY, field.getFieldName(), criteriaNumber))
             .append(" ");
         directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
             .append(" ").append(field.getAsc() ? "asc" : "desc");

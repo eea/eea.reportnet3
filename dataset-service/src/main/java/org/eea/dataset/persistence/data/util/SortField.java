@@ -1,5 +1,8 @@
 package org.eea.dataset.persistence.data.util;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,6 +18,7 @@ public class SortField {
 
   private String fieldName;
   private Boolean asc;
-  private String typefield;
+  @Enumerated(EnumType.STRING)
+  private TypeData typefield;
 
 }
