@@ -62,6 +62,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,6 +99,9 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   @Mock
   private SchemasRepository schemasRepository;

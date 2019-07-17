@@ -43,7 +43,6 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
@@ -510,7 +509,6 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the field errors
    */
   @Override
-  @Async
   public Future<Map<Long, ErrorsValidationVO>> getFieldErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<FieldValidation> fieldValidations =
@@ -546,7 +544,6 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the record errors
    */
   @Override
-  @Async
   public Future<Map<Long, ErrorsValidationVO>> getRecordErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<RecordValidation> recordValidations =
@@ -581,7 +578,6 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the table errors
    */
   @Override
-  @Async
   public Future<Map<Long, ErrorsValidationVO>> getTableErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<TableValidation> tableValidations =
@@ -617,7 +613,6 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the dataset errors
    */
   @Override
-  @Async
   public Future<Map<Long, ErrorsValidationVO>> getDatasetErrors(final Long datasetId,
       final DatasetValue dataset, final List<Long> idValidations) {
     Map<Long, ErrorsValidationVO> errors = new HashMap<>();

@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
@@ -67,7 +68,7 @@ public class LoadValidationsHelper {
    *
    * @throws EEAException the EEA exception
    */
-  public FailedValidationsDatasetVO getListValidations(Long datasetId, Pageable pageable,
+  public FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
       String headerField, Boolean asc) throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
@@ -84,33 +85,7 @@ public class LoadValidationsHelper {
         validations.stream().map(Validation::getId).collect(Collectors.toList());
 
     // PROCESS LIST OF ERRORS VALIDATIONS
-    Map<Long, ErrorsValidationVO> errors = processErrors(idValidations, dataset);
-
-    validation
-        .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
-
-    validation.setTotalErrors(validationRepository.count());
-    LOG.info(
-        "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
-        datasetId, errors.size(), pageable.getPageNumber(), pageable.getPageSize());
-
-    return validation;
-
-  }
-
-
-  /**
-   * Process errors.
-   *
-   * @param idValidations the id validations
-   * @param dataset the dataset
-   * @return the list
-   */
-  private Map<Long, ErrorsValidationVO> processErrors(List<Long> idValidations,
-      DatasetValue dataset) {
-
     Map<Long, ErrorsValidationVO> errors = new HashMap<>();
-
     try {
       Future<Map<Long, ErrorsValidationVO>> datasetErrors =
           validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
@@ -128,7 +103,15 @@ public class LoadValidationsHelper {
     } catch (InterruptedException | ExecutionException e) {
       LOG_ERROR.error("Error obtaining the errors ", e);
     }
+    validation
+        .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
 
-    return errors;
+    validation.setTotalErrors(validationRepository.count());
+    LOG.info(
+        "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
+        datasetId, errors.size(), pageable.getPageNumber(), pageable.getPageSize());
+
+    return validation;
+
   }
 }

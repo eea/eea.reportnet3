@@ -26,4 +26,7 @@ public class ValidationLinkVO implements Serializable {
   /** The id table schema. */
   private String idTableSchema;
 
+  /** The id record. */
+  private Long idRecord;
+
 }

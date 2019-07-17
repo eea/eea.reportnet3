@@ -136,7 +136,7 @@ public class LoadValidationsHelperTest {
         .thenReturn(schema);
     Page<Validation> pageValidation = Page.empty(pageable);
     when(validationRepository.findAll(Mockito.any(Pageable.class))).thenReturn(pageValidation);
-    when(validationRepository.count()).thenReturn(10L);
+
     when(validationService.getDatasetErrors(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new AsyncResult<>(new HashMap<>()));
     when(validationService.getTableErrors(Mockito.any(), Mockito.any()))
@@ -145,6 +145,7 @@ public class LoadValidationsHelperTest {
         .thenReturn(new AsyncResult<>(new HashMap<>()));
     when(validationService.getFieldErrors(Mockito.any(), Mockito.any()))
         .thenReturn(new AsyncResult<>(new HashMap<>()));
+
 
     loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false);
     Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());

@@ -1,9 +1,15 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,25 +18,8 @@ import lombok.ToString;
  * The type Data flow vo.
  */
 
-/**
- * Gets the datasets.
- *
- * @return the datasets
- */
 @Getter
-
-/**
- * Sets the datasets.
- *
- * @param datasets the new datasets
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class DataFlowVO implements Serializable {
 
@@ -41,7 +30,38 @@ public class DataFlowVO implements Serializable {
   private Long id;
 
   /** The datasets. */
-  private List<DataSetVO> datasets;
+  private List<DataSetMetabaseVO> datasets;
+
+  /** The description. */
+  private String description;
+
+  /** The name. */
+  private String name;
+
+  /** The deadline date. */
+  private Date deadlineDate;
+
+  /** The deadline date. */
+  private Date creationDate;
+
+  /** The status. */
+  private TypeStatusEnum status;
+
+  /** The documents. */
+  private List<DocumentVO> documents;
+
+  /** The weblinks. */
+  private List<WeblinkVO> weblinks;
+
+  /** The user request status. */
+  private TypeRequestEnum userRequestStatus;
+
+  /** The request id. */
+  private Long requestId;
+
+
+  /** The contributors. */
+  private List<ContributorVO> contributors;
 
   /**
    * Equals.
@@ -68,7 +88,7 @@ public class DataFlowVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, datasets);
+    return Objects.hash(id, description, name, deadlineDate, status, datasets);
   }
 
 }

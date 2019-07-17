@@ -6,8 +6,8 @@ import ResourcesContext from '../../../Context/ResourcesContext';
 const CustomButton = (props) => {
     const resources = useContext(ResourcesContext);
     let icons = [
-        resources.icons["import"],
         resources.icons["export"],
+        resources.icons["import"],
         resources.icons["trash"],
         resources.icons["warning"],
         resources.icons["clock"],
@@ -17,7 +17,8 @@ const CustomButton = (props) => {
         resources.icons["group-by"],
         resources.icons["sort"],
         resources.icons["validate"],
-        resources.icons["refresh"]
+        resources.icons["refresh"],
+        resources.icons["camera"]
     ];
 
     let disabledButton = props.disabled?true:false;
