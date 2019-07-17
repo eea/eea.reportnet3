@@ -1,8 +1,8 @@
 package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -36,7 +36,7 @@ public class ExcelReaderStrategyTest {
   private ParseCommon parseCommon;
 
   /** The file in. */
-  private FileInputStream fileIn;
+  private ByteArrayInputStream fileIn;
 
   /**
    * Inits the mocks.
@@ -46,7 +46,6 @@ public class ExcelReaderStrategyTest {
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
-    String filename = "testExcelFile.xlsx";
     XSSFWorkbook workbook = new XSSFWorkbook();
     XSSFSheet sheet = workbook.createSheet("BWQ_2006_SPAIN_2018_V1_shortter");
 
@@ -86,13 +85,14 @@ public class ExcelReaderStrategyTest {
     row4.createCell(3).setCellValue("02/08/2018");
     row4.createCell(4).setCellValue("DummiCell");
 
-    FileOutputStream fileOut = new FileOutputStream(filename);
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
-    workbook.write(fileOut);
-    fileOut.close();
+    workbook.write(outStream);
     workbook.close();
+    outStream.close();
 
-    fileIn = new FileInputStream(filename);
+
+    fileIn = new ByteArrayInputStream(outStream.toByteArray());
   }
 
   /**
@@ -143,16 +143,15 @@ public class ExcelReaderStrategyTest {
    */
   @Test(expected = InvalidFileException.class)
   public void testParseFileException() throws IOException, InvalidFileException {
-    String filename = "testExcelFileException.xlsx";
     XSSFWorkbook workbook = new XSSFWorkbook();
 
-    FileOutputStream fileOut = new FileOutputStream(filename);
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
-    workbook.write(fileOut);
-    fileOut.close();
+    workbook.write(outStream);
     workbook.close();
+    outStream.close();
 
-    FileInputStream fileInAux = new FileInputStream(fileOut.getFD());
+    ByteArrayInputStream fileInAux = new ByteArrayInputStream(outStream.toByteArray());
 
     excelReaderStrategy.parseFile(fileInAux, 1L, 1L, "");
   }

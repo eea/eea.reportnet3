@@ -4,6 +4,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -86,8 +87,7 @@ public interface DatasetController {
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema);
-
+      @PathVariable(value = "idTableSchema") String idTableSchema);
 
   /**
    * Delete import data.
@@ -201,5 +201,16 @@ public interface DatasetController {
       @PathVariable("idTableSchema") final String idTableSchema);
 
 
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param mimeType the mime type
+   * @return the response entity
+   * @throws Exception the exception
+   */
+  @GetMapping("/exportFile")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType) throws Exception;
 }

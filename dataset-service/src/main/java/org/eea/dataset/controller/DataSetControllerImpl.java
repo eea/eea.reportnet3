@@ -165,7 +165,7 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   public void loadTableData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema) {
+      @PathVariable(value = "idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -415,6 +415,15 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param mimeType the mime type
+   * @return the response entity
+   * @throws Exception the exception
+   */
   @Override
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
