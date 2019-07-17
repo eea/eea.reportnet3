@@ -17,13 +17,14 @@ public interface RecordStoreController {
    * The interface Record store controller zull.
    */
   @FeignClient(value = "recordstore", path = "/recordstore")
-  public interface RecordStoreControllerZull extends RecordStoreController {
+  interface RecordStoreControllerZull extends RecordStoreController {
 
   }
 
   /**
    * Reste data set data base. DO NOT USE IN PRODUCTION. TO BE REMOVED. ONLY FOR TEST PURPOSES
-   * @deprecated
+   * 
+   * @deprecated (reset db)
    */
   @Deprecated
   @RequestMapping(value = "/reset", method = RequestMethod.POST)
@@ -54,5 +55,5 @@ public interface RecordStoreController {
    * @return the connection to dataset
    */
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
-  public List<ConnectionDataVO> getConnectionToDataset();
+  List<ConnectionDataVO> getDataSetConnections();
 }

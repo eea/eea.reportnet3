@@ -124,35 +124,32 @@ export class CustomFileUpload extends Component {
         this.files = this.state.files || [];
         let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
 
-        // if (this.props.fileLimit >= 1) {    
-        //     console.log(this.files);
-        //     console.log(this.state.files.length); 
-        //     if (this.state.files > 1) {
-        //         for (let i = 0; i < this.state.files.length - this.props.fileLimit; i++) {
-        //                 console.log("twts");
-        //             this.state.files.shift();
-        //           // const filesStates = [...this.state.files];
-        //           // console.log(filesStates + " before");
-        //           // filesStates.shift();
-        //           // console.log(filesStates + " after");
-        //           // this.setState({
-        //           //       files: filesStates
-        //           // });
-        //         }
-        //       }
-        //   }
-
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-            
+        if (this.props.fileLimit > 1) {    
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                
+                if (!this.isFileSelected(file)) {
+                    if (this.validate(file)) {
+                        if (this.isImage(file)) {
+                            file.objectURL = window.URL.createObjectURL(file);
+                        }
+                        this.files.push(file);
+                    }
+                }
+            }
+        }
+        else{
+            let file = files[0];
             if (!this.isFileSelected(file)) {
                 if (this.validate(file)) {
                     if (this.isImage(file)) {
                         file.objectURL = window.URL.createObjectURL(file);
                     }
+                    this.files = [];
                     this.files.push(file);
                 }
             }
+
         }
 
         this.setState({files: this.files}, () => {

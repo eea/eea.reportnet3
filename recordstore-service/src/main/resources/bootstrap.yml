@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    consul:
+      discovery:
+        preferIpAddress: true
+        instanceId: ${spring.application.name}:${random.value}
+      config:
+        name: recordstore
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}

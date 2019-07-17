@@ -1,99 +1,313 @@
-import React, {useState} from 'react';
-import Title from '../../Layout/Title/Title';
-import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
-import TabsSchema from '../../Layout/UI/TabsSchema/TabsSchema';
-import styles from './ReporterDataSet.module.css';
-import {Dialog} from 'primereact/dialog';
-import {CustomFileUpload} from '../../Layout/UI/CustomFileUpload/CustomFileUpload';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useContext, Suspense } from "react";
 
-const ReporterDataSet = () => {
-  const [visible, setVisibility] = useState(false);
+import Title from "../../Layout/Title/Title";
+import ButtonsBar from "../../Layout/UI/ButtonsBar/ButtonsBar";
+import { BreadCrumb } from "primereact/breadcrumb";
+import { Dialog } from "primereact/dialog";
+// import {Lightbox} from 'primereact/lightbox';
+//import {Loader} from '../../Layout/UI/Loader/Loader';
+import TabsSchema from "../../Layout/UI/TabsSchema/TabsSchema";
+import ConfirmDialog from "../../Layout/UI/ConfirmDialog/ConfirmDialog";
+import ValidationViewer from "../../../containers/DataSets/ValidationViewer/ValidationViewer";
+import Dashboard from "../../../containers/DashBoard/DashBoard";
 
-  const showFileUploadDialog = () => {
-      console.log('showFileUploadDialog onClick');
-      setVisibility(true);
-  }
+import MainLayout from "../../Layout/main-layout.component";
+import config from "../../../conf/web.config.json";
+import HTTPRequesterAPI from "../../../services/HTTPRequester/HTTPRequester";
+import getUrl from "../../../Utils/getUrl";
+import styles from "./ReporterDataSet.module.css";
+import ResourcesContext from "../../Context/ResourcesContext";
+import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
-  const onUploadFile = () => {
-      console.log('onUploadFile');
-  }
+const ReporterDataSet = ({ match, history }) => {
+	const {
+		params: { dataFlowId, dataSetId }
+	} = match;
+	const resources = useContext(ResourcesContext);
+	const [datasetTitle, setDatasetTitle] = useState("");
+	const [customButtons, setCustomButtons] = useState([]);
+	const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+	//const [validationError, setValidationError] = useState(false);
+	const [tableSchema, setTableSchema] = useState();
+	const [tableSchemaColumns, setTableSchemaColumns] = useState();
 
-  const onHide = () => {
-      console.log('onClick');
-      setVisibility(false);
-  }
+	const [dashDialogVisible, setDashDialogVisible] = useState(false);
+	const [validationsVisible, setValidationsVisible] = useState(false);
+	const [validateDialogVisible, setValidateDialogVisible] = useState(false);
+	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+	const [isDataDeleted, setIsDataDeleted] = useState(false);
+	const [activeIndex, setActiveIndex] = useState();
+  const [positionIdRecord, setPositionIdRecord] = useState(0);
+  const [idSelectedRow, setIdSelectedRow] = useState(-1);
 
-  //TODO:Change + Error/warning treatment
-  let validationError = true;
+	const home = {
+		icon: resources.icons["home"],
+		command: () => history.push("/")
+	};
 
-  //const buttonClasses = (validationError)?".pi .pi-exclamation-triangle":"";
-  const iconClasses = (validationError)?"warning":"";
+	useEffect(() => {
+		console.log("ReporterDataSet useEffect");
 
-  const customButtons = [
-    {
-      label: "Import",
-      icon: "0",
-      group: "left",
-      clickHandler: showFileUploadDialog
-    },
-    {
-      label: "Export",
-      icon: "1",
-      group: "left",
-      disabled: false,
-      clickHandler: null
-    },
-    {
-      label: "Delete",
-      icon: "2",
-      group: "left",
-      disabled: false,
-      clickHandler: null
-    },
-    {
-      label: "Events",
-      icon: "4",
-      group: "right",
-      disabled: false,
-      clickHandler: null
-    },
-    {
-      label: "Validations",
-      icon: "3",
-      group: "right",
-      disabled: !validationError,
-      clickHandler: null,
-      ownButtonClasses:null,
-      iconClasses:iconClasses
-    },
-    {
-      label: "Dashboards",
-      icon: "5",
-      group: "right",
-      disabled: false,
-      clickHandler: null
-    },
-  ];
+		setBreadCrumbItems([
+			{
+				label: resources.messages["dataFlowTask"],
+				command: () => history.push("/data-flow-task")
+			},
+			{
+				label: resources.messages["reportingDataFlow"],
+				command: () =>
+					history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+			},
+			{ label: resources.messages["viewData"] }
+		]);
 
-  return (
-    <div>
-        <Title title="Reporting Data Set: R3 Demo Dataflow" /> 
-        <div className={styles.ButtonsBar}>      
-          <ButtonsBar buttons={customButtons} />
-        </div>
-        <TabsSchema tables={[
-          { name: "Table 1" },
-          { name: "Table 2" },
-          { name: "Table 3" },
-          { name: "Table 4" }]} />
-          <Dialog header="Upload your Dataset" visible={visible}
-                  className={styles.Dialog} dismissableMask="false" onHide={onHide} >
-              <CustomFileUpload mode="advanced" name="demo[]" url="." onUpload={onUploadFile} 
-                          multiple={false} chooseLabel="Select or drag here your dataset (.csv)" //allowTypes="/(\.|\/)(csv|doc)$/"
-                          fileLimit={1} className={styles.FileUpload}  /> 
-          </Dialog>
-      </div>
-  );
-}
+		//Fetch DataSchema(JSON)
+		//fetchDataHandler(jsonDataSchema);
 
+		//`${config.dataSchemaAPI.url}1`
+		const dataPromise = HTTPRequesterAPI.get({
+			url: getUrl(config.dataSchemaAPI.url, { dataFlowId }),
+			/* url: "/jsons/datosDataSchema2.json", */
+			queryString: {}
+		});
+		dataPromise
+			.then(response => {
+				//'/jsons/error-statistics.json'
+				const dataPromiseError = HTTPRequesterAPI.get({
+					url: `${config.loadStatisticsAPI.url}${dataSetId}`,
+					/* url: "/jsons/error-statistics.json", */
+					queryString: {}
+				});
+
+				//Parse JSON to array statistic values
+				dataPromiseError.then(res => {
+          setDatasetTitle(res.data.nameDataSetSchema);
+					setTableSchema(
+						response.data.tableSchemas.map((item, i) => {
+							return {
+								id: item["idTableSchema"],
+								name: item["nameTableSchema"],
+								hasErrors: {
+									...res.data.tables.filter(
+										t => t["idTableSchema"] === item["idTableSchema"]
+									)[0]
+								}.tableErrors
+							};
+						})
+					);
+
+					setTableSchemaColumns(
+						response.data.tableSchemas.map(table => {
+							return table.recordSchema.fieldSchema.map(item => {
+								return {
+									table: table["nameTableSchema"],
+									field: item["id"],
+									header: `${item["name"].charAt(0).toUpperCase()}${item[
+										"name"
+									].slice(1)}`
+								};
+							});
+						})
+					);
+
+					//#region Button inicialization
+
+					setCustomButtons([
+						{
+							label: resources.messages["export"],
+							icon: "1",
+							group: "left",
+							disabled: true,
+							clickHandler: null
+						},
+						{
+							label: resources.messages["deleteDatasetData"],
+							icon: "2",
+							group: "left",
+							disabled: false,
+							clickHandler: () =>
+								setVisibleHandler(setDeleteDialogVisible, true)
+						},
+						{
+							label: resources.messages["events"],
+							icon: "4",
+							group: "right",
+							disabled: true,
+							clickHandler: null
+						},
+						{
+							label: resources.messages["validate"],
+							icon: "10",
+							group: "right",
+							disabled: false,
+							//!validationError,
+							clickHandler: () =>
+								setVisibleHandler(setValidateDialogVisible, true),
+							ownButtonClasses: null,
+							iconClasses: null
+						},
+						{
+							label: resources.messages["showValidations"],
+							icon: "3",
+							group: "right",
+							disabled: !res.data.datasetErrors,
+							clickHandler: () =>
+								setVisibleHandler(setValidationsVisible, true),
+							ownButtonClasses: null,
+							iconClasses: response.data.datasetErrors ? "warning" : ""
+						},
+						{
+							//title: "Dashboards",
+							label: resources.messages["dashboards"],
+							icon: "5",
+							group: "right",
+							disabled: false,
+							clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
+						}
+					]);
+					//#endregion Button inicialization
+				});
+			})
+			.catch(error => {
+				console.log(error);
+				return error;
+			});
+	}, [isDataDeleted]);
+
+	const setVisibleHandler = (fnUseState, visible) => {
+		fnUseState(visible);
+	};
+
+	const onConfirmDeleteHandler = () => {
+		setDeleteDialogVisible(false);
+		HTTPRequesterAPI.delete({
+			url: `/dataset/${dataSetId}/deleteImportData`,
+			queryString: {}
+		}).then(res => {
+			setIsDataDeleted(true);
+		});
+	};
+
+	const onConfirmValidateHandler = () => {
+		setValidateDialogVisible(false);
+		HTTPRequesterAPI.update({
+			url: `/validation/dataset/${dataSetId}`,
+			queryString: {}
+		});
+	};
+
+	const onTabChangeHandler = idTableSchema => {
+    setActiveIndex(idTableSchema.index);
+    setIdSelectedRow(-1);
+		setPositionIdRecord(0);
+	};
+
+	return (
+		<MainLayout>
+			<BreadCrumb model={breadCrumbItems} home={home} />
+
+			<div className="rep-container">
+				<div className="titleDiv">
+					<Title
+						title={`${resources.messages["titleDataset"]}${datasetTitle}`}
+					/>
+				</div>
+				<div className={styles.ButtonsBar}>
+					<ButtonsBar buttons={customButtons} />
+				</div>
+
+				{/*TODO: Loading spinner --> En el Suspense
+        ¿LinkedErrorData mejor pasar por props o tirar de context?*/}
+				<ReporterDataSetContext.Provider
+					value={{
+						validationsVisibleHandler: null,
+						setTabHandler: null,
+						setPageHandler: posIdRecord => {
+							setPositionIdRecord(posIdRecord);
+            },
+            setIdSelectedRowHandler: (selectedRowId)=> { 
+              setIdSelectedRow(selectedRowId)
+            }
+					}}
+				>
+					<TabsSchema
+						tables={tableSchema}
+						tableSchemaColumns={tableSchemaColumns}
+						urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
+						activeIndex={activeIndex}
+						positionIdRecord={positionIdRecord}
+						onTabChangeHandler={idTableSchema =>
+							onTabChangeHandler(idTableSchema)
+            }
+            idSelectedRow={idSelectedRow}
+					/>
+				</ReporterDataSetContext.Provider>
+				<Dialog
+					visible={dashDialogVisible}
+					onHide={() => setVisibleHandler(setDashDialogVisible, false)}
+					header={resources.messages["titleDashboard"]}
+					maximizable
+					dismissableMask={true}
+					style={{ width: "80%" }}
+				>
+					<Dashboard refresh={dashDialogVisible} />
+				</Dialog>
+				{/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
+				<ReporterDataSetContext.Provider
+					value={{
+						validationsVisibleHandler: () => {
+							setVisibleHandler(setValidationsVisible, false);
+						},
+						setTabHandler: idTableSchema => {
+							setActiveIndex(idTableSchema);
+						},
+						setPageHandler: posIdRecord => {
+							setPositionIdRecord(posIdRecord);
+						},
+            setIdSelectedRowHandler: (selectedRowId)=> { 
+              setIdSelectedRow(selectedRowId)
+            }
+					}}
+				>
+					<Dialog
+						visible={validationsVisible}
+						onHide={() => setVisibleHandler(setValidationsVisible, false)}
+						header={resources.messages["titleValidations"]}
+						maximizable
+						dismissableMask={true}
+						style={{ width: "80%" }}
+					>
+						<ValidationViewer
+							dataSetId={dataSetId}
+							visible={validationsVisible}
+						/>
+					</Dialog>
+				</ReporterDataSetContext.Provider>
+				<ConfirmDialog
+					onConfirm={onConfirmDeleteHandler}
+					onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
+					visible={deleteDialogVisible}
+					header={resources.messages["deleteDatasetHeader"]}
+					maximizable={false}
+					labelConfirm={resources.messages["yes"]}
+					labelCancel={resources.messages["no"]}
+				>
+					{resources.messages["deleteDatasetConfirm"]}
+				</ConfirmDialog>
+				<ConfirmDialog
+					onConfirm={onConfirmValidateHandler}
+					onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
+					visible={validateDialogVisible}
+					header={resources.messages["validateDataSet"]}
+					maximizable={false}
+					labelConfirm={resources.messages["yes"]}
+					labelCancel={resources.messages["no"]}
+				>
+					{resources.messages["validateDataSetConfirm"]}
+				</ConfirmDialog>
+			</div>
+		</MainLayout>
+	);
+};
 export default ReporterDataSet;

@@ -1,27 +1,34 @@
-import React from 'react';
-import logo from '../../assets/images/logo.png';
+import React, { useContext } from "react";
+import UserCard from "../Layout/UI/UserCard/UserCard";
+import logo from "../../assets/images/logo.png";
+import styles from "./Navigation.module.css";
+import ResourcesContext from "../Context/ResourcesContext";
+import {withRouter} from 'react-router-dom';
 
-const Navigation = () => {
-    return (
-      <div className="bootstrap">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-          <a className="navbar-brand" href=".">
-            <img height="50px" src={logo} alt="Reportnet 3"></img>
-          </a>
-          
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav mr-auto">
-              <li className="nav-item active">
-                <a className="nav-link" href=".">Reportnet 3</a>
-              </li>
-            </ul>
-            <div className="my-2 my-lg-0">
-              <a className="nav-link" href=".">Username<i className="pi pi-user"></i></a>
-            </div>
-          </div>
-        </nav>
-      </div>
-    );
-}
+const Navigation = ({history}) => {
+	const resources = useContext(ResourcesContext);
+	return (
+		<div id="header" className={styles.header}>
+			<a
+				href="#home"
+				className={styles.appLogo}
+				title={resources.messages["titleHeader"]}
+				onClick={(e) => {
+					e.preventDefault();
+					history.push('/data-flow-task/') 
+				}}
+			>
+				<img
+					height="50px"
+					src={logo}
+					alt="Reportnet"
+					className={styles.appLogo}
+				/>
+				<h1 className={styles.appTitle}>{resources.messages["titleHeader"]}</h1>
+			</a>
+			<UserCard />
+		</div>
+	);
+};
 
-export default Navigation;
+export default withRouter(Navigation);

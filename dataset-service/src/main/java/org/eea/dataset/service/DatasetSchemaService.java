@@ -7,14 +7,15 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
  */
 public interface DatasetSchemaService {
 
+
   /**
    * Creates the data schema.
    *
-   * @param datasetName the dataset name
+   * @param datasetId the dataset id
    */
-  void createDataSchema(String datasetName);
-  
-  
+  void createDataSchema(Long datasetId);
+
+
   /**
    * Gets dataschema by id.
    *
@@ -22,7 +23,7 @@ public interface DatasetSchemaService {
    * @return the data schema by id
    */
   DataSetSchemaVO getDataSchemaById(String dataschemaId);
-  
+
   /**
    * Gets dataschema by id.
    *
@@ -30,6 +31,5 @@ public interface DatasetSchemaService {
    * @return the data schema by id flow
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
-  
-  
+
 }

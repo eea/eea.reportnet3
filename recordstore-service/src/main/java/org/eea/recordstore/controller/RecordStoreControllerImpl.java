@@ -3,8 +3,10 @@ package org.eea.recordstore.controller;
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.recordstore.exception.DockerAccessException;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/recordstore")
 public class RecordStoreControllerImpl implements RecordStoreController {
 
-  /** The record store service. */
+  /**
+   * The record store service.
+   */
   @Autowired
   private RecordStoreService recordStoreService;
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(RecordStoreControllerImpl.class);
 
   /**
    * Reste data set data base.
@@ -30,8 +44,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void resteDataSetDataBase() {
     try {
       recordStoreService.resetDatasetDatabase();
-    } catch (final DockerAccessException e) {
-      e.printStackTrace();
+    } catch (final RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
     }
   }
 
@@ -42,20 +56,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
-  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName) { // TODO
-                                                                                          // neeed
-                                                                                          // to
-                                                                                          // create
-                                                                                          // standar
-                                                                                          // exceptions
-                                                                                          // in
-                                                                                          // commont
-                                                                                          // interfaces
-    final ConnectionDataVO connectionDataVO = null;
+  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName) {
+    // TODO neeed to create standar
     try {
       recordStoreService.createEmptyDataSet(datasetName);
-    } catch (final DockerAccessException e) {
-      e.printStackTrace();
+      LOG.info("Dataset with name {} created", datasetName);
+    } catch (final RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
       // TODO Error control
     }
   }
@@ -64,6 +71,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * Gets the connection to dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection to dataset
    */
   @Override
@@ -73,8 +81,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     ConnectionDataVO vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
-    } catch (final DockerAccessException e) {
-      e.printStackTrace();
+    } catch (final RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
   }
@@ -86,12 +94,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
-  public List<ConnectionDataVO> getConnectionToDataset() {
+  public List<ConnectionDataVO> getDataSetConnections() {
     List<ConnectionDataVO> vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset();
-    } catch (final DockerAccessException e) {
-      e.printStackTrace();
+    } catch (final RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
   }

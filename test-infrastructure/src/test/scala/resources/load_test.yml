@@ -1,0 +1,24 @@
+gatling_config:
+  scenarios:
+    - requestName: testHealth
+      endpoint: /actuator/health
+      usersNumber: 14
+      numberExecutions: 10
+      useFeeder: false
+      method: get
+      puaseTime: 1
+      timeOut: 1000
+      #headers:
+      #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
+      #requestBody: '{"title":"example"}'
+    - requestName: queryConnection
+      endpoint: /recordstore/connection/dataset_1
+      usersNumber: 11
+      numberExecutions: 12
+      useFeeder: false
+      method: get
+      puaseTime: 1
+      timeOut: 1000
+      #headers:
+      #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
+      #requestBody: '{"title":"example"}'

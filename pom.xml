@@ -26,7 +26,6 @@
     <module>common-interfaces</module>
     <module>common-utitlities</module>
     <module>document-container-service</module>
-    <module>frontend-service</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
@@ -36,6 +35,7 @@
     <mapstruct.version>1.3.0.Final</mapstruct.version>
     <projectlombok.version>1.18.0</projectlombok.version>
     <mockito.version>2.27.0</mockito.version>
+    <gatling.version>3.1.3</gatling.version>
   </properties>
 
   <dependencies>
@@ -110,7 +110,7 @@
       <artifactId>jolokia-core</artifactId>
     </dependency>
 
-    <!--JSON Libraries-->
+    <!--JSON Libraries -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -137,13 +137,13 @@
       <version>1.7.22</version>
     </dependency>
 
-	<!-- Lombook -->
-	<dependency>
-		<groupId>org.projectlombok</groupId>
-		<artifactId>lombok</artifactId>
-		<version>${projectlombok.version}</version>
+    <!-- Lombook -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${projectlombok.version}</version>
 
-	</dependency>
+    </dependency>
 
     <!-- Side libraries -->
     <dependency>
@@ -156,19 +156,19 @@
       <artifactId>guava</artifactId>
       <version>27.1-jre</version>
     </dependency>
-    <!--Redis-->
-    <!--<dependency>-->
-    <!--<groupId>org.springframework.data</groupId>-->
-    <!--<artifactId>spring-data-redis</artifactId>-->
-    <!--<version>2.1.5.RELEASE</version>-->
-    <!--</dependency>-->
+    <!--Redis -->
+    <!--<dependency> -->
+    <!--<groupId>org.springframework.data</groupId> -->
+    <!--<artifactId>spring-data-redis</artifactId> -->
+    <!--<version>2.1.5.RELEASE</version> -->
+    <!--</dependency> -->
 
-    <!--<dependency>-->
-    <!--<groupId>redis.clients</groupId>-->
-    <!--<artifactId>jedis</artifactId>-->
-    <!--<version>2.9.0</version>-->
-    <!--<type>jar</type>-->
-    <!--</dependency>-->
+    <!--<dependency> -->
+    <!--<groupId>redis.clients</groupId> -->
+    <!--<artifactId>jedis</artifactId> -->
+    <!--<version>2.9.0</version> -->
+    <!--<type>jar</type> -->
+    <!--</dependency> -->
 
 
     <dependency>
@@ -176,18 +176,17 @@
       <artifactId>common-utitlities</artifactId>
       <version>3.0-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>org.eea.interfaces</groupId>
       <artifactId>common-interfaces</artifactId>
       <version>3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-	    <groupId>org.mockito</groupId>
-	    <artifactId>mockito-core</artifactId>
-	    <version>${mockito.version}</version>
-	    <scope>test</scope>
-	</dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
@@ -204,6 +203,7 @@
 
   <build>
     <plugins>
+
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -233,11 +233,30 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.4</version>
+        <configuration>
+          <excludes>
+            <exclude>
+              org.eea.*.persistence.**
+            </exclude>
+            <exclude>
+              org.eea.*.configuration
+            </exclude>
+            <exclude>
+              org.eea.*.service.vo
+            </exclude>
+            <exclude>
+              org.eea.interfaces.*
+            </exclude>
+            <exclude>
+              org.eea.*.mapper
+            </exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>prepare-agent</goal>
-            </goals>            
+            </goals>
           </execution>
           <!-- attached to Maven test phase -->
           <execution>
@@ -245,9 +264,17 @@
             <phase>test</phase>
             <goals>
               <goal>report</goal>
-            </goals>            
+            </goals>
+
           </execution>
+
         </executions>
+
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.2</version>
       </plugin>
 
     </plugins>
@@ -284,5 +311,25 @@
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
+  <profiles>
+    <profile>
+      <id>sonar</id>
+      <properties>
+        <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}
+        </sonar.projectKey>
+        <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
+        <sonar.coverage.exclusions>
+          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**
+        </sonar.coverage.exclusions>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

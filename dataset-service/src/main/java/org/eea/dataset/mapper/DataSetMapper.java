@@ -1,13 +1,13 @@
 package org.eea.dataset.mapper;
 
 import java.util.List;
+import java.util.Objects;
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -18,55 +18,43 @@ import org.mapstruct.MappingTarget;
  * The Interface DataSetMapper.
  */
 @Mapper(componentModel = "spring")
-public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> {
+public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
+
 
   /**
    * Map.
    *
    * @param value the value
+   *
    * @return the string
    */
-  String map(ObjectId value) {
+  default String map(ObjectId value) {
     return value.toString();
   }
 
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the data set schema VO
-   */
-  public abstract DataSetSchemaVO entityToClass(DataSetSchema entity);
 
   /**
    * Class to entity.
    *
    * @param model the model
+   *
    * @return the dataset value
    */
   @Mapping(source = "tableVO", target = "tableValues")
   @Override
-  public abstract DatasetValue classToEntity(DataSetVO model);
+  DatasetValue classToEntity(DataSetVO model);
 
 
   /**
    * Entity to class.
    *
    * @param entity the entity
+   *
    * @return the data set VO
    */
   @Mapping(source = "tableValues", target = "tableVO")
   @Override
-  public abstract DataSetVO entityToClass(DatasetValue entity);
-
-  /**
-   * Class to entity.
-   *
-   * @param model the model
-   * @return the table value
-   */
-  public abstract TableValue classToEntity(TableVO model);
-
+  DataSetVO entityToClass(DatasetValue entity);
 
 
   /**
@@ -76,7 +64,7 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
    * @param dataset the dataset
    */
   @AfterMapping
-  public void fillIds(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
+  default void fillIds(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
     List<TableValue> tableValues = dataset.getTableValues();
     tableValues.stream().forEach(tableValue -> {
       tableValue.setDatasetId(dataset);
@@ -86,8 +74,45 @@ public abstract class DataSetMapper implements IMapper<DatasetValue, DataSetVO> 
       });
     });
 
+
   }
 
 
+  /**
+   * Fill ids validation.
+   *
+   * @param dataSetVO the data set VO
+   * @param dataset the dataset
+   */
+  @AfterMapping
+  default void fillIdsValidation(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
+    List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
+    if (null != datasetValidations) {
+      datasetValidations.stream().filter(Objects::nonNull)
+          .forEach(datasetValidation -> datasetValidation.setDatasetValue(dataset));
+    }
+    List<TableValue> tableValues = dataset.getTableValues();
+    if (null != tableValues) {
+      tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
+        List<TableValidation> tableValidations = tableValue.getTableValidations();
+        if (null != tableValidations) {
+          tableValidations.stream().filter(Objects::nonNull)
+              .forEach(tableValidation -> tableValidation.setTableValue(tableValue));
+        }
+        tableValue.getRecords().stream().filter(Objects::nonNull).forEach(record -> {
+          if (null != record.getRecordValidations()) {
+            record.getRecordValidations().stream().filter(Objects::nonNull)
+                .forEach(recordValidation -> recordValidation.setRecordValue(record));
+          }
+          record.getFields().stream().filter(Objects::nonNull).forEach(field -> {
+            if (field.getFieldValidations() != null) {
+              field.getFieldValidations().stream()
+                  .forEach(fieldValidation -> fieldValidation.setFieldValue(field));
+            }
+          });
+        });
+      });
+    }
+  }
 }
 

@@ -11,12 +11,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class FileResponse {
 
@@ -49,12 +43,12 @@ public class FileResponse {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
-    if (getClass() != obj.getClass())
-      return false;
+    }
     FileResponse other = (FileResponse) obj;
     return Arrays.equals(bytes, other.bytes) && Objects.equals(contentType, other.contentType);
   }

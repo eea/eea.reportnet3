@@ -9,7 +9,7 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
 
 /**
- * The type Api gateway application.
+ * The Class ApiGatewayApplication.
  */
 @EnableZuulProxy
 @SpringBootApplication
@@ -18,10 +18,11 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 @EnableEEASwagger
 public class ApiGatewayApplication {
 
+
   /**
-   * The entry point of application.
+   * The main method.
    *
-   * @param args the input arguments
+   * @param args the arguments
    */
   public static void main(final String[] args) {
     SpringApplication.run(ApiGatewayApplication.class, args);

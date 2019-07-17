@@ -3,11 +3,15 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleDataSetVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class DataSetSchemaVO.
+ */
 @Getter
 @Setter
 @ToString
@@ -23,6 +27,11 @@ public class DataSetSchemaVO {
   /** The table schemas. */
   private List<TableSchemaVO> tableSchemas;
 
+
+  /** The rule data set. */
+  private List<RuleDataSetVO> ruleDataSet;
+
+
   /**
    * Hash code.
    *
@@ -30,8 +39,9 @@ public class DataSetSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSetSchema, tableSchemas, nameDataSetSchema);
+    return Objects.hash(idDataSetSchema, nameDataSetSchema, ruleDataSet, tableSchemas);
   }
+
 
   /**
    * Equals.
@@ -49,8 +59,9 @@ public class DataSetSchemaVO {
     }
     DataSetSchemaVO other = (DataSetSchemaVO) obj;
     return Objects.equals(idDataSetSchema, other.idDataSetSchema)
-        && Objects.equals(tableSchemas, other.tableSchemas)
-        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema);
+        && Objects.equals(nameDataSetSchema, other.nameDataSetSchema)
+        && Objects.equals(ruleDataSet, other.ruleDataSet)
+        && Objects.equals(tableSchemas, other.tableSchemas);
   }
 
 }

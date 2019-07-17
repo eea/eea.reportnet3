@@ -3,111 +3,186 @@ package org.eea.validation.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
-import org.eea.validation.model.DataSetSchema;
-import org.eea.validation.model.rules.Rule;
-import org.eea.validation.repository.DataSetSchemaRepository;
-import org.kie.api.KieBase;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.multitenancy.DatasetId;
+import org.eea.validation.persistence.data.domain.DatasetValidation;
+import org.eea.validation.persistence.data.domain.DatasetValue;
+import org.eea.validation.persistence.data.domain.FieldValidation;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValidation;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.domain.TableValidation;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.kie.api.runtime.KieSession;
 
 /**
  * The Class ValidationService.
  */
-@Service
-public class ValidationService {
+public interface ValidationService {
 
-
-  /** The data set schema repository. */
-  @Autowired
-  private DataSetSchemaRepository dataSetSchemaRepository;
 
   /**
-   * Gets the element lenght.
+   * Validate data set data.
    *
-   * @return the element lenght
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
    */
-  public void getElementLenght() {
+  void validateFields(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
 
-
-  }
 
   /**
-   * Gets the rules.
+   * Run dataset validations.
    *
-   * @param rules the rules
-   * @return the rules
+   * @param dataset the dataset
+   * @param kieSession the kie session
+   *
+   * @return the list
    */
-  public List<Map<String, String>> getRules(Rule rules) {
-    return null;
-  }
+  List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
   /**
-   * Sets the new rules.
+   * Run table validations.
    *
-   * @param newRules the new new rules
+   * @param list the list
+   * @param kieSession the kie session
+   *
+   * @return the list
    */
-  public void setNewRules(Rule newRules) {
+  List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
 
-    // List<TableSchema> tableSchemaList = new ArrayList();
-    // TableSchema esquema = new TableSchema();
-    // esquema.setIdTableSchema(new ObjectId());
-    // esquema.setNameSchema("nombre probando123");
-    //
-    // RecordSchema recordSchema = new RecordSchema();
-    // recordSchema.setNameSchema("NAME RECORD SCHEMA");
-    // recordSchema.setIdRecordSchema(new ObjectId());
-    //
-    //
-    // DataSetSchema dataSetSchema = new DataSetSchema();
-    //
-    // List<FieldSchema> fieldSchemaList = new ArrayList();
-    // FieldSchema fieldSchema1 = new FieldSchema();
-    // fieldSchema1.setIdFieldSchema(new ObjectId());
-    // fieldSchema1.setType(HeaderType.BOOLEAN);
-    // FieldSchema fieldSchema2 = new FieldSchema();
-    // fieldSchema2.setType(HeaderType.STRING);
-    // fieldSchema2.setIdFieldSchema(new ObjectId());
-    // fieldSchemaList.add(fieldSchema1);
-    // fieldSchemaList.add(fieldSchema2);
-    //
-    // recordSchema.setFieldSchema(fieldSchemaList);
-    // esquema.setRecordSchema(recordSchema);
-    // esquema.setTableRuleList(new ArrayList());
-    // tableSchemaList.add(esquema);
-    // dataSetSchema.setIdDataSetSchema(new ObjectId());
-    // dataSetSchema.setTableSchemas(tableSchemaList);
-    // DataSetSchema test = dataSetSchemaRepository.save(dataSetSchema);
-    // esquema.setNameSchema("nombre probando1234");
-    // recordSchema.setNameSchema("NAME RECORD SCHEMA 2");
-    // esquema.setRecordSchema(recordSchema);
-    // dataSetSchema.setIdDataSetSchema(new ObjectId());
-    // dataSetSchemaRepository.save(dataSetSchema);
-    List<DataSetSchema> listaTabla = dataSetSchemaRepository.findAll();;
-    Optional<DataSetSchema> dato =
-        dataSetSchemaRepository.findById(new ObjectId("34234234234234234234"));
-    DataSetSchema pasar = dato.get();
-    // var objectId = mongoose.Types.ObjectId('569ed8269353e9f4c51617aa');
-    dataSetSchemaRepository.deleteByTableSchemasNameSchema("nombre probando123");
-    // rulesRepository.save(newRules);
-
-  }
-
-  // Object convertToObjectId(Object id) {
-  // if (id instanceof String && ObjectId.isValid(id)) {
-  // return new ObjectId(id);
-  // }
-  // return id;
   /**
-   * Load new rules.
+   * Run record validations.
    *
-   * @param rules the rules
-   * @return the kie base
+   * @param recordsPaged the records paged
+   * @param kieSession the kie session
+   *
+   * @return the list
    */
-  // }
-  public KieBase loadNewRules(Rule rules) {
-    return null;
-  }
+  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
+      KieSession kieSession);
+
+  /**
+   * Run field validations.
+   *
+   * @param fields the fields
+   * @param kieSession the kie session
+   *
+   * @return the list
+   */
+  List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
+
+  /**
+   * Delete all validation.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteAllValidation(@DatasetId Long datasetId);
+
+
+  /**
+   * Validate data set.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateDataSet(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Validate table.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateTable(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Validate record.
+   *
+   * @param datasetId the dataset id
+   * @param kieSession the kie session
+   * @throws EEAException the EEA exception
+   */
+  void validateRecord(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+
+
+  /**
+   * Load rules knowledge base.
+   *
+   * @param datasetId the dataset id
+   * @return the kie session
+   * @throws EEAException the EEA exception
+   */
+  KieSession loadRulesKnowledgeBase(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Gets the record errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the record errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getRecordErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
+
+  /**
+   * Gets the table errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the table errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getTableErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
+
+  /**
+   * Gets the dataset errors.
+   *
+   * @param datasetId the dataset id
+   * @param dataset the dataset
+   * @param idValidations the id validations
+   * @return the dataset errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getDatasetErrors(@DatasetId Long datasetId,
+      DatasetValue dataset, List<Long> idValidations);
+
+  /**
+   * Gets the datase valuetby id.
+   *
+   * @param datasetId the dataset id
+   * @return the datase valuetby id
+   * @throws EEAException the EEA exception
+   */
+  DatasetValue getDatasetValuebyId(@DatasetId Long datasetId) throws EEAException;
+
+  /**
+   * Gets the find by id data set schema.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @return the find by id data set schema
+   * @throws EEAException the EEA exception
+   */
+  DataSetSchema getfindByIdDataSetSchema(@DatasetId Long datasetId, ObjectId datasetSchemaId)
+      throws EEAException;
+
+
+  /**
+   * Gets the field errors.
+   *
+   * @param datasetId the dataset id
+   * @param idValidations the id validations
+   * @return the field errors
+   */
+  Future<Map<Long, ErrorsValidationVO>> getFieldErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
 
 }

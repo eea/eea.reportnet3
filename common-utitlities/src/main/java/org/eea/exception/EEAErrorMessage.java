@@ -3,7 +3,7 @@ package org.eea.exception;
 /**
  * Instantiates a new EEA error message.
  */
-public class EEAErrorMessage {
+public final class EEAErrorMessage {
 
   /**
    * The Constant DB_FILEFORMAT.
@@ -30,6 +30,41 @@ public class EEAErrorMessage {
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
+  public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
+
+  /** The Constant EXECUTION_ERROR. */
+  public static final String EXECUTION_ERROR = "Runtime error";
+
+  /** The Constant VALIDATION_SESSION_ERROR. */
+  public static final String VALIDATION_SESSION_ERROR = "Validation session error";
+
+  /** The Constant FILE_NOT_FOUND. */
+  public static final String FILE_NOT_FOUND = "File not found in the application";
+
+  /** The Constant FILE_NOT_FOUND. */
+  public static final String RECORD_NOTFOUND = "Record not found";
+
+  /** The Constant PARTITION_ID_NOTFOUND. */
+  public static final String PARTITION_ID_NOTFOUND = "Partition not found";
+
+  /** The Constant DATAFLOW_INCORRECT_ID. */
+  public static final String DATAFLOW_INCORRECT_ID = "Dataflow Id incorrect";
+
+  /** The Constant DATAFLOW_NOTFOUND. */
+  public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
+
+/** The Constant USER_REQUEST_NOTFOUND. */
+  public static final String USER_REQUEST_NOTFOUND = "User request not found";
+
+ /** The Constant DOCUMENT_UPLOAD_ERROR. */
+  public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
+  
+  /** The Constant DOCUMENT_DOWNLOAD_ERROR. */
+  public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
+
+  /**
+   * Instantiates a new EEA error message.
+   */
   private EEAErrorMessage() {
     throw new IllegalStateException("Utility class");
   }

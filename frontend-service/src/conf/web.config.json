@@ -1,0 +1,29 @@
+{
+	"dataSchemaAPI": {
+		"url": "/dataschema/dataflow/{:dataFlowId}"
+	},
+	"dataviewerAPI": {
+		"url": "/dataset/TableValueDataset/"
+	},
+	"validationViewerAPI": {
+		"url": "/dataset/findPositionFromAnyObject/"
+	},
+	"loadStatisticsAPI": {
+		"url": "/dataset/loadStatistics/"
+	},
+	"loadDatasetDataAPI": {
+		"url": "/dataset/1/loadDatasetData/"
+	},
+	"listValidationsAPI": {
+		"url": "/validation/listValidations/"
+	},
+	"loadDataTableAPI": {
+		"url": "/dataset/1/loadTableData/"
+	},
+	"loadDataFlowTaskPendingAcceptedAPI": {
+		"url": "/dataflow/pendingaccepted/"
+	},
+	"loadDatasetsByDataflowID": {
+		"url": "/dataflow/"
+	}
+}

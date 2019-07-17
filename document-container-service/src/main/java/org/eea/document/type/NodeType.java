@@ -18,7 +18,7 @@ public enum NodeType {
    *
    * @param nodeType the node type
    */
-  private NodeType(String nodeType) {
+  NodeType(String nodeType) {
     this.nodeValue = nodeType;
   }
 

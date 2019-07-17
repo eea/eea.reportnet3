@@ -1,14 +1,16 @@
 package org.eea.inspire;
 
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.XmlReader;
 import java.net.URL;
 import org.eea.swagger.EnableEEASwagger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import com.rometools.rome.feed.synd.SyndFeed;
-import com.rometools.rome.io.SyndFeedInput;
-import com.rometools.rome.io.XmlReader;
 
 
 /**
@@ -20,6 +22,16 @@ import com.rometools.rome.io.XmlReader;
 @EnableCircuitBreaker
 @EnableEEASwagger
 public class InspireHarvesterApplication {
+
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(InspireHarvesterApplication.class);
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -45,18 +57,17 @@ public class InspireHarvesterApplication {
       final SyndFeedInput input = new SyndFeedInput();
       final SyndFeed feed = input.build(new XmlReader(feedUrl));
 
-      System.out.println(feed);
+      LOG.info(feed.toString());
 
       ok = true;
     } catch (final Exception ex) {
-      ex.printStackTrace();
-      System.out.println("ERROR: " + ex.getMessage());
+      LOG_ERROR.error("ERROR: {}", ex.getMessage(), ex);
     }
     if (!ok) {
-      System.out.println();
-      System.out.println("FeedReader reads and prints any RSS/Atom feed type.");
-      System.out.println("The first parameter must be the URL of the feed to read.");
-      System.out.println();
+
+      LOG.info("FeedReader reads and prints any RSS/Atom feed type.");
+      LOG.info("The first parameter must be the URL of the feed to read.");
+
     }
   }
 

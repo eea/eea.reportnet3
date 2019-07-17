@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
-import org.eea.dataset.multitenancy.MultiTenantDataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.multitenancy.MultiTenantDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +24,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
@@ -36,22 +37,63 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableJpaRepositories(entityManagerFactoryRef = "dataSetsEntityManagerFactory",
     transactionManagerRef = "dataSetsTransactionManager",
     basePackages = "org.eea.dataset.persistence.data.repository")
+@EnableWebMvc
 public class DatasetConfiguration implements WebMvcConfigurer {
 
-  /** The dll. */
+
+  /**
+   * The dll.
+   */
   @Value("${spring.jpa.hibernate.ddl-auto}")
   private String dll;
 
-  /** The dialect. */
+  /**
+   * The dialect.
+   */
   @Value("${spring.jpa.properties.hibernate.dialect}")
   private String dialect;
 
-  /** The create clob propertie. */
+  /**
+   * The create clob propertie.
+   */
   @Value("${spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation}")
   private String createClobPropertie;
 
+  /**
+   * The batch size.
+   */
+  @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
+  private String batch_Size;
 
-  /** The record store controller zull. */
+  /**
+   * The show sql propertie
+   */
+  @Value("${spring.jpa.hibernate.flushMode}")
+  private String flushMode;
+
+
+  /**
+   * The show sql propertie
+   */
+  @Value("${spring.jpa.hibernate.show-sql}")
+  private String showSql;
+
+  /**
+   * The stats.
+   */
+  @Value("${spring.jpa.properties.hibernate.order_updates}")
+  private String orderUpdates;
+
+  /**
+   * The order.
+   */
+  @Value("${spring.jpa.properties.hibernate.order_inserts}")
+  private String orderInserts;
+
+
+  /**
+   * The record store controller zull.
+   */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
@@ -81,7 +123,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   public Map<Object, Object> targetDataSources() {
     final Map<Object, Object> targetDataSources = new ConcurrentHashMap<>();
 
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getConnectionToDataset();
+    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
     for (final ConnectionDataVO connectionDataVO : connections) {
       targetDataSources.put(connectionDataVO.getSchema(), dataSetsDataSource(connectionDataVO));
     }
@@ -92,6 +134,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * Data sets data source.
    *
    * @param connectionDataVO the connection data VO
+   *
    * @return the data source
    */
   @Primary
@@ -112,16 +155,16 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the local container entity manager factory bean
    */
   @Bean
-  @Autowired
   @Primary
   @Qualifier("dataSetsEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
-    LocalContainerEntityManagerFactoryBean dataSetsEM =
+    final LocalContainerEntityManagerFactoryBean dataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
     dataSetsEM.setDataSource(dataSource());
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.data.domain");
-    JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
+
     dataSetsEM.setJpaProperties(additionalProperties());
     return dataSetsEM;
   }
@@ -132,11 +175,15 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the properties
    */
   Properties additionalProperties() {
-    Properties properties = new Properties();
+    final Properties properties = new Properties();
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
     properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
-    properties.setProperty("hibernate.show_sql", "true");
+    properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
+    properties.setProperty("hibernate.show_sql", showSql);
+    properties.setProperty("hibernate.flushMode", flushMode);
+    properties.setProperty("hibernate.order_updates", orderUpdates);
+    properties.setProperty("hibernate.order_inserts", orderInserts);
     return properties;
   }
 
@@ -146,11 +193,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the platform transaction manager
    */
   @Bean
-  @Autowired
   @Primary
   public PlatformTransactionManager dataSetsTransactionManager() {
 
-    JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
+    final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
   }

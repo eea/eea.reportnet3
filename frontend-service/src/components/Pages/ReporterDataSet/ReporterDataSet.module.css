@@ -1,9 +1,3 @@
-body {
-   -webkit-user-drag: none;
-   -khtml-user-drag: none;
-   -moz-user-drag: none;
-   -o-user-drag: none;
-}
 .ButtonsBar {
     margin-bottom: 0.5em;
     padding: .25em;
@@ -19,5 +13,9 @@ body {
 }
 
 .warning > span {
-    color:red;
-  }
+  color:red;
+}
+
+:global .p-tabview.p-tabview-top {
+  padding-bottom: 80px;
+}

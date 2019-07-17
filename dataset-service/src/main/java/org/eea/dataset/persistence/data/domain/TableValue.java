@@ -11,7 +11,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,28 +29,45 @@ import lombok.ToString;
 @Table(name = "TABLE_VALUE")
 public class TableValue {
 
-  /** The id. */
+
+
+  /**
+   * The id.
+   */
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @SequenceGenerator(name = "table_sequence_generator", sequenceName = "table_sequence",
+      allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "table_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The name. */
-  @Column(name = "NAME")
-  private String name;
+  /**
+   * The id mongo.
+   */
+  @Column(name = "ID_TABLE_SCHEMA")
+  private String idTableSchema;
 
-  /** The id mongo. */
-  @Column(name = "ID_MONGO")
-  private String idMongo;
-
-  /** The records. */
+  /**
+   * The records.
+   */
   @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<RecordValue> records;
 
-  /** The dataset id. */
+  /**
+   * The table validations.
+   */
+  @OneToMany(mappedBy = "tableValue", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<TableValidation> tableValidations;
+
+  /**
+   * The dataset id.
+   */
   @ManyToOne
   @JoinColumn(name = "DATASET_ID")
   private DatasetValue datasetId;
+
+  @Transient
+  private TypeErrorEnum levelError;
 
   /**
    * Hash code.
@@ -56,25 +76,26 @@ public class TableValue {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, records, idMongo, datasetId);
+    return Objects.hash(id, records, idTableSchema, datasetId);
   }
 
   /**
    * Equals.
    *
-   * @param o the o
+   * @param obj the o
+   *
    * @return true, if successful
    */
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
     }
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    TableValue table = (TableValue) obj;
-    return id.equals(table.id) && name.equals(table.name);
+    final TableValue table = (TableValue) obj;
+    return id.equals(table.id);
   }
 
 }

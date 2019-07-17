@@ -1,0 +1,494 @@
+{  
+   "id":null,
+   "idTableSchema":null,
+   "records":[  
+      {  
+         "idRecordSchema":"5cefb5b592f28351b4e9781e",
+         "id":2,
+         "fields":[  
+            {  
+               "type":"string",
+               "value":"ES111C0021902",
+               "id":3,
+               "idFieldSchema":"5cffc519903713258408d50f",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"RIO TAMBRE AMES  PM3",
+               "id":4,
+               "idFieldSchema":"5cefb5b592f28351b4e97820",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":5,
+               "idFieldSchema":"5cefb5b592f28351b4e97829",
+               "fieldValidations": [
+                 {
+                   "id": 9,
+                   "fieldValue": null,
+                   "validation": {
+                     "message": "Error Message",
+                     "id": 8,
+                     "idRule": "idMongo",
+                     "levelError": "WARNING",
+                     "typeEntity": "FIELD",
+                     "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+                   }
+                 },
+                 {
+                   "id": 11,
+                   "fieldValue": null,
+                   "validation": {
+                     "message": "Error Message",
+                     "id": 10,
+                     "idRule": "idMongo",
+                     "levelError": "WARNING",
+                     "typeEntity": "FIELD",
+                     "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+                   }
+                 },
+                 {
+                   "id": 13,
+                   "fieldValue": null,
+                   "validation": {
+                     "message": "Error Message",
+                     "id": 12,
+                     "idRule": "idMongo",
+                     "levelError": "WARNING",
+                     "typeEntity": "FIELD",
+                     "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+                   }
+                 }
+               ],
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"-8,6594",
+               "id":6,
+               "idFieldSchema":"5cefb5b592f28351b4e9782a",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"42,9298",
+               "id":7,
+               "idFieldSchema":"5cefb5b592f28351b4e9782b",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"ETRS89",
+               "id":8,
+               "idFieldSchema":"5cefb5b592f28351b4e9782c",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":9,
+               "idFieldSchema":"5cefb5b592f28351b4e9782d",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"ES014",
+               "id":10,
+               "idFieldSchema":"5cefb5b592f28351b4e9782e",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"Float",
+               "value":"GALICIA COSTA",
+               "id":11,
+               "idFieldSchema":"5cefb5b592f28351b4e9782f",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"float",
+               "value":"ES014",
+               "id":12,
+               "idFieldSchema":"5cefb5b592f28351b4e97830",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"Long",
+               "value":"GALICIA COSTA",
+               "id":13,
+               "idFieldSchema":"5cefb5b592f28351b4e97831",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"long",
+               "value":"ES014MSPFES.014.NR.204.000.04.02",
+               "id":14,
+               "idFieldSchema":"5cefb5b592f28351b4e97832",
+               "fieldValidations": [
+                 {
+                   "id": 9,
+                   "fieldValue": null,
+                   "validation": {
+                     "message": "Error Message",
+                     "id": 8,
+                     "idRule": "idMongo",
+                     "levelError": "WARNING",
+                     "typeEntity": "FIELD",
+                     "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+                   }
+                 },
+                 {
+                   "id": 11,
+                   "fieldValue": null,
+                   "validation": {
+                     "message": "Error Message",
+                     "id": 10,
+                     "idRule": "idMongo",
+                     "levelError": "WARNING",
+                     "typeEntity": "FIELD",
+                     "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+                   }
+                 },
+                 {
+                   "id": 13,
+                   "fieldValue": null,
+                   "validation": {
+                     "message": "Error Message",
+                     "id": 12,
+                     "idRule": "idMongo",
+                     "levelError": "WARNING",
+                     "typeEntity": "FIELD",
+                     "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+                   }
+                 }
+               ],
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"RIO TAMBRE",
+               "id":15,
+               "idFieldSchema":"5cefb5b592f28351b4e97833",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"Int",
+               "value":"na",
+               "id":16,
+               "idFieldSchema":"5cefb5b592f28351b4e97834",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"int",
+               "value":"na",
+               "id":17,
+               "idFieldSchema":"5cefb5b592f28351b4e97835",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":18,
+               "idFieldSchema":"5cefb5b592f28351b4e97821",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"2018",
+               "id":19,
+               "idFieldSchema":"5cefb5b592f28351b4e97822",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"ES11100002C15002A3",
+               "id":20,
+               "idFieldSchema":"5cefb5b592f28351b4e97823",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"1",
+               "id":21,
+               "idFieldSchema":"5cefb5b592f28351b4e97824",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":22,
+               "idFieldSchema":"5cefb5b592f28351b4e97825",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"N",
+               "id":23,
+               "idFieldSchema":"5cefb5b592f28351b4e97826",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"R",
+               "id":24,
+               "idFieldSchema":"5cefb5b592f28351b4e97827",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"N",
+               "id":25,
+               "idFieldSchema":"5cefb5b592f28351b4e97828",
+               "fieldValidations": null,
+               "levelError": null
+            }
+         ],
+         "datasetPartitionId":1,
+         "recordValidations": [
+           {
+             "id": 24,
+             "recordValue": null,
+             "validation": {
+               "message": "Warning Message",
+               "id": 23,
+               "idRule": "idMongo",
+               "levelError": "WARNING",
+               "typeEntity": "RECORD",
+               "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+             }
+           },
+           {
+             "id": 24,
+             "recordValue": null,
+             "validation": {
+               "message": "Error Message",
+               "id": 23,
+               "idRule": "idMongo",
+               "levelError": "ERROR",
+               "typeEntity": "RECORD",
+               "validationDate": "Tue Jun 11 12:59:27 CEST 2019"
+             }
+           }
+         ],
+         "sortCriteria": null,
+         "levelError": null
+      },
+      {  
+         "idRecordSchema":"5cefb5b592f28351b4e9781e",
+         "id":26,
+         "fields":[  
+            {  
+               "type":"string",
+               "value":"ES111M0041",
+               "id":27,
+               "idFieldSchema":"5cefb5b592f28351b4e9781f",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"PLAYA RASO - SESELLE PM1",
+               "id":28,
+               "idFieldSchema":"5cefb5b592f28351b4e97820",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":29,
+               "idFieldSchema":"5cefb5b592f28351b4e97829",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"-8,2247",
+               "id":30,
+               "idFieldSchema":"5cefb5b592f28351b4e9782a",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"43,4281",
+               "id":31,
+               "idFieldSchema":"5cefb5b592f28351b4e9782b",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"ETRS89",
+               "id":32,
+               "idFieldSchema":"5cefb5b592f28351b4e9782c",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":33,
+               "idFieldSchema":"5cefb5b592f28351b4e9782d",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"ES014",
+               "id":34,
+               "idFieldSchema":"5cefb5b592f28351b4e9782e",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"Float",
+               "value":"GALICIA COSTA",
+               "id":35,
+               "idFieldSchema":"5cefb5b592f28351b4e9782f",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"float",
+               "value":"ES014",
+               "id":36,
+               "idFieldSchema":"5cefb5b592f28351b4e97830",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"Long",
+               "value":"GALICIA COSTA",
+               "id":37,
+               "idFieldSchema":"5cefb5b592f28351b4e97831",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"long",
+               "value":"ES014MSPF17",
+               "id":38,
+               "idFieldSchema":"5cefb5b592f28351b4e97832",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"Ares",
+               "id":39,
+               "idFieldSchema":"5cefb5b592f28351b4e97833",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"Int",
+               "value":"na",
+               "id":40,
+               "idFieldSchema":"5cefb5b592f28351b4e97834",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"int",
+               "value":"na",
+               "id":41,
+               "idFieldSchema":"5cefb5b592f28351b4e97835",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":42,
+               "idFieldSchema":"5cefb5b592f28351b4e97821",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"2018",
+               "id":43,
+               "idFieldSchema":"5cefb5b592f28351b4e97822",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"ES11100004M15004A1",
+               "id":44,
+               "idFieldSchema":"5cefb5b592f28351b4e97823",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"1",
+               "id":45,
+               "idFieldSchema":"5cefb5b592f28351b4e97824",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"na",
+               "id":46,
+               "idFieldSchema":"5cefb5b592f28351b4e97825",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"N",
+               "id":47,
+               "idFieldSchema":"5cefb5b592f28351b4e97826",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"C",
+               "id":48,
+               "idFieldSchema":"5cefb5b592f28351b4e97827",
+               "fieldValidations": null,
+               "levelError": null
+            },
+            {  
+               "type":"String",
+               "value":"N",
+               "id":49,
+               "idFieldSchema":"5cefb5b592f28351b4e97828",
+               "fieldValidations": null,
+               "levelError": null
+            }
+         ],
+         "datasetPartitionId":1
+      }
+   ],
+   "headers":null,
+   "name":null,
+   "totalRecords":2244,
+   "tableValidations": null
+}

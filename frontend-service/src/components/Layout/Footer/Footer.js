@@ -1,16 +1,19 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import styles from './Footer.module.css';
+import ResourcesContext from '../../Context/ResourcesContext';
 
 const Footer = () => {
+  const resources = useContext(ResourcesContext);
     return (
+      
       <footer className={styles.Footer}>
-        <a href=".">About the Commission's new web presence</a>
-        <a href=".">Language policy</a>
-        <a href=".">Resources for partners</a>
-        <a href=".">Cookies</a>
-        <a href=".">Privacy policy</a>
-        <a href=".">Legal notice</a>
-        <a href=".">Contact</a>
+        <a href=".">{resources.messages["copyrightAbout"]}</a>
+        <a href=".">{resources.messages["copyrightLanguage"]}</a>
+        <a href=".">{resources.messages["copyrightResources"]}</a>
+        <a href=".">{resources.messages["copyrightCookies"]}</a>
+        <a href=".">{resources.messages["copyrightPrivacy"]}</a>
+        <a href=".">{resources.messages["copyrightLegal"]}</a>
+        <a href=".">{resources.messages["copyrightContact"]}</a>
       </footer>  
     );
 }
