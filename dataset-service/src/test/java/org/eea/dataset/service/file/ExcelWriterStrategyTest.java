@@ -24,7 +24,7 @@ public class ExcelWriterStrategyTest {
   private ExcelWriterStrategy excelWriterStrategy;
 
   @Mock
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   @Before
   public void initMocks() {
@@ -33,7 +33,7 @@ public class ExcelWriterStrategyTest {
 
   @Test
   public void excelWriterStrategyTest() {
-    new ExcelWriterStrategy(parseCommon, "xls");
+    new ExcelWriterStrategy(fileCommon, "xls");
   }
 
   @Test
@@ -66,9 +66,9 @@ public class ExcelWriterStrategyTest {
     fieldValues.add(fieldValue2);
     value.setFields(fieldValues);
     values.add(value);
-    Mockito.when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
-    Mockito.when(parseCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
-    Mockito.when(parseCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
+    Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
     excelWriterStrategy.setMimeType("xls");
     excelWriterStrategy.writeFile(1L, 1L, "");
     excelWriterStrategy.getMimeType();
@@ -104,9 +104,9 @@ public class ExcelWriterStrategyTest {
     fieldValues.add(fieldValue2);
     value.setFields(fieldValues);
     values.add(value);
-    Mockito.when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
-    Mockito.when(parseCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
-    Mockito.when(parseCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
+    Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
     excelWriterStrategy.setMimeType("xlsx");
     excelWriterStrategy.writeFile(1L, 1L, "");
     excelWriterStrategy.getMimeType();
@@ -142,8 +142,8 @@ public class ExcelWriterStrategyTest {
     fieldValues.add(fieldValue2);
     value.setFields(fieldValues);
     values.add(value);
-    Mockito.when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
-    Mockito.when(parseCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
     excelWriterStrategy.setMimeType("xlxs");
     excelWriterStrategy.writeFile(1L, 1L, "");
     excelWriterStrategy.getMimeType();

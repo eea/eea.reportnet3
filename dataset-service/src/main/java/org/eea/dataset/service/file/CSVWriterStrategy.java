@@ -46,8 +46,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   private char delimiter;
 
-  /** The parse common. */
-  private ParseCommon parseCommon;
+  /** The file common. */
+  private FileCommonUtils fileCommon;
 
 
   /** The response. */
@@ -58,12 +58,12 @@ public class CSVWriterStrategy implements WriterStrategy {
    * Instantiates a new CSV writer strategy.
    *
    * @param delimiter the delimiter
-   * @param parseCommon the parse common
+   * @param fileCommon the file common
    */
-  public CSVWriterStrategy(char delimiter, ParseCommon parseCommon) {
+  public CSVWriterStrategy(char delimiter, FileCommonUtils fileCommon) {
     super();
     this.delimiter = delimiter;
-    this.parseCommon = parseCommon;
+    this.fileCommon = fileCommon;
   }
 
 
@@ -80,7 +80,7 @@ public class CSVWriterStrategy implements WriterStrategy {
   public byte[] writeFile(final Long dataflowId, final Long datasetId, final String idTableSchema) {
     LOG.info("starting csv file writter");
 
-    DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId);
 
     // Init the writer
     StringWriter writer = new StringWriter();
@@ -108,8 +108,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
       CSVWriter csvWriter, Long datasetId) {
-    List<RecordValue> records = parseCommon.getRecordValues(datasetId, idTableSchema);
-    List<FieldSchemaVO> fieldSchemas = parseCommon.getFieldSchemas(idTableSchema, dataSetSchema);
+    List<RecordValue> records = fileCommon.getRecordValues(datasetId, idTableSchema);
+    List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<String> headers = new ArrayList<>();
     Map<String, Integer> indexMap = new HashMap<>();
 

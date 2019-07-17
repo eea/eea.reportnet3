@@ -47,7 +47,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
-import org.eea.dataset.service.file.ParseCommon;
+import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
@@ -169,7 +169,7 @@ public class DatasetServiceTest {
   private IFileExportContext contextExport;
 
   @Mock
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   private FieldValue fieldValue;
   private RecordValue recordValue;
@@ -785,8 +785,8 @@ public class DatasetServiceTest {
   public void getFileNameTest() throws EEAException {
     DataSetMetabase dataset = new DataSetMetabase();
     when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(new DataSetSchemaVO());
-    when(parseCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
+    when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(new DataSetSchemaVO());
+    when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
     assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
   }
 

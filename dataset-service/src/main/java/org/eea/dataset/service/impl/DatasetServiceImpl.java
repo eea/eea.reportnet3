@@ -45,7 +45,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.file.ParseCommon;
+import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -125,7 +125,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The parse common. */
   @Autowired
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   /**
    * The data set metabase repository.
@@ -948,10 +948,10 @@ public class DatasetServiceImpl implements DatasetService {
   public String getFileName(String mimeType, String idTableSchema, Long datasetId)
       throws EEAException {
     final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
-    DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(datasetMetabase.getDataflowId());
-    return null == parseCommon.getFieldSchemas(idTableSchema, dataSetSchema)
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(datasetMetabase.getDataflowId());
+    return null == fileCommon.getFieldSchemas(idTableSchema, dataSetSchema)
         ? datasetMetabase.getDataSetName() + "." + mimeType
-        : parseCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
+        : fileCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
 
   }
 }

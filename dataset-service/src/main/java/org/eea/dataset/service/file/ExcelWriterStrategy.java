@@ -36,7 +36,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
   private static final Logger LOG = LoggerFactory.getLogger(CSVWriterStrategy.class);
 
   /** The parse common. */
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   /** The mime type. */
   private String mimeType;
@@ -44,12 +44,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
   /**
    * Instantiates a new excel writer strategy.
    *
-   * @param parseCommon the parse common
+   * @param fileCommon the parse common
    * @param mimeType the mime type
    */
-  public ExcelWriterStrategy(ParseCommon parseCommon, String mimeType) {
+  public ExcelWriterStrategy(FileCommonUtils fileCommon, String mimeType) {
     super();
-    this.parseCommon = parseCommon;
+    this.fileCommon = fileCommon;
     this.mimeType = mimeType;
   }
 
@@ -82,13 +82,13 @@ public class ExcelWriterStrategy implements WriterStrategy {
   @Override
   public byte[] writeFile(Long dataflowId, Long datasetId, String idTableSchema) {
 
-    DataSetSchemaVO dataset = parseCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    TableSchemaVO table = parseCommon.findTableSchema(idTableSchema, dataset);
+    TableSchemaVO table = fileCommon.findTableSchema(idTableSchema, dataset);
 
     // If the given idTableSchema exists, replace all tables with it
     if (null != table) {
@@ -159,7 +159,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     // Set records
     int nRow = 1;
-    for (RecordValue record : parseCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
+    for (RecordValue record : fileCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
 
       Row row = sheet.createRow(nRow++);
       List<FieldValue> fields = record.getFields();

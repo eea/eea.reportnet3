@@ -29,7 +29,7 @@ public class CSVWriterStrategyTest {
 
   /** The parse common. */
   @Mock
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   /**
    * Inits the mocks.
@@ -45,7 +45,7 @@ public class CSVWriterStrategyTest {
    */
   @Test
   public void csvWriterStrategyTest() {
-    CSVWriterStrategy test = new CSVWriterStrategy('|', parseCommon);
+    CSVWriterStrategy test = new CSVWriterStrategy('|', fileCommon);
   }
 
 
@@ -69,8 +69,8 @@ public class CSVWriterStrategyTest {
     record.setFields(fields);
     records.add(record);
     fieldSchemas.add(fieldSchema);
-    Mockito.when(parseCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
-    Mockito.when(parseCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
+    Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
+    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "");
   }
@@ -97,8 +97,8 @@ public class CSVWriterStrategyTest {
     records.add(record);
     records.add(record2);
     fieldSchemas.add(fieldSchema);
-    Mockito.when(parseCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
-    Mockito.when(parseCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
+    Mockito.when(fileCommon.getRecordValues(Mockito.any(), Mockito.any())).thenReturn(records);
+    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "");
   }

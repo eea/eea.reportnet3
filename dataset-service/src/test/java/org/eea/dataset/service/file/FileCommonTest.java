@@ -26,13 +26,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 /*** The Class ParseCommonTest. */
 
 @RunWith(MockitoJUnitRunner.class)
-public class ParseCommonTest {
+public class FileCommonTest {
 
   /**
    * The parse common.
    */
   @InjectMocks
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   /**
    * The data set schema service.
@@ -91,7 +91,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdRecord() {
-    assertEquals("fail", ID, parseCommon.findIdRecord(ID, dataset));
+    assertEquals("fail", ID, fileCommon.findIdRecord(ID, dataset));
   }
 
   /**
@@ -99,7 +99,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdRecordNull() {
-    assertNull("fail", parseCommon.findIdRecord(null, dataset));
+    assertNull("fail", fileCommon.findIdRecord(null, dataset));
   }
 
   /**
@@ -107,7 +107,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdFieldSchema() {
-    assertEquals("fail", fieldSchema, parseCommon.findIdFieldSchema(ID, ID, dataset));
+    assertEquals("fail", fieldSchema, fileCommon.findIdFieldSchema(ID, ID, dataset));
   }
 
   /**
@@ -115,7 +115,7 @@ public class ParseCommonTest {
    */
   @Test
   public void testFindIdFieldSchemaNull() {
-    assertNull("fail", parseCommon.findIdFieldSchema(null, null, dataset));
+    assertNull("fail", fileCommon.findIdFieldSchema(null, null, dataset));
   }
 
   /**
@@ -126,7 +126,7 @@ public class ParseCommonTest {
   @Test
   public void getIdTableSchema() {
     assertEquals("fail", dataset.getTableSchemas().get(0).getIdTableSchema(),
-        parseCommon.getIdTableSchema(ID, dataset));
+        fileCommon.getIdTableSchema(ID, dataset));
   }
 
   /**
@@ -136,7 +136,7 @@ public class ParseCommonTest {
    */
   @Test
   public void getIdTableSchemaNull() {
-    assertNull("fail", parseCommon.getIdTableSchema(null, dataset));
+    assertNull("fail", fileCommon.getIdTableSchema(null, dataset));
   }
 
   /**
@@ -146,7 +146,7 @@ public class ParseCommonTest {
    */
   @Test
   public void getIdTableSchemaNull2() {
-    assertNull("fail", parseCommon.getIdTableSchema("2", dataset));
+    assertNull("fail", fileCommon.getIdTableSchema("2", dataset));
   }
 
   /**
@@ -156,7 +156,7 @@ public class ParseCommonTest {
    */
   @Test
   public void getIdTableSchemaNull3() {
-    assertNull("fail", parseCommon.getIdTableSchema(ID, null));
+    assertNull("fail", fileCommon.getIdTableSchema(ID, null));
   }
 
   /**
@@ -165,7 +165,7 @@ public class ParseCommonTest {
   @Test
   public void testGetDataSetSchema() {
     when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(dataset);
-    assertEquals("fail", dataset, parseCommon.getDataSetSchema(1L));
+    assertEquals("fail", dataset, fileCommon.getDataSetSchema(1L));
   }
 
 
@@ -176,7 +176,7 @@ public class ParseCommonTest {
    */
   @Test
   public void getTableNameTest() {
-    parseCommon.getTableName(ID, dataset);
+    fileCommon.getTableName(ID, dataset);
   }
 
   /**
@@ -186,7 +186,7 @@ public class ParseCommonTest {
    */
   @Test
   public void getFieldSchemasTest() {
-    parseCommon.getFieldSchemas(ID, dataset);
+    fileCommon.getFieldSchemas(ID, dataset);
   }
 
   /**
@@ -206,6 +206,6 @@ public class ParseCommonTest {
     records.add(record);
 
     when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(records);
-    parseCommon.getRecordValues(1L, ID);
+    fileCommon.getRecordValues(1L, ID);
   }
 }

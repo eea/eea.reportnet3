@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * The Class ParseCommon.
  */
 @Component
-public class ParseCommon {
+public class FileCommonUtils {
 
 
   /**
@@ -38,7 +38,7 @@ public class ParseCommon {
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(ParseCommon.class);
+  private static final Logger LOG = LoggerFactory.getLogger(FileCommonUtils.class);
 
   /**
    * Find id record.

@@ -17,7 +17,7 @@ public class FileExportFactory implements IFileExportFactory {
    * The parse common.
    */
   @Autowired
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   @Value("${dataset.loadDataDelimiter}")
   private char delimiter;
@@ -35,14 +35,14 @@ public class FileExportFactory implements IFileExportFactory {
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileExportContextImpl(new CSVWriterStrategy(delimiter, parseCommon));
+        context = new FileExportContextImpl(new CSVWriterStrategy(delimiter, fileCommon));
         break;
       case "xml":
         // Fill it with the xml strategy
         break;
       case "xls":
       case "xlsx":
-        context = new FileExportContextImpl(new ExcelWriterStrategy(parseCommon, mimeType));
+        context = new FileExportContextImpl(new ExcelWriterStrategy(fileCommon, mimeType));
       default:
         break;
     }

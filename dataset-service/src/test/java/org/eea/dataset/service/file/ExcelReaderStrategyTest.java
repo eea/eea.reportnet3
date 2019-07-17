@@ -33,7 +33,7 @@ public class ExcelReaderStrategyTest {
 
   /** The parse common. */
   @Mock
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   /** The file in. */
   private ByteArrayInputStream fileIn;
@@ -107,7 +107,7 @@ public class ExcelReaderStrategyTest {
   public void testParseFile()
       throws InvalidFileException, EncryptedDocumentException, InvalidFormatException, IOException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
-    Mockito.when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
   }
 
@@ -115,8 +115,8 @@ public class ExcelReaderStrategyTest {
   public void testParseFileNotNull()
       throws InvalidFileException, EncryptedDocumentException, InvalidFormatException, IOException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
-    Mockito.when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
-    Mockito.when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
   }
