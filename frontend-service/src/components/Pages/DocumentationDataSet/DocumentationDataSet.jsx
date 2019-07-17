@@ -2,7 +2,6 @@ import React ,{ useState, useEffect, useContext}from 'react'
 import styles from './DocumentationDataSet.module.scss';
 import MainLayout from '../../Layout/main-layout.component';
 import {BreadCrumb} from 'primereact/breadcrumb';
-import uploadDummy from '../../../assets/jsons/uploadDummy';
 import ResourcesContext from '../../Context/ResourcesContext';
 import { TabView, TabPanel } from "primereact/tabview";
 import { DataTable } from "primereact/datatable";
@@ -10,6 +9,8 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import ButtonsBar from '../../Layout/UI/ButtonsBar/ButtonsBar';
 import IconComponent from '../../Layout/UI/icon-component';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import HTTPRequesterAPI from '../../../services/HTTPRequester/HTTPRequester';
 
 const DocumentationDataSet = ({ match, history }) => {
 
@@ -19,16 +20,44 @@ const DocumentationDataSet = ({ match, history }) => {
     const [cols, setCols] = useState();
     const [breadCrumbItems,setBreadCrumbItems] = useState([]);
     const [customButtons, setCustomButtons] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const home = {
 		icon: resources.icons["home"],
 		command: () => history.push("/")
 	};
 
+    //Bread Crumbs settings
+    useEffect(() => {
+        setBreadCrumbItems([
+            { 
+                label: resources.messages["dataFlowTask"], 
+                command: () => history.push('/data-flow-task')
+            },
+            {
+                label: resources.messages["reportingDataFlow"],
+                command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+            },
+            { label: resources.messages["documents"] }
+        ]);
+    }, [history, match.params.dataFlowId, resources.messages]);
+
     //Data Fetching
     useEffect(() => {
         //TO DO change to real API call
-        setFile(uploadDummy);
+        HTTPRequesterAPI.get({
+            url: 'jsons/list-of-documents.json',
+            queryString: {}
+        })
+        .then(response => {
+            setFile(response.data);
+            setLoading(false);
+        })
+        .catch(error => {
+            setLoading(false);
+            console.log("error", error);
+            return error;
+        });
 
         //#region Button inicialization              
         setCustomButtons([
@@ -59,111 +88,98 @@ const DocumentationDataSet = ({ match, history }) => {
 
     }, [file]);
 
-    //Bread Crumbs settings
-	useEffect(() => {
-		setBreadCrumbItems([
-			{ 
-				label: resources.messages["dataFlowTask"], 
-				command: () => history.push('/data-flow-task')
-			},
-			{
-				label: resources.messages["reportingDataFlow"],
-				command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
-			},
-			{ label: resources.messages["documents"] }
-		]);
-	}, [history, match.params.dataFlowId, resources.messages]);
-
     const actionTemplate = (rowData, column) =>{
        
         return <a href={rowData.url}> <IconComponent icon="pi pi-file"/></a>     
     }
     
+    const layout = children => {
+        return (
+            <MainLayout>
+                <div className="titleDiv">
+                    <BreadCrumb model={breadCrumbItems} home={home}/>
+                </div>
+                <div className="rep-container">{children}</div>
+            </MainLayout>
+        )
+    }
+
+    if (loading) {
+        return layout(<ProgressSpinner/>)
+    }
       
 
     if (file) {
-    return (
-        <MainLayout>
-         <BreadCrumb model={breadCrumbItems} home={home}/>
-           
-            <TabView>
-                
-                <TabPanel header={resources.messages['documents']}>
-                      
-                    <ButtonsBar buttons={customButtons} />
-                
-                    {
-
-                    <DataTable value={file} autoLayout={true}>
-                        
-                        <Column
+    return layout (
+        <TabView>
+            <TabPanel header={resources.messages['documents']}>                    
+                <ButtonsBar buttons={customButtons} />
+                {
+                <DataTable value={file} autoLayout={true}>
+                    <Column
                         columnResizeMode="expand"
                         field="title"
                         header={resources.messages['title']}
                         filter={false}
                         filterMatchMode="contains"
-                        />
-                        <Column
+                    />
+                    <Column
                         field="description"
                         header={resources.messages['description']}
                         filter={false}
                         filterMatchMode="contains"
-                        />
-
-                        <Column
+                    />
+                    <Column
                         field="category"
                         header={resources.messages['category']}
                         filter={false}
                         filterMatchMode="contains"
-                        />
-                        <Column
+                    />
+                    <Column
+                        field="language"
+                        header={resources.messages['language']}
+                        filter={false}
+                        filterMatchMode="contains"
+                    />
+                    <Column
                         body={actionTemplate} style={{textAlign:'center', width: '8em'}}
                         field="url"
                         header={resources.messages['url']}
                         filter={false}
                         filterMatchMode="contains"
-                        />
-                    </DataTable>
-                    
-                    }
+                    />
+                </DataTable>                
+                }
 
-                    <DataTable value={file}>{cols}</DataTable>
-                </TabPanel>
-                
-                <TabPanel header={resources.messages['webLinks']}>
-                    {
-
-                    <DataTable value={file} autoLayout={true}>
-                        
-                        <Column
+                <DataTable value={file}>{cols}</DataTable>
+            </TabPanel>
+            
+            <TabPanel header={resources.messages['webLinks']}>
+                {
+                <DataTable value={file} autoLayout={true}>
+                    <Column
                         columnResizeMode="expand"
                         field="title"
                         header={resources.messages['title']}
                         filter={false}
                         filterMatchMode="contains"
-                        />
-                       
-                        <Column
+                    />
+                    
+                    <Column
                         field="url"
                         header={resources.messages['url']}
                         filter={false}
                         filterMatchMode="contains"
-                        />
-                    </DataTable>
-                    
-                    }
-
-                    <DataTable value={file}>{cols}</DataTable>
-                </TabPanel>
-                
-            </TabView>
-        
-        </MainLayout>
+                    />
+                </DataTable>                
+                }
+                <DataTable value={file}>{cols}</DataTable>
+            </TabPanel>                
+        </TabView>
     );
     } else {
     return <></>;
     }
-    
 }
 
 export default DocumentationDataSet
