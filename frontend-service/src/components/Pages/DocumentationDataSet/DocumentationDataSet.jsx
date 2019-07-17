@@ -92,7 +92,7 @@ const DocumentationDataSet = ({ match, history }) => {
 
     const actionTemplate = (rowData, column) =>{
        
-        return <a href={rowData.url}> <IconComponent icon="pi pi-file"/></a>     
+        return <a href={rowData.url} target="_blank"> <IconComponent icon="pi pi-file"/></a>     
     }
     
     const layout = children => {
