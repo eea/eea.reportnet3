@@ -52,7 +52,7 @@ const DataViewer = props => {
 	useEffect(() => {
 		console.log("Setting column options...");
 
-		if (firstRow !== props.positionIdRecord && props.positionIdRecord!==0) {
+		if (firstRow !== props.positionIdRecord) {
 			setFirstRow(Math.floor(props.positionIdRecord / numRows) * numRows);
 		}
 
@@ -118,9 +118,9 @@ const DataViewer = props => {
 		console.log("Refetching data...");
 		setNumRows(event.rows);
     setFirstRow(event.first);
-    contextReporterDataSet.setPageHandler(0);
+    contextReporterDataSet.setPageHandler(event.first);
     contextReporterDataSet.setIdSelectedRowHandler(-1);
-		fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+		//fetchDataHandler(sortField, sortOrder, event.first, event.rows);
 	};
 
 	const onConfirmDeleteHandler = () => {	
