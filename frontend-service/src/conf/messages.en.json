@@ -78,6 +78,7 @@
 		"title": "Title",
 		"description": "Description",
 		"category": "Category",
+		"language": "Language",
 		"url": "Url",
 		"dataFlowTask": "Dataflow Task",
 		"loginUserName": "User name",
