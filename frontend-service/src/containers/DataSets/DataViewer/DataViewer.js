@@ -52,7 +52,7 @@ const DataViewer = props => {
 	useEffect(() => {
 		console.log("Setting column options...");
 
-		if (firstRow !== props.positionIdRecord && props.positionIdRecord!==0) {
+		if (firstRow !== props.positionIdRecord) {
 			setFirstRow(Math.floor(props.positionIdRecord / numRows) * numRows);
 		}
 
