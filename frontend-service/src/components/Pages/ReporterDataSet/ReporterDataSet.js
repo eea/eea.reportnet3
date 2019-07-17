@@ -198,7 +198,8 @@ const ReporterDataSet = ({ match, history }) => {
 	};
 
 	const onTabChangeHandler = idTableSchema => {
-		setActiveIndex(idTableSchema.index);
+    setActiveIndex(idTableSchema.index);
+    setIdSelectedRow(-1);
 		setPositionIdRecord(0);
 	};
 
