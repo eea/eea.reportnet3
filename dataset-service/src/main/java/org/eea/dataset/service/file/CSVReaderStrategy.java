@@ -128,10 +128,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
-      if (null != dataSetSchema) {
-        dataset.setIdDatasetSchema(
-            null != dataSetSchema.getIdDataSetSchema() ? dataSetSchema.getIdDataSetSchema() : null);
-      }
+      dataset.setIdDatasetSchema(null != dataSetSchema ? dataSetSchema.getIdDataSetSchema() : null);
     } catch (final IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
@@ -209,8 +206,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       DataSetSchemaVO dataSetSchema) {
     List<FieldSchemaVO> headers = new ArrayList<>();
 
-    for (final String value : values) {
-
+    for (String value : values) {
       final FieldSchemaVO header = new FieldSchemaVO();
       if (idTableSchema != null) {
         final FieldSchemaVO fieldSchema =

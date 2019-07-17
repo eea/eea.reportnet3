@@ -201,9 +201,5 @@ public interface DatasetController {
       @PathVariable("idTableSchema") final String idTableSchema);
 
 
-  // ResponseEntity exportFile() throws Exception;
-
   ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType) throws Exception;
-
-
 }

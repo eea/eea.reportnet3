@@ -42,7 +42,7 @@ public class FileParserFactory implements IFileParserFactory {
         break;
       case "xls":
       case "xlsx":
-        // fill it with the xlsx and xls strategy
+        context = new FileParseContextImpl(new ExcelReaderStrategy(parseCommon));
         break;
       default:
         break;

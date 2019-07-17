@@ -40,7 +40,6 @@ public class ParseCommon {
    */
   private static final Logger LOG = LoggerFactory.getLogger(ParseCommon.class);
 
-
   /**
    * Find id record.
    *
@@ -58,6 +57,30 @@ public class ParseCommon {
           null != tableS.getRecordSchema() ? tableS.getRecordSchema().getIdRecordSchema() : null;
     }
     return result;
+  }
+
+  /**
+   * Gets the id table schema.
+   *
+   * @param tableName the table name
+   * @param dataSetSchema the data set schema
+   * @return the id table schema
+   */
+  public String getIdTableSchema(String tableName, DataSetSchemaVO dataSetSchema) {
+    // Find the Id of tableSchema in MongoDB
+    String idTable = null;
+    List<TableSchemaVO> tablesSchema = null;
+    if (null != dataSetSchema) {
+      tablesSchema = dataSetSchema.getTableSchemas();
+    }
+    if (null != tablesSchema) {
+      for (TableSchemaVO tableSchema : tablesSchema) {
+        if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
+          idTable = tableSchema.getIdTableSchema();
+        }
+      }
+    }
+    return idTable;
   }
 
   /**
