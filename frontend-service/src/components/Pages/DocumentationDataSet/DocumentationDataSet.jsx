@@ -46,7 +46,7 @@ const DocumentationDataSet = ({ match, history }) => {
     useEffect(() => {
         //TO DO change to real API call
         HTTPRequesterAPI.get({
-            url: 'jsons/list-of-documents.json',
+            url: '/jsons/list-of-documents.json',
             queryString: {}
         })
         .then(response => {
