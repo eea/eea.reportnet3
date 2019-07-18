@@ -135,6 +135,11 @@ public class ExcelReaderStrategyTest {
     assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
   }
 
+  @Test
+  public void testParseAllPages() throws InvalidFileException {
+    assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, null));
+  }
+
   /**
    * Test parse file exception.
    *

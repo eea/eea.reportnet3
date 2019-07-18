@@ -65,23 +65,18 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       List<TableVO> tables = new ArrayList<>();
 
       if (null == idTableSchema) {
-
         LOG.info("Reading all Excel's file pages");
-
         for (Sheet sheet : workbook) {
           tables.add(
               createTable(sheet, fileCommon.getIdTableSchema(sheet.getSheetName(), dataSetSchema),
                   dataSetSchema, partitionId));
         }
       } else {
-
         LOG.info("Reading the first Excel's file page");
-
         tables.add(createTable(workbook.getSheetAt(0), idTableSchema, dataSetSchema, partitionId));
       }
 
-      LOG.info("Finishing reading Exel fiel");
-
+      LOG.info("Finishing reading Exel file");
       return createDataSetVO(dataSetSchema, tables);
 
     } catch (EncryptedDocumentException | InvalidFormatException | IllegalArgumentException
