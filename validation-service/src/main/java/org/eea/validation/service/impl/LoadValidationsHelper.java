@@ -86,22 +86,24 @@ public class LoadValidationsHelper {
 
     // PROCESS LIST OF ERRORS VALIDATIONS
     Map<Long, ErrorsValidationVO> errors = new HashMap<>();
-    try {
-      Future<Map<Long, ErrorsValidationVO>> datasetErrors =
-          validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
-      Future<Map<Long, ErrorsValidationVO>> tableErrors =
-          validationService.getTableErrors(dataset.getId(), idValidations);
-      Future<Map<Long, ErrorsValidationVO>> recordErrors =
-          validationService.getRecordErrors(dataset.getId(), idValidations);
-      Future<Map<Long, ErrorsValidationVO>> fieldErrors =
-          validationService.getFieldErrors(dataset.getId(), idValidations);
+    if (!idValidations.isEmpty()) {
+      try {
+        Future<Map<Long, ErrorsValidationVO>> datasetErrors =
+            validationService.getDatasetErrors(dataset.getId(), dataset, idValidations);
+        Future<Map<Long, ErrorsValidationVO>> tableErrors =
+            validationService.getTableErrors(dataset.getId(), idValidations);
+        Future<Map<Long, ErrorsValidationVO>> recordErrors =
+            validationService.getRecordErrors(dataset.getId(), idValidations);
+        Future<Map<Long, ErrorsValidationVO>> fieldErrors =
+            validationService.getFieldErrors(dataset.getId(), idValidations);
 
-      errors.putAll(datasetErrors.get());
-      errors.putAll(tableErrors.get());
-      errors.putAll(recordErrors.get());
-      errors.putAll(fieldErrors.get());
-    } catch (InterruptedException | ExecutionException e) {
-      LOG_ERROR.error("Error obtaining the errors ", e);
+        errors.putAll(datasetErrors.get());
+        errors.putAll(tableErrors.get());
+        errors.putAll(recordErrors.get());
+        errors.putAll(fieldErrors.get());
+      } catch (InterruptedException | ExecutionException e) {
+        LOG_ERROR.error("Error obtaining the errors ", e);
+      }
     }
     validation
         .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
