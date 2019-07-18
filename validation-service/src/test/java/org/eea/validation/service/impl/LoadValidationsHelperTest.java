@@ -3,7 +3,6 @@ package org.eea.validation.service.impl;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -30,7 +29,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.AsyncResult;
 
 /**
  * The Class LoadValidationsHelperTest.
@@ -136,16 +134,6 @@ public class LoadValidationsHelperTest {
         .thenReturn(schema);
     Page<Validation> pageValidation = Page.empty(pageable);
     when(validationRepository.findAll(Mockito.any(Pageable.class))).thenReturn(pageValidation);
-
-    when(validationService.getDatasetErrors(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new AsyncResult<>(new HashMap<>()));
-    when(validationService.getTableErrors(Mockito.any(), Mockito.any()))
-        .thenReturn(new AsyncResult<>(new HashMap<>()));
-    when(validationService.getRecordErrors(Mockito.any(), Mockito.any()))
-        .thenReturn(new AsyncResult<>(new HashMap<>()));
-    when(validationService.getFieldErrors(Mockito.any(), Mockito.any()))
-        .thenReturn(new AsyncResult<>(new HashMap<>()));
-
 
     loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false);
     Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
