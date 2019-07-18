@@ -162,6 +162,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       RecordVO record = new RecordVO();
       List<FieldVO> fields = new ArrayList<>();
 
+      // Reads the same number of cells as headers we have
       for (int i = 0; i < headersSize; i++) {
         FieldVO field = new FieldVO();
         field.setIdFieldSchema(headers.get(i).getId());
@@ -170,6 +171,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
         fields.add(field);
       }
 
+      // Creates the record with the fields readen
       record.setFields(fields);
       record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
       record.setDatasetPartitionId(partitionId);

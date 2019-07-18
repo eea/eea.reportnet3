@@ -98,7 +98,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     try (Workbook workbook = createWorkbook()) {
 
-      LOG.info("Start writing {} file", mimeType);
+      LOG.info("Starting writing Excel({}) file", mimeType);
 
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
@@ -107,7 +107,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       workbook.write(out);
 
-      LOG.info("Finish writing {} file", mimeType);
+      LOG.info("Finishing writing Excel({}) file", mimeType);
 
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
