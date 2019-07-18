@@ -111,7 +111,7 @@ const DashBoard = (props) =>{
 
     return(
         <React.Fragment>        
-        { (dashBoardData.datasets && dashBoardData.datasets.length > 0 && [].concat.apply([], dashBoardData.datasets[0].totalData).reduce(t=>t>0)) ?
+        { (dashBoardData.datasets && dashBoardData.datasets.length > 0 && ![].concat.apply([], dashBoardData.datasets[0].totalData).every(t=>t===0)) ?
             <React.Fragment>
                 <h1>{dashBoardTitle}</h1>
                 <Chart type="bar" 
