@@ -141,13 +141,13 @@ const DataViewer = props => {
 		console.log("Sorting...");
 		setSortOrder(event.sortOrder);
 		setSortField(event.sortField);
-		contextReporterDataSet.setPageHandler(-1);
+		contextReporterDataSet.setPageHandler(0);
 		contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
 	};
 
 	const onRefreshClickHandler = () => {
-		contextReporterDataSet.setPageHandler(-1);
+		contextReporterDataSet.setPageHandler(0);
     	contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(null, sortOrder, firstRow, numRows);
 	};

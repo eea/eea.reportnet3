@@ -38,7 +38,7 @@ const ReporterDataSet = ({ match, history }) => {
 	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 	const [isDataDeleted, setIsDataDeleted] = useState(false);
 	const [activeIndex, setActiveIndex] = useState();
-  const [positionIdRecord, setPositionIdRecord] = useState(-1);
+  const [positionIdRecord, setPositionIdRecord] = useState(0);
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
 
 	const home = {

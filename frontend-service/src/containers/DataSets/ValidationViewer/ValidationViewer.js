@@ -186,7 +186,7 @@ const ValidationViewer = props => {
 				break;
 			case "TABLE":
 				contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-				contextReporterDataSet.setPageHandler(-1);
+				contextReporterDataSet.setPageHandler(0);
 				contextReporterDataSet.validationsVisibleHandler();
 				break;
 			default:
