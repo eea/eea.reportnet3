@@ -26,28 +26,35 @@ public interface DocumentController {
    *
    * @param file the file
    * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
    */
   @PostMapping(value = "/upload/{dataFlowId}")
-  void uploadDocument(final MultipartFile file, final Long dataFlowId);
+  void uploadDocument(final MultipartFile file, final Long dataFlowId, final String description,
+      final String language);
 
   /**
    * Download document .
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
+   * @param language the language
    * @return the document
    */
   @GetMapping
-  ResponseEntity<Resource> getDocument(final String documentName, final Long dataFlowId);
+  ResponseEntity<Resource> getDocument(final String documentName, final Long dataFlowId,
+      final String language);
 
   /**
    * Delete document.
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
+   * @param language the language
    * @throws Exception the exception
    */
   @DeleteMapping
-  void deleteDocument(final String documentName, final Long dataFlowId) throws Exception;
+  void deleteDocument(final String documentName, final Long dataFlowId, final String language)
+      throws Exception;
 
 }

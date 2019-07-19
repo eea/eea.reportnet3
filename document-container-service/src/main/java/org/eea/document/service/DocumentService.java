@@ -14,27 +14,33 @@ public interface DocumentService {
    *
    * @param file the file
    * @param dataFlowId the data flow id
+   * @param language the language
+   * @param description the description
    * @throws EEAException the EEA exception
    */
-  void uploadDocument(final MultipartFile file, final Long dataFlowId) throws EEAException;
+  void uploadDocument(final MultipartFile file, final Long dataFlowId, final String language,
+      final String description) throws EEAException;
 
   /**
    * Gets the document.
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
+   * @param language the language
    * @return the document
    * @throws EEAException the EEA exception
    */
-  FileResponse getDocument(final String documentName, final Long dataFlowId) throws EEAException;
+  FileResponse getDocument(final String documentName, final Long dataFlowId, final String language)
+      throws EEAException;
 
   /**
    * Delete document.
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @throws Exception
+   * @param language the language
+   * @throws EEAException the EEA exception
    */
-  void deleteDocument(final String documentName, final Long dataFlowId)
-      throws EEAException, Exception;
+  void deleteDocument(final String documentName, final Long dataFlowId, final String language)
+      throws EEAException;
 }

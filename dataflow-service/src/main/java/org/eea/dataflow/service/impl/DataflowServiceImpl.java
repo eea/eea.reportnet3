@@ -8,8 +8,10 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
@@ -42,6 +44,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ContributorRepository contributorRepository;
 
+  @Autowired
+  private DocumentRepository documentRepository;
 
   /** The dataflow mapper. */
   @Autowired
@@ -216,6 +220,31 @@ public class DataflowServiceImpl implements DataflowService {
 
     contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
 
+  }
+
+  @Override
+  public void insertDocument(Long dataflowId, String filename, String language, String description)
+      throws EEAException {
+    if (dataflowId == null || filename == null || language == null || description == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Document document = new Document();
+    document.setDescription(description);
+    document.setLanguage(language);
+    document.setName(filename);
+    document.setDataflow(dataflowRepository.findById(dataflowId).orElse(null));
+    documentRepository.save(document);
+  }
+
+  @Override
+  public void deleteDocument(Long dataflowId, String filename, String language)
+      throws EEAException {
+    if (dataflowId == null || filename == null || language == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Document document =
+        documentRepository.findFirstByDataflowIdAndNameAndLanguage(dataflowId, filename, language);
+    documentRepository.delete(document);
   }
 
 
