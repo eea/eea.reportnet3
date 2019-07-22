@@ -36,12 +36,13 @@ import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -95,6 +96,9 @@ public class DatasetServiceTest {
 
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Mock
+  private ReportingDatasetRepository reportingDatasetRepository;
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
@@ -237,8 +241,8 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(reportingDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new ReportingDataset()));
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
@@ -288,7 +292,7 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
@@ -298,8 +302,8 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(reportingDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new ReportingDataset()));
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
@@ -315,8 +319,8 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(reportingDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new ReportingDataset()));
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
@@ -342,8 +346,8 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(reportingDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new ReportingDataset()));
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
@@ -369,8 +373,8 @@ public class DatasetServiceTest {
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
+    when(reportingDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new ReportingDataset()));
     when(fileParserFactory.createContext("csv")).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
@@ -491,7 +495,7 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetDataFlowIdByIdSuccess() throws Exception {
-    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    when(reportingDatasetRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     Long result = datasetService.getDataFlowIdById(1L);
     assertNotNull("it shouldn't be null", result);
   }
