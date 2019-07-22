@@ -1,9 +1,12 @@
 package org.eea.validation.kafka;
 
+import javax.sql.DataSource;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.handler.EEAEventHandler;
+import org.eea.multitenancy.MultiTenantDataSource;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+// TODO: Auto-generated Javadoc
 /**
  * The type Event handler.
  */
@@ -26,12 +30,18 @@ public class EventHandler implements EEAEventHandler {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The validation service. */
   @Autowired
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
+  /** The validation helper. */
   @Autowired
   private ValidationHelper validationHelper;
+
+  /** The data source. */
+  @Autowired
+  private DataSource dataSource;
 
   /**
    * Gets the type.
@@ -62,6 +72,10 @@ public class EventHandler implements EEAEventHandler {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             datasetId, e);
       }
+    }
+    if (EventType.CONNECTION_CREATED_EVENT.equals(eeaEventVO.getEventType())) {
+      ((MultiTenantDataSource) dataSource)
+          .addDataSource((ConnectionDataVO) eeaEventVO.getData().get("connectionDataVO"));
     }
   }
 }

@@ -41,6 +41,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+// TODO: Auto-generated Javadoc
 /**
  * The type Document service.
  *
@@ -92,7 +93,9 @@ public class DocumentServiceImpl implements DocumentService {
       String modifiedFilename = addFileNode(session, "/" + dataFlowId, file.getInputStream(),
           insertStringBeforePoint(file.getOriginalFilename(), "-" + language), file.getSize(),
           file.getContentType());
-
+      if (StringUtils.isBlank(modifiedFilename)) {
+        throw new EEAException(EEAErrorMessage.FILE_NAME);
+      }
       LOG.info("File added...");
       sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
           description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
@@ -282,10 +285,6 @@ public class DocumentServiceImpl implements DocumentService {
     }
     // Created a node with that of file Name
     Node fileHolder = node.addNode(newFilename, "nt:file");
-    // fileHolder.addMixin("mix:versionable");
-
-    // create node of type file.
-
     Date now = new Date();
 
     // creation of file content node.
@@ -296,8 +295,6 @@ public class DocumentServiceImpl implements DocumentService {
     content.setProperty("jcr:data", binary);
     content.setProperty("jcr:lastModified", now.toInstant().toString());
     session.save();
-    // VersionManager vm = session.getWorkspace().getVersionManager();
-    // vm.checkin(fileHolder.getPath());
     LOG.info("File Saved...");
     return newFilename;
   }
@@ -341,18 +338,6 @@ public class DocumentServiceImpl implements DocumentService {
       Node parentNode = root.getNode(relPath);
       Node node = parentNode.getNode(documentName);
       if (node != null) {
-        // VersionManager versionManager = session.getWorkspace().getVersionManager();
-        // VersionHistory vHistory = versionManager.getVersionHistory(node.getPath());
-        // for (VersionIterator pt = vHistory.getAllVersions(); pt.hasNext();) {
-        // Version p = pt.nextVersion();
-        // System.out.println(p.getPath());
-        // System.out.println(p.getName());
-        // System.out.println(p.getFrozenNode());
-        // System.out.println(p.getReferences().toString());
-        // if (!"jcr:rootVersion".equals(p.getName())) {
-        // p.getFrozenNode().setProperty("theFile", (Node) null);
-        // }
-        // }
         node.remove();
       }
     } else {
