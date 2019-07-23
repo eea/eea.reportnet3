@@ -8,11 +8,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * The Interface SnapshotRepository.
+ */
 public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
 
+  /**
+   * Find by reporting dataset id.
+   *
+   * @param idDataset the id dataset
+   * @return the list
+   */
   List<Snapshot> findByReportingDatasetId(@Param("idReportingDataset") Long idDataset);
 
 
+  /**
+   * Removes the snaphot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   */
   @Transactional
   @Modifying
   @Query(nativeQuery = true,

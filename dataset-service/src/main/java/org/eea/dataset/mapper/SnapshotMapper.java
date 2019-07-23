@@ -6,6 +6,9 @@ import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 
 
+/**
+ * The Interface SnapshotMapper.
+ */
 @Mapper(componentModel = "spring")
 public interface SnapshotMapper extends IMapper<Snapshot, SnapshotVO> {
 
