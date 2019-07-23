@@ -39,6 +39,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
@@ -130,7 +131,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
   /**
    * The dataset repository.
    */
@@ -617,7 +619,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public Long getDataFlowIdById(Long datasetId) throws EEAException {
-    return reportingDatasetRepository.findDataflowIdById(datasetId);
+    return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
 
 

@@ -495,7 +495,7 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetDataFlowIdByIdSuccess() throws Exception {
-    when(reportingDatasetRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     Long result = datasetService.getDataFlowIdById(1L);
     assertNotNull("it shouldn't be null", result);
   }
