@@ -65,6 +65,9 @@ public final class EEAErrorMessage {
   /** The Constant DOCUMENT_NOT_FOUND. */
   public static final String DOCUMENT_NOT_FOUND = "Document not found";
 
+  /** The Constant REPOSITORY_NOT_FOUND. */
+  public static final String REPOSITORY_NOT_FOUND = "Repository not found";
+
   /**
    * Instantiates a new EEA error message.
    */

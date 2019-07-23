@@ -37,11 +37,11 @@ import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-// TODO: Auto-generated Javadoc
 /**
  * The type Document service.
  *
@@ -51,17 +51,37 @@ import org.springframework.web.multipart.MultipartFile;
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
-  /** The Constant CACHE_SIZE. */
-  private static final int CACHE_SIZE = 16;
+  /** The target directory. */
+  @Value("${targetDirectory}")
+  private String targetDirectory;
 
-  /** The Constant PORT. */
-  private static final int PORT = 27017;
+  /** The oak repository url. */
+  @Value("${oakRepositoryUrl}")
+  private String oakRepositoryUrl;
+
+  /** The name oak collection. */
+  @Value("${nameOakCollection}")
+  private String nameOakCollection;
+
+  /** The oak port. */
+  @Value("${oakPort}")
+  private int oakPort;
+
+  /** The oak user. */
+  @Value("${oakUser}")
+  private String oakUser;
+
+  /** The Constant LEFT_PARENTHESIS. */
+  private static final String LEFT_PARENTHESIS = "(";
+
+  /** The Constant CACHE_SIZE. */
+  private static final int NODE_CACHE_SIZE = 16;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
-  /** The Constant ADMIN. */
-  private static final String ADMIN = "admin";
+  /** The Constant PORT. */
+  private static final String PATH_DELIMITER = "/";
 
   /** The kafka sender utils. */
   @Autowired
@@ -90,9 +110,10 @@ public class DocumentServiceImpl implements DocumentService {
       session = initializeSession(session, repository);
 
       // Add a file node with the document
-      String modifiedFilename = addFileNode(session, "/" + dataFlowId, file.getInputStream(),
-          insertStringBeforePoint(file.getOriginalFilename(), "-" + language), file.getSize(),
-          file.getContentType());
+      String modifiedFilename =
+          addFileNode(session, PATH_DELIMITER + dataFlowId, file.getInputStream(),
+              insertStringBeforePoint(file.getOriginalFilename(), "-" + language),
+              file.getContentType());
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
@@ -131,7 +152,7 @@ public class DocumentServiceImpl implements DocumentService {
       session = initializeSession(session, repository);
 
       // downloading the file to the controller
-      fileResponse = getFileContents(session, "/" + dataFlowId,
+      fileResponse = getFileContents(session, PATH_DELIMITER + dataFlowId,
           insertStringBeforePoint(documentName, "-" + language));
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
@@ -158,6 +179,7 @@ public class DocumentServiceImpl implements DocumentService {
    */
   @Override
   @Modified
+  @Async
   public void deleteDocument(String documentName, Long dataFlowId, final String language)
       throws EEAException {
     Session session = null;
@@ -167,6 +189,9 @@ public class DocumentServiceImpl implements DocumentService {
       ns = initializeNode();
       Repository repository = new Jcr(new Oak(ns)).createRepository();
       session = initializeSession(session, repository);
+      if (session == null) {
+        throw new EEAException(EEAErrorMessage.REPOSITORY_NOT_FOUND);
+      }
       // Delete a file node with the document
       deleteFileNode(session, dataFlowId.toString(),
           insertStringBeforePoint(documentName, "-" + language));
@@ -177,7 +202,7 @@ public class DocumentServiceImpl implements DocumentService {
       ns.getVersionGarbageCollector().gc(0, TimeUnit.MILLISECONDS);
       MarkSweepGarbageCollector gc = new MarkSweepGarbageCollector(
           new DocumentBlobReferenceRetriever(ns), (GarbageCollectableBlobStore) ns.getBlobStore(),
-          (ThreadPoolExecutor) Executors.newFixedThreadPool(1), "./target", 5, -1,
+          (ThreadPoolExecutor) Executors.newFixedThreadPool(1), targetDirectory, 5, -1,
           ClusterRepositoryInfo.getId(ns));
       gc.collectGarbage(false);
 
@@ -204,10 +229,10 @@ public class DocumentServiceImpl implements DocumentService {
    * @param language the language
    * @return the string
    */
-  private String insertStringBeforePoint(final String documentName, final String language) {
+  public String insertStringBeforePoint(final String documentName, final String language) {
     int location = 0;
     if (documentName.contains(").")) {
-      location = documentName.lastIndexOf("(");
+      location = documentName.lastIndexOf(LEFT_PARENTHESIS);
     } else {
       location = documentName.lastIndexOf('.');
     }
@@ -225,7 +250,7 @@ public class DocumentServiceImpl implements DocumentService {
   private Session initializeSession(Session session, Repository repository)
       throws RepositoryException {
     if (repository.getDescriptorKeys() != null) {
-      session = repository.login(new SimpleCredentials(ADMIN, ADMIN.toCharArray()));
+      session = repository.login(new SimpleCredentials(oakUser, oakUser.toCharArray()));
     }
     return session;
   }
@@ -236,9 +261,10 @@ public class DocumentServiceImpl implements DocumentService {
    * @return the document node store
    */
   private DocumentNodeStore initializeNode() {
-    final String uri = "mongodb://" + "localhost" + ":" + PORT;
+    final String uri = "mongodb://" + oakRepositoryUrl + ":" + oakPort;
     // creates a node with name oak
-    return new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak", CACHE_SIZE).build();
+    return new MongoDocumentNodeStoreBuilder().setMongoDB(uri, nameOakCollection, NODE_CACHE_SIZE)
+        .build();
   }
 
   /**
@@ -250,7 +276,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @param description the description
    * @param eventType the event type
    */
-  private void sendKafkaNotification(final String filename, final Long dataFlowId,
+  public void sendKafkaNotification(final String filename, final Long dataFlowId,
       final String language, final String description, final EventType eventType) {
     Map<String, Object> result = new HashMap<>();
     result.put("dataflow_id", dataFlowId);
@@ -267,17 +293,18 @@ public class DocumentServiceImpl implements DocumentService {
    * @param absPath the abs path
    * @param is the file
    * @param filename the filename
-   * @param size the size
    * @param contentType the content type
    * @return the string
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
   public String addFileNode(final Session session, final String absPath, final InputStream is,
-      final String filename, final Long size, final String contentType)
-      throws RepositoryException, EEAException {
+      final String filename, final String contentType) throws RepositoryException, EEAException {
 
     Node node = createNodes(session, absPath);
+    if (node == null) {
+      throw new EEAException("Error creating nodes");
+    }
     String newFilename = filename;
     if (node.hasNode(filename)) {
       LOG.info("File already added.");
@@ -287,6 +314,9 @@ public class DocumentServiceImpl implements DocumentService {
     Node fileHolder = node.addNode(newFilename, "nt:file");
     Date now = new Date();
 
+    if (fileHolder == null) {
+      throw new EEAException("Error creating nodes");
+    }
     // creation of file content node.
     Node content = fileHolder.addNode("jcr:content", "nt:resource");
     content.setProperty("jcr:mimeType", contentType);
@@ -311,7 +341,7 @@ public class DocumentServiceImpl implements DocumentService {
       throws RepositoryException {
     String result = filename;
     for (int i = 1; i < 1000; i++) {
-      result = insertStringBeforePoint(filename, "(" + i + ")");
+      result = insertStringBeforePoint(filename, LEFT_PARENTHESIS + i + ")");
       if (!node.hasNode(result)) {
         break;
       }
@@ -328,14 +358,20 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
-  private void deleteFileNode(final Session session, final String relPath,
-      final String documentName) throws RepositoryException, EEAException {
+  public void deleteFileNode(final Session session, final String relPath, final String documentName)
+      throws RepositoryException, EEAException {
     if (session == null) {
       throw new EEAException("Session doesn't exist");
     }
     Node root = session.getRootNode();
+    if (root == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
     if (root.hasNode(relPath)) {
       Node parentNode = root.getNode(relPath);
+      if (parentNode == null) {
+        throw new EEAException("Error getting nodes");
+      }
       Node node = parentNode.getNode(documentName);
       if (node != null) {
         node.remove();
@@ -368,7 +404,7 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Nodes already exist!");
       return session.getNode(absPath);
     }
-    String[] nodeNames = (null != absPath) ? absPath.split("/") : new String[1];
+    String[] nodeNames = (null != absPath) ? absPath.split(PATH_DELIMITER) : new String[1];
     Node node = createNodes(session, nodeNames);
     session.save();
     return node;
@@ -386,7 +422,7 @@ public class DocumentServiceImpl implements DocumentService {
       throws RepositoryException {
     Node parentNode = session.getRootNode();
     for (String childNode : nodes) {
-      if (StringUtils.isNotBlank(childNode)) {
+      if (StringUtils.isNotBlank(childNode) && null != parentNode) {
         addChild(parentNode, childNode);
         parentNode = parentNode.getNode(childNode);
         // set the node type
@@ -438,11 +474,15 @@ public class DocumentServiceImpl implements DocumentService {
    * @return the file contents
    * @throws RepositoryException the repository exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
    */
-  public static FileResponse getFileContents(final Session session, final String basePath,
-      final String fileName) throws RepositoryException, IOException {
+  public FileResponse getFileContents(final Session session, final String basePath,
+      final String fileName) throws RepositoryException, IOException, EEAException {
     // Obtains the information from the node,name, content and type.
     Node node = session.getNode(basePath);
+    if (node == null) {
+      throw new EEAException("Node not found");
+    }
     Node fileHolder = node.getNode(fileName);
     Node fileContent = fileHolder.getNode("jcr:content");
     Binary bin = fileContent.getProperty("jcr:data").getBinary();

@@ -21,7 +21,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class EventHandlerTest.
  */
