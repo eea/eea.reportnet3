@@ -2,10 +2,11 @@ package org.eea.dataset.controller;
 
 import java.util.List;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  @Autowired
+  private ReportingDatasetService reportingDatasetService;
+
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -43,9 +47,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataSetMetabaseVO> findDataSetIdByDataflowId(Long idDataflow) {
+  public List<ReportingDatasetVO> findDataSetIdByDataflowId(Long idDataflow) {
 
-    return datasetMetabaseService.getDataSetIdByDataflowId(idDataflow);
+    return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
 
   }
 
@@ -74,6 +78,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public void createSnapshot(@PathVariable("id") Long datasetId,
       @RequestParam("description") String description) {
 
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
     try {
       datasetMetabaseService.addSnapshot(datasetId, description);
     } catch (EEAException e) {
@@ -89,6 +97,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public void deleteSnapshot(@PathVariable("id") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
     try {
       datasetMetabaseService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {

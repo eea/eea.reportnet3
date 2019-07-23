@@ -1,7 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -32,7 +32,7 @@ public interface DatasetMetabaseController {
    * @return the list
    */
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataSetMetabaseVO> findDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
+  List<ReportingDatasetVO> findDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
 
   @GetMapping(value = "/{id}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
