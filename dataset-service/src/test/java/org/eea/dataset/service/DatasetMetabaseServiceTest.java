@@ -33,6 +33,7 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The snapshot repository. */
   @Mock
   private SnapshotRepository snapshotRepository;
 
@@ -40,6 +41,7 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
+  /** The snapshot mapper. */
   @Mock
   private SnapshotMapper snapshotMapper;
 
@@ -67,6 +69,11 @@ public class DatasetMetabaseServiceTest {
   }
 
 
+  /**
+   * Test get snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetSnapshots() throws Exception {
 
@@ -77,6 +84,11 @@ public class DatasetMetabaseServiceTest {
 
   }
 
+  /**
+   * Test add snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testAddSnapshots() throws Exception {
 
@@ -85,6 +97,11 @@ public class DatasetMetabaseServiceTest {
 
   }
 
+  /**
+   * Test delete snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteSnapshots() throws Exception {
 

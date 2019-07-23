@@ -31,6 +31,7 @@ public class DataSetMetabaseControllerImplTest {
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The reporting dataset service. */
   @Mock
   private ReportingDatasetService reportingDatasetService;
 
@@ -56,6 +57,11 @@ public class DataSetMetabaseControllerImplTest {
   }
 
 
+  /**
+   * Test get snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetSnapshots() throws Exception {
     when(datasetMetabaseService.getSnapshotsByIdDataset(Mockito.anyLong()))
@@ -64,6 +70,11 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(datasetMetabaseService, times(1)).getSnapshotsByIdDataset(Mockito.any());
   }
 
+  /**
+   * Test add snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testAddSnapshots() throws Exception {
 
@@ -71,6 +82,11 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(datasetMetabaseService, times(1)).addSnapshot(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test delete snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteSnapshots() throws Exception {
 
@@ -78,24 +94,44 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(datasetMetabaseService, times(1)).removeSnapshot(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test get snapshots exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetSnapshotsException() throws Exception {
 
     dataSetMetabaseControllerImpl.getSnapshotsByIdDataset(null);
   }
 
+  /**
+   * Test add snapshots exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testAddSnapshotsException() throws Exception {
 
     dataSetMetabaseControllerImpl.createSnapshot(null, "test");
   }
 
+  /**
+   * Test delete snapshots exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteSnapshotsException() throws Exception {
 
     dataSetMetabaseControllerImpl.deleteSnapshot(null, 1L);
   }
 
+  /**
+   * Test get snapshots exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetSnapshotsException2() throws Exception {
 
@@ -104,6 +140,11 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(datasetMetabaseService, times(1)).getSnapshotsByIdDataset(Mockito.any());
   }
 
+  /**
+   * Test add snapshots exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testAddSnapshotsException2() throws Exception {
 
@@ -112,6 +153,11 @@ public class DataSetMetabaseControllerImplTest {
     dataSetMetabaseControllerImpl.createSnapshot(1L, "test");
   }
 
+  /**
+   * Test delete snapshots exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteSnapshotsException2() throws Exception {
 

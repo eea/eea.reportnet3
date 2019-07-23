@@ -34,9 +34,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The reporting dataset service. */
   @Autowired
   private ReportingDatasetService reportingDatasetService;
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
@@ -54,6 +56,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
 
+  /**
+   * Gets the snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots by id dataset
+   */
   @Override
   @GetMapping(value = "/{id}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("id") Long datasetId) {
@@ -73,6 +81,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
 
+  /**
+   * Creates the snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param description the description
+   */
   @Override
   @PostMapping(value = "/{id}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createSnapshot(@PathVariable("id") Long datasetId,
@@ -92,6 +106,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
 
+  /**
+   * Delete snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @DeleteMapping(value = "/{id}/snapshot/delete/{idSnapshot}")
   public void deleteSnapshot(@PathVariable("id") Long datasetId,

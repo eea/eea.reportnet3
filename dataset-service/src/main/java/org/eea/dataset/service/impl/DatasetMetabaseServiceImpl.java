@@ -31,9 +31,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
+  /** The snapshot repository. */
   @Autowired
   private SnapshotRepository snapshotRepository;
 
+  /** The snapshot mapper. */
   @Autowired
   private SnapshotMapper snapshotMapper;
 
@@ -54,6 +56,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return dataSetMetabaseMapper.entityListToClass(datasets);
   }
 
+  /**
+   * Gets the snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots by id dataset
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<SnapshotVO> getSnapshotsByIdDataset(Long datasetId) throws EEAException {
 
@@ -64,6 +73,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   }
 
+  /**
+   * Adds the snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param description the description
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void addSnapshot(Long idDataset, String description) throws EEAException {
 
@@ -79,6 +95,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   }
 
+  /**
+   * Removes the snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
     snapshotRepository.removeSnaphot(idDataset, idSnapshot);

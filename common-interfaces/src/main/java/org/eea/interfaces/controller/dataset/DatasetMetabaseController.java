@@ -35,14 +35,32 @@ public interface DatasetMetabaseController {
   List<ReportingDatasetVO> findDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
 
+  /**
+   * Gets the snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots by id dataset
+   */
   @GetMapping(value = "/{id}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
   List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("id") Long datasetId);
 
 
+  /**
+   * Creates the snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param description the description
+   */
   @PostMapping(value = "/{id}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
   void createSnapshot(@PathVariable("id") Long datasetId,
       @RequestParam("description") String description);
 
+  /**
+   * Delete snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @DeleteMapping(value = "/{id}/snapshot/delete/{idSnapshot}")
   void deleteSnapshot(@PathVariable("id") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
