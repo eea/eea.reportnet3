@@ -3,7 +3,6 @@ package org.eea.dataset.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -430,33 +429,26 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
+      final Pageable pageable, final List<String> idFieldSchema, final List<Boolean> asc)
+      throws EEAException {
     List<RecordValue> records = null;
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
-    if (StringUtils.isBlank(idFieldSchema)) {
+    if (null == idFieldSchema) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
     } else {
-      if (idFieldSchema.contains(",")) {
-        List<String> idFieldSchemas = Arrays.asList(idFieldSchema.split(","));
-        SortField[] sortFields = new SortField[idFieldSchemas.size()];
-        for (int i = 0; i < idFieldSchemas.size(); i++) {
-          FieldValue typefield =
-              fieldRepository.findFirstTypeByIdFieldSchema(idFieldSchemas.get(i).toString());
-          SortField sortField = new SortField();
-          sortField.setFieldName(idFieldSchemas.get(i).toString());
-          sortField.setAsc(asc);
-          sortField.setTypefield(typefield.getType());
-          sortFields[i] = sortField;
-        }
-        records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortFields);
-      } else {
-        FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(idFieldSchema);
+
+      SortField[] sortFields = new SortField[idFieldSchema.size()];
+      for (int i = 0; i < idFieldSchema.size(); i++) {
+        FieldValue typefield =
+            fieldRepository.findFirstTypeByIdFieldSchema(idFieldSchema.get(i).toString());
         SortField sortField = new SortField();
-        sortField.setFieldName(idFieldSchema);
-        sortField.setAsc(asc);
+        sortField.setFieldName(idFieldSchema.get(i).toString());
+        sortField.setAsc(asc.get(i));
         sortField.setTypefield(typefield.getType());
-        records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
+        sortFields[i] = sortField;
       }
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortFields);
+
     }
 
     if (records == null) {
@@ -478,7 +470,7 @@ public class DatasetServiceImpl implements DatasetService {
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
           datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
           pageable.getPageSize());
-      if (StringUtils.isNotBlank(idFieldSchema)) {
+      if (null != idFieldSchema) {
         LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
       }
 

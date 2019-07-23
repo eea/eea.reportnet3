@@ -53,8 +53,8 @@ public interface DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+      @RequestParam(value = "fields", required = false) List<String> fields,
+      @RequestParam(value = "asc", required = false) List<Boolean> asc);
 
   /**
    * Update dataset data set vo.
@@ -198,7 +198,6 @@ public interface DatasetController {
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
   void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema);
-
 
 
 

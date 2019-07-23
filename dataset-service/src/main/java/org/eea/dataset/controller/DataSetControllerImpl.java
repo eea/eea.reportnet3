@@ -92,8 +92,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
+      @RequestParam(value = "fields", required = false) List<String> fields,
+      @RequestParam(value = "asc", required = false) List<Boolean> asc) {
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -410,4 +410,5 @@ public class DataSetControllerImpl implements DatasetController {
     LOG.info("executing delete");
     datasetService.deleteTableBySchema(idTableSchema, dataSetId);
   }
+
 }
