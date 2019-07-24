@@ -44,7 +44,8 @@ public class DocumentControllerImpl implements DocumentController {
   @Override
   @PostMapping(value = "/upload/{dataFlowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId) {
+      @PathVariable("dataFlowId") final Long dataFlowId, @RequestParam final String description,
+      @RequestParam final String language) {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -53,8 +54,11 @@ public class DocumentControllerImpl implements DocumentController {
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
-      documentService.uploadDocument(file, dataFlowId);
+      documentService.uploadDocument(file, dataFlowId, language, description);
     } catch (EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -71,9 +75,10 @@ public class DocumentControllerImpl implements DocumentController {
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public ResponseEntity<Resource> getDocument(
       @RequestParam("documentName") final String documentName,
-      @RequestParam("dataFlowId") final Long dataFlowId) {
+      @RequestParam("dataFlowId") final Long dataFlowId,
+      @RequestParam("language") final String language) {
     try {
-      FileResponse file = documentService.getDocument(documentName, dataFlowId);
+      FileResponse file = documentService.getDocument(documentName, dataFlowId, language);
       HttpHeaders header = new HttpHeaders();
       header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + documentName);
       header.add("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -83,6 +88,9 @@ public class DocumentControllerImpl implements DocumentController {
       return ResponseEntity.ok().headers(header).contentLength(file.getBytes().length)
           .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
     } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -92,16 +100,21 @@ public class DocumentControllerImpl implements DocumentController {
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
+   * @param language the language
    * @return the document
-   * @throws Exception
+   * @throws Exception the exception
    */
   @Override
   @DeleteMapping
   public void deleteDocument(@RequestParam("documentName") final String documentName,
-      @RequestParam("dataFlowId") final Long dataFlowId) throws Exception {
+      @RequestParam("dataFlowId") final Long dataFlowId,
+      @RequestParam("language") final String language) throws Exception {
     try {
-      documentService.deleteDocument(documentName, dataFlowId);
+      documentService.deleteDocument(documentName, dataFlowId, language);
     } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

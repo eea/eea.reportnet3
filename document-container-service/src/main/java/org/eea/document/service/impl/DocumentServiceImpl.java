@@ -11,11 +11,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.jcr.Binary;
 import javax.jcr.Node;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
-import javax.jcr.version.VersionManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.Oak;
@@ -44,43 +44,62 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The type Document service.
- * 
+ *
  * @author ruben.lozano
  *
  */
 @Service("documentService")
 public class DocumentServiceImpl implements DocumentService {
 
-  /** The Constant CACHE_SIZE. */
-  private static final int CACHE_SIZE = 16;
+  /** The target directory. */
+  @Value("${targetDirectory}")
+  private String targetDirectory;
 
-  /** The Constant PORT. */
-  private static final int PORT = 27017;
+  /** The oak repository url. */
+  @Value("${oakRepositoryUrl}")
+  private String oakRepositoryUrl;
+
+  /** The name oak collection. */
+  @Value("${nameOakCollection}")
+  private String nameOakCollection;
+
+  /** The oak port. */
+  @Value("${oakPort}")
+  private int oakPort;
+
+  /** The oak user. */
+  @Value("${oakUser}")
+  private String oakUser;
+
+  /** The Constant LEFT_PARENTHESIS. */
+  private static final String LEFT_PARENTHESIS = "(";
+
+  /** The Constant CACHE_SIZE. */
+  private static final int NODE_CACHE_SIZE = 16;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
-  /** The Constant ADMIN. */
-  private static final String ADMIN = "admin";
+  /** The Constant PORT. */
+  private static final String PATH_DELIMITER = "/";
 
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
-
-  /** The demo exit location. */
-  @Value(value = "C:/OutFiles/file.txt")
-  private String demoExitLocation;
 
   /**
    * upload a document to the jackrabbit content repository.
    *
    * @param file the file
    * @param dataFlowId the data flow id
+   * @param language the language
+   * @param description the description
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
-  public void uploadDocument(final MultipartFile file, final Long dataFlowId) throws EEAException {
+  public void uploadDocument(final MultipartFile file, final Long dataFlowId, final String language,
+      final String description) throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
@@ -91,12 +110,16 @@ public class DocumentServiceImpl implements DocumentService {
       session = initializeSession(session, repository);
 
       // Add a file node with the document
-      addFileNode(session, "/" + dataFlowId, file.getInputStream(), file.getOriginalFilename(),
-          file.getSize(), file.getContentType(), ADMIN);
-
+      String modifiedFilename =
+          addFileNode(session, PATH_DELIMITER + dataFlowId, file.getInputStream(),
+              insertStringBeforePoint(file.getOriginalFilename(), "-" + language),
+              file.getContentType());
+      if (StringUtils.isBlank(modifiedFilename)) {
+        throw new EEAException(EEAErrorMessage.FILE_NAME);
+      }
       LOG.info("File added...");
-      sendKafkaNotification(file.getOriginalFilename(), dataFlowId,
-          EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
+      sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
+          description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     } catch (RepositoryException | IOException | EEAException e) {
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
@@ -112,12 +135,13 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
+   * @param language the language
    * @return the document
    * @throws EEAException the EEA exception
    */
   @Override
-  public FileResponse getDocument(final String documentName, final Long dataFlowId)
-      throws EEAException {
+  public FileResponse getDocument(final String documentName, final Long dataFlowId,
+      final String language) throws EEAException {
     Session session = null;
     FileResponse fileResponse = null;
     DocumentNodeStore ns = null;
@@ -128,9 +152,13 @@ public class DocumentServiceImpl implements DocumentService {
       session = initializeSession(session, repository);
 
       // downloading the file to the controller
-      fileResponse = getFileContents(session, "/" + dataFlowId, documentName);
+      fileResponse = getFileContents(session, PATH_DELIMITER + dataFlowId,
+          insertStringBeforePoint(documentName, "-" + language));
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
+      if (e.getClass().equals(PathNotFoundException.class)) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
+      }
       throw new EEAException(EEAErrorMessage.DOCUMENT_DOWNLOAD_ERROR, e);
     } finally {
       cleanUp(session);
@@ -146,11 +174,14 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
-   * @throws Exception
+   * @param language the language
+   * @throws EEAException the EEA exception
    */
   @Override
   @Modified
-  public void deleteDocument(String documentName, Long dataFlowId) throws Exception {
+  @Async
+  public void deleteDocument(String documentName, Long dataFlowId, final String language)
+      throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
@@ -158,25 +189,54 @@ public class DocumentServiceImpl implements DocumentService {
       ns = initializeNode();
       Repository repository = new Jcr(new Oak(ns)).createRepository();
       session = initializeSession(session, repository);
-
+      if (session == null) {
+        throw new EEAException(EEAErrorMessage.REPOSITORY_NOT_FOUND);
+      }
       // Delete a file node with the document
-      deleteFileNode(session, dataFlowId.toString(), documentName);
+      deleteFileNode(session, dataFlowId.toString(),
+          insertStringBeforePoint(documentName, "-" + language));
+      session.save();
       LOG.info("File deleted...");
-      sendKafkaNotification(documentName, dataFlowId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
+
+      ns.getClock().waitUntil(ns.getClock().getTime() + 6000);
+      ns.getVersionGarbageCollector().gc(0, TimeUnit.MILLISECONDS);
+      MarkSweepGarbageCollector gc = new MarkSweepGarbageCollector(
+          new DocumentBlobReferenceRetriever(ns), (GarbageCollectableBlobStore) ns.getBlobStore(),
+          (ThreadPoolExecutor) Executors.newFixedThreadPool(1), targetDirectory, 5, -1,
+          ClusterRepositoryInfo.getId(ns));
+      gc.collectGarbage(false);
+
+      sendKafkaNotification(documentName, dataFlowId, language, null,
+          EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
+
     } catch (Exception e) {
-      throw new EEAException(e);
+      if (e.getClass().equals(PathNotFoundException.class)) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
+      }
+      throw new EEAException(EEAErrorMessage.EXECUTION_ERROR, e);
     } finally {
       if (ns != null) {
-        ns.getVersionGarbageCollector().gc(0, TimeUnit.MILLISECONDS);
-        MarkSweepGarbageCollector gc = new MarkSweepGarbageCollector(
-            new DocumentBlobReferenceRetriever(ns), (GarbageCollectableBlobStore) ns.getBlobStore(),
-            (ThreadPoolExecutor) Executors.newFixedThreadPool(1), ns.getRoot().getPath(), 5, -1,
-            ClusterRepositoryInfo.getOrCreateId(ns));
-        gc.collectGarbage(false);
         ns.dispose();
       }
       cleanUp(session);
     }
+  }
+
+  /**
+   * Insert string before point.
+   *
+   * @param documentName the document name
+   * @param language the language
+   * @return the string
+   */
+  public String insertStringBeforePoint(final String documentName, final String language) {
+    int location = 0;
+    if (documentName.contains(").")) {
+      location = documentName.lastIndexOf(LEFT_PARENTHESIS);
+    } else {
+      location = documentName.lastIndexOf('.');
+    }
+    return documentName.substring(0, location) + language + documentName.substring(location);
   }
 
   /**
@@ -190,7 +250,7 @@ public class DocumentServiceImpl implements DocumentService {
   private Session initializeSession(Session session, Repository repository)
       throws RepositoryException {
     if (repository.getDescriptorKeys() != null) {
-      session = repository.login(new SimpleCredentials(ADMIN, ADMIN.toCharArray()));
+      session = repository.login(new SimpleCredentials(oakUser, oakUser.toCharArray()));
     }
     return session;
   }
@@ -201,9 +261,10 @@ public class DocumentServiceImpl implements DocumentService {
    * @return the document node store
    */
   private DocumentNodeStore initializeNode() {
-    final String uri = "mongodb://" + "localhost" + ":" + PORT;
+    final String uri = "mongodb://" + oakRepositoryUrl + ":" + oakPort;
     // creates a node with name oak
-    return new MongoDocumentNodeStoreBuilder().setMongoDB(uri, "oak", CACHE_SIZE).build();
+    return new MongoDocumentNodeStoreBuilder().setMongoDB(uri, nameOakCollection, NODE_CACHE_SIZE)
+        .build();
   }
 
   /**
@@ -211,13 +272,17 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param filename the filename
    * @param dataFlowId the data flow id
+   * @param language the language
+   * @param description the description
    * @param eventType the event type
    */
-  private void sendKafkaNotification(final String filename, final Long dataFlowId,
-      final EventType eventType) {
+  public void sendKafkaNotification(final String filename, final Long dataFlowId,
+      final String language, final String description, final EventType eventType) {
     Map<String, Object> result = new HashMap<>();
     result.put("dataflow_id", dataFlowId);
     result.put("filename", filename);
+    result.put("language", language);
+    result.put("description", description);
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
 
@@ -228,44 +293,60 @@ public class DocumentServiceImpl implements DocumentService {
    * @param absPath the abs path
    * @param is the file
    * @param filename the filename
-   * @param size the size
    * @param contentType the content type
-   * @param userName the user name
+   * @return the string
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
-  public static void addFileNode(final Session session, final String absPath, final InputStream is,
-      final String filename, final Long size, final String contentType, final String userName)
-      throws RepositoryException, EEAException {
+  public String addFileNode(final Session session, final String absPath, final InputStream is,
+      final String filename, final String contentType) throws RepositoryException, EEAException {
 
     Node node = createNodes(session, absPath);
+    if (node == null) {
+      throw new EEAException("Error creating nodes");
+    }
+    String newFilename = filename;
     if (node.hasNode(filename)) {
       LOG.info("File already added.");
-      return;
+      newFilename = increaseCounterFileName(node, filename);
     }
     // Created a node with that of file Name
-    Node fileHolder = node.addNode(filename);
-    fileHolder.addMixin("mix:versionable");
-    fileHolder.setProperty("jcr:createdBy", userName);
-    fileHolder.setProperty("jcr:nodeType", NodeType.FILE.getValue());
-    fileHolder.setProperty("size", size);
-
-    // create node of type file.
-    Node file1 = fileHolder.addNode("theFile", "nt:file");
-
+    Node fileHolder = node.addNode(newFilename, "nt:file");
     Date now = new Date();
 
+    if (fileHolder == null) {
+      throw new EEAException("Error creating nodes");
+    }
     // creation of file content node.
-    Node content = file1.addNode("jcr:content", "nt:resource");
+    Node content = fileHolder.addNode("jcr:content", "nt:resource");
     content.setProperty("jcr:mimeType", contentType);
     Binary binary = session.getValueFactory().createBinary(is);
 
     content.setProperty("jcr:data", binary);
     content.setProperty("jcr:lastModified", now.toInstant().toString());
     session.save();
-    VersionManager vm = session.getWorkspace().getVersionManager();
-    vm.checkin(fileHolder.getPath());
     LOG.info("File Saved...");
+    return newFilename;
+  }
+
+  /**
+   * Increase counter file name.
+   *
+   * @param node the node
+   * @param filename the filename
+   * @return the string
+   * @throws RepositoryException the repository exception
+   */
+  private String increaseCounterFileName(final Node node, final String filename)
+      throws RepositoryException {
+    String result = filename;
+    for (int i = 1; i < 1000; i++) {
+      result = insertStringBeforePoint(filename, LEFT_PARENTHESIS + i + ")");
+      if (!node.hasNode(result)) {
+        break;
+      }
+    }
+    return result;
   }
 
   /**
@@ -277,21 +358,26 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws RepositoryException the repository exception
    * @throws EEAException the EEA exception
    */
-  private void deleteFileNode(final Session session, final String relPath,
-      final String documentName) throws RepositoryException, EEAException {
+  public void deleteFileNode(final Session session, final String relPath, final String documentName)
+      throws RepositoryException, EEAException {
     if (session == null) {
       throw new EEAException("Session doesn't exist");
     }
     Node root = session.getRootNode();
+    if (root == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
     if (root.hasNode(relPath)) {
       Node parentNode = root.getNode(relPath);
+      if (parentNode == null) {
+        throw new EEAException("Error getting nodes");
+      }
       Node node = parentNode.getNode(documentName);
       if (node != null) {
         node.remove();
-        session.save();
       }
     } else {
-      LOG.info("Node not exist!");
+      LOG.info("Node does not exists!");
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
 
@@ -318,7 +404,7 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Nodes already exist!");
       return session.getNode(absPath);
     }
-    String[] nodeNames = (null != absPath) ? absPath.split("/") : new String[1];
+    String[] nodeNames = (null != absPath) ? absPath.split(PATH_DELIMITER) : new String[1];
     Node node = createNodes(session, nodeNames);
     session.save();
     return node;
@@ -336,7 +422,7 @@ public class DocumentServiceImpl implements DocumentService {
       throws RepositoryException {
     Node parentNode = session.getRootNode();
     for (String childNode : nodes) {
-      if (StringUtils.isNotBlank(childNode)) {
+      if (StringUtils.isNotBlank(childNode) && null != parentNode) {
         addChild(parentNode, childNode);
         parentNode = parentNode.getNode(childNode);
         // set the node type
@@ -388,13 +474,17 @@ public class DocumentServiceImpl implements DocumentService {
    * @return the file contents
    * @throws RepositoryException the repository exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
    */
-  public static FileResponse getFileContents(final Session session, final String basePath,
-      final String fileName) throws RepositoryException, IOException {
+  public FileResponse getFileContents(final Session session, final String basePath,
+      final String fileName) throws RepositoryException, IOException, EEAException {
     // Obtains the information from the node,name, content and type.
     Node node = session.getNode(basePath);
+    if (node == null) {
+      throw new EEAException("Node not found");
+    }
     Node fileHolder = node.getNode(fileName);
-    Node fileContent = fileHolder.getNode("theFile").getNode("jcr:content");
+    Node fileContent = fileHolder.getNode("jcr:content");
     Binary bin = fileContent.getProperty("jcr:data").getBinary();
     InputStream stream = bin.getStream();
     byte[] bytes = IOUtils.toByteArray(stream);
