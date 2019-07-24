@@ -1,15 +1,16 @@
 package org.eea.document.service.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
-import javax.jcr.Node;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
-import org.apache.sling.testing.mock.jcr.MockJcr;
+import org.eea.document.type.FileResponse;
+import org.eea.document.utils.OakRepositoryUtils;
 import org.eea.exception.EEAException;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,16 +36,12 @@ public class DocumentServiceImplTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The oak repository utils. */
+  @Mock
+  private OakRepositoryUtils oakRepositoryUtils;
+
   /** The file mock. */
   private MockMultipartFile fileMock;
-
-  /** The session. */
-  @Mock
-  Session session;
-
-  /** The node. */
-  @Mock
-  Node node;
 
   /**
    * Inits the mocks.
@@ -54,125 +51,212 @@ public class DocumentServiceImplTest {
   @Before
   public void initMocks() throws RepositoryException {
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    session = MockJcr.newSession();
-    session.getRootNode().addNode("1", "nt:file");
-    session.save();
     MockitoAnnotations.initMocks(this);
   }
 
-
   /**
-   * Adds the file node exception test.
+   * Upload document exception test.
    *
    * @throws EEAException the EEA exception
-   * @throws RepositoryException the repository exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
-  public void addFileNodeExceptionTest() throws EEAException, RepositoryException, IOException {
-    documentService.addFileNode(null, "/", fileMock.getInputStream(),
-        fileMock.getOriginalFilename(), fileMock.getContentType());
-    Mockito.verify(documentService, times(1)).addFileNode(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+  public void uploadDocumentExceptionTest() throws EEAException {
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadDocument(null, 1L, "ES", "desc");
   }
 
   /**
-   * Adds the file node test.
+   * Upload document exception 2 test.
    *
    * @throws EEAException the EEA exception
-   * @throws RepositoryException the repository exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
-  public void addFileNodeTest() throws EEAException, RepositoryException, IOException {
-    when(session.itemExists(Mockito.any())).thenReturn(true);
-    when(session.getNode(Mockito.any())).thenReturn(node);
-    documentService.addFileNode(session, "1", fileMock.getInputStream(),
-        fileMock.getOriginalFilename(), fileMock.getContentType());
-    Mockito.verify(documentService, times(1)).addFileNode(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+  public void uploadDocumentException2Test() throws EEAException {
+    fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
   }
 
   /**
-   * Adds the file node new test.
+   * Upload document exception 3 test.
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
-  public void addFileNodeNewTest() throws EEAException, RepositoryException, IOException {
-    when(session.itemExists(Mockito.any())).thenReturn(false);
-    documentService.addFileNode(session, "1/", fileMock.getInputStream(),
-        fileMock.getOriginalFilename(), fileMock.getContentType());
-    Mockito.verify(documentService, times(1)).addFileNode(Mockito.any(), Mockito.any(),
+  public void uploadDocumentException3Test() throws EEAException, RepositoryException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    doThrow(new EEAException()).when(oakRepositoryUtils).addFileNode(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
   }
 
   /**
-   * Insert string before point test.
+   * Upload document exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   */
+  @Test(expected = EEAException.class)
+  public void uploadDocumentException4Test() throws EEAException, RepositoryException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn("");
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
+  }
+
+  /**
+   * Upload document success test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
    */
   @Test
-  public void insertStringBeforePointTest() {
-    assertEquals("TestES.jpg", documentService.insertStringBeforePoint("Test.jpg", "ES"));
-  }
-
-  /**
-   * Insert string before point parenthesis test.
-   */
-  @Test
-  public void insertStringBeforePointParenthesisTest() {
-    assertEquals("TestES(1).jpg", documentService.insertStringBeforePoint("Test(1).jpg", "ES"));
-  }
-
-  /**
-   * Gets the file contents test.
-   *
-   * @return the file contents test
-   * @throws RepositoryException the repository exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void getFileContentsTest() throws RepositoryException, IOException, EEAException {
-    documentService.getFileContents(session, "", "filename");
-    Mockito.verify(documentService, times(1)).getFileContents(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Send kafka notification test.
-   */
-  @Test
-  public void sendKafkaNotificationTest() {
-    documentService.sendKafkaNotification("filename", 1L, "ES", "desc",
-        EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
+  public void uploadDocumentSuccessTest() throws EEAException, RepositoryException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn("name-ES");
+    doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   /**
-   * Delete file node test.
+   * Gets the document exception test.
    *
-   * @throws RepositoryException the repository exception
+   * @return the document exception test
    * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
-  public void deleteFileNodeTest() throws RepositoryException, EEAException {
-    documentService.deleteFileNode(session, "", "documentName");
-    Mockito.verify(documentService, times(1)).deleteFileNode(Mockito.any(), Mockito.any(),
-        Mockito.any());
+  public void getDocumentExceptionTest() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    doThrow(new RepositoryException()).when(oakRepositoryUtils).getFileContents(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.getDocument("filename", 1L, "ES");
   }
 
   /**
-   * Delete file node null session test.
+   * Gets the document exception 2 test.
    *
-   * @throws RepositoryException the repository exception
+   * @return the document exception 2 test
    * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = EEAException.class)
-  public void deleteFileNodeNullSessionTest() throws RepositoryException, EEAException {
-    documentService.deleteFileNode(null, "", "documentName");
-    Mockito.verify(documentService, times(1)).deleteFileNode(Mockito.any(), Mockito.any(),
-        Mockito.any());
+  public void getDocumentException2Test() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).getFileContents(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.getDocument("filename", 1L, "ES");
   }
+
+  /**
+   * Gets the document success test.
+   *
+   * @return the document success test
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void getDocumentSuccessTest() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    when(oakRepositoryUtils.getFileContents(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new FileResponse());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    assertNotNull(documentService.getDocument("filename", 1L, "ES"));
+  }
+
+  /**
+   * Delete document exception test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDocumentExceptionTest() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteDocument("filename", 1L, "ES");
+  }
+
+  /**
+   * Delete document exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDocumentException2Test() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteDocument("filename", 1L, "ES");
+  }
+
+  /**
+   * Delete document success test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDocumentSuccessTest() throws Exception {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.insertStringBeforePoint(Mockito.any(), Mockito.any()))
+        .thenReturn("name");
+    doNothing().when(oakRepositoryUtils).deleteFileNode(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    doNothing().when(oakRepositoryUtils).runGC(Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteDocument("filename", 1L, "ES");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+  }
+
 }

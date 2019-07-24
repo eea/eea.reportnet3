@@ -41,9 +41,11 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private UserRequestRepository userRequestRepository;
 
+  /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
 
+  /** The document repository. */
   @Autowired
   private DocumentRepository documentRepository;
 
@@ -222,20 +224,42 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
+  /**
+   * Insert document.
+   *
+   * @param dataflowId the dataflow id
+   * @param filename the filename
+   * @param language the language
+   * @param description the description
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void insertDocument(Long dataflowId, String filename, String language, String description)
       throws EEAException {
     if (dataflowId == null || filename == null || language == null || description == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    Document document = new Document();
-    document.setDescription(description);
-    document.setLanguage(language);
-    document.setName(filename);
-    document.setDataflow(dataflowRepository.findById(dataflowId).orElse(null));
-    documentRepository.save(document);
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+    if (dataflow != null) {
+      Document document = new Document();
+      document.setDescription(description);
+      document.setLanguage(language);
+      document.setName(filename);
+      document.setDataflow(dataflow);
+      documentRepository.save(document);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
   }
 
+  /**
+   * Delete document.
+   *
+   * @param dataflowId the dataflow id
+   * @param filename the filename
+   * @param language the language
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void deleteDocument(Long dataflowId, String filename, String language)
       throws EEAException {
@@ -244,8 +268,11 @@ public class DataflowServiceImpl implements DataflowService {
     }
     Document document =
         documentRepository.findFirstByDataflowIdAndNameAndLanguage(dataflowId, filename, language);
-    documentRepository.delete(document);
+    if (document == null) {
+      throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    } else {
+      documentRepository.delete(document);
+    }
   }
-
 
 }
