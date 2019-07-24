@@ -196,7 +196,7 @@ public class DocumentServiceImplTest {
     when(oakRepositoryUtils.getFileContents(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FileResponse());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    assertNotNull(documentService.getDocument("filename", 1L, "ES"));
+    assertNotNull("null result", documentService.getDocument("filename", 1L, "ES"));
   }
 
   /**

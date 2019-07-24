@@ -109,7 +109,8 @@ public class OakRepositoryUtilsTest {
    */
   @Test
   public void insertStringBeforePointTest() throws EEAException {
-    assertEquals("TestES.jpg", oakRepositoryUtils.insertStringBeforePoint("Test.jpg", "ES"));
+    assertEquals("not the expected result", "TestES.jpg",
+        oakRepositoryUtils.insertStringBeforePoint("Test.jpg", "ES"));
   }
 
   /**
@@ -119,7 +120,8 @@ public class OakRepositoryUtilsTest {
    */
   @Test
   public void insertStringBeforePointParenthesisTest() throws EEAException {
-    assertEquals("TestES(1).jpg", oakRepositoryUtils.insertStringBeforePoint("Test(1).jpg", "ES"));
+    assertEquals("not the expected result", "TestES(1).jpg",
+        oakRepositoryUtils.insertStringBeforePoint("Test(1).jpg", "ES"));
   }
 
   /**

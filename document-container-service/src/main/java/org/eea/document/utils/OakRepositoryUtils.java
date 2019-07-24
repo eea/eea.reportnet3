@@ -27,7 +27,6 @@ import org.eea.document.type.FileResponse;
 import org.eea.document.type.NodeType;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +38,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class OakRepositoryUtils {
 
+
+  /** The Constant UPDATE_DELAY. */
+  private static final int UPDATE_DELAY = 6000;
 
   /** The Constant LEFT_PARENTHESIS. */
   private static final String LEFT_PARENTHESIS = "(";
@@ -131,7 +133,7 @@ public class OakRepositoryUtils {
    * @param ns the ns
    * @return the repository
    */
-  public @NotNull Repository initializeRepository(DocumentNodeStore ns) {
+  public Repository initializeRepository(DocumentNodeStore ns) {
     return new Jcr(new Oak(ns)).createRepository();
   }
 
@@ -191,7 +193,7 @@ public class OakRepositoryUtils {
   private String increaseCounterFileName(final Node node, final String filename)
       throws RepositoryException, EEAException {
     String result = filename;
-    for (int i = 1; i < 1000; i++) {
+    for (int i = 1; true; i++) {
       result = insertStringBeforePoint(filename, LEFT_PARENTHESIS + i + ")");
       if (!node.hasNode(result)) {
         break;
@@ -362,7 +364,7 @@ public class OakRepositoryUtils {
    * @throws Exception the exception
    */
   public void runGC(DocumentNodeStore ns) throws Exception {
-    ns.getClock().waitUntil(ns.getClock().getTime() + 6000);
+    ns.getClock().waitUntil(ns.getClock().getTime() + UPDATE_DELAY);
     ns.getVersionGarbageCollector().gc(0, TimeUnit.MILLISECONDS);
     MarkSweepGarbageCollector gc = new MarkSweepGarbageCollector(
         new DocumentBlobReferenceRetriever(ns), (GarbageCollectableBlobStore) ns.getBlobStore(),
