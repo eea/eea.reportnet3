@@ -19,7 +19,8 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    * @param idDataset the id dataset
    * @return the list
    */
-  List<Snapshot> findByReportingDatasetId(@Param("idReportingDataset") Long idDataset);
+  List<Snapshot> findByReportingDatasetIdOrderByCreationDateDesc(
+      @Param("idReportingDataset") Long idDataset);
 
 
   /**

@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
-import java.sql.Date;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
@@ -66,8 +65,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Override
   public List<SnapshotVO> getSnapshotsByIdDataset(Long datasetId) throws EEAException {
 
-
-    List<Snapshot> snapshots = snapshotRepository.findByReportingDatasetId(datasetId);
+    List<Snapshot> snapshots =
+        snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId);
 
     return snapshotMapper.entityListToClass(snapshots);
 
@@ -84,7 +83,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public void addSnapshot(Long idDataset, String description) throws EEAException {
 
     Snapshot snap = new Snapshot();
-    snap.setCreationDate(Date.valueOf(LocalDate.now()));
+    snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
     snap.setDescription(description);
     ReportingDataset reportingDataset = new ReportingDataset();
     reportingDataset.setId(idDataset);
