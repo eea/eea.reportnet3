@@ -30,8 +30,8 @@ public class Weblink {
   private Long id;
 
   /** The name. */
-  @Column(name = "NAME")
-  private String name;
+  @Column(name = "DESCRIPTION")
+  private String description;
 
   /** The url. */
   @Column(name = "URL")
@@ -69,6 +69,6 @@ public class Weblink {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, url, dataflow);
+    return Objects.hash(id, description, url, dataflow);
   }
 }
