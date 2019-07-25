@@ -176,11 +176,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.TRUE);
-    List<String> fields = Arrays.asList("field_1", "fields_2", "fields_3");
-
-    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, order);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields);
   }
 
   /**
@@ -192,8 +189,8 @@ public class DataSetControllerImplTest {
   public void testGetDataTablesValuesExceptionEntry2() throws Exception {
     List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
-    List<String> fields = Arrays.asList("field_1", "fields_2", "fields_3");
-    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, order);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields);
   }
 
   /**
@@ -204,11 +201,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any());
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.TRUE);
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, order);
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
   }
 
   /**
@@ -218,11 +212,9 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry4() throws Exception {
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.TRUE);
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, order);
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
   }
 
   /**
@@ -233,11 +225,9 @@ public class DataSetControllerImplTest {
   // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.FALSE);
-    List<String> fields = Arrays.asList("field_1", "fields_2", "fields_3");
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, order);
+        Mockito.any())).thenReturn(new TableVO());
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
   }
 
   /**
@@ -248,14 +238,14 @@ public class DataSetControllerImplTest {
   @Test
   public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
+        Mockito.any())).thenReturn(new TableVO());
     List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
-    List<String> fields = Arrays.asList("field_1", "fields_2", "fields_3");
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, order);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**

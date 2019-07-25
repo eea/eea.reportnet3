@@ -7,8 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -416,19 +414,15 @@ public class DatasetServiceTest {
 
   @Test
   public void testGetTableValuesByIdEmpty() throws Exception {
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.TRUE);
-    TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null, order);
+    TableVO result = datasetService.getTableValuesById(1L, "mongoId", pageable, null);
     Assert.assertNotNull("result null", result);
     Assert.assertEquals("wrong number of records", Long.valueOf(0), result.getTotalRecords());
   }
 
   @Test(expected = EEAException.class)
   public void testGetTableValuesByIdNull() throws Exception {
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.TRUE);
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any())).thenReturn(null);
-    datasetService.getTableValuesById(1L, "mongoId", pageable, null, order);
+    datasetService.getTableValuesById(1L, "mongoId", pageable, null);
   }
 
   @Test
@@ -437,9 +431,7 @@ public class DatasetServiceTest {
         .thenReturn(recordValues);
 
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
-    Collections.fill(order, Boolean.TRUE);
-    datasetService.getTableValuesById(1L, "mongoId", pageable, null, order);
+    datasetService.getTableValuesById(1L, "mongoId", pageable, null);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 
@@ -465,9 +457,7 @@ public class DatasetServiceTest {
     recValidation.setRecordValue(new RecordValue());
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
-    List<String> listFields = Arrays.asList("field_1", "fields_2", "fields_3");
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[3]));
-    Collections.fill(order, Boolean.TRUE);
+    String listFields = "field_1=1,fields_2=2,fields_3=3";
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
@@ -475,7 +465,7 @@ public class DatasetServiceTest {
     when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
 
-    datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable, listFields, order);
+    datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable, listFields);
 
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
@@ -502,16 +492,14 @@ public class DatasetServiceTest {
     recValidation.setRecordValue(new RecordValue());
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
-    List<String> listFields = Arrays.asList("field_1", "fields_2", "fields_3");
-    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[3]));
-    Collections.fill(order, Boolean.TRUE);
+    String listFields = "field_1=1,fields_2=2,fields_3=3";
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
     when(fieldValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(recordValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(fieldRepository.findFirstTypeByIdFieldSchema(Mockito.any())).thenReturn(fieldValue);
-    datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable, listFields, order);
+    datasetService.getTableValuesById(1L, new ObjectId().toString(), pageable, listFields);
 
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
