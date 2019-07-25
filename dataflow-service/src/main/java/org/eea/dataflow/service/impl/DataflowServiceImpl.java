@@ -76,7 +76,6 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
   public DataFlowVO getById(Long id) throws EEAException {
 
     if (id == null) {
@@ -234,6 +233,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public void insertDocument(Long dataflowId, String filename, String language, String description)
       throws EEAException {
     if (dataflowId == null || filename == null || language == null || description == null) {
@@ -261,6 +261,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public void deleteDocument(Long dataflowId, String filename, String language)
       throws EEAException {
     if (dataflowId == null || filename == null || language == null) {

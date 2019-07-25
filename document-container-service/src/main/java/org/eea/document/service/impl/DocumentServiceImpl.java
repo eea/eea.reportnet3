@@ -58,7 +58,6 @@ public class DocumentServiceImpl implements DocumentService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Async
   public void uploadDocument(final MultipartFile file, final Long dataFlowId, final String language,
       final String description) throws EEAException {
     Session session = null;
