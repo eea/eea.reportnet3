@@ -56,10 +56,8 @@ public final class EEAErrorMessage {
 
   /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
-  
-  /** The Constant SCHEMA_ID_NONFOUND. */
 
-  /** The Constant DOCUMENT_UPLOAD_ERROR. */
+  /** The Constant SCHEMA_ID_NONFOUND. */
   public static final String SCHEMA_ID_NONFOUND = "IdSchema not found";
 
   /** The Constant DOCUMENT_UPLOAD_ERROR. */
@@ -76,11 +74,11 @@ public final class EEAErrorMessage {
 
   /** The Constant REPOSITORY_NOT_FOUND. */
   public static final String REPOSITORY_NOT_FOUND = "Repository not found";
-  
-    /** The Constant URL_FORMAT_INCORRECT. */
+
+  /** The Constant URL_FORMAT_INCORRECT. */
   public static final String URL_FORMAT_INCORRECT = "Format url is incorrect";
 
-   /** The Constant ID_LINK_INCORRECT. */
+  /** The Constant ID_LINK_INCORRECT. */
   public static final String ID_LINK_INCORRECT = "Id link is incorrect";
 
   /**
