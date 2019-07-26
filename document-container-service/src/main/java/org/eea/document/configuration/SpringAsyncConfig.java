@@ -1,4 +1,4 @@
-package org.eea.validation.configuration;
+package org.eea.document.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
