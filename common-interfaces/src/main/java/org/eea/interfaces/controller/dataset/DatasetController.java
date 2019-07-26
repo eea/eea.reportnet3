@@ -161,11 +161,11 @@ public interface DatasetController {
    * @param idTableSchema the id table schema
    * @param records the records
    */
-  @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
+  @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestParam(value = "records", required = true) List<RecordVO> records);
+      @RequestBody List<RecordVO> records);
 
   /**
    * Update record.
@@ -175,8 +175,7 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/{id}/updateRecord", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateRecords(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "records", required = true) List<RecordVO> records);
+  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
    * Delete records.
