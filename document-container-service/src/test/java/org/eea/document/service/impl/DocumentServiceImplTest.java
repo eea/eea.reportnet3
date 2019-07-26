@@ -58,23 +58,26 @@ public class DocumentServiceImplTest {
    * Upload document exception test.
    *
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
   @Test(expected = EEAException.class)
-  public void uploadDocumentExceptionTest() throws EEAException {
+  public void uploadDocumentExceptionTest() throws EEAException, IOException {
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(null, 1L, "ES", "desc");
+    documentService.uploadDocument(fileMock.getInputStream(), null, null, 1L, "ES", "desc");
   }
 
   /**
    * Upload document exception 2 test.
    *
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
   @Test(expected = EEAException.class)
-  public void uploadDocumentException2Test() throws EEAException {
+  public void uploadDocumentException2Test() throws EEAException, IOException {
     fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
+    documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L, "ES", "desc");
   }
 
   /**
@@ -82,9 +85,10 @@ public class DocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
+   * @throws IOException
    */
   @Test(expected = EEAException.class)
-  public void uploadDocumentException3Test() throws EEAException, RepositoryException {
+  public void uploadDocumentException3Test() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
@@ -93,7 +97,9 @@ public class DocumentServiceImplTest {
     doThrow(new EEAException()).when(oakRepositoryUtils).addFileNode(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
+    documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L, "ES", "desc");
+
   }
 
   /**
@@ -101,9 +107,10 @@ public class DocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
+   * @throws IOException
    */
   @Test(expected = EEAException.class)
-  public void uploadDocumentException4Test() throws EEAException, RepositoryException {
+  public void uploadDocumentException4Test() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
@@ -112,7 +119,8 @@ public class DocumentServiceImplTest {
     when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn("");
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
+    documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L, "ES", "desc");
   }
 
   /**
@@ -120,9 +128,10 @@ public class DocumentServiceImplTest {
    *
    * @throws EEAException the EEA exception
    * @throws RepositoryException the repository exception
+   * @throws IOException
    */
   @Test
-  public void uploadDocumentSuccessTest() throws EEAException, RepositoryException {
+  public void uploadDocumentSuccessTest() throws EEAException, RepositoryException, IOException {
     when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
     when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
     when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
@@ -132,7 +141,8 @@ public class DocumentServiceImplTest {
         Mockito.any())).thenReturn("name-ES");
     doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(fileMock, 1L, "ES", "desc");
+    documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L, "ES", "desc");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 

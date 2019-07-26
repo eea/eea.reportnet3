@@ -247,6 +247,7 @@ public class DataflowServiceImpl implements DataflowService {
       document.setName(filename);
       document.setDataflow(dataflow);
       documentRepository.save(document);
+      LOG.info("document saved");
     } else {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
@@ -273,6 +274,7 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
     } else {
       documentRepository.delete(document);
+      LOG.info("document deleted");
     }
   }
 

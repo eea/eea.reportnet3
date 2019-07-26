@@ -1,5 +1,6 @@
 package org.eea.document.controller;
 
+import java.io.IOException;
 import javax.ws.rs.Produces;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
@@ -40,6 +41,8 @@ public class DocumentControllerImpl implements DocumentController {
    *
    * @param file the file
    * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
    */
   @Override
   @PostMapping(value = "/upload/{dataFlowId}")
@@ -54,8 +57,9 @@ public class DocumentControllerImpl implements DocumentController {
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
-      documentService.uploadDocument(file, dataFlowId, language, description);
-    } catch (EEAException e) {
+      documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+          file.getOriginalFilename(), dataFlowId, language, description);
+    } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }

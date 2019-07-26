@@ -2,6 +2,7 @@ package org.eea.document.service.impl;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.PathNotFoundException;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The type Document service.
@@ -51,23 +51,24 @@ public class DocumentServiceImpl implements DocumentService {
   /**
    * upload a document to the jackrabbit content repository.
    *
-   * @param file the file
+   * @param inputStream the input stream
+   * @param contentType the content type
+   * @param filename the filename
    * @param dataFlowId the data flow id
    * @param language the language
    * @param description the description
    * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public void uploadDocument(final MultipartFile file, final Long dataFlowId, final String language,
-      final String description) throws EEAException {
+  @Async
+  public void uploadDocument(final InputStream inputStream, final String contentType,
+      final String filename, final Long dataFlowId, final String language, final String description)
+      throws EEAException, IOException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
-      if (file == null) {
-        throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
-      }
-
-      if (file.getOriginalFilename() == null || file.getContentType() == null) {
+      if (filename == null || contentType == null) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
 
@@ -79,19 +80,20 @@ public class DocumentServiceImpl implements DocumentService {
 
       // Add a file node with the document
       String nameWithLanguage =
-          oakRepositoryUtils.insertStringBeforePoint(file.getOriginalFilename(), "-" + language);
+          oakRepositoryUtils.insertStringBeforePoint(filename, "-" + language);
 
       String modifiedFilename = oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + dataFlowId,
-          file.getInputStream(), nameWithLanguage, file.getContentType());
+          inputStream, nameWithLanguage, contentType);
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
       LOG.info("File added...");
       sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
           description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
-    } catch (RepositoryException | IOException | EEAException e) {
+    } catch (RepositoryException | EEAException e) {
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
+      inputStream.close();
       oakRepositoryUtils.cleanUp(session, ns);
     }
   }
