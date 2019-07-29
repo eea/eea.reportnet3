@@ -3,7 +3,6 @@ package org.eea.dataflow.controller;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 import org.eea.dataflow.service.DataflowWebLinkService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
+  /** The dataflow web link service. */
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
 
@@ -36,12 +35,13 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Save link.
    *
    * @param idDataflow the id dataflow
+   * @return the link
    */
   @Override
-  @GetMapping(value = "{idDataflow}/weblink/")
-  public List<WeblinkVO> getLink(@PathVariable("idDataflow") Long idDataflow) {
+  @GetMapping(value = "{idLink}")
+  public WeblinkVO getLink(@RequestParam("idLink") Long idLink) {
     try {
-      return dataflowWebLinkService.getWebLink(idDataflow);
+      return dataflowWebLinkService.getWebLink(idLink);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
@@ -56,9 +56,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param description the description
    */
   @Override
-  @PostMapping(value = "{idDataflow}/weblink/save")
-  public void saveLink(@PathVariable("idDataflow") Long idDataflow, String url,
-      String description) {
+  @PutMapping
+  public void saveLink(Long idDataflow, String url, String description) {
 
 
     try {
@@ -86,9 +85,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param idLink the id link
    */
   @Override
-  @DeleteMapping(value = "{idDataflow}/weblink/remove")
+  @DeleteMapping(value = "{idLink}")
   public void removeLink(@RequestParam(value = "idLink") Long idLink) {
-
     try {
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EEAException e) {
@@ -105,7 +103,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param description the description
    */
   @Override
-  @PutMapping(value = "{idDataflow}/weblink/update")
+  @PostMapping(value = "{idLink}")
   public void updateLink(@RequestParam(value = "idLink") Long idLink,
       @RequestParam(value = "url") String url,
       @RequestParam(value = "description") String description) {

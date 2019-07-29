@@ -29,8 +29,8 @@ public interface DataFlowWebLinkController {
    * @param idDataflow the id dataflow
    * @return the link
    */
-  @GetMapping(value = "{idDataflow}/weblink/")
-  List<WeblinkVO> getLink(@PathVariable("idDataflow") Long idDataflow);
+  @GetMapping(value = "{idLink}")
+  WeblinkVO getLink(@RequestParam("idLink") Long idLink);
 
   /**
    * Save link.
@@ -39,8 +39,8 @@ public interface DataFlowWebLinkController {
    * @param url the url
    * @param description the description
    */
-  @PostMapping(value = "{idDataflow}/weblink/save")
-  void saveLink(@PathVariable("idDataflow") Long idDataflow,
+  @PutMapping
+  void saveLink(@RequestParam("idDataflow") Long idDataflow,
       @RequestParam(value = "url") String url,
       @RequestParam(value = "description") String description);
 
@@ -49,7 +49,7 @@ public interface DataFlowWebLinkController {
    *
    * @param idLink the id link
    */
-  @DeleteMapping(value = "{idDataflow}/weblink/remove")
+  @DeleteMapping(value = "{idLink}")
   void removeLink(@RequestParam(value = "idLink") Long idLink);
 
   /**
@@ -59,8 +59,9 @@ public interface DataFlowWebLinkController {
    * @param url the url
    * @param description the description
    */
-  @PutMapping(value = "{idDataflow}/weblink/update")
+  @PostMapping(value = "{idLink}")
   void updateLink(@RequestParam(value = "idLink") Long idLink,
       @RequestParam(value = "url") String url,
       @RequestParam(value = "description") String description);
 }
+

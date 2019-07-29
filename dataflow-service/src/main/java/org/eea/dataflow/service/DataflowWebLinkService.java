@@ -1,11 +1,11 @@
 package org.eea.dataflow.service;
 
-import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 
+
 /**
- * The Interface DataflowService.
+ * The Interface DataflowWebLinkService.
  */
 public interface DataflowWebLinkService {
 
@@ -16,8 +16,9 @@ public interface DataflowWebLinkService {
    *
    * @param idDataflow the id dataflow
    * @return the web link
+   * @throws EEAException the EEA exception
    */
-  List<WeblinkVO> getWebLink(Long idDataflow) throws EEAException;
+  WeblinkVO getWebLink(Long idLink) throws EEAException;
 
   /**
    * Removes the contributor from dataflow.

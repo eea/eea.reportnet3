@@ -2,8 +2,6 @@ package org.eea.dataflow.service;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.eea.dataflow.mapper.DataflowWebLinkMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -46,30 +44,25 @@ public class DataFlowWebLinkServiceImplTest {
    * Gets the web link.
    *
    * @return the web link
+   * @throws EEAException
    */
   @Test
-  public void getWebLink() {
-    List<Weblink> webList = new ArrayList<>();
-    Weblink webLink = new Weblink();
-    webList.add(webLink);
-    when(webLinkRepository.findAllByDataflow_Id(Mockito.anyLong())).thenReturn(webList);
+  public void getWebLink() throws EEAException {
+    when(webLinkRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Weblink()));
     when(dataflowWebLinkMapper.entityToClass(Mockito.any())).thenReturn(new WeblinkVO());
     dataflowServiceWebLinkImpl.getWebLink(Mockito.anyLong());
-    Mockito.verify(webLinkRepository, times(1)).findAllByDataflow_Id(Mockito.anyLong());
-
-    when(webLinkRepository.findAllByDataflow_Id(Mockito.anyLong())).thenReturn(null);
-    dataflowServiceWebLinkImpl.getWebLink(Mockito.anyLong());
+    Mockito.verify(webLinkRepository, times(1)).findById(Mockito.anyLong());
   }
 
   /**
    * Gets the web link empty.
    *
    * @return the web link empty
+   * @throws EEAException
    */
-  @Test
-  public void getWebLinkEmpty() {
-    List<Weblink> webList = new ArrayList<>();
-    when(webLinkRepository.findAllByDataflow_Id(Mockito.anyLong())).thenReturn(webList);
+  @Test(expected = EEAException.class)
+  public void getWebLinkEmpty() throws EEAException {
+    when(webLinkRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
     dataflowServiceWebLinkImpl.getWebLink(Mockito.anyLong());
   }
 

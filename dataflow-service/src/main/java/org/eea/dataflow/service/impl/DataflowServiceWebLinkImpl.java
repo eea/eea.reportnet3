@@ -1,9 +1,6 @@
 package org.eea.dataflow.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowWebLinkMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Weblink;
@@ -18,8 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 /**
- * The Class DataflowServiceImpl.
+ * The Class DataflowServiceWebLinkImpl.
  */
 @Service("WebLinkService")
 public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
@@ -29,6 +27,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   @Autowired
   private DataflowRepository dataflowRepository;
 
+  /** The dataflow web link mapper. */
   @Autowired
   private DataflowWebLinkMapper dataflowWebLinkMapper;
 
@@ -43,19 +42,23 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
 
+  /**
+   * Gets the web link.
+   *
+   * @param idDataflow the id dataflow
+   * @return the web link
+   */
   @Override
-  public List<WeblinkVO> getWebLink(Long idDataflow) {
-    List<Weblink> listWebLinks = webLinkRepository.findAllByDataflow_Id(idDataflow);
-    LOG.info("get the links with dataflowId : {}", idDataflow);
-
-    List<WeblinkVO> weblinkVOList = new ArrayList<>();
-
-    if (null != listWebLinks && !listWebLinks.isEmpty()) {
-      for (Weblink weblink : listWebLinks) {
-        weblinkVOList.add(dataflowWebLinkMapper.entityToClass(weblink));
-      }
+  public WeblinkVO getWebLink(Long idLink) throws EEAException {
+    Optional<Weblink> idLinkData = webLinkRepository.findById(idLink);
+    LOG.info("get the links with id : {}", idLink);
+    WeblinkVO weblinkVO = new WeblinkVO();
+    if (idLinkData.isPresent()) {
+      weblinkVO = dataflowWebLinkMapper.entityToClass(idLinkData.get());
+    } else {
+      throw new EEAException(EEAErrorMessage.ID_LINK_INCORRECT);
     }
-    return weblinkVOList;
+    return weblinkVO;
   }
 
   /**
@@ -67,7 +70,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
   public void saveWebLink(Long idDataflow, String url, String description) throws EEAException {
 
     Weblink webLinkObject = new Weblink();
@@ -90,7 +92,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
   public void removeWebLink(Long webLink) throws EEAException {
 
     Optional<Weblink> webLinkData = webLinkRepository.findById(webLink);
@@ -110,7 +111,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
   public void updateWebLink(Long webLinkId, String description, String url) throws EEAException {
 
     Optional<Weblink> webLink = webLinkRepository.findById(webLinkId);
