@@ -1,0 +1,71 @@
+[
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "First document",
+    "description": "Provides independent information on the environment.",
+    "category": "pdf",
+    "language": "en",
+    "url": "http://placehold.com/daycore_lorem_sint.pdf",
+    "val": "true",
+    "validations":{
+      "id": 0,
+      "idRule": "string",
+      "levelError": "BLOCKER",
+      "message": "Blocked! Have to check this Row",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  },
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "Segundo documento",
+    "description": "Información para aquellos involucrados en desarrollar, aplicar y evaluar las políticas ambientales.",
+    "category": "txt",
+    "language": "es",
+    "url": "http://placehold.com/daycore_lorem_sint.txt",
+    "validations":{
+      "id": 2,
+      "idRule": "string",
+      "levelError": "WARNING",
+      "message": "Warning! Have to check this Row",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  },
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "Third document",
+    "description": "Information of 33 member countries and six cooperating countries.",
+    "category": "xml",
+    "language": "en",
+    "url": "http://placehold.com/daycore_lorem_sint.xml",
+    "validations":{
+      "id": 1,
+      "idRule": "string",
+      "levelError": "",
+      "message": "Error! Have to check this Row",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  },
+  {
+    "_id": "5cf7e7be44b6eefdc908078f",
+    "index": "0",
+    "title": "Last document",
+    "description": "The map only shows territories situated in and around Europe.",
+    "category": "pdf",
+    "language": "en",
+    "url": "http://placehold.com/daycore_lorem_sint.pdf",
+    "validations":{
+      "id": 0,
+      "idRule": "string",
+      "levelError": "ERROR",
+      "message": "Error! Have to check this Row.",
+      "typeEntity": "RECORD",
+      "validationDate": "01/01/2000"
+    }
+  }
+]

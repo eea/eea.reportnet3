@@ -182,6 +182,7 @@ public interface ValidationService {
    * @param idValidations the id validations
    * @return the field errors
    */
-  Future<Map<Long, ErrorsValidationVO>> getFieldErrors(Long datasetId, List<Long> idValidations);
+  Future<Map<Long, ErrorsValidationVO>> getFieldErrors(@DatasetId Long datasetId,
+      List<Long> idValidations);
 
 }

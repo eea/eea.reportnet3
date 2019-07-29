@@ -61,11 +61,11 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -73,6 +73,10 @@ import org.springframework.stereotype.Service;
  */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
+
+  /** The kafka sender helper. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * The Constant ROOT.
@@ -385,9 +389,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  @Async
   public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
+    LOG.info("Executed delete table with id {}, from dataset {}", idTableSchema, datasetId);
   }
 
   /**
@@ -673,6 +677,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
       validationLink.setPosition(Long.valueOf(recordPosition));
+      validationLink.setIdRecord(record.getId());
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
           new ObjectId(record.getTableValue().getDatasetId().getIdDatasetSchema()));
@@ -715,7 +720,11 @@ public class DatasetServiceImpl implements DatasetService {
 
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-      stats.setNameDataSetSchema(schema.getNameDataSetSchema());
+
+      DataSetMetabase datasetMb =
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+
+      stats.setNameDataSetSchema(datasetMb.getDataSetName());
       List<String> listIdsDataSetSchema = new ArrayList<>();
       Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
       for (TableSchema tableSchema : schema.getTableSchemas()) {

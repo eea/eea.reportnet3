@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import {withRouter} from 'react-router-dom';
 import {Chart} from 'primereact/chart';
 
 import HTTPRequester from '../../services/HTTPRequester/HTTPRequester';
@@ -7,6 +8,7 @@ import config from '../../conf/web.config.json';
 import ResourcesContext from '../../components/Context/ResourcesContext';
 
 const DashBoard = (props) =>{
+    const {match:{params: { dataSetId } }} = props;
     const [dashBoardData, setDashBoardData] = useState({});
     const [dashBoardOptions, setDashBoardOptions] = useState({});
     const [dashBoardTitle, setDashBoardTitle] = useState("");
@@ -19,7 +21,7 @@ const DashBoard = (props) =>{
             //'/jsons/error-statistics.json'
             const dataPromise = HTTPRequester.get(
             {
-                url: `${config.loadStatisticsAPI.url}1`,
+                url: `${config.loadStatisticsAPI.url}${dataSetId}`,
                 queryString: {}
             });
 
@@ -108,16 +110,18 @@ const DashBoard = (props) =>{
 
 
     return(
-        <React.Fragment>
-        <h1>{dashBoardTitle}</h1>
-        { (dashBoardData.datasets && dashBoardData.datasets.length > 0) ?
-          <Chart type="bar" 
-                 data={dashBoardData} 
-                 options={dashBoardOptions} />
+        <React.Fragment>        
+        { (dashBoardData.datasets && dashBoardData.datasets.length > 0 && ![].concat.apply([], dashBoardData.datasets[0].totalData).every(t=>t===0)) ?
+            <React.Fragment>
+                <h1>{dashBoardTitle}</h1>
+                <Chart type="bar" 
+                        data={dashBoardData} 
+                        options={dashBoardOptions} />
+            </React.Fragment>
         : <div className={styles.NoErrorData}>{resources.messages["noErrorData"]}</div>
             }
         </React.Fragment>
     );
 }
 
-export default React.memo(DashBoard);
+export default withRouter(React.memo(DashBoard));

@@ -8,18 +8,33 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+/**
+ * The Class RecordStoreConfiguration.
+ */
 @Configuration
 public class RecordStoreConfiguration {
 
+  /** The connection url. */
   @Value("${spring.datasource.url}")
   private String connectionUrl;
+
+  /** The connection username. */
   @Value("${spring.datasource.username}")
   private String connectionUsername;
+
+  /** The connection password. */
   @Value("${spring.datasource.password}")
   private String connectionPassword;
+
+  /** The connection driver. */
   @Value("${spring.datasource.driverClassName}")
   private String connectionDriver;
 
+  /**
+   * Data source.
+   *
+   * @return the data source
+   */
   @Bean
   public DataSource dataSource() {
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -31,6 +46,12 @@ public class RecordStoreConfiguration {
     return dataSource;
   }
 
+  /**
+   * Jdbc template.
+   *
+   * @param dataSource the data source
+   * @return the jdbc template
+   */
   @Bean
   @Autowired
   public JdbcTemplate jdbcTemplate(DataSource dataSource) {

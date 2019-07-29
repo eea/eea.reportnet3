@@ -153,7 +153,7 @@
   },
   {
     "key": "config/dataflow/spring.datasource.url",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3Q6NTQzMi9tZXRhYmFzZX0="
   },
   {
     "key": "config/dataflow/spring.datasource.hikari.connection-timeout",
@@ -373,6 +373,18 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.dataset.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
+    "value": "L2RhdGFzY2hlbWEvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
     "value": "ZmFsc2U="
   },
   {

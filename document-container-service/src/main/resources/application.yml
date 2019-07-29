@@ -3,7 +3,12 @@ server:
 spring:
   application:
     name: document
-
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 500MB
+        
+        
   cloud:
     consul:
       discovery:
@@ -37,3 +42,5 @@ hystrix:
       circuitBreaker:
         requestVolumeThreshold: 2
         sleepWindowInMilliseconds: 10000
+kafka:
+  bootstrapAddress: ${KAFKA_BOOTSTRAP_URL:localhost:9092}
