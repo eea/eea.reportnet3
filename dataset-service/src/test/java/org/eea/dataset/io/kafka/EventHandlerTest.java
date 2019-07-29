@@ -1,7 +1,6 @@
 package org.eea.dataset.io.kafka;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -10,10 +9,13 @@ import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.MultiTenantDataSource;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EventHandlerTest {
 
   @InjectMocks

@@ -698,5 +698,26 @@
   {
     "key": "config/ums/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  }, {
+    "key": "config/document/spring.application.servlet.multipart.max-file-size",
+    "value": "MTA0ODU3NjAw"
+  }, {
+    "key": "config/document/spring.application.servlet.multipart.max-request-size",
+    "value": "MjA5NzE1MjAw"
+  }, {
+    "key": "config/document/targetDirectory",
+    "value": "Li90YXJnZXQ="
+  }, {
+    "key": "config/document/oakRepositoryUrl",
+    "value": "bG9jYWxob3N0"
+  }, {
+    "key": "config/document/nameOakCollection",
+    "value": "b2Fr"
+  }, {
+    "key": "config/document/oakPort",
+    "value": "MjcwMTc="
+  }, {
+    "key": "config/document/oakUser",
+    "value": "YWRtaW4="
   }
 ]

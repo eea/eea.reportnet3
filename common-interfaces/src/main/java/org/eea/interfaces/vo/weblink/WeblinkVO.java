@@ -21,7 +21,7 @@ public class WeblinkVO implements Serializable {
   private Long id;
 
   /** The name. */
-  private String name;
+  private String description;
 
   /** The url. */
   private String url;

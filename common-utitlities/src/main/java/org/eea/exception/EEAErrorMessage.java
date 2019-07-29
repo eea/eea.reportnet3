@@ -30,6 +30,7 @@ public final class EEAErrorMessage {
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
+  /** The Constant IDTABLESCHEMA_INCORRECT. */
   public static final String IDTABLESCHEMA_INCORRECT = "TableSchemaId incorrect";
 
   /** The Constant EXECUTION_ERROR. */
@@ -53,14 +54,32 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_NOTFOUND. */
   public static final String DATAFLOW_NOTFOUND = "Dataflow not found";
 
-/** The Constant USER_REQUEST_NOTFOUND. */
+  /** The Constant USER_REQUEST_NOTFOUND. */
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
- /** The Constant DOCUMENT_UPLOAD_ERROR. */
+  /** The Constant SCHEMA_ID_NONFOUND. */
+  public static final String SCHEMA_ID_NONFOUND = "IdSchema not found";
+
+  /** The Constant DOCUMENT_UPLOAD_ERROR. */
   public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
-  
+
   /** The Constant DOCUMENT_DOWNLOAD_ERROR. */
   public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
+
+  /** The Constant TABLE_NOT_FOUND. */
+  public static final String TABLE_NOT_FOUND = "Table not found";
+
+  /** The Constant DOCUMENT_NOT_FOUND. */
+  public static final String DOCUMENT_NOT_FOUND = "Document not found";
+
+  /** The Constant REPOSITORY_NOT_FOUND. */
+  public static final String REPOSITORY_NOT_FOUND = "Repository not found";
+
+  /** The Constant URL_FORMAT_INCORRECT. */
+  public static final String URL_FORMAT_INCORRECT = "Format url is incorrect";
+
+  /** The Constant ID_LINK_INCORRECT. */
+  public static final String ID_LINK_INCORRECT = "Id link is incorrect";
 
   /**
    * Instantiates a new EEA error message.

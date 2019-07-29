@@ -13,6 +13,12 @@ import org.springframework.data.repository.query.Param;
 public interface ContributorRepository extends PagingAndSortingRepository<Contributor, Long> {
 
 
+  /**
+   * Removes the contributor from dataset.
+   *
+   * @param idDataflow the id dataflow
+   * @param idContributor the id contributor
+   */
   @Transactional
   @Modifying
   @Query(nativeQuery = true,

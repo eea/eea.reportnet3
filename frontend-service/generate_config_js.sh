@@ -7,7 +7,7 @@ fi
  
 cat <<EOF
 window.env = {
-	  REACT_APP_BACKEND: $BACKEND_JSON;
+	  REACT_APP_BACKEND: $BACKEND_JSON
 };
 
 EOF

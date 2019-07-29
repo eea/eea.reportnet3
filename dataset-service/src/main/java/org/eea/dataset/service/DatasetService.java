@@ -155,9 +155,6 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @throws EEAException the EEA exception
-   *
-   *
-   *
    */
   void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
@@ -201,6 +198,17 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   String getFileName(String mimeType, String idTableSchema, @DatasetId Long datasetId)
+      throws EEAException;
+
+  /**
+   * Creates the records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
+   */
+  void createRecords(Long datasetId, List<RecordVO> records, String idTableSchema)
       throws EEAException;
 
 }

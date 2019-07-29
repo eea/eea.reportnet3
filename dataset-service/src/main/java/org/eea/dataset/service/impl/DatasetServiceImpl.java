@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,10 +38,12 @@ import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -65,7 +68,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,10 +79,6 @@ import org.springframework.stereotype.Service;
  */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
-
-  /** The kafka sender helper. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * The Constant ROOT.
@@ -131,11 +129,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FileCommonUtils fileCommon;
 
-  /**
-   * The data set metabase repository.
-   */
+
+  /** The reporting dataset repository. */
   @Autowired
-  private DataSetMetabaseRepository dataSetMetabaseRepository;
+  private ReportingDatasetRepository reportingDatasetRepository;
 
   /**
    * The partition data set metabase repository.
@@ -143,6 +140,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
   /**
    * The dataset repository.
    */
@@ -253,11 +252,11 @@ public class DatasetServiceImpl implements DatasetService {
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
       // Get the dataFlowId from the metabase
-      final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
+      final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
-          context.parse(is, datasetMetabase.getDataflowId(), partition.getId(), idTableSchema);
+          context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
       // map the VO to the entity
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
@@ -306,14 +305,13 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  private DataSetMetabase obtainDatasetMetabase(final Long datasetId) throws EEAException {
-    final DataSetMetabase datasetMetabase =
-        dataSetMetabaseRepository.findById(datasetId).orElse(null);
-    if (datasetMetabase == null) {
-      LOG_ERROR.error(EEAErrorMessage.DATASET_NOTFOUND);
+  private ReportingDataset obtainReportingDataset(final Long datasetId) throws EEAException {
+    final ReportingDataset reportingDataset =
+        reportingDatasetRepository.findById(datasetId).orElse(null);
+    if (reportingDataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    return datasetMetabase;
+    return reportingDataset;
   }
 
 
@@ -734,7 +732,7 @@ public class DatasetServiceImpl implements DatasetService {
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
 
       DataSetMetabase datasetMb =
-          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
 
       stats.setNameDataSetSchema(datasetMb.getDataSetName());
       List<String> listIdsDataSetSchema = new ArrayList<>();
@@ -905,7 +903,6 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -917,6 +914,34 @@ public class DatasetServiceImpl implements DatasetService {
 
     }
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
+    List<FieldValue> fields = recordValue.parallelStream().map(RecordValue::getFields)
+        .filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
+    fieldRepository.saveAll(fields);
+  }
+
+  /**
+   * Creates the records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void createRecords(final Long datasetId, final List<RecordVO> records,
+      final String idTableSchema) throws EEAException {
+    if (datasetId == null || records == null || idTableSchema == null) {
+      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
+    if (tableId == 0) {
+      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+    }
+    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
+    TableValue table = new TableValue();
+    table.setId(tableId);
+    recordValue.parallelStream().forEach(record -> record.setTableValue(table));
     recordRepository.saveAll(recordValue);
   }
 
@@ -945,7 +970,7 @@ public class DatasetServiceImpl implements DatasetService {
     // final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
 
     // Get the dataFlowId from the metabase
-    final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
+    final DataSetMetabase datasetMetabase = obtainReportingDataset(datasetId);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
@@ -956,7 +981,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public String getFileName(String mimeType, String idTableSchema, Long datasetId)
       throws EEAException {
-    final DataSetMetabase datasetMetabase = obtainDatasetMetabase(datasetId);
+    final DataSetMetabase datasetMetabase = obtainReportingDataset(datasetId);
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(datasetMetabase.getDataflowId());
     return null == fileCommon.getFieldSchemas(idTableSchema, dataSetSchema)
         ? datasetMetabase.getDataSetName() + "." + mimeType
