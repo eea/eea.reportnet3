@@ -4,13 +4,10 @@ spring:
   application:
     name: ums
 eea:
-  security:
-    secret: ${SECURITY_TOKEN_SECRET:JWTSuperSecretKey}
-    expiration-time: ${SECURITY_TOKEN_EXPIRATION_TIME:30000}
   keycloak:
-    realmName: ${KEYCLOAK_REAM_NAME:SpringBootKeycloak}
-    secret: ${KEYCLOAK_SECRET:dfd1e0cc-6244-48e0-b248-5061e2df10ce}
-    clientId: ${KEYCLOAK_CLIENT_ID:login-app}
-    host: ${KEYCLOAK_HOST:localhost:8080}
+    realmName: ${KEYCLOAK_REAM_NAME:Reportnet}
+    secret: ${KEYCLOAK_SECRET:354e2128-a330-420f-a550-1fb700975d19}
+    clientId: ${KEYCLOAK_CLIENT_ID:reportnet}
+    host: ${KEYCLOAK_HOST:k8s-node001.devoami.altia.es:32291}
     scheme: ${KEYCLOAK_SCHEME:http}
-    publicKey: ${KEYCLOAK_CLIENT_PUBLIC_KEY:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv0q5hycS1yugHmx6iRZWryWEKnyf/Ze04+0aAKefnAs5BOF7xmPqkGQ3Vegd8GbHPBuGsXEMzjN9ED4nubs5A/lLcqHVAKJF4DibNAkPbYK2szMe+d98e8/y8KWX2KseE0pSZAI0ujh5DnYgV5Q9w3s+OU+AG8hM/meTIJ9+3q162MjRLiZr/ctcougkIdWtoHl3SAfg49SwnPewqNxVqewsMkSRjgIJtRmmW/uiXdAFXoyvfDymvm/EE3SMWJStGBHKscmSqh03JAQiJ+zCNdpvS+S8PBS2LTD5x7UYCP0NKoUzaa65mnvcJKdXZSRgaqighNafQ5454LudDmfJTwIDAQAB}
+    publicKey: ${KEYCLOAK_CLIENT_PUBLIC_KEY:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsojJChk5UfJOHuOLQ1SZtYB5JzSrWRkJ3gBMGryHGDgAGqjf+gHNAwHswVbx6k0deKr4HSdrD+VIkkM1AGC/CNa/STI1ir4zmYQPpewAcKvM7BF/CJlwMjV6c9GiJutC7h58DRFtdgz4O2KVqDkZ5l/pZeKKxnEXK5M8x+HmIqD+F3+BWgCIJF7Tcu1sFnWjJWKO5yyAPXyq7YYF59tV7JPcfoJqPMqsvxNqP48K19RQN9ndu1qfXmLONLYhU0rdeDpERXYLoPGpchYL5ZCd6Dt+RpDpc2FnOis42DJD/ev2/LWSUugZFZx6Zqfh4nWhzlYPrnfiSFyxZEX9OY8eIQIDAQAB}
