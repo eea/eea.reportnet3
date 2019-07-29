@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.security.authorization.DataflowProvider;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +26,7 @@ public class UserManagementControllerImpl implements UserManagementController {
 
   @Override
   @RequestMapping(value = "/user/test-security", method = RequestMethod.GET)
-  @PreAuthorize("@secondLevelAuthorizationService.checkObjectAccess(#dataflowId,'DATAFLOW_PROVIDER','DATAFLOW_REQUESTOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER')")
   public String testSecuredService(Long dataflowId) {
     return "OLEEEEE";
   }

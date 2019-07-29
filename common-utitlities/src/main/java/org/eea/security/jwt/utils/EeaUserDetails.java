@@ -11,6 +11,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * The type Eea user details.
+ */
 @Setter
 @ToString
 public class EeaUserDetails implements UserDetails {
@@ -21,19 +24,15 @@ public class EeaUserDetails implements UserDetails {
   private String password;
   private Collection<? extends GrantedAuthority> authorities;
 
-  public static EeaUserDetails create(String username, String password) {
-    EeaUserDetails principal = new EeaUserDetails();
-    principal.setUsername(username);
-    principal.setPassword(username);
-    List<GrantedAuthority> authorities = new ArrayList<>();
-    authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
-    authorities.add(new SimpleGrantedAuthority("ROLE_STEWARD"));
-    authorities.add(new SimpleGrantedAuthority("ROLE_REQUESTOR"));
-    principal.setAuthorities(authorities);
 
-    return principal;
-  }
-
+  /**
+   * Create eea user details.
+   *
+   * @param username the username
+   * @param roles the roles
+   *
+   * @return the eea user details
+   */
   public static EeaUserDetails create(String username, Set<String> roles) {
     EeaUserDetails principal = new EeaUserDetails();
     principal.setUsername(username);
@@ -45,9 +44,7 @@ public class EeaUserDetails implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(role));
       }
     });
-    authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER"));
-    authorities.add(new SimpleGrantedAuthority("ROLE_STEWARD"));
-    authorities.add(new SimpleGrantedAuthority("ROLE_REQUESTOR"));
+
     principal.setAuthorities(authorities);
 
     return principal;

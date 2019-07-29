@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,21 +35,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private JwtTokenProvider tokenProvider;
 
-  @Autowired
-  @Qualifier("userDetailsService")
-  private UserDetailsService customUserDetailsService;
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
+    PermissionEvaluator q;
     try {
       String jwt = getJwtFromRequest(request);
       AccessToken token = null;
       if (StringUtils.hasText(jwt)
           && (token = (AccessToken) tokenProvider.retrieveToken(jwt)) != null) {
-        //TODO Se pueden obtener las authorities del jwt, pq de hecho, keycloak lo hará así
         String username = token.getPreferredUsername();
         Map<String, Object> otherClaims = token.getOtherClaims();
 

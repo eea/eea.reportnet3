@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * The type Jwt token provider.
+ */
 @Component
 @Slf4j
 public class JwtTokenProvider {
@@ -33,6 +36,12 @@ public class JwtTokenProvider {
 
   private PublicKey publicKey;
 
+  /**
+   * Create public key.
+   *
+   * @throws NoSuchAlgorithmException the no such algorithm exception
+   * @throws InvalidKeySpecException the invalid key spec exception
+   */
   @PostConstruct
   public void createPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -45,6 +54,15 @@ public class JwtTokenProvider {
   }
 
 
+  /**
+   * Retrieve token json web token.
+   *
+   * @param authToken the auth token
+   *
+   * @return the json web token
+   *
+   * @throws VerificationException the verification exception
+   */
   public JsonWebToken retrieveToken(String authToken) throws VerificationException {
 
     TokenVerifier token = TokenVerifier.create(authToken, AccessToken.class).publicKey(publicKey)
