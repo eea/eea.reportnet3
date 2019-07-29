@@ -3,3 +3,11 @@ server:
 spring:
   application:
     name: recordstore
+eea:
+  keycloak:
+    realmName: ${KEYCLOAK_REAM_NAME:Reportnet}
+    secret: ${KEYCLOAK_SECRET:354e2128-a330-420f-a550-1fb700975d19}
+    clientId: ${KEYCLOAK_CLIENT_ID:reportnet}
+    host: ${KEYCLOAK_HOST:k8s-node001.devoami.altia.es:32291}
+    scheme: ${KEYCLOAK_SCHEME:http}
+    publicKey: ${KEYCLOAK_CLIENT_PUBLIC_KEY:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsojJChk5UfJOHuOLQ1SZtYB5JzSrWRkJ3gBMGryHGDgAGqjf+gHNAwHswVbx6k0deKr4HSdrD+VIkkM1AGC/CNa/STI1ir4zmYQPpewAcKvM7BF/CJlwMjV6c9GiJutC7h58DRFtdgz4O2KVqDkZ5l/pZeKKxnEXK5M8x+HmIqD+F3+BWgCIJF7Tcu1sFnWjJWKO5yyAPXyq7YYF59tV7JPcfoJqPMqsvxNqP48K19RQN9ndu1qfXmLONLYhU0rdeDpERXYLoPGpchYL5ZCd6Dt+RpDpc2FnOis42DJD/ev2/LWSUugZFZx6Zqfh4nWhzlYPrnfiSFyxZEX9OY8eIQIDAQAB}

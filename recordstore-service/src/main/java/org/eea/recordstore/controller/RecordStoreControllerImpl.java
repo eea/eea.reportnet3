@@ -2,12 +2,15 @@ package org.eea.recordstore.controller;
 
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
+import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -102,5 +105,20 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       LOG_ERROR.error(e.getMessage(), e);
     }
     return vo;
+  }
+
+  @Autowired
+  private UserManagementControllerZull userManagementController;
+
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
+
+  @GetMapping(value = "/prueba")
+  public String prueba() {
+
+    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
+    Long value = 1l;
+    userManagementController.generateToken("user1", "1234");
+    return userManagementController.testSecuredService(value);
   }
 }

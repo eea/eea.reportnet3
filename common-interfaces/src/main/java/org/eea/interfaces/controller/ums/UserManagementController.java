@@ -19,5 +19,5 @@ public interface UserManagementController {
       @RequestParam("password") String password);
 
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
-  String testSecuredService(Long dataflowId);
+  String testSecuredService(@RequestParam("dataflowId") Long dataflowId);
 }

@@ -13,7 +13,7 @@ public class RecordStoreSecurityConfiguration extends SecurityConfiguration {
 
   @Override
   protected String[] getAuthenticatedRequest() {
-    return new String[0];
+    return new String[]{"/recordstore/prueba"};
   }
 
   @Override

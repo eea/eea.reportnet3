@@ -27,7 +27,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @RequestMapping(value = "/user/test-security", method = RequestMethod.GET)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER')")
-  public String testSecuredService(Long dataflowId) {
+  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";
   }
 }
