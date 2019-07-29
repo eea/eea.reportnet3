@@ -211,5 +211,7 @@ public interface DatasetController {
    */
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  ResponseEntity exportFile(Long datasetId, String idTableSchema, String mimeType) throws Exception;
+  ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("idTableSchema") String idTableSchema,
+      @RequestParam("mimeType") String mimeType) throws Exception;
 }
