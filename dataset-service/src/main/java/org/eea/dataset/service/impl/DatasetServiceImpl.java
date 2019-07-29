@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -891,7 +892,6 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -903,6 +903,34 @@ public class DatasetServiceImpl implements DatasetService {
 
     }
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
+    List<FieldValue> fields = recordValue.parallelStream().map(RecordValue::getFields)
+        .filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
+    fieldRepository.saveAll(fields);
+  }
+
+  /**
+   * Creates the records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void createRecords(final Long datasetId, final List<RecordVO> records,
+      final String idTableSchema) throws EEAException {
+    if (datasetId == null || records == null || idTableSchema == null) {
+      throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
+    }
+    Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
+    if (tableId == 0) {
+      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+    }
+    List<RecordValue> recordValue = recordMapper.classListToEntity(records);
+    TableValue table = new TableValue();
+    table.setId(tableId);
+    recordValue.parallelStream().forEach(record -> record.setTableValue(table));
     recordRepository.saveAll(recordValue);
   }
 

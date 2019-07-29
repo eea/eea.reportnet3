@@ -360,7 +360,7 @@ public class DataSetControllerImpl implements DatasetController {
   @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteRecords(@PathVariable("id") final Long datasetId,
-      @RequestBody final List<Long> recordIds) {
+      @RequestParam final List<Long> recordIds) {
     if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }

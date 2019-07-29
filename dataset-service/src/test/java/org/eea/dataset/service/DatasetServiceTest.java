@@ -49,6 +49,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -62,7 +63,9 @@ import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -736,14 +739,6 @@ public class DatasetServiceTest {
     datasetService.updateRecords(1L, null);
   }
 
-
-  public void updateRecordsTest() throws Exception {
-    when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
-    when(recordRepository.saveAll(Mockito.any())).thenReturn(recordValues);
-    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
-    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
-  }
-
   @Test(expected = EEAException.class)
   public void deleteRecordsNullTest() throws Exception {
     datasetService.deleteRecords(null, new ArrayList<Long>());
@@ -760,4 +755,50 @@ public class DatasetServiceTest {
     datasetService.deleteRecords(1L, new ArrayList<Long>());
     Mockito.verify(recordRepository, times(1)).deleteRecordsWithIds(Mockito.any());
   }
+
+  @Test
+  public void updateRecordsTest() throws EEAException {
+    when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
+    datasetService.updateRecords(1L, new ArrayList<RecordVO>());
+    Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
+  }
+
+
+  @Test
+  public void createRecordsTest() throws EEAException {
+    List<RecordValue> myRecords = new ArrayList<>();
+    myRecords.add(new RecordValue());
+    Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
+    Mockito.when(recordMapper.classListToEntity(Mockito.any())).thenReturn(myRecords);
+    datasetService.createRecords(1L, new ArrayList<RecordVO>(), "");
+    Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
+  }
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
+  @Test
+  public void createRecordsExceptionTest() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.TABLE_NOT_FOUND);
+    datasetService.createRecords(1L, new ArrayList<RecordVO>(), "");
+  }
+
+  @Test
+  public void createRecordsException2Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
+    datasetService.createRecords(1L, new ArrayList<RecordVO>(), null);
+  }
+
+  @Test
+  public void createRecordsException3Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
+    datasetService.createRecords(1L, null, "");
+  }
+
+  @Test
+  public void createRecordsException4Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
+    datasetService.createRecords(null, new ArrayList<RecordVO>(), "");
+  }
+
 }
