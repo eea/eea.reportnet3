@@ -446,7 +446,7 @@ public class DatasetServiceImpl implements DatasetService {
       String[] pairs = fields.split(",");
       for (int i = 0; i < pairs.length; i++) {
         String pair = pairs[i];
-        String[] keyValue = pair.split("=");
+        String[] keyValue = pair.split(":");
         mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
         commonShortFields.add(keyValue[0]);
       }
