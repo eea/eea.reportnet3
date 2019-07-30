@@ -24,6 +24,9 @@ import org.springframework.core.env.PropertySource;
 public class FileBasedSecurityConfiguration extends SecurityConfiguration {
 
 
+  @Autowired
+  private Environment env;
+
   @Value("${eea.security.permittedRequest:@null}")
   private String[] permittedRequest;
 
@@ -34,11 +37,12 @@ public class FileBasedSecurityConfiguration extends SecurityConfiguration {
 
   private List<Pair<String[], String>> roleProtectedRequest;
 
-  @Autowired
-  private Environment env;
 
+  /**
+   * Fills role protected request attribute with data got from Application.yml.
+   */
   @PostConstruct
-  public void someMethod() {
+  private void fillRoleProtectedRequest() {
     Map<String, Object> map = new HashMap<>();
     for (Iterator it = ((AbstractEnvironment) env).getPropertySources().iterator();
         it.hasNext(); ) {
@@ -74,15 +78,7 @@ public class FileBasedSecurityConfiguration extends SecurityConfiguration {
 
   @Override
   protected List<Pair<String[], String>> getRoleProtectedRequest() {
-
-//    List<Pair<String[], String>> allowedRoles = new ArrayList<>();
-//    Pair<String[], String> allowedRoleProvider = new ImmutablePair<>(
-//        new String[]{"/recordstore/connection/*"}, "PROVIDER");
-//    Pair<String[], String> allowedRoleRequestor = new ImmutablePair<>(
-//        new String[]{"/recordstore/dataset/create/*"}, "REQUESTOR");
-//    allowedRoles.add(allowedRoleProvider);
-//    allowedRoles.add(allowedRoleRequestor);
-    return null;
+    return roleProtectedRequest;
   }
 }
 
