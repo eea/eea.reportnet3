@@ -53,7 +53,6 @@ public class CSVWriterStrategy implements WriterStrategy {
   /** The response. */
   private HttpServletResponse response;
 
-
   /**
    * Instantiates a new CSV writer strategy.
    *
@@ -65,8 +64,6 @@ public class CSVWriterStrategy implements WriterStrategy {
     this.delimiter = delimiter;
     this.fileCommon = fileCommon;
   }
-
-
 
   /**
    * Parses the file.
@@ -89,14 +86,12 @@ public class CSVWriterStrategy implements WriterStrategy {
 
     setLines(idTableSchema, dataSetSchema, csvWriter, datasetId);
 
-    // once read we convert it to string
+    // Once read we convert it to string
     String csv = writer.getBuffer().toString();
 
     return csv.getBytes();
 
   }
-
-
 
   /**
    * Sets the lines.
@@ -108,27 +103,63 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
       CSVWriter csvWriter, Long datasetId) {
-    List<RecordValue> records = fileCommon.getRecordValues(datasetId, idTableSchema);
+
     List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
-    List<String> headers = new ArrayList<>();
+    List<RecordValue> records = fileCommon.getRecordValues(datasetId, idTableSchema);
     Map<String, Integer> indexMap = new HashMap<>();
 
-    // Writting the headers
+    // If we don't have fieldSchemas, return an empty file.
+    if (fieldSchemas != null) {
+
+      int nHeaders = setHeaders(fieldSchemas, indexMap, csvWriter);
+
+      // If we don't have records, return a file only with headers.
+      if (records != null) {
+        setRecords(records, indexMap, nHeaders, csvWriter);
+      }
+    }
+  }
+
+  /**
+   * Sets the headers.
+   *
+   * @param fieldSchemas the field schemas
+   * @param indexMap the index map
+   * @param csvWriter the csv writer
+   * @return the int
+   */
+  private int setHeaders(List<FieldSchemaVO> fieldSchemas, Map<String, Integer> indexMap,
+      CSVWriter csvWriter) {
+
+    List<String> headers = new ArrayList<>();
+
     int nHeaders = 0;
     for (FieldSchemaVO fieldSchema : fieldSchemas) {
       headers.add(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
     }
-
     csvWriter.writeNext(headers.stream().toArray(String[]::new));
 
-    // Writting the values
+    return nHeaders;
+  }
+
+  /**
+   * Sets the records.
+   *
+   * @param records the records
+   * @param indexMap the index map
+   * @param nHeaders the n headers
+   * @param csvWriter the csv writer
+   */
+  private void setRecords(List<RecordValue> records, Map<String, Integer> indexMap, int nHeaders,
+      CSVWriter csvWriter) {
+
     for (RecordValue recordValue : records) {
       List<FieldValue> fields = recordValue.getFields();
       List<String> unknownColumns = new ArrayList<>();
       String[] fieldsToWrite = new String[nHeaders];
-      for (int i = 0; i < fields.size(); i++) {
-        FieldValue field = fields.get(i);
+
+      for (FieldValue field : fields) {
         if (null != field.getIdFieldSchema()) {
           fieldsToWrite[indexMap.get(field.getIdFieldSchema())] = field.getValue();
         } else {
@@ -139,8 +170,6 @@ public class CSVWriterStrategy implements WriterStrategy {
       csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite));
     }
   }
-
-
 
   /**
    * Join output array.
