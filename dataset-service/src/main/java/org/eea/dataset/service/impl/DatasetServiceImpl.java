@@ -433,8 +433,8 @@ public class DatasetServiceImpl implements DatasetService {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<String, Integer>();
     List<SortField> sortFieldsArray = new ArrayList<>();
-
     List<RecordValue> records = null;
+
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     if (null == fields) {
@@ -444,13 +444,12 @@ public class DatasetServiceImpl implements DatasetService {
     } else {
 
       String[] pairs = fields.split(",");
-      for (String pairValue : pairs) {
-        String pair = pairValue;
+      for (int i = 0; i < pairs.length; i++) {
+        String pair = pairs[i];
         String[] keyValue = pair.split("=");
         mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
         commonShortFields.add(keyValue[0]);
       }
-
 
       for (String nameField : commonShortFields) {
         FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);

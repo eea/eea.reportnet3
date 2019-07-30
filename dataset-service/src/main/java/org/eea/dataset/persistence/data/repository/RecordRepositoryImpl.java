@@ -1,9 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -154,6 +151,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param pageable the pageable
    * @return the list
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable) {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
@@ -165,27 +163,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return query.getResultList();
   }
 
-
-  /**
-   * Removes duplicated records in the query.
-   *
-   * @param records the records
-   *
-   * @return the list
-   */
-  private List<RecordValue> sanitizeUnOrderedRecords(List<RecordValue> records) {
-    List<RecordValue> sanitizedRecords = new ArrayList<>();
-    Set<Long> processedRecords = new HashSet<>();
-    for (RecordValue recordValue : records) {
-      if (!processedRecords.contains(recordValue.getId())) {
-        processedRecords.add(recordValue.getId());
-        sanitizedRecords.add(recordValue);
-      }
-
-    }
-    return sanitizedRecords;
-
-  }
 
   /**
    * Sanitize ordered records.
