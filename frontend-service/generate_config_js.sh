@@ -6,5 +6,8 @@ else
 fi
  
 cat <<EOF
-window.REACT_APP_BACKEND=$BACKEND_JSON;
+window.env = {
+	  REACT_APP_BACKEND: $BACKEND_JSON
+};
+
 EOF

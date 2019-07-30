@@ -57,8 +57,8 @@ const ValidationViewer = props => {
 		));
 		columnsArr.push(
 			<Column
-				key="idObject"
-				field="idObject"
+				key="idRecord"
+				field="idRecord"
 				header=""
 				className={styles.VisibleHeader}
 			/>
@@ -176,6 +176,7 @@ const ValidationViewer = props => {
 					.then(res => {
 						contextReporterDataSet.setTabHandler(event.data.idTableSchema);
 						contextReporterDataSet.setPageHandler(res.data.position);
+						contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
 						contextReporterDataSet.validationsVisibleHandler();
 					})
 					.catch(error => {

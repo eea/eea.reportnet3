@@ -26,8 +26,8 @@ const DataViewer = props => {
 	const [loading, setLoading] = useState(false);
 	const [numRows, setNumRows] = useState(10);
 	const [firstRow, setFirstRow] = useState(
-		props.positionIdObject && props.positionIdObject !== null
-			? Math.floor(props.positionIdObject / numRows) * numRows
+		props.positionIdRecord && props.positionIdRecord !== null
+			? Math.floor(props.positionIdRecord / numRows) * numRows
 			: 0
 	);
 	const [sortOrder, setSortOrder] = useState();
@@ -52,8 +52,8 @@ const DataViewer = props => {
 	useEffect(() => {
 		console.log("Setting column options...");
 
-		if (firstRow !== props.positionIdObject) {
-			setFirstRow(Math.floor(props.positionIdObject / numRows) * numRows);
+		if (firstRow !== props.positionIdRecord) {
+			setFirstRow(Math.floor(props.positionIdRecord / numRows) * numRows);
 		}
 
 		let colOpt = [];
@@ -66,14 +66,15 @@ const DataViewer = props => {
 		fetchDataHandler(
 			null,
 			sortOrder,
-			Math.floor(props.positionIdObject / numRows) * numRows,
+			Math.floor(props.positionIdRecord / numRows) * numRows,
 			numRows
 		);
 
 		console.log("Filtering data...");
-		const inmTableSchemaColumns = [...props.tableSchemaColumns];
+    const inmTableSchemaColumns = [...props.tableSchemaColumns];
+    inmTableSchemaColumns.push({table: inmTableSchemaColumns[0].table, field: "id", header: ""})
 		setCols(inmTableSchemaColumns);
-	}, [props.positionIdObject]);
+	}, [props.positionIdRecord]);
 
 	useEffect(() => {
 		// let visibilityIcon = (<div className="TableDiv">
@@ -87,15 +88,19 @@ const DataViewer = props => {
 		// </div>;
 		// setHeader(headerArr);
 
-		let columnsArr = cols.map(col => (
+    let columnsArr = cols.map(col => {
+      let sort = (col.field==="id")? false : true;
+      let visibleColumn = (col.field==="id")? styles.VisibleHeader : "";
+      return (
 			<Column
-				sortable={true}
+        sortable = {sort}
 				key={col.field}
 				field={col.field}
 				header={col.header}
-				body={dataTemplate}
+        body={dataTemplate}
+        className={visibleColumn}
 			/>
-		));
+		)});
 		let validationCol = (
 			<Column
 				key="recordValidation"
@@ -113,7 +118,9 @@ const DataViewer = props => {
 		console.log("Refetching data...");
 		setNumRows(event.rows);
 		setFirstRow(event.first);
-		fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+		contextReporterDataSet.setPageHandler(event.first);
+		contextReporterDataSet.setIdSelectedRowHandler(-1);
+		//fetchDataHandler(sortField, sortOrder, event.first, event.rows);
 	};
 
 	const onConfirmDeleteHandler = () => {	
@@ -134,10 +141,13 @@ const DataViewer = props => {
 		console.log("Sorting...");
 		setSortOrder(event.sortOrder);
 		setSortField(event.sortField);
-		fetchDataHandler(event.multiSortMeta, event.sortOrder, firstRow, numRows);
+		contextReporterDataSet.setPageHandler(0);
+		contextReporterDataSet.setIdSelectedRowHandler(-1);
 	};
 
 	const onRefreshClickHandler = () => {
+		contextReporterDataSet.setPageHandler(0);
+    	contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(null, sortOrder, firstRow, numRows);
 	};
 
@@ -200,7 +210,8 @@ const DataViewer = props => {
 					fieldData: { [field.idFieldSchema]: field.value },
 					fieldValidations: field.fieldValidations
 				};
-			});
+      });
+      arrayDataFields.push({fieldData: {id: record.id}, fieldValidations:null});
 			const arrayDataAndValidations = {
 				dataRow: arrayDataFields,
 				recordValidations
@@ -288,7 +299,7 @@ const DataViewer = props => {
 						levelError = "BLOCKER";
 					}
 				}
-			});
+			});      
 
 			return (
 				<div
@@ -404,6 +415,12 @@ const DataViewer = props => {
 		});
 	};
 
+  const rowClassName = (rowData) => {
+    let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === "id")[0].fieldData.id;
+    console.log(rowData.dataRow, props.idSelectedRow)
+    return {'p-highlight' : (id === props.idSelectedRow)};
+  }
+  
 	let totalCount = <span>Total: {totalRecords} rows</span>;
 
 	return (
@@ -436,8 +453,8 @@ const DataViewer = props => {
 					header={header}
 					sortField={sortField}
 					sortOrder={sortOrder}
-					autoLayout={true}
-					sortMode="multiple"
+          autoLayout={true}
+          rowClassName={rowClassName}
 				>
 					{columns}
 				</DataTable>

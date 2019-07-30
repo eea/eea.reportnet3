@@ -110,12 +110,14 @@ const DashBoard = (props) =>{
 
 
     return(
-        <React.Fragment>
-        <h1>{dashBoardTitle}</h1>
-        { (dashBoardData.datasets && dashBoardData.datasets.length > 0) ?
-          <Chart type="bar" 
-                 data={dashBoardData} 
-                 options={dashBoardOptions} />
+        <React.Fragment>        
+        { (dashBoardData.datasets && dashBoardData.datasets.length > 0 && ![].concat.apply([], dashBoardData.datasets[0].totalData).every(t=>t===0)) ?
+            <React.Fragment>
+                <h1>{dashBoardTitle}</h1>
+                <Chart type="bar" 
+                        data={dashBoardData} 
+                        options={dashBoardOptions} />
+            </React.Fragment>
         : <div className={styles.NoErrorData}>{resources.messages["noErrorData"]}</div>
             }
         </React.Fragment>

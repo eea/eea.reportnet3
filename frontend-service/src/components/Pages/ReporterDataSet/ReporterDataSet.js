@@ -15,12 +15,15 @@ import Dashboard from "../../../containers/DashBoard/DashBoard";
 import MainLayout from "../../Layout/main-layout.component";
 import config from "../../../conf/web.config.json";
 import HTTPRequesterAPI from "../../../services/HTTPRequester/HTTPRequester";
+import getUrl from "../../../Utils/getUrl";
 import styles from "./ReporterDataSet.module.css";
 import ResourcesContext from "../../Context/ResourcesContext";
 import ReporterDataSetContext from "../../Context/ReporterDataSetContext";
 
-const ReporterDataSet = ({match, history}) => {
-	const { params: { dataSetId } } = match;
+const ReporterDataSet = ({ match, history }) => {
+	const {
+		params: { dataFlowId, dataSetId }
+	} = match;
 	const resources = useContext(ResourcesContext);
 	const [datasetTitle, setDatasetTitle] = useState("");
 	const [customButtons, setCustomButtons] = useState([]);
@@ -35,7 +38,8 @@ const ReporterDataSet = ({match, history}) => {
 	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
 	const [isDataDeleted, setIsDataDeleted] = useState(false);
 	const [activeIndex, setActiveIndex] = useState();
-	const [positionIdObject, setPositionIdObject] = useState(0);
+  const [positionIdRecord, setPositionIdRecord] = useState(0);
+  const [idSelectedRow, setIdSelectedRow] = useState(-1);
 
 	const home = {
 		icon: resources.icons["home"],
@@ -47,13 +51,13 @@ const ReporterDataSet = ({match, history}) => {
 
 		setBreadCrumbItems([
 			{
-			  label: resources.messages["dataFlowTask"],
-			  command: () => history.push("/data-flow-task")
+				label: resources.messages["dataFlowTask"],
+				command: () => history.push("/data-flow-task")
 			},
 			{
-			  label: resources.messages["reportingDataFlow"],
-			  command: () =>
-				history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+				label: resources.messages["reportingDataFlow"],
+				command: () =>
+					history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
 			},
 			{ label: resources.messages["viewData"] }
 		]);
@@ -63,14 +67,13 @@ const ReporterDataSet = ({match, history}) => {
 
 		//`${config.dataSchemaAPI.url}1`
 		const dataPromise = HTTPRequesterAPI.get({
-			url: `${config.dataSchemaAPI.url}${dataSetId}`,
+			url: getUrl(config.dataSchemaAPI.url, { dataFlowId }),
 			/* url: "/jsons/datosDataSchema2.json", */
 			queryString: {}
 		});
 		dataPromise
 			.then(response => {
 				//'/jsons/error-statistics.json'
-				setDatasetTitle(response.data.nameDataSetSchema);
 				const dataPromiseError = HTTPRequesterAPI.get({
 					url: `${config.loadStatisticsAPI.url}${dataSetId}`,
 					/* url: "/jsons/error-statistics.json", */
@@ -79,6 +82,7 @@ const ReporterDataSet = ({match, history}) => {
 
 				//Parse JSON to array statistic values
 				dataPromiseError.then(res => {
+          setDatasetTitle(res.data.nameDataSetSchema);
 					setTableSchema(
 						response.data.tableSchemas.map((item, i) => {
 							return {
@@ -177,7 +181,7 @@ const ReporterDataSet = ({match, history}) => {
 
 	const onConfirmDeleteHandler = () => {
 		setDeleteDialogVisible(false);
-		HTTPRequesterAPI.delete({			
+		HTTPRequesterAPI.delete({
 			url: `/dataset/${dataSetId}/deleteImportData`,
 			queryString: {}
 		}).then(res => {
@@ -185,7 +189,7 @@ const ReporterDataSet = ({match, history}) => {
 		});
 	};
 
-	const onConfirmValidateHandler = () => {		
+	const onConfirmValidateHandler = () => {
 		setValidateDialogVisible(false);
 		HTTPRequesterAPI.update({
 			url: `/validation/dataset/${dataSetId}`,
@@ -194,8 +198,9 @@ const ReporterDataSet = ({match, history}) => {
 	};
 
 	const onTabChangeHandler = idTableSchema => {
-		setActiveIndex(idTableSchema.index);
-		setPositionIdObject(0);
+    setActiveIndex(idTableSchema.index);
+    setIdSelectedRow(-1);
+		setPositionIdRecord(0);
 	};
 
 	return (
@@ -218,20 +223,24 @@ const ReporterDataSet = ({match, history}) => {
 					value={{
 						validationsVisibleHandler: null,
 						setTabHandler: null,
-						setPageHandler: posIdObject => {
-							setPositionIdObject(posIdObject);
-						}
+						setPageHandler: posIdRecord => {
+							setPositionIdRecord(posIdRecord);
+            },
+            setIdSelectedRowHandler: (selectedRowId)=> { 
+              setIdSelectedRow(selectedRowId)
+            }
 					}}
 				>
 					<TabsSchema
 						tables={tableSchema}
-						tableSchemaColumns={tableSchemaColumns}						
+						tableSchemaColumns={tableSchemaColumns}
 						urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
 						activeIndex={activeIndex}
-						positionIdObject={positionIdObject}
+						positionIdRecord={positionIdRecord}
 						onTabChangeHandler={idTableSchema =>
 							onTabChangeHandler(idTableSchema)
-						}
+            }
+            idSelectedRow={idSelectedRow}
 					/>
 				</ReporterDataSetContext.Provider>
 				<Dialog
@@ -253,9 +262,12 @@ const ReporterDataSet = ({match, history}) => {
 						setTabHandler: idTableSchema => {
 							setActiveIndex(idTableSchema);
 						},
-						setPageHandler: posIdObject => {
-							setPositionIdObject(posIdObject);
-						}
+						setPageHandler: posIdRecord => {
+							setPositionIdRecord(posIdRecord);
+						},
+            setIdSelectedRowHandler: (selectedRowId)=> { 
+              setIdSelectedRow(selectedRowId)
+            }
 					}}
 				>
 					<Dialog
@@ -266,7 +278,10 @@ const ReporterDataSet = ({match, history}) => {
 						dismissableMask={true}
 						style={{ width: "80%" }}
 					>
-						<ValidationViewer dataSetId={dataSetId} visible={validationsVisible}/>
+						<ValidationViewer
+							dataSetId={dataSetId}
+							visible={validationsVisible}
+						/>
 					</Dialog>
 				</ReporterDataSetContext.Provider>
 				<ConfirmDialog

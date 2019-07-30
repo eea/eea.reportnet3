@@ -5,8 +5,9 @@ import java.io.InputStream;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.callable.UpdateRecordHelper;
-import org.eea.dataset.service.file.FileTreatmentHelper;
+import org.eea.dataset.service.helper.DeleteHelper;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
+import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -72,6 +73,9 @@ public class DataSetControllerImpl implements DatasetController {
   /** The load validations helper. */
   @Autowired
   UpdateRecordHelper updateRecordHelper;
+
+  @Autowired
+  DeleteHelper deleteHelper;
 
   /**
    * Gets the data tables values.
@@ -394,6 +398,7 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param dataSetId the data set id
    * @param idTableSchema the id table schema
+   * @throws EEAException
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
@@ -406,8 +411,12 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    LOG.info("executing delete");
-    datasetService.deleteTableBySchema(idTableSchema, dataSetId);
+    LOG.info("Executing delete table value with id {} from dataset {}", idTableSchema, dataSetId);
+    try {
+      deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
 }
