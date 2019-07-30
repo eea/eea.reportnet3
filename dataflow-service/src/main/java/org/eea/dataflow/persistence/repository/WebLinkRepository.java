@@ -9,7 +9,12 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface WebLinkRepository extends CrudRepository<Weblink, Long> {
 
-  // to find all dataflow
+  /**
+   * Find all by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
   List<Weblink> findAllByDataflow_Id(Long idDataflow);
 
 }

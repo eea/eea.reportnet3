@@ -54,7 +54,7 @@ public class FileExportContextImplTest {
     byte[] expectedResult = "".getBytes();
     Mockito.when(writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(expectedResult);
-    assertEquals(expectedResult, fileExportContextImpl.fileWriter(1L, 1L, ""));
+    assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, ""));
   }
 
 }

@@ -14,7 +14,7 @@ public interface DataflowWebLinkService {
   /**
    * Gets the web link.
    *
-   * @param idDataflow the id dataflow
+   * @param idLink the id link
    * @return the web link
    * @throws EEAException the EEA exception
    */

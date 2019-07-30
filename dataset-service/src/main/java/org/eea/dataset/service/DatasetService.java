@@ -104,12 +104,10 @@ public interface DatasetService {
   /**
    * Gets the dataset by id.
    *
-   * @deprecated this deprecated
    * @param datasetId the dataset id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
+   * @deprecated this deprecated
    */
   @Deprecated
   DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
@@ -175,14 +173,16 @@ public interface DatasetService {
    */
   void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
 
+
   /**
    * Export file.
    *
    * @param datasetId the dataset id
    * @param mimeType the mime type
-   * @param response the response
-   * @throws EEAException
-   * @throws IOException
+   * @param idTableSchema the id table schema
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
       throws EEAException, IOException;
