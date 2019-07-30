@@ -17,7 +17,7 @@ public class DatasetSecurityConfiguration extends SecurityConfiguration {
   }
 
   @Override
-  protected String[] getPermitedRequest() {
+  protected String[] getPermittedRequest() {
     return new String[]{"/dataset/**"};
   }
 

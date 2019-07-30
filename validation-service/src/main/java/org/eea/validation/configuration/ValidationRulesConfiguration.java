@@ -1,5 +1,6 @@
 package org.eea.validation.configuration;
 
+import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,26 +21,38 @@ import com.mongodb.MongoClient;
 @EnableMongoRepositories(basePackages = "org.eea.validation.persistence.repository")
 public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
 
-  /** The Constant DEFAULT_PORT. */
+  /**
+   * The Constant DEFAULT_PORT.
+   */
   private static final int DEFAULT_PORT = 27017;
 
-  /** The dll. */
+  /**
+   * The dll.
+   */
   @Value("${mongodb.hibernate.ddl-auto}")
   private String dll;
 
-  /** The host. */
+  /**
+   * The host.
+   */
   @Value("${mongodb.primary.host}")
   private String host;
 
-  /** The port. */
+  /**
+   * The port.
+   */
   @Value("${mongodb.primary.port}")
   private Integer port;
 
-  /** The username. */
+  /**
+   * The username.
+   */
   @Value("${mongodb.primary.username}")
   private String username;
 
-  /** The password. */
+  /**
+   * The password.
+   */
   @Value("${mongodb.primary.password}")
   private String password;
 
@@ -47,6 +60,7 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
    * Schemas transaction manager.
    *
    * @param dbFactory the db factory
+   *
    * @return the mongo transaction manager
    */
   @Bean

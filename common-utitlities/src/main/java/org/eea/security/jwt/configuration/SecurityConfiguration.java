@@ -2,22 +2,20 @@ package org.eea.security.jwt.configuration;
 
 
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eea.security.jwt.expression.SecondLevelAuthorizationConfiguration;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
@@ -28,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @ComponentScan("org.eea.security")
 @Import(SecondLevelAuthorizationConfiguration.class)
 public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
 
   @Autowired
   private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -62,7 +61,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
     if (null != authenticatedRequest && authenticatedRequest.length > 0) {
       http.authorizeRequests().antMatchers(authenticatedRequest).authenticated();
     }
-    String[] permitedRequest = getPermitedRequest();
+    String[] permitedRequest = getPermittedRequest();
     if (null != permitedRequest && permitedRequest.length > 0) {
       http.authorizeRequests().antMatchers(permitedRequest).permitAll();
     }
@@ -96,7 +95,7 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
    *
    * @return the string [ ]
    */
-  protected abstract String[] getPermitedRequest();
+  protected abstract String[] getPermittedRequest();
 
   /**
    * Gets role protected request.
