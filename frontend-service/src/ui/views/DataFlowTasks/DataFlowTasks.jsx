@@ -52,8 +52,9 @@ export const DataFlowTasks = ({ match, history }) => {
     if (tabMenuActiveItem.tabKey === 'pending') {
       c.listKeys.push('pending');
       c.listKeys.push('accepted');
-      // c.apiUrl = `${config.loadDataFlowTaskPendingAcceptedAPI.url}${c.userId}`;
-      c.apiUrl = '/jsons/DataFlaws2.json';
+      c.apiUrl = window.env.REACT_APP_JSON
+        ? '/jsons/DataFlaws2.json'
+        : `${config.loadDataFlowTaskPendingAcceptedAPI.url}${c.userId}`;
       c.queryString = {};
     } else {
       c.listKeys.push('completed');
