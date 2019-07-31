@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useContext, Suspense } from 'react';
-
-import PropTypes from 'prop-types';
+import React, { useState, useContext } from 'react';
 
 import styles from './DataFlowColumn.module.css';
 
 import { config } from 'assets/conf';
 
 import { Button } from 'primereact/button';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -18,17 +15,16 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
   const resources = useContext(ResourcesContext);
   const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
 
-  console.log('Start DataFlowColumn...');
-
   const setVisibleHandler = (fnUseState, visible) => {
     fnUseState(visible);
   };
 
   const onConfirmSubscribeHandler = () => {
-    console.log('onConfirmSubscribeHandler');
     setSubscribeDialogVisible(false);
-    HTTPRequester.get({ url: '/subscribe/dataflow', queryString: {} });
-    console.log('/subscribe/dataflow');
+    HTTPRequester.get({
+      url: window.env.REACT_APP_JSON ? '/subscribe/dataflow' : '/subscribe/dataflow',
+      queryString: {}
+    });
   };
 
   return (

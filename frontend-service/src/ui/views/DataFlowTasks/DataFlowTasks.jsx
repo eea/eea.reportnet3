@@ -61,7 +61,7 @@ export const DataFlowTasks = ({ match, history }) => {
     }
 
     HTTPRequester.get({
-      url: c.apiUrl,
+      url: window.env.REACT_APP_JSON ? c.apiUrl : c.apiUrl,
       queryString: c.queryString
     })
       .then(response => {
