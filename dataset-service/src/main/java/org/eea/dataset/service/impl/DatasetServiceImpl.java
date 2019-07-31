@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,6 +141,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
   /**
@@ -172,6 +174,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  /** The file export factory. */
   @Autowired
   private IFileExportFactory fileExportFactory;
 
@@ -213,15 +216,38 @@ public class DatasetServiceImpl implements DatasetService {
   private RecordValidationMapper recordValidationMapper;
 
 
+
   /**
-   * Creates the removeDatasetData dataset.
+   * Creates the empty dataset.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
+   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void createEmptyDataset(final String datasetName) {
-    recordStoreControllerZull.createEmptyDataset("dataset_" + datasetName);
+  public void createEmptyDataset(final String datasetName, String idDatasetSchema, Long idDataflow)
+      throws EEAException {
+
+    ReportingDataset reportingData = new ReportingDataset();
+    reportingData.setDataSetName(datasetName);
+    reportingData.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+    reportingData.setDataflowId(idDataflow);
+    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
+    partition.setUsername("root");
+    partition.setIdDataSet(reportingData);
+    List<PartitionDataSetMetabase> partitions = new ArrayList<>();
+    partitions.add(partition);
+    reportingData.setPartitions(partitions);
+    // save reporting dataset into metabase
+    reportingDatasetRepository.save(reportingData);
+
+    // create the dataset into datasets
+    recordStoreControllerZull.createEmptyDataset("dataset_" + reportingData.getId(),
+        idDatasetSchema);
+
+
   }
 
 
@@ -506,14 +532,13 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Retrieves in a controlled way the data from database
-   *
+   * 
    * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
-   * @deprecated this method is deprecated
    * @param idTableSchema the id table schema
    * @param idFieldSchema the id field schema
-   *
    * @return the list
+   * @deprecated this method is deprecated
    */
   @Deprecated
   private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
@@ -575,12 +600,10 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Gets the by id.
    *
-   * @deprecated this method is deprecated
    * @param datasetId the dataset id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
+   * @deprecated this method is deprecated
    */
   @Override
   @Transactional
@@ -962,6 +985,16 @@ public class DatasetServiceImpl implements DatasetService {
     recordRepository.deleteRecordsWithIds(recordIds);
   }
 
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param idTableSchema the id table schema
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Transactional
   public byte[] exportFile(Long datasetId, String mimeType, final String idTableSchema)
@@ -978,6 +1011,15 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Gets the file name.
+   *
+   * @param mimeType the mime type
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the file name
+   * @throws EEAException the EEA exception
+   */
   @Override
   public String getFileName(String mimeType, String idTableSchema, Long datasetId)
       throws EEAException {
@@ -986,6 +1028,25 @@ public class DatasetServiceImpl implements DatasetService {
     return null == fileCommon.getFieldSchemas(idTableSchema, dataSetSchema)
         ? datasetMetabase.getDataSetName() + "." + mimeType
         : fileCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;
+
+  }
+
+
+  /**
+   * Insert schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void insertSchema(Long datasetId, String idDatasetSchema) throws EEAException {
+
+    DatasetValue ds = new DatasetValue();
+    ds.setIdDatasetSchema(idDatasetSchema);
+    ds.setId(datasetId);
+    datasetRepository.save(ds);
 
   }
 }

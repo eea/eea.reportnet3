@@ -19,12 +19,17 @@ import org.springframework.data.domain.Pageable;
  */
 public interface DatasetService {
 
+
   /**
-   * Create removeDatasetData dataset.
+   * Creates the empty dataset.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
+   * @throws EEAException the EEA exception
    */
-  void createEmptyDataset(String datasetName);
+  void createEmptyDataset(String datasetName, String idDatasetSchema, Long idDataflow)
+      throws EEAException;
 
   /**
    * Process the file: read, parse and save in the db.
@@ -210,5 +215,15 @@ public interface DatasetService {
    */
   void createRecords(Long datasetId, List<RecordVO> records, String idTableSchema)
       throws EEAException;
+
+
+  /**
+   * Insert schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  void insertSchema(@DatasetId Long datasetId, String idDatasetSchema) throws EEAException;
 
 }
