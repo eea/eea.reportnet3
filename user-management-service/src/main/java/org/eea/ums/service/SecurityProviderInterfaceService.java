@@ -25,6 +25,16 @@ public interface SecurityProviderInterfaceService {
   String doLogin(String username, String password, Object... extraParams);
 
   /**
+   * Check access permission boolean.
+   *
+   * @param resource the resource
+   * @param scopes the scopes
+   *
+   * @return the boolean
+   */
+  Boolean checkAccessPermission(String resource, String... scopes);
+
+  /**
    * Gets user group info.
    *
    * @param securityToken the security token

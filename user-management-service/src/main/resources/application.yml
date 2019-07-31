@@ -3,3 +3,6 @@ server:
 spring:
   application:
     name: ums
+eea:
+  security:
+    authenticatedRequest: /user/checkAccess

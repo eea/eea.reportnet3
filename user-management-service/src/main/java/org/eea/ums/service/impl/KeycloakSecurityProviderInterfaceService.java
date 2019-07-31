@@ -1,20 +1,16 @@
 package org.eea.ums.service.impl;
 
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.ums.service.SecurityProviderInterfaceService;
-import org.eea.ums.service.keycloak.KeycloakConnectorService;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
 import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 @Service
 public class KeycloakSecurityProviderInterfaceService implements SecurityProviderInterfaceService {
@@ -44,6 +40,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public String doLogin(String username, String password, Object... extraParams) {
     return keycloakConnectorService.generateToken(username, password);
+  }
+
+  @Override
+  public Boolean checkAccessPermission(String resource, String... scopes) {
+    return !keycloakConnectorService.checkUserPermision(resource, scopes).equals("DENY");
   }
 
   @Override

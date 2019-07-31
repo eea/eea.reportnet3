@@ -24,6 +24,13 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @RequestMapping(value = "/user/checkAccess", method = RequestMethod.GET)
+  public Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
+      @RequestParam("scopes") String[] scopes) {
+    return securityProviderInterfaceService.checkAccessPermission(resource, scopes);
+  }
+
+  @Override
   @RequestMapping(value = "/user/test-security", method = RequestMethod.GET)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {

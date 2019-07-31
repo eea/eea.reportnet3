@@ -18,6 +18,10 @@ public interface UserManagementController {
   String generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password);
 
+  @RequestMapping(value = "/user/checkAccess", method = RequestMethod.GET)
+  Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
+      @RequestParam("scopes") String[] scopes);
+
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
   String testSecuredService(@RequestParam("dataflowId") Long dataflowId);
 }

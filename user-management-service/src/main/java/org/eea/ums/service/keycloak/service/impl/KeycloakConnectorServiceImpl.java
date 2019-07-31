@@ -1,4 +1,4 @@
-package org.eea.ums.service.keycloak;
+package org.eea.ums.service.keycloak.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,9 @@ import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
 import org.eea.ums.service.keycloak.model.Resource;
+import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * The type Keycloak connector service.
  */
 @Service
-public class KeycloakConnectorService {
+public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   @Value("${eea.keycloak.realmName}")
   private String realmName;
@@ -40,8 +42,6 @@ public class KeycloakConnectorService {
 
   @Value("${eea.keycloak.clientId}")
   private String clientId;
-
-  private String internalClientId;
 
   @Value("${eea.keycloak.host}")
   private String keycloakHost;
@@ -53,6 +53,11 @@ public class KeycloakConnectorService {
   private String adminUser;
   @Value("${eea.keycloak.admin.password}")
   private String adminPass;
+
+
+  private String internalClientId;
+  private Map<String, String> resourceTypes = new HashMap<>();
+
   private RestTemplate restTemplate = new RestTemplate();
 
   private static final String GENERATE_TOKEN_URL = "/auth/realms/{realm}/protocol/openid-connect/token";
@@ -62,6 +67,8 @@ public class KeycloakConnectorService {
   private static final String ADD_USER_TO_USER_GROUP_URL = "";
   private static final String CHECK_USER_PERMISSION = "/auth/admin/realms/{realm}/clients/{clientInterenalId}/authz/resource-server/policy/evaluate";
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
+  private static final String GET_RESOURCE_SET = "/auth/realms/{realm}/authz/protection/resource_set";
+  private static final String GET_RESOURCE_INFO = "/auth/realms/{realm}/authz/protection/resource_set/{resourceId}";
 
 
   @PostConstruct
@@ -70,18 +77,26 @@ public class KeycloakConnectorService {
     //such as clientId, resources...
     String adminToken = this.generateToken(adminUser, adminPass);
     this.internalClientId = getReportnetClientInfo(adminToken).getId();
+    List<ResourceInfo> resources = this.getResourceInfo(adminToken);
+    resources.stream()
+        .forEach(resource -> resourceTypes.put(resource.getName(), resource.getType()));
 
   }
+
 
   /**
    * Check user permision boolean.
    *
+   * @param resourceName the resource name
+   * @param scopes the scopes
+   *
    * @return the boolean
    */
-  public Boolean checkUserPermision(String resourceName, String... scopes) {
+  @Override
+  public String checkUserPermision(String resourceName, String... scopes) {
 
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", TokenMonitor.getToken());
+    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
@@ -100,17 +115,18 @@ public class KeycloakConnectorService {
     resource.setName(resourceName);
     resource.setScopes(Arrays.asList(scopes));
     resources.add(resource);
+    resource.setType(this.resourceTypes.get(resourceName));
     checkResourceInfo.setResources(resources);
 
     HttpEntity<CheckResourcePermissionRequest> request = new HttpEntity<>(
         checkResourceInfo, headers);
-    ResponseEntity<CheckResourcePermissionResult[]> clientInfo = this.restTemplate
+    ResponseEntity<CheckResourcePermissionResult> checkResult = this.restTemplate
         .exchange(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
                 .path(CHECK_USER_PERMISSION)
                 .buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
-            CheckResourcePermissionResult[].class);
-    return false;
+            CheckResourcePermissionResult.class);
+    return checkResult.getBody().getStatus();
   }
 
   /**
@@ -121,8 +137,11 @@ public class KeycloakConnectorService {
    *
    * @return the string
    */
+  @Override
   public String generateToken(String username, String password) {
     HttpHeaders headers = createBasicHeaders(null);
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("realm", realmName);
 
@@ -170,10 +189,45 @@ public class KeycloakConnectorService {
 
   }
 
+  private List<ResourceInfo> getResourceInfo(String adminToken) {
+    //First Get all the Resource sets
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Authorization", "Bearer " + adminToken);
+    HttpHeaders headers = createBasicHeaders(headerInfo);
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put("realm", realmName);
+
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
+        null, headers);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+
+    ResponseEntity<String[]> resourceSet = this.restTemplate
+        .exchange(
+            uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_SET)
+                .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+            String[].class);
+    //Second: Once all the resource sets have been retrieved, get information about everyone of them
+    List<ResourceInfo> result = new ArrayList<>();
+    Arrays.asList(resourceSet.getBody()).forEach(resourceSetId -> {
+
+      Map<String, String> uriRequestParam = new HashMap<>();
+      uriRequestParam.put("realm", realmName);
+      uriRequestParam.put("resourceId", resourceSetId);
+      UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
+      ResponseEntity<ResourceInfo> resource = this.restTemplate
+          .exchange(
+              uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
+                  .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
+              ResourceInfo.class);
+      result.add(resource.getBody());
+    });
+    return result;
+  }
+
   private HttpHeaders createBasicHeaders(Map<String, String> headersInfo) {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
     if (null != headersInfo && headersInfo.size() > 0) {
       headersInfo.entrySet().forEach(entry -> headers.set(entry.getKey(), entry.getValue()));
     }

@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import javax.annotation.concurrent.ThreadSafe;
-import org.eea.ums.service.keycloak.KeycloakConnectorService;
+import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class TokenMonitor implements DisposableBean {
 
   @Autowired
-  private KeycloakConnectorService keycloakConnectorService;
+  private KeycloakConnectorServiceImpl keycloakConnectorService;
   @Value("${eea.keycloak.admin.user}")
   private String adminUser;
   @Value("${eea.keycloak.admin.password}")

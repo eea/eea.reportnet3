@@ -7,34 +7,31 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * The type Resource.
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
     "name",
-    "scopes",
-    "type"
+    "type",
+    "owner",
+    "ownerManagedAccess",
+    "displayName",
+    "_id",
+    "uris"
 })
 @Getter
 @Setter
-public class Resource {
+public class ResourceInfo {
 
-  /**
-   * The Name.
-   */
   @JsonProperty("name")
   private String name;
-  /**
-   * The Scopes.
-   */
-  @JsonProperty("scopes")
-  private List<String> scopes = null;
-
-  /**
-   * The Type
-   */
   @JsonProperty("type")
   private String type;
+  @JsonProperty("ownerManagedAccess")
+  private Boolean ownerManagedAccess;
+  @JsonProperty("displayName")
+  private String displayName;
+  @JsonProperty("_id")
+  private String id;
+  @JsonProperty("uris")
+  private List<String> uris = null;
 
 }
