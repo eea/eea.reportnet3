@@ -29,6 +29,9 @@
 	"deleteSnapshotByID": {
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
 	},
+	"createSnapshot": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
+	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/"
 	}

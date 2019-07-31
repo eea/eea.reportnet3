@@ -25,12 +25,9 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
 
     dataPromise
       .then(response => {
-        //rerender DataFlowList component
         dataFetch();
-        console.log(response);
       })
       .catch(error => {
-        console.warn(`${type} ERROR =>  `, error);
         return error;
       });
   };

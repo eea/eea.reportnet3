@@ -66,9 +66,7 @@ export const ReporterDataSet = ({ match, history }) => {
     ]);
 
     const dataPromise = HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/datosDataSchema2.json'
-        : getUrl(config.dataSchemaAPI.url, { dataFlowId }),
+      url: window.env.REACT_APP_JSON ? '/jsons/datosDataSchema2.json' : getUrl(config.dataSchemaAPI.url, { dataSetId }),
       queryString: {}
     });
     dataPromise
@@ -216,12 +214,8 @@ export const ReporterDataSet = ({ match, history }) => {
         description: snapshotState.description
       }
     })
-      .then(response => {
-        console.log('createSnapshot response');
-      })
-      .catch(error => {
-        console.log('createSnapshot error');
-      });
+      .then(response => {})
+      .catch(error => {});
     setVisibleHandler(setSnapshotDialogVisible, false);
   };
 
