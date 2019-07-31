@@ -35,8 +35,9 @@ export const ReportingDataFlow = ({ history, match }) => {
 
   useEffect(() => {
     HTTPRequester.get({
-      // url: `${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`,
-      url: '/jsons/response_DataflowById.json',
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_DataflowById.json'
+        : `${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`,
       queryString: {}
     })
       .then(response => {
