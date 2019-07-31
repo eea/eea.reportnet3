@@ -1,6 +1,7 @@
 package org.eea.dataflow.service;
 
 import java.util.List;
+import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -90,6 +91,13 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
+
+  /**
+   * Creates the data flow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  void createDataFlow(Dataflow dataflow);
 
   /**
    * Insert document.

@@ -52,7 +52,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   public WeblinkVO getWebLink(Long idLink) throws EEAException {
     Optional<Weblink> idLinkData = webLinkRepository.findById(idLink);
     LOG.info("get the links with id : {}", idLink);
-    WeblinkVO weblinkVO = null;
+    WeblinkVO weblinkVO = new WeblinkVO();
     if (idLinkData.isPresent()) {
       weblinkVO = dataflowWebLinkMapper.entityToClass(idLinkData.get());
     } else {
