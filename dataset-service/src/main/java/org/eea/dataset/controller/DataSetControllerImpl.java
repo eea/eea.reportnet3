@@ -77,6 +77,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   UpdateRecordHelper updateRecordHelper;
 
+  /** The delete helper. */
   @Autowired
   DeleteHelper deleteHelper;
 
@@ -142,19 +143,29 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+
   /**
-   * Creates the removeDatasetData data set.
+   * Creates the empty data set.
    *
    * @param datasetname the datasetname
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
    */
   @Override
   @PostMapping(value = "/create")
-  public void createEmptyDataSet(final String datasetname) {
+  public void createEmptyDataSet(
+      @RequestParam(value = "datasetName", required = true) final String datasetname,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
+      @RequestParam(value = "idDataflow", required = false) Long idDataflow) {
     if (StringUtils.isBlank(datasetname)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetService.createEmptyDataset(datasetname);
+    try {
+      datasetService.createEmptyDataset(datasetname, idDatasetSchema, idDataflow);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
   }
 
   /**
@@ -265,9 +276,9 @@ public class DataSetControllerImpl implements DatasetController {
   /**
    * Gets the by id.
    *
-   * @deprecated this method is deprecated
    * @param datasetId the dataset id
    * @return the by id
+   * @deprecated this method is deprecated
    */
   @Override
   @RequestMapping(value = "{id}", method = RequestMethod.GET)
@@ -379,6 +390,7 @@ public class DataSetControllerImpl implements DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @param records the records
    */
   @Override
@@ -402,7 +414,6 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param dataSetId the data set id
    * @param idTableSchema the id table schema
-   * @throws EEAException
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
@@ -448,6 +459,27 @@ public class DataSetControllerImpl implements DatasetController {
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
     return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+  }
+
+
+  /**
+   * Insert id data schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @Override
+  @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void insertIdDataSchema(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema) {
+
+    try {
+      datasetService.insertSchema(datasetId, idDatasetSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+
   }
 
 }

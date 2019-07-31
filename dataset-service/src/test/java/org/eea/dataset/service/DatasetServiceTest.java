@@ -410,9 +410,10 @@ public class DatasetServiceTest {
 
   @Test
   public void testCreateEmptyDataset() throws Exception {
-    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any());
-    datasetService.createEmptyDataset("");
-    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any());
+    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
+    datasetService.createEmptyDataset("", "5d0c822ae1ccd34cfcd97e20", 1L);
+    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any());
   }
 
 

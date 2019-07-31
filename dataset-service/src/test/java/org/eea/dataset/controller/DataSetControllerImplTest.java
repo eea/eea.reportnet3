@@ -246,7 +246,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry1() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet(null);
+    dataSetControllerImpl.createEmptyDataSet(null, null, 1L);
   }
 
   /**
@@ -256,7 +256,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry2() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet("");
+    dataSetControllerImpl.createEmptyDataSet("", "", 1L);
   }
 
   /**
@@ -266,10 +266,12 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void createEmptyDataSetTest() throws Exception {
-    doNothing().when(datasetService).createEmptyDataset(Mockito.any());
-    dataSetControllerImpl.createEmptyDataSet("datasetName");
+    doNothing().when(datasetService).createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.createEmptyDataSet("datasetName", null, 1L);
 
-    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any());
+    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 

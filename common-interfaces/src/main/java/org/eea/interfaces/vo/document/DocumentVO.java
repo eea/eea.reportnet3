@@ -26,4 +26,10 @@ public class DocumentVO implements Serializable {
   /** The language. */
   private String language;
 
+  /** The description. */
+  private String description;
+
+  /** The category. */
+  private String category;
+
 }
