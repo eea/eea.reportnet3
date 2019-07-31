@@ -238,8 +238,8 @@ export const ReporterDataSet = ({ match, history }) => {
 
   const deleteSnapshot = () => {
     HTTPRequester.delete({
-      url: getUrl(config.deleteSnaphost.url, {
-        dataFlowId,
+      url: getUrl(config.deleteSnapshotByID.url, {
+        // dataFlowId,
         dataSetId,
         snapshotId: snapshotState.snapShotId
       })
