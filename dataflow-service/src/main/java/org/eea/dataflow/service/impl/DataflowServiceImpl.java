@@ -1,9 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
@@ -11,7 +9,6 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.domain.Document;
-import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
@@ -248,37 +245,9 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Transactional
   private void createMetabaseDataFlow(Dataflow dataflow) {
-    Set<Dataflow> dataflows = new HashSet<Dataflow>();
-    Set<UserRequest> userRequests = new HashSet<UserRequest>();
-    List<Contributor> contributors = new ArrayList<Contributor>();
     if (dataflowRepository.findByName(dataflow.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflow.getName());
     } else {
-      // ADD SubmissionAgreement
-      // SubmissionAgreement submissionAgreement = new SubmissionAgreement();
-      // submissionAgreement.setName("");
-      // submissionAgreement.setDescription("");
-      // submissionAgreement.setDataflow(dataflow);
-      // dataflow.setSubmissionAgreement(submissionAgreement);
-      // // ADD Contributor
-      // Contributor contributor = new Contributor();
-      // contributor.setEmail("test@test.eea");
-      // contributor.setDataflow(dataflow);
-      // contributor.setUserId(1L);
-      // contributors.add(contributor);
-      // dataflow.setContributors(contributors);
-      // // ADD UserRequest
-      // dataflows.add(dataflow);
-      // dataflows.stream().forEach(dataFlow -> {
-      // UserRequest userRequest = new UserRequest();
-      // userRequest.setDataflows(dataflows);
-      // userRequest.setUserRequester(1L);
-      // userRequest.setUserRequested(1L);
-      // userRequest.setRequestType(TypeRequestEnum.PENDING);
-      // userRequests.add(userRequest);
-      // dataflow.setUserRequests(userRequests);
-      // });
-      // Respository save
       dataflowRepository.save(dataflow);
     }
   }
