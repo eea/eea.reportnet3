@@ -85,7 +85,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public void createEmptyDataSet(String datasetName) throws RecordStoreAccessException {
+  public void createEmptyDataSet(String datasetName, String idDatasetSchema)
+      throws RecordStoreAccessException {
 
 
     final List<String> commands = new ArrayList<>();
@@ -112,6 +113,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     event.setEventType(EventType.CONNECTION_CREATED_EVENT);
     final Map<String, Object> data = new HashMap<>();
     data.put("connectionDataVO", createConnectionDataVO(datasetName));
+    data.put("dataset_id", datasetName);
+    data.put("idDatasetSchema", idDatasetSchema);
     event.setData(data);
     kafkaSender.sendMessage(event);
 
