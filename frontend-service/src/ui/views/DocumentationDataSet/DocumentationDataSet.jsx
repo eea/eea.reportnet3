@@ -35,12 +35,17 @@ export const DocumentationDataSet = ({ match, history }) => {
     command: () => history.push('/')
   };
 
-  useEffect(async () => {
-    setIsLoading(true);
+  const setDocumentsAndWebLinks = async () => {
     setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
     setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    setDocumentsAndWebLinks();
     setIsLoading(false);
   }, []);
+
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
