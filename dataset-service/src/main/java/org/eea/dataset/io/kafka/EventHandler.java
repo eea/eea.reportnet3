@@ -57,11 +57,12 @@ public class EventHandler implements EEAEventHandler {
       ((MultiTenantDataSource) dataSource)
           .addDataSource((ConnectionDataVO) eeaEventVO.getData().get("connectionDataVO"));
 
+      // if there is idDatasetSchema, insert it into the corresponding dataset_value
       String dataset = (String) eeaEventVO.getData().get("dataset_id");
       String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
       if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
         String[] aux = dataset.split("_");
-        Long idDataset = Long.valueOf(aux[1]);
+        Long idDataset = Long.valueOf(aux[aux.length - 1]);
         datasetControllerImpl.insertIdDataSchema(idDataset, idDatasetSchema);
       }
 
