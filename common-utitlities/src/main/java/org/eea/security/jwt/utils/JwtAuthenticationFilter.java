@@ -1,6 +1,7 @@
 package org.eea.security.jwt.utils;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,8 +65,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userDetails, jwt, userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+        //authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        Map<String, String> details = new HashMap<>();
+        details.put("userId", token.getSubject());
+        authentication.setDetails(details);
+        authentication.getDetails();
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
     } catch (Exception ex) {
