@@ -20,6 +20,9 @@
 	"dataviewerAPI": {
 		"url": "/dataset/TableValueDataset/"
 	},
+	"loadSnapshotsListAPI": {
+		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"
+	},
 	"validationViewerAPI": {
 		"url": "/dataset/findPositionFromAnyObject/"
 	},

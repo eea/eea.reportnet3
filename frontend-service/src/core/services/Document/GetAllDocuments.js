@@ -1,1 +1,1 @@
-export const GetAllDocuments = ({ documentRepository }) => async () => documentRepository.all();
+export const GetAllDocuments = ({ documentRepository }) => async url => documentRepository.all(url);

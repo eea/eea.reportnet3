@@ -1,1 +1,1 @@
-export const GetAllWebLinks = ({ webLinkRepository }) => async () => webLinkRepository.all();
+export const GetAllWebLinks = ({ webLinkRepository }) => async url => webLinkRepository.all(url);

@@ -1,8 +1,8 @@
 import { api } from 'core/infrastructure/api';
 import { Document } from 'core/domain/model/Document/Document';
 
-const all = async () => {
-  const documentsDTO = await api.documents();
+const all = async url => {
+  const documentsDTO = await api.documents(url);
 
   return documentsDTO.map(
     documentDTO =>

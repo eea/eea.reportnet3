@@ -2,11 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './SnapshotSliderBar.module.css';
 
-import { Sidebar } from 'primereact/sidebar';
-import { SnapshotList } from './_components/SnapshotList';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from '../../ReporterDataSet';
+import { config } from 'assets/conf';
 
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Sidebar } from 'primereact/sidebar';
+import { SnapshotContext } from '../../ReporterDataSet';
+import { SnapshotList } from './_components/SnapshotList';
+
+import { getUrl } from 'core/infrastructure/getUrl';
 import { SnapshotService } from 'core/services/Snapshot';
 
 const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId }) => {
@@ -16,7 +19,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId }) => {
   const [snapshotDescription, setSnapshotDescription] = useState('');
 
   useEffect(async () => {
-    setSnapshotListData(await SnapshotService.all());
+    setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
   }, []);
 
   return (

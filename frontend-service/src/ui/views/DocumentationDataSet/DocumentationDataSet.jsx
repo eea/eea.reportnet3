@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import styles from './DocumentationDataSet.module.scss';
 
+import { config } from 'assets/conf';
+
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
@@ -35,11 +37,10 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   useEffect(async () => {
     setIsLoading(true);
-    setDocuments(await DocumentService.all());
-    setWebLinks(await WebLinkService.all());
+    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
+    setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
     setIsLoading(false);
   }, []);
-
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
