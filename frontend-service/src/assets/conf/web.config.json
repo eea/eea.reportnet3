@@ -20,11 +20,14 @@
 	"dataviewerAPI": {
 		"url": "/dataset/TableValueDataset/"
 	},
+	"validationViewerAPI": {
+		"url": "/dataset/findPositionFromAnyObject/"
+	},
 	"loadSnapshotsListAPI": {
 		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"
 	},
-	"validationViewerAPI": {
-		"url": "/dataset/findPositionFromAnyObject/"
+	"deleteSnapshotByID": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
 	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/"

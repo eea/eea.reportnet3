@@ -7,7 +7,7 @@ const all = async url => {
   return documentsDTO.map(
     documentDTO =>
       new Document(
-        documentDTO.title,
+        documentDTO.name,
         documentDTO.description,
         documentDTO.category,
         documentDTO.language,
