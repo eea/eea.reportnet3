@@ -205,12 +205,12 @@ export const ReporterDataSet = ({ match, history }) => {
 
   const createSnapshot = () => {
     HTTPRequester.post({
-      url: getUrl(config.createSnaphost.url, {
-        dataFlowId,
+      url: getUrl(config.createSnapshot.url, {
+        // dataFlowId,
         dataSetId
       }),
       data: {
-        date: snapshotState.createdAt,
+        // date: snapshotState.createdAt,
         description: snapshotState.description
       }
     })
@@ -252,7 +252,6 @@ export const ReporterDataSet = ({ match, history }) => {
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
   };
-
   //snapshot initial state object
   const snapshotInitialStateObj = {
     apiCall: '',
