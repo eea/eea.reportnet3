@@ -1,0 +1,21 @@
+.listItem {
+	margin-bottom: 2rem;
+}
+.listItemData {
+	margin-bottom: 1rem;
+}
+.listItemData h4 {
+	margin-bottom: 0.5rem;
+}
+.listItemData p {
+	margin: 0px;
+}
+.listActions {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+.listActions button:nth-of-type(1) {
+	margin-right: 0.5rem;
+}

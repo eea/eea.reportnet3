@@ -1,0 +1,12 @@
+[
+	{
+		"id": 1,
+		"created_at": 1566918491000,
+		"description": "Snap description 1"
+	},
+	{
+		"id": 2,
+		"created_at": 1593270491000,
+		"description": "Snap description 2"
+	}
+]
