@@ -70,16 +70,17 @@ export const ReporterDataSet = ({ match, history }) => {
 
     //`${config.dataSchemaAPI.url}1`
     const dataPromise = HTTPRequester.get({
-      // url: getUrl(config.dataSchemaAPI.url, { dataFlowId }),
-      url: '/jsons/datosDataSchema2.json',
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/datosDataSchema2.json'
+        : getUrl(config.dataSchemaAPI.url, { dataFlowId }),
       queryString: {}
     });
     dataPromise
       .then(response => {
-        //'/jsons/error-statistics.json'
         const dataPromiseError = HTTPRequester.get({
-          // url: `${config.loadStatisticsAPI.url}${dataSetId}`,
-          url: '/jsons/error-statistics.json',
+          url: window.env.REACT_APP_JSON
+            ? '/jsons/error-statistics.json'
+            : `${config.loadStatisticsAPI.url}${dataSetId}`,
           queryString: {}
         });
 
@@ -185,7 +186,9 @@ export const ReporterDataSet = ({ match, history }) => {
   const onConfirmDeleteHandler = () => {
     setDeleteDialogVisible(false);
     HTTPRequester.delete({
-      url: `/dataset/${dataSetId}/deleteImportData`,
+      url: window.env.REACT_APP_JSON
+        ? `/dataset/${dataSetId}/deleteImportData`
+        : `/dataset/${dataSetId}/deleteImportData`,
       queryString: {}
     }).then(res => {
       setIsDataDeleted(true);
@@ -195,8 +198,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const onConfirmValidateHandler = () => {
     setValidateDialogVisible(false);
     HTTPRequester.update({
-      // url: `/validation/dataset/${dataSetId}`,
-      url: 'jsons/list-of-errors.json',
+      url: window.env.REACT_APP_JSON ? 'jsons/list-of-errors.json' : `/validation/dataset/${dataSetId}`,
       queryString: {}
     });
   };
