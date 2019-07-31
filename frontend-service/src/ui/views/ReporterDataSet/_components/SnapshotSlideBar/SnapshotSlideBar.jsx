@@ -18,8 +18,11 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId }) => {
   const [snapshotListData, setSnapshotListData] = useState([]);
   const [snapshotDescription, setSnapshotDescription] = useState('');
 
-  useEffect(async () => {
+  const setSnapshotList = async () => {
     setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
+  };
+  useEffect(() => {
+    setSnapshotList();
   }, []);
 
   return (

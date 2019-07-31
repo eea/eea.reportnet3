@@ -65,10 +65,6 @@ export const ReporterDataSet = ({ match, history }) => {
       { label: resources.messages['viewData'] }
     ]);
 
-    //Fetch DataSchema(JSON)
-    //fetchDataHandler(jsonDataSchema);
-
-    //`${config.dataSchemaAPI.url}1`
     const dataPromise = HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
