@@ -132,7 +132,9 @@ const DataViewer = withRouter(
       const onConfirmDeleteHandler = () => {
         setDeleteDialogVisible(false);
         HTTPRequester.delete({
-          url: `/dataset/${dataSetId}/deleteImportTable/${tableId}`,
+          url: window.env.REACT_APP_JSON
+            ? `/dataset/${dataSetId}/deleteImportTable/${tableId}`
+            : `/dataset/${dataSetId}/deleteImportTable/${tableId}`,
           queryString: {}
         }).then(res => {
           setIsDataDeleted(true);
@@ -184,8 +186,7 @@ const DataViewer = withRouter(
         }
 
         const dataPromise = HTTPRequester.get({
-          // url: urlViewer,
-          url: '/jsons/response_dataset_values2.json',
+          url: window.env.REACT_APP_JSON ? '/jsons/response_dataset_values2.json' : urlViewer,
           queryString: queryString
         });
         dataPromise
