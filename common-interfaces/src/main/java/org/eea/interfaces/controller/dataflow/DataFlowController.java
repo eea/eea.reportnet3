@@ -1,11 +1,13 @@
 package org.eea.interfaces.controller.dataflow;
 
 
+import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -117,4 +119,16 @@ public interface DataFlowController {
   void removeContributor(@PathVariable("idDataflow") Long idDataflow,
       @RequestParam(value = "idContributor") Long userId);
 
+
+  /**
+   * Creates the data flow.
+   *
+   * @param dataflowId the dataflow id
+   * @param nameDataFlow the name data flow
+   */
+  @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
+  void createDataFlow(@RequestParam("description") String description,
+      @RequestParam("nameDataFlow") String nameDataFlow,
+      @RequestParam(name = "date", required = false) @DateTimeFormat(
+          iso = DateTimeFormat.ISO.DATE_TIME) Date deadDateToSend);
 }

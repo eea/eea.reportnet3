@@ -1,11 +1,15 @@
 package org.eea.dataset.persistence.metabase.domain;
 
+import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,17 +17,21 @@ import lombok.ToString;
 /**
  * The type ReportingDataset.
  */
-@Entity(name = "REPORTING_DATASET")
+@Entity
 @Getter
 @Setter
 @ToString
+@Table(name = "REPORTING_DATASET")
 public class ReportingDataset extends DataSetMetabase {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
+
+  @OneToMany(mappedBy = "reportingDataset", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Snapshot> snapshots;
 
 
 

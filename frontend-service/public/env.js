@@ -8,7 +8,8 @@
 // any syntax that is not yet supported by your targeted browsers.
 
 window.env = {
-	// This option can be retrieved in "src/index.js" with "window.env.REACT_APP_BACKEND".
-	   REACT_APP_BACKEND: 'http://localhost:8010'
-	//REACT_APP_BACKEND: "http://localhost:3000"
+  // This option can be retrieved in "src/index.js" with "window.env.REACT_APP_BACKEND".
+  // REACT_APP_BACKEND: 'http://localhost:8010'
+  REACT_APP_BACKEND: 'http://localhost:3000',
+  REACT_APP_JSON: false
 };

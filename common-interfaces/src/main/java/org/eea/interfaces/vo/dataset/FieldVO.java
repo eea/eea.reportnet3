@@ -1,7 +1,6 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
@@ -48,7 +47,7 @@ public class FieldVO implements Serializable {
    * The validations.
    */
 
-  private List<FieldValidationVO> fieldValidations = new ArrayList<FieldValidationVO>();
+  private List<FieldValidationVO> fieldValidations;
 
   /** The level error. */
   private TypeErrorEnum levelError;

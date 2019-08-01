@@ -2,15 +2,17 @@ package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * The Class FileParserFactoryTest.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class FileParserFactoryTest {
 
   /** The file parser factory. */
@@ -20,14 +22,11 @@ public class FileParserFactoryTest {
 
   /**
    * Inits the mocks.
-   *
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Before
-  public void initMocks() throws IOException {
+  public void initMocks() {
     MockitoAnnotations.initMocks(this);
   }
-
 
   /**
    * Test create context csv.
@@ -35,6 +34,22 @@ public class FileParserFactoryTest {
   @Test
   public void testCreateContextCsv() {
     assertNotNull("is null", fileParserFactory.createContext("csv"));
+  }
+
+  /**
+   * Test create context xls.
+   */
+  @Test
+  public void testCreateContextXls() {
+    assertNotNull("is null", fileParserFactory.createContext("xls"));
+  }
+
+  /**
+   * Test create context xlsx.
+   */
+  @Test
+  public void testCreateContextXlsx() {
+    assertNotNull("is null", fileParserFactory.createContext("xlsx"));
   }
 
   /**

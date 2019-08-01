@@ -4,6 +4,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -13,6 +14,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,13 +66,18 @@ public interface DatasetController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateDataset(@RequestBody DataSetVO dataset);
 
+
   /**
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
    */
   @RequestMapping(value = "/create", method = RequestMethod.POST)
-  void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
+  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
+      @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
 
   /**
@@ -82,8 +89,7 @@ public interface DatasetController {
    */
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   void loadTableData(@PathVariable("id") Long datasetId, @RequestParam("file") MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema);
-
+      @PathVariable(value = "idTableSchema") String idTableSchema);
 
   /**
    * Delete import data.
@@ -112,7 +118,6 @@ public interface DatasetController {
    *
    * @param id the id
    * @param idDataset the id dataset
-   * @param pageSize the page size
    * @param type the type
    * @return the table from any object id
    */
@@ -158,11 +163,11 @@ public interface DatasetController {
    * @param idTableSchema the id table schema
    * @param records the records
    */
-  @RequestMapping(value = "/{id}/record", method = RequestMethod.POST,
+  @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
-      @RequestParam(value = "records", required = true) List<RecordVO> records);
+      @RequestBody List<RecordVO> records);
 
   /**
    * Update record.
@@ -172,8 +177,7 @@ public interface DatasetController {
    */
   @RequestMapping(value = "/{id}/updateRecord", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateRecords(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "records", required = true) List<RecordVO> records);
+  void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
    * Delete records.
@@ -197,5 +201,30 @@ public interface DatasetController {
       @PathVariable("idTableSchema") final String idTableSchema);
 
 
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param mimeType the mime type
+   * @return the response entity
+   * @throws Exception the exception
+   */
+  @GetMapping("/exportFile")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("idTableSchema") String idTableSchema,
+      @RequestParam("mimeType") String mimeType) throws Exception;
+
+
+  /**
+   * Insert id data schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  void insertIdDataSchema(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema);
 
 }

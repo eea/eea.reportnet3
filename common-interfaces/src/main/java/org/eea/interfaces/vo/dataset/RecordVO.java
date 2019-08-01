@@ -1,7 +1,6 @@
 package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -45,7 +44,7 @@ public class RecordVO implements Serializable {
   /**
    * The validations.
    */
-  private List<RecordValidationVO> recordValidations = new ArrayList<RecordValidationVO>();
+  private List<RecordValidationVO> recordValidations;
 
   /**
    * The sort criteria.

@@ -1,12 +1,14 @@
 package org.eea.dataset.persistence.metabase.domain;
 
-import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,10 +16,11 @@ import lombok.ToString;
 /**
  * The type Snapshot.
  */
-@Entity(name = "SNAPSHOT")
+@Entity
 @Getter
 @Setter
 @ToString
+@Table(name = "SNAPSHOT")
 public class Snapshot extends DataSetMetabase {
 
   /** The id. */
@@ -26,13 +29,12 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The name. */
-  @Column(name = "NAME")
-  private String name;
+  @Column(name = "DESCRIPTION")
+  private String description;
 
-  /** The creation date. */
-  @Column(name = "CREATIONDATE")
-  private Date creationDate;
+  @ManyToOne
+  @JoinColumn(name = "REPORTING_DATASET_ID")
+  private ReportingDataset reportingDataset;
 
   /** The datacollection. */
   @Column(name = "DATACOLLECTION_ID")
@@ -65,7 +67,7 @@ public class Snapshot extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, creationDate, datacollection);
+    return Objects.hash(id, description, datacollection);
   }
 
 }

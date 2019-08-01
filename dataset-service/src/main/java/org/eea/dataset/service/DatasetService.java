@@ -19,12 +19,17 @@ import org.springframework.data.domain.Pageable;
  */
 public interface DatasetService {
 
+
   /**
-   * Create removeDatasetData dataset.
+   * Creates the empty dataset.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
+   * @throws EEAException the EEA exception
    */
-  void createEmptyDataset(String datasetName);
+  void createEmptyDataset(String datasetName, String idDatasetSchema, Long idDataflow)
+      throws EEAException;
 
   /**
    * Process the file: read, parse and save in the db.
@@ -104,12 +109,10 @@ public interface DatasetService {
   /**
    * Gets the dataset by id.
    *
-   * @deprecated this deprecated
    * @param datasetId the dataset id
-   *
    * @return the by id
-   *
    * @throws EEAException the EEA exception
+   * @deprecated this deprecated
    */
   @Deprecated
   DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
@@ -155,9 +158,6 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @throws EEAException the EEA exception
-   *
-   *
-   *
    */
   void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
@@ -177,5 +177,53 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
+
+
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param idTableSchema the id table schema
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String idTableSchema)
+      throws EEAException, IOException;
+
+
+  /**
+   * Gets the file name.
+   *
+   * @param mimeType the mime type
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @return the file name
+   * @throws EEAException the EEA exception
+   */
+  String getFileName(String mimeType, String idTableSchema, @DatasetId Long datasetId)
+      throws EEAException;
+
+  /**
+   * Creates the records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
+   */
+  void createRecords(Long datasetId, List<RecordVO> records, String idTableSchema)
+      throws EEAException;
+
+
+  /**
+   * Insert schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  void insertSchema(@DatasetId Long datasetId, String idDatasetSchema) throws EEAException;
 
 }

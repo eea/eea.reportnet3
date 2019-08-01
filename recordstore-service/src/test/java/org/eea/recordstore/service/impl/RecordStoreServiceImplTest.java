@@ -101,7 +101,7 @@ public class RecordStoreServiceImplTest {
   @Test
   public void testCreateDataset() throws RecordStoreAccessException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    recordStoreServiceImpl.createEmptyDataSet(DATASET);
+    recordStoreServiceImpl.createEmptyDataSet(DATASET, "");
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
@@ -117,7 +117,7 @@ public class RecordStoreServiceImplTest {
     doThrow(new InterruptedException()).when(dockerInterfaceService).executeCommandInsideContainer(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    recordStoreServiceImpl.createEmptyDataSet(DATASET);
+    recordStoreServiceImpl.createEmptyDataSet(DATASET, "");
   }
 
   /**
@@ -172,7 +172,8 @@ public class RecordStoreServiceImplTest {
    * @throws InterruptedException the interrupted exception
    */
   @Test(expected = RecordStoreAccessException.class)
-  public void testConnectionDataException() throws RecordStoreAccessException, InterruptedException {
+  public void testConnectionDataException()
+      throws RecordStoreAccessException, InterruptedException {
     doThrow(new InterruptedException()).when(dockerInterfaceService).executeCommandInsideContainer(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());

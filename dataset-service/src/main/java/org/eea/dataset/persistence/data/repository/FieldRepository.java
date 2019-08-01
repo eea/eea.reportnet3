@@ -1,6 +1,8 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 
@@ -21,11 +23,19 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
 
 
   /**
-   * Find first type by idfieldchema.
+   * Find by id field schema.
    *
    * @param idFieldSchema the id field schema
-   * @return the string
+   * @return the list
    */
-  FieldValue findFirstTypeByIdFieldSchema(String idFieldSchema);
+  List<FieldValue> findByIdFieldSchema(String idFieldSchema);
+
+  /**
+   * Find by record.
+   *
+   * @param record the record
+   * @return the list
+   */
+  List<FieldValue> findByRecord(RecordValue record);
 
 }

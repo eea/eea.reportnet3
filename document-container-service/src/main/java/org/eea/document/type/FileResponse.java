@@ -28,11 +28,7 @@ public class FileResponse {
    */
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(bytes);
-    result = prime * result + Objects.hash(contentType);
-    return result;
+    return Objects.hash(bytes, contentType);
   }
 
   /**
