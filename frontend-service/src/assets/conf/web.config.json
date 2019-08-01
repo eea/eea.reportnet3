@@ -30,7 +30,7 @@
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
 	},
 	"createSnapshot": {
-		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?{:snapshotDescription}"
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:snapshotDescription}"
 	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/"
