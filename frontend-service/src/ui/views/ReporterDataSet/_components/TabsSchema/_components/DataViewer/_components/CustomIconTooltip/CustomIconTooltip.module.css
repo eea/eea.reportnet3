@@ -1,12 +1,9 @@
-/* Tooltip container */
 .tooltip {
   position: relative;
   display: inline-block;
 }
 
-/* Tooltip text */
 .tooltip .tooltiptext {
-  /* overflow: visible !important;*/
   visibility: hidden;
   width: 200px;
   background-color: #555;
@@ -27,19 +24,6 @@
   transition: opacity 0.3s;
 }
 
-/*
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 45%;
-  right: 100%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  
-}*/
-
-/* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;

@@ -24,10 +24,6 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, isSnapshotListRe
 
   useEffect(() => {
     setSnapshotList();
-  }, []);
-
-  useEffect(() => {
-    setSnapshotList();
   }, [isSnapshotListRerender]);
 
   return (
