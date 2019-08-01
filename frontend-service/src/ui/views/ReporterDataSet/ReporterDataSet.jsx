@@ -44,7 +44,6 @@ export const ReporterDataSet = ({ match, history }) => {
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
-  const [isSnapshotListRerender, setIsSnapshotListRerender] = useState(false);
 
   const home = {
     icon: resources.icons['home'],
@@ -219,7 +218,6 @@ export const ReporterDataSet = ({ match, history }) => {
       .then(response => {})
       .catch(error => {});
     setVisibleHandler(setSnapshotDialogVisible, false);
-    setIsSnapshotListRerender(!isSnapshotListRerender);
   };
 
   const restoreSnapshot = () => {
@@ -231,13 +229,12 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     })
       .then(response => {
-        console.log('restoreSnapshot response');
+        console.log('restoreSnapshot response', response);
       })
       .catch(error => {
-        console.log('restoreSnapshot error');
+        console.log('restoreSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
-    setIsSnapshotListRerender(!isSnapshotListRerender);
   };
 
   const deleteSnapshot = () => {
@@ -255,7 +252,6 @@ export const ReporterDataSet = ({ match, history }) => {
         console.log('deleteSnapshot error');
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
-    setIsSnapshotListRerender(!isSnapshotListRerender);
   };
 
   const snapshotInitialStateObj = {
@@ -276,11 +272,10 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: '',
-          createdAt: Date.now(),
+          creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
-          action: createSnapshot,
-          apiCall: 'CREATE'
+          action: createSnapshot
         };
 
       case 'delete_snapshot':
@@ -288,11 +283,10 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: payload.id,
-          createdAt: payload.createdAt,
+          creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          action: deleteSnapshot,
-          apiCall: 'DELETE'
+          action: deleteSnapshot
         };
 
       case 'restore_snapshot':
@@ -300,11 +294,10 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: payload.id,
-          createdAt: payload.createdAt,
+          creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.restoreSnapshotMessage,
-          action: restoreSnapshot,
-          apiCall: 'RESTORE'
+          action: restoreSnapshot
         };
       default:
         return state;
@@ -408,7 +401,6 @@ export const ReporterDataSet = ({ match, history }) => {
             snapshotDispatch: snapshotDispatch
           }}>
           <SnapshotSlideBar
-            isSnapshotListRerender={isSnapshotListRerender}
             dataSetId={dataSetId}
             isVisible={snapshotIsVisible}
             setIsVisible={setSnapshotIsVisible}
@@ -428,7 +420,7 @@ export const ReporterDataSet = ({ match, history }) => {
             <ul>
               <li>
                 <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.createdAt).format()}
+                {moment(snapshotState.creationDate).format()}
               </li>
               <li>
                 <strong>{resources.messages.description}: </strong>

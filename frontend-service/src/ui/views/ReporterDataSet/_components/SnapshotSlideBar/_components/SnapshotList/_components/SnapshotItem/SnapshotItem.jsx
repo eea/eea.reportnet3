@@ -13,7 +13,7 @@ export function SnapshotItem({ itemData }) {
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
-        <h4>{moment(itemData.created_at).format()}</h4>
+        <h4>{moment(itemData.creationDate).format()}</h4>
         <p>{itemData.description}</p>
       </div>
       <div className={styles.listActions}>
