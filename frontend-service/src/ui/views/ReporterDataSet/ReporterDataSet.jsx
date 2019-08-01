@@ -19,6 +19,8 @@ import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { ValidationViewer } from './_components/ValidationViewer';
 
+import { SnapshotService } from 'core/services/Snapshot';
+
 import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
@@ -42,8 +44,9 @@ export const ReporterDataSet = ({ match, history }) => {
   const [activeIndex, setActiveIndex] = useState();
   const [positionIdRecord, setPositionIdRecord] = useState(0);
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
-  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
+  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
+  const [snapshotListData, setSnapshotListData] = useState([]);
 
   const home = {
     icon: resources.icons['home'],
@@ -203,6 +206,10 @@ export const ReporterDataSet = ({ match, history }) => {
     setPositionIdRecord(0);
   };
 
+  const setSnapshotList = async () => {
+    setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
+  };
+
   const createSnapshot = () => {
     HTTPRequester.post({
       url: getUrl(config.createSnapshot.url, {
@@ -215,9 +222,9 @@ export const ReporterDataSet = ({ match, history }) => {
         description: snapshotState.description
       }
     })
-      .then(response => {})
+      .then(response => {setSnapshotList();})
       .catch(error => {});
-    setVisibleHandler(setSnapshotDialogVisible, false);
+      setVisibleHandler(setSnapshotDialogVisible, false)
   };
 
   const restoreSnapshot = () => {
@@ -229,10 +236,11 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     })
       .then(response => {
-        console.log('restoreSnapshot response');
+        setSnapshotList();
+        console.log('restoreSnapshot response', response);
       })
       .catch(error => {
-        console.log('restoreSnapshot error');
+        console.log('restoreSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
   };
@@ -246,14 +254,15 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     })
       .then(response => {
-        console.log('deleteSnapshot response');
+        setSnapshotList();
+        console.log('deleteSnapshot response', response);
       })
       .catch(error => {
-        console.log('deleteSnapshot error');
+        console.error('deleteSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
   };
-  //snapshot initial state object
+
   const snapshotInitialStateObj = {
     apiCall: '',
     createdAt: '',
@@ -265,7 +274,6 @@ export const ReporterDataSet = ({ match, history }) => {
     action: () => {}
   };
 
-  //snapshot Reducer
   const snapshotReducer = (state, { type, payload }) => {
     switch (type) {
       case 'create_snapshot':
@@ -273,11 +281,10 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: '',
-          createdAt: Date.now(),
+          creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
-          action: createSnapshot,
-          apiCall: 'CREATE'
+          action: createSnapshot
         };
 
       case 'delete_snapshot':
@@ -285,11 +292,10 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: payload.id,
-          createdAt: payload.createdAt,
+          creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          action: deleteSnapshot,
-          apiCall: 'DELETE'
+          action: deleteSnapshot
         };
 
       case 'restore_snapshot':
@@ -297,11 +303,10 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: payload.id,
-          createdAt: payload.createdAt,
+          creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.restoreSnapshotMessage,
-          action: restoreSnapshot,
-          apiCall: 'RESTORE'
+          action: restoreSnapshot
         };
       default:
         return state;
@@ -410,6 +415,8 @@ export const ReporterDataSet = ({ match, history }) => {
             setIsVisible={setSnapshotIsVisible}
             setSnapshotDialogVisible={setSnapshotDialogVisible}
             setVisibleHandler={setVisibleHandler}
+            setSnapshotList={setSnapshotList}
+            snapshotListData={snapshotListData}
           />
           <ConfirmDialog
             onConfirm={snapshotState.action}
@@ -424,7 +431,7 @@ export const ReporterDataSet = ({ match, history }) => {
             <ul>
               <li>
                 <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.createdAt).format()}
+                {moment(snapshotState.creationDate).format()}
               </li>
               <li>
                 <strong>{resources.messages.description}: </strong>

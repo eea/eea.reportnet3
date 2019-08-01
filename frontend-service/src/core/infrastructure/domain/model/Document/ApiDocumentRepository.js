@@ -7,6 +7,7 @@ const all = async url => {
   return documentsDTO.map(
     documentDTO =>
       new Document(
+        documentDTO.id,
         documentDTO.name,
         documentDTO.description,
         documentDTO.category,
@@ -16,6 +17,11 @@ const all = async url => {
   );
 };
 
+const getDocumentById = async documentId => {
+  await api.documentById(documentId);
+};
+
 export const ApiDocumentRepository = {
-  all
+  all,
+  getDocumentById
 };

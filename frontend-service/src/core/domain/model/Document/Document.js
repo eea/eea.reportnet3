@@ -1,5 +1,6 @@
 export class Document {
-  constructor(title, description, category, language, url) {
+  constructor(id, title, description, category, language, url) {
+    this.id = id;
     this.title = title;
     this.description = description;
     this.category = category;

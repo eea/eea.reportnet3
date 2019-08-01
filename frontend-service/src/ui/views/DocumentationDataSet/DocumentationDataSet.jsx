@@ -21,11 +21,14 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
+import { getUrl } from 'core/infrastructure/getUrl';
+
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   // const [documentsAndWebLinksData, setDocumentsAndWebLinksData] = useState();
   const [documents, setDocuments] = useState([]);
+  const [documentToDownload, setDocumentToDownload] = useState();
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
@@ -103,6 +106,13 @@ export const DocumentationDataSet = ({ match, history }) => {
     setIsUploadDialogVisible(false);
   };
 
+  const getDocumentByID = async documentId => {
+    await DocumentService.getByDocumentId(documentId);
+  };
+
+  const downloadDocument = documentId => {
+    getDocumentByID(documentId);
+  };
   const dialogFooter = (
     <div>
       <Button
@@ -119,7 +129,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a onClick={downloadDocument(rowData.url)}>
+      <a onClick={() => downloadDocument(rowData.id)}>
         {' '}
         <IconComponent icon="pi pi-file" />
       </a>
