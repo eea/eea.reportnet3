@@ -12,7 +12,7 @@ import { SnapshotList } from './_components/SnapshotList';
 import { getUrl } from 'core/infrastructure/getUrl';
 import { SnapshotService } from 'core/services/Snapshot';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, isSnapshotListRerender }) => {
+const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -24,7 +24,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, isSnapshotListRe
 
   useEffect(() => {
     setSnapshotList();
-  }, [isSnapshotListRerender]);
+  }, [snapshotListData]);
 
   return (
     <Sidebar visible={isVisible} onHide={e => setIsVisible()} position="right">
