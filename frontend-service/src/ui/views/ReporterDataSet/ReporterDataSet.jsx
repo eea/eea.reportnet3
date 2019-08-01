@@ -210,8 +210,14 @@ export const ReporterDataSet = ({ match, history }) => {
     setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
   };
 
-  const createSnapshot = () => {
-    HTTPRequester.post({
+  const manageSnapshotCreation = () => {
+    createSnapshot();
+    setVisibleHandler(setSnapshotDialogVisible, false);
+    setSnapshotList();
+  };
+
+  const createSnapshot = async () => {
+    await HTTPRequester.post({
       url: getUrl(config.createSnapshot.url, {
         // dataFlowId,
         dataSetId,
@@ -224,8 +230,6 @@ export const ReporterDataSet = ({ match, history }) => {
     })
       .then(response => {})
       .catch(error => {});
-    setVisibleHandler(setSnapshotDialogVisible, false);
-    setSnapshotList();
   };
 
   const restoreSnapshot = () => {
@@ -255,10 +259,10 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     })
       .then(response => {
-        console.log('deleteSnapshot response');
+        console.log('deleteSnapshot response', response);
       })
       .catch(error => {
-        console.log('deleteSnapshot error');
+        console.error('deleteSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
     setSnapshotList();
@@ -285,7 +289,7 @@ export const ReporterDataSet = ({ match, history }) => {
           creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
-          action: createSnapshot
+          action: manageSnapshotCreation
         };
 
       case 'delete_snapshot':
