@@ -14,6 +14,13 @@ export const api = {
     });
     return response.data.documents;
   },
+  documentById: async url => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON ? '' : url,
+      queryString: {}
+    });
+    return response.data;
+  },
   snapshots: async url => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON ? '/jsons/snapshots.json' : url,

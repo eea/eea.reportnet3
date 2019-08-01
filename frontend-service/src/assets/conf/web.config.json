@@ -32,6 +32,12 @@
 	"createSnapshot": {
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:snapshotDescription}"
 	},
+	"downloadDocument": {
+		"url": "/document?dataFlowId={:dataFlowId}&documentName={:documentName}&language={:documentLanguage}"
+	},
+	"uploadDocument": {
+		"url": "document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
+	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/"
 	}
