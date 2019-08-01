@@ -224,10 +224,11 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
+
   /**
    * Creates the data flow.
    *
-   * @param nameDataFlow the name data flow
+   * @param dataflow the dataflow
    */
   @Override
   @Transactional
@@ -241,7 +242,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Creates the metabase data flow.
    *
-   * @param nameDataFlow the name data flow
+   * @param dataflow the dataflow
    */
   @Transactional
   private void createMetabaseDataFlow(Dataflow dataflow) {

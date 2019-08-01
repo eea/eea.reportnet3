@@ -1,6 +1,5 @@
 package org.eea.dataset.service.helper;
 
-import java.io.IOException;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
@@ -47,8 +46,6 @@ public class DeleteHelper {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InterruptedException the interrupted exception
    */
   @Async
   public void executeDeleteProcess(final Long datasetId, String idTableSchema) throws EEAException {

@@ -477,7 +477,7 @@ public class DatasetServiceTest {
     recValidation.setRecordValue(new RecordValue());
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
-    String listFields = "field_1=1,fields_2=2,fields_3=3";
+    String listFields = "field_1:1,fields_2:2,fields_3:3";
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);
@@ -512,7 +512,7 @@ public class DatasetServiceTest {
     recValidation.setRecordValue(new RecordValue());
     recV.add(recValidation);
     pageable = PageRequest.of(0, 1);
-    String listFields = "field_1=1,fields_2=2,fields_3=3";
+    String listFields = "field_1:1,fields_2:2,fields_3:3";
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(recordVOs);
     when(fieldValidationRepository.findByFieldValue_RecordIdIn(Mockito.any())).thenReturn(fieldV);
     when(recordValidationRepository.findByRecordValueIdIn(Mockito.any())).thenReturn(recV);

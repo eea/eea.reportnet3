@@ -21,10 +21,11 @@ public interface DataFlowWebLinkController {
   interface DataFlowWebLinkControllerZuul extends DataFlowWebLinkController {
   }
 
+
   /**
    * Gets the link.
    *
-   * @param idDataflow the id dataflow
+   * @param idLink the id link
    * @return the link
    */
   @GetMapping(value = "{idLink}")

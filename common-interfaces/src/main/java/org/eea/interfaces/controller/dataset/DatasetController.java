@@ -38,6 +38,7 @@ public interface DatasetController {
 
   }
 
+
   /**
    * Gets the data tables values.
    *
@@ -45,7 +46,7 @@ public interface DatasetController {
    * @param idTableSchema the id table schema
    * @param pageNum the page num
    * @param pageSize the page size
-   * @param commonShortFields the common short fields
+   * @param fields the fields
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,12 +56,11 @@ public interface DatasetController {
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields);
 
+
   /**
-   * Update dataset data set vo.
+   * Update dataset.
    *
    * @param dataset the dataset
-   *
-   * @return the data set vo
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)

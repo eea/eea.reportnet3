@@ -72,6 +72,7 @@ public class DocumentControllerImpl implements DocumentController {
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
+   * @param language the language
    * @return the document
    */
   @Override
@@ -99,13 +100,13 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+
   /**
-   * Delete a document.
+   * Delete document.
    *
    * @param documentName the document name
    * @param dataFlowId the data flow id
    * @param language the language
-   * @return the document
    * @throws Exception the exception
    */
   @Override

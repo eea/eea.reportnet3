@@ -443,19 +443,15 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
-   * Gets the table values by id. It additionally can page the results and sort them
-   *
-   * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
+   * Gets the table values by id.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the mongo ID
+   * @param idTableSchema the id table schema
    * @param pageable the pageable
-   * @param idFieldSchema the id field schema
-   * @param asc the asc
-   *
+   * @param fields the fields
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -555,7 +551,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * String to boolean.
    *
-   * @param a the a
+   * @param string the string
    * @return the boolean
    */
   private Boolean stringToBoolean(String string) {

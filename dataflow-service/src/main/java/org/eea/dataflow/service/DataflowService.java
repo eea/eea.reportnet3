@@ -92,10 +92,11 @@ public interface DataflowService {
    */
   void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
 
+
   /**
    * Creates the data flow.
    *
-   * @param dataflowId the dataflow id
+   * @param dataflow the dataflow
    */
   void createDataFlow(Dataflow dataflow);
 
