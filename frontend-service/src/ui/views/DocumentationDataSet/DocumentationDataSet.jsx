@@ -63,7 +63,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   //Data Fetching
   useEffect(() => {
-    //#region Button inicialization
+    //#region Button initialization
     setCustomButtons([
       {
         label: resources.messages['upload'],
@@ -94,16 +94,18 @@ export const DocumentationDataSet = ({ match, history }) => {
         clickHandler: null
       }
     ]);
-    //#end region Button inicialization
+    //#end region Button initialization
   }, []);
 
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
   };
 
+  const downloadDocument = () => {};
+
   const actionTemplate = (rowData, column) => {
     return (
-      <a href={rowData.url} target="_blank">
+      <a onClick={downloadDocument(rowData.url)}>
         {' '}
         <IconComponent icon="pi pi-file" />
       </a>
@@ -188,7 +190,7 @@ export const DocumentationDataSet = ({ match, history }) => {
                 body={actionTemplate}
                 style={{ textAlign: 'center', width: '8em' }}
                 field="url"
-                header={resources.messages['url']}
+                header={resources.messages['file']}
                 filter={false}
                 filterMatchMode="contains"
               />
