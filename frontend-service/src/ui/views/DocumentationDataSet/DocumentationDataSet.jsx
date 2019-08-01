@@ -5,12 +5,14 @@ import styles from './DocumentationDataSet.module.scss';
 import { config } from 'assets/conf';
 
 import { BreadCrumb } from 'primereact/breadcrumb';
+import { Button } from 'primereact/button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { IconComponent } from 'ui/views/_components/IconComponent';
+import { InputText } from 'primereact/inputtext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -101,6 +103,18 @@ export const DocumentationDataSet = ({ match, history }) => {
     setIsUploadDialogVisible(false);
   };
 
+  const dialogFooter = (
+    <div>
+      <Button
+        label={resources.messages['cancel']}
+        icon="pi pi-times"
+        className="p-button-primary"
+        onClick={onHideHandler}
+      />
+      <Button label={resources.messages['save']} icon="pi pi-check" className="p-button-primary" onClick />
+    </div>
+  );
+
   const downloadDocument = () => {};
 
   const actionTemplate = (rowData, column) => {
@@ -143,6 +157,7 @@ export const DocumentationDataSet = ({ match, history }) => {
           <ButtonsBar buttonsList={customButtons} />
           <Dialog
             header={resources.messages['upload']}
+            footer={dialogFooter}
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
@@ -150,14 +165,31 @@ export const DocumentationDataSet = ({ match, history }) => {
             <CustomFileUpload
               mode="advanced"
               name="file"
-              /* url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`} */
-              /* onUpload={onUploadHandler} */
+              //url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`}
+              //onUpload={onUploadHandler}
               multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               fileLimit={1}
               className={styles.FileUpload}
-              maxFileSize={1024}
+              //maxFileSize={1024}
             />
+            {isUploadDialogVisible && (
+              <div className="rep-row">
+                <div className="rep-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor="title">{resources.messages['title']}</label>
+                </div>
+                <div className="rep-col-8" style={{ padding: '.5em' }}>
+                  <InputText id="title" onChange />
+                </div>
+
+                <div className="rep-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor="description">{resources.messages['description']}</label>
+                </div>
+                <div className="rep-col-8" style={{ padding: '.5em' }}>
+                  <InputText id="description" onChange />
+                </div>
+              </div>
+            )}
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true}>
