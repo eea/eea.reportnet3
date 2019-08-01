@@ -19,11 +19,14 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
+import { getUrl } from 'core/infrastructure/getUrl';
+
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   // const [documentsAndWebLinksData, setDocumentsAndWebLinksData] = useState();
   const [documents, setDocuments] = useState([]);
+  const [documentToDownload, setDocumentToDownload] = useState();
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
@@ -35,12 +38,17 @@ export const DocumentationDataSet = ({ match, history }) => {
     command: () => history.push('/')
   };
 
-  useEffect(async () => {
-    setIsLoading(true);
+  const setDocumentsAndWebLinks = async () => {
     setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
     setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    setDocumentsAndWebLinks();
     setIsLoading(false);
   }, []);
+
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
@@ -58,7 +66,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   //Data Fetching
   useEffect(() => {
-    //#region Button inicialization
+    //#region Button initialization
     setCustomButtons([
       {
         label: resources.messages['upload'],
@@ -89,16 +97,24 @@ export const DocumentationDataSet = ({ match, history }) => {
         clickHandler: null
       }
     ]);
-    //#end region Button inicialization
+    //#end region Button initialization
   }, []);
 
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
   };
 
+  const getDocumentByID = async documentId => {
+    await DocumentService.getByDocumentId(documentId);
+  };
+
+  const downloadDocument = documentId => {
+    getDocumentByID(documentId);
+  };
+
   const actionTemplate = (rowData, column) => {
     return (
-      <a href={rowData.url} target="_blank">
+      <a onClick={() => downloadDocument(rowData.id)}>
         {' '}
         <IconComponent icon="pi pi-file" />
       </a>
@@ -183,7 +199,7 @@ export const DocumentationDataSet = ({ match, history }) => {
                 body={actionTemplate}
                 style={{ textAlign: 'center', width: '8em' }}
                 field="url"
-                header={resources.messages['url']}
+                header={resources.messages['file']}
                 filter={false}
                 filterMatchMode="contains"
               />

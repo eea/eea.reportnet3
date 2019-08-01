@@ -1,5 +1,5 @@
 import { config } from 'assets/conf';
-
+import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
 
 export const api = {
@@ -13,6 +13,18 @@ export const api = {
       queryString: {}
     });
     return response.data.documents;
+  },
+  documentById: async documentId => {
+    await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? getUrl(config.downloadDocumentByIdAPI.url, {
+            documentId: documentId
+          })
+        : getUrl(config.downloadDocumentByIdAPI.url, {
+            documentId: documentId
+          }),
+      queryString: {}
+    });
   },
   snapshots: async url => {
     const response = await HTTPRequester.get({

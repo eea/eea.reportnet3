@@ -20,8 +20,9 @@ const Dashboard = withRouter(
     useEffect(() => {
       if (refresh) {
         const dataPromise = HTTPRequester.get({
-          // url: `${config.loadStatisticsAPI.url}${dataSetId}`,
-          url: '/jsons/error-statistics.json',
+          url: window.env.REACT_APP_JSON
+            ? '/jsons/error-statistics.json'
+            : `${config.loadStatisticsAPI.url}${dataSetId}`,
           queryString: {}
         });
 

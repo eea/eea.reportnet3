@@ -16,19 +16,18 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
 
   const updateStatusDataFlow = type => {
     const dataPromise = HTTPRequester.update({
-      url: `/dataflow/updateStatusRequest/${itemContent.id}?type=${type}`,
+      url: window.env.REACT_APP_JSON
+        ? `/dataflow/updateStatusRequest/${itemContent.id}?type=${type}`
+        : `/dataflow/updateStatusRequest/${itemContent.id}?type=${type}`,
       data: { id: itemContent.id },
       queryString: {}
     });
 
     dataPromise
       .then(response => {
-        //rerender DataFlowList component
         dataFetch();
-        console.log(response);
       })
       .catch(error => {
-        console.warn(`${type} ERROR =>  `, error);
         return error;
       });
   };
