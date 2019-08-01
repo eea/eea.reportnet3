@@ -17,6 +17,7 @@ import org.eea.ums.service.keycloak.model.Resource;
 import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -58,9 +59,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
 
   private String internalClientId;
-  private Map<String, String> resourceTypes = new HashMap<>();
+  private Map<String, String> resourceTypes;
 
-  private RestTemplate restTemplate = new RestTemplate();
+  @Autowired
+  private RestTemplate restTemplate;
 
   private static final String GENERATE_TOKEN_URL = "/auth/realms/{realm}/protocol/openid-connect/token";
   private static final String LIST_USERS_URL = "";
@@ -80,6 +82,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     String adminToken = this.generateToken(adminUser, adminPass);
     this.internalClientId = getReportnetClientInfo(adminToken).getId();
     List<ResourceInfo> resources = this.getResourceInfo(adminToken);
+    resourceTypes = new HashMap<>();
     resources.stream()
         .forEach(resource -> resourceTypes.put(resource.getName(), resource.getType()));
 

@@ -20,23 +20,6 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
 
-  public String generateToken(String username, String password, Object... extraParams) {
-    String token = "";
-    if (verifyUserExist(username, password)) {
-      token = generateToken(username, password);
-    }
-
-    return token;
-  }
-
-  private Boolean verifyUserExist(String username, String password) {
-    Boolean exists = false;
-    if (username.equals("eea")) {
-      exists = true;
-    }
-    return exists;
-  }
-
 
   @Override
   public String doLogin(String username, String password, Object... extraParams) {
