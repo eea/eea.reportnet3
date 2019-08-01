@@ -6,9 +6,7 @@ pipeline {
     //     cron(cron_working_branch)
     // }
 
-    agent any {
-        //label 'java8'
-    }
+    agent any 
     stages {
         stage('Preparation') {
             steps {
