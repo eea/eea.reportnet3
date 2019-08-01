@@ -207,7 +207,8 @@ export const ReporterDataSet = ({ match, history }) => {
     HTTPRequester.post({
       url: getUrl(config.createSnapshot.url, {
         // dataFlowId,
-        dataSetId
+        dataSetId,
+        snapshotDescription: snapshotState.description
       }),
       data: {
         // date: snapshotState.createdAt,
