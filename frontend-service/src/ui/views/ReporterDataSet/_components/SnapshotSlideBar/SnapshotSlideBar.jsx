@@ -21,6 +21,11 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, isSnapshotListRe
   const setSnapshotList = async () => {
     setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
   };
+
+  useEffect(() => {
+    setSnapshotList();
+  }, []);
+
   useEffect(() => {
     setSnapshotList();
   }, [isSnapshotListRerender]);
