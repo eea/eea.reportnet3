@@ -1,6 +1,6 @@
 pipeline {
 
-    agent { node { label 'docker-1.13' } }
+    agent { node { label 'docker' } }
     tools {
         maven 'maven3'
         jdk 'Java8'
