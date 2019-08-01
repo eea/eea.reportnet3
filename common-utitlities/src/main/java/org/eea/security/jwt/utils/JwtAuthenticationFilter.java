@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.JsonWebToken;
 import org.slf4j.Logger;
@@ -72,8 +73,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.getDetails();
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
-    } catch (Exception ex) {
-      LOG_ERROR.error("Could not set user authentication in security context", ex);
+    } catch (VerificationException e) {
+      LOG_ERROR.error("Could not set user authentication in security context", e);
     }
 
     filterChain.doFilter(request, response);
@@ -81,10 +82,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private String getJwtFromRequest(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
+    String jwt = null;
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7, bearerToken.length());
+      jwt = bearerToken.substring(7, bearerToken.length());
     }
-    return null;
+    return jwt;
   }
 }
 
