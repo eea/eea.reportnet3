@@ -272,7 +272,7 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: '',
-          createdAt: Date.now(),
+          creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
           action: createSnapshot
@@ -283,7 +283,7 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: payload.id,
-          createdAt: payload.createdAt,
+          creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.deleteSnapshotMessage,
           action: deleteSnapshot
@@ -294,7 +294,7 @@ export const ReporterDataSet = ({ match, history }) => {
         return {
           ...state,
           snapShotId: payload.id,
-          createdAt: payload.createdAt,
+          creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.restoreSnapshotMessage,
           action: restoreSnapshot
@@ -420,7 +420,7 @@ export const ReporterDataSet = ({ match, history }) => {
             <ul>
               <li>
                 <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.createdAt).format()}
+                {moment(snapshotState.creationDate).format()}
               </li>
               <li>
                 <strong>{resources.messages.description}: </strong>
