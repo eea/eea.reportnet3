@@ -45,13 +45,4 @@ public interface UserManagementController {
   Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
       @RequestParam("scopes") AccessScopeEnum[] scopes);
 
-  /**
-   * Test secured service string.
-   *
-   * @param dataflowId the dataflow id
-   *
-   * @return the string
-   */
-  @RequestMapping(value = "/test-security", method = RequestMethod.GET)
-  String testSecuredService(@RequestParam("dataflowId") Long dataflowId);
 }
