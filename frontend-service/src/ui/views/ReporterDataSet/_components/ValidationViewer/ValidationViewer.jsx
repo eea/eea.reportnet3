@@ -100,8 +100,9 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     }
 
     const dataPromise = HTTPRequester.get({
-      //url: `${config.listValidationsAPI.url}${dataSetId}`,
-
+      url: window.env.REACT_APP_JSON
+        ? `${config.listValidationsAPI.url}${dataSetId}`
+        : `${config.listValidationsAPI.url}${dataSetId}`,
       queryString: queryString
     });
     dataPromise
@@ -150,7 +151,9 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
           type: event.data.typeEntity
         };
         const dataPromise = HTTPRequester.get({
-          url: `${config.validationViewerAPI.url}${event.data.idObject}`,
+          url: window.env.REACT_APP_JSON
+            ? `${config.validationViewerAPI.url}${event.data.idObject}`
+            : `${config.validationViewerAPI.url}${event.data.idObject}`,
           queryString: queryString
         });
 

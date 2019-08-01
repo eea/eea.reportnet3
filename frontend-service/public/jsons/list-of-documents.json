@@ -18,9 +18,9 @@
   "creationDate": null,
   "status": "ACCEPTED",
   "documents": [{
-    "_id": "5cf7e7be44b6eefdc908078f",
+    "id": "5cf7e7be44b6eefdc908078f",
     "index": "0",
-    "title": "First document",
+    "name": "First document",
     "description": "Provides independent information on the environment.",
     "category": "pdf",
     "language": "en",
@@ -36,9 +36,9 @@
     }
   },
   {
-    "_id": "5cf7e7be44b6eefdc908078f",
+    "id": "5cf7e7be44b6eefdc908078g",
     "index": "0",
-    "title": "Segundo documento",
+    "name": "Segundo documento",
     "description": "Información para aquellos involucrados en desarrollar, aplicar y evaluar las políticas ambientales.",
     "category": "txt",
     "language": "es",
@@ -53,9 +53,9 @@
     }
   },
   {
-    "_id": "5cf7e7be44b6eefdc908078f",
+    "id": "5cf7e7be44b6eefdc908078h",
     "index": "0",
-    "title": "Third document",
+    "name": "Third document",
     "description": "Information of 33 member countries and six cooperating countries.",
     "category": "xml",
     "language": "en",
@@ -70,9 +70,9 @@
     }
   },
   {
-    "_id": "5cf7e7be44b6eefdc908078f",
+    "id": "5cf7e7be44b6eefdc908078i",
     "index": "0",
-    "title": "Last document",
+    "name": "Last document",
     "description": "The map only shows territories situated in and around Europe.",
     "category": "pdf",
     "language": "en",
