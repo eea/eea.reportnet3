@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -11,20 +13,26 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-
-public class SecondLevelAuthorizationSecurityExpression extends SecurityExpressionRoot implements
+/**
+ * The type Eea security expression root.
+ */
+public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
     MethodSecurityExpressionOperations {
 
   private Object returnObject;
   private Object filterObject;
+  private UserManagementControllerZull userManagementControllerZull;
 
   /**
-   * Instantiates a new Security expression.
+   * Creates a new instance
    *
-   * @param authentication the authentication
+   * @param authentication the {@link Authentication} to use. Cannot be null.
+   * @param userManagementControllerZull the user management controller zull
    */
-  public SecondLevelAuthorizationSecurityExpression(Authentication authentication) {
+  public EeaSecurityExpressionRoot(Authentication authentication,
+      UserManagementControllerZull userManagementControllerZull) {
     super(authentication);
+    this.userManagementControllerZull = userManagementControllerZull;
   }
 
   /**
@@ -47,6 +55,21 @@ public class SecondLevelAuthorizationSecurityExpression extends SecurityExpressi
 
     return !roles.stream().filter(authorities::contains).findFirst().orElse("not_found")
         .equals("not_found");
+  }
+
+
+  /**
+   * Cherck permission boolean.
+   *
+   * @param resource the resource
+   * @param accessScopeEnums the access scope enums
+   *
+   * @return the boolean
+   */
+  public boolean checkPermission(String resource, AccessScopeEnum... accessScopeEnums) {
+
+    return userManagementControllerZull
+        .checkResourceAccessPermission(resource, accessScopeEnums);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,13 +27,13 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @RequestMapping(value = "/user/checkAccess", method = RequestMethod.GET)
   public Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
-      @RequestParam("scopes") String[] scopes) {
+      @RequestParam("scopes") AccessScopeEnum[] scopes) {
     return securityProviderInterfaceService.checkAccessPermission(resource, scopes);
   }
 
   @Override
   @RequestMapping(value = "/user/test-security", method = RequestMethod.GET)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";
   }

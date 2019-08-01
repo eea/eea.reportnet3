@@ -4,6 +4,7 @@ package org.eea.ums.service;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 
@@ -32,7 +33,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @return the boolean
    */
-  Boolean checkAccessPermission(String resource, String... scopes);
+  Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes);
 
   /**
    * Gets user group info.

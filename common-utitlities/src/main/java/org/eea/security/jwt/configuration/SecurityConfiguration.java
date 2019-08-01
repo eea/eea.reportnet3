@@ -2,13 +2,11 @@ package org.eea.security.jwt.configuration;
 
 
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eea.security.jwt.expression.SecondLevelAuthorizationConfiguration;
+import org.eea.security.jwt.expression.EeaExpressionConfiguration;
 import org.eea.security.jwt.utils.JwtAuthenticationEntryPoint;
 import org.eea.security.jwt.utils.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -24,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @ComponentScan("org.eea.security")
-@Import(SecondLevelAuthorizationConfiguration.class)
+@Import(EeaExpressionConfiguration.class)
 public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 

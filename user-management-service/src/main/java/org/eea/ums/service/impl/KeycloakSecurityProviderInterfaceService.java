@@ -4,6 +4,7 @@ package org.eea.ums.service.impl;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
@@ -43,7 +44,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   @Override
-  public Boolean checkAccessPermission(String resource, String... scopes) {
+  public Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes) {
     return !keycloakConnectorService.checkUserPermision(resource, scopes).equals("DENY");
   }
 

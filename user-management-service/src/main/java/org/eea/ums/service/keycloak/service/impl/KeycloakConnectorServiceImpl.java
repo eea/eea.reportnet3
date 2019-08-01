@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
@@ -93,7 +95,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * @return the boolean
    */
   @Override
-  public String checkUserPermision(String resourceName, String... scopes) {
+  public String checkUserPermision(String resourceName, AccessScopeEnum... scopes) {
 
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
@@ -113,7 +115,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     List<Resource> resources = new ArrayList<>();
     Resource resource = new Resource();
     resource.setName(resourceName);
-    resource.setScopes(Arrays.asList(scopes));
+    resource.setScopes(Arrays.asList(scopes).stream().map(AccessScopeEnum::getScope).collect(
+        Collectors.toList()));
     resources.add(resource);
     resource.setType(this.resourceTypes.get(resourceName));
     checkResourceInfo.setResources(resources);

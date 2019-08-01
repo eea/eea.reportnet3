@@ -1,5 +1,7 @@
 package org.eea.ums.service.keycloak.service;
 
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+
 /**
  * The interface Keycloak connector service.
  */
@@ -13,7 +15,7 @@ public interface KeycloakConnectorService {
    *
    * @return the boolean
    */
-  String checkUserPermision(String resourceName, String... scopes);
+  String checkUserPermision(String resourceName, AccessScopeEnum... scopes);
 
   /**
    * Generate token string.

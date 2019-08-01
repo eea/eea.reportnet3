@@ -1,6 +1,7 @@
 package org.eea.security.jwt.expression;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -8,13 +9,25 @@ import org.springframework.security.authentication.AuthenticationTrustResolverIm
 import org.springframework.security.core.Authentication;
 
 /**
- * The type Second level authorize method security expression handler.
+ * The type Eea method security expression handler.
  */
-public class SecondLevelAuthorizeMethodSecurityExpressionHandler extends
+public class EeaMethodSecurityExpressionHandler extends
     DefaultMethodSecurityExpressionHandler {
+
+  private UserManagementControllerZull userManagementControllerZull;
 
   private AuthenticationTrustResolver trustResolver =
       new AuthenticationTrustResolverImpl();
+
+  /**
+   * Instantiates a new Eea method security expression handler.
+   *
+   * @param userManagementControllerZull the user management controller zull
+   */
+  public EeaMethodSecurityExpressionHandler(
+      UserManagementControllerZull userManagementControllerZull) {
+    this.userManagementControllerZull = userManagementControllerZull;
+  }
 
   /**
    * Create Security Expression Root
@@ -24,8 +37,8 @@ public class SecondLevelAuthorizeMethodSecurityExpressionHandler extends
   @Override
   protected MethodSecurityExpressionOperations createSecurityExpressionRoot(
       Authentication authentication, MethodInvocation invocation) {
-    SecondLevelAuthorizationSecurityExpression root =
-        new SecondLevelAuthorizationSecurityExpression(authentication);
+    EeaSecurityExpressionRoot root =
+        new EeaSecurityExpressionRoot(authentication, userManagementControllerZull);
     root.setPermissionEvaluator(getPermissionEvaluator());
     root.setTrustResolver(this.trustResolver);
     root.setRoleHierarchy(getRoleHierarchy());
