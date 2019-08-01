@@ -210,14 +210,8 @@ export const ReporterDataSet = ({ match, history }) => {
     setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
   };
 
-  const manageSnapshotCreation = () => {
-    createSnapshot();
-    setVisibleHandler(setSnapshotDialogVisible, false);
-    setSnapshotList();
-  };
-
-  const createSnapshot = async () => {
-    await HTTPRequester.post({
+  const createSnapshot = () => {
+    HTTPRequester.post({
       url: getUrl(config.createSnapshot.url, {
         // dataFlowId,
         dataSetId,
@@ -228,8 +222,9 @@ export const ReporterDataSet = ({ match, history }) => {
         description: snapshotState.description
       }
     })
-      .then(response => {})
+      .then(response => {setSnapshotList();})
       .catch(error => {});
+      setVisibleHandler(setSnapshotDialogVisible, false)
   };
 
   const restoreSnapshot = () => {
@@ -241,13 +236,13 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     })
       .then(response => {
+        setSnapshotList();
         console.log('restoreSnapshot response', response);
       })
       .catch(error => {
         console.log('restoreSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
-    setSnapshotList();
   };
 
   const deleteSnapshot = () => {
@@ -259,13 +254,13 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     })
       .then(response => {
+        setSnapshotList();
         console.log('deleteSnapshot response', response);
       })
       .catch(error => {
         console.error('deleteSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
-    setSnapshotList();
   };
 
   const snapshotInitialStateObj = {
@@ -289,7 +284,7 @@ export const ReporterDataSet = ({ match, history }) => {
           creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
-          action: manageSnapshotCreation
+          action: createSnapshot
         };
 
       case 'delete_snapshot':
