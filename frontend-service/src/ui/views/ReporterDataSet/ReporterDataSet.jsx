@@ -401,7 +401,6 @@ export const ReporterDataSet = ({ match, history }) => {
             snapshotDispatch: snapshotDispatch
           }}>
           <SnapshotSlideBar
-            isSnapshotListRerender={isSnapshotListRerender}
             dataSetId={dataSetId}
             isVisible={snapshotIsVisible}
             setIsVisible={setSnapshotIsVisible}
