@@ -44,6 +44,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
+  const [isSnapshotListRerender, setIsSnapshotListRerender] = useState(false);
 
   const home = {
     icon: resources.icons['home'],
@@ -218,6 +219,7 @@ export const ReporterDataSet = ({ match, history }) => {
       .then(response => {})
       .catch(error => {});
     setVisibleHandler(setSnapshotDialogVisible, false);
+    setIsSnapshotListRerender(!isSnapshotListRerender);
   };
 
   const restoreSnapshot = () => {
@@ -235,6 +237,7 @@ export const ReporterDataSet = ({ match, history }) => {
         console.log('restoreSnapshot error');
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
+    setIsSnapshotListRerender(!isSnapshotListRerender);
   };
 
   const deleteSnapshot = () => {
@@ -252,8 +255,9 @@ export const ReporterDataSet = ({ match, history }) => {
         console.log('deleteSnapshot error');
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
+    setIsSnapshotListRerender(!isSnapshotListRerender);
   };
-  //snapshot initial state object
+
   const snapshotInitialStateObj = {
     apiCall: '',
     createdAt: '',
@@ -265,7 +269,6 @@ export const ReporterDataSet = ({ match, history }) => {
     action: () => {}
   };
 
-  //snapshot Reducer
   const snapshotReducer = (state, { type, payload }) => {
     switch (type) {
       case 'create_snapshot':
@@ -405,6 +408,7 @@ export const ReporterDataSet = ({ match, history }) => {
             snapshotDispatch: snapshotDispatch
           }}>
           <SnapshotSlideBar
+            isSnapshotListRerender={isSnapshotListRerender}
             dataSetId={dataSetId}
             isVisible={snapshotIsVisible}
             setIsVisible={setSnapshotIsVisible}
