@@ -19,6 +19,8 @@ import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { ValidationViewer } from './_components/ValidationViewer';
 
+import { SnapshotService } from 'core/services/Snapshot';
+
 import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
@@ -42,8 +44,9 @@ export const ReporterDataSet = ({ match, history }) => {
   const [activeIndex, setActiveIndex] = useState();
   const [positionIdRecord, setPositionIdRecord] = useState(0);
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
-  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
+  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
+  const [snapshotListData, setSnapshotListData] = useState([]);
 
   const home = {
     icon: resources.icons['home'],
@@ -203,6 +206,10 @@ export const ReporterDataSet = ({ match, history }) => {
     setPositionIdRecord(0);
   };
 
+  const setSnapshotList = async () => {
+    setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
+  };
+
   const createSnapshot = () => {
     HTTPRequester.post({
       url: getUrl(config.createSnapshot.url, {
@@ -218,6 +225,7 @@ export const ReporterDataSet = ({ match, history }) => {
       .then(response => {})
       .catch(error => {});
     setVisibleHandler(setSnapshotDialogVisible, false);
+    setSnapshotList();
   };
 
   const restoreSnapshot = () => {
@@ -235,6 +243,7 @@ export const ReporterDataSet = ({ match, history }) => {
         console.log('restoreSnapshot error', error);
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
+    setSnapshotList();
   };
 
   const deleteSnapshot = () => {
@@ -252,6 +261,7 @@ export const ReporterDataSet = ({ match, history }) => {
         console.log('deleteSnapshot error');
       });
     setVisibleHandler(setSnapshotDialogVisible, false);
+    setSnapshotList();
   };
 
   const snapshotInitialStateObj = {
@@ -406,6 +416,8 @@ export const ReporterDataSet = ({ match, history }) => {
             setIsVisible={setSnapshotIsVisible}
             setSnapshotDialogVisible={setSnapshotDialogVisible}
             setVisibleHandler={setVisibleHandler}
+            setSnapshotList={setSnapshotList}
+            snapshotListData={snapshotListData}
           />
           <ConfirmDialog
             onConfirm={snapshotState.action}
