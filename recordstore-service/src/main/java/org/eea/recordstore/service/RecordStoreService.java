@@ -58,4 +58,9 @@ public interface RecordStoreService {
    * @throws RecordStoreAccessException the docker access exception
    */
   List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException;
+
+
+  void createSnapshot(Long idDataset);
+
+  void restoreSnapshot(Long idDataset);
 }

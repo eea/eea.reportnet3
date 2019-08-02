@@ -196,6 +196,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     event.setData(data);
     kafkaSender.sendMessage(event);
 
+    try {
+      this.createSnapshot();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -304,4 +310,49 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     result.setSchema(datasetName);
     return result;
   }
+
+
+  public void createSnapshot() throws InterruptedException {
+
+
+
+  }
+
+
+  @Override
+  public void createSnapshot(Long idDataset) {
+
+    /*
+     * Runtime rt = Runtime.getRuntime(); Process p; ProcessBuilder pb; rt = Runtime.getRuntime();
+     * pb = new ProcessBuilder("C:\\Program Files\\PostgreSQL\\9.3\\bin\\pg_dumpall.exe",
+     * "--host=localhost", "--port=5432", "--username=postgres", "--no-password", "--format=custom",
+     * "--blobs", "--verbose", "--file=D:\\service_station_backup.backup", "service_station"); p =
+     * pb.start(); p.waitFor(); System.out.println(p.exitValue());
+     */
+
+    final Container container = dockerInterfaceService.getContainer(containerName);
+
+
+    try {
+      final byte[] result = dockerInterfaceService.executeCommandInsideContainer(container,
+          "pg_dump", "-v", "-Fc", "-h", ipPostgreDb, "-U", userPostgreDb, "-p", "5432", "-d",
+          "datasets", "-n", "dataset_1", "-f", "/tmp/snap1.dump");
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    // pg_dump -v -Fc -h localhost -U %user% -p 5432 datasets -n %sourceDatasetName% -f
+    // "/tmp/%sourceDatasetName%.dump"
+
+  }
+
+
+  @Override
+  public void restoreSnapshot(Long idDataset) {
+    // TODO Auto-generated method stub
+
+  }
+
+
+
 }

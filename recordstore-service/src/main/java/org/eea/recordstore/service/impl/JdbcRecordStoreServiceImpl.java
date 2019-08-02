@@ -2,6 +2,7 @@ package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -38,6 +40,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Autowired
   private KafkaSender kafkaSender;
+
+  @Autowired
+  private DataSetControllerZuul datasetControllerZuul;
 
 
   /**
@@ -193,4 +198,77 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     });
   }
+
+  @Override
+  public void createSnapshot(Long idDataset) {
+
+    // Runtime rt = Runtime.getRuntime();
+    Process p;
+    ProcessBuilder pb;
+
+    String nombreFichero = "snap6.dump";
+    pb = new ProcessBuilder("C:\\pgsql\\bin\\pg_dump", "-v", "-Fc", "--host=localhost",
+        "--port=5432", "--username=postgres", "--dbname=datasets", "--schema=dataset_" + idDataset,
+        "--data-only", "--file=C:\\tmp\\" + nombreFichero);
+    try {
+
+
+      pb.redirectErrorStream(true);
+      p = pb.start();
+      // p.waitFor();
+      InputStream is = p.getInputStream();
+      InputStreamReader isr = new InputStreamReader(is);
+      BufferedReader br = new BufferedReader(isr);
+      String ll;
+
+      while ((ll = br.readLine()) != null) {
+        System.out.println(ll);
+      }
+
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    // pg_dump -v -Fc -h localhost -U %user% -p 5432 datasets -n %sourceDatasetName% -f
+    // "/tmp/%sourceDatasetName%.dump"
+
+  }
+
+
+  @Override
+  public void restoreSnapshot(Long idDataset) {
+
+    Runtime rt = Runtime.getRuntime();
+    Process p;
+    ProcessBuilder pb;
+
+    pb = new ProcessBuilder("C:\\pgsql\\bin\\pg_restore", "-v", "--host=localhost", "--port=5432",
+        "--username=postgres", "--dbname=datasets", "C:\\tmp\\snap6.dump");
+    try {
+      // se pueden borrar los datos del dataset directamente desde el pg_restore, con el parametro
+      // -c
+      datasetControllerZuul.deleteImportData(idDataset);
+
+      pb.redirectErrorStream(true);
+      p = pb.start();
+      // p.waitFor();
+      InputStream is = p.getInputStream();
+      InputStreamReader isr = new InputStreamReader(is);
+      BufferedReader br = new BufferedReader(isr);
+      String ll;
+
+      while ((ll = br.readLine()) != null) {
+        System.out.println(ll);
+      }
+
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    // pg_restore -v -h localhost -U %user% -p 5432 -d datasets "/tmp/%sourceDatasetName%.dump"
+
+  }
+
 }
