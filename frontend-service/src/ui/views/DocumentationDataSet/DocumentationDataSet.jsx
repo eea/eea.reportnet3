@@ -162,7 +162,7 @@ export const DocumentationDataSet = ({ match, history }) => {
               name="file"
               // disableUploadButton={setInputDocumentDescription === ''} // validate description is not empty and able upload button
               // "url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
-              url={getUrl(config.uploadDocumentAPI.url, {
+              url={getUrl(`${window.env.REACT_APP_BACKEND}${config.uploadDocumentAPI.url}`, {
                 dataFlowId: match.params.dataFlowId,
                 description: inputDocumentDescription,
                 language: 'es'
