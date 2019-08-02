@@ -145,7 +145,7 @@ const DataViewer = withRouter(
         setSortField(event.sortField);
         contextReporterDataSet.setPageHandler(0);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+        fetchDataHandler(event.multiSortMeta, event.sortOrder, firstRow, numRows);
       };
 
       const onRefreshClickHandler = () => {
@@ -174,9 +174,18 @@ const DataViewer = withRouter(
           pageSize: nRows
         };
 
-        if (sField !== undefined && sField !== null) {
-          queryString.fields = sField;
-          queryString.asc = sOrder === -1 ? 0 : 1;
+        // if (sField !== undefined && sField !== null) {
+        //   queryString.fields = sField;
+        //   queryString.asc = sOrder === -1 ? 0 : 1;
+        // }
+
+        if (sField !== undefined && sField !== null && sField != []) {
+          const myFields = sField.map((e) => {
+            return {[e.field]: e.order};
+           });
+          const format = JSON.stringify(myFields).replace(/['" {} [\]]+/g, '')
+          queryString.fields = format;
+          //queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
         const dataPromise = HTTPRequester.get({
@@ -422,7 +431,8 @@ const DataViewer = withRouter(
               sortField={sortField}
               sortOrder={sortOrder}
               autoLayout={true}
-              rowClassName={rowClassName}>
+              rowClassName={rowClassName}
+              sortMode="multiple">
               {columns}
             </DataTable>
           </div>
