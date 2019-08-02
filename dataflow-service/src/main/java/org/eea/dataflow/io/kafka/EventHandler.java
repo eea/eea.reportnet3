@@ -61,14 +61,11 @@ public class EventHandler implements EEAEventHandler {
     }
 
     if (EventType.DELETE_DOCUMENT_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
-      Long dataflowId = (Long) eeaEventVO.getData().get("dataflow_id");
-      String filename = (String) eeaEventVO.getData().get("filename");
-      String language = (String) eeaEventVO.getData().get("language");
+      Long documentId = (Long) eeaEventVO.getData().get("documentId");
       try {
-        dataflowService.deleteDocument(dataflowId, filename, language);
+        dataflowService.deleteDocument(documentId);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error deleting document for dataflow {} due to exception {}", dataflowId,
-            e);
+        LOG_ERROR.error("Error deleting document {} due to exception {}", documentId, e);
       }
     }
 

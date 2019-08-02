@@ -6,6 +6,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -119,6 +120,15 @@ public interface DataflowService {
    * @param language the language
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(Long dataflowId, String filename, String language) throws EEAException;
+  void deleteDocument(Long documentId) throws EEAException;
+
+  /**
+   * Gets the document by id.
+   *
+   * @param documentId the document id
+   * @return the document by id
+   * @throws EEAException
+   */
+  DocumentVO getDocumentById(Long documentId) throws EEAException;
 
 }
