@@ -84,6 +84,8 @@
 		"language": "Language",
 		"url": "Url",
 		"file": "File",
+		"cancel": "Cancel",
+		"save": "Save",
 		"dataFlowTask": "Dataflow Task",
 		"loginUserName": "User name",
 		"loginPassword": "Password",
