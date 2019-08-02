@@ -5,12 +5,14 @@ import styles from './DocumentationDataSet.module.scss';
 import { config } from 'assets/conf';
 
 import { BreadCrumb } from 'primereact/breadcrumb';
+import { Button } from 'primereact/button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { IconComponent } from 'ui/views/_components/IconComponent';
+import { InputText } from 'primereact/inputtext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -24,14 +26,13 @@ import { getUrl } from 'core/infrastructure/getUrl';
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
-  // const [documentsAndWebLinksData, setDocumentsAndWebLinksData] = useState();
   const [documents, setDocuments] = useState([]);
-  const [documentToDownload, setDocumentToDownload] = useState();
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [inputDocumentDescription, setInputDocumentDescription] = useState('');
 
   const home = {
     icon: resources.icons['home'],
@@ -104,19 +105,19 @@ export const DocumentationDataSet = ({ match, history }) => {
     setIsUploadDialogVisible(false);
   };
 
-  const getDocumentByID = async documentId => {
-    await DocumentService.getByDocumentId(documentId);
+  const downloadDocumentById = async documentId => {
+    await DocumentService.downloadDocumentById(documentId);
   };
 
   const downloadDocument = documentId => {
-    getDocumentByID(documentId);
+    downloadDocumentById(documentId);
   };
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a onClick={() => downloadDocument(rowData.id)}>
+      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData.id)}>
         {' '}
-        <IconComponent icon="pi pi-file" />
+        <IconComponent icon={config.icons.archive} />
       </a>
     );
   };
@@ -159,14 +160,39 @@ export const DocumentationDataSet = ({ match, history }) => {
             <CustomFileUpload
               mode="advanced"
               name="file"
-              /* url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`} */
-              /* onUpload={onUploadHandler} */
+              // disableUploadButton={setInputDocumentDescription === ''} // validate description is not empty and able upload button
+              // "url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
+              url={getUrl(config.uploadDocumentAPI.url, {
+                dataFlowId: match.params.dataFlowId,
+                description: inputDocumentDescription,
+                language: 'es'
+              })}
+              // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
+              onUpload={() => onHideHandler()}
               multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               fileLimit={1}
               className={styles.FileUpload}
-              maxFileSize={1024}
+              //maxFileSize={1024}
             />
+            {isUploadDialogVisible && (
+              <div className="rep-row">
+                <div className="rep-col-4" style={{ padding: '.75em' }} />
+                <div className="rep-col-8" style={{ padding: '.5em' }} />
+
+                <div className="rep-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor="inputDocumentDescription">{resources.messages['description']}</label>
+                </div>
+                <div className="rep-col-8" style={{ padding: '.5em' }}>
+                  <InputText
+                    id="inputDocumentDescription"
+                    onChange={e => {
+                      setInputDocumentDescription(e.target.value);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true}>
