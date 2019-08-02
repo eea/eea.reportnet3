@@ -178,9 +178,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             request,
             TokenInfo.class);
 
-    String token = "";
+    String token = null;
     if (null != tokenInfo && null != tokenInfo.getBody()) {
-      token = tokenInfo.getBody().getAccessToken();
+      token = StringUtils.isBlank(tokenInfo.getBody().getAccessToken()) ? ""
+          : tokenInfo.getBody().getAccessToken();
     }
     return token;
 
@@ -205,8 +206,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     ClientInfo result = null;
     if (null != clientInfo && null != clientInfo.getBody()) {
       ClientInfo[] clientInfos = clientInfo.getBody();
-      result = Arrays.asList(clientInfos).stream()
-          .filter(info -> info.getClientId().equals(clientId)).findFirst().orElse(null);
+      for (ClientInfo info : clientInfos) {
+        if (clientId.equals(info.getClientId())) {
+          result = info;
+          break;
+        }
+      }
     }
     return result;
 
@@ -230,11 +235,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                 .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
             String[].class);
     List<ResourceInfo> result = new ArrayList<>();
-    if (null != resourceSet && null != resourceSet.getBody() && 0 < resourceSet.getBody().length) {
-      String[] resources = resourceSet.getBody();
+    if (null != resourceSet && null != resourceSet.getBody()) {
       //Second: Once all the resource sets have been retrieved, get information about everyone of them
-
-      Arrays.asList(resources).forEach(resourceSetId -> {
+      List<String> resources = Arrays.asList(resourceSet.getBody());
+      resources.forEach(resourceSetId -> {
 
         Map<String, String> uriRequestParam = new HashMap<>();
         uriRequestParam.put(URI_PARAM_REALM, realmName);
