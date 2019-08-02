@@ -38,7 +38,10 @@ public interface DataflowMapper extends IMapper<Dataflow, DataFlowVO> {
   default void fillCategory(Dataflow dataflow, @MappingTarget DataFlowVO dataFlowVO) {
     List<DocumentVO> documents = dataFlowVO.getDocuments();
     documents.stream().filter(document -> StringUtils.isNotBlank(document.getName()))
-        .forEach(document -> document.setCategory(
-            document.getName().substring(document.getName().lastIndexOf('.') + 1).toLowerCase()));
+        .forEach(document -> {
+          document.setCategory(
+              document.getName().substring(document.getName().lastIndexOf('.') + 1).toLowerCase());
+          document.setDataflowId(dataflow.getId());
+        });
   }
 }
