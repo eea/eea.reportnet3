@@ -206,10 +206,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     ClientInfo result = null;
     if (null != clientInfo && null != clientInfo.getBody()) {
       ClientInfo[] clientInfos = clientInfo.getBody();
-      for (ClientInfo info : clientInfos) {
-        if (clientId.equals(info.getClientId())) {
-          result = info;
-          break;
+      if (null != clientInfos) {
+        for (ClientInfo info : clientInfos) {
+          if (clientId.equals(info.getClientId())) {
+            result = info;
+            break;
+          }
         }
       }
     }
