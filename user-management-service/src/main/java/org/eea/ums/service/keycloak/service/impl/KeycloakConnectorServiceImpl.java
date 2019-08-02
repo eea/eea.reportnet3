@@ -240,22 +240,25 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                 .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
             String[].class);
     List<ResourceInfo> result = new ArrayList<>();
+    //Second: Once all the resource sets have been retrieved, get information about everyone of them
     if (null != resourceSet && null != resourceSet.getBody()) {
-      //Second: Once all the resource sets have been retrieved, get information about everyone of them
       String[] resourcesetBody = resourceSet.getBody();
-      Arrays.asList(resourcesetBody).forEach(resourceSetId -> {
+      List<String> resources = Arrays.asList(resourcesetBody);
+      if (null != resources && resources.size() > 0) {
+        resources.forEach(resourceSetId -> {
 
-        Map<String, String> uriRequestParam = new HashMap<>();
-        uriRequestParam.put(URI_PARAM_REALM, realmName);
-        uriRequestParam.put(URI_PARAM_RESOURCE_ID, resourceSetId);
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
-        ResponseEntity<ResourceInfo> resource = this.restTemplate
-            .exchange(
-                uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
-                    .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
-                ResourceInfo.class);
-        result.add(resource.getBody());
-      });
+          Map<String, String> uriRequestParam = new HashMap<>();
+          uriRequestParam.put(URI_PARAM_REALM, realmName);
+          uriRequestParam.put(URI_PARAM_RESOURCE_ID, resourceSetId);
+          UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
+          ResponseEntity<ResourceInfo> resource = this.restTemplate
+              .exchange(
+                  uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
+                      .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
+                  ResourceInfo.class);
+          result.add(resource.getBody());
+        });
+      }
     }
     return result;
   }
