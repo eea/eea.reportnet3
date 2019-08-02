@@ -19,12 +19,13 @@ public interface RecordStoreService {
   @Deprecated
   void resetDatasetDatabase() throws RecordStoreAccessException;
 
+
   /**
-   * Create empty data set.
+   * Creates the empty data set.
    *
    * @param datasetName the dataset name
-   *
-   * @throws RecordStoreAccessException the docker access exception
+   * @param idDatasetSchema the id dataset schema
+   * @throws RecordStoreAccessException the record store access exception
    */
   void createEmptyDataSet(String datasetName, String idDatasetSchema)
       throws RecordStoreAccessException;

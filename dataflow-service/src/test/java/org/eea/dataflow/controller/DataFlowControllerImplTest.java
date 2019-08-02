@@ -1,14 +1,19 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -298,6 +303,41 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
     Mockito.verify(dataflowService, times(1)).removeContributorFromDataflow(Mockito.any(),
         Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createDataFlowThrow() throws EEAException {
+    dataFlowControllerImpl.createDataFlow("123", "123", new Date(-1));
+  }
+
+  @Test
+  public void createDataFlow() throws EEAException, ParseException {
+    new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    doNothing().when(dataflowService).createDataFlow(Mockito.any());
+    dataFlowControllerImpl.createDataFlow("123", "123", date);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void getDocumentByIdExceptionTest() throws EEAException {
+    dataFlowControllerImpl.getDocumentById(null);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getDocumentByIdException2Test() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getDocumentById(Mockito.any());
+    dataFlowControllerImpl.getDocumentById(1L);
+  }
+
+  @Test
+  public void getDocumentByIdSuccessTest() throws EEAException {
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    when(dataflowService.getDocumentById(Mockito.any())).thenReturn(document);
+    assertEquals("fail", document, dataFlowControllerImpl.getDocumentById(1L));
   }
 
 }

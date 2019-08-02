@@ -46,6 +46,6 @@ public interface DocumentService {
    * @param language the language
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final String documentName, final Long dataFlowId, final String language)
-      throws EEAException;
+  void deleteDocument(final Long documentId, final String documentName, final Long dataFlowId,
+      final String language) throws EEAException;
 }

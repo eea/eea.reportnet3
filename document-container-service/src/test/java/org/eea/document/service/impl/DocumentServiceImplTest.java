@@ -226,7 +226,7 @@ public class DocumentServiceImplTest {
     doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument("filename", 1L, "ES");
+    documentService.deleteDocument(1L, "filename", 1L, "ES");
   }
 
   /**
@@ -246,7 +246,7 @@ public class DocumentServiceImplTest {
     doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument("filename", 1L, "ES");
+    documentService.deleteDocument(1L, "filename", 1L, "ES");
   }
 
   /**
@@ -265,7 +265,7 @@ public class DocumentServiceImplTest {
         Mockito.any());
     doNothing().when(oakRepositoryUtils).runGC(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument("filename", 1L, "ES");
+    documentService.deleteDocument(1L, "filename", 1L, "ES");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 

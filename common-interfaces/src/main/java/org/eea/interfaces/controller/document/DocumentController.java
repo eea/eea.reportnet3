@@ -5,6 +5,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,25 +37,19 @@ public interface DocumentController {
   /**
    * Download document .
    *
-   * @param documentName the document name
-   * @param dataFlowId the data flow id
-   * @param language the language
+   * @param documentId the document id
    * @return the document
    */
-  @GetMapping
-  ResponseEntity<Resource> getDocument(final String documentName, final Long dataFlowId,
-      final String language);
+  @GetMapping(value = "/{documentId}")
+  ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId);
 
   /**
    * Delete document.
    *
-   * @param documentName the document name
-   * @param dataFlowId the data flow id
-   * @param language the language
+   * @param documentId the document id
    * @throws Exception the exception
    */
-  @DeleteMapping
-  void deleteDocument(final String documentName, final Long dataFlowId, final String language)
-      throws Exception;
+  @DeleteMapping(value = "/{documentId}")
+  void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
 
 }

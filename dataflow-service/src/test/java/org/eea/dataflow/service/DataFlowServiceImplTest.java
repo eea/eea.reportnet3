@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
@@ -22,6 +23,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +73,9 @@ public class DataFlowServiceImplTest {
   /** The dataset controller. */
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+  @Mock
+  private DocumentMapper documentMapper;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -332,39 +337,7 @@ public class DataFlowServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void deleteDocumentException1Test() throws EEAException {
-    dataflowServiceImpl.deleteDocument(null, null, null);
-  }
-
-  /**
-   * Delete document exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentException2Test() throws EEAException {
-    dataflowServiceImpl.deleteDocument(1L, null, null);
-  }
-
-  /**
-   * Delete document exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentException3Test() throws EEAException {
-    dataflowServiceImpl.deleteDocument(1L, "filename", null);
-  }
-
-  /**
-   * Delete document exception 4 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void deleteDocumentException4Test() throws EEAException {
-    when(documentRepository.findFirstByDataflowIdAndNameAndLanguage(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(null);
-    dataflowServiceImpl.deleteDocument(1L, "filename", "ES");
+    dataflowServiceImpl.deleteDocument(null);
   }
 
   /**
@@ -374,11 +347,41 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void deleteDocumentSuccessTest() throws EEAException {
-    when(documentRepository.findFirstByDataflowIdAndNameAndLanguage(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(new Document());
-    doNothing().when(documentRepository).delete(Mockito.any());
-    dataflowServiceImpl.deleteDocument(1L, "filename", "ES");
-    Mockito.verify(documentRepository, times(1)).delete(Mockito.any());
+    doNothing().when(documentRepository).deleteById(Mockito.any());
+    dataflowServiceImpl.deleteDocument(1L);
+    Mockito.verify(documentRepository, times(1)).deleteById(Mockito.any());
+  }
+
+  /**
+   * Gets the document by id exception 1 test.
+   *
+   * @return the document by id exception 1 test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getDocumentByIdException1Test() throws EEAException {
+    dataflowServiceImpl.getDocumentById(null);
+  }
+
+  /**
+   * Gets the document by id exception 2 test.
+   *
+   * @return the document by id exception 2 test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getDocumentByIdException2Test() throws EEAException {
+    when(documentRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    dataflowServiceImpl.getDocumentById(1L);
+  }
+
+  @Test
+  public void getDocumentByIdSuccessTest() throws EEAException {
+    DocumentVO documentVO = new DocumentVO();
+    documentVO.setId(1L);
+    when(documentRepository.findById(Mockito.any())).thenReturn(Optional.of(new Document()));
+    when(documentMapper.entityToClass(Mockito.any())).thenReturn(documentVO);
+    assertEquals("not equals", documentVO, dataflowServiceImpl.getDocumentById(1L));
   }
 
 }
