@@ -140,6 +140,7 @@ public class DocumentServiceImpl implements DocumentService {
   /**
    * Delete document.
    *
+   * @param documentId the document id
    * @param documentName the document name
    * @param dataFlowId the data flow id
    * @param language the language
@@ -148,8 +149,8 @@ public class DocumentServiceImpl implements DocumentService {
   @Override
   @Modified
   @Async
-  public void deleteDocument(String documentName, Long dataFlowId, final String language)
-      throws EEAException {
+  public void deleteDocument(Long documentId, String documentName, Long dataFlowId,
+      final String language) throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
@@ -166,8 +167,7 @@ public class DocumentServiceImpl implements DocumentService {
 
       oakRepositoryUtils.runGC(ns);
 
-      sendKafkaNotification(documentName, dataFlowId, language, null,
-          EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
+      sendKafkaNotification(documentId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
 
     } catch (Exception e) {
       if (e.getClass().equals(PathNotFoundException.class)) {
@@ -195,6 +195,18 @@ public class DocumentServiceImpl implements DocumentService {
     result.put("filename", filename);
     result.put("language", language);
     result.put("description", description);
+    kafkaSenderUtils.releaseKafkaEvent(eventType, result);
+  }
+
+  /**
+   * Send kafka notification.
+   *
+   * @param documentId the document id
+   * @param eventType the event type
+   */
+  public void sendKafkaNotification(final Long documentId, final EventType eventType) {
+    Map<String, Object> result = new HashMap<>();
+    result.put("documentId", documentId);
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
 

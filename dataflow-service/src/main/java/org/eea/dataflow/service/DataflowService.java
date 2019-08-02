@@ -1,10 +1,12 @@
 package org.eea.dataflow.service;
 
 import java.util.List;
+import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -92,6 +94,13 @@ public interface DataflowService {
   void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
 
   /**
+   * Creates the data flow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  void createDataFlow(Dataflow dataflow);
+
+  /**
    * Insert document.
    *
    * @param dataflowId the dataflow id
@@ -111,6 +120,15 @@ public interface DataflowService {
    * @param language the language
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(Long dataflowId, String filename, String language) throws EEAException;
+  void deleteDocument(Long documentId) throws EEAException;
+
+  /**
+   * Gets the document by id.
+   *
+   * @param documentId the document id
+   * @return the document by id
+   * @throws EEAException
+   */
+  DocumentVO getDocumentById(Long documentId) throws EEAException;
 
 }

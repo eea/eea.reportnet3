@@ -1,11 +1,14 @@
 package org.eea.interfaces.controller.dataflow;
 
 
+import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -117,5 +120,27 @@ public interface DataFlowController {
   void removeContributor(@PathVariable("idDataflow") Long idDataflow,
       @RequestParam(value = "idContributor") Long userId);
 
+
+  /**
+   * Creates the data flow.
+   *
+   * @param description the description
+   * @param nameDataFlow the name data flow
+   * @param deadDateToSend the dead date to send
+   */
+  @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
+  void createDataFlow(@RequestParam("description") String description,
+      @RequestParam("nameDataFlow") String nameDataFlow,
+      @RequestParam(name = "date", required = false) @DateTimeFormat(
+          iso = DateTimeFormat.ISO.DATE_TIME) Date deadDateToSend);
+
+  /**
+   * Gets the document by id.
+   *
+   * @param documentId the document id
+   * @return the document by id
+   */
+  @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DocumentVO getDocumentById(@PathVariable("documentId") Long documentId);
 
 }

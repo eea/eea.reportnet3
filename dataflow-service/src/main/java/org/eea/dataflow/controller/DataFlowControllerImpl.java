@@ -1,7 +1,11 @@
 package org.eea.dataflow.controller;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -9,11 +13,13 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -265,6 +272,43 @@ public class DataFlowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
+  }
+
+  /**
+   * Creates the table data flow.
+   *
+   * @param tableName the table name
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand(fallbackMethod = "createDataFlow")
+  @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void createDataFlow(@RequestParam(value = "description") String description,
+      @RequestParam("nameDataFlow") String nameDataFlow,
+      @RequestParam(name = "date", required = false) @DateTimeFormat(
+          iso = DateTimeFormat.ISO.DATE_TIME) Date deadDateToSend) {
+
+    final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
+    if (deadDateToSend.before(dateToday) || deadDateToSend.equals(dateToday)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATE_AFTER_INCORRECT);
+    }
+    Dataflow dataflow = new Dataflow(description, nameDataFlow, dateToday, deadDateToSend);
+    dataflowService.createDataFlow(dataflow);
+  }
+
+  @Override
+  public DocumentVO getDocumentById(Long documentId) {
+    if (documentId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    }
+    DocumentVO document = null;
+    try {
+      document = dataflowService.getDocumentById(documentId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    }
+    return document;
   }
 
 }

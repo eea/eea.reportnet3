@@ -29,6 +29,12 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
@@ -81,6 +87,27 @@ public class Dataflow {
   @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))
   private Set<UserRequest> userRequests;
+
+  /**
+   * Instantiates a new dataflow.
+   */
+  public Dataflow() {}
+
+  /**
+   * Instantiates a new dataflow.
+   *
+   * @param description the description
+   * @param name the name
+   * @param deadDate the dead date
+   * @param creationDate the creation date
+   */
+  public Dataflow(String description, String name, Date creationDate, Date deadDate) {
+    this.name = name;
+    this.description = description;
+    this.creationDate = creationDate;
+    this.deadlineDate = deadDate;
+    this.status = TypeStatusEnum.PENDING;
+  }
 
   /**
    * Equals.

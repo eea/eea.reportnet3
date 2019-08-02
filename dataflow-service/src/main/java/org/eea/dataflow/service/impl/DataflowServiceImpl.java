@@ -5,6 +5,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
@@ -20,6 +21,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  @Autowired
+  private DocumentMapper documentMapper;
 
   /**
    * The Constant LOG.
@@ -225,6 +229,34 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Creates the data flow.
+   *
+   * @param nameDataFlow the name data flow
+   */
+  @Override
+  @Transactional
+  public void createDataFlow(Dataflow dataflow) {
+    createMetabaseDataFlow(dataflow);
+    // createDatasetfromDataFlow(nameDataFlow);
+    // createSchemaDataFlow(nameDataFlow);
+
+  }
+
+  /**
+   * Creates the metabase data flow.
+   *
+   * @param nameDataFlow the name data flow
+   */
+  @Transactional
+  private void createMetabaseDataFlow(Dataflow dataflow) {
+    if (dataflowRepository.findByName(dataflow.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflow.getName());
+    } else {
+      dataflowRepository.save(dataflow);
+    }
+  }
+
+  /**
    * Insert document.
    *
    * @param dataflowId the dataflow id
@@ -264,19 +296,31 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public void deleteDocument(Long dataflowId, String filename, String language)
-      throws EEAException {
-    if (dataflowId == null || filename == null || language == null) {
+  public void deleteDocument(Long documentId) throws EEAException {
+    if (documentId == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    Document document =
-        documentRepository.findFirstByDataflowIdAndNameAndLanguage(dataflowId, filename, language);
+    documentRepository.deleteById(documentId);
+    LOG.info("document deleted");
+  }
+
+  /**
+   * Gets the document by id.
+   *
+   * @param documentId the document id
+   * @return the document by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DocumentVO getDocumentById(Long documentId) throws EEAException {
+    if (documentId == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Document document = documentRepository.findById(documentId).orElse(null);
     if (document == null) {
       throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
-    } else {
-      documentRepository.delete(document);
-      LOG.info("document deleted");
     }
+    return documentMapper.entityToClass(document);
   }
 
 }
