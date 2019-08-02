@@ -63,6 +63,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /** The document mapper. */
   @Autowired
   private DocumentMapper documentMapper;
 
@@ -287,12 +288,11 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+
   /**
    * Delete document.
    *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
+   * @param documentId the document id
    * @throws EEAException the EEA exception
    */
   @Override

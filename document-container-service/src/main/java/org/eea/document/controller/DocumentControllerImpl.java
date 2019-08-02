@@ -43,6 +43,7 @@ public class DocumentControllerImpl implements DocumentController {
   @Autowired
   private DataFlowControllerZuul dataflowController;
 
+
   /**
    * Upload document.
    *
@@ -78,7 +79,6 @@ public class DocumentControllerImpl implements DocumentController {
    * Gets the document.
    *
    * @param documentId the document id
-   * @param language the language
    * @return the document
    */
   @Override
