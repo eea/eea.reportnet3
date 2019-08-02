@@ -31,7 +31,8 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
             }}
           />
           <button
-            className="rp-btn primary"
+            className={snapshotDescription === '' ? "rp-btn secondary" : "rp-btn primary"}
+            disabled = {snapshotDescription === ''}
             onClick={() =>
               snapshotContext.snapshotDispatch({
                 type: 'create_snapshot',
