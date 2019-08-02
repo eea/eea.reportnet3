@@ -17,11 +17,11 @@ const all = async url => {
   );
 };
 
-const getDocumentById = async documentId => {
-  await api.documentById(documentId);
+const downloadDocumentById = async documentId => {
+  await api.downloadDocumentById(documentId);
 };
 
 export const ApiDocumentRepository = {
   all,
-  getDocumentById
+  downloadDocumentById
 };

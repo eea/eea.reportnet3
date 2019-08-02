@@ -36,7 +36,7 @@
 		"url": "/document/{:documentId}"
 	},
 	"uploadDocumentAPI": {
-		"url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
+		"url": "/document/upload/{:dataFlowId}?description={:description}&language={:language}"
 	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/"

@@ -26,14 +26,13 @@ import { getUrl } from 'core/infrastructure/getUrl';
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
-  // const [documentsAndWebLinksData, setDocumentsAndWebLinksData] = useState();
   const [documents, setDocuments] = useState([]);
-  const [documentToDownload, setDocumentToDownload] = useState();
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [inputDocumentDescription, setInputDocumentDescription] = useState('');
 
   const home = {
     icon: resources.icons['home'],
@@ -106,24 +105,13 @@ export const DocumentationDataSet = ({ match, history }) => {
     setIsUploadDialogVisible(false);
   };
 
-  const getDocumentByID = async documentId => {
-    await DocumentService.getByDocumentId(documentId);
+  const downloadDocumentById = async documentId => {
+    await DocumentService.downloadDocumentById(documentId);
   };
 
   const downloadDocument = documentId => {
-    getDocumentByID(documentId);
+    downloadDocumentById(documentId);
   };
-  const dialogFooter = (
-    <div>
-      <Button
-        label={resources.messages['cancel']}
-        icon="pi pi-times"
-        className="p-button-primary"
-        onClick={onHideHandler}
-      />
-      <Button label={resources.messages['save']} icon="pi pi-check" className="p-button-primary" onClick />
-    </div>
-  );
 
   const actionTemplate = (rowData, column) => {
     return (
@@ -165,7 +153,6 @@ export const DocumentationDataSet = ({ match, history }) => {
           <ButtonsBar buttonsList={customButtons} />
           <Dialog
             header={resources.messages['upload']}
-            footer={dialogFooter}
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
@@ -173,8 +160,15 @@ export const DocumentationDataSet = ({ match, history }) => {
             <CustomFileUpload
               mode="advanced"
               name="file"
-              //url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`}
-              //onUpload={onUploadHandler}
+              // disableUploadButton={setInputDocumentDescription === ''} // validate description is not empty and able upload button
+              // "url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
+              url={getUrl(config.uploadDocumentAPI.url, {
+                dataFlowId: match.params.dataFlowId,
+                description: inputDocumentDescription,
+                language: 'es'
+              })}
+              // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
+              onUpload={() => onHideHandler()}
               multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
               fileLimit={1}
@@ -183,18 +177,19 @@ export const DocumentationDataSet = ({ match, history }) => {
             />
             {isUploadDialogVisible && (
               <div className="rep-row">
-                <div className="rep-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor="title">{resources.messages['title']}</label>
-                </div>
-                <div className="rep-col-8" style={{ padding: '.5em' }}>
-                  <InputText id="title" onChange />
-                </div>
+                <div className="rep-col-4" style={{ padding: '.75em' }} />
+                <div className="rep-col-8" style={{ padding: '.5em' }} />
 
                 <div className="rep-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor="description">{resources.messages['description']}</label>
+                  <label htmlFor="inputDocumentDescription">{resources.messages['description']}</label>
                 </div>
                 <div className="rep-col-8" style={{ padding: '.5em' }}>
-                  <InputText id="description" onChange />
+                  <InputText
+                    id="inputDocumentDescription"
+                    onChange={e => {
+                      setInputDocumentDescription(e.target.value);
+                    }}
+                  />
                 </div>
               </div>
             )}

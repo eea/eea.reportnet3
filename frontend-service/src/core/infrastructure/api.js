@@ -14,15 +14,18 @@ export const api = {
     });
     return response.data.documents;
   },
-  documentById: async documentId => {
+  downloadDocumentById: async documentId => {
     await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? getUrl(config.downloadDocumentByIdAPI.url, {
-            documentId: documentId
-          })
-        : getUrl(config.downloadDocumentByIdAPI.url, {
-            documentId: documentId
-          }),
+      url: getUrl(config.downloadDocumentByIdAPI.url, {
+        documentId: documentId
+      }),
+      // url: window.env.REACT_APP_JSON
+      //   ? getUrl(config.downloadDocumentByIdAPI.url, {
+      //       documentId: documentId
+      //     })
+      //   : getUrl(config.downloadDocumentByIdAPI.url, {
+      //       documentId: documentId
+      //     }),
       queryString: {}
     });
   },
