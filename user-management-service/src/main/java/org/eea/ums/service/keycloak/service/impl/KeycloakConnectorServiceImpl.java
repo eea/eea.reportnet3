@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
@@ -134,7 +135,13 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                 .path(CHECK_USER_PERMISSION)
                 .buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
             CheckResourcePermissionResult.class);
-    return checkResult.getBody().getStatus();
+    CheckResourcePermissionResult result = new CheckResourcePermissionResult();
+    if (null != checkResult && null != checkResult.getBody()) {
+      result = checkResult.getBody();
+    }
+    String permission = result.getStatus();
+
+    return StringUtils.isBlank(permission) ? "DENY" : permission;
   }
 
   /**
@@ -171,7 +178,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             request,
             TokenInfo.class);
 
-    return tokenInfo.getBody().getAccessToken();
+    String token = "";
+    if (null != tokenInfo && null != tokenInfo.getBody()) {
+      token = tokenInfo.getBody().getAccessToken();
+    }
+    return token;
 
   }
 
@@ -193,7 +204,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             ClientInfo[].class);
     ClientInfo result = null;
     if (null != clientInfo && null != clientInfo.getBody()) {
-      result = Arrays.asList(clientInfo.getBody()).stream()
+      ClientInfo[] clientInfos = clientInfo.getBody();
+      result = Arrays.asList(clientInfos).stream()
           .filter(info -> info.getClientId().equals(clientId)).findFirst().orElse(null);
     }
     return result;
@@ -219,9 +231,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             String[].class);
     List<ResourceInfo> result = new ArrayList<>();
     if (null != resourceSet && null != resourceSet.getBody() && 0 < resourceSet.getBody().length) {
+      String[] resources = resourceSet.getBody();
       //Second: Once all the resource sets have been retrieved, get information about everyone of them
 
-      Arrays.asList(resourceSet.getBody()).forEach(resourceSetId -> {
+      Arrays.asList(resources).forEach(resourceSetId -> {
 
         Map<String, String> uriRequestParam = new HashMap<>();
         uriRequestParam.put(URI_PARAM_REALM, realmName);
