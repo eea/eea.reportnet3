@@ -1,6 +1,7 @@
 package org.eea.recordstore.configuration;
 
 import javax.sql.DataSource;
+import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,19 +15,27 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 public class RecordStoreConfiguration {
 
-  /** The connection url. */
+  /**
+   * The connection url.
+   */
   @Value("${spring.datasource.url}")
   private String connectionUrl;
 
-  /** The connection username. */
+  /**
+   * The connection username.
+   */
   @Value("${spring.datasource.username}")
   private String connectionUsername;
 
-  /** The connection password. */
+  /**
+   * The connection password.
+   */
   @Value("${spring.datasource.password}")
   private String connectionPassword;
 
-  /** The connection driver. */
+  /**
+   * The connection driver.
+   */
   @Value("${spring.datasource.driverClassName}")
   private String connectionDriver;
 
@@ -50,6 +59,7 @@ public class RecordStoreConfiguration {
    * Jdbc template.
    *
    * @param dataSource the data source
+   *
    * @return the jdbc template
    */
   @Bean

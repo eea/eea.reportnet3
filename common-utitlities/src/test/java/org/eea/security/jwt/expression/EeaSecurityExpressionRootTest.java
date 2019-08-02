@@ -1,0 +1,74 @@
+package org.eea.security.jwt.expression;
+
+import java.util.HashSet;
+import java.util.Set;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.security.jwt.utils.EeaUserDetails;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
+@RunWith(MockitoJUnitRunner.class)
+public class EeaSecurityExpressionRootTest {
+
+  private EeaSecurityExpressionRoot eeaSecurityExpressionRoot;
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
+
+  private static final Long DATAFLOW_ID = 1l;
+
+  @Before
+  public void init() {
+    Set<String> roles = new HashSet<>();
+    roles.add(ObjectAccessRoleEnum.DATAFLOW_PROVIDER.getAccessRole(DATAFLOW_ID));
+    UserDetails userDetails = EeaUserDetails.create("test", roles);
+    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+        userDetails, null, userDetails.getAuthorities());
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+    Mockito.reset(userManagementControllerZull);
+
+    eeaSecurityExpressionRoot = new EeaSecurityExpressionRoot(authenticationToken,
+        userManagementControllerZull);
+
+  }
+
+  @Test
+  public void secondLevelAuthorize() {
+    Assert.assertTrue(eeaSecurityExpressionRoot
+        .secondLevelAuthorize(DATAFLOW_ID, ObjectAccessRoleEnum.DATAFLOW_PROVIDER));
+  }
+
+  @Test
+  public void secondLevelAuthorizeUnauthorized() {
+    Assert.assertFalse(eeaSecurityExpressionRoot
+        .secondLevelAuthorize(DATAFLOW_ID, ObjectAccessRoleEnum.DATAFLOW_REQUESTOR));
+  }
+
+  @Test
+  public void checkPermission() {
+    Mockito.when(
+        userManagementControllerZull.checkResourceAccessPermission(Mockito.anyString(), Mockito.any(
+            AccessScopeEnum[].class))).thenReturn(true);
+    Assert.assertTrue(eeaSecurityExpressionRoot
+        .checkPermission("", AccessScopeEnum.CREATE));
+  }
+
+  @Test
+  public void checkPermissionUnauthorized() {
+    Mockito.when(
+        userManagementControllerZull.checkResourceAccessPermission(Mockito.anyString(), Mockito.any(
+            AccessScopeEnum[].class))).thenReturn(false);
+    Assert.assertFalse(eeaSecurityExpressionRoot
+        .checkPermission("", AccessScopeEnum.CREATE));
+  }
+}

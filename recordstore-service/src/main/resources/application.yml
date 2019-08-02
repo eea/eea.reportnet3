@@ -3,3 +3,12 @@ server:
 spring:
   application:
     name: recordstore
+eea:
+  security:
+    permittedRequest: /recordstore/connections, /recordstore/connection/*
+    authenticatedRequest: /recordstore/prueba
+    roleProtectedRequest:
+      PROVIDER:
+        /recordstore/connection/*
+      REQUESTOR:
+        /recordstore/dataset/create/*
