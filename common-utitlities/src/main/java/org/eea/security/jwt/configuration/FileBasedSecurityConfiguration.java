@@ -1,5 +1,6 @@
 package org.eea.security.jwt.configuration;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -68,12 +69,12 @@ public class FileBasedSecurityConfiguration extends SecurityConfiguration {
 
   @Override
   protected String[] getAuthenticatedRequest() {
-    return authenticatedRequest;
+    return Arrays.copyOf(authenticatedRequest, authenticatedRequest.length);
   }
 
   @Override
   protected String[] getPermittedRequest() {
-    return permittedRequest;
+    return Arrays.copyOf(permittedRequest, permittedRequest.length);
   }
 
   @Override

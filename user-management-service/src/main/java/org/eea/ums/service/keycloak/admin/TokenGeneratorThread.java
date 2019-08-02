@@ -63,7 +63,7 @@ public class TokenGeneratorThread implements Runnable {
   /**
    * Stop thread.
    */
-  synchronized public void stopThread() {
+  public void stopThread() {
     this.exit = true;
     log.info("Finished token generator thread");
   }

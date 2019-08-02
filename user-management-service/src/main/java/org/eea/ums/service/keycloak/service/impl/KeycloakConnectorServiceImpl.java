@@ -73,6 +73,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
   private static final String GET_RESOURCE_SET = "/auth/realms/{realm}/authz/protection/resource_set";
   private static final String GET_RESOURCE_INFO = "/auth/realms/{realm}/authz/protection/resource_set/{resourceId}";
+  private static final String URI_PARAM_REALM = "realm";
+  private static final String URI_PARAM_RESOURCE_ID = "resourceId";
 
 
   @PostConstruct
@@ -105,7 +107,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("realm", realmName);
+    uriParams.put(URI_PARAM_REALM, realmName);
     uriParams.put("clientInterenalId", internalClientId);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
@@ -149,7 +151,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("realm", realmName);
+    uriParams.put(URI_PARAM_REALM, realmName);
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("username", username);
@@ -178,7 +180,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headerInfo.put("Authorization", "Bearer " + adminToken);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("realm", realmName);
+    uriParams.put(URI_PARAM_REALM, realmName);
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
         null, headers);
@@ -189,9 +191,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_CLIENT_ID)
                 .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
             ClientInfo[].class);
-
-    return Arrays.asList(clientInfo.getBody()).stream()
-        .filter(info -> info.getClientId().equals(clientId)).findFirst().orElse(null);
+    ClientInfo result = null;
+    if (null != clientInfo && null != clientInfo.getBody()) {
+      result = Arrays.asList(clientInfo.getBody()).stream()
+          .filter(info -> info.getClientId().equals(clientId)).findFirst().orElse(null);
+    }
+    return result;
 
   }
 
@@ -201,7 +206,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     headerInfo.put("Authorization", "Bearer " + adminToken);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("realm", realmName);
+    uriParams.put(URI_PARAM_REALM, realmName);
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
         null, headers);
@@ -212,21 +217,24 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_SET)
                 .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
             String[].class);
-    //Second: Once all the resource sets have been retrieved, get information about everyone of them
     List<ResourceInfo> result = new ArrayList<>();
-    Arrays.asList(resourceSet.getBody()).forEach(resourceSetId -> {
+    if (null != resourceSet && null != resourceSet.getBody() && 0 < resourceSet.getBody().length) {
+      //Second: Once all the resource sets have been retrieved, get information about everyone of them
 
-      Map<String, String> uriRequestParam = new HashMap<>();
-      uriRequestParam.put("realm", realmName);
-      uriRequestParam.put("resourceId", resourceSetId);
-      UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
-      ResponseEntity<ResourceInfo> resource = this.restTemplate
-          .exchange(
-              uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
-                  .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
-              ResourceInfo.class);
-      result.add(resource.getBody());
-    });
+      Arrays.asList(resourceSet.getBody()).forEach(resourceSetId -> {
+
+        Map<String, String> uriRequestParam = new HashMap<>();
+        uriRequestParam.put(URI_PARAM_REALM, realmName);
+        uriRequestParam.put(URI_PARAM_RESOURCE_ID, resourceSetId);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
+        ResponseEntity<ResourceInfo> resource = this.restTemplate
+            .exchange(
+                uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
+                    .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
+                ResourceInfo.class);
+        result.add(resource.getBody());
+      });
+    }
     return result;
   }
 
