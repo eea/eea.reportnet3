@@ -19,7 +19,7 @@ public enum ConditionsDrools {
 
   /** The dataflowrule. */
   RULE_ID("ruleid"),
-  /** The schema name. */
+
   /** The schema name. */
   SCHEMA_NAME("schemaName"),
 
@@ -41,6 +41,11 @@ public enum ConditionsDrools {
     this.value = value;
   }
 
+  /**
+   * Gets the value.
+   *
+   * @return the value
+   */
   public String getValue() {
     return value;
   }
