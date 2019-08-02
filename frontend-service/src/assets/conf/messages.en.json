@@ -89,7 +89,7 @@
 		"loginPassword": "Password",
 		"loginLogin": "Login",
 		"appName": "Reportnet 3.0",
-		"createSnapshotTitle": "Create snapshot",
+		"createSnapshotTitle": "Snapshots",
 		"createSnapshotPlaceholder": "Please, enter a description",
 		"createSnapshotMessage": "You are about to CREATE a snapshot...",
 		"deleteSnapshotMessage": "You are about to DELETE a snapshot...",

@@ -3,6 +3,7 @@ import moment from 'moment';
 
 import styles from './SnapshotItem.module.scss';
 
+import { IconComponent } from 'ui/views/_components/IconComponent';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 
@@ -25,7 +26,7 @@ export function SnapshotItem({ itemData }) {
               payload: { ...itemData }
             })
           }>
-          {resources.messages.restore}
+          <IconComponent icon={resources.icons['replay']} />
         </button>
         <button
           className="rp-btn warning"
@@ -35,7 +36,7 @@ export function SnapshotItem({ itemData }) {
               payload: { ...itemData }
             })
           }>
-          {resources.messages.delete}
+          <IconComponent icon={resources.icons['trash']} />
         </button>
       </div>
     </li>

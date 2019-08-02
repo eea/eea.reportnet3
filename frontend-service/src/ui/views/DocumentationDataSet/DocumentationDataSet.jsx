@@ -114,9 +114,9 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a onClick={() => downloadDocument(rowData.id)}>
+      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData.id)}>
         {' '}
-        <IconComponent icon="pi pi-file" />
+        <IconComponent icon={config.icons.archive} />
       </a>
     );
   };
