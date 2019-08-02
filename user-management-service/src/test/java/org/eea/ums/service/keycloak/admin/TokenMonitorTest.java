@@ -1,6 +1,10 @@
 package org.eea.ums.service.keycloak.admin;
 
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,6 +37,13 @@ public class TokenMonitorTest {
     MockitoAnnotations.initMocks(this);
   }
 
+
+  @Test
+  public void startTokenGeneratorThread() {
+    ReflectionTestUtils
+        .invokeMethod(tokenMonitor, "startTokenGeneratorThread");
+    Mockito.verify(executorService, times(1)).submit(Mockito.any(TokenGeneratorThread.class));
+  }
 
   @Test
   public void destroy() {

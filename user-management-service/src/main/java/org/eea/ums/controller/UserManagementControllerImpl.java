@@ -31,10 +31,9 @@ public class UserManagementControllerImpl implements UserManagementController {
     return securityProviderInterfaceService.checkAccessPermission(resource, scopes);
   }
 
-
-  @RequestMapping(value = "/test-security", method = RequestMethod.GET)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
-  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
-    return "OLEEEEE";
-  }
+//  @RequestMapping(value = "/test-security", method = RequestMethod.GET)
+//  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
+//  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
+//    return "OLEEEEE";
+//  }
 }

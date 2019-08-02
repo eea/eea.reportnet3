@@ -1,9 +1,12 @@
 package org.eea.ums.service.keycloak.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
+import org.eea.ums.service.keycloak.model.ClientInfo;
+import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -38,6 +43,9 @@ public class KeycloakConnectorServiceImplTest {
     Map<String, String> resourceTypes = new HashMap<>();
     resourceTypes.put("Dataflow", "reportnet:type:dataflow");
     ReflectionTestUtils.setField(keycloakConnectorService, "resourceTypes", resourceTypes);
+    ReflectionTestUtils.setField(keycloakConnectorService, "realmName", "Reportnet");
+    ReflectionTestUtils.setField(keycloakConnectorService, "clientId", "reportnet");
+
     MockitoAnnotations.initMocks(this);
   }
 
@@ -76,5 +84,58 @@ public class KeycloakConnectorServiceImplTest {
     String token = keycloakConnectorService.generateToken("user1", "1234");
     Assert.assertNotNull(result);
     Assert.assertEquals("JWT", token);
+
+  }
+
+  @Test
+  public void getReportnetClientInfo() {
+    ClientInfo info = new ClientInfo();
+    info.setClientId("reportnet");
+    ClientInfo[] body = new ClientInfo[]{info};
+
+    ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body,
+        HttpStatus.OK);
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(clientInfoResult);
+    ClientInfo result = ReflectionTestUtils
+        .invokeMethod(keycloakConnectorService, "getReportnetClientInfo", "token");
+    Assert.assertNotNull(result);
+
+  }
+
+  @Test
+  public void getResourceInfo() {
+
+    String[] bodyResourceSet = new String[]{"resource1"};
+
+    ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet,
+        HttpStatus.OK);
+
+    ResourceInfo bodyResourceInfo = new ResourceInfo();
+    bodyResourceInfo.setName("Dataflow");
+    ResponseEntity<ResourceInfo> resourceInfo = new ResponseEntity<>(bodyResourceInfo,
+        HttpStatus.OK);
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).then(new Answer<ResponseEntity>() {
+      @Override
+      public ResponseEntity answer(InvocationOnMock invocation) throws Throwable {
+        String url = invocation.getArgument(0);
+        if (url.endsWith("resource1")) {
+          return resourceInfo;
+        } else {
+          return resourceSetInfo;
+        }
+
+      }
+    });
+
+    List<ResourceInfo> result = ReflectionTestUtils
+        .invokeMethod(keycloakConnectorService, "getResourceInfo", "token");
+    Assert.assertNotNull(result);
+    Assert.assertTrue(!result.isEmpty());
+    Assert.assertEquals(result.get(0).getName(), "Dataflow");
+
   }
 }
