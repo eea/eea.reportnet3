@@ -19,7 +19,8 @@ export function SnapshotItem({ itemData }) {
       </div>
       <div className={styles.listActions}>
         <button
-          className="rp-btn success"
+          disabled
+          className="rp-btn secondary"
           onClick={() =>
             snapshotContext.snapshotDispatch({
               type: 'restore_snapshot',

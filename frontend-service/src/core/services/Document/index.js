@@ -1,8 +1,8 @@
 import { documentRepository } from 'core/domain/model/Document/DocumentRepository';
 import { GetAllDocuments } from './GetAllDocuments';
-import { GetDocumentById } from './GetDocumentById';
+import { DownloadDocumentById } from './DownloadDocumentById';
 
 export const DocumentService = {
   all: GetAllDocuments({ documentRepository }),
-  getByDocumentId: GetDocumentById({ documentRepository })
+  downloadDocumentById: DownloadDocumentById({ documentRepository })
 };
