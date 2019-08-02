@@ -1,7 +1,5 @@
 package org.eea.ums.service.impl;
 
-import static org.junit.Assert.*;
-
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Assert;
@@ -11,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class KeycloakSecurityProviderInterfaceServiceTest {
 
@@ -45,23 +42,29 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertTrue(checkedAccessPermission);
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void getUserGroupInfo() {
+    keycloakSecurityProviderInterfaceService.getUserGroupInfo("");
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void getUsers() {
+    keycloakSecurityProviderInterfaceService.getUsers("", "");
+
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void createUserGroup() {
+    keycloakSecurityProviderInterfaceService.createUserGroup("", "", null);
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void addUserToUserGroup() {
+    keycloakSecurityProviderInterfaceService.addUserToUserGroup("", "", "");
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void removeUserFromUserGroup() {
+    keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "", "");
   }
 }
