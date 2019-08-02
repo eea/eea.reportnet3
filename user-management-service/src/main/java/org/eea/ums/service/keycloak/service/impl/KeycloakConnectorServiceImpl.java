@@ -139,9 +139,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
-    String permission = result.getStatus();
+    String permission = null != result && null != result.getStatus() ? result.getStatus() : "DENY";
 
-    return StringUtils.isBlank(permission) ? "DENY" : permission;
+    return permission;
   }
 
   /**
@@ -178,12 +178,15 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             request,
             TokenInfo.class);
 
-    String token = null;
+    String token = "";
     if (null != tokenInfo && null != tokenInfo.getBody()) {
-      token = StringUtils.isBlank(tokenInfo.getBody().getAccessToken()) ? ""
-          : tokenInfo.getBody().getAccessToken();
+      TokenInfo responseBody = tokenInfo.getBody();
+
+      if (null != responseBody && StringUtils.isBlank(responseBody.getAccessToken())) {
+        token = responseBody.getAccessToken();
+      }
     }
-    return token;
+    return StringUtils.isBlank(token) ? "" : token;
 
   }
 
@@ -239,8 +242,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     List<ResourceInfo> result = new ArrayList<>();
     if (null != resourceSet && null != resourceSet.getBody()) {
       //Second: Once all the resource sets have been retrieved, get information about everyone of them
-      List<String> resources = Arrays.asList(resourceSet.getBody());
-      resources.forEach(resourceSetId -> {
+      String[] resourcesetBody = resourceSet.getBody();
+      Arrays.asList(resourcesetBody).forEach(resourceSetId -> {
 
         Map<String, String> uriRequestParam = new HashMap<>();
         uriRequestParam.put(URI_PARAM_REALM, realmName);
