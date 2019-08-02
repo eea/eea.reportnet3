@@ -69,7 +69,7 @@ export const ReporterDataSet = ({ match, history }) => {
     ]);
 
     const dataPromise = HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/datosDataSchema2.json' : getUrl(config.dataSchemaAPI.url, { dataSetId }),
+      url: window.env.REACT_APP_JSON ? '/jsons/datosDataSchema2.json' : getUrl(config.dataSchemaAPI.url, { dataFlowId }),
       queryString: {}
     });
     dataPromise

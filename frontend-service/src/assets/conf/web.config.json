@@ -6,7 +6,7 @@
 		"url": "/dataflow/pendingaccepted/"
 	},
 	"dataSchemaAPI": {
-		"url": "/dataschema/dataflow/{:dataSetId}"
+		"url": "/dataschema/dataflow/{:dataFlowId}"
 	},
 	"loadDatasetDataAPI": {
 		"url": "/dataset/{:dataSetId}/loadDatasetData/"
