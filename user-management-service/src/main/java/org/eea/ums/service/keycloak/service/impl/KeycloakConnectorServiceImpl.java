@@ -182,7 +182,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (null != tokenInfo && null != tokenInfo.getBody()) {
       TokenInfo responseBody = tokenInfo.getBody();
 
-      if (null != responseBody && StringUtils.isBlank(responseBody.getAccessToken())) {
+      if (null != responseBody && !StringUtils.isBlank(responseBody.getAccessToken())) {
         token = responseBody.getAccessToken();
       }
     }
@@ -243,21 +243,23 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     //Second: Once all the resource sets have been retrieved, get information about everyone of them
     if (null != resourceSet && null != resourceSet.getBody()) {
       String[] resourcesetBody = resourceSet.getBody();
-      List<String> resources = Arrays.asList(resourcesetBody);
-      if (null != resources && resources.size() > 0) {
-        resources.forEach(resourceSetId -> {
+      if (null != resourcesetBody) {
+        List<String> resources = Arrays.asList(resourcesetBody);
+        if (null != resources && resources.size() > 0) {
+          resources.forEach(resourceSetId -> {
 
-          Map<String, String> uriRequestParam = new HashMap<>();
-          uriRequestParam.put(URI_PARAM_REALM, realmName);
-          uriRequestParam.put(URI_PARAM_RESOURCE_ID, resourceSetId);
-          UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
-          ResponseEntity<ResourceInfo> resource = this.restTemplate
-              .exchange(
-                  uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
-                      .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
-                  ResourceInfo.class);
-          result.add(resource.getBody());
-        });
+            Map<String, String> uriRequestParam = new HashMap<>();
+            uriRequestParam.put(URI_PARAM_REALM, realmName);
+            uriRequestParam.put(URI_PARAM_RESOURCE_ID, resourceSetId);
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance();
+            ResponseEntity<ResourceInfo> resource = this.restTemplate
+                .exchange(
+                    uriBuilder.scheme(keycloakScheme).host(keycloakHost).path(GET_RESOURCE_INFO)
+                        .buildAndExpand(uriRequestParam).toString(), HttpMethod.GET, request,
+                    ResourceInfo.class);
+            result.add(resource.getBody());
+          });
+        }
       }
     }
     return result;
