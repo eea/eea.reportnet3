@@ -347,7 +347,7 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void deleteDocumentSuccessTest() throws EEAException {
-    doNothing().when(documentRepository).delete(Mockito.any());
+    doNothing().when(documentRepository).deleteById(Mockito.any());
     dataflowServiceImpl.deleteDocument(1L);
     Mockito.verify(documentRepository, times(1)).deleteById(Mockito.any());
   }
