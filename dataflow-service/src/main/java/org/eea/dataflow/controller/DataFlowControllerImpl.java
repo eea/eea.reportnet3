@@ -13,6 +13,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -296,6 +297,20 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     Dataflow dataflow = new Dataflow(description, nameDataFlow, dateToday, deadDateToSend);
     dataflowService.createDataFlow(dataflow);
+  }
+
+  @Override
+  public DocumentVO getDocumentById(Long documentId) {
+    if (documentId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    }
+    DocumentVO document = null;
+    try {
+      document = dataflowService.getDocumentById(documentId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    }
+    return document;
   }
 
 }

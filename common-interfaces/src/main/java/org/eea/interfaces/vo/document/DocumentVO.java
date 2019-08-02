@@ -32,4 +32,7 @@ public class DocumentVO implements Serializable {
   /** The category. */
   private String category;
 
+  /** The dataflow id. */
+  private Long dataflowId;
+
 }
