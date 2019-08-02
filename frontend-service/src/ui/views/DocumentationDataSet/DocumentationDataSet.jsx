@@ -125,8 +125,6 @@ export const DocumentationDataSet = ({ match, history }) => {
     </div>
   );
 
-  const downloadDocument = () => {};
-
   const actionTemplate = (rowData, column) => {
     return (
       <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData.id)}>
