@@ -431,7 +431,7 @@ export const ReporterDataSet = ({ match, history }) => {
             <ul>
               <li>
                 <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.creationDate).format()}
+                {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
               </li>
               <li>
                 <strong>{resources.messages.description}: </strong>
