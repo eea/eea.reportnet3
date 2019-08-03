@@ -197,6 +197,12 @@ pipeline {
                             def app
                             app = docker.build("k8s-swi001:5000/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
                             app.push()                    
+                        }
+                        script {
+                            echo 'User Management Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/user-management-service:3.0", "--build-arg JAR_FILE=user-management-service/target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
+                            app.push()                    
                         }    
                     }
                 }
