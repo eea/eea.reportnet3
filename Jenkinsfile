@@ -165,7 +165,7 @@ pipeline {
                         script {
                             echo 'Recordstore Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./recordstore-service/")
                             app.push()                    
                         }
                         script {
