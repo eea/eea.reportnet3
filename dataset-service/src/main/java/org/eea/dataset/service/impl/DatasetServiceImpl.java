@@ -483,7 +483,7 @@ public class DatasetServiceImpl implements DatasetService {
         FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
         SortField sortField = new SortField();
         sortField.setFieldName(nameField);
-        sortField.setAsc((stringToBoolean(nameField)));
+        sortField.setAsc((intToBoolean(mapFields.get(nameField))));
         sortField.setTypefield(typefield.getType());
         sortFieldsArray.add(sortField);
       }
@@ -554,8 +554,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param string the string
    * @return the boolean
    */
-  private Boolean stringToBoolean(String string) {
-    return string.equals("1");
+  private Boolean intToBoolean(Integer integer) {
+    return integer == 1;
   }
 
 
