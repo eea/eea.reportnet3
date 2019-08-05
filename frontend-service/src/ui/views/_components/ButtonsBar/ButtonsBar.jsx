@@ -40,17 +40,6 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
       {buttons}
       <div className="p-toolbar-group-left">{leftButtons}</div>
       <div className="p-toolbar-group-right">{rightButtons}</div>
-
-      {/* <div className="p-toolbar-group-left">
-                <CustomButton label="Import" icon="0" />
-                <CustomButton label="Export" icon="1" />
-                <CustomButton label="Delete" icon="2" />
-            </div>
-            <div className="p-toolbar-group-right">
-                <CustomButton label="Events" icon="4" />
-                <CustomButton label="Validations" icon="3" />
-                <CustomButton label="Dashboards" icon="5" />
-            </div> */}
     </Toolbar>
   );
 });
