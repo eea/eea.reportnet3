@@ -146,6 +146,12 @@ CREATE TABLE public.dataflow_user_request (
 
 --GRANTS
 
+GRANT USAGE ON SCHEMA public TO root ;
+GRANT USAGE ON SCHEMA public TO root ;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO root ;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO root ;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO root ;
+
 ALTER TABLE public.contributor OWNER TO root;
 GRANT ALL ON TABLE public.contributor TO root;
 ALTER TABLE public.data_collection OWNER TO root;
