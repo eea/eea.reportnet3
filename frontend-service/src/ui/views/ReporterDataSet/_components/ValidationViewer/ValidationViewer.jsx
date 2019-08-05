@@ -100,9 +100,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     }
 
     const dataPromise = HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? `${config.listValidationsAPI.url}${dataSetId}`
-        : `${config.listValidationsAPI.url}${dataSetId}`,
+      url: window.env.REACT_APP_JSON ? '/jsons/list-of-errors.json' : `${config.listValidationsAPI.url}${dataSetId}`,
       queryString: queryString
     });
     dataPromise
