@@ -8,11 +8,10 @@ import { BreadCrumb } from 'primereact/breadcrumb';
 import { Button } from 'primereact/button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
-import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { IconComponent } from 'ui/views/_components/IconComponent';
-import { InputText } from 'primereact/inputtext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -158,43 +157,7 @@ export const DocumentationDataSet = ({ match, history }) => {
             className={styles.Dialog}
             dismissableMask={false}
             onHide={onHideHandler}>
-            <CustomFileUpload
-              mode="advanced"
-              name="file"
-              // disableUploadButton={setInputDocumentDescription === ''} // validate description is not empty and able upload button
-              // "url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
-              // url={getUrl(`${config.uploadDocumentAPI.url}`, {
-              //   dataFlowId: match.params.dataFlowId,
-              //   description: inputDocumentDescription,
-              //   language: 'es'
-              // })}
-              // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
-              url={`${window.env.REACT_APP_BACKEND}/document/upload/${match.params.dataFlowId}?description=${inputDocumentDescription}&language=es`}
-              onUpload={() => onHideHandler()}
-              multiple={false}
-              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
-              fileLimit={1}
-              className={styles.FileUpload}
-              //maxFileSize={1024}
-            />
-            {isUploadDialogVisible && (
-              <div className="rep-row">
-                <div className="rep-col-4" style={{ padding: '.75em' }} />
-                <div className="rep-col-8" style={{ padding: '.5em' }} />
-
-                <div className="rep-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor="inputDocumentDescription">{resources.messages['description']}</label>
-                </div>
-                <div className="rep-col-8" style={{ padding: '.5em' }}>
-                  <InputText
-                    id="inputDocumentDescription"
-                    onChange={e => {
-                      setInputDocumentDescription(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+            <DocumentFileUpload />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true}>
