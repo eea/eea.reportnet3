@@ -3,6 +3,8 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { isPlainObject } from 'lodash';
 
+import { config } from 'assets/conf';
+
 const DocumentFileUpload = () => {
   return (
     <Formik
@@ -64,8 +66,7 @@ const validationSchema = Yup.object().shape({
       return !isPlainObject(value);
     })
     .test('fileSize', 'File Size is too large', value => {
-      console.log('file size', value.size);
-      return value.size <= 20480000;
+      return value.size <= config.MAX_FILE_SIZE;
     })
     .test('fileType', 'Unsupported File Format', value => ['application/pdf'].includes(value.type))
 });
