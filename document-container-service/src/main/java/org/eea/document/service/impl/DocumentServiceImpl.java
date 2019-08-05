@@ -1,6 +1,5 @@
 package org.eea.document.service.impl;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -113,7 +112,7 @@ public class DocumentServiceImpl implements DocumentService {
     Session session = null;
     FileResponse fileResponse = null;
     DocumentNodeStore ns = null;
-    try (FileOutputStream fos = new FileOutputStream(documentName)) {
+    try {
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
