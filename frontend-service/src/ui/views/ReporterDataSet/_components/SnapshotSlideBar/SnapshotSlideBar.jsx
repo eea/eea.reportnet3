@@ -49,14 +49,10 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
                   name="createSnapshotDescriptionInputName"
                   placeholder={resources.messages.createSnapshotPlaceholder}
                 />
-                {errors.createSnapshotDescriptionInputName && touched.createSnapshotDescriptionInputName ? (
+                {errors.createSnapshotDescriptionInputName || touched.createSnapshotDescriptionInputName ? (
                   <div className={styles.errors}>{errors.createSnapshotDescriptionInputName}</div>
                 ) : null}
-
-                <button
-                  className={isSubmitting ? 'rp-btn secondary' : 'rp-btn primary'}
-                  type="submit"
-                  disabled={isSubmitting}>
+                <button className="rp-btn primary" type="submit">
                   {resources.messages.create}
                 </button>
               </Form>
