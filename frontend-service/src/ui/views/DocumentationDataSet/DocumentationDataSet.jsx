@@ -103,6 +103,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
+    setDocumentsAndWebLinks();
   };
 
   const downloadDocumentById = async documentId => {
@@ -162,12 +163,13 @@ export const DocumentationDataSet = ({ match, history }) => {
               name="file"
               // disableUploadButton={setInputDocumentDescription === ''} // validate description is not empty and able upload button
               // "url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
-              url={getUrl(config.uploadDocumentAPI.url, {
-                dataFlowId: match.params.dataFlowId,
-                description: inputDocumentDescription,
-                language: 'es'
-              })}
+              // url={getUrl(`${config.uploadDocumentAPI.url}`, {
+              //   dataFlowId: match.params.dataFlowId,
+              //   description: inputDocumentDescription,
+              //   language: 'es'
+              // })}
               // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
+              url={`${window.env.REACT_APP_BACKEND}/document/upload/${match.params.dataFlowId}?description=${inputDocumentDescription}&language=es`}
               onUpload={() => onHideHandler()}
               multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"

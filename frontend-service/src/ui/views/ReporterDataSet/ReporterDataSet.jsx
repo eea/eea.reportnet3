@@ -69,7 +69,9 @@ export const ReporterDataSet = ({ match, history }) => {
     ]);
 
     const dataPromise = HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/datosDataSchema2.json' : getUrl(config.dataSchemaAPI.url, { dataFlowId }),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/datosDataSchema2.json'
+        : getUrl(config.dataSchemaAPI.url, { dataFlowId }),
       queryString: {}
     });
     dataPromise
@@ -195,7 +197,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const onConfirmValidateHandler = () => {
     setValidateDialogVisible(false);
     HTTPRequester.update({
-      url: window.env.REACT_APP_JSON ? 'jsons/list-of-errors.json' : `/validation/dataset/${dataSetId}`,
+      url: window.env.REACT_APP_JSON ? '/jsons/list-of-errors.json' : `/validation/dataset/${dataSetId}`,
       queryString: {}
     });
   };
@@ -222,9 +224,11 @@ export const ReporterDataSet = ({ match, history }) => {
         description: snapshotState.description
       }
     })
-      .then(response => {setSnapshotList();})
+      .then(response => {
+        setSnapshotList();
+      })
       .catch(error => {});
-      setVisibleHandler(setSnapshotDialogVisible, false)
+    setVisibleHandler(setSnapshotDialogVisible, false);
   };
 
   const restoreSnapshot = () => {
@@ -431,7 +435,7 @@ export const ReporterDataSet = ({ match, history }) => {
             <ul>
               <li>
                 <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.creationDate).format()}
+                {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
               </li>
               <li>
                 <strong>{resources.messages.description}: </strong>

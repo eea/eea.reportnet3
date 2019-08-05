@@ -69,7 +69,9 @@ const DataViewer = withRouter(
         }
         setColOptions(colOpt);
 
-        fetchDataHandler(null, sortOrder, Math.floor(positionIdRecord / numRows) * numRows, numRows);
+        if (positionIdRecord !== 0 || fetchedData.length === 0) {
+          fetchDataHandler(null, sortOrder, Math.floor(positionIdRecord / numRows) * numRows, numRows);
+        }
 
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -120,7 +122,9 @@ const DataViewer = withRouter(
         setFirstRow(event.first);
         contextReporterDataSet.setPageHandler(event.first);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        //fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+        if (event.first === 0) {
+          fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+        }
       };
 
       const onConfirmDeleteHandler = () => {
