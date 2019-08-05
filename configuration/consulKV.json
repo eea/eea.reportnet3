@@ -698,26 +698,41 @@
   {
     "key": "config/ums/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-  }, {
-    "key": "config/document/spring.application.servlet.multipart.max-file-size",
-    "value": "MTAwTUI="
-  }, {
-    "key": "config/document/spring.application.servlet.multipart.max-request-size",
-    "value": "NTAwTUI="
-  }, {
-    "key": "config/document/targetDirectory",
-    "value": "Li90YXJnZXQ="
-  }, {
-    "key": "config/document/oakRepositoryUrl",
-    "value": "bG9jYWxob3N0"
-  }, {
-    "key": "config/document/nameOakCollection",
-    "value": "b2Fr"
-  }, {
-    "key": "config/document/oakPort",
-    "value": "MjcwMTc="
-  }, {
-    "key": "config/document/oakUser",
-    "value": "YWRtaW4="
+  },
+  {
+    "key": "config/application/eea.keycloak.realmName",
+    "value": "JHtLRVlDTE9BS19SRUFNX05BTUU6UmVwb3J0bmV0fQ=="
+  },
+  {
+    "key": "config/application/eea.keycloak.secret",
+    "value": "JHtLRVlDTE9BS19TRUNSRVQ6MzU0ZTIxMjgtYTMzMC00MjBmLWE1NTAtMWZiNzAwOTc1ZDE5fQ=="
+  },
+  {
+    "key": "config/application/eea.keycloak.clientId",
+    "value": "JHtLRVlDTE9BS19DTElFTlRfSUQ6cmVwb3J0bmV0fQ=="
+  },
+  {
+    "key": "config/application/eea.keycloak.host",
+    "value": "JHtLRVlDTE9BS19IT1NUOms4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzIyOTF9"
+  },
+  {
+    "key": "config/application/eea.keycloak.scheme",
+    "value": "JHtLRVlDTE9BS19TQ0hFTUU6aHR0cH0="
+  },
+  {
+    "key": "config/application/eea.keycloak.publicKey",
+    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXNvakpDaGs1VWZKT0h1T0xRMVNadFlCNUp6U3JXUmtKM2dCTUdyeUhHRGdBR3FqZitnSE5Bd0hzd1ZieDZrMGRlS3I0SFNkckQrVklra00xQUdDL0NOYS9TVEkxaXI0em1ZUVBwZXdBY0t2TTdCRi9DSmx3TWpWNmM5R2lKdXRDN2g1OERSRnRkZ3o0TzJLVnFEa1o1bC9wWmVLS3huRVhLNU04eCtIbUlxRCtGMytCV2dDSUpGN1RjdTFzRm5XakpXS081eXlBUFh5cTdZWUY1OXRWN0pQY2ZvSnFQTXFzdnhOcVA0OEsxOVJRTjluZHUxcWZYbUxPTkxZaFUwcmRlRHBFUlhZTG9QR3BjaFlMNVpDZDZEdCtScERwYzJGbk9pczQyREpEL2V2Mi9MV1NVdWdaRlp4NlpxZmg0bldoemxZUHJuZmlTRnl4WkVYOU9ZOGVJUUlEQVFBQn0="
+  },
+  {
+    "key": "config/ums/eea.keycloak.admin.user",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
+  },
+  {
+    "key": "config/ums/eea.keycloak.admin.password",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9QQVNTV09SRDphZG1pbn0="
+  },
+  {
+    "key": "config/ums/eea.keycloak.admin.token.expiration",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9UT0tFTl9USU1FT1VUOjMwMDAwMH0="
   }
 ]
