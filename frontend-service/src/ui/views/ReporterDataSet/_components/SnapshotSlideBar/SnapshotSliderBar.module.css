@@ -1,6 +1,9 @@
 .content {
 }
-
+.errors {
+  color: var(--errors);
+  padding-bottom: 10px;
+}
 .title {
   composes: heading-3 from global;
   margin-bottom: 1rem;
