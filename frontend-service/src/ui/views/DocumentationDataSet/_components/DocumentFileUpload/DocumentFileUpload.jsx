@@ -23,17 +23,25 @@ const DocumentFileUpload = () => {
               {({ field }) => <input type="text" name="description" {...field} placeholder="file description" />}
             </Field>
             <ErrorMessage name="description" component="div" />
-            <select name="lang">
+
+            <Field name="lang" component="select" placeholder="select">
               <option>select lang</option>
               <option value="eus">eus</option>
               <option value="en">en</option>
               <option value="es">es</option>
-            </select>
+            </Field>
+            <ErrorMessage name="lang" component="div" />
+          </fieldset>
+          <fieldset>
+            <Field name="uploadFile">
+              {({ field }) => <input type="file" name="uploadFile" placeholder="file upload" />}
+            </Field>
           </fieldset>
           <fieldset>
             <button type="submit" disabled={isSubmitting}>
               Upload
             </button>
+            <button type="reset">Reset</button>
           </fieldset>
         </Form>
       )}
