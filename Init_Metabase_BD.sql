@@ -84,7 +84,7 @@ CREATE TABLE public.reporting_dataset (
 
 CREATE TABLE public."snapshot" (
 	datacollection_id int8 NULL,
-	"DESCRIPTION" varchar(255) NULL,
+	"description" varchar(255) NULL,
 	REPORTING_DATASET_ID int8 null,
 	id serial NOT NULL,
 	CONSTRAINT snapshot_pkey PRIMARY KEY (id),
