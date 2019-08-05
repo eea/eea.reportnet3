@@ -11,6 +11,7 @@ pipeline {
         timeout(time: 60, unit: 'MINUTES')
     }
     stages {
+        //Project Build
         stage('Project Build') {
             steps {
                 sh 'mvn clean -B -V verify'
