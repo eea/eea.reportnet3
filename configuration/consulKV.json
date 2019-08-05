@@ -719,5 +719,9 @@
   }, {
     "key": "config/document/oakUser",
     "value": "YWRtaW4="
+  },
+  {
+    "key": "config/communication/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   }
 ]

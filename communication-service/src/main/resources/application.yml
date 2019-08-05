@@ -12,6 +12,9 @@ spring:
       probability: 1.0
     web:
       skipPattern: "(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)"
+    integration:
+      websockets:
+        enabled: false
 
 management:
   endpoints:
