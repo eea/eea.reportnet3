@@ -19,9 +19,9 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
 
   const createSnapshotInputValidationSchema = Yup.object().shape({
     createSnapshotDescriptionInputName: Yup.string()
-      .min(2, 'Too short description!')
-      .max(50, 'Too long description!')
-      .required('Description is required')
+      .min(2, resources.messages['snapshotDescriptionValidationMin'])
+      .max(100, resources.messages['snapshotDescriptionValidationMax'])
+      .required(resources.messages['snapshotDescriptionValidationRequired'])
   });
 
   return (
