@@ -165,7 +165,7 @@ pipeline {
                         script {
                             echo 'Recordstore Service'
                             def app
-                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 .")
+                            app = docker.build("k8s-swi001:5000/recordstore-service:3.0", "--build-arg JAR_FILE=recordstore-service/target/recordstore-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=8090 ./recordstore-service/")
                             app.push()                    
                         }
                         script {
@@ -196,6 +196,12 @@ pipeline {
                             echo 'Document Container Service'
                             def app
                             app = docker.build("k8s-swi001:5000/document-container-service:3.0", "--build-arg JAR_FILE=document-container-service/target/document-container-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9040 .")
+                            app.push()                    
+                        }
+                        script {
+                            echo 'User Management Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/user-management-service:3.0", "--build-arg JAR_FILE=user-management-service/target/user-management-service-3.0-SNAPSHOT.jar --build-arg MS_PORT=9010 .")
                             app.push()                    
                         }    
                     }

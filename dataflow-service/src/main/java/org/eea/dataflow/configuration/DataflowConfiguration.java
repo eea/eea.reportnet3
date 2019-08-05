@@ -1,5 +1,6 @@
 package org.eea.dataflow.configuration;
 
+import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
