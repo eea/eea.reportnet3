@@ -5,25 +5,20 @@ import * as Yup from 'yup';
 const DocumentFileUpload = () => {
   return (
     <Formik
-      initialValues={{ title: '', description: '', lang: '' }}
+      initialValues={{ title: '', description: '', lang: '', uploadFile: null }}
       validationSchema={validationSchema}
       onSubmit={(values, { setSubmitting }) => {
         // onLogin(values.user, values.password);
+        console.log('file name: ', values.uploadFile);
         setSubmitting(false);
       }}>
-      {({ isSubmitting }) => (
+      {({ isSubmitting, setFieldValue }) => (
         <Form>
           <fieldset>
-            <Field name="title" type="text">
-              {({ field }) => <input type="text" name="title" {...field} placeholder="file title" />}
-            </Field>
+            <Field name="title" type="text" placeholder="file title" />
             <ErrorMessage name="title" component="div" />
-
-            <Field name="description" type="text">
-              {({ field }) => <input type="text" name="description" {...field} placeholder="file description" />}
-            </Field>
+            <Field name="description" type="text" placeholder="file description" />
             <ErrorMessage name="description" component="div" />
-
             <Field name="lang" component="select" placeholder="select">
               <option>select lang</option>
               <option value="eus">eus</option>
@@ -34,7 +29,16 @@ const DocumentFileUpload = () => {
           </fieldset>
           <fieldset>
             <Field name="uploadFile">
-              {({ field }) => <input type="file" name="uploadFile" placeholder="file upload" />}
+              {() => (
+                <input
+                  type="file"
+                  name="uploadFile"
+                  placeholder="file upload"
+                  onChange={event => {
+                    setFieldValue('uploadFile', event.currentTarget.files[0]);
+                  }}
+                />
+              )}
             </Field>
           </fieldset>
           <fieldset>
