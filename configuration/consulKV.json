@@ -734,5 +734,9 @@
   {
     "key": "config/ums/eea.keycloak.admin.token.expiration",
     "value": "JHtLRVlDTE9BS19BRE1JTl9UT0tFTl9USU1FT1VUOjMwMDAwMH0="
+  },
+    {
+    "key": "config/communication/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   }
 ]
