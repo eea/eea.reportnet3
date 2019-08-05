@@ -1,5 +1,5 @@
 import React from 'react';
-import { Formik } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 const DocumentFileUpload = () => {
@@ -12,10 +12,17 @@ const DocumentFileUpload = () => {
         setSubmitting(false);
       }}>
       {({ isSubmitting }) => (
-        <form>
+        <Form>
           <fieldset>
-            <input type="text" name="title" placeholder="file title" />
-            <input type="text" name="description" placeholder="file description" />
+            <Field name="title" type="text">
+              {({ field }) => <input type="text" name="title" {...field} placeholder="file title" />}
+            </Field>
+            <ErrorMessage name="title" component="div" />
+
+            <Field name="description" type="text">
+              {({ field }) => <input type="text" name="description" {...field} placeholder="file description" />}
+            </Field>
+            <ErrorMessage name="description" component="div" />
             <select name="lang">
               <option>select lang</option>
               <option value="eus">eus</option>
@@ -28,7 +35,7 @@ const DocumentFileUpload = () => {
               Upload
             </button>
           </fieldset>
-        </form>
+        </Form>
       )}
     </Formik>
   );
