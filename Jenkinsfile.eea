@@ -15,10 +15,10 @@ pipeline {
             steps {
                 sh 'mvn clean -B -V verify'
             }
-        }
-        post {
-            success {
-                archive '**/target/*.jar'
+            post {
+                success {
+                    archive '**/target/*.jar'
+                }
             }
         }
     }
