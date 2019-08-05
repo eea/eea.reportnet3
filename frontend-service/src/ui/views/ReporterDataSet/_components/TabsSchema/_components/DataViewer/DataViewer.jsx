@@ -55,13 +55,10 @@ const DataViewer = withRouter(
       let growlRef = useRef();
 
       useEffect(() => {
-        console.log('deleted', isDataDeleted);
         setFetchedData([]);
       }, [isDataDeleted]);
 
       useEffect(() => {
-        console.log('Setting column options...');
-
         if (firstRow !== positionIdRecord) {
           setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
         }
@@ -72,10 +69,8 @@ const DataViewer = withRouter(
         }
         setColOptions(colOpt);
 
-        console.log('Fetching data...');
         fetchDataHandler(null, sortOrder, Math.floor(positionIdRecord / numRows) * numRows, numRows);
 
-        console.log('Filtering data...');
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         setCols(inmTableSchemaColumns);
@@ -121,7 +116,6 @@ const DataViewer = withRouter(
       }, [cols, colOptions]);
 
       const onChangePageHandler = event => {
-        console.log('Refetching data...');
         setNumRows(event.rows);
         setFirstRow(event.first);
         contextReporterDataSet.setPageHandler(event.first);
@@ -132,7 +126,9 @@ const DataViewer = withRouter(
       const onConfirmDeleteHandler = () => {
         setDeleteDialogVisible(false);
         HTTPRequester.delete({
-          url: `/dataset/${dataSetId}/deleteImportTable/${tableId}`,
+          url: window.env.REACT_APP_JSON
+            ? `/dataset/${dataSetId}/deleteImportTable/${tableId}`
+            : `/dataset/${dataSetId}/deleteImportTable/${tableId}`,
           queryString: {}
         }).then(res => {
           setIsDataDeleted(true);
@@ -149,7 +145,7 @@ const DataViewer = withRouter(
         setSortField(event.sortField);
         contextReporterDataSet.setPageHandler(0);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+        fetchDataHandler(event.multiSortMeta, event.sortOrder, firstRow, numRows);
       };
 
       const onRefreshClickHandler = () => {
@@ -178,14 +174,22 @@ const DataViewer = withRouter(
           pageSize: nRows
         };
 
-        if (sField !== undefined && sField !== null) {
-          queryString.fields = sField;
-          queryString.asc = sOrder === -1 ? 0 : 1;
+        // if (sField !== undefined && sField !== null) {
+        //   queryString.fields = sField;
+        //   queryString.asc = sOrder === -1 ? 0 : 1;
+        // }
+
+        if (sField !== undefined && sField !== null && sField != []) {
+          const myFields = sField.map((e) => {
+            return {[e.field]: e.order};
+           });
+          const format = JSON.stringify(myFields).replace(/['" {} [\]]+/g, '')
+          queryString.fields = format;
+          //queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
         const dataPromise = HTTPRequester.get({
-          // url: urlViewer,
-          url: '/jsons/response_dataset_values2.json',
+          url: window.env.REACT_APP_JSON ? '/jsons/response_dataset_values2.json' : urlViewer,
           queryString: queryString
         });
         dataPromise
@@ -398,7 +402,7 @@ const DataViewer = withRouter(
 
       const rowClassName = rowData => {
         let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
-        console.log(rowData.dataRow, idSelectedRow);
+
         return { 'p-highlight': id === idSelectedRow };
       };
 
@@ -427,7 +431,8 @@ const DataViewer = withRouter(
               sortField={sortField}
               sortOrder={sortOrder}
               autoLayout={true}
-              rowClassName={rowClassName}>
+              rowClassName={rowClassName}
+              sortMode="multiple">
               {columns}
             </DataTable>
           </div>

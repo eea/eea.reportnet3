@@ -81,16 +81,15 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   DeleteHelper deleteHelper;
 
+
   /**
    * Gets the data tables values.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the mongo ID
+   * @param idTableSchema the id table schema
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
-   * @param asc the asc
-   *
    * @return the data tables values
    */
   @Override
@@ -100,8 +99,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
+      @RequestParam(value = "fields", required = false) String fields) {
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -112,7 +110,7 @@ public class DataSetControllerImpl implements DatasetController {
 
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields, asc);
+      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields);
     } catch (EEAException e) {
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

@@ -210,7 +210,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
-        case "integer":
+        case "number":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
@@ -234,7 +234,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
-        case "coordinatelat":
+        case "coordinate_lat":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);
@@ -246,7 +246,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
-        case "coordinatelong":
+        case "coordinate_long":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(1L);
           rule2.setIdFieldSchema(idFieldSchema);

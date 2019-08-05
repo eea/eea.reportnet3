@@ -3,12 +3,15 @@ package org.eea.dataset.persistence.metabase.domain;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -41,7 +44,8 @@ public class TableHeadersCollection {
 
   /** The header type. */
   @Column(name = "HEADER_TYPE")
-  private String headerType;
+  @Enumerated(EnumType.STRING)
+  private TypeData headerType;
 
   /**
    * Hash code.

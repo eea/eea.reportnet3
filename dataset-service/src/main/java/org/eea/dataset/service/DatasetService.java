@@ -61,22 +61,19 @@ public interface DatasetService {
    */
   void deleteImportData(@DatasetId Long dataSetId);
 
+
   /**
    * Gets the table values by id.
    *
    * @param datasetId the dataset id
    * @param mongoID the mongo ID
    * @param pageable the pageable
-   * @param idFieldSchema the id field schema
-   * @param asc the asc
-   *
+   * @param fields the fields
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-      String idFieldSchema, Boolean asc) throws EEAException;
-
+      String fields) throws EEAException;
 
   /**
    * Sets the dataschema tables.
@@ -84,7 +81,6 @@ public interface DatasetService {
    * @param datasetId the dataset id
    * @param dataFlowId the data flow id
    * @param tableCollections the table collections
-   *
    * @throws EEAException the EEA exception
    */
   void setDataschemaTables(@DatasetId Long datasetId, Long dataFlowId,
@@ -117,25 +113,22 @@ public interface DatasetService {
   @Deprecated
   DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
 
+
   /**
    * Update dataset.
    *
    * @param datasetId the dataset id
    * @param dataset the dataset
-   *
-   * @return the data set VO
-   *
    * @throws EEAException the EEA exception
    */
   void updateDataset(@DatasetId Long datasetId, DataSetVO dataset) throws EEAException;
+
 
   /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the data flow id by id
-   *
    * @throws EEAException the EEA exception
    */
   Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;

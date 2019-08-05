@@ -1,0 +1,8 @@
+server:
+  port: 9010
+spring:
+  application:
+    name: ums
+eea:
+  security:
+    authenticatedRequest: /user/checkAccess

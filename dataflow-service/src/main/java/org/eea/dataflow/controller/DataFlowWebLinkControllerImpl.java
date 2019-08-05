@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+
 /**
  * The Class DataFlowWebLinkControllerImpl.
  */
@@ -31,10 +32,11 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
 
+
   /**
-   * Save link.
+   * Gets the link.
    *
-   * @param idDataflow the id dataflow
+   * @param idLink the id link
    * @return the link
    */
   @Override

@@ -38,6 +38,7 @@ public interface DatasetController {
 
   }
 
+
   /**
    * Gets the data tables values.
    *
@@ -46,8 +47,6 @@ public interface DatasetController {
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
-   * @param asc the asc
-   *
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,15 +54,13 @@ public interface DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+      @RequestParam(value = "fields", required = false) String fields);
+
 
   /**
-   * Update dataset data set vo.
+   * Update dataset.
    *
    * @param dataset the dataset
-   *
-   * @return the data set vo
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
