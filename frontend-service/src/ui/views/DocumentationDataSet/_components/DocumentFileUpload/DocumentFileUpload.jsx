@@ -1,15 +1,16 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { isPlainObject } from 'lodash';
 
 const DocumentFileUpload = () => {
   return (
     <Formik
-      initialValues={{ title: '', description: '', lang: '', uploadFile: null }}
+      initialValues={{ title: '', description: '', lang: '', uploadFile: {} }}
       validationSchema={validationSchema}
       onSubmit={(values, { setSubmitting }) => {
         // onLogin(values.user, values.password);
-        console.log('file name: ', values.uploadFile);
+        // console.log('file name: ', values.uploadFile);
         setSubmitting(false);
       }}>
       {({ isSubmitting, setFieldValue }) => (
@@ -40,6 +41,7 @@ const DocumentFileUpload = () => {
                 />
               )}
             </Field>
+            <ErrorMessage name="uploadFile" component="div" />
           </fieldset>
           <fieldset>
             <button type="submit" disabled={isSubmitting}>
@@ -56,7 +58,16 @@ const DocumentFileUpload = () => {
 const validationSchema = Yup.object().shape({
   title: Yup.string().required('please enter a title'),
   description: Yup.string().required('please enter a description'),
-  lang: Yup.string().required('language must be selected')
+  lang: Yup.string().required('language must be selected'),
+  uploadFile: Yup.mixed()
+    .test('fileEmpty', 'Please choose a file', value => {
+      return !isPlainObject(value);
+    })
+    .test('fileSize', 'File Size is too large', value => {
+      console.log('file size', value.size);
+      return value.size <= 20480000;
+    })
+    .test('fileType', 'Unsupported File Format', value => ['application/pdf'].includes(value.type))
 });
 
 export { DocumentFileUpload };
