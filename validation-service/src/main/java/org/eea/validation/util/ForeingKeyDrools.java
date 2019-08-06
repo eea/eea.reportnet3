@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component("foreingKeyDrools")
 public class ForeingKeyDrools {
 
+  /** The dataset repository. */
   private static DatasetRepository datasetRepository;
 
   @Autowired
@@ -17,6 +18,12 @@ public class ForeingKeyDrools {
     ForeingKeyDrools.datasetRepository = datasetRepository;
   }
 
+  /**
+   * Query.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   public static Boolean query(String value) {
     // List<DatasetValue> dataset = datasetRepository.findAll();
     if (value.equals("2019")) {
