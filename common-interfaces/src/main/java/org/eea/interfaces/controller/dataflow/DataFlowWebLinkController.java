@@ -17,10 +17,9 @@ public interface DataFlowWebLinkController {
   /**
    * The Interface DataFlowWebLinkControllerZuul.
    */
-  @FeignClient(value = "weblink", path = "/weblink")
+  @FeignClient(value = "weblink", contextId = "weblink", path = "/weblink")
   interface DataFlowWebLinkControllerZuul extends DataFlowWebLinkController {
   }
-
 
   /**
    * Gets the link.

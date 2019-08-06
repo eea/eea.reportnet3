@@ -13,13 +13,14 @@ import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 
 /**
  * The Class DataflowServiceWebLinkImpl.
  */
-@Service("WebLinkService")
+@Service
 public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
 
@@ -40,7 +41,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
-
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -94,14 +95,14 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void removeWebLink(Long webLink) throws EEAException {
-
-    Optional<Weblink> webLinkData = webLinkRepository.findById(webLink);
-    if (!webLinkData.isPresent()) {
-      throw new EEAException(EEAErrorMessage.ID_LINK_INCORRECT);
+  public void removeWebLink(Long webLinkId) throws EEAException {
+    try {
+      webLinkRepository.deleteById(webLinkId);
+    } catch (EmptyResultDataAccessException e) {
+      LOG_ERROR.error("link with id: {}", webLinkId);
+      throw new EEAException(EEAErrorMessage.ID_LINK_INCORRECT, e);
     }
-    webLinkRepository.delete(webLinkData.get());
-    LOG.info("delete the link with id : {}", webLink);
+    LOG.info("delete the link with id : {}", webLinkId);
   }
 
   /**

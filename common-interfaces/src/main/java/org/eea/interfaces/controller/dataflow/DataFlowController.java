@@ -6,7 +6,6 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -134,14 +133,5 @@ public interface DataFlowController {
       @RequestParam("nameDataFlow") String nameDataFlow,
       @RequestParam(name = "date", required = false) @DateTimeFormat(
           iso = DateTimeFormat.ISO.DATE_TIME) Date deadDateToSend);
-
-  /**
-   * Gets the document by id.
-   *
-   * @param documentId the document id
-   * @return the document by id
-   */
-  @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DocumentVO getDocumentById(@PathVariable("documentId") Long documentId);
 
 }
