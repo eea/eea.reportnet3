@@ -5,6 +5,7 @@ import styles from './SnapshotSliderBar.module.scss';
 
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import { IconComponent } from 'ui/views/_components/IconComponent';
+import { isEmpty } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { Sidebar } from 'primereact/sidebar';
@@ -53,14 +54,19 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
               }
               render={({ errors, touched, isSubmitting }) => (
                 <Form className={styles.createForm}>
-                  <div className={styles.inputnAndErrorBox}>
+                  <div
+                    className={`formField${
+                      !isEmpty(errors.createSnapshotDescriptionInputName) && touched.createSnapshotDescriptionInputName
+                        ? ' error'
+                        : ''
+                    }`}>
                     <Field
                       type="text"
                       name="createSnapshotDescriptionInputName"
                       placeholder={resources.messages.createSnapshotPlaceholder}
                     />
                     {errors.createSnapshotDescriptionInputName || touched.createSnapshotDescriptionInputName ? (
-                      <div className={styles.errors}>{errors.createSnapshotDescriptionInputName}</div>
+                      <div className="error">{errors.createSnapshotDescriptionInputName}</div>
                     ) : null}
                   </div>
                   <button className="rp-btn primary" type="submit">
