@@ -38,70 +38,19 @@ public class CodeListUtils {
   public static Boolean codeListValidate(String value, String codeList) {
     switch (codeList) {
       case "BWDStatus":
-        return codeListBWDStatus(value);
+        return listBWDStatus.stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value));
       case "BWDPeriodType":
-        return codeListBWDPeriodType(value);
+        return listBWDPeriodType.stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value));
       case "BWDSampleStatus":
-        return codeListBWDSampleStatus(value);
+        return listBWDSampleStatus.stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value));
       case "BWDObservationStatus":
-        return codeListBWDObservationStatus(value);
+        return listBWDObservationStatus.stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value));
       default:
         return false;
     }
   }
-
-  /**
-   * Code list BWD status.
-   *
-   * @param value the value
-   * @return the boolean
-   */
-  private static Boolean codeListBWDStatus(String value) {
-    if (listBWDStatus.stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Code list BWD period type.
-   *
-   * @param value the value
-   * @return the boolean
-   */
-  private static Boolean codeListBWDPeriodType(String value) {
-    if (listBWDPeriodType.stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Code list BWD sample status.
-   *
-   * @param value the value
-   * @return the boolean
-   */
-  private static Boolean codeListBWDSampleStatus(String value) {
-    if (listBWDSampleStatus.stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Code list BWD observation status.
-   *
-   * @param value the value
-   * @return the boolean
-   */
-  private static Boolean codeListBWDObservationStatus(String value) {
-    if (listBWDObservationStatus.stream()
-        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-    return false;
-  }
-
 }
 
