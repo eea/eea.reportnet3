@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { isPlainObject } from 'lodash';
+import { isPlainObject, isEmpty } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { DocumentService } from 'core/services/Document';
 
@@ -43,18 +43,18 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
           onUpload();
         }
       }}>
-      {({ isSubmitting, setFieldValue, errors }) => (
+      {({ isSubmitting, setFieldValue, errors, touched }) => (
         <Form>
           <fieldset>
-            <div className={`formField${errors.title ? ' error' : ''}`}>
+            <div className={`formField${!isEmpty(errors.title) && touched.title ? ' error' : ''}`}>
               <Field name="title" type="text" placeholder={resources.messages.fileTitle} />
               <ErrorMessage className="error" name="title" component="div" />
             </div>
-            <div className={`formField${errors.description ? ' error' : ''}`}>
+            <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field name="description" type="text" placeholder={resources.messages.fileDescription} />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
-            <div className={`formField${errors.lang ? ' error' : ''}`}>
+            <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field name="lang" component="select" placeholder={resources.messages.select}>
                 <option>{resources.messages.selectLang}</option>
                 {config.languages.map(language => (
@@ -67,7 +67,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
             </div>
           </fieldset>
           <fieldset>
-            <div className={`formField${errors.uploadFile ? ' error' : ''}`}>
+            <div className={`formField${!isEmpty(errors.uploadFile) && touched.uploadFile ? ' error' : ''}`}>
               <Field name="uploadFile">
                 {() => (
                   <input
