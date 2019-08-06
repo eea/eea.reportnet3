@@ -1,21 +1,32 @@
 .listItem {
-	margin-bottom: 2rem;
+  margin: 0;
+}
+.itemBox {
+  margin: 0;
+}
+p {
+  margin: 0;
+  padding: 2px 0 2rem 0;
 }
 .listItemData {
-	margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  h4 {
+  }
+
+  .listActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    button {
+      font-size: 0.9rem;
+      padding: 0.3rem;
+    }
+  }
 }
-.listItemData h4 {
-	margin-bottom: 0.5rem;
-}
-.listItemData p {
-	margin: 0px;
-}
-.listActions {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-}
-.listActions button:nth-of-type(1) {
-	margin-right: 0.5rem;
+
+.listItemData .listActions button:nth-of-type(1) {
+  margin-right: 0.5rem;
 }
