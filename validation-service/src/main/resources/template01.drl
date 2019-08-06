@@ -31,6 +31,13 @@ end
 
 end template
 
+function boolean isQuery( String value ){
+	return ForeingKeyDrools.query(value);
+}
+
+function boolean isCodeList( String value ,String codeList){
+	return CodeListUtils.codeListValidate(value,codeList);
+}
 function boolean isValid( String s ){
 
     try {
