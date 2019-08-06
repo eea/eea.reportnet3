@@ -18,7 +18,7 @@ public class NotificationController {
     if (eeaEventVO != null && eeaEventVO.getData() != null) {
 
       // String userId = (String) eeaEventVO.getData().get("userId");
-      String userId = "ID_test0";
+      String userId = "user1";
       EventType message = eeaEventVO.getEventType();
 
       if (userId != null && message != null) {

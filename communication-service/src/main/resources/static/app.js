@@ -14,7 +14,7 @@ function setConnected(connected) {
 }
 
 function connect() {
-    var socket = new SockJS('/reportnet3-websocket');
+    var socket = new WebSocket("ws://localhost:9020/communication/reportnet-websocket?" + $("#token")[0].value);
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
