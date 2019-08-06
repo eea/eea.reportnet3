@@ -239,9 +239,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Transactional
   public void createDataFlow(Dataflow dataflow) {
     createMetabaseDataFlow(dataflow);
-    // createDatasetfromDataFlow(nameDataFlow);
-    // createSchemaDataFlow(nameDataFlow);
-
   }
 
   /**

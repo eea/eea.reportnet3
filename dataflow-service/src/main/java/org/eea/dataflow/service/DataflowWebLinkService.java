@@ -36,7 +36,7 @@ public interface DataflowWebLinkService {
    * @param webLink the web link
    * @throws EEAException the EEA exception
    */
-  void removeWebLink(Long webLink) throws EEAException;
+  void removeWebLink(Long webLinkId) throws EEAException;
 
   /**
    * Update web link.
