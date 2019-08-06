@@ -18,7 +18,8 @@ const all = async url => {
 };
 
 const downloadDocumentById = async documentId => {
-  return await api.downloadDocumentById(documentId);
+  const fileData = await api.downloadDocumentById(documentId);
+  return fileData;
 };
 
 export const ApiDocumentRepository = {
