@@ -29,7 +29,7 @@ public class JwtTokenProviderTest {
   @Test
   public void createPublicKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKeyValue", SUPER_SECRET_PUBLIC_KEY);
-    jwtTokenProvider.createPublicKey();
+    ReflectionTestUtils.invokeMethod(jwtTokenProvider, "createPublicKey");
     Assert.assertNotNull(ReflectionTestUtils.getField(jwtTokenProvider, "publicKey"));
   }
 
@@ -38,7 +38,7 @@ public class JwtTokenProviderTest {
       throws InvalidKeySpecException, NoSuchAlgorithmException {
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKeyValue", "KO");
     try {
-      jwtTokenProvider.createPublicKey();
+      ReflectionTestUtils.invokeMethod(jwtTokenProvider, "createPublicKey");
     } finally {
       Assert.assertNull(ReflectionTestUtils.getField(jwtTokenProvider, "publicKey"));
     }
