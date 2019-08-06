@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
+
 import * as fileDownload from 'js-file-download';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DocumentationDataSet.module.scss';
 
@@ -25,6 +27,8 @@ export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [documents, setDocuments] = useState([]);
+  const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [fileName, setFileName] = useState('');
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
@@ -99,19 +103,22 @@ export const DocumentationDataSet = ({ match, history }) => {
     //#end region Button initialization
   }, []);
 
+  useEffect(() => {
+    console.log('FILE_DATA', fileToDownload);
+    console.log('FILE_NAME', fileName);
+    if (!isUndefined(fileToDownload)) {
+      fileDownload(fileToDownload, fileName);
+    }
+  }, [fileToDownload]);
+
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
     setDocumentsAndWebLinks();
   };
 
-  const getDocumentToDownloadById = async documentId => {
-    return await DocumentService.downloadDocumentById(documentId);
-  };
-
-  const downloadDocument = rowData => {
-    const documentToDownload = getDocumentToDownloadById(rowData.id);
-    const fileName = createFileName(rowData.title, rowData.category);
-    fileDownload(documentToDownload, fileName);
+  const downloadDocument = async rowData => {
+    setFileName(createFileName(rowData.title, rowData.category));
+    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
   };
 
   const createFileName = (title, category) => {
