@@ -116,12 +116,12 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   const downloadDocument = async rowData => {
-    setFileName(createFileName(rowData.title, rowData.category));
+    setFileName(createFileName(rowData.title));
     setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
   };
 
-  const createFileName = (title, category) => {
-    return `${title.split(' ').join('_')}.${category}`;
+  const createFileName = title => {
+    return `${title.split(' ').join('_')}`;
   };
 
   const actionTemplate = (rowData, column) => {

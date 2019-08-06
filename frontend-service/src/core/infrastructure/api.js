@@ -17,7 +17,7 @@ export const api = {
   },
 
   downloadDocumentById: async documentId => {
-    const response = await HTTPRequester.get({
+    const response = await HTTPRequester.download({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
         : getUrl(config.downloadDocumentByIdAPI.url, {
