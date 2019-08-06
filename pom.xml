@@ -26,7 +26,6 @@
     <module>common-interfaces</module>
     <module>common-utitlities</module>
     <module>document-container-service</module>
-    <module>test-infrastructure</module>
     <module>user-management-service</module>
   </modules>
   <properties>
