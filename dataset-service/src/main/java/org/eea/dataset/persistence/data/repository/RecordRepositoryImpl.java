@@ -129,7 +129,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               .append(" ");
           directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
               .append(" ").append(field.getAsc() ? "asc" : "desc");
-
+          break;
       }
     }
     Query query = entityManager.createQuery(String.format(MASTER_QUERY, sortQueryBuilder.toString(),
