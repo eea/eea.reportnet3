@@ -120,8 +120,8 @@ const DataViewer = withRouter(
       const onChangePageHandler = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
-        contextReporterDataSet.setPageHandler(event.first);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
+        contextReporterDataSet.onSetPage(event.first);
+        contextReporterDataSet.onSetSelectedRowId(-1);
         if (event.first === 0) {
           fetchDataHandler(sortField, sortOrder, event.first, event.rows);
         }
@@ -147,14 +147,14 @@ const DataViewer = withRouter(
         console.log('Sorting...');
         setSortOrder(event.sortOrder);
         setSortField(event.sortField);
-        contextReporterDataSet.setPageHandler(0);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
+        contextReporterDataSet.onSetPage(0);
+        contextReporterDataSet.onSetSelectedRowId(-1);
         fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
       };
 
-      const onRefreshClickHandler = () => {
-        contextReporterDataSet.setPageHandler(0);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
+      const onRefreshonClick = () => {
+        contextReporterDataSet.onSetPage(0);
+        contextReporterDataSet.onSetSelectedRowId(-1);
         fetchDataHandler(null, sortOrder, firstRow, numRows);
       };
 
@@ -318,49 +318,49 @@ const DataViewer = withRouter(
           icon: '0',
           group: 'left',
           disabled: false,
-          clickHandler: () => setImportDialogVisible(true)
+          onClick: () => setImportDialogVisible(true)
         },
         {
           label: resources.messages['deleteTable'],
           icon: '2',
           group: 'left',
           disabled: false,
-          clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+          onClick: () => setVisibleHandler(setDeleteDialogVisible, true)
         },
         {
           label: resources.messages['visibility'],
           icon: '6',
           group: 'left',
           disabled: true,
-          clickHandler: null
+          onClick: null
         },
         {
           label: resources.messages['filter'],
           icon: '7',
           group: 'left',
           disabled: true,
-          clickHandler: null
+          onClick: null
         },
         {
           label: resources.messages['group-by'],
           icon: '8',
           group: 'left',
           disabled: true,
-          clickHandler: null
+          onClick: null
         },
         {
           label: resources.messages['sort'],
           icon: '9',
           group: 'left',
           disabled: true,
-          clickHandler: null
+          onClick: null
         },
         {
           label: resources.messages['refresh'],
           icon: '11',
           group: 'right',
           disabled: true,
-          clickHandler: onRefreshClickHandler
+          onClick: onRefreshonClick
         }
       ];
 

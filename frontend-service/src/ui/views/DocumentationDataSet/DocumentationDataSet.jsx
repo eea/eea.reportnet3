@@ -74,28 +74,28 @@ export const DocumentationDataSet = ({ match, history }) => {
         icon: '0',
         group: 'left',
         disabled: false,
-        clickHandler: () => setIsUploadDialogVisible(true)
+        onClick: () => setIsUploadDialogVisible(true)
       },
       {
         label: resources.messages['visibility'],
         icon: '6',
         group: 'left',
         disabled: true,
-        clickHandler: null
+        onClick: null
       },
       {
         label: resources.messages['filter'],
         icon: '7',
         group: 'left',
         disabled: true,
-        clickHandler: null
+        onClick: null
       },
       {
         label: resources.messages['export'],
         icon: '1',
         group: 'left',
         disabled: true,
-        clickHandler: null
+        onClick: null
       }
     ]);
     //#end region Button initialization
@@ -169,7 +169,9 @@ export const DocumentationDataSet = ({ match, history }) => {
               //   language: 'es'
               // })}
               // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
-              url={`${window.env.REACT_APP_BACKEND}/document/upload/${match.params.dataFlowId}?description=${inputDocumentDescription}&language=es`}
+              url={`${window.env.REACT_APP_BACKEND}/document/upload/${
+                match.params.dataFlowId
+              }?description=${inputDocumentDescription}&language=es`}
               onUpload={() => onHideHandler()}
               multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"

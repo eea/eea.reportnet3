@@ -1,7 +1,8 @@
 import React from 'react';
 
 export const ReporterDataSetContext = React.createContext({
-  validationsVisibleHandler: null,
-  setTabHandler: null,
-  setPageHandler: null
+  onValidationsVisible: null,
+  onSetTab: null,
+  onSetPage: null,
+  onSetSelectedRowId: null
 });

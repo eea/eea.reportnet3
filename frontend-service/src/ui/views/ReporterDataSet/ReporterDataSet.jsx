@@ -118,21 +118,21 @@ export const ReporterDataSet = ({ match, history }) => {
               icon: '1',
               group: 'left',
               disabled: true,
-              clickHandler: null
+              onClick: null
             },
             {
               label: resources.messages['deleteDatasetData'],
               icon: '2',
               group: 'left',
               disabled: false,
-              clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
+              onClick: () => setVisibleHandler(setDeleteDialogVisible, true)
             },
             {
               label: resources.messages['events'],
               icon: '4',
               group: 'right',
               disabled: true,
-              clickHandler: null
+              onClick: null
             },
             {
               label: resources.messages['validate'],
@@ -140,7 +140,7 @@ export const ReporterDataSet = ({ match, history }) => {
               group: 'right',
               disabled: false,
               //!validationError,
-              clickHandler: () => setVisibleHandler(setValidateDialogVisible, true),
+              onClick: () => setVisibleHandler(setValidateDialogVisible, true),
               ownButtonClasses: null,
               iconClasses: null
             },
@@ -149,7 +149,7 @@ export const ReporterDataSet = ({ match, history }) => {
               icon: '3',
               group: 'right',
               disabled: !res.data.datasetErrors,
-              clickHandler: () => setVisibleHandler(setValidationsVisible, true),
+              onClick: () => setVisibleHandler(setValidationsVisible, true),
               ownButtonClasses: null,
               iconClasses: response.data.datasetErrors ? 'warning' : ''
             },
@@ -159,14 +159,14 @@ export const ReporterDataSet = ({ match, history }) => {
               icon: '5',
               group: 'right',
               disabled: false,
-              clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
+              onClick: () => setVisibleHandler(setDashDialogVisible, true)
             },
             {
               label: resources.messages['snapshots'],
               icon: '12',
               group: 'right',
               disabled: false,
-              clickHandler: () => setSnapshotIsVisible(true)
+              onClick: () => setSnapshotIsVisible(true)
             }
           ]);
           //#endregion Button inicialization
@@ -215,12 +215,10 @@ export const ReporterDataSet = ({ match, history }) => {
   const createSnapshot = () => {
     HTTPRequester.post({
       url: getUrl(config.createSnapshot.url, {
-        // dataFlowId,
         dataSetId,
         snapshotDescription: snapshotState.description
       }),
       data: {
-        // date: snapshotState.createdAt,
         description: snapshotState.description
       }
     })
@@ -333,12 +331,12 @@ export const ReporterDataSet = ({ match, history }) => {
         </div>
         <ReporterDataSetContext.Provider
           value={{
-            validationsVisibleHandler: null,
-            setTabHandler: null,
-            setPageHandler: posIdRecord => {
+            onValidationsVisible: null,
+            onSetTab: null,
+            onSetPage: posIdRecord => {
               setPositionIdRecord(posIdRecord);
             },
-            setIdSelectedRowHandler: selectedRowId => {
+            onSetSelectedRowId: selectedRowId => {
               setIdSelectedRow(selectedRowId);
             }
           }}>
@@ -364,16 +362,16 @@ export const ReporterDataSet = ({ match, history }) => {
         {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
         <ReporterDataSetContext.Provider
           value={{
-            validationsVisibleHandler: () => {
+            onValidationsVisible: () => {
               setVisibleHandler(setValidationsVisible, false);
             },
-            setTabHandler: idTableSchema => {
+            onSetTab: idTableSchema => {
               setActiveIndex(idTableSchema);
             },
-            setPageHandler: posIdRecord => {
+            onSetPage: posIdRecord => {
               setPositionIdRecord(posIdRecord);
             },
-            setIdSelectedRowHandler: selectedRowId => {
+            onSetSelectedRowId: selectedRowId => {
               setIdSelectedRow(selectedRowId);
             }
           }}>

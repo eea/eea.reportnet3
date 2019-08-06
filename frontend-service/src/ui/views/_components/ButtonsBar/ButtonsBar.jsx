@@ -15,7 +15,7 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
             title={b.title}
             icon={b.icon}
             key={i}
-            handleClick={b.clickHandler}
+            onClick={b.onClick}
             disabled={b.disabled}
             ownButtonClasses={b.ownButtonClasses}
             iconClasses={b.iconClasses}
@@ -27,7 +27,7 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
             title={b.title}
             icon={b.icon}
             key={i}
-            handleClick={b.clickHandler}
+            onClick={b.onClick}
             disabled={b.disabled}
             ownButtonClasses={b.ownButtonClasses}
             iconClasses={b.iconClasses}

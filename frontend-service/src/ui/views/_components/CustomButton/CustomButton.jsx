@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { Button } from 'primereact/button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const CustomButton = ({ disabled, icon, iconClasses, label, handleClick }) => {
+export const CustomButton = ({ disabled, icon, iconClasses, label, onClick }) => {
   const resources = useContext(ResourcesContext);
   let icons = [
     resources.icons['export'],
@@ -31,7 +31,7 @@ export const CustomButton = ({ disabled, icon, iconClasses, label, handleClick }
       icon={iconClassName}
       label={label}
       style={{ marginRight: '.25em' }}
-      onClick={handleClick}
+      onClick={onClick}
       disabled={disabledButton}
     />
   );

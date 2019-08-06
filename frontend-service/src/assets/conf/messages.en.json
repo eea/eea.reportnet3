@@ -39,7 +39,7 @@
 		"origin": "Origin",
 		"levelError": "Level error",
 		"errorMessage": "Message",
-		"typeEntity": "Entity",
+		"entityType": "Entity",
 		"loading": "Loading...",
 		"visibility": "Visibility",
 		"filter": "Filter",

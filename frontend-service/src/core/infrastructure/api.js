@@ -7,6 +7,34 @@ export const api = {
     const response = await HTTPRequester.get('/characters.json');
     return response.json();
   },
+  dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/list-of-errors.json'
+        : getUrl(config.loadStatisticsAPI.url, {
+            dataSetId: dataSetId,
+            pageNum: pageNum,
+            pageSize: pageSize,
+            sortField: sortField,
+            asc: asc
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  errorPositionByObjectId: async (objectId, dataSetId, entityType) => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_getTableFromAnyObjectId.json'
+        : getUrl(config.validationViewerAPI.url, {
+            objectId: objectId,
+            dataSetId: dataSetId,
+            entityType: entityType
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
   documents: async url => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON ? '/jsons/list-of-documents.json' : url,
@@ -19,13 +47,6 @@ export const api = {
       url: getUrl(config.downloadDocumentByIdAPI.url, {
         documentId: documentId
       }),
-      // url: window.env.REACT_APP_JSON
-      //   ? getUrl(config.downloadDocumentByIdAPI.url, {
-      //       documentId: documentId
-      //     })
-      //   : getUrl(config.downloadDocumentByIdAPI.url, {
-      //       documentId: documentId
-      //     }),
       queryString: {}
     });
   },

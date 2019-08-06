@@ -15,13 +15,13 @@
 		"url": "/dataset/{:dataSetId}/loadTableData/"
 	},
 	"loadStatisticsAPI": {
-		"url": "/dataset/loadStatistics/"
+		"url": "/dataset/loadStatistics/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	},
 	"dataviewerAPI": {
 		"url": "/dataset/TableValueDataset/"
 	},
 	"validationViewerAPI": {
-		"url": "/dataset/findPositionFromAnyObject/"
+		"url": "/dataset/findPositionFromAnyObject/{:objectId}?dataSetId={:dataSetId}&type={:entityType}"
 	},
 	"loadSnapshotsListAPI": {
 		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"

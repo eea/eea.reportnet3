@@ -6,8 +6,6 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.css';
 
-import { config } from 'assets/conf';
-
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
@@ -15,25 +13,61 @@ import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ReporterDataSetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+import { DataSetService } from 'core/services/DataSet';
 
 const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefined }) => {
-  const resources = useContext(ResourcesContext);
   const contextReporterDataSet = useContext(ReporterDataSetContext);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const resources = useContext(ResourcesContext);
+  const [columns, setColumns] = useState([]);
   const [fetchedData, setFetchedData] = useState([]);
+  const [firstRow, setFirstRow] = useState(0);
   const [loading, setLoading] = useState(false);
   const [numRows, setNumRows] = useState(10);
-  const [firstRow, setFirstRow] = useState(0);
-  const [sortOrder, setSortOrder] = useState();
   const [sortField, setSortField] = useState();
-  const [columns, setColumns] = useState([]);
-  const [header] = useState();
+  const [sortOrder, setSortOrder] = useState();
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [defaultButtonsList] = useState([
+    {
+      label: resources.messages['visibility'],
+      icon: '6',
+      group: 'left',
+      disabled: true,
+      onClick: null
+    },
+    {
+      label: resources.messages['filter'],
+      icon: '7',
+      group: 'left',
+      disabled: true,
+      onClick: null
+    },
+    {
+      label: resources.messages['group-by'],
+      icon: '8',
+      group: 'left',
+      disabled: true,
+      onClick: null
+    },
+    {
+      label: resources.messages['sort'],
+      icon: '9',
+      group: 'left',
+      disabled: true,
+      onClick: null
+    },
+    {
+      label: resources.messages['refresh'],
+      icon: '11',
+      group: 'right',
+      disabled: false,
+      onClick: () => fetchData(null, sortOrder, firstRow, numRows)
+    }
+  ]);
 
   useEffect(() => {
     const headers = [
       {
-        id: 'nameTableSchema',
+        id: 'tableSchemaName',
         header: resources.messages['origin']
       },
       {
@@ -45,8 +79,8 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
         header: resources.messages['errorMessage']
       },
       {
-        id: 'typeEntity',
-        header: resources.messages['typeEntity']
+        id: 'entityType',
+        header: resources.messages['entityType']
       }
     ];
     let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
@@ -54,167 +88,64 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     columnsArr.push(<Column key="idTableSchema" field="idTableSchema" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
 
-    fetchDataHandler(null, sortOrder, firstRow, numRows);
+    fetchData(null, sortOrder, firstRow, numRows);
   }, []);
 
   useEffect(() => {
     if (visible) {
-      fetchDataHandler(null, sortOrder, firstRow, numRows);
+      fetchData(null, sortOrder, firstRow, numRows);
     }
   }, [visible]);
 
-  const onChangePageHandler = event => {
+  const onChangePage = event => {
     console.log('Refetching data ValidationViewer...');
     setNumRows(event.rows);
     setFirstRow(event.first);
-    fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+    fetchData(sortField, sortOrder, event.first, event.rows);
   };
 
-  const onSortHandler = event => {
+  const onLoadErrors = async (fRow, nRows, sField, sOrder) => {
+    const dataSetErrors = await DataSetService.errorsById(dataSetId, Math.floor(fRow / nRows), nRows, sField, sOrder);
+    setTotalRecords(dataSetErrors.totalErrors);
+    setFetchedData(dataSetErrors.errors);
+    setLoading(false);
+  };
+
+  const onSelectError = async (objectId, entityType) => {
+    const dataSetError = await DataSetService.errorPositionByObjectId(objectId, dataSetId, entityType);
+    contextReporterDataSet.onSetTab(dataSetError.tableSchemaId);
+    contextReporterDataSet.onSetPage(dataSetError.position);
+    contextReporterDataSet.onSetSelectedRowId(dataSetError.idRecord);
+    contextReporterDataSet.onValidationsVisible();
+  };
+
+  const onSort = event => {
     console.log('Sorting ValidationViewer...');
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
-    fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+    fetchData(event.sortField, event.sortOrder, firstRow, numRows);
   };
 
-  // const onColumnToggleHandler = (event) =>{
-  //   console.log("OnColumnToggle...");
-  //   setCols(event.value);
-  //   setColOptions(colOptions);
-  // }
-
-  const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
+  const fetchData = (sField, sOrder, fRow, nRows) => {
     setLoading(true);
-
-    //http://localhost:8030/dataset/listValidations/1?asc=true&fields=typeEntity&pageNum=0&pageSize=20
-
-    let queryString = {
-      dataSetId: dataSetId,
-      pageNum: Math.floor(fRow / nRows),
-      pageSize: nRows
-    };
-
-    if (sField !== undefined && sField !== null) {
-      queryString.fields = sField;
-      queryString.asc = sOrder === -1 ? 0 : 1;
-    }
-
-    const dataPromise = HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/list-of-errors.json' : `${config.listValidationsAPI.url}${dataSetId}`,
-      queryString: queryString
-    });
-    dataPromise
-      .then(res => {
-        setTotalRecords(res.data.totalErrors);
-        filterDataResponse(res.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.log(error);
-        return error;
-      });
+    onLoadErrors(fRow, nRows, sField, sOrder);
   };
 
-  const filterDataResponse = data => {
-    setFetchedData(data.errors);
-  };
-
-  const filterLinkedDataResponse = data => {
-    const dataFiltered = data.records.map(record => {
-      const recordValidations = record.recordValidations;
-      const arrayDataFields = record.fields.map(field => {
-        return {
-          fieldData: { [field.idFieldSchema]: field.value },
-          fieldValidations: field.fieldValidations
-        };
-      });
-      const arrayDataAndValidations = {
-        dataRow: arrayDataFields,
-        recordValidations
-      };
-
-      return arrayDataAndValidations;
-    });
-
-    return dataFiltered;
-  };
-
-  const onRowSelectHandler = event => {
-    //http://localhost:8030/dataset/loadTableFromAnyObject/901?dataSetId=1&pageSize=2&type=FIELD
-    switch (event.data.typeEntity) {
+  const onRowSelect = event => {
+    switch (event.data.entityType) {
       case 'FIELD':
       case 'RECORD':
-        let queryString = {
-          datasetId: dataSetId,
-          type: event.data.typeEntity
-        };
-        const dataPromise = HTTPRequester.get({
-          url: window.env.REACT_APP_JSON
-            ? `${config.validationViewerAPI.url}${event.data.idObject}`
-            : `${config.validationViewerAPI.url}${event.data.idObject}`,
-          queryString: queryString
-        });
-
-        dataPromise
-          .then(res => {
-            contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-            contextReporterDataSet.setPageHandler(res.data.position);
-            contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
-            contextReporterDataSet.validationsVisibleHandler();
-          })
-          .catch(error => {
-            console.log(error);
-            return error;
-          });
+        onSelectError();
         break;
       case 'TABLE':
-        contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-        contextReporterDataSet.setPageHandler(0);
-        contextReporterDataSet.validationsVisibleHandler();
+        contextReporterDataSet.onSetTab(event.data.tableSchemaId);
+        contextReporterDataSet.onSetPage(0);
+        contextReporterDataSet.onValidationsVisible();
         break;
       default:
-        //contextReporterDataSet.validationsVisibleHandler();
         break;
     }
   };
-
-  const defaultButtonsList = [
-    {
-      label: resources.messages['visibility'],
-      icon: '6',
-      group: 'left',
-      disabled: true,
-      clickHandler: null
-    },
-    {
-      label: resources.messages['filter'],
-      icon: '7',
-      group: 'left',
-      disabled: true,
-      clickHandler: null
-    },
-    {
-      label: resources.messages['group-by'],
-      icon: '8',
-      group: 'left',
-      disabled: true,
-      clickHandler: null
-    },
-    {
-      label: resources.messages['sort'],
-      icon: '9',
-      group: 'left',
-      disabled: true,
-      clickHandler: null
-    },
-    {
-      label: resources.messages['refresh'],
-      icon: '11',
-      group: 'right',
-      disabled: false,
-      clickHandler: () => fetchDataHandler(null, sortOrder, firstRow, numRows)
-    }
-  ];
 
   let totalCount = <span>Total: {totalRecords} rows</span>;
 
@@ -225,26 +156,25 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
       </Suspense>
       <div>
         <DataTable
-          value={fetchedData}
+          autoLayout={true}
+          first={firstRow}
+          lazy={true}
+          loading={loading}
+          onRowSelect={onRowSelect}
+          onPage={onChangePage}
+          onSort={onSort}
+          paginator={true}
           paginatorRight={totalCount}
           resizableColumns={true}
           reorderableColumns={true}
-          paginator={true}
           rows={numRows}
-          first={firstRow}
-          onPage={onChangePageHandler}
           rowsPerPageOptions={[5, 10, 15]}
-          lazy={true}
-          loading={loading}
-          totalRecords={totalRecords}
           sortable={true}
-          onSort={onSortHandler}
-          header={header}
           sortField={sortField}
           sortOrder={sortOrder}
-          autoLayout={true}
+          totalRecords={totalRecords}
           selectionMode="single"
-          onRowSelect={onRowSelectHandler}>
+          value={fetchedData}>
           {columns}
         </DataTable>
       </div>
