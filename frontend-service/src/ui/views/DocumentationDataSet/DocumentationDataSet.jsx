@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
 
+import * as fileDownload from 'js-file-download';
+import isUndefined from 'lodash/isUndefined';
+
 import styles from './DocumentationDataSet.module.scss';
 
 import { config } from 'assets/conf';
 
 import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
-import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { IconComponent } from 'ui/views/_components/IconComponent';
-import { InputText } from 'primereact/inputtext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -21,12 +22,12 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
-import { getUrl } from 'core/infrastructure/getUrl';
-
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [documents, setDocuments] = useState([]);
+  const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [fileName, setFileName] = useState('');
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
@@ -40,8 +41,8 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   const setDocumentsAndWebLinks = async () => {
-    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
     setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
+    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
   };
 
   useEffect(() => {
@@ -101,22 +102,31 @@ export const DocumentationDataSet = ({ match, history }) => {
     //#end region Button initialization
   }, []);
 
+  useEffect(() => {
+    console.log('FILE_DATA', fileToDownload);
+    console.log('FILE_NAME', fileName);
+    if (!isUndefined(fileToDownload)) {
+      fileDownload(fileToDownload, fileName);
+    }
+  }, [fileToDownload]);
+
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
     setDocumentsAndWebLinks();
   };
 
-  const downloadDocumentById = async documentId => {
-    await DocumentService.downloadDocumentById(documentId);
+  const downloadDocument = async rowData => {
+    setFileName(createFileName(rowData.title));
+    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
   };
 
-  const downloadDocument = documentId => {
-    downloadDocumentById(documentId);
+  const createFileName = title => {
+    return `${title.split(' ').join('_')}`;
   };
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData.id)}>
+      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
         {' '}
         <IconComponent icon={config.icons.archive} />
       </a>
@@ -158,43 +168,7 @@ export const DocumentationDataSet = ({ match, history }) => {
             className={styles.Dialog}
             dismissableMask={false}
             onHide={onHideHandler}>
-            <CustomFileUpload
-              mode="advanced"
-              name="file"
-              // disableUploadButton={setInputDocumentDescription === ''} // validate description is not empty and able upload button
-              // "url": "/document/upload/{:dataFlowId}?description={documentDescription}&language={documentLanguage}"
-              // url={getUrl(`${config.uploadDocumentAPI.url}`, {
-              //   dataFlowId: match.params.dataFlowId,
-              //   description: inputDocumentDescription,
-              //   language: 'es'
-              // })}
-              // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
-              url={`${window.env.REACT_APP_BACKEND}/document/upload/${match.params.dataFlowId}?description=${inputDocumentDescription}&language=es`}
-              onUpload={() => onHideHandler()}
-              multiple={false}
-              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
-              fileLimit={1}
-              className={styles.FileUpload}
-              //maxFileSize={1024}
-            />
-            {isUploadDialogVisible && (
-              <div className="rep-row">
-                <div className="rep-col-4" style={{ padding: '.75em' }} />
-                <div className="rep-col-8" style={{ padding: '.5em' }} />
-
-                <div className="rep-col-4" style={{ padding: '.75em' }}>
-                  <label htmlFor="inputDocumentDescription">{resources.messages['description']}</label>
-                </div>
-                <div className="rep-col-8" style={{ padding: '.5em' }}>
-                  <InputText
-                    id="inputDocumentDescription"
-                    onChange={e => {
-                      setInputDocumentDescription(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHideHandler} />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true}>
