@@ -7,5 +7,3 @@ spring:
     multipart:
       max-file-size: ${spring.application.servlet.multipart.max-file-size:100MB}
       max-request-size: ${spring.application.servlet.multipart.max-request-size:500MB}
-kafka:
-  bootstrapAddress: ${KAFKA_BOOTSTRAP_URL:localhost:9092}
