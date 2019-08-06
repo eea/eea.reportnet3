@@ -96,9 +96,19 @@
 		"createSnapshotMessage": "You are about to CREATE a snapshot...",
 		"deleteSnapshotMessage": "You are about to DELETE a snapshot...",
 		"restoreSnapshotMessage": "You are about to RESTORE a snapshot...",
-		"creationDate": "Creation date",
 		"snapshotDescriptionValidationMin": "Too short description!",
 		"snapshotDescriptionValidationMax": "Too long description!",
-		"snapshotDescriptionValidationRequired": "Description is required"
+		"snapshotDescriptionValidationRequired": "Description is required",
+		"creationDate": "Creation date",
+		"fileTitle":"file title",
+		"fileDescription": "file description",
+		"selectLang": "select lang",
+		"reset": "Reset",
+		"select":"select",
+		"emptyTitleValidationError": "Please, enter a title",
+		"emptyDescriptionValidationError":"Please, enter a description",
+		"emptyLanguageValidationError":"Please, language must be selected",
+		"emptyFileValidationError":"Please, select a file",
+		"tooLargeFileValidationError":"File size is too large"
 	}
 }
