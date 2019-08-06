@@ -18,7 +18,8 @@ const all = async url => {
 };
 
 const downloadDocumentById = async documentId => {
-  await api.downloadDocumentById(documentId);
+  const fileData = await api.downloadDocumentById(documentId);
+  return fileData;
 };
 
 const uploadDocument = async (dataFlowId, title, description, language, file) => {

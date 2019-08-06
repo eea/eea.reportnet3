@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 
+import * as fileDownload from 'js-file-download';
+import isUndefined from 'lodash/isUndefined';
+
 import styles from './DocumentationDataSet.module.scss';
 
 import { config } from 'assets/conf';
 
 import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -20,12 +22,12 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
-import { getUrl } from 'core/infrastructure/getUrl';
-
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [documents, setDocuments] = useState([]);
+  const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [fileName, setFileName] = useState('');
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [customButtons, setCustomButtons] = useState([]);
@@ -100,22 +102,31 @@ export const DocumentationDataSet = ({ match, history }) => {
     //#end region Button initialization
   }, []);
 
+  useEffect(() => {
+    console.log('FILE_DATA', fileToDownload);
+    console.log('FILE_NAME', fileName);
+    if (!isUndefined(fileToDownload)) {
+      fileDownload(fileToDownload, fileName);
+    }
+  }, [fileToDownload]);
+
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
     setDocumentsAndWebLinks();
   };
 
-  const downloadDocumentById = async documentId => {
-    await DocumentService.downloadDocumentById(documentId);
+  const downloadDocument = async rowData => {
+    setFileName(createFileName(rowData.title, rowData.category));
+    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
   };
 
-  const downloadDocument = documentId => {
-    downloadDocumentById(documentId);
+  const createFileName = (title, category) => {
+    return `${title.split(' ').join('_')}.${category}`;
   };
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData.id)}>
+      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
         {' '}
         <IconComponent icon={config.icons.archive} />
       </a>

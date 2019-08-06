@@ -7,6 +7,7 @@ export const api = {
     const response = await HTTPRequester.get('/characters.json');
     return response.json();
   },
+
   documents: async url => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON ? '/jsons/list-of-documents.json' : url,
@@ -14,20 +15,17 @@ export const api = {
     });
     return response.data.documents;
   },
+
   downloadDocumentById: async documentId => {
-    await HTTPRequester.get({
-      url: getUrl(config.downloadDocumentByIdAPI.url, {
-        documentId: documentId
-      }),
-      // url: window.env.REACT_APP_JSON
-      //   ? getUrl(config.downloadDocumentByIdAPI.url, {
-      //       documentId: documentId
-      //     })
-      //   : getUrl(config.downloadDocumentByIdAPI.url, {
-      //       documentId: documentId
-      //     }),
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/list-of-documents.json'
+        : getUrl(config.downloadDocumentByIdAPI.url, {
+            documentId: documentId
+          }),
       queryString: {}
     });
+    return response.data;
   },
 
   uploadDocument: async (dataFlowId, title, description, language, file) => {
@@ -53,6 +51,7 @@ export const api = {
     });
     return response.data;
   },
+
   webLinks: async url => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON ? '/jsons/list-of-documents.json' : url,
