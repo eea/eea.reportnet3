@@ -29,6 +29,11 @@ export const HTTPRequester = (function() {
     },
     delete: options => {
       return axios.delete(`${baseURL}${options.url}`, options.data);
+    },
+    postWithFiles: options => {
+      return axios.post(`${baseURL}${options.url}`, options.data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
     }
   };
   return HTTPRequesterAPI;

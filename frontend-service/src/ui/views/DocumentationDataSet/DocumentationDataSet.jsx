@@ -39,8 +39,8 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   const setDocumentsAndWebLinks = async () => {
-    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
     setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
+    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
   };
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export const DocumentationDataSet = ({ match, history }) => {
             className={styles.Dialog}
             dismissableMask={false}
             onHide={onHideHandler}>
-            <DocumentFileUpload />
+            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHideHandler} />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true}>

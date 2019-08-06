@@ -3,10 +3,11 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { isPlainObject } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { DocumentService } from 'core/services/Document';
 
 import { config } from 'assets/conf';
 
-const DocumentFileUpload = () => {
+const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
   const resources = useContext(ResourcesContext);
   const initialValues = { title: '', description: '', lang: '', uploadFile: {} };
   const validationSchema = Yup.object().shape({
@@ -27,10 +28,18 @@ const DocumentFileUpload = () => {
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values, { setSubmitting }) => {
-        // onLogin(values.user, values.password);
-        // console.log('file name: ', values.uploadFile);
-        setSubmitting(false);
+      onSubmit={async (values, { setSubmitting }) => {
+        const response = await DocumentService.uploadDocument(
+          dataFlowId,
+          values.title,
+          values.description,
+          values.lang,
+          values.uploadFile
+        );
+        if (response.status === 200) {
+          setSubmitting(false);
+          onUpload();
+        }
       }}>
       {({ isSubmitting, setFieldValue }) => (
         <Form>
