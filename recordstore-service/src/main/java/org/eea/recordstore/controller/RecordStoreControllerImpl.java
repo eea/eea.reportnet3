@@ -109,19 +109,4 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
-  @Override
-  @RequestMapping(value = "/dataset/{idDataset}/createSnapshot", method = RequestMethod.POST)
-  public void createSnapshot(@PathVariable("idDataset") Long idDataset) {
-
-    recordStoreService.createSnapshot(idDataset);
-    LOG.info("created snapshot");
-  }
-
-  @Override
-  @RequestMapping(value = "/dataset/{idDataset}/restoreSnapshot", method = RequestMethod.POST)
-  public void restoreSnapshot(@PathVariable("idDataset") Long idDataset) {
-
-    recordStoreService.restoreSnapshot(idDataset);
-    LOG.info("snapshot restore");
-  }
 }

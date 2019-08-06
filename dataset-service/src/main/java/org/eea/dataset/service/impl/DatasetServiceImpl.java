@@ -443,34 +443,53 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
-   * Gets the table values by id. It additionally can page the results and sort them
-   *
-   * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
+   * Gets the table values by id.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the mongo ID
+   * @param idTableSchema the id table schema
    * @param pageable the pageable
-   * @param idFieldSchema the id field schema
-   * @param asc the asc
-   *
+   * @param fields the fields
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
+      final Pageable pageable, final String fields) throws EEAException {
+    List<String> commonShortFields = new ArrayList<>();
+    Map<String, Integer> mapFields = new HashMap<String, Integer>();
+    List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
+
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
-    if (StringUtils.isBlank(idFieldSchema)) {
+
+    if (null == fields) {
+
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+
     } else {
-      SortField sortField = new SortField();
-      sortField.setFieldName(idFieldSchema);
-      sortField.setAsc(asc);
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
+
+      String[] pairs = fields.split(",");
+      for (int i = 0; i < pairs.length; i++) {
+        String pair = pairs[i];
+        String[] keyValue = pair.split(":");
+        mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
+        commonShortFields.add(keyValue[0]);
+      }
+
+      for (String nameField : commonShortFields) {
+        FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
+        SortField sortField = new SortField();
+        sortField.setFieldName(nameField);
+        sortField.setAsc((intToBoolean(mapFields.get(nameField))));
+        sortField.setTypefield(typefield.getType());
+        sortFieldsArray.add(sortField);
+      }
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable,
+          sortFieldsArray.stream().toArray(SortField[]::new));
+
     }
 
     if (records == null) {
@@ -492,8 +511,8 @@ public class DatasetServiceImpl implements DatasetService {
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
           datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
           pageable.getPageSize());
-      if (StringUtils.isNotBlank(idFieldSchema)) {
-        LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
+      if (null != fields) {
+        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
       }
 
       // 5º retrieve validations to set them into the final result
@@ -527,6 +546,16 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return result;
+  }
+
+  /**
+   * String to boolean.
+   *
+   * @param string the string
+   * @return the boolean
+   */
+  private Boolean intToBoolean(Integer integer) {
+    return integer == 1;
   }
 
 

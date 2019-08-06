@@ -43,6 +43,7 @@ public class DocumentControllerImpl implements DocumentController {
   @Autowired
   private DataFlowControllerZuul dataflowController;
 
+
   /**
    * Upload document.
    *
@@ -107,11 +108,11 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+
   /**
-   * Delete a document.
+   * Delete document.
    *
    * @param documentId the document id
-   * @return the document
    * @throws Exception the exception
    */
   @Override

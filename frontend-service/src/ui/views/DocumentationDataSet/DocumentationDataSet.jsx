@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
+import * as fileDownload from 'js-file-download';
 
 import styles from './DocumentationDataSet.module.scss';
 
 import { config } from 'assets/conf';
 
 import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
@@ -20,8 +20,6 @@ import { TabView, TabPanel } from 'primereact/tabview';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
-
-import { getUrl } from 'core/infrastructure/getUrl';
 
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
@@ -106,17 +104,23 @@ export const DocumentationDataSet = ({ match, history }) => {
     setDocumentsAndWebLinks();
   };
 
-  const downloadDocumentById = async documentId => {
-    await DocumentService.downloadDocumentById(documentId);
+  const getDocumentToDownloadById = async documentId => {
+    return await DocumentService.downloadDocumentById(documentId);
   };
 
-  const downloadDocument = documentId => {
-    downloadDocumentById(documentId);
+  const downloadDocument = rowData => {
+    const documentToDownload = getDocumentToDownloadById(rowData.id);
+    const fileName = createFileName(rowData.title, rowData.category);
+    fileDownload(documentToDownload, fileName);
+  };
+
+  const createFileName = (title, category) => {
+    return `${title.split(' ').join('_')}.${category}`;
   };
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData.id)}>
+      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
         {' '}
         <IconComponent icon={config.icons.archive} />
       </a>
@@ -169,7 +173,9 @@ export const DocumentationDataSet = ({ match, history }) => {
               //   language: 'es'
               // })}
               // url={getUrl(`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`)}
-              url={`${window.env.REACT_APP_BACKEND}/document/upload/${match.params.dataFlowId}?description=${inputDocumentDescription}&language=es`}
+              url={`${window.env.REACT_APP_BACKEND}/document/upload/${
+                match.params.dataFlowId
+              }?description=${inputDocumentDescription}&language=es`}
               onUpload={() => onHideHandler()}
               multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"

@@ -42,11 +42,13 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
 
 
+
   /**
    * Gets the web link.
    *
-   * @param idDataflow the id dataflow
+   * @param idLink the id link
    * @return the web link
+   * @throws EEAException the EEA exception
    */
   @Override
   public WeblinkVO getWebLink(Long idLink) throws EEAException {

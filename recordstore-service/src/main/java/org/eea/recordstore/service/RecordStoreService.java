@@ -60,7 +60,4 @@ public interface RecordStoreService {
   List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException;
 
 
-  void createSnapshot(Long idDataset);
-
-  void restoreSnapshot(Long idDataset);
 }

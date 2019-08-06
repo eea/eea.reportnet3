@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +75,7 @@ public class DatasetSchemaServiceTest {
     header.setHeaderName("test");
     header.setId(1L);
     // header.setTableId(1L);
-    header.setHeaderType("String");
+    header.setHeaderType(TypeData.TEXT);
     headers.add(header);
 
     table.setId(1L);
@@ -111,7 +112,7 @@ public class DatasetSchemaServiceTest {
 
     header.setHeaderName("test");
     header.setId(1L);
-    header.setHeaderType("integer");
+    header.setHeaderType(TypeData.NUMBER);
     headers.add(header);
 
     table.setId(1L);
@@ -139,7 +140,7 @@ public class DatasetSchemaServiceTest {
 
     header.setHeaderName("test");
     header.setId(1L);
-    header.setHeaderType("boolean");
+    header.setHeaderType(TypeData.BOOLEAN);
     headers.add(header);
 
     table.setId(1L);
@@ -168,7 +169,7 @@ public class DatasetSchemaServiceTest {
 
     header.setHeaderName("test");
     header.setId(1L);
-    header.setHeaderType("coordinateLat");
+    header.setHeaderType(TypeData.COORDINATE_LAT);
     headers.add(header);
 
     table.setId(1L);
@@ -195,7 +196,7 @@ public class DatasetSchemaServiceTest {
 
     header.setHeaderName("test");
     header.setId(1L);
-    header.setHeaderType("coordinateLong");
+    header.setHeaderType(TypeData.COORDINATE_LONG);
     headers.add(header);
 
     table.setId(1L);
@@ -222,7 +223,7 @@ public class DatasetSchemaServiceTest {
 
     header.setHeaderName("test");
     header.setId(1L);
-    header.setHeaderType("date");
+    header.setHeaderType(TypeData.DATE);
     headers.add(header);
 
     table.setId(1L);
@@ -298,11 +299,11 @@ public class DatasetSchemaServiceTest {
 
     FieldSchema field = new FieldSchema();
     field.setHeaderName("test");
-    field.setType("String");
+    field.setType(TypeData.TEXT);
 
     FieldSchema field2 = new FieldSchema();
     field2.setHeaderName("test");
-    field2.setType("String");
+    field2.setType(TypeData.TEXT);
 
     assertEquals("Not equals", field, field2);
 

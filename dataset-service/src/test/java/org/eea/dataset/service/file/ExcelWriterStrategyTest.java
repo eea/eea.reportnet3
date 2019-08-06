@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -52,7 +53,7 @@ public class ExcelWriterStrategyTest {
     field.setId("9012");
     field.setIdRecord("3456");
     field.setName("FieldTest_ExcelWriterStrategy");
-    field.setType("String");
+    field.setType(TypeData.TEXT);
     fields.add(field);
     records.setIdRecordSchema("5678");
     records.setFieldSchema(fields);
@@ -90,7 +91,7 @@ public class ExcelWriterStrategyTest {
     field.setId("9012");
     field.setIdRecord("3456");
     field.setName("FieldTest_ExcelWriterStrategy");
-    field.setType("String");
+    field.setType(TypeData.TEXT);
     fields.add(field);
     records.setIdRecordSchema("5678");
     records.setFieldSchema(fields);
@@ -128,7 +129,7 @@ public class ExcelWriterStrategyTest {
     field.setId("9012");
     field.setIdRecord("3456");
     field.setName("FieldTest_ExcelWriterStrategy");
-    field.setType("String");
+    field.setType(TypeData.TEXT);
     fields.add(field);
     records.setIdRecordSchema("5678");
     records.setFieldSchema(fields);

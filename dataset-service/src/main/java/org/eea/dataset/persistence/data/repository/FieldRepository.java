@@ -38,4 +38,15 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    */
   List<FieldValue> findByRecord(RecordValue record);
 
+
+  /**
+   * Find first type by id field schema.
+   *
+   * @param nameField the name field
+   * @return the field value
+   */
+  FieldValue findFirstTypeByIdFieldSchema(String nameField);
+
+
+
 }

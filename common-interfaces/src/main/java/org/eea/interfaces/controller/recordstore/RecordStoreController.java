@@ -60,10 +60,4 @@ public interface RecordStoreController {
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
   List<ConnectionDataVO> getDataSetConnections();
 
-
-  @RequestMapping(value = "/dataset/{idDataset}/createSnapshot", method = RequestMethod.POST)
-  void createSnapshot(@PathVariable("idDataset") Long idDataset);
-
-  @RequestMapping(value = "/dataset/{idDataset}/restoreSnapshot", method = RequestMethod.POST)
-  void restoreSnapshot(@PathVariable("idDataset") Long idDataset);
 }
