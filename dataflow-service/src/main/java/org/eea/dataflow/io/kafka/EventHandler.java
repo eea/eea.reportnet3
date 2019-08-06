@@ -1,6 +1,6 @@
 package org.eea.dataflow.io.kafka;
 
-import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -25,7 +25,7 @@ public class EventHandler implements EEAEventHandler {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Autowired
-  private DataflowService dataflowService;
+  private DataflowDocumentService dataflowService;
 
   /**
    * Gets the type.

@@ -5,5 +5,5 @@ spring:
     name: document
   servlet:
     multipart:
-      max-file-size: ${spring.application.servlet.multipart.max-file-size:100MB}
-      max-request-size: ${spring.application.servlet.multipart.max-request-size:500MB}
+      max-file-size: ${TOMCAT_MAX_FILE_SIZE:100MB}
+      max-request-size: ${TOMCAT_MAX_REQUEST_SIZE:500MB}

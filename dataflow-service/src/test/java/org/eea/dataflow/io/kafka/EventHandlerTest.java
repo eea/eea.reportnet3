@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -31,7 +31,7 @@ public class EventHandlerTest {
 
   /** The dataflow service. */
   @Mock
-  private DataflowService dataflowService;
+  private DataflowDocumentService dataflowService;
 
   /**
    * Inits the mocks.

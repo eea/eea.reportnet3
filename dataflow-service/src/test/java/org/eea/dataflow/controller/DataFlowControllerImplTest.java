@@ -13,7 +13,6 @@ import java.util.List;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -318,26 +317,6 @@ public class DataFlowControllerImplTest {
     doNothing().when(dataflowService).createDataFlow(Mockito.any());
     dataFlowControllerImpl.createDataFlow("123", "123", date);
     Mockito.verify(dataflowService, times(1)).createDataFlow(Mockito.any());
-  }
-
-
-  @Test(expected = ResponseStatusException.class)
-  public void getDocumentByIdExceptionTest() throws EEAException {
-    dataFlowControllerImpl.getDocumentById(null);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void getDocumentByIdException2Test() throws EEAException {
-    doThrow(new EEAException()).when(dataflowService).getDocumentById(Mockito.any());
-    dataFlowControllerImpl.getDocumentById(1L);
-  }
-
-  @Test
-  public void getDocumentByIdSuccessTest() throws EEAException {
-    DocumentVO document = new DocumentVO();
-    document.setId(1L);
-    when(dataflowService.getDocumentById(Mockito.any())).thenReturn(document);
-    assertEquals("fail", document, dataFlowControllerImpl.getDocumentById(1L));
   }
 
 }

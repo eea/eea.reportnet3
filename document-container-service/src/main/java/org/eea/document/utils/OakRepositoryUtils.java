@@ -358,12 +358,12 @@ public class OakRepositoryUtils {
   }
 
   /**
-   * Run GC.
+   * Delete blobs from repository.
    *
    * @param ns the ns
    * @throws Exception the exception
    */
-  public void runGC(DocumentNodeStore ns) throws Exception {
+  public void deleteBlobsFromRepository(DocumentNodeStore ns) throws Exception {
     ns.getClock().waitUntil(ns.getClock().getTime() + UPDATE_DELAY);
     ns.getVersionGarbageCollector().gc(0, TimeUnit.MILLISECONDS);
     MarkSweepGarbageCollector gc = new MarkSweepGarbageCollector(
