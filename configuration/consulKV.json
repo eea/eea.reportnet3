@@ -377,7 +377,7 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
-    "value": "L2RhdGFzY2hlbWEvKio="
+    "value": "L2RhdGFzZXRtZXRhYmFzZS8qKg=="
   },
   {
     "key": "config/apiGateway/zuul.routes.datasetmetabase.serviceId",
