@@ -43,7 +43,7 @@ public class JwtTokenProvider {
    * @throws InvalidKeySpecException the invalid key spec exception
    */
   @PostConstruct
-  public void createPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+  private void createPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(
         Base64.getDecoder().decode(publicKeyValue.getBytes()));
