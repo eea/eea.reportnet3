@@ -5,6 +5,8 @@ import { isPlainObject } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { DocumentService } from 'core/services/Document';
 
+import styles from './DocumentFileUpload.module.css';
+
 import { config } from 'assets/conf';
 
 const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
@@ -41,43 +43,55 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
           onUpload();
         }
       }}>
-      {({ isSubmitting, setFieldValue }) => (
+      {({ isSubmitting, setFieldValue, errors }) => (
         <Form>
           <fieldset>
-            <Field name="title" type="text" placeholder={resources.messages.fileTitle} />
-            <ErrorMessage name="title" component="div" />
-            <Field name="description" type="text" placeholder={resources.messages.fileDescription} />
-            <ErrorMessage name="description" component="div" />
-            <Field name="lang" component="select" placeholder={resources.messages.select}>
-              <option>{resources.messages.selectLang}</option>
-              {config.languages.map(language => (
-                <option key={`lang-${language.code}`} value={language.code}>
-                  {language.code}
-                </option>
-              ))}
-            </Field>
-            <ErrorMessage name="lang" component="div" />
+            <div className={`formField${errors.title ? ' error' : ''}`}>
+              <Field name="title" type="text" placeholder={resources.messages.fileTitle} />
+              <ErrorMessage className="error" name="title" component="div" />
+            </div>
+            <div className={`formField${errors.description ? ' error' : ''}`}>
+              <Field name="description" type="text" placeholder={resources.messages.fileDescription} />
+              <ErrorMessage className="error" name="description" component="div" />
+            </div>
+            <div className={`formField${errors.lang ? ' error' : ''}`}>
+              <Field name="lang" component="select" placeholder={resources.messages.select}>
+                <option>{resources.messages.selectLang}</option>
+                {config.languages.map(language => (
+                  <option key={`lang-${language.code}`} value={language.code}>
+                    {language.code}
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage className="error" name="lang" component="div" />
+            </div>
           </fieldset>
           <fieldset>
-            <Field name="uploadFile">
-              {() => (
-                <input
-                  type="file"
-                  name="uploadFile"
-                  placeholder="file upload"
-                  onChange={event => {
-                    setFieldValue('uploadFile', event.currentTarget.files[0]);
-                  }}
-                />
-              )}
-            </Field>
-            <ErrorMessage name="uploadFile" component="div" />
+            <div className={`formField${errors.uploadFile ? ' error' : ''}`}>
+              <Field name="uploadFile">
+                {() => (
+                  <input
+                    type="file"
+                    name="uploadFile"
+                    placeholder="file upload"
+                    onChange={event => {
+                      setFieldValue('uploadFile', event.currentTarget.files[0]);
+                    }}
+                  />
+                )}
+              </Field>
+              <ErrorMessage name="uploadFile" component="div" />
+            </div>
           </fieldset>
           <fieldset>
-            <button type="submit" disabled={isSubmitting}>
-              {resources.messages.upload}
-            </button>
-            <button type="reset">{resources.messages.reset}</button>
+            <div className={styles.btnWrapper}>
+              <button className={styles.primaryBtn} type="submit" disabled={isSubmitting}>
+                {resources.messages.upload}
+              </button>
+              <button className={styles.defaultBtn} type="reset">
+                {resources.messages.reset}
+              </button>
+            </div>
           </fieldset>
         </Form>
       )}
