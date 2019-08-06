@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotSliderBar.module.css';
 
 import { Formik, Field, Form } from 'formik';
+import { IconComponent } from 'ui/views/_components/IconComponent';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotContext } from '../../ReporterDataSet';
@@ -53,7 +55,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
                   <div className={styles.errors}>{errors.createSnapshotDescriptionInputName}</div>
                 ) : null}
                 <button className="rp-btn primary" type="submit">
-                  {resources.messages.create}
+                  <IconComponent icon={primeIcons.icons.check} />
                 </button>
               </Form>
             )}
