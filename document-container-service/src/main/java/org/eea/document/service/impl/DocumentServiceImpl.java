@@ -164,7 +164,7 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), nameWithLanguage);
       LOG.info("File deleted...");
 
-      oakRepositoryUtils.runGC(ns);
+      oakRepositoryUtils.deleteBlobsFromRepository(ns);
 
       sendKafkaNotification(documentId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
 

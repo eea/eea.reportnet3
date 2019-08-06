@@ -6,7 +6,7 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class DocumentControllerImpl implements DocumentController {
 
   /** The dataflow controller. */
   @Autowired
-  private DataFlowControllerZuul dataflowController;
+  private DataFlowDocumentControllerZuul dataflowController;
 
 
   /**
@@ -86,7 +86,7 @@ public class DocumentControllerImpl implements DocumentController {
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId) {
     try {
-      DocumentVO document = dataflowController.getDocumentById(documentId);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
@@ -119,7 +119,7 @@ public class DocumentControllerImpl implements DocumentController {
   @DeleteMapping(value = "/{documentId}")
   public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
     try {
-      DocumentVO document = dataflowController.getDocumentById(documentId);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
