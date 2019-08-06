@@ -1,5 +1,8 @@
 .content {
 }
+.p-sidebar-close {
+  margin-right: 15px !important;
+}
 .createForm {
   display: flex;
   justify-content: space-between;
@@ -25,6 +28,13 @@
   margin-bottom: 1rem;
   padding: 0.5rem 0;
 }
+.sidebar {
+  padding-right: 0px !important;
+}
+
+:global button.p-sidebar-close.p-link {
+  margin-right: 15px;
+}
 
 .newContainer {
   display: flex;
@@ -49,6 +59,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-left: 0.5rem !important;
 }
 
 .listContainer ul {
