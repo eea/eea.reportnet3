@@ -22,6 +22,7 @@ const DocumentFileUpload = () => {
       })
     // .test('fileType', 'Unsupported File Format', value => ['application/pdf'].includes(value.type))
   });
+
   return (
     <Formik
       initialValues={initialValues}
@@ -40,9 +41,11 @@ const DocumentFileUpload = () => {
             <ErrorMessage name="description" component="div" />
             <Field name="lang" component="select" placeholder={resources.messages.select}>
               <option>{resources.messages.selectLang}</option>
-              <option value="eus">eus</option>
-              <option value="en">en</option>
-              <option value="es">es</option>
+              {config.languages.map(language => (
+                <option key={`lang-${language.code}`} value={language.code}>
+                  {language.code}
+                </option>
+              ))}
             </Field>
             <ErrorMessage name="lang" component="div" />
           </fieldset>
