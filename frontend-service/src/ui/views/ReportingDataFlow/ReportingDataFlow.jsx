@@ -85,7 +85,11 @@ export const ReportingDataFlow = ({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn navTitle={resources.messages['dataFlow']} dataFlowTitle={dataFlowData.name} search={true} />
+      <DataFlowColumn
+        navTitle={resources.messages['dataFlow']}
+        dataFlowTitle={dataFlowData.name}
+        buttonTitle={resources.messages['subscribeThisButton']}
+      />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <h2 className={styles.title}>
           <IconComponent icon={resources.icons['shoppingCart']} />

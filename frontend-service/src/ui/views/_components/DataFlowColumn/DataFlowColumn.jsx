@@ -11,7 +11,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
+const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }) => {
   const resources = useContext(ResourcesContext);
   const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
 
@@ -36,7 +36,7 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
             type="text"
             id=""
             /* onKeyUp="" */
-            className=""
+            className={styles.searchInput}
             placeholder={resources.messages['searchDataFlow']}
             title={resources.messages['typeDataFlowName']}
           />
@@ -52,8 +52,8 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false }) => {
 
         <Button
           icon={config.icons.plus}
-          label={resources.messages['subscribeButton']}
-          className="p-button-primary"
+          label={buttonTitle}
+          className={styles.subscribeBtn}
           onClick={() => {
             setVisibleHandler(setSubscribeDialogVisible, true);
           }}
