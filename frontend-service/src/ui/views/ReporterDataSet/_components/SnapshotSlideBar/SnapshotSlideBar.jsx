@@ -32,7 +32,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
     <Sidebar
       visible={isVisible}
       onHide={e => setIsVisible()}
-      blockScroll="true"
+      blockScroll={true}
       position="right"
       className={styles.sidebar}>
       <ScrollPanel style={{ width: '100%', height: '100%' }} className={styles.scrollPanel}>
