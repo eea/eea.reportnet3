@@ -42,8 +42,8 @@ const DataViewer = withRouter(
       const [firstRow, setFirstRow] = useState(
         positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
       );
-      const [sortOrder, setSortOrder] = useState();
-      const [sortField, setSortField] = useState();
+      const [sortOrder, setSortOrder] = useState(undefined);
+      const [sortField, setSortField] = useState(undefined);
       const [columns, setColumns] = useState([]);
       const [cols, setCols] = useState(tableSchemaColumns);
       const [header] = useState();
@@ -178,7 +178,7 @@ const DataViewer = withRouter(
           pageSize: nRows
         };
 
-        if (sField !== undefined && sField !== null) {
+        if (!isUndefined(sField) && sField !== null) {
           queryString.fields = sField + ':' + sOrder;
         }
 
