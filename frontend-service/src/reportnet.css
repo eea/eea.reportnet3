@@ -1775,23 +1775,28 @@ input,
 select {
   display: block;
   width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--c-black-200);
   padding: 0.5rem;
   border-radius: 3px;
 }
 
+select:focus,
 input:focus {
   border-color: var(--c-corporate-blue);
-  border-width: 2px;
+  box-shadow: inset 0px 0px 0px 1px var(--c-corporate-blue);
+  outline: none;
 }
 
 .formField.error input {
   border-color: var(--errors);
-  border-width: 2px;
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  outline: none;
 }
 .formField.error select {
   border-color: var(--errors);
-  border-width: 2px;
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  outline: none;
 }
 
 form .error {
