@@ -21,6 +21,11 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
     setSnapshotList();
   }, []);
 
+  useEffect(() => {
+    const bodySelector = document.querySelector('body');
+    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'scroll');
+  }, [isVisible]);
+
   const createSnapshotInputValidationSchema = Yup.object().shape({
     createSnapshotDescriptionInputName: Yup.string()
       .min(2, resources.messages['snapshotDescriptionValidationMin'])
@@ -70,7 +75,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
                     ) : null}
                   </div>
                   <button className="rp-btn primary" type="submit">
-                    <IconComponent icon={primeIcons.icons.check} />
+                    <IconComponent icon={primeIcons.icons.plus} />
                   </button>
                 </Form>
               )}
