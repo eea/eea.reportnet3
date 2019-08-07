@@ -5,42 +5,5 @@ spring:
     name: document
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 500MB
-        
-        
-  cloud:
-    consul:
-      discovery:
-        instanceId: ${spring.application.name}:${random.value}
-  sleuth:
-    sampler:
-      probability: 1.0
-    web:
-      skipPattern: "(^cleanup.*|.+favicon.*|.+actuator.*|.+prometheus.*)"
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
-
-hystrix:
-  command:
-    default:
-      circuitBreaker:
-        requestVolumeThreshold: 2
-        sleepWindowInMilliseconds: 10000
-kafka:
-  bootstrapAddress: ${KAFKA_BOOTSTRAP_URL:localhost:9092}
+      max-file-size: ${TOMCAT_MAX_FILE_SIZE:100MB}
+      max-request-size: ${TOMCAT_MAX_REQUEST_SIZE:500MB}

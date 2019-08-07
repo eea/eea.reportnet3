@@ -61,7 +61,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   public void executeCreateProcess(final Long datasetId, List<RecordVO> records,
       String idTableSchema) throws EEAException {
-    datasetService.updateRecords(datasetId, records);
+    datasetService.createRecords(datasetId, records, idTableSchema);
     LOG.info("Records have been created");
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);

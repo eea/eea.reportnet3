@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The interface Record store controller.
@@ -30,14 +31,16 @@ public interface RecordStoreController {
   @RequestMapping(value = "/reset", method = RequestMethod.POST)
   void resteDataSetDataBase();
 
+
   /**
-   * Creates a Crunchy Container with dataset schema defined and empty. Publishes a Kafka Event with
-   * connection details when finish
+   * Creates the empty dataset.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
    */
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
-  void createEmptyDataset(@PathVariable("datasetName") String datasetName);
+  void createEmptyDataset(@PathVariable("datasetName") String datasetName,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema);
 
   /**
    * Gets connection to dataset.
@@ -56,4 +59,5 @@ public interface RecordStoreController {
    */
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
   List<ConnectionDataVO> getDataSetConnections();
+
 }

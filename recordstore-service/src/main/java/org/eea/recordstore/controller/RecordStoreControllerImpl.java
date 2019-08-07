@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -49,17 +50,20 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
   }
 
+
   /**
    * Creates the empty dataset.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
    */
   @Override
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
-  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName) {
+  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
     // TODO neeed to create standar
     try {
-      recordStoreService.createEmptyDataSet(datasetName);
+      recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
       LOG.info("Dataset with name {} created", datasetName);
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
@@ -103,5 +107,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
     return vo;
   }
+
 
 }

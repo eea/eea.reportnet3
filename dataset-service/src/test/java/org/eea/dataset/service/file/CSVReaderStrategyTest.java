@@ -34,7 +34,7 @@ public class CSVReaderStrategyTest {
 
   /** The parse common. */
   @Mock
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
 
   /** The input. */
@@ -90,8 +90,8 @@ public class CSVReaderStrategyTest {
   @Test
   public void testParseFile() throws InvalidFileException {
 
-    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
-    when(parseCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+    when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
     DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "");
     assertNotNull("is null", result);
@@ -110,7 +110,7 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    when(parseCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, 1L, null, null);
   }
 

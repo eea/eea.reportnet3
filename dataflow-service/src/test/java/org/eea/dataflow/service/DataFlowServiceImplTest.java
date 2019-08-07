@@ -5,12 +5,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
@@ -47,8 +51,13 @@ public class DataFlowServiceImplTest {
   @Mock
   private UserRequestRepository userRequestRepository;
 
+  /** The contributor repository. */
   @Mock
   private ContributorRepository contributorRepository;
+
+  /** The document repository. */
+  @Mock
+  private DocumentRepository documentRepository;
 
   /** The dataflow mapper. */
   @Mock
@@ -61,6 +70,10 @@ public class DataFlowServiceImplTest {
   /** The dataset controller. */
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+  /** The document mapper. */
+  @Mock
+  private DocumentMapper documentMapper;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -128,9 +141,38 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getPendingAccepted() throws EEAException {
-    when(dataflowRepository.findPendingAccepted(Mockito.any())).thenReturn(new ArrayList<>());
+    List<DataflowWithRequestType> dataflows = new ArrayList<>();
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    DataflowWithRequestType df = new DataflowWithRequestType() {
+
+      @Override
+      public TypeRequestEnum getTypeRequestEnum() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public Long getRequestId() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public Dataflow getDataflow() {
+        // TODO Auto-generated method stub
+        return dataflow;
+      }
+    };
+    dataflows.add(df);
+    when(dataflowRepository.findPendingAccepted(Mockito.any())).thenReturn(dataflows);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setId(1L);
+    List<DataFlowVO> dataflowsVO = new ArrayList<>();
+    dataflowsVO.add(dfVO);
+    when(dataflowNoContentMapper.entityListToClass(Mockito.any())).thenReturn(dataflowsVO);
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getPendingAccepted(Mockito.any()));
+    assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
   }
 
   /**
@@ -222,4 +264,23 @@ public class DataFlowServiceImplTest {
         Mockito.any());
   }
 
+  /**
+   * Creates the data flow exist.
+   */
+  @Test
+  public void createDataFlowExist() {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    when(dataflowRepository.findByName(dataFlowVO.getName()))
+        .thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.createDataFlow(dataFlowVO);
+  }
+
+  /**
+   * Creates the data flow non exist.
+   */
+  @Test
+  public void createDataFlowNonExist() {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataflowServiceImpl.createDataFlow(dataFlowVO);
+  }
 }

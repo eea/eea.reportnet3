@@ -22,12 +22,11 @@ public interface ValidationController {
 
   }
 
+
   /**
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   *
-   * @return the data set VO
    */
   @RequestMapping(value = "/dataset/{id}", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)

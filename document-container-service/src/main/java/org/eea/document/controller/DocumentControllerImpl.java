@@ -1,11 +1,14 @@
 package org.eea.document.controller;
 
+import java.io.IOException;
 import javax.ws.rs.Produces;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import feign.FeignException;
 
 /**
  * The type Document controller.
@@ -35,16 +39,24 @@ public class DocumentControllerImpl implements DocumentController {
   @Autowired
   private DocumentService documentService;
 
+  /** The dataflow controller. */
+  @Autowired
+  private DataFlowDocumentControllerZuul dataflowController;
+
+
   /**
    * Upload document.
    *
    * @param file the file
    * @param dataFlowId the data flow id
+   * @param description the description
+   * @param language the language
    */
   @Override
   @PostMapping(value = "/upload/{dataFlowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId) {
+      @PathVariable("dataFlowId") final Long dataFlowId, @RequestParam final String description,
+      @RequestParam final String language) {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -53,8 +65,12 @@ public class DocumentControllerImpl implements DocumentController {
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
-      documentService.uploadDocument(file, dataFlowId);
-    } catch (EEAException e) {
+      documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+          file.getOriginalFilename(), dataFlowId, language, description);
+    } catch (EEAException | IOException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -62,20 +78,22 @@ public class DocumentControllerImpl implements DocumentController {
   /**
    * Gets the document.
    *
-   * @param documentName the document name
-   * @param dataFlowId the data flow id
+   * @param documentId the document id
    * @return the document
    */
   @Override
-  @GetMapping
+  @GetMapping(value = "/{documentId}")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  public ResponseEntity<Resource> getDocument(
-      @RequestParam("documentName") final String documentName,
-      @RequestParam("dataFlowId") final Long dataFlowId) {
+  public ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId) {
     try {
-      FileResponse file = documentService.getDocument(documentName, dataFlowId);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
+      if (document == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      FileResponse file = documentService.getDocument(document.getName(), document.getDataflowId(),
+          document.getLanguage());
       HttpHeaders header = new HttpHeaders();
-      header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + documentName);
+      header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getName());
       header.add("Cache-Control", "no-cache, no-store, must-revalidate");
       header.add("Pragma", "no-cache");
       header.add("Expires", "0");
@@ -83,25 +101,36 @@ public class DocumentControllerImpl implements DocumentController {
       return ResponseEntity.ok().headers(header).contentLength(file.getBytes().length)
           .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
     } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
+
   /**
-   * Delete a document.
+   * Delete document.
    *
-   * @param documentName the document name
-   * @param dataFlowId the data flow id
-   * @return the document
-   * @throws Exception
+   * @param documentId the document id
+   * @throws Exception the exception
    */
   @Override
-  @DeleteMapping
-  public void deleteDocument(@RequestParam("documentName") final String documentName,
-      @RequestParam("dataFlowId") final Long dataFlowId) throws Exception {
+  @DeleteMapping(value = "/{documentId}")
+  public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
     try {
-      documentService.deleteDocument(documentName, dataFlowId);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
+      if (document == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      documentService.deleteDocument(documentId, document.getName(), document.getDataflowId(),
+          document.getLanguage());
+    } catch (final FeignException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

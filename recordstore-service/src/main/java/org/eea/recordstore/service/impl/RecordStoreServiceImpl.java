@@ -1,6 +1,5 @@
 package org.eea.recordstore.service.impl;
 
-import com.github.dockerjava.api.model.Container;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,11 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import com.github.dockerjava.api.model.Container;
 
 /**
  * The Class RecordStoreServiceImpl.
  */
-//@Service
+// @Service
 public class RecordStoreServiceImpl implements RecordStoreService {
 
   /**
@@ -138,15 +138,17 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+
   /**
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
-   *
-   * @throws RecordStoreAccessException the docker access exception
+   * @param idDatasetSchema the id dataset schema
+   * @throws RecordStoreAccessException the record store access exception
    */
   @Override
-  public void createEmptyDataSet(final String datasetName) throws RecordStoreAccessException {
+  public void createEmptyDataSet(final String datasetName, final String idDatasetSchema)
+      throws RecordStoreAccessException {
     // line to run a crunchy container
     // docker run -d -e PG_DATABASE=datasets -e PG_PRIMARY_PORT=5432 -e PG_MODE=primary -e
     // PG_USER=root -e PG_PASSWORD=root -e PGPASSWORD=root -e PG_PRIMARY_USER=root -e
@@ -189,6 +191,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     event.setEventType(EventType.CONNECTION_CREATED_EVENT);
     final Map<String, Object> data = new HashMap<>();
     data.put("connectionDataVO", createConnectionDataVO(datasetName));
+    data.put("dataset_id", datasetName);
+    data.put("idDatasetSchema", idDatasetSchema);
     event.setData(data);
     kafkaSender.sendMessage(event);
 
@@ -300,4 +304,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     result.setSchema(datasetName);
     return result;
   }
+
+
 }

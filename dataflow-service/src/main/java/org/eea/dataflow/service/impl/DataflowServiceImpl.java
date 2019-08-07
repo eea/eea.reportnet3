@@ -5,11 +5,13 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
@@ -39,9 +41,13 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private UserRequestRepository userRequestRepository;
 
+  /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
 
+  /** The document repository. */
+  @Autowired
+  private DocumentRepository documentRepository;
 
   /** The dataflow mapper. */
   @Autowired
@@ -55,6 +61,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /** The document mapper. */
+  @Autowired
+  private DocumentMapper documentMapper;
 
   /**
    * The Constant LOG.
@@ -218,5 +227,31 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
+
+  /**
+   * Creates the data flow.
+   *
+   * @param dataflowVO the dataflow VO
+   */
+  @Override
+  @Transactional
+  public void createDataFlow(DataFlowVO dataflowVO) {
+    createMetabaseDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the metabase data flow.
+   *
+   * @param dataflow the dataflow
+   */
+  @Transactional
+  private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
+    } else {
+      Dataflow dataflow = dataflowMapper.classToEntity(dataflowVO);
+      dataflowRepository.save(dataflow);
+    }
+  }
 
 }

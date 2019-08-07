@@ -8,6 +8,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -174,7 +176,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
-    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, "field", true);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields);
   }
 
   /**
@@ -184,7 +187,10 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry2() throws Exception {
-    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, "field", true);
+    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
+    Collections.fill(order, Boolean.TRUE);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields);
   }
 
   /**
@@ -195,9 +201,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
   }
 
   /**
@@ -207,9 +212,9 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry4() throws Exception {
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
   }
 
   /**
@@ -220,8 +225,9 @@ public class DataSetControllerImplTest {
   // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", false);
+        Mockito.any())).thenReturn(new TableVO());
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
   }
 
   /**
@@ -232,11 +238,14 @@ public class DataSetControllerImplTest {
   @Test
   public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", true);
+        Mockito.any())).thenReturn(new TableVO());
+    List<Boolean> order = new ArrayList<Boolean>(Arrays.asList(new Boolean[2]));
+    Collections.fill(order, Boolean.TRUE);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -246,7 +255,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry1() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet(null);
+    dataSetControllerImpl.createEmptyDataSet(null, null, 1L);
   }
 
   /**
@@ -256,7 +265,7 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry2() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet("");
+    dataSetControllerImpl.createEmptyDataSet("", "", 1L);
   }
 
   /**
@@ -266,10 +275,12 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void createEmptyDataSetTest() throws Exception {
-    doNothing().when(datasetService).createEmptyDataset(Mockito.any());
-    dataSetControllerImpl.createEmptyDataSet("datasetName");
+    doNothing().when(datasetService).createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.createEmptyDataSet("datasetName", null, 1L);
 
-    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any());
+    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 
@@ -639,5 +650,12 @@ public class DataSetControllerImplTest {
     doThrow(new EEAException()).when(updateRecordHelper).executeCreateProcess(Mockito.any(),
         Mockito.any(), Mockito.any());
     dataSetControllerImpl.insertRecords(1L, "id", records);
+  }
+
+  @Test
+  public void exportFile() throws Exception {
+    Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("".getBytes());
+    dataSetControllerImpl.exportFile(1L, "id", "csv");
   }
 }

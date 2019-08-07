@@ -17,7 +17,7 @@ public class FileParserFactory implements IFileParserFactory {
    * The parse common.
    */
   @Autowired
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
   @Value("${dataset.loadDataDelimiter}")
   private char delimiter;
@@ -35,10 +35,14 @@ public class FileParserFactory implements IFileParserFactory {
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, parseCommon));
+        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, fileCommon));
         break;
       case "xml":
         // Fill it with the xml strategy
+        break;
+      case "xls":
+      case "xlsx":
+        context = new FileParseContextImpl(new ExcelReaderStrategy(fileCommon));
         break;
       default:
         break;

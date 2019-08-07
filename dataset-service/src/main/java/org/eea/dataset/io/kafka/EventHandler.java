@@ -1,6 +1,9 @@
 package org.eea.dataset.io.kafka;
 
 import javax.sql.DataSource;
+import org.apache.commons.lang.StringUtils;
+import org.eea.dataset.service.DatasetService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -23,10 +26,19 @@ public class EventHandler implements EEAEventHandler {
   private static final Logger LOG = LoggerFactory.getLogger(EventHandler.class);
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * The data source.
    */
   @Autowired
   private DataSource dataSource;
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
 
   /**
    * Gets the type.
@@ -51,6 +63,20 @@ public class EventHandler implements EEAEventHandler {
     if (EventType.CONNECTION_CREATED_EVENT.equals(eeaEventVO.getEventType())) {
       ((MultiTenantDataSource) dataSource)
           .addDataSource((ConnectionDataVO) eeaEventVO.getData().get("connectionDataVO"));
+
+      // if there is idDatasetSchema, insert it into the corresponding dataset_value
+      String dataset = (String) eeaEventVO.getData().get("dataset_id");
+      String idDatasetSchema = (String) eeaEventVO.getData().get("idDatasetSchema");
+      if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
+        String[] aux = dataset.split("_");
+        Long idDataset = Long.valueOf(aux[aux.length - 1]);
+        try {
+          datasetService.insertSchema(idDataset, idDatasetSchema);
+        } catch (EEAException e) {
+          LOG_ERROR.error(e.getMessage());
+        }
+      }
+
     }
   }
 }

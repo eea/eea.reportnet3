@@ -29,6 +29,12 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
