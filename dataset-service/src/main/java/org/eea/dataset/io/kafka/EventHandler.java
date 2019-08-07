@@ -2,7 +2,6 @@ package org.eea.dataset.io.kafka;
 
 import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
-import org.eea.dataset.controller.DataSetControllerImpl;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -43,8 +42,6 @@ public class EventHandler implements EEAEventHandler {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  @Autowired
-  private DataSetControllerImpl datasetControllerImpl;
 
   /**
    * Gets the type.
