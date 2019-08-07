@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
@@ -260,5 +261,19 @@ public class DataFlowServiceImplTest {
     dataflowServiceImpl.removeContributorFromDataflow(1L, 1L);
     Mockito.verify(contributorRepository, times(1)).removeContributorFromDataset(Mockito.any(),
         Mockito.any());
+  }
+
+  @Test
+  public void createDataFlowExist() {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    when(dataflowRepository.findByName(dataFlowVO.getName()))
+        .thenReturn(Optional.of(new Dataflow()));
+    dataflowServiceImpl.createDataFlow(dataFlowVO);
+  }
+
+  @Test
+  public void createDataFlowNonExist() {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataflowServiceImpl.createDataFlow(dataFlowVO);
   }
 }

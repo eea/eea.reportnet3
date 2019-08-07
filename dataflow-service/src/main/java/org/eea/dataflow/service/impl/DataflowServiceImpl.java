@@ -235,8 +235,8 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public void createDataFlow(Dataflow dataflow) {
-    createMetabaseDataFlow(dataflow);
+  public void createDataFlow(DataFlowVO dataflowVO) {
+    createMetabaseDataFlow(dataflowVO);
   }
 
   /**
@@ -245,10 +245,11 @@ public class DataflowServiceImpl implements DataflowService {
    * @param dataflow the dataflow
    */
   @Transactional
-  private void createMetabaseDataFlow(Dataflow dataflow) {
-    if (dataflowRepository.findByName(dataflow.getName()).isPresent()) {
-      LOG.info("The dataflow: {} already exists.", dataflow.getName());
+  private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
     } else {
+      Dataflow dataflow = dataflowMapper.classToEntity(dataflowVO);
       dataflowRepository.save(dataflow);
     }
   }
