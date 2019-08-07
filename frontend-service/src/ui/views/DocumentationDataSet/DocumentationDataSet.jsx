@@ -97,6 +97,13 @@ export const DocumentationDataSet = ({ match, history }) => {
         group: 'left',
         disabled: true,
         clickHandler: null
+      },
+      {
+        label: resources.messages['refresh'],
+        icon: '11',
+        group: 'right',
+        disabled: false,
+        clickHandler: () => onRefreshDocumentAndWebLinks()
       }
     ]);
     //#end region Button initialization
@@ -109,6 +116,12 @@ export const DocumentationDataSet = ({ match, history }) => {
       fileDownload(fileToDownload, fileName);
     }
   }, [fileToDownload]);
+
+  const onRefreshDocumentAndWebLinks = () => {
+    setIsLoading(true);
+    setDocumentsAndWebLinks();
+    setIsLoading(false);
+  };
 
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
