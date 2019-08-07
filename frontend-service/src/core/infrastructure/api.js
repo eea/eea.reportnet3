@@ -28,20 +28,19 @@ export const api = {
     return response.data;
   },
 
-  uploadDocument: async (dataFlowId, title, description, language, file) => {
+  uploadDocument: async (dataFlowId, description, language, file) => {
     const formData = new FormData();
     formData.append('file', file, file.name);
     const response = await HTTPRequester.postWithFiles({
       url: getUrl(config.uploadDocumentAPI.url, {
         dataFlowId: dataFlowId,
-        title: title,
         description: description,
         language: language
       }),
       queryString: {},
       data: formData
     });
-    return response.data;
+    return response;
   },
 
   snapshots: async url => {

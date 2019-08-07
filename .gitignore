@@ -4076,3 +4076,4 @@ indexsearch-service/.factorypath
 document-container-service/.factorypath
 common-interfaces/.factorypath
 collaboration-service/.factorypath
+frontend-service/.vscode/launch.json

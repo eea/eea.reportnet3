@@ -22,8 +22,8 @@ const downloadDocumentById = async documentId => {
   return fileData;
 };
 
-const uploadDocument = async (dataFlowId, title, description, language, file) => {
-  await api.uploadDocument(dataFlowId, title, description, language, file);
+const uploadDocument = async (dataFlowId, description, language, file) => {
+  await api.uploadDocument(dataFlowId, description, language, file);
 };
 
 export const ApiDocumentRepository = {
