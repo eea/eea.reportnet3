@@ -1070,7 +1070,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void insertSchema(Long datasetId, String idDatasetSchema) throws EEAException {
+  public void insertSchema(final Long datasetId, String idDatasetSchema) throws EEAException {
 
     DatasetValue ds = new DatasetValue();
     ds.setIdDatasetSchema(idDatasetSchema);
