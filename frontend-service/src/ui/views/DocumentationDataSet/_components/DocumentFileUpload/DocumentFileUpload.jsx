@@ -11,9 +11,9 @@ import { config } from 'assets/conf';
 
 const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
   const resources = useContext(ResourcesContext);
-  const initialValues = { title: '', description: '', lang: '', uploadFile: {} };
+  const initialValues = { /* title: '', */ description: '', lang: '', uploadFile: {} };
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required(resources.messages.emptyTitleValidationError),
+    // title: Yup.string().required(resources.messages.emptyTitleValidationError),
     description: Yup.string().required(resources.messages.emptyDescriptionValidationError),
     lang: Yup.string().required(resources.messages.emptyLanguageValidationError),
     uploadFile: Yup.mixed()
@@ -33,7 +33,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
       onSubmit={async (values, { setSubmitting }) => {
         const response = await DocumentService.uploadDocument(
           dataFlowId,
-          values.title,
+          // values.title,
           values.description,
           values.lang,
           values.uploadFile
@@ -46,10 +46,10 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
       {({ isSubmitting, setFieldValue, errors, touched }) => (
         <Form>
           <fieldset>
-            <div className={`formField${!isEmpty(errors.title) && touched.title ? ' error' : ''}`}>
+            {/* <div className={`formField${!isEmpty(errors.title) && touched.title ? ' error' : ''}`}>
               <Field name="title" type="text" placeholder={resources.messages.fileTitle} />
               <ErrorMessage className="error" name="title" component="div" />
-            </div>
+            </div> */}
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field name="description" type="text" placeholder={resources.messages.fileDescription} />
               <ErrorMessage className="error" name="description" component="div" />
