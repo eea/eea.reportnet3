@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
-import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
 import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
