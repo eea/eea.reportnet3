@@ -28,6 +28,10 @@ public interface DataflowMapper extends IMapper<Dataflow, DataFlowVO> {
   @Mapping(source = "deadlineDate", target = "deadlineDate", dateFormat = "dd/MM/yyyy")
   DataFlowVO entityToClass(Dataflow entity);
 
+  @Override
+  @Mapping(source = "deadlineDate", target = "deadlineDate", dateFormat = "dd/MM/yyyy")
+  Dataflow classToEntity(DataFlowVO entity);
+
   /**
    * Fill category.
    *

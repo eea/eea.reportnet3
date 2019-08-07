@@ -1,7 +1,6 @@
 package org.eea.dataflow.service;
 
 import java.util.List;
-import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -98,6 +97,6 @@ public interface DataflowService {
    *
    * @param dataflow the dataflow
    */
-  void createDataFlow(Dataflow dataflow);
+  void createDataFlow(DataFlowVO dataflowVO);
 
 }

@@ -306,17 +306,33 @@ public class DataFlowControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createDataFlowThrow() throws EEAException {
-    dataFlowControllerImpl.createDataFlow("123", "123", new Date(-1));
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date(-1));
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  @Test
+  public void createDataFlowNullThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createDataFlowDateTodayThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date());
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 
   @Test
   public void createDataFlow() throws EEAException, ParseException {
-    new Date();
+    DataFlowVO dataflowVO = new DataFlowVO();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date = sdf.parse("2914-09-15");
-    doNothing().when(dataflowService).createDataFlow(Mockito.any());
-    dataFlowControllerImpl.createDataFlow("123", "123", date);
-    Mockito.verify(dataflowService, times(1)).createDataFlow(Mockito.any());
+    dataflowVO.setDeadlineDate(date);
+    doNothing().when(dataflowService).createDataFlow(dataflowVO);
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
 }
