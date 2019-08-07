@@ -2,7 +2,8 @@ import { ApiDataSetRepository } from 'core/infrastructure/domain/model/DataSet/A
 
 export const DataSetRepository = {
   errorsById: () => Promise.reject('[DataSetRepository#errorsById] must be implemented'),
-  errorPositionByObjectId: () => Promise.reject('[DataSetRepository#errorPositionByObjectId] must be implemented')
+  errorPositionByObjectId: () => Promise.reject('[DataSetRepository#errorPositionByObjectId] must be implemented'),
+  errorStatisticsById: () => Promise.reject('[DataSetRepository#errorStatisticsById] must be implemented')
 };
 
 export const dataSetRepository = Object.assign({}, DataSetRepository, ApiDataSetRepository);

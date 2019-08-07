@@ -15,7 +15,7 @@
 		"url": "/dataset/{:dataSetId}/loadTableData/"
 	},
 	"loadStatisticsAPI": {
-		"url": "/dataset/loadStatistics/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
+		"url": "/dataset/loadStatistics/{:dataSetId}"
 	},
 	"dataviewerAPI": {
 		"url": "/dataset/TableValueDataset/"
@@ -39,6 +39,6 @@
 		"url": "/document/upload/{:dataFlowId}?title={:title}&description={:description}&language={:language}"
 	},
 	"listValidationsAPI": {
-		"url": "/validation/listValidations/"
+		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	}
 }

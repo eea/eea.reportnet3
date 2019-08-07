@@ -1,9 +1,10 @@
 import { dataSetRepository } from 'core/domain/model/DataSet/DataSetRepository';
 import { GetDataSetErrors } from './GetDataSetErrors';
-import { GetErrorPosition } from './GetErrorPosition';
 import { GetDataSetStatistics } from './GetDataSetStatistics';
+import { GetErrorPosition } from './GetErrorPosition';
 
 export const DataSetService = {
   errorsById: GetDataSetErrors({ dataSetRepository }),
-  errorPositionByObjectId: GetErrorPosition({ dataSetRepository })
+  errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),
+  errorStatisticsById: GetDataSetStatistics({ dataSetRepository })
 };

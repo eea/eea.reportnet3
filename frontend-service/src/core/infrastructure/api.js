@@ -11,12 +11,23 @@ export const api = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'
-        : getUrl(config.loadStatisticsAPI.url, {
+        : getUrl(config.listValidationsAPI.url, {
             dataSetId: dataSetId,
             pageNum: pageNum,
             pageSize: pageSize,
             sortField: sortField,
             asc: asc
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  dataSetTablesById: async dataSetId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/error-statistics.json'
+        : getUrl(config.loadStatisticsAPI.url, {
+            dataSetId: dataSetId
           }),
       queryString: {}
     });

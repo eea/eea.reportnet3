@@ -110,7 +110,7 @@ export const DocumentationDataSet = ({ match, history }) => {
     }
   }, [fileToDownload]);
 
-  const onHideHandler = () => {
+  const onHide = () => {
     setIsUploadDialogVisible(false);
     setDocumentsAndWebLinks();
   };
@@ -167,8 +167,8 @@ export const DocumentationDataSet = ({ match, history }) => {
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHideHandler}>
-            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHideHandler} />
+            onHide={onHide}>
+            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true}>
