@@ -1,0 +1,67 @@
+.content {
+}
+.p-sidebar-close {
+  margin-right: 15px !important;
+}
+.createForm {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.inputnAndErrorBox {
+  display: block;
+}
+.errors {
+  color: var(--errors);
+  padding-bottom: 0;
+}
+.title {
+  composes: heading-3 from global;
+  margin-bottom: 1rem;
+}
+.title h3 {
+  color: var(--c-corporate-blue);
+  margin: 0px;
+}
+
+.section {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+.sidebar {
+  padding-right: 0px !important;
+}
+
+:global button.p-sidebar-close.p-link {
+  margin-right: 15px;
+}
+
+.newContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+// .newContainer input {
+//   display: block;
+//   width: 100%;
+//   font-size: 1rem;
+//   padding: 0.25rem;
+//   border: 1px solid var(--grey-75);
+//   margin-bottom: 0;
+// }
+
+.newContainer button {
+  font-size: 1.25em;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0.5rem !important;
+}
+
+.listContainer ul {
+  padding: 0 0.5rem;
+}
