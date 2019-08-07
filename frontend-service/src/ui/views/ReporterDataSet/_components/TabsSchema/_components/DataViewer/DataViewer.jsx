@@ -42,8 +42,8 @@ const DataViewer = withRouter(
       const [firstRow, setFirstRow] = useState(
         positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
       );
-      const [sortOrder, setSortOrder] = useState();
-      const [sortField, setSortField] = useState();
+      const [sortOrder, setSortOrder] = useState(undefined);
+      const [sortField, setSortField] = useState(undefined);
       const [columns, setColumns] = useState([]);
       const [cols, setCols] = useState(tableSchemaColumns);
       const [header] = useState();
@@ -149,7 +149,7 @@ const DataViewer = withRouter(
         setSortField(event.sortField);
         contextReporterDataSet.setPageHandler(0);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(event.multiSortMeta, event.sortOrder, firstRow, numRows);
+        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
       };
 
       const onRefreshClickHandler = () => {
@@ -178,17 +178,8 @@ const DataViewer = withRouter(
           pageSize: nRows
         };
 
-        // if (sField !== undefined && sField !== null) {
+        if (!isUndefined(sField) && sField !== null) {
           queryString.fields = sField + ':' + sOrder;
-        // }
-
-        if (sField !== undefined && sField !== null && sField != []) {
-          const myFields = sField.map((e) => {
-            return {[e.field]: e.order};
-           });
-          const format = JSON.stringify(myFields).replace(/['" {} [\]]+/g, '')
-          queryString.fields = format;
-          //queryString.asc = sOrder === -1 ? 0 : 1;
         }
 
         const dataPromise = HTTPRequester.get({
@@ -434,8 +425,7 @@ const DataViewer = withRouter(
               sortField={sortField}
               sortOrder={sortOrder}
               autoLayout={true}
-              rowClassName={rowClassName}
-              sortMode="multiple">
+              rowClassName={rowClassName}>
               {columns}
             </DataTable>
           </div>
