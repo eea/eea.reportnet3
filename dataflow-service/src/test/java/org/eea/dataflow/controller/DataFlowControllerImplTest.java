@@ -304,6 +304,11 @@ public class DataFlowControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Creates the data flow throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createDataFlowThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -311,12 +316,22 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 
+  /**
+   * Creates the data flow null throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createDataFlowNullThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 
+  /**
+   * Creates the data flow date today throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createDataFlowDateTodayThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -324,6 +339,12 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 
+  /**
+   * Creates the data flow.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
   @Test
   public void createDataFlow() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();

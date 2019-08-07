@@ -31,6 +31,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
 
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The dataflow web link service. */
