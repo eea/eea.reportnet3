@@ -36,6 +36,9 @@ public class DocumentServiceImpl implements DocumentService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The Constant PATH_DELIMITER. */
   private static final String PATH_DELIMITER = "/";
 
@@ -90,6 +93,7 @@ public class DocumentServiceImpl implements DocumentService {
       sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
           description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     } catch (RepositoryException | EEAException e) {
+      LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
@@ -126,6 +130,7 @@ public class DocumentServiceImpl implements DocumentService {
           nameWithLanguage);
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
+      LOG_ERROR.error("Error in getDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -169,6 +174,7 @@ public class DocumentServiceImpl implements DocumentService {
       sendKafkaNotification(documentId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
 
     } catch (Exception e) {
+      LOG_ERROR.error("Error in deleteDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
