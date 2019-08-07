@@ -61,36 +61,36 @@ import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
-public class MyHandshakeHandler implements HandshakeHandler, Lifecycle {
+public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
 
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
-  private static final boolean jettyWsPresent;
+  private static final boolean JETTYWSPRESENT;
 
-  private static final boolean tomcatWsPresent;
+  private static final boolean TOMCATWSPRESENT;
 
-  private static final boolean undertowWsPresent;
+  private static final boolean UNDERTOWWSPRESENT;
 
-  private static final boolean glassfishWsPresent;
+  private static final boolean GLASSFISHWSPRESENT;
 
-  private static final boolean weblogicWsPresent;
+  private static final boolean WEBLOGICWSPRESENT;
 
-  private static final boolean websphereWsPresent;
+  private static final boolean WEBSPHEREWSPRESENT;
 
   static {
-    ClassLoader classLoader = MyHandshakeHandler.class.getClassLoader();
-    jettyWsPresent = ClassUtils
+    ClassLoader classLoader = CustomHandshakeHandler.class.getClassLoader();
+    JETTYWSPRESENT = ClassUtils
         .isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
-    tomcatWsPresent = ClassUtils
+    TOMCATWSPRESENT = ClassUtils
         .isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
-    undertowWsPresent =
+    UNDERTOWWSPRESENT =
         ClassUtils.isPresent("io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
-    glassfishWsPresent =
+    GLASSFISHWSPRESENT =
         ClassUtils.isPresent("org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", classLoader);
-    weblogicWsPresent =
+    WEBLOGICWSPRESENT =
         ClassUtils.isPresent("weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
-    websphereWsPresent =
+    WEBSPHEREWSPRESENT =
         ClassUtils.isPresent("com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
 
   }
@@ -111,7 +111,7 @@ public class MyHandshakeHandler implements HandshakeHandler, Lifecycle {
    * 
    * @throws IllegalStateException if no {@link RequestUpgradeStrategy} can be found.
    */
-  protected MyHandshakeHandler() {
+  protected CustomHandshakeHandler() {
     this(initRequestUpgradeStrategy());
   }
 
@@ -120,7 +120,7 @@ public class MyHandshakeHandler implements HandshakeHandler, Lifecycle {
    * 
    * @param requestUpgradeStrategy the upgrade strategy to use
    */
-  protected MyHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {
+  protected CustomHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {
     Assert.notNull(requestUpgradeStrategy, "RequestUpgradeStrategy must not be null");
     this.requestUpgradeStrategy = requestUpgradeStrategy;
   }
@@ -128,17 +128,17 @@ public class MyHandshakeHandler implements HandshakeHandler, Lifecycle {
 
   private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
     String className;
-    if (tomcatWsPresent) {
+    if (TOMCATWSPRESENT) {
       className = "org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy";
-    } else if (jettyWsPresent) {
+    } else if (JETTYWSPRESENT) {
       className = "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
-    } else if (undertowWsPresent) {
+    } else if (UNDERTOWWSPRESENT) {
       className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";
-    } else if (glassfishWsPresent) {
+    } else if (GLASSFISHWSPRESENT) {
       className = "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
-    } else if (weblogicWsPresent) {
+    } else if (WEBLOGICWSPRESENT) {
       className = "org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy";
-    } else if (websphereWsPresent) {
+    } else if (WEBSPHEREWSPRESENT) {
       className = "org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy";
     } else {
       throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");

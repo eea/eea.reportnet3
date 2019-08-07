@@ -11,8 +11,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
 
-  private static int contador = 0;
-
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
     config.enableSimpleBroker("/queue", "/user");
@@ -26,8 +24,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
   }
 
   @Bean
-  public MyHandshakeHandler myHandshakeHandler() {
+  public CustomHandshakeHandler myHandshakeHandler() {
 
-    return new MyHandshakeHandler();
+    return new CustomHandshakeHandler();
   }
 }
