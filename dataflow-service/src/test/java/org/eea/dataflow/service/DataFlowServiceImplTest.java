@@ -71,6 +71,7 @@ public class DataFlowServiceImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /** The document mapper. */
   @Mock
   private DocumentMapper documentMapper;
 
@@ -263,6 +264,9 @@ public class DataFlowServiceImplTest {
         Mockito.any());
   }
 
+  /**
+   * Creates the data flow exist.
+   */
   @Test
   public void createDataFlowExist() {
     DataFlowVO dataFlowVO = new DataFlowVO();
@@ -271,6 +275,9 @@ public class DataFlowServiceImplTest {
     dataflowServiceImpl.createDataFlow(dataFlowVO);
   }
 
+  /**
+   * Creates the data flow non exist.
+   */
   @Test
   public void createDataFlowNonExist() {
     DataFlowVO dataFlowVO = new DataFlowVO();
