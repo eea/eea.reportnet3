@@ -138,6 +138,15 @@ body {
   cursor: pointer;
 }
 
+.rp-btn.default {
+  color: var(--c-black-400);
+}
+.rp-btn.rp-btn.default:hover {
+  background-color: var(--c-orange-200);
+  color: var(--blue-120);
+  border: 2px solid var(--c-orange-200);
+}
+
 .rp-btn.primary {
   background-color: var(--c-corporate-blue);
   border-color: var(--c-corporate-blue);
@@ -1753,6 +1762,40 @@ body {
   top: 30vh;
   width: 75px;
   height: 75px;
+}
+
+/* forms */
+fieldset {
+  border: none;
+}
+.formField {
+  margin-bottom: 1rem;
+}
+input,
+select {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--c-black-200);
+  padding: 0.5rem;
+  border-radius: 3px;
+}
+
+input:focus {
+  border-color: var(--c-corporate-blue);
+  border-width: 2px;
+}
+
+.formField.error input {
+  border-color: var(--errors);
+  border-width: 2px;
+}
+.formField.error select {
+  border-color: var(--errors);
+  border-width: 2px;
+}
+
+form .error {
+  color: var(--errors);
 }
 
 @keyframes p-progress-spinner-color {
