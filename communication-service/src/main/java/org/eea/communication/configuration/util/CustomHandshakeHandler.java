@@ -1,4 +1,4 @@
-package org.eea.communication.configuration;
+package org.eea.communication.configuration.util;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,12 +9,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.JsonWebToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -61,6 +62,7 @@ import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
  * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
  * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
+@Component
 public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
 
   @Autowired
@@ -92,11 +94,10 @@ public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
         ClassUtils.isPresent("weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
     WEBSPHEREWSPRESENT =
         ClassUtils.isPresent("com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
-
   }
 
 
-  protected final Log logger = LogFactory.getLog(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(CustomHandshakeHandler.class);
 
   private final RequestUpgradeStrategy requestUpgradeStrategy;
 
@@ -224,19 +225,19 @@ public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
 
   @Override
   public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-      WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
+      WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
     URI uri = request.getURI();
     WebSocketHttpHeaders headers = new WebSocketHttpHeaders(request.getHeaders());
     if (logger.isTraceEnabled()) {
-      logger.trace("Processing request " + uri + " with headers=" + headers);
+      logger.trace("Processing request {} with headers={}", uri, headers);
     }
     try {
       if (HttpMethod.GET != request.getMethod()) {
         response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
         response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
         if (logger.isErrorEnabled()) {
-          logger.error("Handshake failed due to unexpected HTTP method: " + request.getMethod());
+          logger.error("Handshake failed due to unexpected HTTP method: {}", request.getMethod());
         }
         return false;
       }
@@ -266,20 +267,13 @@ public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
         return false;
       }
       JsonWebToken jwt = jwtTokenProvider.retrieveToken(uri.getQuery());
-      if (!jwt.isActive()) {
-        if (logger.isErrorEnabled()) {
-          logger.error("Security token is not active");
-        }
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return false;
-      }
       attributes.put("userId", ((AccessToken) jwt).getPreferredUsername());
     } catch (IOException ex) {
       throw new HandshakeFailureException(
           "Response update failed during upgrade to WebSocket: " + request.getURI(), ex);
     } catch (VerificationException ex) {
       if (logger.isErrorEnabled()) {
-        logger.error("Security token is not valid");
+        logger.error("Security token is not valid: {}", ex.getMessage());
       }
       response.setStatusCode(HttpStatus.UNAUTHORIZED);
       return false;
@@ -293,8 +287,8 @@ public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
     Principal user = determineUser(request, wsHandler, attributes);
 
     if (logger.isTraceEnabled()) {
-      logger.trace(
-          "Upgrading to WebSocket, subProtocol=" + subProtocol + ", extensions=" + extensions);
+      logger.trace("Upgrading to WebSocket, subProtocol={}, extensions={}", subProtocol,
+          extensions);
     }
     this.requestUpgradeStrategy.upgrade(request, response, subProtocol, extensions, user, wsHandler,
         attributes);
@@ -304,8 +298,8 @@ public class CustomHandshakeHandler implements HandshakeHandler, Lifecycle {
   protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response)
       throws IOException {
     if (logger.isErrorEnabled()) {
-      logger.error(
-          "Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade());
+      logger.error("Handshake failed due to invalid Upgrade header: {}",
+          request.getHeaders().getUpgrade());
     }
     response.setStatusCode(HttpStatus.BAD_REQUEST);
     response.getBody()

@@ -1,7 +1,6 @@
 package org.eea.communication.io.kafka;
 
-import org.eea.communication.controller.NotificationController;
-import org.eea.exception.EEAException;
+import org.eea.communication.service.NotificationService;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.handler.EEAEventHandler;
 import org.slf4j.Logger;
@@ -13,9 +12,9 @@ import org.springframework.stereotype.Service;
 public class EventHandler implements EEAEventHandler {
 
   @Autowired
-  NotificationController notificationController;
+  NotificationService notificationService;
 
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private final Logger logger = LoggerFactory.getLogger(EventHandler.class);
 
   @Override
   public Class<EEAEventVO> getType() {
@@ -24,10 +23,9 @@ public class EventHandler implements EEAEventHandler {
 
   @Override
   public void processMessage(final EEAEventVO eeaEventVO) {
-    try {
-      notificationController.sendNotification(eeaEventVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error sending notification: {}", e.getMessage());
+
+    if (!notificationService.sendNotification(eeaEventVO)) {
+      logger.error("Error sending notification: {}", eeaEventVO);
     }
   }
 }
