@@ -38,7 +38,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
           values.lang,
           values.uploadFile
         );
-        if (response.status === 200) {
+        if (response === 200) {
           setSubmitting(false);
           onUpload();
         }
