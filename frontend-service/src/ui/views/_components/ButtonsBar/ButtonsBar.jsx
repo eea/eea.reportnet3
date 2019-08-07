@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CustomButton } from 'ui/views/_components/CustomButton';
+import { Button } from 'ui/views/_components/Button';
 import { Toolbar } from 'primereact/toolbar';
 
 export const ButtonsBar = React.memo(({ buttonsList }) => {
@@ -10,7 +10,7 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
   const buttons = buttonsList.forEach((b, i) => {
     b.group === 'left'
       ? leftButtons.push(
-          <CustomButton
+          <Button
             label={b.label}
             title={b.title}
             icon={b.icon}
@@ -22,7 +22,7 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
           />
         )
       : rightButtons.push(
-          <CustomButton
+          <Button
             label={b.label}
             title={b.title}
             icon={b.icon}

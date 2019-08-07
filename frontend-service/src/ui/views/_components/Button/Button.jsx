@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 
-import { Button } from 'primereact/button';
+import { Button as PrimeButton } from 'primereact/button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const CustomButton = ({ disabled, icon, iconClasses, label, onClick }) => {
+export const Button = ({ disabled, icon, iconClasses, label, onClick }) => {
   const resources = useContext(ResourcesContext);
   let icons = [
     resources.icons['export'],
@@ -26,7 +26,7 @@ export const CustomButton = ({ disabled, icon, iconClasses, label, onClick }) =>
   const iconClassName = `${icons[icon]} ${iconClasses ? iconClasses : ''}`;
 
   return (
-    <Button
+    <PrimeButton
       className={classes}
       icon={iconClassName}
       label={label}

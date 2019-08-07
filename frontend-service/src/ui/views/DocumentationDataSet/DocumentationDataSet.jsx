@@ -30,7 +30,7 @@ export const DocumentationDataSet = ({ match, history }) => {
   const [fileName, setFileName] = useState('');
   const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [customButtons, setCustomButtons] = useState([]);
+  const [buttons, setButtons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [inputDocumentDescription, setInputDocumentDescription] = useState('');
@@ -69,7 +69,7 @@ export const DocumentationDataSet = ({ match, history }) => {
   //Data Fetching
   useEffect(() => {
     //#region Button initialization
-    setCustomButtons([
+    setButtons([
       {
         label: resources.messages['upload'],
         icon: '0',
@@ -161,7 +161,7 @@ export const DocumentationDataSet = ({ match, history }) => {
     return layout(
       <TabView>
         <TabPanel header={resources.messages['documents']}>
-          <ButtonsBar buttonsList={customButtons} />
+          <ButtonsBar buttonsList={buttons} />
           <Dialog
             header={resources.messages['upload']}
             visible={isUploadDialogVisible}

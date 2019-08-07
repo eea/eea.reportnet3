@@ -10,7 +10,7 @@ import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-import { CustomIconTooltip } from './_components/CustomIconTooltip';
+import { IconTooltip } from './_components/IconTooltip';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { Growl } from 'primereact/growl';
@@ -257,7 +257,7 @@ const DataViewer = withRouter(
             }
           });
 
-          return <CustomIconTooltip levelError={levelError} message={message} />;
+          return <IconTooltip levelError={levelError} message={message} />;
         } else {
           return;
         }
@@ -302,7 +302,7 @@ const DataViewer = withRouter(
                 justifyContent: 'space-between'
               }}>
               {' '}
-              {row ? row.fieldData[column.field] : null} <CustomIconTooltip levelError={levelError} message={message} />
+              {row ? row.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
             </div>
           );
         } else {

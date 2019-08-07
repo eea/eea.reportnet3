@@ -32,7 +32,7 @@ export const ReporterDataSet = ({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const [datasetTitle, setDatasetTitle] = useState('');
-  const [customButtons, setCustomButtons] = useState([]);
+  const [buttons, setButtons] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
@@ -112,7 +112,7 @@ export const ReporterDataSet = ({ match, history }) => {
 
           //#region Button inicialization
 
-          setCustomButtons([
+          setButtons([
             {
               label: resources.messages['export'],
               icon: '1',
@@ -327,7 +327,7 @@ export const ReporterDataSet = ({ match, history }) => {
           <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
         </div>
         <div className={styles.ButtonsBar}>
-          <ButtonsBar buttonsList={customButtons} />
+          <ButtonsBar buttonsList={buttons} />
         </div>
         <ReporterDataSetContext.Provider
           value={{

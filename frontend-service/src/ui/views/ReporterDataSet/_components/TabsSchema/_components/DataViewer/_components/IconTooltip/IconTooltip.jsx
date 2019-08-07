@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 
-import styles from './CustomIconTooltip.module.css';
+import styles from './IconTooltip.module.css';
 
 import { Button } from 'primereact/button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const CustomIconTooltip = ({ levelError, message }) => {
+export const IconTooltip = ({ levelError, message }) => {
   let validationIcon = '';
   let iconColor = '';
 
