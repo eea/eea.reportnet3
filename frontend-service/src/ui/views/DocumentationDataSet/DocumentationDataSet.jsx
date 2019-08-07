@@ -103,7 +103,7 @@ export const DocumentationDataSet = ({ match, history }) => {
         icon: '11',
         group: 'right',
         disabled: false,
-        clickHandler: () => onRefresh()
+        clickHandler: () => onRefreshDocumentAndWebLinks()
       }
     ]);
     //#end region Button initialization
@@ -117,7 +117,7 @@ export const DocumentationDataSet = ({ match, history }) => {
     }
   }, [fileToDownload]);
 
-  const onRefresh = () => {
+  const onRefreshDocumentAndWebLinks = () => {
     setIsLoading(true);
     setDocumentsAndWebLinks();
     setIsLoading(false);
