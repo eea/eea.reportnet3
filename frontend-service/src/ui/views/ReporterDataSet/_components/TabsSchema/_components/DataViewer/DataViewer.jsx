@@ -59,6 +59,10 @@ const DataViewer = withRouter(
       }, [isDataDeleted]);
 
       useEffect(() => {
+        if (isUndefined(positionIdRecord)) {
+          return;
+        }
+
         if (firstRow !== positionIdRecord) {
           setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
         }
@@ -69,9 +73,7 @@ const DataViewer = withRouter(
         }
         setColOptions(colOpt);
 
-        if (positionIdRecord !== 0 || fetchedData.length === 0) {
-          fetchDataHandler(null, null, Math.floor(positionIdRecord / numRows) * numRows, numRows);
-        }
+        fetchDataHandler(null, null, Math.floor(positionIdRecord / numRows) * numRows, numRows);
 
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -120,8 +122,8 @@ const DataViewer = withRouter(
       const onChangePageHandler = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
-        contextReporterDataSet.setPageHandler(event.first);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
+        contextReporterDataSet.setPageHandler(undefined);
+        //contextReporterDataSet.setIdSelectedRowHandler(-1);
         //if (event.first === 0) {
         fetchDataHandler(sortField, sortOrder, event.first, event.rows);
         //}
@@ -147,15 +149,16 @@ const DataViewer = withRouter(
         console.log('Sorting...');
         setSortOrder(event.sortOrder);
         setSortField(event.sortField);
-        contextReporterDataSet.setPageHandler(0);
+        setFirstRow(0);
+        contextReporterDataSet.setPageHandler(undefined);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+        fetchDataHandler(event.sortField, event.sortOrder, 0, numRows);
       };
 
       const onRefreshClickHandler = () => {
-        contextReporterDataSet.setPageHandler(0);
+        contextReporterDataSet.setPageHandler(undefined);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(null, null, firstRow, numRows);
+        fetchDataHandler(sortField, sortOrder, firstRow, numRows);
       };
 
       // const onColumnToggleHandler = (event) =>{
@@ -358,7 +361,7 @@ const DataViewer = withRouter(
           label: resources.messages['refresh'],
           icon: '11',
           group: 'right',
-          disabled: true,
+          disabled: false,
           clickHandler: onRefreshClickHandler
         }
       ];
