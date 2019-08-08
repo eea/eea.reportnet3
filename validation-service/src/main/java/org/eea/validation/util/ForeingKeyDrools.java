@@ -21,6 +21,7 @@ public class ForeingKeyDrools {
   }
 
 
+  /** The validation service. */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
@@ -35,7 +36,7 @@ public class ForeingKeyDrools {
    *
    * @param value the value
    * @param fieldSchema the field schema
-   * @param nameDataset the name dataset
+   * @param idDataset the id dataset
    * @return the boolean
    */
   public static Boolean queryGetAllFieldValue(String value, String fieldSchema, Long idDataset) {

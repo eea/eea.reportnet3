@@ -22,8 +22,9 @@ public class FieldRepositoryImpl implements FieldExtendedQueriesRepository {
   /**
    * Find all field values by field schem and name data set.
    *
+   * @param value the value
    * @param fieldSchema the field schema
-   * @param nameDataset the name dataset
+   * @param idDataset the id dataset
    * @return the list
    */
   @SuppressWarnings("unchecked")

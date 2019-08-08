@@ -115,6 +115,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
+
+  /** The dataset repository. */
+  @Autowired
+  private FieldRepositoryImpl fieldRepositoryImpl;
+
   /**
    * Gets the element lenght.
    *
@@ -668,10 +673,15 @@ public class ValidationServiceImpl implements ValidationService {
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
   }
 
-  /** The dataset repository. */
-  @Autowired
-  private FieldRepositoryImpl fieldRepositoryImpl;
 
+  /**
+   * Find reference drools.
+   *
+   * @param value the value
+   * @param datasetId the dataset id
+   * @param idFieldSchema the id field schema
+   * @return the boolean
+   */
   @Override
   public Boolean findReferenceDrools(String value, Long datasetId, String idFieldSchema) {
     Integer sameValue = fieldRepositoryImpl.findAllFieldValuesByFieldSchemAndNameDataSet(value,
