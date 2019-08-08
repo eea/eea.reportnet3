@@ -139,10 +139,10 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
+      <span className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
         {' '}
         <IconComponent icon={config.icons.archive} />
-      </a>
+      </span>
     );
   };
 
