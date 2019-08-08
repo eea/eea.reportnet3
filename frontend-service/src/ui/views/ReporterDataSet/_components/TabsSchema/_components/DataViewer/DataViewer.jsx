@@ -39,9 +39,9 @@ const DataViewer = withRouter(
       const [fetchedData, setFetchedData] = useState([]);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
-      const [firstRow, setFirstRow] = useState(
-        positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
-      );
+      const [firstRow, setFirstRow] = useState(0);
+       // positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
+      //);
       const [sortOrder, setSortOrder] = useState(undefined);
       const [sortField, setSortField] = useState(undefined);
       const [columns, setColumns] = useState([]);
@@ -58,26 +58,38 @@ const DataViewer = withRouter(
         setFetchedData([]);
       }, [isDataDeleted]);
 
-      useEffect(() => {
-        if (isUndefined(positionIdRecord)) {
-          return;
-        }
-
-        if (firstRow !== positionIdRecord) {
-          setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
-        }
-
+      useEffect(() => {        
         let colOpt = [];
         for (let col of cols) {
           colOpt.push({ label: col.header, value: col });
         }
         setColOptions(colOpt);
 
-        fetchDataHandler(null, null, Math.floor(positionIdRecord / numRows) * numRows, numRows);
-
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         setCols(inmTableSchemaColumns);
+      }, [])
+
+      useEffect(() => {
+        console.log('Entro en USE EFFECT');
+
+        if (isUndefined(positionIdRecord)) {
+          console.log('Salgo de USE EFFECT por UNDEFINED');
+          return;
+        }
+
+        if (positionIdRecord === -1) {
+          fetchDataHandler(undefined, undefined, 0, numRows);
+          console.log('Salgo de USE EFFECT por -1 (carga datos)');
+          return;
+        }
+
+        setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
+        setSortField(undefined);
+        setSortOrder(undefined);
+        fetchDataHandler(undefined, undefined, Math.floor(positionIdRecord / numRows) * numRows, numRows);
+
+        console.log('Salgo de USE EFFECT por FIN (carga datos validación)');
       }, [positionIdRecord]);
 
       useEffect(() => {
@@ -122,7 +134,7 @@ const DataViewer = withRouter(
       const onChangePageHandler = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
-        contextReporterDataSet.setPageHandler(undefined);
+        //contextReporterDataSet.setPageHandler(-1);
         //contextReporterDataSet.setIdSelectedRowHandler(-1);
         //if (event.first === 0) {
         fetchDataHandler(sortField, sortOrder, event.first, event.rows);
@@ -150,14 +162,14 @@ const DataViewer = withRouter(
         setSortOrder(event.sortOrder);
         setSortField(event.sortField);
         setFirstRow(0);
-        contextReporterDataSet.setPageHandler(undefined);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
+        //contextReporterDataSet.setPageHandler(-1);
+        //contextReporterDataSet.setIdSelectedRowHandler(-1);
         fetchDataHandler(event.sortField, event.sortOrder, 0, numRows);
       };
 
       const onRefreshClickHandler = () => {
-        contextReporterDataSet.setPageHandler(undefined);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
+        //contextReporterDataSet.setPageHandler(-1);
+        //contextReporterDataSet.setIdSelectedRowHandler(-1);
         fetchDataHandler(sortField, sortOrder, firstRow, numRows);
       };
 

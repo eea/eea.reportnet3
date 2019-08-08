@@ -157,9 +157,9 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
 
         dataPromise
           .then(res => {
-            contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-            contextReporterDataSet.setPageHandler(res.data.position);
-            contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
+            contextReporterDataSet.setValidationHandler(event.data.idTableSchema, res.data.position, res.data.idRecord);
+            //contextReporterDataSet.setPageHandler(res.data.position);
+            //contextReporterDataSet.setIdSelectedRowHandler(res.data.idRecord);
             contextReporterDataSet.validationsVisibleHandler();
           })
           .catch(error => {
@@ -168,8 +168,8 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
           });
         break;
       case 'TABLE':
-        contextReporterDataSet.setTabHandler(event.data.idTableSchema);
-        contextReporterDataSet.setPageHandler(0);
+        contextReporterDataSet.setValidationHandler(event.data.idTableSchema, -1, -1);
+        //contextReporterDataSet.setPageHandler(0);
         contextReporterDataSet.validationsVisibleHandler();
         break;
       default:
