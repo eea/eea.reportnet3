@@ -185,4 +185,14 @@ public interface ValidationService {
   Future<Map<Long, ErrorsValidationVO>> getFieldErrors(@DatasetId Long datasetId,
       List<Long> idValidations);
 
+  /**
+   * Find reference drools.
+   * 
+   * @param value
+   *
+   * @param datasetId the dataset id
+   * @param idFieldSchema the id field schema
+   * @return the boolean
+   */
+  Boolean findReferenceDrools(String value, @DatasetId Long datasetId, String idFieldSchema);
 }

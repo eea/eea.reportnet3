@@ -31,8 +31,8 @@ end
 
 end template
 
-function boolean isQuery( String value ){
-	return ForeingKeyDrools.query(value);
+function boolean isQuery(String value, String fieldSchema, Long idDataset){
+	return ForeingKeyDrools.queryGetAllFieldValue(value,fieldSchema,idDataset);
 }
 
 function boolean isCodeList( String value ,String codeList){

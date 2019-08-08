@@ -30,6 +30,7 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -665,6 +666,17 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
+  }
+
+  /** The dataset repository. */
+  @Autowired
+  private FieldRepositoryImpl fieldRepositoryImpl;
+
+  @Override
+  public Boolean findReferenceDrools(String value, Long datasetId, String idFieldSchema) {
+    Integer sameValue = fieldRepositoryImpl.findAllFieldValuesByFieldSchemAndNameDataSet(value,
+        idFieldSchema, datasetId);
+    return sameValue != null && sameValue != 0 ? Boolean.TRUE : Boolean.FALSE;
   }
 
 }
