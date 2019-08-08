@@ -112,7 +112,11 @@ export const DataFlowTasks = ({ match, history }) => {
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn navTitle={resources.messages['dataFlow']} search={false} />
+      <DataFlowColumn
+        navTitle={resources.messages['dataFlow']}
+        search={true}
+        buttonTitle={resources.messages['subscribeButton']}
+      />
       <div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabData.map((data, i) => (

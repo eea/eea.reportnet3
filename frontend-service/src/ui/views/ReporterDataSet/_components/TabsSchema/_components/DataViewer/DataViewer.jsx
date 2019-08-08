@@ -42,8 +42,8 @@ const DataViewer = withRouter(
       const [firstRow, setFirstRow] = useState(
         positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
       );
-      const [sortOrder, setSortOrder] = useState();
-      const [sortField, setSortField] = useState();
+      const [sortOrder, setSortOrder] = useState(undefined);
+      const [sortField, setSortField] = useState(undefined);
       const [columns, setColumns] = useState([]);
       const [cols, setCols] = useState(tableSchemaColumns);
       const [header] = useState();
@@ -70,7 +70,7 @@ const DataViewer = withRouter(
         setColOptions(colOpt);
 
         if (positionIdRecord !== 0 || fetchedData.length === 0) {
-          fetchDataHandler(null, sortOrder, Math.floor(positionIdRecord / numRows) * numRows, numRows);
+          fetchDataHandler(null, null, Math.floor(positionIdRecord / numRows) * numRows, numRows);
         }
 
         const inmTableSchemaColumns = [...tableSchemaColumns];
@@ -122,9 +122,9 @@ const DataViewer = withRouter(
         setFirstRow(event.first);
         contextReporterDataSet.setPageHandler(event.first);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        if (event.first === 0) {
-          fetchDataHandler(sortField, sortOrder, event.first, event.rows);
-        }
+        //if (event.first === 0) {
+        fetchDataHandler(sortField, sortOrder, event.first, event.rows);
+        //}
       };
 
       const onConfirmDeleteHandler = () => {
@@ -155,7 +155,7 @@ const DataViewer = withRouter(
       const onRefreshClickHandler = () => {
         contextReporterDataSet.setPageHandler(0);
         contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(null, sortOrder, firstRow, numRows);
+        fetchDataHandler(null, null, firstRow, numRows);
       };
 
       // const onColumnToggleHandler = (event) =>{
@@ -178,9 +178,8 @@ const DataViewer = withRouter(
           pageSize: nRows
         };
 
-        if (sField !== undefined && sField !== null) {
-          queryString.fields = sField;
-          queryString.asc = sOrder === -1 ? 0 : 1;
+        if (!isUndefined(sField) && sField !== null) {
+          queryString.fields = sField + ':' + sOrder;
         }
 
         const dataPromise = HTTPRequester.get({
