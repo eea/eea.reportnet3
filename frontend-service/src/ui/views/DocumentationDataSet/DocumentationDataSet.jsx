@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext } from 'react';
 
 import * as fileDownload from 'js-file-download';
@@ -147,7 +148,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionWeblink = (rowData, column) => {
     return (
-      <a href={rowData.url} target="_blank">
+      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
         {' '}
         {rowData.url}
       </a>
