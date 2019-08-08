@@ -59,7 +59,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
             render={({ errors, touched, isSubmitting }) => (
               <Form className={styles.createForm}>
                 <div
-                  className={`formField${
+                  className={`${styles.createInuputAndButtonBox} ${
                     !isEmpty(errors.createSnapshotDescriptionInputName) && touched.createSnapshotDescriptionInputName
                       ? ' error'
                       : ''
@@ -69,13 +69,15 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
                     name="createSnapshotDescriptionInputName"
                     placeholder={resources.messages.createSnapshotPlaceholder}
                   />
-                  {errors.createSnapshotDescriptionInputName || touched.createSnapshotDescriptionInputName ? (
-                    <div className="error">{errors.createSnapshotDescriptionInputName}</div>
-                  ) : null}
+                  <div className={styles.createButtonBox}>
+                    <button className="rp-btn primary" type="submit">
+                      <IconComponent icon={primeIcons.icons.plus} />
+                    </button>
+                  </div>
                 </div>
-                <button className="rp-btn primary" type="submit">
-                  <IconComponent icon={primeIcons.icons.plus} />
-                </button>
+                {errors.createSnapshotDescriptionInputName || touched.createSnapshotDescriptionInputName ? (
+                  <div className="error">{errors.createSnapshotDescriptionInputName}</div>
+                ) : null}
               </Form>
             )}
           />
