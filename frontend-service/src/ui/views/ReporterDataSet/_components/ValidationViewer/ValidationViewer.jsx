@@ -86,8 +86,6 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
     setLoading(true);
 
-    //http://localhost:8030/dataset/listValidations/1?asc=true&fields=typeEntity&pageNum=0&pageSize=20
-
     let queryString = {
       dataSetId: dataSetId,
       pageNum: Math.floor(fRow / nRows),
@@ -119,28 +117,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     setFetchedData(data.errors);
   };
 
-  const filterLinkedDataResponse = data => {
-    const dataFiltered = data.records.map(record => {
-      const recordValidations = record.recordValidations;
-      const arrayDataFields = record.fields.map(field => {
-        return {
-          fieldData: { [field.idFieldSchema]: field.value },
-          fieldValidations: field.fieldValidations
-        };
-      });
-      const arrayDataAndValidations = {
-        dataRow: arrayDataFields,
-        recordValidations
-      };
-
-      return arrayDataAndValidations;
-    });
-
-    return dataFiltered;
-  };
-
   const onRowSelectHandler = event => {
-    //http://localhost:8030/dataset/loadTableFromAnyObject/901?dataSetId=1&pageSize=2&type=FIELD
     switch (event.data.typeEntity) {
       case 'FIELD':
       case 'RECORD':
