@@ -11,7 +11,6 @@
   flex-direction: row;
   justify-content: space-between;
   .createButtonBox {
-    margin-left: 7px;
     align-self: center;
   }
 }
@@ -59,10 +58,7 @@
   padding: 0 0.5rem;
 }
 
-.rp-btn.primary {
-  border: 2px solid transparent !important;
-  font-size: 0.9rem !important;
-  margin: 0px !important;
+.createSnapshotButton {
   padding: 0.3rem !important;
-  line-height: 1 !important;
+  font-size: 0.9rem !important;
 }

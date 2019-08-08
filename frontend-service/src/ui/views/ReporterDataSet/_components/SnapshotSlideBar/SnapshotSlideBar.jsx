@@ -71,7 +71,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
                     placeholder={resources.messages.createSnapshotPlaceholder}
                   />
                   <div className={styles.createButtonBox}>
-                    <button className="rp-btn primary" type="submit">
+                    <button className={`${styles.createSnapshotButton} rp-btn primary`} type="submit">
                       <IconComponent icon={primeIcons.icons.plus} />
                     </button>
                   </div>
