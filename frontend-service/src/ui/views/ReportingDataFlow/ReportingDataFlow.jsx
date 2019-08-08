@@ -22,9 +22,6 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const ReportingDataFlow = ({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [redirect, setRedirect] = useState(false);
-  const [redirectTo, setRedirectTo] = useState('');
-  const [splitOptions, setSplitOptions] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,7 +46,7 @@ export const ReportingDataFlow = ({ history, match }) => {
         console.log('error', error);
         return error;
       });
-  }, []);
+  }, [match.params.dataFlowId]);
 
   //Bread Crumbs settings
   useEffect(() => {

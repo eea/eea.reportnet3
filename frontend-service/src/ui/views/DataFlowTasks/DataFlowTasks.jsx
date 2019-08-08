@@ -14,8 +14,6 @@ import { TabMenu } from 'primereact/tabmenu';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-const i18nKey = 'app.components.pages.dataFlowTasks';
-
 export const DataFlowTasks = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
