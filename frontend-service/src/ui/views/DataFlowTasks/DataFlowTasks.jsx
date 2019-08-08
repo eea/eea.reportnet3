@@ -14,13 +14,11 @@ import { TabMenu } from 'primereact/tabmenu';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-const i18nKey = 'app.components.pages.dataFlowTasks';
-
 export const DataFlowTasks = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [tabMenuItems, setTabMenuItems] = useState([
+  const tabMenuItems = [
     {
       label: resources.messages['dataFlowAcceptedPendingTab'],
       className: styles.flow_tab,
@@ -32,7 +30,7 @@ export const DataFlowTasks = ({ match, history }) => {
       disabled: true,
       tabKey: 'completed'
     }
-  ]);
+  ];
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
   const [tabData, setTabData] = useState([]);
   const [loading, setLoading] = useState(true);
