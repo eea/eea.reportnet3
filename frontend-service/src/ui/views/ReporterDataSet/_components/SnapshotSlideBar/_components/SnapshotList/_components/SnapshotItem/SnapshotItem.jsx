@@ -5,12 +5,10 @@ import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotItem.module.scss';
 
 import { IconComponent } from 'ui/views/_components/IconComponent';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 
 export function SnapshotItem({ itemData }) {
   const snapshotContext = useContext(SnapshotContext);
-  const resources = useContext(ResourcesContext);
 
   return (
     <li className={styles.listItem}>

@@ -80,10 +80,10 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
         ) : (
           <>
             {/* <a className={styles.btn} href="#"> */}
-              <IconComponent icon={`${primeIcons.icons.comment}`} />
+            <IconComponent icon={`${primeIcons.icons.comment}`} />
             {/* </a> */}
             {/* <a className={styles.btn} href="http://"> */}
-              <IconComponent icon={`${primeIcons.icons.share}`} />
+            <IconComponent icon={`${primeIcons.icons.share}`} />
             {/* </a> */}
           </>
         )}
