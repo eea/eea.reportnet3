@@ -37,7 +37,7 @@ export const TabsSchema = ({
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
                   urlViewer={urlViewer}
-                  positionIdRecord={positionIdRecord}
+                  positionIdRecord={table.id === activeIndex ? positionIdRecord : -1}
                   idSelectedRow={idSelectedRow}
                 />
               </div>
@@ -55,7 +55,7 @@ export const TabsSchema = ({
   };
 
   return (
-    <TabView activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0} onTabChange={onTabChangeHandler}>
+    <TabView renderActiveOnly={false} activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0} onTabChange={onTabChangeHandler}>
       {tabs}
     </TabView>
   );
