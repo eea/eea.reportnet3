@@ -23,7 +23,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
 
   useEffect(() => {
     const bodySelector = document.querySelector('body');
-    isVisible ? (bodySelector.style.overflowY = 'hidden') : (bodySelector.style.overflowY = 'scroll');
+    isVisible ? (bodySelector.style.overflowY = 'hidden') : (bodySelector.style.overflowY = 'auto');
   }, [isVisible]);
 
   const createSnapshotInputValidationSchema = Yup.object().shape({
