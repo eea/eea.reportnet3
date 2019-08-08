@@ -40,50 +40,48 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
       blockScroll={true}
       position="right"
       className={styles.sidebar}>
-      <ScrollPanel style={{ width: '100%', height: '100%' }} className={styles.scrollPanel}>
-        <div className={styles.content}>
-          <div className={styles.title}>
-            <h3>{resources.messages.createSnapshotTitle}</h3>
-          </div>
-          <div className={`${styles.newContainer} ${styles.section}`}>
-            <Formik
-              initialValues={{ createSnapshot: '' }}
-              validationSchema={createSnapshotInputValidationSchema}
-              onSubmit={snapshotDescriptionInput =>
-                snapshotContext.snapshotDispatch({
-                  type: 'create_snapshot',
-                  payload: {
-                    description: snapshotDescriptionInput.createSnapshotDescriptionInputName
-                  }
-                })
-              }
-              render={({ errors, touched, isSubmitting }) => (
-                <Form className={styles.createForm}>
-                  <div
-                    className={`formField${
-                      !isEmpty(errors.createSnapshotDescriptionInputName) && touched.createSnapshotDescriptionInputName
-                        ? ' error'
-                        : ''
-                    }`}>
-                    <Field
-                      type="text"
-                      name="createSnapshotDescriptionInputName"
-                      placeholder={resources.messages.createSnapshotPlaceholder}
-                    />
-                    {errors.createSnapshotDescriptionInputName || touched.createSnapshotDescriptionInputName ? (
-                      <div className="error">{errors.createSnapshotDescriptionInputName}</div>
-                    ) : null}
-                  </div>
-                  <button className="rp-btn primary" type="submit">
-                    <IconComponent icon={primeIcons.icons.plus} />
-                  </button>
-                </Form>
-              )}
-            />
-          </div>
-          <SnapshotList snapshotListData={snapshotListData} />
+      <div className={styles.content}>
+        <div className={styles.title}>
+          <h3>{resources.messages.createSnapshotTitle}</h3>
         </div>
-      </ScrollPanel>
+        <div className={`${styles.newContainer} ${styles.section}`}>
+          <Formik
+            initialValues={{ createSnapshot: '' }}
+            validationSchema={createSnapshotInputValidationSchema}
+            onSubmit={snapshotDescriptionInput =>
+              snapshotContext.snapshotDispatch({
+                type: 'create_snapshot',
+                payload: {
+                  description: snapshotDescriptionInput.createSnapshotDescriptionInputName
+                }
+              })
+            }
+            render={({ errors, touched, isSubmitting }) => (
+              <Form className={styles.createForm}>
+                <div
+                  className={`formField${
+                    !isEmpty(errors.createSnapshotDescriptionInputName) && touched.createSnapshotDescriptionInputName
+                      ? ' error'
+                      : ''
+                  }`}>
+                  <Field
+                    type="text"
+                    name="createSnapshotDescriptionInputName"
+                    placeholder={resources.messages.createSnapshotPlaceholder}
+                  />
+                  {errors.createSnapshotDescriptionInputName || touched.createSnapshotDescriptionInputName ? (
+                    <div className="error">{errors.createSnapshotDescriptionInputName}</div>
+                  ) : null}
+                </div>
+                <button className="rp-btn primary" type="submit">
+                  <IconComponent icon={primeIcons.icons.plus} />
+                </button>
+              </Form>
+            )}
+          />
+        </div>
+        <SnapshotList snapshotListData={snapshotListData} />
+      </div>
     </Sidebar>
   );
 };

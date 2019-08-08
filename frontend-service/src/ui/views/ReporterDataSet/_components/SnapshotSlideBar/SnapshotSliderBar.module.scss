@@ -29,27 +29,15 @@
   padding: 0.5rem 0;
 }
 .sidebar {
-  padding-right: 0px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-
-:global button.p-sidebar-close.p-link {
-  margin-right: 15px;
-}
-
 .newContainer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
 }
-// .newContainer input {
-//   display: block;
-//   width: 100%;
-//   font-size: 1rem;
-//   padding: 0.25rem;
-//   border: 1px solid var(--grey-75);
-//   margin-bottom: 0;
-// }
 
 .newContainer button {
   font-size: 1.25em;
