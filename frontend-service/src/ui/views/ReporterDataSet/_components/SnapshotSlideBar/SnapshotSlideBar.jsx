@@ -47,14 +47,15 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
           <Formik
             initialValues={{ createSnapshot: '' }}
             validationSchema={snapshotValidationSchema}
-            onSubmit={snapshotDescriptionInput =>
+            onSubmit={values => {
               snapshotContext.snapshotDispatch({
                 type: 'create_snapshot',
                 payload: {
-                  description: snapshotDescriptionInput.createSnapshotDescription
+                  description: values.createSnapshotDescription
                 }
-              })
-            }
+              });
+              values.createSnapshotDescription = '';
+            }}
             render={({ errors, touched, isSubmitting }) => (
               <Form className={styles.createForm}>
                 <div
