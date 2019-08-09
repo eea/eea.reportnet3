@@ -58,7 +58,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
               <Field name="lang" component="select">
                 <option value="">{resources.messages.selectLang}</option>
                 {config.languages.map(language => (
-                  <option key={`lang-${language.code}`} value={language.code}>
+                  <option key={language.code} value={language.code}>
                     {language.name}
                   </option>
                 ))}
