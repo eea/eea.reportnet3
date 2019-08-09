@@ -3,6 +3,10 @@ server:
 spring:
   application:
     name: apiGateway
+  servlet:
+    multipart:
+      max-file-size: ${TOMCAT_MAX_FILE_SIZE:1073741824}
+      max-request-size: ${TOMCAT_MAX_REQUEST_SIZE:1073741824}
 
 zuul:
   sensitiveHeaders: Cookie,Set-Cookie
