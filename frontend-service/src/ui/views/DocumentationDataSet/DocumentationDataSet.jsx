@@ -110,8 +110,6 @@ export const DocumentationDataSet = ({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    console.log('FILE_DATA', fileToDownload);
-    console.log('FILE_NAME', fileName);
     if (!isUndefined(fileToDownload)) {
       fileDownload(fileToDownload, fileName);
     }
