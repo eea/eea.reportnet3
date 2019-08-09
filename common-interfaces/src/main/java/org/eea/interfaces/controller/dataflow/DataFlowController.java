@@ -123,9 +123,7 @@ public interface DataFlowController {
   /**
    * Creates the data flow.
    *
-   * @param description the description
-   * @param nameDataFlow the name data flow
-   * @param deadDateToSend the dead date to send
+   * @param dataFlowVO the data flow VO
    */
   @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
   void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
