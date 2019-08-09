@@ -54,6 +54,7 @@
 		"searchDataFlow": "Search data flows",
 		"typeDataFlowName": "Type a DataFlow name",
 		"subscribeButton": "Subscribe to a data flow",
+		"subscribeThisButton": "Subscribe to current data flow",
 		"subscribeButtonTitle": "Active open data flows",
 		"subscribeDataFlow": "No open data flow to show",
 		"close": "Close",

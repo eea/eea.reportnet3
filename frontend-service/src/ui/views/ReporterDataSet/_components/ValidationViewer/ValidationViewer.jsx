@@ -85,7 +85,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     ];
     let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
     columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
-    columnsArr.push(<Column key="idTableSchema" field="idTableSchema" header="" className={styles.VisibleHeader} />);
+    columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
 
     fetchData('', sortOrder, firstRow, numRows);
@@ -98,7 +98,6 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   }, [visible]);
 
   const onChangePage = event => {
-    console.log('Refetching data ValidationViewer...');
     setNumRows(event.rows);
     setFirstRow(event.first);
     fetchData(sortField, sortOrder, event.first, event.rows);
@@ -111,12 +110,9 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     setLoading(false);
   };
 
-  const onSelectError = async (objectId, entityType) => {
-    const dataSetError = await DataSetService.errorPositionByObjectId(objectId, dataSetId, entityType);
-    contextReporterDataSet.onSetTab(dataSetError.tableSchemaId);
-    contextReporterDataSet.onSetPage(dataSetError.position);
-    contextReporterDataSet.onSetSelectedRowId(dataSetError.recordId);
-    contextReporterDataSet.onValidationsVisible();
+  const onLoadErrorPosition = async (objectId, dataSetId, entityType) => {
+    const errorPosition = await DataSetService.errorPositionByObjectId(objectId, dataSetId, entityType);
+    return errorPosition;
   };
 
   const onSort = event => {
@@ -131,15 +127,20 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     onLoadErrors(fRow, nRows, sField, sOrder);
   };
 
-  const onRowSelect = event => {
+  const onRowSelect = async event => {
     switch (event.data.entityType) {
       case 'FIELD':
       case 'RECORD':
-        onSelectError(event.data.objectId, event.data.entityType);
+        const dataSetError = await onLoadErrorPosition(event.data.objectId, dataSetId, event.data.entityType);
+        contextReporterDataSet.onSelectValidation(
+          event.data.tableSchemaId,
+          dataSetError.position,
+          dataSetError.recordId
+        );
+        contextReporterDataSet.onValidationsVisible();
         break;
       case 'TABLE':
-        contextReporterDataSet.onSetTab(event.data.tableSchemaId);
-        contextReporterDataSet.onSetPage(0);
+        contextReporterDataSet.onSelectValidation(event.data.tableSchemaId, -1, -1);
         contextReporterDataSet.onValidationsVisible();
         break;
       default:

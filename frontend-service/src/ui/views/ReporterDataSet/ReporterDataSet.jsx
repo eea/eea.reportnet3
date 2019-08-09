@@ -30,13 +30,13 @@ export const ReporterDataSet = ({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const [activeIndex, setActiveIndex] = useState();
-  const [buttons, setButtons] = useState([]);
+  const [buttonsList, setButtonsList] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
-  const [recordPositionId, setRecordPositionId] = useState(0);
+  const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRowId, setSelectedRowId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
@@ -132,7 +132,7 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     );
 
-    setButtons([
+    setButtonsList([
       {
         label: resources.messages['export'],
         icon: '1',
@@ -184,7 +184,7 @@ export const ReporterDataSet = ({ match, history }) => {
         icon: '12',
         group: 'right',
         disabled: false,
-        onClick: () => setSnapshotIsVisible(true)
+        onClick: () => onSetVisible(setSnapshotIsVisible, true)
       }
     ]);
   };
@@ -193,10 +193,8 @@ export const ReporterDataSet = ({ match, history }) => {
     fnUseState(visible);
   };
 
-  const onTabChange = idTableSchema => {
-    setActiveIndex(idTableSchema.index);
-    setSelectedRowId(-1);
-    setRecordPositionId(0);
+  const onTabChange = tableSchemaId => {
+    setActiveIndex(tableSchemaId.index);
   };
 
   const onRestoreSnapshot = async () => {
@@ -268,22 +266,20 @@ export const ReporterDataSet = ({ match, history }) => {
           <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
         </div>
         <div className={styles.ButtonsBar}>
-          <ButtonsBar buttonsList={buttons} />
+          <ButtonsBar buttonsList={buttonsList} />
         </div>
         <ReporterDataSetContext.Provider
           value={{
-            onValidationsVisible: null,
-            onSetTab: null,
-            onSetPage: recordPositionId => {
-              setRecordPositionId(recordPositionId);
-            },
-            onSetSelectedRowId: selectedRowId => {
+            validationsVisibleHandler: null,
+            onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+              setActiveIndex(tableSchemaId);
+              setRecordPositionId(posIdRecord);
               setSelectedRowId(selectedRowId);
             }
           }}>
           <TabsSchema
             activeIndex={activeIndex}
-            onTabChange={idTableSchema => onTabChange(idTableSchema)}
+            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
             recordPositionId={recordPositionId}
             selectedRowId={selectedRowId}
             tables={tableSchema}
@@ -305,13 +301,9 @@ export const ReporterDataSet = ({ match, history }) => {
             onValidationsVisible: () => {
               onSetVisible(setValidationsVisible, false);
             },
-            onSetTab: idTableSchema => {
-              setActiveIndex(idTableSchema);
-            },
-            onSetPage: recordPositionId => {
-              setRecordPositionId(recordPositionId);
-            },
-            onSetSelectedRowId: selectedRowId => {
+            onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+              setActiveIndex(tableSchemaId);
+              setRecordPositionId(posIdRecord);
               setSelectedRowId(selectedRowId);
             }
           }}>

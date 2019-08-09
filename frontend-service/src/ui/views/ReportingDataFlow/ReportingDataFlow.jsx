@@ -22,9 +22,6 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const ReportingDataFlow = ({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [redirect, setRedirect] = useState(false);
-  const [redirectTo, setRedirectTo] = useState('');
-  const [splitOptions, setSplitOptions] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,7 +46,7 @@ export const ReportingDataFlow = ({ history, match }) => {
         console.log('error', error);
         return error;
       });
-  }, []);
+  }, [match.params.dataFlowId]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -85,7 +82,11 @@ export const ReportingDataFlow = ({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn navTitle={resources.messages['dataFlow']} dataFlowTitle={dataFlowData.name} search={true} />
+      <DataFlowColumn
+        navTitle={resources.messages['dataFlow']}
+        dataFlowTitle={dataFlowData.name}
+        buttonTitle={resources.messages['subscribeThisButton']}
+      />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <h2 className={styles.title}>
           <IconComponent icon={resources.icons['shoppingCart']} />

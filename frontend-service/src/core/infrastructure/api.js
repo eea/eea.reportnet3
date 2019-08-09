@@ -121,7 +121,7 @@ export const api = {
       queryString: {},
       data: formData
     });
-    return response;
+    return response.status;
   },
   createSnapshotById: async (dataSetId, description) => {
     try {
