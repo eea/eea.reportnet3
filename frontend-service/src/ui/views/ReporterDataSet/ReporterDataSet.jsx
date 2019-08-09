@@ -70,7 +70,6 @@ export const ReporterDataSet = ({ match, history }) => {
 
   useEffect(() => {
     onLoadDataSetSchema();
-    setLoading(false);
   }, [isDataDeleted]);
 
   const onConfirmDelete = async () => {
@@ -190,6 +189,7 @@ export const ReporterDataSet = ({ match, history }) => {
         onClick: () => onSetVisible(setSnapshotIsVisible, true)
       }
     ]);
+    setLoading(false);
   };
 
   const onSetVisible = (fnUseState, visible) => {
@@ -264,7 +264,6 @@ export const ReporterDataSet = ({ match, history }) => {
     return (
       <MainLayout>
         <BreadCrumb model={breadCrumbItems} home={home} />
-
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
@@ -276,9 +275,7 @@ export const ReporterDataSet = ({ match, history }) => {
 
   return layout(
     <div>
-      <div className="titleDiv">
-        <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
-      </div>
+      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
       <div className={styles.ButtonsBar}>
         <ButtonsBar buttonsList={buttonsList} />
       </div>

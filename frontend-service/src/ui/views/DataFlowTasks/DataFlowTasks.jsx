@@ -96,9 +96,7 @@ export const DataFlowTasks = ({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <div className="titleDiv">
-          <BreadCrumb model={breadCrumbItems} home={home} />
-        </div>
+        <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
