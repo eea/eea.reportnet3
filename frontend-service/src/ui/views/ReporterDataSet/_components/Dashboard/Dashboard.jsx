@@ -21,6 +21,9 @@ const Dashboard = withRouter(
       if (refresh) {
         onLoadStatistics();
       }
+      return () => {
+        setDashboardData([]);
+      };
     }, [refresh, dataSetId]);
 
     const onLoadStatistics = async () => {
