@@ -202,8 +202,6 @@ export const ReporterDataSet = ({ match, history }) => {
 
   const onTabChangeHandler = idTableSchema => {
     setActiveIndex(idTableSchema.index);
-    setIdSelectedRow(-1);
-    setPositionIdRecord(-1);
   };
 
   const setSnapshotList = async () => {
