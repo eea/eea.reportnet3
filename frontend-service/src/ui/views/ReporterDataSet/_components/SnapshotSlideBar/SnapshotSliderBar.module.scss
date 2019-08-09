@@ -6,11 +6,11 @@
 .createForm {
   width: 100%;
 }
-.createInuputAndButtonBox {
+.createInputAndButtonWrapper {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  .createButtonBox {
+  .createButtonWrapper {
     align-self: center;
   }
 }
