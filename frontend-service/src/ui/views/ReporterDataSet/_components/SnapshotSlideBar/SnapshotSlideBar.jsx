@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useContext, useEffect } from 'react';
 
 import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotSliderBar.module.scss';
 
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import { Formik, Field, Form } from 'formik';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { isEmpty } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
