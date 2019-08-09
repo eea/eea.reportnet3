@@ -5,13 +5,11 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
-import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
-import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
@@ -45,10 +43,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /** The document repository. */
-  @Autowired
-  private DocumentRepository documentRepository;
-
   /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
@@ -60,10 +54,6 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
-
-  /** The document mapper. */
-  @Autowired
-  private DocumentMapper documentMapper;
 
   /**
    * The Constant LOG.

@@ -95,7 +95,7 @@ public interface DataflowService {
   /**
    * Creates the data flow.
    *
-   * @param dataflow the dataflow
+   * @param dataflowVO the dataflow VO
    */
   void createDataFlow(DataFlowVO dataflowVO);
 
