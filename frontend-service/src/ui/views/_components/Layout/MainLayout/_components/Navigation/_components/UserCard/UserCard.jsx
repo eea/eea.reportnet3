@@ -1,8 +1,10 @@
 import React, { useContext } from 'react';
+
 import styles from './UserCard.module.css';
+
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const UserCard = () => {
+const UserCard = React.memo(() => {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -19,6 +21,6 @@ const UserCard = () => {
             </div> */}
     </div>
   );
-};
+});
 
-export default React.memo(UserCard);
+export { UserCard };

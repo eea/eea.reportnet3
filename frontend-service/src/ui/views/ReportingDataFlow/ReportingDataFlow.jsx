@@ -37,7 +37,7 @@ export const ReportingDataFlow = ({ history, match }) => {
     HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_DataflowById.json'
-        : `${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`,
+        : `${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`,
       queryString: {}
     })
       .then(response => {

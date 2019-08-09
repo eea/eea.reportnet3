@@ -2,6 +2,48 @@ import { api } from 'core/infrastructure/api';
 import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
 import { DataSet } from 'core/domain/model/DataSet/DataSet';
 import { DataSetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
+import { DataSetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
+import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
+
+const dataSetSchemaById = async dataFlowId => {
+  const dataSetSchemaDTO = await api.dataSetSchemaById(dataFlowId);
+
+  const dataSet = new DataSet();
+  dataSet.dataSetSchemaId = dataSetSchemaDTO.idDatasetSchema;
+  dataSet.dataSetSchemaName = dataSetSchemaDTO.nameDataSetSchema;
+
+  const tables = dataSetSchemaDTO.tableSchemas.map(dataSetTableDTO => {
+    const records = [dataSetTableDTO.recordSchema].map(dataSetRecordDTO => {
+      const fields = dataSetRecordDTO.fieldSchema.map(dataSetFieldDTO => {
+        return new DataSetTableField(
+          dataSetFieldDTO.id,
+          dataSetFieldDTO.idRecord,
+          dataSetFieldDTO.name,
+          dataSetFieldDTO.type
+        );
+      });
+      return new DataSetTableRecord(dataSetRecordDTO.idRecordSchema, fields);
+    });
+    return new DataSetTable(
+      null,
+      dataSetTableDTO.idTableSchema,
+      dataSetTableDTO.nameTableSchema,
+      null,
+      null,
+      null,
+      records
+    );
+  });
+
+  dataSet.tables = tables;
+
+  return dataSet;
+};
+
+const deleteDataById = async dataSetId => {
+  const dataDeleted = await api.deleteDataById(dataSetId);
+  return dataDeleted;
+};
 
 const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
   const dataSetErrorsDTO = await api.dataSetErrorsById(dataSetId, pageNum, pageSize, sortField, asc);
@@ -82,6 +124,11 @@ const errorStatisticsById = async dataSetId => {
   return dataSet;
 };
 
+const validateDataById = async dataSetId => {
+  const dataValidation = await api.validateDataById(dataSetId);
+  return dataValidation;
+};
+
 const getPercentage = valArr => {
   let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
   return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
@@ -94,7 +141,10 @@ const transposeMatrix = matrix => {
 };
 
 export const ApiDataSetRepository = {
+  dataSetSchemaById,
+  deleteDataById,
   errorsById,
   errorPositionByObjectId,
-  errorStatisticsById
+  errorStatisticsById,
+  validateDataById
 };

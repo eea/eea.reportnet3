@@ -23,8 +23,8 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   const [firstRow, setFirstRow] = useState(0);
   const [loading, setLoading] = useState(false);
   const [numRows, setNumRows] = useState(10);
-  const [sortField, setSortField] = useState();
-  const [sortOrder, setSortOrder] = useState();
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   const [defaultButtonsList] = useState([
     {
@@ -60,7 +60,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
       icon: '11',
       group: 'right',
       disabled: false,
-      onClick: () => fetchData(null, sortOrder, firstRow, numRows)
+      onClick: () => fetchData('', sortOrder, firstRow, numRows)
     }
   ]);
 
@@ -84,16 +84,16 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
       }
     ];
     let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
-    columnsArr.push(<Column key="idRecord" field="idRecord" header="" className={styles.VisibleHeader} />);
+    columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
     columnsArr.push(<Column key="idTableSchema" field="idTableSchema" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
 
-    fetchData(null, sortOrder, firstRow, numRows);
+    fetchData('', sortOrder, firstRow, numRows);
   }, []);
 
   useEffect(() => {
     if (visible) {
-      fetchData(null, sortOrder, firstRow, numRows);
+      fetchData('', sortOrder, firstRow, numRows);
     }
   }, [visible]);
 
@@ -115,7 +115,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     const dataSetError = await DataSetService.errorPositionByObjectId(objectId, dataSetId, entityType);
     contextReporterDataSet.onSetTab(dataSetError.tableSchemaId);
     contextReporterDataSet.onSetPage(dataSetError.position);
-    contextReporterDataSet.onSetSelectedRowId(dataSetError.idRecord);
+    contextReporterDataSet.onSetSelectedRowId(dataSetError.recordId);
     contextReporterDataSet.onValidationsVisible();
   };
 
@@ -135,7 +135,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     switch (event.data.entityType) {
       case 'FIELD':
       case 'RECORD':
-        onSelectError();
+        onSelectError(event.data.objectId, event.data.entityType);
         break;
       case 'TABLE':
         contextReporterDataSet.onSetTab(event.data.tableSchemaId);

@@ -13,12 +13,12 @@ import { SnapshotContext } from '../../ReporterDataSet';
 import { SnapshotList } from './_components/SnapshotList';
 import * as Yup from 'yup';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList, snapshotListData }) => {
+const SnapshotSlideBar = ({ isVisible, setIsVisible, onLoadSnapshotList, snapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
 
   useEffect(() => {
-    setSnapshotList();
+    onLoadSnapshotList();
   }, []);
 
   const createSnapshotInputValidationSchema = Yup.object().shape({

@@ -1,44 +1,47 @@
 {
-	"loadDatasetsByDataflowID": {
-		"url": "/dataflow/"
-	},
-	"loadDataFlowTaskPendingAcceptedAPI": {
-		"url": "/dataflow/pendingaccepted/"
+	"createSnapshot": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:description}"
 	},
 	"dataSchemaAPI": {
 		"url": "/dataschema/dataflow/{:dataFlowId}"
 	},
-	"loadDatasetDataAPI": {
-		"url": "/dataset/{:dataSetId}/loadDatasetData/"
-	},
-	"loadDataTableAPI": {
-		"url": "/dataset/{:dataSetId}/loadTableData/"
-	},
-	"loadStatisticsAPI": {
-		"url": "/dataset/loadStatistics/{:dataSetId}"
-	},
 	"dataviewerAPI": {
 		"url": "/dataset/TableValueDataset/"
+	},	
+	"deleteSnapshotByID": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
 	},
-	"validationViewerAPI": {
-		"url": "/dataset/findPositionFromAnyObject/{:objectId}?dataSetId={:dataSetId}&type={:entityType}"
+	"deleteImportData": {
+		"url": "/dataset/{:dataSetId}/deleteImportData"
+	},		
+	"downloadDocumentByIdAPI": {
+		"url": "/document/{:documentId}"
+	},
+	"listValidationsAPI": {
+		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
+	},	
+	"loadDataFlowTaskPendingAcceptedAPI": {
+		"url": "/dataflow/pendingaccepted/"
+	},
+	"loadDataSetsByDataflowID": {
+		"url": "/dataflow/"
+	},		
+	"loadDataTableAPI": {
+		"url": "/dataset/{:dataSetId}/loadTableData/"
 	},
 	"loadSnapshotsListAPI": {
 		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"
 	},
-	"deleteSnapshotByID": {
-		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
-	},
-	"createSnapshot": {
-		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:snapshotDescription}"
-	},
-	"downloadDocumentByIdAPI": {
-		"url": "/document/{:documentId}"
+	"loadStatisticsAPI": {
+		"url": "/dataset/loadStatistics/{:dataSetId}"
 	},
 	"uploadDocumentAPI": {
 		"url": "/document/upload/{:dataFlowId}?description={:description}&language={:language}"
 	},
-	"listValidationsAPI": {
-		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
+	"validationViewerAPI": {
+		"url": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:dataSetId}&type={:entityType}"
+	},
+	"validateDataSetAPI":{
+		"url": "/validation/dataset/{:dataSetId}"
 	}
 }

@@ -33,6 +33,34 @@ export const api = {
     });
     return response.data;
   },
+  dataSetSchemaById: async dataFlowId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/datosDataSchema2.json'
+        : getUrl(config.dataSchemaAPI.url, {
+            dataFlowId: dataFlowId
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  deleteDataById: async dataSetId => {
+    try {
+      const response = await HTTPRequester.delete({
+        url: window.env.REACT_APP_JSON
+          ? `/dataset/${dataSetId}/deleteImportData`
+          : getUrl(config.deleteImportData.url, {
+              dataSetId: dataSetId
+            }),
+        queryString: {}
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.log(`Error deleting dataSet data: ${error}`);
+      return false;
+    }
+  },
   errorPositionByObjectId: async (objectId, dataSetId, entityType) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -46,6 +74,23 @@ export const api = {
     });
     return response.data;
   },
+  validateDataById: async dataSetId => {
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/jsons/list-of-errors.json`
+          : getUrl(config.validateDataSetAPI.url, {
+              dataSetId: dataSetId
+            }),
+        queryString: {}
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.log(`Error calling dataSet data validation: ${error}`);
+      return false;
+    }
+  },
   documents: async url => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON ? '/jsons/list-of-documents.json' : url,
@@ -53,7 +98,6 @@ export const api = {
     });
     return response.data.documents;
   },
-
   downloadDocumentById: async documentId => {
     const response = await HTTPRequester.download({
       url: window.env.REACT_APP_JSON
@@ -65,7 +109,6 @@ export const api = {
     });
     return response.data;
   },
-
   uploadDocument: async (dataFlowId, description, language, file) => {
     const formData = new FormData();
     formData.append('file', file, file.name);
@@ -80,10 +123,60 @@ export const api = {
     });
     return response;
   },
+  createSnapshotById: async (dataSetId, description) => {
+    try {
+      const response = await HTTPRequester.post({
+        url: getUrl(config.createSnapshot.url, {
+          dataSetId,
+          description: description
+        }),
+        data: {
+          description: description
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.log(`Error creating the snapshot: ${error}`);
+      return false;
+    }
+  },
+  deleteSnapshotById: async (dataSetId, snapshotId) => {
+    try {
+      const response = await HTTPRequester.delete({
+        url: getUrl(config.deleteSnapshotByID.url, {
+          dataSetId,
+          snapshotId: snapshotId
+        })
+      });
 
-  snapshots: async url => {
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.log(`Error deleting snapshot data: ${error}`);
+      return false;
+    }
+  },
+  restoreSnapshotById: async (dataFlowId, dataSetId, snapshotId) => {
+    try {
+      const response = await HTTPRequester.update({
+        url: getUrl(config.restoreSnaphost.url, {
+          dataFlowId,
+          dataSetId,
+          snapshotId: snapshotId
+        })
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.log(`Error restoring the snapshot: ${error}`);
+      return false;
+    }
+  },
+  snapshots: async dataSetId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/snapshots.json' : url,
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/snapshots.json'
+        : getUrl(config.loadSnapshotsListAPI.url, {
+            dataSetId: dataSetId
+          }),
       queryString: {}
     });
     return response.data;

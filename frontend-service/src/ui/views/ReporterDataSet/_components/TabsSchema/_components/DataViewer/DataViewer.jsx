@@ -22,10 +22,10 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 const DataViewer = withRouter(
   React.memo(
     ({
-      positionIdRecord,
+      recordPositionId,
       tableSchemaColumns,
       tableId,
-      idSelectedRow,
+      selectedRowId,
       urlViewer,
       buttonsList = undefined,
       tableName,
@@ -40,7 +40,7 @@ const DataViewer = withRouter(
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
       const [firstRow, setFirstRow] = useState(
-        positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
+        recordPositionId && recordPositionId !== null ? Math.floor(recordPositionId / numRows) * numRows : 0
       );
       const [sortOrder, setSortOrder] = useState();
       const [sortField, setSortField] = useState();
@@ -59,8 +59,8 @@ const DataViewer = withRouter(
       }, [isDataDeleted]);
 
       useEffect(() => {
-        if (firstRow !== positionIdRecord) {
-          setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
+        if (firstRow !== recordPositionId) {
+          setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
         }
 
         let colOpt = [];
@@ -69,14 +69,14 @@ const DataViewer = withRouter(
         }
         setColOptions(colOpt);
 
-        if (positionIdRecord !== 0 || fetchedData.length === 0) {
-          fetchDataHandler(null, sortOrder, Math.floor(positionIdRecord / numRows) * numRows, numRows);
+        if (recordPositionId !== 0 || fetchedData.length === 0) {
+          fetchDataHandler(null, sortOrder, Math.floor(recordPositionId / numRows) * numRows, numRows);
         }
 
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         setCols(inmTableSchemaColumns);
-      }, [positionIdRecord]);
+      }, [recordPositionId]);
 
       useEffect(() => {
         // let visibilityIcon = (<div className="TableDiv">
@@ -398,7 +398,7 @@ const DataViewer = withRouter(
       const rowClassName = rowData => {
         let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
 
-        return { 'p-highlight': id === idSelectedRow };
+        return { 'p-highlight': id === selectedRowId };
       };
 
       let totalCount = <span>Total: {totalRecords} rows</span>;

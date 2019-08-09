@@ -41,8 +41,8 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   const setDocumentsAndWebLinks = async () => {
-    setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
-    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
+    setWebLinks(await WebLinkService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
+    setDocuments(await DocumentService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
   };
 
   useEffect(() => {
@@ -103,8 +103,6 @@ export const DocumentationDataSet = ({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    console.log('FILE_DATA', fileToDownload);
-    console.log('FILE_NAME', fileName);
     if (!isUndefined(fileToDownload)) {
       fileDownload(fileToDownload, fileName);
     }

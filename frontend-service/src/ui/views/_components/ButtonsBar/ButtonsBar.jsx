@@ -7,30 +7,30 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
   const leftButtons = [];
   const rightButtons = [];
 
-  const buttons = buttonsList.forEach((b, i) => {
-    b.group === 'left'
+  const buttons = buttonsList.forEach((button, i) => {
+    button.group === 'left'
       ? leftButtons.push(
           <Button
-            label={b.label}
-            title={b.title}
-            icon={b.icon}
+            label={button.label}
+            title={button.title}
+            icon={button.icon}
             key={i}
-            onClick={b.onClick}
-            disabled={b.disabled}
-            ownButtonClasses={b.ownButtonClasses}
-            iconClasses={b.iconClasses}
+            onClick={button.onClick}
+            disabled={button.disabled}
+            ownButtonClasses={button.ownButtonClasses}
+            iconClasses={button.iconClasses}
           />
         )
       : rightButtons.push(
           <Button
-            label={b.label}
-            title={b.title}
-            icon={b.icon}
+            label={button.label}
+            title={button.title}
+            icon={button.icon}
             key={i}
-            onClick={b.onClick}
-            disabled={b.disabled}
-            ownButtonClasses={b.ownButtonClasses}
-            iconClasses={b.iconClasses}
+            onClick={button.onClick}
+            disabled={button.disabled}
+            ownButtonClasses={button.ownButtonClasses}
+            iconClasses={button.iconClasses}
           />
         );
   });

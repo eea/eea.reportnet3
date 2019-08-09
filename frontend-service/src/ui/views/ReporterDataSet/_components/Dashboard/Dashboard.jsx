@@ -23,7 +23,7 @@ const Dashboard = withRouter(
       }
     }, [refresh]);
 
-    const onLoadStatistics = async dataSetId => {
+    const onLoadStatistics = async () => {
       const dataSet = await DataSetService.errorStatisticsById(dataSetId);
       const tableStatisticValues = dataSet.tableStatisticValues;
       const tableNames = dataSet.tables.map(table => table.tableSchemaName);

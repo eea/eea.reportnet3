@@ -12,8 +12,8 @@ export const TabsSchema = ({
   tableSchemaColumns,
   buttonsList = undefined,
   urlViewer,
-  positionIdRecord,
-  idSelectedRow,
+  recordPositionId,
+  selectedRowId,
   activeIndex,
   onTabChangeHandler
 }) => {
@@ -37,8 +37,8 @@ export const TabsSchema = ({
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
                   urlViewer={urlViewer}
-                  positionIdRecord={positionIdRecord}
-                  idSelectedRow={idSelectedRow}
+                  recordPositionId={recordPositionId}
+                  selectedRowId={selectedRowId}
                 />
               </div>
             </TabPanel>

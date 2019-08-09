@@ -5,9 +5,11 @@ export class DataSetTable {
     tableSchemaName,
     recordsWithoutErrorsPercentage,
     recordsWithErrorsPercentage,
-    recordsWithWarningsPercentage
+    recordsWithWarningsPercentage,
+    records
   ) {
     this.hasErrors = hasErrors;
+    this.records = records;
     this.recordsWithoutErrorsPercentage = recordsWithoutErrorsPercentage;
     this.recordsWithErrorsPercentage = recordsWithErrorsPercentage;
     this.recordsWithWarningsPercentage = recordsWithWarningsPercentage;
