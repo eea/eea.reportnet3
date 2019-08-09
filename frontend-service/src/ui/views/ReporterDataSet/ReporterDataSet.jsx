@@ -109,13 +109,13 @@ export const ReporterDataSet = ({ match, history }) => {
 
     setDatasetTitle(dataSetSchema.dataSetSchemaName);
     setTableSchema(
-      dataSetSchema.tables.map((field, i) => {
+      dataSetSchema.tables.map(tableSchema => {
         return {
-          id: field['tableSchemaId'],
-          name: field['tableSchemaName'],
+          id: tableSchema['tableSchemaId'],
+          name: tableSchema['tableSchemaName'],
           hasErrors: {
-            ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === field['tableSchemaId'])[0]
-          }.tableErrors
+            ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+          }.hasErrors
         };
       })
     );

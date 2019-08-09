@@ -26,30 +26,29 @@ import { WebLinkService } from 'core/services/WebLink';
 export const DocumentationDataSet = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
-  const [documents, setDocuments] = useState([]);
-  const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [fileName, setFileName] = useState('');
-  const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [buttons, setButtons] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [fileName, setFileName] = useState('');
+  const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [webLinks, setWebLinks] = useState([]);
 
   const home = {
     icon: resources.icons['home'],
     command: () => history.push('/')
   };
 
-  const setDocumentsAndWebLinks = async () => {
-    setWebLinks(await WebLinkService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
-    setDocuments(await DocumentService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
-  };
+  useEffect(() => {
+    onLoadDocumentsAndWebLinks();
+  }, []);
 
   useEffect(() => {
-    setIsLoading(true);
-    setDocumentsAndWebLinks();
-    setIsLoading(false);
-  }, []);
+    if (!isUndefined(fileToDownload)) {
+      fileDownload(fileToDownload, fileName);
+    }
+  }, [fileToDownload]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -103,32 +102,27 @@ export const DocumentationDataSet = ({ match, history }) => {
         icon: '11',
         group: 'right',
         disabled: false,
-        clickHandler: () => onRefreshDocumentAndWebLinks()
+        clickHandler: () => onLoadDocumentsAndWebLinks()
       }
     ]);
     //#end region Button initialization
   }, []);
 
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      fileDownload(fileToDownload, fileName);
-    }
-  }, [fileToDownload]);
-
-  const onRefreshDocumentAndWebLinks = () => {
-    setIsLoading(true);
-    setDocumentsAndWebLinks();
-    setIsLoading(false);
+  const onDownloadDocument = async rowData => {
+    setFileName(createFileName(rowData.title));
+    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
   };
 
   const onHide = () => {
     setIsUploadDialogVisible(false);
-    setDocumentsAndWebLinks();
+    onLoadDocumentsAndWebLinks();
   };
 
-  const downloadDocument = async rowData => {
-    setFileName(createFileName(rowData.title));
-    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+  const onLoadDocumentsAndWebLinks = async () => {
+    setIsLoading(true);
+    setWebLinks(await WebLinkService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
+    setDocuments(await DocumentService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
+    setIsLoading(false);
   };
 
   const createFileName = title => {
@@ -137,7 +131,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionTemplate = (rowData, column) => {
     return (
-      <span className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
+      <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
         <IconComponent icon={config.icons.archive} />
       </span>

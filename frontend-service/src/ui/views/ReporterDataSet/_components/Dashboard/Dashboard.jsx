@@ -6,6 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './Dashboard.module.css';
 
 import { Chart } from 'primereact/chart';
+import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 import { DataSetService } from 'core/services/DataSet';
@@ -15,6 +16,8 @@ const Dashboard = withRouter(
     const [dashboardData, setDashboardData] = useState({});
     const [dashboardOptions, setDashboardOptions] = useState({});
     const [dashboardTitle, setDashboardTitle] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
     const resources = useContext(ResourcesContext);
 
     useEffect(() => {
@@ -27,6 +30,7 @@ const Dashboard = withRouter(
     }, [refresh, dataSetId]);
 
     const onLoadStatistics = async () => {
+      setIsLoading(true);
       const dataSet = await DataSetService.errorStatisticsById(dataSetId);
       const tableStatisticValues = dataSet.tableStatisticValues;
       const tableNames = dataSet.tables.map(table => table.tableSchemaName);
@@ -92,22 +96,31 @@ const Dashboard = withRouter(
           ]
         }
       });
+      setIsLoading(false);
     };
 
-    return (
-      <React.Fragment>
-        {!isUndefined(dashboardData.datasets) &&
-        dashboardData.datasets.length > 0 &&
-        ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0) ? (
-          <React.Fragment>
-            <h1>{dashboardTitle}</h1>
-            <Chart type="bar" data={dashboardData} options={dashboardOptions} />
-          </React.Fragment>
-        ) : (
-          <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>
-        )}
-      </React.Fragment>
-    );
+    const renderDashboard = () => {
+      if (isLoading) {
+        return <ProgressSpinner />;
+      } else {
+        if (
+          !isUndefined(dashboardData.datasets) &&
+          dashboardData.datasets.length > 0 &&
+          ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
+        ) {
+          return (
+            <React.Fragment>
+              <h1>{dashboardTitle}</h1>
+              <Chart type="bar" data={dashboardData} options={dashboardOptions} />
+            </React.Fragment>
+          );
+        } else {
+          return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
+        }
+      }
+    };
+
+    return <React.Fragment>{renderDashboard()}</React.Fragment>;
   })
 );
 
