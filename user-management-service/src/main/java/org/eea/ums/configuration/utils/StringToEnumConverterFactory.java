@@ -9,6 +9,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.stereotype.Component;
 
+/**
+ * The type String to enum converter factory.
+ */
 @Component
 public class StringToEnumConverterFactory
     implements ConverterFactory<String, Enum> {
@@ -20,6 +23,11 @@ public class StringToEnumConverterFactory
 
     private Class<T> enumType;
 
+    /**
+     * Instantiates a new String to enum converter.
+     *
+     * @param enumType the enum type
+     */
     public StringToEnumConverter(Class<T> enumType) {
       this.enumType = enumType;
     }

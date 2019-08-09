@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The type User management controller.
+ */
 @RestController
 @RequestMapping(value = "/user")
 public class UserManagementControllerImpl implements UserManagementController {
