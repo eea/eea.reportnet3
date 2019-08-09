@@ -4,13 +4,17 @@
   margin-right: 15px !important;
 }
 .createForm {
-  display: flex;
-  justify-content: space-between;
   width: 100%;
 }
-.inputnAndErrorBox {
-  display: block;
+.createInputAndButtonWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  .createButtonWrapper {
+    align-self: center;
+  }
 }
+
 .errors {
   color: var(--errors);
   padding-bottom: 0;
@@ -29,27 +33,15 @@
   padding: 0.5rem 0;
 }
 .sidebar {
-  padding-right: 0px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-
-:global button.p-sidebar-close.p-link {
-  margin-right: 15px;
-}
-
 .newContainer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
 }
-// .newContainer input {
-//   display: block;
-//   width: 100%;
-//   font-size: 1rem;
-//   padding: 0.25rem;
-//   border: 1px solid var(--grey-75);
-//   margin-bottom: 0;
-// }
 
 .newContainer button {
   font-size: 1.25em;
@@ -64,4 +56,9 @@
 
 .listContainer ul {
   padding: 0 0.5rem;
+}
+
+.createSnapshotButton {
+  padding: 0.3rem !important;
+  font-size: 0.9rem !important;
 }
