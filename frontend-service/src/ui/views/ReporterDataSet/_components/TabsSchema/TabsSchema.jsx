@@ -8,14 +8,14 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { TabView, TabPanel } from 'primereact/tabview';
 
 export const TabsSchema = ({
-  tables,
-  tableSchemaColumns,
+  activeIndex,
   buttonsList = undefined,
-  urlViewer,
+  onTabChangeHandler,
   recordPositionId,
   selectedRowId,
-  activeIndex,
-  onTabChangeHandler
+  tables,
+  tableSchemaColumns,
+  urlViewer
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -29,16 +29,16 @@ export const TabsSchema = ({
               rightIcon={table.hasErrors ? resources.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
                 <DataViewer
+                  buttonsList={buttonsList}
                   key={table.id}
+                  recordPositionId={recordPositionId}
+                  selectedRowId={selectedRowId}
                   tableId={table.id}
                   tableName={table.name}
-                  buttonsList={buttonsList}
                   tableSchemaColumns={
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
                   urlViewer={urlViewer}
-                  recordPositionId={recordPositionId}
-                  selectedRowId={selectedRowId}
                 />
               </div>
             </TabPanel>

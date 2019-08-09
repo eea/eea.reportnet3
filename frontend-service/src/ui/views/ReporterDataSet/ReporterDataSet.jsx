@@ -19,13 +19,8 @@ import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { ValidationViewer } from './_components/ValidationViewer';
 
-import { SnapshotService } from 'core/services/Snapshot';
-
-import { getUrl } from 'core/infrastructure/getUrl';
-
 import { DataSetService } from 'core/services/DataSet';
-
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+import { SnapshotService } from 'core/services/Snapshot';
 
 export const SnapshotContext = React.createContext();
 
@@ -68,6 +63,7 @@ export const ReporterDataSet = ({ match, history }) => {
       },
       { label: resources.messages['viewData'] }
     ]);
+    onLoadSnapshotList();
   }, []);
 
   useEffect(() => {
@@ -163,7 +159,6 @@ export const ReporterDataSet = ({ match, history }) => {
         icon: '10',
         group: 'right',
         disabled: false,
-        //!validationError,
         onClick: () => onSetVisible(setValidateDialogVisible, true),
         ownButtonClasses: null,
         iconClasses: null
@@ -178,7 +173,6 @@ export const ReporterDataSet = ({ match, history }) => {
         iconClasses: dataSetStatistics.datasetErrors ? 'warning' : ''
       },
       {
-        //title: "Dashboards",
         label: resources.messages['dashboards'],
         icon: '5',
         group: 'right',
@@ -260,7 +254,6 @@ export const ReporterDataSet = ({ match, history }) => {
         };
       default:
         return state;
-      // break;
     }
   };
 
@@ -360,7 +353,6 @@ export const ReporterDataSet = ({ match, history }) => {
           }}>
           <SnapshotSlideBar
             isVisible={snapshotIsVisible}
-            onLoadSnapshotList={onLoadSnapshotList}
             setIsVisible={setSnapshotIsVisible}
             setSnapshotDialogVisible={setSnapshotDialogVisible}
             snapshotListData={snapshotListData}

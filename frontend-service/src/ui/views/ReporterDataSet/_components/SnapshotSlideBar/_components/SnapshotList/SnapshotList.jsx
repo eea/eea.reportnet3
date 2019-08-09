@@ -8,7 +8,6 @@ export function SnapshotList({ snapshotListData }) {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
-        {/* TODO ADD Scrolling  */}
         {snapshotListData.map(item => (
           <SnapshotItem itemData={item} key={item.id} />
         ))}

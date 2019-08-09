@@ -13,13 +13,9 @@ import { SnapshotContext } from '../../ReporterDataSet';
 import { SnapshotList } from './_components/SnapshotList';
 import * as Yup from 'yup';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, onLoadSnapshotList, snapshotListData }) => {
+const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
-
-  useEffect(() => {
-    onLoadSnapshotList();
-  }, []);
 
   const createSnapshotInputValidationSchema = Yup.object().shape({
     createSnapshotDescriptionInputName: Yup.string()
@@ -30,11 +26,11 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, onLoadSnapshotList, snapsho
 
   return (
     <Sidebar
-      visible={isVisible}
-      onHide={e => setIsVisible()}
       blockScroll={true}
+      className={styles.sidebar}
+      onHide={e => setIsVisible()}
       position="right"
-      className={styles.sidebar}>
+      visible={isVisible}>
       <ScrollPanel style={{ width: '100%', height: '100%' }} className={styles.scrollPanel}>
         <div className={styles.content}>
           <div className={styles.title}>
@@ -43,7 +39,6 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, onLoadSnapshotList, snapsho
           <div className={`${styles.newContainer} ${styles.section}`}>
             <Formik
               initialValues={{ createSnapshot: '' }}
-              validationSchema={createSnapshotInputValidationSchema}
               onSubmit={snapshotDescriptionInput =>
                 snapshotContext.snapshotDispatch({
                   type: 'create_snapshot',
@@ -74,6 +69,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, onLoadSnapshotList, snapsho
                   </button>
                 </Form>
               )}
+              validationSchema={createSnapshotInputValidationSchema}
             />
           </div>
           <SnapshotList snapshotListData={snapshotListData} />
