@@ -39,7 +39,7 @@ export const HTTPRequester = (function() {
     },
     postWithFiles: options => {
       return axios.post(`${baseURL}${options.url}`, options.data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': undefined }
       });
     }
   };
