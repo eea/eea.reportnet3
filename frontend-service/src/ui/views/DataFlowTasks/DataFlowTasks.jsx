@@ -18,7 +18,7 @@ export const DataFlowTasks = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [tabMenuItems, setTabMenuItems] = useState([
+  const [tabMenuItems] = useState([
     {
       label: resources.messages['dataFlowAcceptedPendingTab'],
       className: styles.flow_tab,
