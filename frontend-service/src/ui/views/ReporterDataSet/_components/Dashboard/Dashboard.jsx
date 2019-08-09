@@ -12,9 +12,9 @@ import { DataSetService } from 'core/services/DataSet';
 
 const Dashboard = withRouter(
   React.memo(({ refresh, match: { params: { dataSetId } } }) => {
-    const [dashBoardData, setDashBoardData] = useState({});
-    const [dashBoardOptions, setDashBoardOptions] = useState({});
-    const [dashBoardTitle, setDashBoardTitle] = useState('');
+    const [dashboardData, setDashboardData] = useState({});
+    const [dashboardOptions, setDashboardOptions] = useState({});
+    const [dashboardTitle, setDashboardTitle] = useState('');
     const resources = useContext(ResourcesContext);
 
     useEffect(() => {
@@ -28,8 +28,8 @@ const Dashboard = withRouter(
       const tableStatisticValues = dataSet.tableStatisticValues;
       const tableNames = dataSet.tables.map(table => table.tableSchemaName);
 
-      setDashBoardTitle(dataSet.dataSetSchemaName);
-      setDashBoardData({
+      setDashboardTitle(dataSet.dataSetSchemaName);
+      setDashboardData({
         labels: tableNames,
         datasets: [
           {
@@ -53,7 +53,7 @@ const Dashboard = withRouter(
         ]
       });
 
-      setDashBoardOptions({
+      setDashboardOptions({
         tooltips: {
           mode: 'index',
           callbacks: {
@@ -93,12 +93,12 @@ const Dashboard = withRouter(
 
     return (
       <React.Fragment>
-        {!isUndefined(dashBoardData.datasets) &&
-        dashBoardData.datasets.length > 0 &&
-        ![].concat.apply([], dashBoardData.datasets[0].totalData).every(t => t === 0) ? (
+        {!isUndefined(dashboardData.datasets) &&
+        dashboardData.datasets.length > 0 &&
+        ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0) ? (
           <React.Fragment>
-            <h1>{dashBoardTitle}</h1>
-            <Chart type="bar" data={dashBoardData} options={dashBoardOptions} />
+            <h1>{dashboardTitle}</h1>
+            <Chart type="bar" data={dashboardData} options={dashboardOptions} />
           </React.Fragment>
         ) : (
           <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>

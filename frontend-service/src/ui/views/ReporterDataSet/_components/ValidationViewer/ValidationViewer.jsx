@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, Suspense, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import isUndefined from 'lodash/isUndefined';
@@ -152,9 +152,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
 
   return (
     <div>
-      <Suspense fallback={<div>Loading...</div>}>
-        <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} />
-      </Suspense>
+      <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} />
       <div>
         <DataTable
           autoLayout={true}
