@@ -14,7 +14,6 @@ import { CustomIconTooltip } from './_components/CustomIconTooltip';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { Growl } from 'primereact/growl';
-import { ReporterDataSetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
@@ -33,17 +32,15 @@ const DataViewer = withRouter(
         params: { dataSetId }
       }
     }) => {
-      const contextReporterDataSet = useContext(ReporterDataSetContext);
+      //const contextReporterDataSet = useContext(ReporterDataSetContext);
       const [importDialogVisible, setImportDialogVisible] = useState(false);
       const [totalRecords, setTotalRecords] = useState(0);
       const [fetchedData, setFetchedData] = useState([]);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
-      const [firstRow, setFirstRow] = useState(
-        positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
-      );
-      const [sortOrder, setSortOrder] = useState();
-      const [sortField, setSortField] = useState();
+      const [firstRow, setFirstRow] = useState(0);
+      const [sortOrder, setSortOrder] = useState(undefined);
+      const [sortField, setSortField] = useState(undefined);
       const [columns, setColumns] = useState([]);
       const [cols, setCols] = useState(tableSchemaColumns);
       const [header] = useState();
@@ -58,24 +55,29 @@ const DataViewer = withRouter(
         setFetchedData([]);
       }, [isDataDeleted]);
 
-      useEffect(() => {
-        if (firstRow !== positionIdRecord) {
-          setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
-        }
-
+      useEffect(() => {        
         let colOpt = [];
         for (let col of cols) {
           colOpt.push({ label: col.header, value: col });
         }
         setColOptions(colOpt);
 
-        if (positionIdRecord !== 0 || fetchedData.length === 0) {
-          fetchDataHandler(null, sortOrder, Math.floor(positionIdRecord / numRows) * numRows, numRows);
-        }
-
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         setCols(inmTableSchemaColumns);
+
+        fetchDataHandler(undefined, undefined, 0, numRows);
+      }, [])
+
+      useEffect(() => {
+        if (isUndefined(positionIdRecord) || positionIdRecord === -1) {
+          return;
+        }
+
+        setFirstRow(Math.floor(positionIdRecord / numRows) * numRows);
+        setSortField(undefined);
+        setSortOrder(undefined);
+        fetchDataHandler(undefined, undefined, Math.floor(positionIdRecord / numRows) * numRows, numRows);
       }, [positionIdRecord]);
 
       useEffect(() => {
@@ -120,11 +122,7 @@ const DataViewer = withRouter(
       const onChangePageHandler = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
-        contextReporterDataSet.setPageHandler(event.first);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
-        if (event.first === 0) {
-          fetchDataHandler(sortField, sortOrder, event.first, event.rows);
-        }
+        fetchDataHandler(sortField, sortOrder, event.first, event.rows);
       };
 
       const onConfirmDeleteHandler = () => {
@@ -144,30 +142,15 @@ const DataViewer = withRouter(
       };
 
       const onSortHandler = event => {
-        console.log('Sorting...');
         setSortOrder(event.sortOrder);
         setSortField(event.sortField);
-        contextReporterDataSet.setPageHandler(0);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+        setFirstRow(0);
+        fetchDataHandler(event.sortField, event.sortOrder, 0, numRows);
       };
 
       const onRefreshClickHandler = () => {
-        contextReporterDataSet.setPageHandler(0);
-        contextReporterDataSet.setIdSelectedRowHandler(-1);
-        fetchDataHandler(null, sortOrder, firstRow, numRows);
+        fetchDataHandler(sortField, sortOrder, firstRow, numRows);
       };
-
-      // const onColumnToggleHandler = (event) =>{
-      //   console.log("OnColumnToggle...");
-      //   setCols(event.value);
-      //   setColOptions(colOptions);
-      // }
-
-      // useEffect(()=>{
-      //   console.log("Fetching new data...");
-      // console.log(fetchedData);
-      // },[fetchedData]);
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
@@ -178,9 +161,8 @@ const DataViewer = withRouter(
           pageSize: nRows
         };
 
-        if (sField !== undefined && sField !== null) {
-          queryString.fields = sField;
-          queryString.asc = sOrder === -1 ? 0 : 1;
+        if (!isUndefined(sField) && sField !== null) {
+          queryString.fields = sField + ':' + sOrder;
         }
 
         const dataPromise = HTTPRequester.get({
@@ -449,18 +431,16 @@ const DataViewer = withRouter(
             />
           </Dialog>
 
-          <ReporterDataSetContext.Provider>
-            <ConfirmDialog
-              onConfirm={onConfirmDeleteHandler}
-              onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
-              visible={deleteDialogVisible}
-              header={resources.messages['deleteDatasetTableHeader']}
-              maximizable={false}
-              labelConfirm={resources.messages['yes']}
-              labelCancel={resources.messages['no']}>
-              {resources.messages['deleteDatasetTableConfirm']}
-            </ConfirmDialog>
-          </ReporterDataSetContext.Provider>
+          <ConfirmDialog
+            onConfirm={onConfirmDeleteHandler}
+            onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
+            visible={deleteDialogVisible}
+            header={resources.messages['deleteDatasetTableHeader']}
+            maximizable={false}
+            labelConfirm={resources.messages['yes']}
+            labelCancel={resources.messages['no']}>
+            {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
         </div>
       );
     }

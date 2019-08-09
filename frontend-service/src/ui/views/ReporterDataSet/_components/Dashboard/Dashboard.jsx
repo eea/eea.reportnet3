@@ -115,7 +115,7 @@ const Dashboard = withRouter(
             return error;
           });
       }
-    }, [refresh]);
+    }, [refresh, dataSetId]);
 
     const getPercentage = valArr => {
       let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));

@@ -1,3 +1,13 @@
 .title {
   text-transform: uppercase;
 }
+
+.searchInput {
+  margin-bottom: 1rem;
+  width: 90%;
+}
+
+.subscribeBtn {
+  width: 90%;
+  font-size: 0.8rem !important;
+}

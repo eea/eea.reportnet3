@@ -21,7 +21,7 @@ const Login = ({ history }) => {
             </fieldset>
             <fieldset>
               <label htmlFor="password">{resources.messages.loginPassword}</label>
-              <input type="password" placeholder={resources.messages.loginPassword} />
+              <input type="password" placeholder={resources.messages.loginPassword} autoComplete="password" />
             </fieldset>
             <fieldset className={`${styles.buttonHolder}`}>
               <button className="rp-btn primary" onClick={() => history.push('/data-flow-task/')}>
