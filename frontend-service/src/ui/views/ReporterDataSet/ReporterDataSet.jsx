@@ -12,6 +12,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'primereact/dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { ProgressSpinner } from 'primereact/progressspinner';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
@@ -36,6 +37,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const [datasetTitle, setDatasetTitle] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRowId, setSelectedRowId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
@@ -68,6 +70,7 @@ export const ReporterDataSet = ({ match, history }) => {
 
   useEffect(() => {
     onLoadDataSetSchema();
+    setLoading(false);
   }, [isDataDeleted]);
 
   const onConfirmDelete = async () => {
@@ -257,121 +260,131 @@ export const ReporterDataSet = ({ match, history }) => {
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
-  return (
-    <MainLayout>
-      <BreadCrumb model={breadCrumbItems} home={home} />
+  const layout = children => {
+    return (
+      <MainLayout>
+        <BreadCrumb model={breadCrumbItems} home={home} />
 
-      <div className="rep-container">
-        <div className="titleDiv">
-          <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
-        </div>
-        <div className={styles.ButtonsBar}>
-          <ButtonsBar buttonsList={buttonsList} />
-        </div>
-        <ReporterDataSetContext.Provider
-          value={{
-            validationsVisibleHandler: null,
-            onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
-              setActiveIndex(tableSchemaId);
-              setRecordPositionId(posIdRecord);
-              setSelectedRowId(selectedRowId);
-            }
-          }}>
-          <TabsSchema
-            activeIndex={activeIndex}
-            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-            recordPositionId={recordPositionId}
-            selectedRowId={selectedRowId}
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
-          />
-        </ReporterDataSetContext.Provider>
+        <div className="rep-container">{children}</div>
+      </MainLayout>
+    );
+  };
+
+  if (loading) {
+    return layout(<ProgressSpinner />);
+  }
+
+  return layout(
+    <div>
+      <div className="titleDiv">
+        <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
+      </div>
+      <div className={styles.ButtonsBar}>
+        <ButtonsBar buttonsList={buttonsList} />
+      </div>
+      <ReporterDataSetContext.Provider
+        value={{
+          validationsVisibleHandler: null,
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+            setActiveIndex(tableSchemaId);
+            setRecordPositionId(posIdRecord);
+            setSelectedRowId(selectedRowId);
+          }
+        }}>
+        <TabsSchema
+          activeIndex={activeIndex}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          recordPositionId={recordPositionId}
+          selectedRowId={selectedRowId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+          urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
+        />
+      </ReporterDataSetContext.Provider>
+      <Dialog
+        dismissableMask={true}
+        header={resources.messages['titleDashboard']}
+        maximizable
+        onHide={() => onSetVisible(setDashDialogVisible, false)}
+        style={{ width: '80%' }}
+        visible={dashDialogVisible}>
+        <Dashboard refresh={dashDialogVisible} />
+      </Dialog>
+      <ReporterDataSetContext.Provider
+        value={{
+          onValidationsVisible: () => {
+            onSetVisible(setValidationsVisible, false);
+          },
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+            setActiveIndex(tableSchemaId);
+            setRecordPositionId(posIdRecord);
+            setSelectedRowId(selectedRowId);
+          }
+        }}>
         <Dialog
           dismissableMask={true}
-          header={resources.messages['titleDashboard']}
+          header={resources.messages['titleValidations']}
           maximizable
-          onHide={() => onSetVisible(setDashDialogVisible, false)}
+          onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={dashDialogVisible}>
-          <Dashboard refresh={dashDialogVisible} />
+          visible={validationsVisible}>
+          <ValidationViewer dataSetId={dataSetId} visible={validationsVisible} />
         </Dialog>
-        <ReporterDataSetContext.Provider
-          value={{
-            onValidationsVisible: () => {
-              onSetVisible(setValidationsVisible, false);
-            },
-            onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
-              setActiveIndex(tableSchemaId);
-              setRecordPositionId(posIdRecord);
-              setSelectedRowId(selectedRowId);
-            }
-          }}>
-          <Dialog
-            dismissableMask={true}
-            header={resources.messages['titleValidations']}
-            maximizable
-            onHide={() => onSetVisible(setValidationsVisible, false)}
-            style={{ width: '80%' }}
-            visible={validationsVisible}>
-            <ValidationViewer dataSetId={dataSetId} visible={validationsVisible} />
-          </Dialog>
-        </ReporterDataSetContext.Provider>
-        <ConfirmDialog
-          header={resources.messages['deleteDatasetHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={onConfirmDelete}
-          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}>
-          {resources.messages['deleteDatasetConfirm']}
-        </ConfirmDialog>
-        <ConfirmDialog
-          header={resources.messages['validateDataSet']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={onConfirmValidate}
-          onHide={() => onSetVisible(setValidateDialogVisible, false)}
-          visible={validateDialogVisible}>
-          {resources.messages['validateDataSetConfirm']}
-        </ConfirmDialog>
+      </ReporterDataSetContext.Provider>
+      <ConfirmDialog
+        header={resources.messages['deleteDatasetHeader']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={onConfirmDelete}
+        onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+        visible={deleteDialogVisible}>
+        {resources.messages['deleteDatasetConfirm']}
+      </ConfirmDialog>
+      <ConfirmDialog
+        header={resources.messages['validateDataSet']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={onConfirmValidate}
+        onHide={() => onSetVisible(setValidateDialogVisible, false)}
+        visible={validateDialogVisible}>
+        {resources.messages['validateDataSetConfirm']}
+      </ConfirmDialog>
 
-        <SnapshotContext.Provider
-          value={{
-            snapshotState: snapshotState,
-            snapshotDispatch: snapshotDispatch
-          }}>
-          <SnapshotSlideBar
-            isVisible={snapshotIsVisible}
-            setIsVisible={setSnapshotIsVisible}
-            setSnapshotDialogVisible={setSnapshotDialogVisible}
-            snapshotListData={snapshotListData}
-          />
-          <ConfirmDialog
-            className={styles.snapshotDialog}
-            header={snapshotState.dialogMessage}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
-            maximizable={false}
-            onConfirm={snapshotState.action}
-            onHide={() => onSetVisible(setSnapshotDialogVisible, false)}
-            showHeader={false}
-            visible={snapshotDialogVisible}>
-            <ul>
-              <li>
-                <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-              </li>
-              <li>
-                <strong>{resources.messages.description}: </strong>
-                {snapshotState.description}
-              </li>
-            </ul>
-          </ConfirmDialog>
-        </SnapshotContext.Provider>
-      </div>
-    </MainLayout>
+      <SnapshotContext.Provider
+        value={{
+          snapshotState: snapshotState,
+          snapshotDispatch: snapshotDispatch
+        }}>
+        <SnapshotSlideBar
+          isVisible={snapshotIsVisible}
+          setIsVisible={setSnapshotIsVisible}
+          setSnapshotDialogVisible={setSnapshotDialogVisible}
+          snapshotListData={snapshotListData}
+        />
+        <ConfirmDialog
+          className={styles.snapshotDialog}
+          header={snapshotState.dialogMessage}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={snapshotState.action}
+          onHide={() => onSetVisible(setSnapshotDialogVisible, false)}
+          showHeader={false}
+          visible={snapshotDialogVisible}>
+          <ul>
+            <li>
+              <strong>{resources.messages.creationDate}: </strong>
+              {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            </li>
+            <li>
+              <strong>{resources.messages.description}: </strong>
+              {snapshotState.description}
+            </li>
+          </ul>
+        </ConfirmDialog>
+      </SnapshotContext.Provider>
+    </div>
   );
 };
