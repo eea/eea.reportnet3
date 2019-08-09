@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.junit.Assert;
@@ -136,6 +137,29 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(result);
     Assert.assertTrue(!result.isEmpty());
     Assert.assertEquals(result.get(0).getName(), "Dataflow");
+
+  }
+
+  @Test
+  public void getGroupsByUser() {
+
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setId("1");
+    groupInfo.setName("Dataflow-1-DATA_PROVIDER");
+    groupInfo.setPath("/path");
+    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
+
+    ResponseEntity<GroupInfo[]> responseGroupInfos = new ResponseEntity<>(groupInfos,
+        HttpStatus.OK);
+
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(responseGroupInfos);
+
+    GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
+    Assert.assertNotNull(result);
+    Assert.assertTrue(result.length > 0);
+    Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_PROVIDER");
 
   }
 }

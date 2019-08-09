@@ -747,31 +747,32 @@
     "key": "config/document/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
-	{
+  {
     "key": "config/document/spring.servlet.multipart.max-file-size",
     "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
-  }, 
+  },
   {
     "key": "config/document/spring.servlet.multipart.max-request-size",
     "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
-  }, 
+  },
   {
     "key": "config/document/targetDirectory",
     "value": "JHtPQUtfRElSRUNUT1JZX0dDOi4vdGFyZ2V0fQ=="
-  }, 
+  },
   {
     "key": "config/document/oakRepositoryUrl",
     "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
-  }, 
+  },
   {
     "key": "config/document/nameOakCollection",
     "value": "JHtNT05HT19EQl9ERUZBVUxUX0NPTExFQ1RJT046b2FrfQ=="
-  }, 
+  },
   {
     "key": "config/document/oakPort",
     "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
-  }, {
+  },
+  {
     "key": "config/document/oakUser",
-    "value": "JHtNT05HT19EQl9VU0VSOmFkbWlufQ=="
+    "value": "JHtNT05HT19EQl9VU0VSTkFNRTphZG1pbn0="
   }
 ]

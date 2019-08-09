@@ -6,14 +6,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import javax.swing.text.html.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionResult;
 import org.eea.ums.service.keycloak.model.ClientInfo;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.Resource;
 import org.eea.ums.service.keycloak.model.ResourceInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
@@ -74,8 +77,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
   private static final String GET_RESOURCE_SET = "/auth/realms/{realm}/authz/protection/resource_set";
   private static final String GET_RESOURCE_INFO = "/auth/realms/{realm}/authz/protection/resource_set/{resourceId}";
+  private static final String GET_GROUPS_BY_USER = "/auth/admin/realms/{realm}/users/{userId}/groups";
   private static final String URI_PARAM_REALM = "realm";
   private static final String URI_PARAM_RESOURCE_ID = "resourceId";
+  private static final String URI_PARAM_USER_ID = "userId";
 
 
   @PostConstruct
@@ -144,6 +149,32 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     return permission;
   }
 
+  @Override
+  public GroupInfo[] getGroupsByUser(String userId) {
+
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+
+    HttpHeaders headers = createBasicHeaders(headerInfo);
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = new HttpEntity<>(
+        null, headers);
+    ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate
+        .exchange(
+            uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+                .path(GET_GROUPS_BY_USER)
+                .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+            GroupInfo[].class);
+    Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+        .map(entity -> (GroupInfo[]) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+        .map(entity -> (GroupInfo[]) entity).orElse(null);
+  }
+
   /**
    * Generate token string.
    *
@@ -189,6 +220,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     return StringUtils.isBlank(token) ? "" : token;
 
   }
+
 
   private ClientInfo getReportnetClientInfo(String adminToken) {
     Map<String, String> headerInfo = new HashMap<>();
@@ -274,4 +306,6 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     }
     return headers;
   }
+
+
 }
