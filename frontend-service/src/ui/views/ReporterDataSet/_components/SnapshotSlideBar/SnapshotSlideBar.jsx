@@ -45,7 +45,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
           <Formik
-            initialValues={{ createSnapshot: '' }}
+            initialValues={{ createSnapshotDescription: '' }}
             validationSchema={snapshotValidationSchema}
             onSubmit={values => {
               snapshotContext.snapshotDispatch({
