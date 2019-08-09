@@ -3,7 +3,3 @@ server:
 spring:
   application:
     name: document
-  servlet:
-    multipart:
-      max-file-size: ${TOMCAT_MAX_FILE_SIZE:104857600}
-      max-request-size: ${TOMCAT_MAX_REQUEST_SIZE:209715200}
