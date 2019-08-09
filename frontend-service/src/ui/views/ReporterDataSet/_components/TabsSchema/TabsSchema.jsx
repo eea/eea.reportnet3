@@ -38,7 +38,7 @@ export const TabsSchema = ({
                   }
                   urlViewer={urlViewer}
                   positionIdRecord={table.id === activeIndex ? positionIdRecord : -1}
-                  idSelectedRow={idSelectedRow}
+                  idSelectedRow={table.id === activeIndex ? idSelectedRow : -1}
                 />
               </div>
             </TabPanel>
@@ -46,7 +46,7 @@ export const TabsSchema = ({
         })
       : null;
   const filterActiveIndex = idTableSchema => {
-    //TODO: Refactorizar este apaño.
+    //TODO: Refactorizar este apaño y CUIDADO con activeIndex (integer cuando es manual, idTable cuando es por validación).
     if (Number.isInteger(idTableSchema)) {
       return tabs ? activeIndex : 0;
     } else {

@@ -14,7 +14,6 @@ import { CustomIconTooltip } from './_components/CustomIconTooltip';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { Growl } from 'primereact/growl';
-import { ReporterDataSetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
@@ -33,15 +32,13 @@ const DataViewer = withRouter(
         params: { dataSetId }
       }
     }) => {
-      const contextReporterDataSet = useContext(ReporterDataSetContext);
+      //const contextReporterDataSet = useContext(ReporterDataSetContext);
       const [importDialogVisible, setImportDialogVisible] = useState(false);
       const [totalRecords, setTotalRecords] = useState(0);
       const [fetchedData, setFetchedData] = useState([]);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
       const [firstRow, setFirstRow] = useState(0);
-       // positionIdRecord && positionIdRecord !== null ? Math.floor(positionIdRecord / numRows) * numRows : 0
-      //);
       const [sortOrder, setSortOrder] = useState(undefined);
       const [sortField, setSortField] = useState(undefined);
       const [columns, setColumns] = useState([]);
@@ -68,19 +65,12 @@ const DataViewer = withRouter(
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         setCols(inmTableSchemaColumns);
+
+        fetchDataHandler(undefined, undefined, 0, numRows);
       }, [])
 
       useEffect(() => {
-        console.log('Entro en USE EFFECT');
-
-        if (isUndefined(positionIdRecord)) {
-          console.log('Salgo de USE EFFECT por UNDEFINED');
-          return;
-        }
-
-        if (positionIdRecord === -1) {
-          fetchDataHandler(undefined, undefined, 0, numRows);
-          console.log('Salgo de USE EFFECT por -1 (carga datos)');
+        if (isUndefined(positionIdRecord) || positionIdRecord === -1) {
           return;
         }
 
@@ -88,8 +78,6 @@ const DataViewer = withRouter(
         setSortField(undefined);
         setSortOrder(undefined);
         fetchDataHandler(undefined, undefined, Math.floor(positionIdRecord / numRows) * numRows, numRows);
-
-        console.log('Salgo de USE EFFECT por FIN (carga datos validación)');
       }, [positionIdRecord]);
 
       useEffect(() => {
@@ -134,11 +122,7 @@ const DataViewer = withRouter(
       const onChangePageHandler = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
-        //contextReporterDataSet.setPageHandler(-1);
-        //contextReporterDataSet.setIdSelectedRowHandler(-1);
-        //if (event.first === 0) {
         fetchDataHandler(sortField, sortOrder, event.first, event.rows);
-        //}
       };
 
       const onConfirmDeleteHandler = () => {
@@ -158,31 +142,15 @@ const DataViewer = withRouter(
       };
 
       const onSortHandler = event => {
-        console.log('Sorting...');
         setSortOrder(event.sortOrder);
         setSortField(event.sortField);
         setFirstRow(0);
-        //contextReporterDataSet.setPageHandler(-1);
-        //contextReporterDataSet.setIdSelectedRowHandler(-1);
         fetchDataHandler(event.sortField, event.sortOrder, 0, numRows);
       };
 
       const onRefreshClickHandler = () => {
-        //contextReporterDataSet.setPageHandler(-1);
-        //contextReporterDataSet.setIdSelectedRowHandler(-1);
         fetchDataHandler(sortField, sortOrder, firstRow, numRows);
       };
-
-      // const onColumnToggleHandler = (event) =>{
-      //   console.log("OnColumnToggle...");
-      //   setCols(event.value);
-      //   setColOptions(colOptions);
-      // }
-
-      // useEffect(()=>{
-      //   console.log("Fetching new data...");
-      // console.log(fetchedData);
-      // },[fetchedData]);
 
       const fetchDataHandler = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
@@ -373,7 +341,7 @@ const DataViewer = withRouter(
           label: resources.messages['refresh'],
           icon: '11',
           group: 'right',
-          disabled: false,
+          disabled: true,
           clickHandler: onRefreshClickHandler
         }
       ];
@@ -463,18 +431,16 @@ const DataViewer = withRouter(
             />
           </Dialog>
 
-          <ReporterDataSetContext.Provider>
-            <ConfirmDialog
-              onConfirm={onConfirmDeleteHandler}
-              onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
-              visible={deleteDialogVisible}
-              header={resources.messages['deleteDatasetTableHeader']}
-              maximizable={false}
-              labelConfirm={resources.messages['yes']}
-              labelCancel={resources.messages['no']}>
-              {resources.messages['deleteDatasetTableConfirm']}
-            </ConfirmDialog>
-          </ReporterDataSetContext.Provider>
+          <ConfirmDialog
+            onConfirm={onConfirmDeleteHandler}
+            onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
+            visible={deleteDialogVisible}
+            header={resources.messages['deleteDatasetTableHeader']}
+            maximizable={false}
+            labelConfirm={resources.messages['yes']}
+            labelCancel={resources.messages['no']}>
+            {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
         </div>
       );
     }

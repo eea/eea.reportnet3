@@ -54,8 +54,6 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   useEffect(() => {
-    console.log('ReporterDataSet useEffect');
-
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowTask'],
@@ -338,11 +336,6 @@ export const ReporterDataSet = ({ match, history }) => {
               setActiveIndex(idTableSchema);
               setPositionIdRecord(posIdRecord);
               setIdSelectedRow(selectedRowId);
-              // setState({
-              //   activeIndex: idTableSchema,
-              //   positionIdRecord: posIdRecord,
-              //   idSelectedRow: selectedRowId
-              // });
             }
           }}>
           <TabsSchema

@@ -64,14 +64,12 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   }, [visible]);
 
   const onChangePageHandler = event => {
-    console.log('Refetching data ValidationViewer...');
     setNumRows(event.rows);
     setFirstRow(event.first);
     fetchDataHandler(sortField, sortOrder, event.first, event.rows);
   };
 
   const onSortHandler = event => {
-    console.log('Sorting ValidationViewer...');
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
     fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
