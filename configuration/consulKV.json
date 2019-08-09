@@ -536,6 +536,14 @@
     "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
   },
   {
+    "key": "config/apiGateway/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDczNzQxODI0fQ=="
+  }, 
+  {
+    "key": "config/apiGateway/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToxMDczNzQxODI0fQ=="
+  },
+  {
     "key": "config/validation/mongodb.hibernate.ddl-auto",
     "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -740,11 +748,11 @@
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
   {
-    "key": "config/document/spring.application.servlet.multipart.max-file-size",
+    "key": "config/document/spring.servlet.multipart.max-file-size",
     "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
   },
   {
-    "key": "config/document/spring.application.servlet.multipart.max-request-size",
+    "key": "config/document/spring.servlet.multipart.max-request-size",
     "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
   },
   {

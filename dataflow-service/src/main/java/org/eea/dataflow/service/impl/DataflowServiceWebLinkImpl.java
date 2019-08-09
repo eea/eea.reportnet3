@@ -41,6 +41,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
@@ -88,10 +90,11 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
         dataflow.get().getName());
   }
 
+
   /**
    * Removes the web link.
    *
-   * @param webLink the web link
+   * @param webLinkId the web link id
    * @throws EEAException the EEA exception
    */
   @Override

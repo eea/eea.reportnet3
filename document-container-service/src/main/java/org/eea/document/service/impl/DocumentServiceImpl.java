@@ -8,6 +8,7 @@ import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.eea.document.service.DocumentService;
@@ -70,7 +71,8 @@ public class DocumentServiceImpl implements DocumentService {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
-      if (filename == null || contentType == null) {
+      if (filename == null || contentType == null
+          || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
 
@@ -100,6 +102,7 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.cleanUp(session, ns);
     }
   }
+
 
   /**
    * Gets the document.

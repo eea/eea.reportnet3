@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext } from 'react';
 
 import * as fileDownload from 'js-file-download';
@@ -33,7 +34,6 @@ export const DocumentationDataSet = ({ match, history }) => {
   const [customButtons, setCustomButtons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
-  const [inputDocumentDescription, setInputDocumentDescription] = useState('');
 
   const home = {
     icon: resources.icons['home'],
@@ -97,18 +97,29 @@ export const DocumentationDataSet = ({ match, history }) => {
         group: 'left',
         disabled: true,
         clickHandler: null
+      },
+      {
+        label: resources.messages['refresh'],
+        icon: '11',
+        group: 'right',
+        disabled: false,
+        clickHandler: () => onRefreshDocumentAndWebLinks()
       }
     ]);
     //#end region Button initialization
   }, []);
 
   useEffect(() => {
-    console.log('FILE_DATA', fileToDownload);
-    console.log('FILE_NAME', fileName);
     if (!isUndefined(fileToDownload)) {
       fileDownload(fileToDownload, fileName);
     }
   }, [fileToDownload]);
+
+  const onRefreshDocumentAndWebLinks = () => {
+    setIsLoading(true);
+    setDocumentsAndWebLinks();
+    setIsLoading(false);
+  };
 
   const onHideHandler = () => {
     setIsUploadDialogVisible(false);
@@ -126,16 +137,16 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
+      <span className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
         {' '}
         <IconComponent icon={config.icons.archive} />
-      </a>
+      </span>
     );
   };
 
   const actionWeblink = (rowData, column) => {
     return (
-      <a href={rowData.url} target="_blank">
+      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
         {' '}
         {rowData.url}
       </a>

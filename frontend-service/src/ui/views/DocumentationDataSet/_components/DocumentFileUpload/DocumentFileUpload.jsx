@@ -38,7 +38,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
           values.lang,
           values.uploadFile
         );
-        if (response.status === 200) {
+        if (response === 200) {
           setSubmitting(false);
           onUpload();
         }
@@ -55,11 +55,11 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
               <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
-              <Field name="lang" component="select" placeholder={resources.messages.select}>
-                <option>{resources.messages.selectLang}</option>
+              <Field name="lang" component="select">
+                <option value="">{resources.messages.selectLang}</option>
                 {config.languages.map(language => (
-                  <option key={`lang-${language.code}`} value={language.code}>
-                    {language.code}
+                  <option key={language.code} value={language.code}>
+                    {language.name}
                   </option>
                 ))}
               </Field>

@@ -40,7 +40,7 @@ export const api = {
       queryString: {},
       data: formData
     });
-    return response;
+    return response.status;
   },
 
   snapshots: async url => {
