@@ -3,6 +3,7 @@ import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
 
 export const api = {
+  /* #region Dataset */
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -16,9 +17,10 @@ export const api = {
           }),
       queryString: {}
     });
+
     return response.data;
   },
-  dataSetTablesById: async dataSetId => {
+  dataSetStatisticsById: async dataSetId => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/error-statistics.json'
@@ -40,7 +42,7 @@ export const api = {
     });
     return response.data;
   },
-  deleteDataById: async dataSetId => {
+  deleteDataSetDataById: async dataSetId => {
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
@@ -70,7 +72,7 @@ export const api = {
     });
     return response.data;
   },
-  validateDataById: async dataSetId => {
+  validateDataSetById: async dataSetId => {
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
@@ -87,6 +89,8 @@ export const api = {
       return false;
     }
   },
+  /* #endregion */
+  /* #region Documents */
   documents: async dataFlowId => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -123,6 +127,8 @@ export const api = {
     });
     return response.status;
   },
+  /* #endregion */
+  /* #region Snapshots */
   createSnapshotById: async (dataSetId, description) => {
     try {
       const response = await HTTPRequester.post({
@@ -181,7 +187,8 @@ export const api = {
     });
     return response.data;
   },
-
+  /* #endregion */
+  /* #region WebLinks */
   webLinks: async dataFlowId => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -193,4 +200,5 @@ export const api = {
     });
     return response.data.weblinks;
   }
+  /* #endregion */
 };

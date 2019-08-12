@@ -1,12 +1,12 @@
-import { CreateSnapshot } from './CreateSnapshot';
-import { DeleteSnapshot } from './DeleteSnapshot';
-import { GetAllSnapshots } from './GetAllSnapshots';
-import { RestoreSnapshot } from './RestoreSnapshot';
+import { Create } from './Create';
+import { Delete } from './Delete';
+import { GetAll } from './GetAll';
+import { Restore } from './Restore';
 import { snapshotRepository } from 'core/domain/model/Snapshot/SnapshotRepository';
 
 export const SnapshotService = {
-  all: GetAllSnapshots({ snapshotRepository }),
-  createById: CreateSnapshot({ snapshotRepository }),
-  deleteById: DeleteSnapshot({ snapshotRepository }),
-  restoreById: RestoreSnapshot({ snapshotRepository })
+  all: GetAll({ snapshotRepository }),
+  createById: Create({ snapshotRepository }),
+  deleteById: Delete({ snapshotRepository }),
+  restoreById: Restore({ snapshotRepository })
 };

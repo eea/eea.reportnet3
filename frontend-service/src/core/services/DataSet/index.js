@@ -1,16 +1,16 @@
 import { dataSetRepository } from 'core/domain/model/DataSet/DataSetRepository';
 import { DeleteData } from './DeleteData';
-import { GetDataSetErrors } from './GetDataSetErrors';
-import { GetDataSetSchema } from './GetDataSetSchema';
-import { GetDataSetStatistics } from './GetDataSetStatistics';
+import { GetErrors } from './GetErrors';
+import { GetSchema } from './GetSchema';
+import { GetStatistics } from './GetStatistics';
 import { GetErrorPosition } from './GetErrorPosition';
 import { ValidateData } from './ValidateData';
 
 export const DataSetService = {
-  dataSetSchemaById: GetDataSetSchema({ dataSetRepository }),
+  dataSetSchemaById: GetSchema({ dataSetRepository }),
   deleteDataById: DeleteData({ dataSetRepository }),
-  errorsById: GetDataSetErrors({ dataSetRepository }),
+  errorsById: GetErrors({ dataSetRepository }),
   errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),
-  errorStatisticsById: GetDataSetStatistics({ dataSetRepository }),
+  errorStatisticsById: GetStatistics({ dataSetRepository }),
   validateDataById: ValidateData({ dataSetRepository })
 };

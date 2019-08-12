@@ -21,41 +21,91 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 const DataViewer = withRouter(
   React.memo(
     ({
-      recordPositionId,
-      tableSchemaColumns,
-      tableId,
-      selectedRowId,
-      urlViewer,
       buttonsList = undefined,
+      recordPositionId,
+      selectedRowId,
+      tableId,
       tableName,
+      tableSchemaColumns,
+      urlViewer,
       match: {
         params: { dataSetId }
       }
     }) => {
       //const contextReporterDataSet = useContext(ReporterDataSetContext);
-      const [importDialogVisible, setImportDialogVisible] = useState(false);
-      const [totalRecords, setTotalRecords] = useState(0);
+      const [colOptions, setColOptions] = useState([{}]);
+      const [cols, setCols] = useState(tableSchemaColumns);
+      const [columns, setColumns] = useState([]);
+      const [defaultButtonsList, setDefaultButtonsList] = useState([]);
+      const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
       const [fetchedData, setFetchedData] = useState([]);
+      const [firstRow, setFirstRow] = useState(0);
+      const [header] = useState();
+      const [importDialogVisible, setImportDialogVisible] = useState(false);
+      const [isDataDeleted, setIsDataDeleted] = useState(false);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
-      const [firstRow, setFirstRow] = useState(0);
-      const [sortOrder, setSortOrder] = useState(undefined);
       const [sortField, setSortField] = useState(undefined);
-      const [columns, setColumns] = useState([]);
-      const [cols, setCols] = useState(tableSchemaColumns);
-      const [header] = useState();
-      const [colOptions, setColOptions] = useState([{}]);
+      const [sortOrder, setSortOrder] = useState(undefined);
+      const [totalRecords, setTotalRecords] = useState(0);
+
       const resources = useContext(ResourcesContext);
-      const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-      const [isDataDeleted, setIsDataDeleted] = useState(false);
 
       let growlRef = useRef();
 
       useEffect(() => {
-        setFetchedData([]);
-      }, [isDataDeleted]);
+        setDefaultButtonsList([
+          {
+            label: resources.messages['import'],
+            icon: '0',
+            group: 'left',
+            disabled: false,
+            onClick: () => setImportDialogVisible(true)
+          },
+          {
+            label: resources.messages['deleteTable'],
+            icon: '2',
+            group: 'left',
+            disabled: false,
+            onClick: () => onSetVisible(setDeleteDialogVisible, true)
+          },
+          {
+            label: resources.messages['visibility'],
+            icon: '6',
+            group: 'left',
+            disabled: true,
+            onClick: null
+          },
+          {
+            label: resources.messages['filter'],
+            icon: '7',
+            group: 'left',
+            disabled: true,
+            onClick: null
+          },
+          {
+            label: resources.messages['group-by'],
+            icon: '8',
+            group: 'left',
+            disabled: true,
+            onClick: null
+          },
+          {
+            label: resources.messages['sort'],
+            icon: '9',
+            group: 'left',
+            disabled: true,
+            onClick: null
+          },
+          {
+            label: resources.messages['refresh'],
+            icon: '11',
+            group: 'right',
+            disabled: true,
+            onClick: onRefresh
+          }
+        ]);
 
-      useEffect(() => {
         let colOpt = [];
         for (let col of cols) {
           colOpt.push({ label: col.header, value: col });
@@ -66,8 +116,12 @@ const DataViewer = withRouter(
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
         setCols(inmTableSchemaColumns);
 
-        fetchData(undefined, undefined, 0, numRows);
+        onFetchData(undefined, undefined, 0, numRows);
       }, []);
+
+      useEffect(() => {
+        setFetchedData([]);
+      }, [isDataDeleted]);
 
       useEffect(() => {
         if (isUndefined(recordPositionId) || recordPositionId === -1) {
@@ -77,7 +131,7 @@ const DataViewer = withRouter(
         setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
         setSortField(undefined);
         setSortOrder(undefined);
-        fetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows);
+        onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows);
       }, [recordPositionId]);
 
       useEffect(() => {
@@ -86,21 +140,21 @@ const DataViewer = withRouter(
           let visibleColumn = col.field === 'id' ? styles.VisibleHeader : '';
           return (
             <Column
-              sortable={sort}
-              key={col.field}
-              field={col.field}
-              header={col.header}
               body={dataTemplate}
               className={visibleColumn}
+              field={col.field}
+              header={col.header}
+              key={col.field}
+              sortable={sort}
             />
           );
         });
         let validationCol = (
           <Column
-            key="recordValidation"
+            body={validationsTemplate}
             field="validations"
             header=""
-            body={validationsTemplate}
+            key="recordValidation"
             style={{ width: '15px' }}
           />
         );
@@ -111,7 +165,7 @@ const DataViewer = withRouter(
       const onChangePage = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
-        fetchData(sortField, sortOrder, event.first, event.rows);
+        onFetchData(sortField, sortOrder, event.first, event.rows);
       };
 
       const onConfirmDelete = () => {
@@ -126,22 +180,7 @@ const DataViewer = withRouter(
         });
       };
 
-      const setVisible = (fnUseState, visible) => {
-        fnUseState(visible);
-      };
-
-      const onSort = event => {
-        setSortOrder(event.sortOrder);
-        setSortField(event.sortField);
-        setFirstRow(0);
-        fetchData(event.sortField, event.sortOrder, 0, numRows);
-      };
-
-      const onRefresh = () => {
-        fetchData(sortField, sortOrder, firstRow, numRows);
-      };
-
-      const fetchData = (sField, sOrder, fRow, nRows) => {
+      const onFetchData = (sField, sOrder, fRow, nRows) => {
         setLoading(true);
 
         let queryString = {
@@ -151,7 +190,7 @@ const DataViewer = withRouter(
         };
 
         if (!isUndefined(sField) && sField !== null) {
-          queryString.fields = sField + ':' + sOrder;
+          queryString.fields = `${sField}:${sOrder}`;
         }
 
         const dataPromise = HTTPRequester.get({
@@ -173,8 +212,45 @@ const DataViewer = withRouter(
           });
       };
 
+      const onHide = () => {
+        setImportDialogVisible(false);
+      };
+
+      const onRefresh = () => {
+        onFetchData(sortField, sortOrder, firstRow, numRows);
+      };
+
+      const onSetVisible = (fnUseState, visible) => {
+        fnUseState(visible);
+      };
+
+      const onSort = event => {
+        setSortOrder(event.sortOrder);
+        setSortField(event.sortField);
+        setFirstRow(0);
+        onFetchData(event.sortField, event.sortOrder, 0, numRows);
+      };
+
+      const onUpload = () => {
+        setImportDialogVisible(false);
+
+        const detailContent = (
+          <span>
+            {resources.messages['datasetLoadingMessage']}
+            <strong>{editLargeStringWithDots(tableName, 22)}</strong>
+            {resources.messages['datasetLoading']}
+          </span>
+        );
+
+        growlRef.current.show({
+          severity: 'info',
+          summary: resources.messages['datasetLoadingTitle'],
+          detail: detailContent,
+          life: '5000'
+        });
+      };
+
       const filterDataResponse = data => {
-        //TODO: Refactorizar
         const dataFiltered = data.records.map(record => {
           const recordValidations = record.recordValidations;
           const arrayDataFields = record.fields.map(field => {
@@ -283,62 +359,6 @@ const DataViewer = withRouter(
         }
       };
 
-      const defaultButtonsList = [
-        {
-          label: resources.messages['import'],
-          icon: '0',
-          group: 'left',
-          disabled: false,
-          onClick: () => setImportDialogVisible(true)
-        },
-        {
-          label: resources.messages['deleteTable'],
-          icon: '2',
-          group: 'left',
-          disabled: false,
-          onClick: () => setVisible(setDeleteDialogVisible, true)
-        },
-        {
-          label: resources.messages['visibility'],
-          icon: '6',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['filter'],
-          icon: '7',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['group-by'],
-          icon: '8',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['sort'],
-          icon: '9',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['refresh'],
-          icon: '11',
-          group: 'right',
-          disabled: true,
-          onClick: onRefresh
-        }
-      ];
-
-      const onHide = () => {
-        setImportDialogVisible(false);
-      };
-
       const editLargeStringWithDots = (string, length) => {
         if (string.length > length) {
           return string.substring(0, length).concat('...');
@@ -347,87 +367,68 @@ const DataViewer = withRouter(
         }
       };
 
-      const onUpload = () => {
-        setImportDialogVisible(false);
-
-        const detailContent = (
-          <span>
-            {resources.messages['datasetLoadingMessage']}
-            <strong>{editLargeStringWithDots(tableName, 22)}</strong>
-            {resources.messages['datasetLoading']}
-          </span>
-        );
-
-        growlRef.current.show({
-          severity: 'info',
-          summary: resources.messages['datasetLoadingTitle'],
-          detail: detailContent,
-          life: '5000'
-        });
-      };
-
       const rowClassName = rowData => {
         let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
 
         return { 'p-highlight': id === selectedRowId };
       };
 
-      let totalCount = <span>Total: {totalRecords} rows</span>;
+      const totalCount = <span>Total: {totalRecords} rows</span>;
 
       return (
         <div>
           <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} />
           <div className={styles.Table}>
             <DataTable
-              value={fetchedData}
-              paginatorRight={totalCount}
-              resizableColumns={true}
-              reorderableColumns={true}
-              paginator={true}
-              rows={numRows}
+              autoLayout={true}
+              header={header}
               first={firstRow}
-              onPage={onChangePage}
-              rowsPerPageOptions={[5, 10, 20, 100]}
               lazy={true}
               loading={loading}
-              totalRecords={totalRecords}
-              sortable={true}
+              onPage={onChangePage}
               onSort={onSort}
-              header={header}
+              paginator={true}
+              paginatorRight={totalCount}
+              reorderableColumns={true}
+              resizableColumns={true}
+              rowClassName={rowClassName}
+              rows={numRows}
+              rowsPerPageOptions={[5, 10, 20, 100]}
+              sortable={true}
               sortField={sortField}
               sortOrder={sortOrder}
-              autoLayout={true}
-              rowClassName={rowClassName}>
+              totalRecords={totalRecords}
+              value={fetchedData}>
               {columns}
             </DataTable>
           </div>
           <Growl ref={growlRef} />
           <Dialog
-            header={resources.messages['uploadDataset']}
-            visible={importDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHide}>
+            header={resources.messages['uploadDataset']}
+            onHide={onHide}
+            visible={importDialogVisible}>
             <CustomFileUpload
-              mode="advanced"
-              name="file"
-              url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${tableId}`}
-              onUpload={onUpload}
-              multiple={false}
               chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
-              fileLimit={1}
               className={styles.FileUpload}
+              fileLimit={1}
+              mode="advanced"
+              multiple={false}
+              name="file"
+              onUpload={onUpload}
+              url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${tableId}`}
             />
           </Dialog>
 
           <ConfirmDialog
-            onConfirm={onConfirmDelete}
-            onHide={() => setVisible(setDeleteDialogVisible, false)}
-            visible={deleteDialogVisible}
             header={resources.messages['deleteDatasetTableHeader']}
-            maximizable={false}
+            labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            labelCancel={resources.messages['no']}>
+            maximizable={false}
+            onConfirm={onConfirmDelete}
+            onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+            visible={deleteDialogVisible}>
             {resources.messages['deleteDatasetTableConfirm']}
           </ConfirmDialog>
         </div>

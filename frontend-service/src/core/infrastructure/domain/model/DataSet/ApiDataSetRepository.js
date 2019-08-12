@@ -41,7 +41,7 @@ const dataSetSchemaById = async dataFlowId => {
 };
 
 const deleteDataById = async dataSetId => {
-  const dataDeleted = await api.deleteDataById(dataSetId);
+  const dataDeleted = await api.deleteDataSetDataById(dataSetId);
   return dataDeleted;
 };
 
@@ -90,7 +90,7 @@ const errorPositionByObjectId = async (objectId, dataSetId, entityType) => {
 };
 
 const errorStatisticsById = async dataSetId => {
-  const dataSetTablesDTO = await api.dataSetTablesById(dataSetId);
+  const dataSetTablesDTO = await api.dataSetStatisticsById(dataSetId);
 
   const dataSet = new DataSet();
   dataSet.dataSetSchemaName = dataSetTablesDTO.nameDataSetSchema;
@@ -125,7 +125,7 @@ const errorStatisticsById = async dataSetId => {
 };
 
 const validateDataById = async dataSetId => {
-  const dataValidation = await api.validateDataById(dataSetId);
+  const dataValidation = await api.validateDataSetById(dataSetId);
   return dataValidation;
 };
 
