@@ -1759,6 +1759,7 @@ body {
 
 .p-progress-spinner {
   left: 50%;
+  transform: translate(-50%);
   top: 30vh;
   width: 75px;
   height: 75px;
@@ -1804,18 +1805,16 @@ form .error {
 }
 
 @keyframes p-progress-spinner-color {
-  100%,
   0% {
     stroke: var(--blue-120);
   }
-  40% {
+  25% {
+    stroke: var(--yellow-120);
+  }
+  50% {
     stroke: var(--blue-120);
   }
-  66% {
-    stroke: var(--blue-120);
-  }
-  80%,
-  90% {
-    stroke: var(--blue-120);
+  100% {
+    stroke: var(--yellow-120);
   }
 }
