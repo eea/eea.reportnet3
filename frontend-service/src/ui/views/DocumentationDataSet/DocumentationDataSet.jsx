@@ -182,7 +182,7 @@ export const DocumentationDataSet = ({ match, history }) => {
             <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHideHandler} />
           </Dialog>
           {
-            <DataTable value={documents} autoLayout={true}>
+            <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="title"
@@ -222,7 +222,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
         <TabPanel header={resources.messages['webLinks']}>
           {
-            <DataTable value={webLinks} autoLayout={true}>
+            <DataTable value={webLinks} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="description"
