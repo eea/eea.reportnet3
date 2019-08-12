@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import * as fileDownload from 'js-file-download';
 import isUndefined from 'lodash/isUndefined';
@@ -14,6 +14,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
+import { Growl } from 'primereact/growl';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ProgressSpinner } from 'primereact/progressspinner';
@@ -153,6 +154,12 @@ export const DocumentationDataSet = ({ match, history }) => {
     );
   };
 
+  const onGrowlAlert = message => {
+    growlRef.current.show(message);
+  };
+
+  let growlRef = useRef();
+
   const layout = children => {
     return (
       <MainLayout>
@@ -160,6 +167,7 @@ export const DocumentationDataSet = ({ match, history }) => {
           <BreadCrumb model={breadCrumbItems} home={home} />
         </div>
         <div className="rep-container">{children}</div>
+        <Growl ref={growlRef} />
       </MainLayout>
     );
   };
@@ -179,7 +187,11 @@ export const DocumentationDataSet = ({ match, history }) => {
             className={styles.Dialog}
             dismissableMask={false}
             onHide={onHideHandler}>
-            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHideHandler} />
+            <DocumentFileUpload
+              dataFlowId={match.params.dataFlowId}
+              onUpload={onHideHandler}
+              onGrowlAlert={onGrowlAlert}
+            />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
