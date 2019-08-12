@@ -14,13 +14,11 @@ import { TabMenu } from 'primereact/tabmenu';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-const i18nKey = 'app.components.pages.dataFlowTasks';
-
 export const DataFlowTasks = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [tabMenuItems, setTabMenuItems] = useState([
+  const [tabMenuItems] = useState([
     {
       label: resources.messages['dataFlowAcceptedPendingTab'],
       className: styles.flow_tab,
@@ -112,7 +110,11 @@ export const DataFlowTasks = ({ match, history }) => {
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn navTitle={resources.messages['dataFlow']} search={false} />
+      <DataFlowColumn
+        navTitle={resources.messages['dataFlow']}
+        search={true}
+        buttonTitle={resources.messages['subscribeButton']}
+      />
       <div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabData.map((data, i) => (

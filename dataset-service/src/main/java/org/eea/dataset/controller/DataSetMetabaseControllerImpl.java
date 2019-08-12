@@ -99,6 +99,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     try {
       datasetMetabaseService.addSnapshot(datasetId, description);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
@@ -124,6 +125,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     try {
       datasetMetabaseService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }

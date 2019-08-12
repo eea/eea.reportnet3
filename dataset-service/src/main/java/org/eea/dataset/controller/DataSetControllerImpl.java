@@ -112,6 +112,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
@@ -136,6 +137,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.updateDataset(dataset.getId(), dataset);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
 
     }
@@ -195,6 +197,7 @@ public class DataSetControllerImpl implements DatasetController {
       fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException | EEAException | InterruptedException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
@@ -357,6 +360,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeUpdateProcess(datasetId, records);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -379,6 +383,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordIds);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -403,6 +408,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -428,6 +434,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -474,6 +481,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.insertSchema(datasetId, idDatasetSchema);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
 

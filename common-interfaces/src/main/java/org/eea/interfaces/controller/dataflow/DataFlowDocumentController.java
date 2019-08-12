@@ -1,0 +1,34 @@
+package org.eea.interfaces.controller.dataflow;
+
+
+import org.eea.interfaces.vo.document.DocumentVO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+
+/**
+ * The Interface DataFlowDocumentController.
+ */
+public interface DataFlowDocumentController {
+
+
+  /**
+   * The Interface DataFlowDocumentControllerZuul.
+   */
+  @FeignClient(value = "dataflow", contextId = "dataflowDocument", path = "/dataflowDocument")
+  interface DataFlowDocumentControllerZuul extends DataFlowDocumentController {
+
+  }
+
+  /**
+   * Gets the document by id.
+   *
+   * @param documentId the document id
+   * @return the document by id
+   */
+  @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DocumentVO getDocumentInfoById(@PathVariable("documentId") Long documentId);
+
+}

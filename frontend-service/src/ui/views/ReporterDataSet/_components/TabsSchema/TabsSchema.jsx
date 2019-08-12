@@ -37,8 +37,8 @@ export const TabsSchema = ({
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
                   urlViewer={urlViewer}
-                  positionIdRecord={positionIdRecord}
-                  idSelectedRow={idSelectedRow}
+                  positionIdRecord={table.id === activeIndex ? positionIdRecord : -1}
+                  idSelectedRow={table.id === activeIndex ? idSelectedRow : -1}
                 />
               </div>
             </TabPanel>
@@ -46,7 +46,7 @@ export const TabsSchema = ({
         })
       : null;
   const filterActiveIndex = idTableSchema => {
-    //TODO: Refactorizar este apaño.
+    //TODO: Refactorizar este apaño y CUIDADO con activeIndex (integer cuando es manual, idTable cuando es por validación).
     if (Number.isInteger(idTableSchema)) {
       return tabs ? activeIndex : 0;
     } else {
@@ -55,7 +55,7 @@ export const TabsSchema = ({
   };
 
   return (
-    <TabView activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0} onTabChange={onTabChangeHandler}>
+    <TabView renderActiveOnly={false} activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0} onTabChange={onTabChangeHandler}>
       {tabs}
     </TabView>
   );

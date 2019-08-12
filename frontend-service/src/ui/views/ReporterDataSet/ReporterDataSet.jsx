@@ -42,7 +42,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
-  const [positionIdRecord, setPositionIdRecord] = useState(0);
+  const [positionIdRecord, setPositionIdRecord] = useState(-1);
   const [idSelectedRow, setIdSelectedRow] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
@@ -54,8 +54,6 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   useEffect(() => {
-    console.log('ReporterDataSet useEffect');
-
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowTask'],
@@ -205,7 +203,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const onTabChangeHandler = idTableSchema => {
     setActiveIndex(idTableSchema.index);
     setIdSelectedRow(-1);
-    setPositionIdRecord(0);
+    setPositionIdRecord(-1);
   };
 
   const setSnapshotList = async () => {
@@ -334,11 +332,9 @@ export const ReporterDataSet = ({ match, history }) => {
         <ReporterDataSetContext.Provider
           value={{
             validationsVisibleHandler: null,
-            setTabHandler: null,
-            setPageHandler: posIdRecord => {
+            setValidationHandler: (idTableSchema, posIdRecord, selectedRowId) => {
+              setActiveIndex(idTableSchema);
               setPositionIdRecord(posIdRecord);
-            },
-            setIdSelectedRowHandler: selectedRowId => {
               setIdSelectedRow(selectedRowId);
             }
           }}>
@@ -367,14 +363,15 @@ export const ReporterDataSet = ({ match, history }) => {
             validationsVisibleHandler: () => {
               setVisibleHandler(setValidationsVisible, false);
             },
-            setTabHandler: idTableSchema => {
+            setValidationHandler: (idTableSchema, posIdRecord, selectedRowId) => {
               setActiveIndex(idTableSchema);
-            },
-            setPageHandler: posIdRecord => {
               setPositionIdRecord(posIdRecord);
-            },
-            setIdSelectedRowHandler: selectedRowId => {
               setIdSelectedRow(selectedRowId);
+              // setState({
+              //   activeIndex: idTableSchema,
+              //   positionIdRecord: posIdRecord,
+              //   idSelectedRow: selectedRowId
+              // });
             }
           }}>
           <Dialog

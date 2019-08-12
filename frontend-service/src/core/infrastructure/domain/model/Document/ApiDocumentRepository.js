@@ -22,7 +22,13 @@ const downloadDocumentById = async documentId => {
   return fileData;
 };
 
+const uploadDocument = async (dataFlowId, description, language, file) => {
+  const responseData = await api.uploadDocument(dataFlowId, description, language, file);
+  return responseData;
+};
+
 export const ApiDocumentRepository = {
   all,
-  downloadDocumentById
+  downloadDocumentById,
+  uploadDocument
 };

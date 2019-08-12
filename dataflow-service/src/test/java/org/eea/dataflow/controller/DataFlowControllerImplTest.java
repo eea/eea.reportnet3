@@ -13,7 +13,6 @@ import java.util.List;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -305,39 +304,56 @@ public class DataFlowControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Creates the data flow throw.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createDataFlowThrow() throws EEAException {
-    dataFlowControllerImpl.createDataFlow("123", "123", new Date(-1));
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date(-1));
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 
+  /**
+   * Creates the data flow null throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createDataFlowNullThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the data flow date today throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createDataFlowDateTodayThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date());
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the data flow.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
   @Test
   public void createDataFlow() throws EEAException, ParseException {
-    new Date();
+    DataFlowVO dataflowVO = new DataFlowVO();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date = sdf.parse("2914-09-15");
-    doNothing().when(dataflowService).createDataFlow(Mockito.any());
-    dataFlowControllerImpl.createDataFlow("123", "123", date);
-    Mockito.verify(dataflowService, times(1)).createDataFlow(Mockito.any());
-  }
-
-
-  @Test(expected = ResponseStatusException.class)
-  public void getDocumentByIdExceptionTest() throws EEAException {
-    dataFlowControllerImpl.getDocumentById(null);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void getDocumentByIdException2Test() throws EEAException {
-    doThrow(new EEAException()).when(dataflowService).getDocumentById(Mockito.any());
-    dataFlowControllerImpl.getDocumentById(1L);
-  }
-
-  @Test
-  public void getDocumentByIdSuccessTest() throws EEAException {
-    DocumentVO document = new DocumentVO();
-    document.setId(1L);
-    when(dataflowService.getDocumentById(Mockito.any())).thenReturn(document);
-    assertEquals("fail", document, dataFlowControllerImpl.getDocumentById(1L));
+    dataflowVO.setDeadlineDate(date);
+    doNothing().when(dataflowService).createDataFlow(dataflowVO);
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
 }

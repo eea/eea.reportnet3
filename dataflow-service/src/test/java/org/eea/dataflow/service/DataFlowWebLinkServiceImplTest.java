@@ -1,5 +1,6 @@
 package org.eea.dataflow.service;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * The Class DataFlowServiceImplTest.
@@ -96,7 +98,8 @@ public class DataFlowWebLinkServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void removeWebLinkException() throws EEAException {
-    dataflowServiceWebLinkImpl.removeWebLink(Mockito.any());
+    doThrow(EmptyResultDataAccessException.class).when(webLinkRepository).deleteById(1L);
+    dataflowServiceWebLinkImpl.removeWebLink(1L);
   }
 
   /**
@@ -106,9 +109,7 @@ public class DataFlowWebLinkServiceImplTest {
    */
   @Test()
   public void removeWebLink() throws EEAException {
-    when(webLinkRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Weblink()));
     dataflowServiceWebLinkImpl.removeWebLink(Mockito.anyLong());
-    Mockito.verify(webLinkRepository, times(1)).findById(Mockito.anyLong());
   }
 
   /**

@@ -1,13 +1,18 @@
 package org.eea.ums.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
-import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
 import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,20 +37,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   @Override
-  public List<UserGroupVO> getUserGroupInfo(String securityToken) {
+  public List<UserVO> getUsers(@Nullable String userId) {
     throw new UnsupportedOperationException("Method Not implemented yet");
   }
 
   @Override
-  public List<UserVO> getUsers(@Nullable String userId, String securityToken) {
+  public void createResourceInstance(String userGroupName, Map<String, String> attributes) {
     throw new UnsupportedOperationException("Method Not implemented yet");
   }
 
-  @Override
-  public void createUserGroup(String userGroupName, String securityToken,
-      Map<String, String> attributes) {
-    throw new UnsupportedOperationException("Method Not implemented yet");
-  }
 
   @Override
   public void addUserToUserGroup(String userId, String groupId, String securityToken) {
@@ -55,5 +55,26 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void removeUserFromUserGroup(String userId, String groupId, String securityToken) {
     throw new UnsupportedOperationException("Method Not implemented yet");
+  }
+
+  @Override
+  public List<ResourceAccessVO> getResourcesByUser(String userId) {
+    GroupInfo[] groupInfos = keycloakConnectorService.getGroupsByUser(userId);
+    List<ResourceAccessVO> result = new ArrayList<>();
+    if (null != groupInfos && groupInfos.length > 0) {
+      for (GroupInfo group : groupInfos) {
+        //name has the format <ResourceName>-<ResourceId>-<RoleName>
+        if (!StringUtils.isBlank(group.getName())) {
+          String name = group.getName();
+          String[] splittedName = name.split("-");
+          ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+          resourceAccessVO.setResource(ResourceEnum.fromValue(splittedName[0]));
+          resourceAccessVO.setId(Long.valueOf(splittedName[1]));
+          resourceAccessVO.setRole(SecurityRoleEnum.fromValue(splittedName[2]));
+          result.add(resourceAccessVO);
+        }
+      }
+    }
+    return result;
   }
 }

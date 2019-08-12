@@ -1,9 +1,5 @@
 server:
-  port: 9040
+  port: 9040        
 spring:
   application:
     name: document
-  servlet:
-    multipart:
-      max-file-size: ${spring.application.servlet.multipart.max-file-size:100MB}
-      max-request-size: ${spring.application.servlet.multipart.max-request-size:500MB}
