@@ -13,6 +13,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { TabMenu } from 'primereact/tabmenu';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+import { DataFlowService } from 'core/services/DataFlow';
 
 export const DataFlowTasks = ({ match, history }) => {
   const resources = useContext(ResourcesContext);
@@ -34,53 +35,29 @@ export const DataFlowTasks = ({ match, history }) => {
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
   const [tabData, setTabData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingContent, setpendingContent] = useState([]);
+  const [acceptedContent, setacceptedContent] = useState([]);
+  const [completedContent, setcompletedContent] = useState([]);
   const home = {
     icon: resources.icons['home'],
     command: () => history.push('/')
   };
 
-  const dataFetch = () => {
+  const dataFetch = async () => {
     setLoading(true);
-    const c = {
-      listKeys: [],
-      apiUrl: '',
-      userId: 2,
-      queryString: {}
-    };
-    if (tabMenuActiveItem.tabKey === 'pending') {
-      c.listKeys.push('pending');
-      c.listKeys.push('accepted');
-      c.apiUrl = window.env.REACT_APP_JSON
-        ? '/jsons/DataFlaws2.json'
-        : `${config.loadDataFlowTaskPendingAcceptedAPI.url}${c.userId}`;
-      c.queryString = {};
-    } else {
-      c.listKeys.push('completed');
-      c.apiUrl = '';
+    const userId = 2;
+    try {
+      const pendingResponse = await DataFlowService.pending(userId);
+      const acceptedResponse = await DataFlowService.accepted(userId);
+      const completedResponse = await DataFlowService.completed(userId);
+      setpendingContent(pendingResponse);
+      setacceptedContent(acceptedResponse);
+      setcompletedContent(completedResponse);
+    } catch (error) {
+      console.error('dataFetch error: ', error);
     }
 
-    HTTPRequester.get({
-      url: c.apiUrl,
-      queryString: c.queryString
-    })
-      .then(response => {
-        setTabData(
-          c.listKeys.map(key => {
-            return {
-              listContent: response.data.filter(data => data.userRequestStatus.toLowerCase() === key),
-              listType: key,
-              listTitle: resources.messages[`${key}DataFlowTitle`],
-              listDescription: resources.messages[`${key}DataFlowText`]
-            };
-          })
-        );
-        setLoading(false);
-      })
-      .catch(error => {
-        console.log('error', error);
-        setLoading(false);
-        return error;
-      });
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -115,9 +92,31 @@ export const DataFlowTasks = ({ match, history }) => {
       />
       <div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
-        {tabData.map((data, i) => (
-          <DataFlowList {...data} key={i} dataFetch={dataFetch} />
-        ))}
+        <div>
+          {tabMenuActiveItem.tabKey === 'pending' ? (
+            <>
+              <DataFlowList
+                listTitle={resources.messages.pendingDataFlowTitle}
+                listDescription={resources.messages.pendingDataFlowText}
+                listContent={pendingContent}
+                dataFetch={dataFetch}
+              />
+              <DataFlowList
+                listTitle={resources.messages.acceptedDataFlowTitle}
+                listDescription={resources.messages.acceptedDataFlowText}
+                listContent={acceptedContent}
+                dataFetch={dataFetch}
+              />
+            </>
+          ) : (
+            <DataFlowList
+              listTitle={resources.messages.completedDataFlowTitle}
+              listDescription={resources.messages.completedDataFlowText}
+              listContent={completedContent}
+              dataFetch={dataFetch}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

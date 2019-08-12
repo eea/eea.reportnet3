@@ -21,7 +21,7 @@
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	},	
 	"loadDataFlowTaskPendingAcceptedAPI": {
-		"url": "/dataflow/pendingaccepted/"
+		"url": "/dataflow/pendingaccepted/{:userId}"
 	},
 	"loadDataSetsByDataflowID": {
 		"url": "/dataflow/"

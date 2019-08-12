@@ -3,9 +3,32 @@ import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
 
 export const api = {
-  dataflows: async () => {
-    const response = await HTTPRequester.get('/characters.json');
-    return response.json();
+  pendingDataFlows: async userId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlaws2.json'
+        : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  acceptedDataFlows: async userId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlaws2.json'
+        : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  completedDataFlows: async userId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlaws2.json'
+        : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
+      queryString: {}
+    });
+    return response.data;
   },
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const response = await HTTPRequester.get({
