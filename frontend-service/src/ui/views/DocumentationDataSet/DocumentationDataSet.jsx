@@ -108,9 +108,16 @@ export const DocumentationDataSet = ({ match, history }) => {
     //#end region Button initialization
   }, []);
 
-  const onDownloadDocument = async rowData => {
-    setFileName(createFileName(rowData.title));
-    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+  useEffect(() => {
+    if (!isUndefined(fileToDownload)) {
+      fileDownload(fileToDownload, fileName);
+    }
+  }, [fileToDownload]);
+
+  const onRefreshDocumentAndWebLinks = () => {
+    setIsLoading(true);
+    setDocumentsAndWebLinks();
+    setIsLoading(false);
   };
 
   const onHide = () => {
@@ -174,7 +181,7 @@ export const DocumentationDataSet = ({ match, history }) => {
             <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} />
           </Dialog>
           {
-            <DataTable value={documents} autoLayout={true}>
+            <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="title"
@@ -214,7 +221,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
         <TabPanel header={resources.messages['webLinks']}>
           {
-            <DataTable value={webLinks} autoLayout={true}>
+            <DataTable value={webLinks} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="description"

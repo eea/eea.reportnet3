@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect } from 'react';
 
 import primeIcons from 'assets/conf/prime.icons';
@@ -56,7 +57,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
             render={({ errors, touched, isSubmitting }) => (
               <Form className={styles.createForm}>
                 <div
-                  className={`${styles.createInputAndButtonWrapper} ${
+                  className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
                     !isEmpty(errors.createSnapshotDescription) && touched.createSnapshotDescription ? ' error' : ''
                   }`}>
                   <Field

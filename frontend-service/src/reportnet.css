@@ -193,6 +193,12 @@ body {
   padding-right: 1rem;
 }
 
+.p-button-icon-only .p-button-icon-left,
+.p-button-text-icon-left .p-button-icon-left,
+.p-button-text-icon-right .p-button-icon-right {
+  margin-top: -0.4em;
+}
+
 @media (min-width: 480px) {
   .rep-container {
     padding-left: 1rem;
@@ -1803,6 +1809,8 @@ input:focus {
 form .error {
   color: var(--errors);
 }
+
+/* buttons */
 
 @keyframes p-progress-spinner-color {
   0% {
