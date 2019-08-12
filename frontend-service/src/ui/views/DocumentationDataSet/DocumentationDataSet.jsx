@@ -114,12 +114,6 @@ export const DocumentationDataSet = ({ match, history }) => {
     }
   }, [fileToDownload]);
 
-  const onRefreshDocumentAndWebLinks = () => {
-    setIsLoading(true);
-    setDocumentsAndWebLinks();
-    setIsLoading(false);
-  };
-
   const onHide = () => {
     setIsUploadDialogVisible(false);
     onLoadDocumentsAndWebLinks();
