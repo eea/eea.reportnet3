@@ -114,6 +114,11 @@ export const DocumentationDataSet = ({ match, history }) => {
     }
   }, [fileToDownload]);
 
+  const onDownloadDocument = async rowData => {
+    setFileName(createFileName(rowData.title));
+    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+  };
+
   const onHide = () => {
     setIsUploadDialogVisible(false);
     onLoadDocumentsAndWebLinks();
@@ -121,8 +126,8 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
-    setWebLinks(await WebLinkService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
-    setDocuments(await DocumentService.all(`${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`));
+    setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
+    setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
     setIsLoading(false);
   };
 

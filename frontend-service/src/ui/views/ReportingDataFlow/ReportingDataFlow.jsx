@@ -15,6 +15,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { SplitButton } from 'primereact/splitbutton';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+import { getUrl } from 'core/infrastructure/getUrl';
 
 /* import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json"; */
 //import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
@@ -34,7 +35,9 @@ export const ReportingDataFlow = ({ history, match }) => {
     HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_DataflowById.json'
-        : `${config.loadDataSetsByDataflowID.url}${match.params.dataFlowId}`,
+        : getUrl(config.loadDataSetsByDataflowID.url, {
+            dataFlowId: match.params.dataFlowId
+          }),
       queryString: {}
     })
       .then(response => {

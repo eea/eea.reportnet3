@@ -3,10 +3,6 @@ import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
 
 export const api = {
-  dataflows: async () => {
-    const response = await HTTPRequester.get('/characters.json');
-    return response.json();
-  },
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -91,9 +87,13 @@ export const api = {
       return false;
     }
   },
-  documents: async url => {
+  documents: async dataFlowId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/list-of-documents.json' : url,
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/list-of-documents.json'
+        : getUrl(config.loadDataSetsByDataflowID.url, {
+            dataFlowId: dataFlowId
+          }),
       queryString: {}
     });
     return response.data.documents;
@@ -182,9 +182,13 @@ export const api = {
     return response.data;
   },
 
-  webLinks: async url => {
+  webLinks: async dataFlowId => {
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/list-of-documents.json' : url,
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/list-of-documents.json'
+        : getUrl(config.loadDataSetsByDataflowID.url, {
+            dataFlowId: dataFlowId
+          }),
       queryString: {}
     });
     return response.data.weblinks;
