@@ -41,7 +41,6 @@
   font-size: 1rem;
   margin-bottom: 1rem;
   border-radius: 3px;
-  border: 1px solid var(--grey-25);
   box-sizing: border-box;
 }
 .loginBoxContainer .loginBox form fieldset.buttonHolder {
