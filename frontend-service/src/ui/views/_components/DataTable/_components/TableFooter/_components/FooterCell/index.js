@@ -1,0 +1,1 @@
+export { FooterCell } from './FooterCell';

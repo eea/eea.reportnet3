@@ -6,7 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './ValidationViewer.module.css';
 
-import { DataTable } from 'primereact/datatable';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Column } from 'primereact/column';
 
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';

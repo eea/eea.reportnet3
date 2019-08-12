@@ -11,7 +11,7 @@ import { config } from 'assets/conf';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'primereact/dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { IconComponent } from 'ui/views/_components/IconComponent';
