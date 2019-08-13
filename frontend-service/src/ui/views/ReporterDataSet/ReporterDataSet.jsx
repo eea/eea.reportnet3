@@ -12,10 +12,10 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { ValidationViewer } from './_components/ValidationViewer';
@@ -270,7 +270,7 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(

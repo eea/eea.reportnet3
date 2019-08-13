@@ -16,8 +16,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView, TabPanel } from 'primereact/tabview';
 
 import { DocumentService } from 'core/services/Document';
@@ -163,7 +163,7 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   if (isLoading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   if (documents) {
