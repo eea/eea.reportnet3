@@ -8,7 +8,7 @@ import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 
-import DomHandler from './DomHandler';
+import DomHandler from 'ui/DomHandler';
 
 export class CustomFileUpload extends Component {
   static defaultProps = {

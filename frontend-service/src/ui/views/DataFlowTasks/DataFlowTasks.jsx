@@ -56,7 +56,6 @@ export const DataFlowTasks = ({ match, history }) => {
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
-
     setLoading(false);
   };
 
@@ -92,31 +91,34 @@ export const DataFlowTasks = ({ match, history }) => {
       />
       <div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
-        <div>
-          {tabMenuActiveItem.tabKey === 'pending' ? (
-            <>
-              <DataFlowList
-                listTitle={resources.messages.pendingDataFlowTitle}
-                listDescription={resources.messages.pendingDataFlowText}
-                listContent={pendingContent}
-                dataFetch={dataFetch}
-              />
-              <DataFlowList
-                listTitle={resources.messages.acceptedDataFlowTitle}
-                listDescription={resources.messages.acceptedDataFlowText}
-                listContent={acceptedContent}
-                dataFetch={dataFetch}
-              />
-            </>
-          ) : (
+        {tabMenuActiveItem.tabKey === 'pending' ? (
+          <>
+            <DataFlowList
+              listTitle={resources.messages.pendingDataFlowTitle}
+              listDescription={resources.messages.pendingDataFlowText}
+              listContent={pendingContent}
+              dataFetch={dataFetch}
+              listType="pending"
+            />
+            <DataFlowList
+              listTitle={resources.messages.acceptedDataFlowTitle}
+              listDescription={resources.messages.acceptedDataFlowText}
+              listContent={acceptedContent}
+              dataFetch={dataFetch}
+              listType="accepted"
+            />
+          </>
+        ) : (
+          <>
             <DataFlowList
               listTitle={resources.messages.completedDataFlowTitle}
               listDescription={resources.messages.completedDataFlowText}
               listContent={completedContent}
               dataFetch={dataFetch}
+              listType="completed"
             />
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

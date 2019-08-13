@@ -24,7 +24,7 @@
 		"url": "/dataflow/pendingaccepted/{:userId}"
 	},
 	"loadDataSetsByDataflowID": {
-		"url": "/dataflow/"
+		"url": "/dataflow/{:dataFlowId}"
 	},		
 	"loadDataTableAPI": {
 		"url": "/dataset/{:dataSetId}/loadTableData/"
