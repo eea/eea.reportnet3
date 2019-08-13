@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
 
-import { Button } from 'primereact/button';
+import { Button } from 'ui/views/_components/Button';
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 
@@ -344,7 +344,7 @@ export class CustomFileUpload extends Component {
           let size = <div>{this.formatSize(file.size)}</div>;
           let removeButton = (
             <div>
-              <Button type="button" icon="pi pi-times" onClick={() => this.remove(index)} />
+              <Button type="button" icon="cancel" onClick={() => this.remove(index)} />
             </div>
           );
 
@@ -370,7 +370,7 @@ export class CustomFileUpload extends Component {
       uploadButton = (
         <Button
           label={this.props.uploadLabel}
-          icon="pi pi-upload"
+          icon="upload"
           onClick={this.upload}
           disabled={this.props.disabled || !this.hasFiles()}
         />
@@ -378,7 +378,7 @@ export class CustomFileUpload extends Component {
       cancelButton = (
         <Button
           label={this.props.cancelLabel}
-          icon="pi pi-times"
+          icon="cancel"
           onClick={this.clear}
           disabled={this.props.disabled || !this.hasFiles()}
         />

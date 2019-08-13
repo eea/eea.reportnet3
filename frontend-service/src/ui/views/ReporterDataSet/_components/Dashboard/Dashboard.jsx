@@ -6,9 +6,8 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './Dashboard.module.css';
 
 import { Chart } from 'primereact/chart';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
+import { Spinner } from 'ui/views/_components/Spinner';
 import { DataSetService } from 'core/services/DataSet';
 
 const Dashboard = withRouter(
@@ -101,7 +100,7 @@ const Dashboard = withRouter(
 
     const renderDashboard = () => {
       if (isLoading) {
-        return <ProgressSpinner />;
+        return <Spinner />;
       } else {
         if (
           !isUndefined(dashboardData.datasets) &&

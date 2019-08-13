@@ -14,7 +14,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
@@ -59,49 +59,49 @@ const DataViewer = withRouter(
         setDefaultButtonsList([
           {
             label: resources.messages['import'],
-            icon: '0',
+            icon: 'export',
             group: 'left',
             disabled: false,
             onClick: () => setImportDialogVisible(true)
           },
           {
             label: resources.messages['deleteTable'],
-            icon: '2',
+            icon: 'trash',
             group: 'left',
             disabled: false,
             onClick: () => onSetVisible(setDeleteDialogVisible, true)
           },
           {
             label: resources.messages['visibility'],
-            icon: '6',
+            icon: 'eye',
             group: 'left',
             disabled: true,
             onClick: null
           },
           {
             label: resources.messages['filter'],
-            icon: '7',
+            icon: 'filter',
             group: 'left',
             disabled: true,
             onClick: null
           },
           {
             label: resources.messages['group-by'],
-            icon: '8',
+            icon: 'group-by',
             group: 'left',
             disabled: true,
             onClick: null
           },
           {
             label: resources.messages['sort'],
-            icon: '9',
+            icon: 'sort',
             group: 'left',
             disabled: true,
             onClick: null
           },
           {
             label: resources.messages['refresh'],
-            icon: '11',
+            icon: 'refresh',
             group: 'right',
             disabled: true,
             onClick: onRefresh

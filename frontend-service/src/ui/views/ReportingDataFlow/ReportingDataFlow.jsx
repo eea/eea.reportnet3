@@ -4,14 +4,13 @@ import styles from './ReportingDataFlow.module.css';
 
 import { config } from 'assets/conf';
 
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
-import { ProgressSpinner } from 'primereact/progressspinner';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'primereact/splitbutton';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
@@ -78,7 +77,7 @@ export const ReportingDataFlow = ({ history, match }) => {
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(
