@@ -10,7 +10,7 @@ import { BreadCrumb } from 'primereact/breadcrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';

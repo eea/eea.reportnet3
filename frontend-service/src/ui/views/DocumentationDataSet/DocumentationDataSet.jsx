@@ -12,7 +12,7 @@ import { BreadCrumb } from 'primereact/breadcrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';

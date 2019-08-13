@@ -12,7 +12,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const ConfirmDialog = React.memo(
