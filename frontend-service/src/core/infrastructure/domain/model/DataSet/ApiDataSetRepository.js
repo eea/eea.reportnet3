@@ -114,7 +114,7 @@ const schemaById = async dataFlowId => {
           DataTableFieldDTO.type
         );
       });
-      return new DataSetTableRecord(dataTableRecordDTO.idRecordSchema, fields);
+      return new DataSetTableRecord(dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
     });
     return new DataSetTable(
       null,
@@ -167,7 +167,8 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
         return field;
       });
 
-      record.id = dataTableRecordDTO.idRecordSchema;
+      record.recordId = dataTableRecordDTO.id;
+      record.recordSchemaId = dataTableRecordDTO.idRecordSchema;
       record.fields = fields;
 
       if (!isNull(dataTableRecordDTO.recordValidations)) {

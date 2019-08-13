@@ -251,7 +251,7 @@ const DataViewer = withRouter(
               fieldValidations: field.validations
             };
           });
-          arrayDataFields.push({ fieldData: { id: record.id }, fieldValidations: null });
+          arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
           const arrayDataAndValidations = {
             dataRow: arrayDataFields,
             recordValidations
