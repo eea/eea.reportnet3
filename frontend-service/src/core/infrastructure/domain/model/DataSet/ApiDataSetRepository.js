@@ -1,44 +1,12 @@
+import isNull from 'lodash/isNull';
+
 import { api } from 'core/infrastructure/api';
 import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
 import { DataSet } from 'core/domain/model/DataSet/DataSet';
 import { DataSetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
 import { DataSetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
 import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
-
-const dataSetSchemaById = async dataFlowId => {
-  const dataSetSchemaDTO = await api.dataSetSchemaById(dataFlowId);
-
-  const dataSet = new DataSet();
-  dataSet.dataSetSchemaId = dataSetSchemaDTO.idDatasetSchema;
-  dataSet.dataSetSchemaName = dataSetSchemaDTO.nameDataSetSchema;
-
-  const tables = dataSetSchemaDTO.tableSchemas.map(dataSetTableDTO => {
-    const records = [dataSetTableDTO.recordSchema].map(dataSetRecordDTO => {
-      const fields = dataSetRecordDTO.fieldSchema.map(dataSetFieldDTO => {
-        return new DataSetTableField(
-          dataSetFieldDTO.id,
-          dataSetFieldDTO.idRecord,
-          dataSetFieldDTO.name,
-          dataSetFieldDTO.type
-        );
-      });
-      return new DataSetTableRecord(dataSetRecordDTO.idRecordSchema, fields);
-    });
-    return new DataSetTable(
-      null,
-      dataSetTableDTO.idTableSchema,
-      dataSetTableDTO.nameTableSchema,
-      null,
-      null,
-      null,
-      records
-    );
-  });
-
-  dataSet.tables = tables;
-
-  return dataSet;
-};
+import { Validation } from 'core/domain/model/Validation/Validation';
 
 const deleteDataById = async dataSetId => {
   const dataDeleted = await api.deleteDataSetDataById(dataSetId);
@@ -129,6 +97,98 @@ const errorStatisticsById = async dataSetId => {
   return dataSet;
 };
 
+const schemaById = async dataFlowId => {
+  const dataSetSchemaDTO = await api.dataSetSchemaById(dataFlowId);
+
+  const dataSet = new DataSet();
+  dataSet.dataSetSchemaId = dataSetSchemaDTO.idDatasetSchema;
+  dataSet.dataSetSchemaName = dataSetSchemaDTO.nameDataSetSchema;
+
+  const tables = dataSetSchemaDTO.tableSchemas.map(dataSetTableDTO => {
+    const records = [dataSetTableDTO.recordSchema].map(dataTableRecordDTO => {
+      const fields = dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+        return new DataSetTableField(
+          DataTableFieldDTO.id,
+          DataTableFieldDTO.idRecord,
+          DataTableFieldDTO.name,
+          DataTableFieldDTO.type
+        );
+      });
+      return new DataSetTableRecord(dataTableRecordDTO.idRecordSchema, fields);
+    });
+    return new DataSetTable(
+      null,
+      dataSetTableDTO.idTableSchema,
+      dataSetTableDTO.nameTableSchema,
+      null,
+      null,
+      null,
+      records
+    );
+  });
+
+  dataSet.tables = tables;
+
+  return dataSet;
+};
+
+const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
+  const tableDataDTO = await api.dataSetTableDataById(dataSetId, tableSchemaId, pageNum, pageSize, fields);
+  const table = new DataSetTable();
+
+  if (tableDataDTO.totalRecords > 0) {
+    table.tableSchemaId = tableDataDTO.idTableSchema;
+    table.totalRecords = tableDataDTO.totalRecords;
+
+    let field, record;
+
+    const records = tableDataDTO.records.map(dataTableRecordDTO => {
+      record = new DataSetTableRecord();
+      const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
+        field = new DataSetTableField();
+        field.fieldId = DataTableFieldDTO.id;
+        field.fieldSchemaId = DataTableFieldDTO.idFieldSchema;
+        field.recordId = dataTableRecordDTO.idRecordSchema;
+        field.name = DataTableFieldDTO.name;
+        field.type = DataTableFieldDTO.type;
+        field.value = DataTableFieldDTO.value;
+
+        if (!isNull(DataTableFieldDTO.fieldValidations)) {
+          field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
+            return new Validation(
+              fieldValidation.id,
+              fieldValidation.validation.levelError,
+              fieldValidation.validation.typeEntity,
+              fieldValidation.validation.validationDate,
+              fieldValidation.validation.message
+            );
+          });
+        }
+        return field;
+      });
+
+      record.id = dataTableRecordDTO.idRecordSchema;
+      record.fields = fields;
+
+      if (!isNull(dataTableRecordDTO.recordValidations)) {
+        record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
+          return new Validation(
+            recordValidation.id,
+            recordValidation.validation.levelError,
+            recordValidation.validation.typeEntity,
+            recordValidation.validation.validationDate,
+            recordValidation.validation.message
+          );
+        });
+      }
+      return record;
+    });
+
+    table.records = records;
+  }
+  return table;
+};
+
 const validateDataById = async dataSetId => {
   const dataValidation = await api.validateDataSetById(dataSetId);
   return dataValidation;
@@ -146,11 +206,12 @@ const transposeMatrix = matrix => {
 };
 
 export const ApiDataSetRepository = {
-  dataSetSchemaById,
+  schemaById,
   deleteDataById,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,
   errorStatisticsById,
+  tableDataById,
   validateDataById
 };

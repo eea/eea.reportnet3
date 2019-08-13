@@ -4,8 +4,6 @@ import moment from 'moment';
 
 import styles from './ReporterDataSet.module.css';
 
-import { config } from 'assets/conf';
-
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -106,7 +104,7 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   const onLoadDataSetSchema = async () => {
-    const dataSetSchema = await DataSetService.dataSetSchemaById(dataFlowId);
+    const dataSetSchema = await DataSetService.schemaById(dataFlowId);
     const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
 
     setDatasetTitle(dataSetSchema.dataSetSchemaName);
@@ -295,7 +293,6 @@ export const ReporterDataSet = ({ match, history }) => {
           selectedRowId={selectedRowId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
-          urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
         />
       </ReporterDataSetContext.Provider>
       <Dialog

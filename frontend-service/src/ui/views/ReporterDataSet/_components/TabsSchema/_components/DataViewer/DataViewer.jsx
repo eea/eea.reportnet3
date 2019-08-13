@@ -4,6 +4,8 @@ import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'assets/conf';
+
 import styles from './DataViewer.module.css';
 
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
@@ -16,8 +18,8 @@ import { Dialog } from 'primereact/dialog';
 import { Growl } from 'primereact/growl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
+import { getUrl } from 'core/infrastructure/getUrl';
 import { DataSetService } from 'core/services/DataSet';
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const DataViewer = withRouter(
   React.memo(
@@ -28,7 +30,6 @@ const DataViewer = withRouter(
       tableId,
       tableName,
       tableSchemaColumns,
-      urlViewer,
       match: {
         params: { dataSetId }
       }
@@ -177,36 +178,30 @@ const DataViewer = withRouter(
         }
       };
 
-      const onFetchData = (sField, sOrder, fRow, nRows) => {
+      const onFetchData = async (sField, sOrder, fRow, nRows) => {
         setLoading(true);
 
-        let queryString = {
-          idTableSchema: tableId,
-          pageNum: Math.floor(fRow / nRows),
-          pageSize: nRows
-        };
-
+        let fields;
         if (!isUndefined(sField) && sField !== null) {
-          queryString.fields = `${sField}:${sOrder}`;
+          fields = `${sField}:${sOrder}`;
         }
 
-        const dataPromise = HTTPRequester.get({
-          url: window.env.REACT_APP_JSON ? '/jsons/response_dataset_values2.json' : urlViewer,
-          queryString: queryString
-        });
-        dataPromise
-          .then(response => {
-            filterDataResponse(response.data);
-            if (response.data.totalRecords !== totalRecords) {
-              setTotalRecords(response.data.totalRecords);
-            }
+        const tableData = await DataSetService.tableDataById(
+          dataSetId,
+          tableId,
+          Math.floor(fRow / nRows),
+          nRows,
+          fields
+        );
 
-            setLoading(false);
-          })
-          .catch(error => {
-            console.log(error);
-            return error;
-          });
+        if (!isUndefined(tableData.records)) {
+          filterDataResponse(tableData);
+        }
+        if (tableData.totalRecords !== totalRecords) {
+          setTotalRecords(tableData.totalRecords);
+        }
+
+        setLoading(false);
       };
 
       const onHide = () => {
@@ -249,11 +244,11 @@ const DataViewer = withRouter(
 
       const filterDataResponse = data => {
         const dataFiltered = data.records.map(record => {
-          const recordValidations = record.recordValidations;
+          const recordValidations = record.validations;
           const arrayDataFields = record.fields.map(field => {
             return {
-              fieldData: { [field.idFieldSchema]: field.value },
-              fieldValidations: field.fieldValidations
+              fieldData: { [field.fieldSchemaId]: field.value },
+              fieldValidations: field.validations
             };
           });
           arrayDataFields.push({ fieldData: { id: record.id }, fieldValidations: null });
@@ -269,9 +264,9 @@ const DataViewer = withRouter(
       };
 
       //Template for Record validation
-      const validationsTemplate = (fetchedData, column) => {
-        if (fetchedData.recordValidations) {
-          const validations = fetchedData.recordValidations.map(val => val.validation);
+      const validationsTemplate = (recordData, column) => {
+        if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
+          const validations = recordData.recordValidations;
 
           let message = '';
           validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
@@ -310,8 +305,8 @@ const DataViewer = withRouter(
       //Template for Field validation
       const dataTemplate = (rowData, column) => {
         let row = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-        if (row !== null && row && row.fieldValidations !== null) {
-          const validations = row.fieldValidations.map(val => val.validation);
+        if (row !== null && row && row.fieldValidations !== null && !isUndefined(row.fieldValidations)) {
+          const validations = row.fieldValidations;
           let message = [];
           validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
           let levelError = '';
@@ -414,7 +409,10 @@ const DataViewer = withRouter(
               multiple={false}
               name="file"
               onUpload={onUpload}
-              url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${tableId}`}
+              url={`${window.env.REACT_APP_BACKEND}${getUrl(config.loadDataTableAPI.url, {
+                dataSetId: dataSetId,
+                tableId: tableId
+              })}`}
             />
           </Dialog>
 
