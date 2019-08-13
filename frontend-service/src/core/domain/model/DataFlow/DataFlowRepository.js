@@ -1,7 +1,9 @@
 import { ApiDataFlowRepository } from 'core/infrastructure/domain/model/DataFlow/ApiDataFlowRepository';
 
 export const DataFlowRepository = {
-  all: () => Promise.reject('[DataFlowRepository#all] must be implemented')
+  pending: () => Promise.reject('[DataFlowRepository#pending] must be implemented'),
+  accepted: () => Promise.reject('[DataFlowRepository#accepted] must be implemented'),
+  completed: () => Promise.reject('[DataFlowRepository#completed] must be implemented')
 };
 
 export const dataFlowRepository = Object.assign({}, DataFlowRepository, ApiDataFlowRepository);

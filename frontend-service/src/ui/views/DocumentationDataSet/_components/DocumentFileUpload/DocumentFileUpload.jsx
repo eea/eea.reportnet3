@@ -4,7 +4,6 @@ import * as Yup from 'yup';
 import { isPlainObject, isEmpty } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { DocumentService } from 'core/services/Document';
-import { Growl } from 'primereact/growl';
 
 import styles from './DocumentFileUpload.module.css';
 
