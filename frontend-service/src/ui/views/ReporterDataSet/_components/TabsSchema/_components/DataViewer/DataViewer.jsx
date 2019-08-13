@@ -16,6 +16,7 @@ import { Dialog } from 'primereact/dialog';
 import { Growl } from 'primereact/growl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
+import { DataSetService } from 'core/services/DataSet';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const DataViewer = withRouter(
@@ -168,16 +169,12 @@ const DataViewer = withRouter(
         onFetchData(sortField, sortOrder, event.first, event.rows);
       };
 
-      const onConfirmDelete = () => {
+      const onConfirmDelete = async () => {
         setDeleteDialogVisible(false);
-        HTTPRequester.delete({
-          url: window.env.REACT_APP_JSON
-            ? `/dataset/${dataSetId}/deleteImportTable/${tableId}`
-            : `/dataset/${dataSetId}/deleteImportTable/${tableId}`,
-          queryString: {}
-        }).then(res => {
+        const dataDeleted = await DataSetService.deleteTableDataById(dataSetId);
+        if (dataDeleted) {
           setIsDataDeleted(true);
-        });
+        }
       };
 
       const onFetchData = (sField, sOrder, fRow, nRows) => {
