@@ -13,7 +13,6 @@ export const Button = ({ disabled, icon, iconClasses, label, onClick, className,
       className={className}
       icon={iconClassName}
       label={label}
-      // style={{ marginRight: '.25em' }}
       style={style}
       onClick={onClick}
       disabled={disabled}
