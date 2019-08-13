@@ -14,9 +14,9 @@ function setConnected(connected) {
 }
 
 function connect() {
-    var socket = new WebSocket("ws://localhost:9020/communication/reportnet-websocket?" + $("#token")[0].value);
+    var socket = new WebSocket("ws://localhost:9020/communication/reportnet-websocket");
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    stompClient.connect({token: $("#token")[0].value}, function (frame) {
         setConnected(true);
         $("#userName").text(frame.headers["user-name"]);
         console.log('Connected: ' + frame);
