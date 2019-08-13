@@ -6,7 +6,7 @@ import styles from './ReporterDataSet.module.css';
 
 import { config } from 'assets/conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';

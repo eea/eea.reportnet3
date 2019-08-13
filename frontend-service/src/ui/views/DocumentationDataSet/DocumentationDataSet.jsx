@@ -8,7 +8,7 @@ import styles from './DocumentationDataSet.module.scss';
 
 import { config } from 'assets/conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
