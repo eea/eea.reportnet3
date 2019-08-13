@@ -11,7 +11,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { Button } from 'primereact/button';
-import { ProgressSpinner } from 'primereact/progressspinner';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'primereact/splitbutton';
 
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
@@ -78,7 +78,7 @@ export const ReportingDataFlow = ({ history, match }) => {
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(

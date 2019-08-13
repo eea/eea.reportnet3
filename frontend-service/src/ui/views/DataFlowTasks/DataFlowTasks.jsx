@@ -6,8 +6,8 @@ import { BreadCrumb } from 'primereact/breadcrumb';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DataFlowList } from './DataFlowList';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
 import { DataFlowService } from 'core/services/DataFlow';
@@ -75,7 +75,7 @@ export const DataFlowTasks = ({ match, history }) => {
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(
