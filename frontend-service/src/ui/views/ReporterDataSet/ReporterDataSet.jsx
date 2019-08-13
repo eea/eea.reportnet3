@@ -137,28 +137,28 @@ export const ReporterDataSet = ({ match, history }) => {
     setButtonsList([
       {
         label: resources.messages['export'],
-        icon: '1',
+        icon: 'import',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['deleteDatasetData'],
-        icon: '2',
+        icon: 'trash',
         group: 'left',
         disabled: false,
         onClick: () => onSetVisible(setDeleteDialogVisible, true)
       },
       {
         label: resources.messages['events'],
-        icon: '4',
+        icon: 'clock',
         group: 'right',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['validate'],
-        icon: '10',
+        icon: 'validate',
         group: 'right',
         disabled: false,
         onClick: () => onSetVisible(setValidateDialogVisible, true),
@@ -167,7 +167,7 @@ export const ReporterDataSet = ({ match, history }) => {
       },
       {
         label: resources.messages['showValidations'],
-        icon: '3',
+        icon: 'warning',
         group: 'right',
         disabled: !dataSetStatistics.datasetErrors,
         onClick: () => onSetVisible(setValidationsVisible, true),
@@ -176,14 +176,14 @@ export const ReporterDataSet = ({ match, history }) => {
       },
       {
         label: resources.messages['dashboards'],
-        icon: '5',
+        icon: 'dashboard',
         group: 'right',
         disabled: false,
         onClick: () => onSetVisible(setDashDialogVisible, true)
       },
       {
         label: resources.messages['snapshots'],
-        icon: '12',
+        icon: 'camera',
         group: 'right',
         disabled: false,
         onClick: () => onSetVisible(setSnapshotIsVisible, true)
