@@ -90,12 +90,12 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    *
    * @param datasetId the dataset id
    * @param field the field
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   public void executeFieldUpdateProcess(Long datasetId, FieldVO field) throws EEAException {
     datasetService.updateField(datasetId, field);
     LOG.info("Field is modified");
-    // after the records have been saved, an event is sent to notify it
+    // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }
 
