@@ -30,6 +30,18 @@ export const api = {
     });
     return response.data;
   },
+  reportingDataFlow: async dataFlowId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_DataflowById.json'
+        : getUrl(config.loadDataSetsByDataflowID.url, {
+            dataFlowId: dataFlowId
+          }),
+      queryString: {}
+    });
+    console.log('response.data', response.data);
+    return response.data;
+  },
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
