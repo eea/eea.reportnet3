@@ -74,7 +74,7 @@ public class DocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void uploadDocumentException2Test() throws EEAException, IOException {
-    fileMock = new MockMultipartFile("file", "fileOriginal.cs", null, (byte[]) null);
+    fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
         fileMock.getOriginalFilename(), 1L, "ES", "desc");
@@ -119,19 +119,6 @@ public class DocumentServiceImplTest {
     when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn("");
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
-        fileMock.getOriginalFilename(), 1L, "ES", "desc");
-  }
-
-  /**
-   * Upload document exception 5 test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test(expected = EEAException.class)
-  public void uploadDocumentException5Test() throws EEAException, IOException {
-    fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
         fileMock.getOriginalFilename(), 1L, "ES", "desc");
   }

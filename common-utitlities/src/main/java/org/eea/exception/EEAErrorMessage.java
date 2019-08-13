@@ -81,11 +81,14 @@ public final class EEAErrorMessage {
   /** The Constant ID_LINK_INCORRECT. */
   public static final String ID_LINK_INCORRECT = "Id link is incorrect";
 
-
- /** The Constant DATE_FORMAT_INCORRECT. */
+  /** The Constant DATE_FORMAT_INCORRECT. */
   public static final String DATE_FORMAT_INCORRECT = "Format date is incorrect";
 
   public static final String DATE_AFTER_INCORRECT = "The date has to be later than today's date";
+
+  /** The Constant FIELD_NOTFOUND. */
+  public static final String FIELD_NOT_FOUND = "Field not found";
+
   /**
    * Instantiates a new EEA error message.
    */
