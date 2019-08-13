@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState } from 'react';
 
 import styles from './DataFlowTasks.module.scss';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DataFlowList } from './DataFlowList';
 import { MainLayout } from 'ui/views/_components/Layout';
