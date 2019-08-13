@@ -59,6 +59,24 @@ export const api = {
       return false;
     }
   },
+  deleteDataSetTableDataById: async (dataSetId, tableId) => {
+    try {
+      const response = await HTTPRequester.delete({
+        url: window.env.REACT_APP_JSON
+          ? `/dataset/${dataSetId}/deleteImportTable/${tableId}`
+          : getUrl(config.deleteImportTable.url, {
+              dataSetId: dataSetId,
+              tableId: tableId
+            }),
+        queryString: {}
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.log(`Error deleting dataSet table data: ${error}`);
+      return false;
+    }
+  },
   errorPositionByObjectId: async (objectId, dataSetId, entityType) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON

@@ -45,6 +45,11 @@ const deleteDataById = async dataSetId => {
   return dataDeleted;
 };
 
+const deleteTableDataById = async (dataSetId, tableId) => {
+  const dataDeleted = await api.deleteDataSetTableDataById(dataSetId, tableId);
+  return dataDeleted;
+};
+
 const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
   const dataSetErrorsDTO = await api.dataSetErrorsById(dataSetId, pageNum, pageSize, sortField, asc);
 
@@ -143,6 +148,7 @@ const transposeMatrix = matrix => {
 export const ApiDataSetRepository = {
   dataSetSchemaById,
   deleteDataById,
+  deleteTableDataById,
   errorsById,
   errorPositionByObjectId,
   errorStatisticsById,
