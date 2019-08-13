@@ -10,7 +10,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
+import { Button } from 'ui/views/_components/Button';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'primereact/splitbutton';
 
