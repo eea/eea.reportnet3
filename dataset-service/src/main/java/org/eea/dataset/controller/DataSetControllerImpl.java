@@ -13,6 +13,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -484,8 +485,21 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
+  }
 
-
+  @Override
+  @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateField(@PathVariable("id") final Long datasetId,
+      @RequestBody final FieldVO field) {
+    if (datasetId == null || field == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NOT_FOUND);
+    }
+    try {
+      updateRecordHelper.executeFieldUpdateProcess(datasetId, field);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
 }

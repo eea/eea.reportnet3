@@ -58,6 +58,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
@@ -459,7 +460,7 @@ public class DatasetServiceImpl implements DatasetService {
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
       final Pageable pageable, final String fields) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
-    Map<String, Integer> mapFields = new HashMap<String, Integer>();
+    Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
 
@@ -561,7 +562,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Retrieves in a controlled way the data from database
-   * 
+   *
    * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
    * @param idTableSchema the id table schema
@@ -1077,5 +1078,22 @@ public class DatasetServiceImpl implements DatasetService {
     ds.setId(datasetId);
     datasetRepository.save(ds);
 
+  }
+
+  /**
+   * Update records.
+   *
+   * @param datasetId the dataset id
+   * @param records the records
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void updateField(final Long datasetId, final FieldVO field) throws EEAException {
+    if (datasetId == null || field == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
+
+    }
+    fieldRepository.saveValue(field.getId(), field.getValue());
   }
 }
