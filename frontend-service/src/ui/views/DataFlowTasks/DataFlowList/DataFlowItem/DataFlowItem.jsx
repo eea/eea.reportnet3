@@ -4,10 +4,9 @@ import moment from 'moment';
 
 import styles from './DataFlowItem.module.scss';
 
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Icon } from 'ui/views/_components/Icon';
 import { Link } from 'react-router-dom';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import primeIcons from 'assets/conf/prime.icons';
 
 import { DataFlowService } from 'core/services/DataFlow';
 
@@ -61,7 +60,7 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
   return layout(
     <>
       <div className={`${styles.card_component_icon}`}>
-        <IconComponent icon={`${primeIcons.icons.clone}`} className={`${styles.card_component_icon_i}`} />
+        <Icon icon="clone" className={`${styles.card_component_icon_i}`} />
       </div>
 
       <div className={`${styles.card_component_content} `}>
@@ -87,10 +86,10 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
         ) : (
           <>
             {/* <a className={styles.btn} href="#"> */}
-            <IconComponent icon={`${primeIcons.icons.comment}`} />
+            <Icon icon="comment" />
             {/* </a> */}
             {/* <a className={styles.btn} href="http://"> */}
-            <IconComponent icon={`${primeIcons.icons.share}`} />
+            <Icon icon="share" />
             {/* </a> */}
           </>
         )}

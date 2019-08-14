@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import styles from './TabsSchema.module.css';
 
+import { config } from 'assets/conf';
+
 import { DataViewer } from './_components/DataViewer';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
@@ -22,10 +24,7 @@ export const TabsSchema = ({
     tables && tableSchemaColumns
       ? tables.map((table, i) => {
           return (
-            <TabPanel
-              header={table.name}
-              key={table.id}
-              rightIcon={table.hasErrors ? resources.icons['warning'] : null}>
+            <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}

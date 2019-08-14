@@ -5,7 +5,7 @@ import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotSliderBar.module.scss';
 
 import { Formik, Field, Form } from 'formik';
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Icon } from 'ui/views/_components/Icon';
 import { isEmpty } from 'lodash';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Sidebar } from 'primereact/sidebar';
@@ -66,7 +66,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
                   />
                   <div className={styles.createButtonWrapper}>
                     <button className={`${styles.createSnapshotButton} rp-btn primary`} type="submit">
-                      <IconComponent icon={primeIcons.icons.plus} />
+                      <Icon icon="plus" />
                     </button>
                   </div>
                 </div>

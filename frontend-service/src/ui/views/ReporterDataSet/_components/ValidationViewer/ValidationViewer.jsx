@@ -42,8 +42,8 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
       onClick: null
     },
     {
-      label: resources.messages['group-by'],
-      icon: 'group-by',
+      label: resources.messages['groupBy'],
+      icon: 'groupBy',
       group: 'left',
       disabled: true,
       onClick: null
@@ -116,7 +116,6 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   };
 
   const onSort = event => {
-    console.log('Sorting ValidationViewer...');
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
     fetchData(event.sortField, event.sortOrder, firstRow, numRows);
