@@ -4,18 +4,16 @@ import moment from 'moment';
 
 import styles from './ReporterDataSet.module.css';
 
-import { config } from 'assets/conf';
-
-import { BreadCrumb } from 'primereact/breadcrumb';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { ValidationViewer } from './_components/ValidationViewer';
@@ -106,7 +104,7 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   const onLoadDataSetSchema = async () => {
-    const dataSetSchema = await DataSetService.dataSetSchemaById(dataFlowId);
+    const dataSetSchema = await DataSetService.schemaById(dataFlowId);
     const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
 
     setDatasetTitle(dataSetSchema.dataSetSchemaName);
@@ -137,28 +135,28 @@ export const ReporterDataSet = ({ match, history }) => {
     setButtonsList([
       {
         label: resources.messages['export'],
-        icon: '1',
+        icon: 'import',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['deleteDatasetData'],
-        icon: '2',
+        icon: 'trash',
         group: 'left',
         disabled: false,
         onClick: () => onSetVisible(setDeleteDialogVisible, true)
       },
       {
         label: resources.messages['events'],
-        icon: '4',
+        icon: 'clock',
         group: 'right',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['validate'],
-        icon: '10',
+        icon: 'validate',
         group: 'right',
         disabled: false,
         onClick: () => onSetVisible(setValidateDialogVisible, true),
@@ -167,7 +165,7 @@ export const ReporterDataSet = ({ match, history }) => {
       },
       {
         label: resources.messages['showValidations'],
-        icon: '3',
+        icon: 'warning',
         group: 'right',
         disabled: !dataSetStatistics.datasetErrors,
         onClick: () => onSetVisible(setValidationsVisible, true),
@@ -176,14 +174,14 @@ export const ReporterDataSet = ({ match, history }) => {
       },
       {
         label: resources.messages['dashboards'],
-        icon: '5',
+        icon: 'dashboard',
         group: 'right',
         disabled: false,
         onClick: () => onSetVisible(setDashDialogVisible, true)
       },
       {
         label: resources.messages['snapshots'],
-        icon: '12',
+        icon: 'camera',
         group: 'right',
         disabled: false,
         onClick: () => onSetVisible(setSnapshotIsVisible, true)
@@ -270,7 +268,7 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(
@@ -295,7 +293,6 @@ export const ReporterDataSet = ({ match, history }) => {
           selectedRowId={selectedRowId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
-          urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
         />
       </ReporterDataSetContext.Provider>
       <Dialog

@@ -8,16 +8,16 @@ import styles from './DocumentationDataSet.module.scss';
 
 import { config } from 'assets/conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView, TabPanel } from 'primereact/tabview';
 
 import { DocumentService } from 'core/services/Document';
@@ -71,35 +71,35 @@ export const DocumentationDataSet = ({ match, history }) => {
     setButtons([
       {
         label: resources.messages['upload'],
-        icon: '0',
+        icon: 'export',
         group: 'left',
         disabled: false,
         onClick: () => setIsUploadDialogVisible(true)
       },
       {
         label: resources.messages['visibility'],
-        icon: '6',
+        icon: 'eye',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['filter'],
-        icon: '7',
+        icon: 'filter',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['export'],
-        icon: '1',
+        icon: 'import',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['refresh'],
-        icon: '11',
+        icon: 'refresh',
         group: 'right',
         disabled: false,
         clickHandler: () => onLoadDocumentsAndWebLinks()
@@ -163,7 +163,7 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   if (isLoading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   if (documents) {
@@ -184,35 +184,35 @@ export const DocumentationDataSet = ({ match, history }) => {
               <Column
                 columnResizeMode="expand"
                 field="title"
-                header={resources.messages['title']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['title']}
               />
               <Column
                 field="description"
-                header={resources.messages['description']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['description']}
               />
               <Column
                 field="category"
-                header={resources.messages['category']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['category']}
               />
               <Column
                 field="language"
-                header={resources.messages['language']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['language']}
               />
               <Column
                 body={actionTemplate}
-                style={{ textAlign: 'center', width: '8em' }}
                 field="url"
-                header={resources.messages['file']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['file']}
+                style={{ textAlign: 'center', width: '8em' }}
               />
             </DataTable>
           }

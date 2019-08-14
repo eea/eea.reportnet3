@@ -1,35 +1,42 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
 
 import moment from 'moment';
 
 import styles from './DataFlowItem.module.scss';
 
+import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Link } from 'react-router-dom';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import primeIcons from 'assets/conf/prime.icons';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { IconComponent } from 'ui/views/_components/IconComponent';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { DataFlowService } from 'core/services/DataFlow';
 
 export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
   const resources = useContext(ResourcesContext);
 
-  const updateStatusDataFlow = type => {
-    const dataPromise = HTTPRequester.update({
-      url: window.env.REACT_APP_JSON
-        ? `/dataflow/updateStatusRequest/${itemContent.id}?type=${type}`
-        : `/dataflow/updateStatusRequest/${itemContent.id}?type=${type}`,
-      data: { id: itemContent.id },
-      queryString: {}
-    });
-
-    dataPromise
-      .then(response => {
+  const onAcceptDataFlow = async () => {
+    try {
+      const status = await DataFlowService.accept(itemContent.id);
+      if (status >= 200 && status <= 299) {
         dataFetch();
-      })
-      .catch(error => {
-        return error;
-      });
+      } else {
+        console.error('AcceptDataFlow error with status: ', status);
+      }
+    } catch (error) {
+      console.error('AcceptDataFlow error: ', error);
+    }
+  };
+  const onRejectDataFlow = async () => {
+    try {
+      const status = await DataFlowService.reject(itemContent.id);
+      if (status >= 200 && status <= 299) {
+        dataFetch();
+      } else {
+        console.error('RejectDataFlow error with status: ', status);
+      }
+    } catch (error) {
+      console.error('RejectDataFlow error: ', error);
+    }
   };
 
   const layout = children => {
@@ -69,11 +76,11 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
       <div className={`${styles.card_component_btn}`}>
         {listType === 'pending' ? (
           <>
-            <button type="button" className={`${styles.rep_button}`} onClick={() => updateStatusDataFlow('ACCEPTED')}>
+            <button type="button" className={`${styles.rep_button}`} onClick={() => onAcceptDataFlow()}>
               {resources.messages['accept']}
             </button>
 
-            <button type="button" className={`${styles.rep_button}`} onClick={() => updateStatusDataFlow('REJECTED')}>
+            <button type="button" className={`${styles.rep_button}`} onClick={() => onRejectDataFlow()}>
               {resources.messages['reject']}
             </button>
           </>

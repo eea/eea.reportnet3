@@ -4,12 +4,10 @@ import styles from './DataFlowColumn.module.css';
 
 import { config } from 'assets/conf';
 
-import { Button } from 'primereact/button';
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }) => {
   const resources = useContext(ResourcesContext);
@@ -21,10 +19,6 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
 
   const onConfirmSubscribeHandler = () => {
     setSubscribeDialogVisible(false);
-    HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/subscribe/dataflow' : '/subscribe/dataflow',
-      queryString: {}
-    });
   };
 
   return (
@@ -33,12 +27,11 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
       {search && (
         <div className="navSection">
           <input
-            type="text"
-            id=""
-            /* onKeyUp="" */
             className={styles.searchInput}
+            id=""
             placeholder={resources.messages['searchDataFlow']}
             title={resources.messages['typeDataFlowName']}
+            type="text"
           />
         </div>
       )}
@@ -51,21 +44,21 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
         )}
 
         <Button
-          icon={config.icons.plus}
-          label={buttonTitle}
           className={styles.subscribeBtn}
+          icon="plus"
+          label={buttonTitle}
           onClick={() => {
             setVisibleHandler(setSubscribeDialogVisible, true);
           }}
         />
         <ConfirmDialog
-          onConfirm={onConfirmSubscribeHandler}
-          onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
-          visible={subscribeDialogVisible}
           header={resources.messages['subscribeButtonTitle']}
           maximizable={false}
+          labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['close']}>
+          onConfirm={onConfirmSubscribeHandler}
+          onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
+          visible={subscribeDialogVisible}>
           {resources.messages['subscribeDataFlow']}
         </ConfirmDialog>
       </div>

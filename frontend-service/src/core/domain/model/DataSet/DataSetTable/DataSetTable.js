@@ -6,7 +6,8 @@ export class DataSetTable {
     recordsWithoutErrorsPercentage,
     recordsWithErrorsPercentage,
     recordsWithWarningsPercentage,
-    records
+    records,
+    totalRecords
   ) {
     this.hasErrors = hasErrors;
     this.records = records;
@@ -15,5 +16,6 @@ export class DataSetTable {
     this.recordsWithWarningsPercentage = recordsWithWarningsPercentage;
     this.tableSchemaId = tableSchemaId;
     this.tableSchemaName = tableSchemaName;
+    this.totalRecords = totalRecords;
   }
 }

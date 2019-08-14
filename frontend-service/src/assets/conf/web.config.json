@@ -6,7 +6,7 @@
 		"url": "/dataschema/dataflow/{:dataFlowId}"
 	},
 	"dataviewerAPI": {
-		"url": "/dataset/TableValueDataset/"
+		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}"
 	},	
 	"deleteSnapshotByID": {
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
@@ -30,7 +30,7 @@
 		"url": "/dataflow/{:dataFlowId}"
 	},		
 	"loadDataTableAPI": {
-		"url": "/dataset/{:dataSetId}/loadTableData/"
+		"url": "/dataset/{:dataSetId}/loadTableData/{:tableId}"
 	},
 	"loadSnapshotsListAPI": {
 		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"
@@ -46,5 +46,11 @@
 	},
 	"validateDataSetAPI":{
 		"url": "/validation/dataset/{:dataSetId}"
+	},
+	"acceptDataFlow":{
+		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	},
+	"rejectDataFlow":{
+		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
 	}
 }

@@ -30,6 +30,33 @@ export const api = {
     });
     return response.data;
   },
+  reportingDataFlow: async dataFlowId => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_DataflowById.json'
+        : getUrl(config.loadDataSetsByDataflowID.url, {
+            dataFlowId: dataFlowId
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  acceptDataFlow: async dataFlowId => {
+    const response = await HTTPRequester.update({
+      url: getUrl(config.acceptDataFlow.url, { dataFlowId, type: 'ACCEPTED' }),
+      data: { id: dataFlowId },
+      queryString: {}
+    });
+    return response.status;
+  },
+  rejectDataFlow: async dataFlowId => {
+    const response = await HTTPRequester.update({
+      url: getUrl(config.rejectDataFlow.url, { dataFlowId, type: 'REJECTED' }),
+      data: { id: dataFlowId },
+      queryString: {}
+    });
+    return response.status;
+  },
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -63,6 +90,21 @@ export const api = {
         ? '/jsons/datosDataSchema2.json'
         : getUrl(config.dataSchemaAPI.url, {
             dataFlowId: dataFlowId
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  dataSetTableDataById: async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_dataset_values2.json'
+        : getUrl(config.dataviewerAPI.url, {
+            dataSetId: dataSetId,
+            tableSchemaId: tableSchemaId,
+            pageNum: pageNum,
+            pageSize: pageSize,
+            fields: fields
           }),
       queryString: {}
     });

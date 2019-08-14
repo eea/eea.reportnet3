@@ -4,26 +4,21 @@ import styles from './ReportingDataFlow.module.css';
 
 import { config } from 'assets/conf';
 
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
-import { ProgressSpinner } from 'primereact/progressspinner';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'primereact/splitbutton';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { getUrl } from 'core/infrastructure/getUrl';
-
-/* import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json"; */
-//import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
+import { DataFlowService } from 'core/services/DataFlow';
 
 export const ReportingDataFlow = ({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataFlowData, setDataFlowData] = useState(null);
+  const [dataFlowData, setDataFlowData] = useState(undefined);
   const [loading, setLoading] = useState(true);
 
   const home = {
@@ -31,24 +26,15 @@ export const ReportingDataFlow = ({ history, match }) => {
     command: () => history.push('/')
   };
 
+  const onLoadReportingDataFlow = async () => {
+    const dataFlow = await DataFlowService.reporting(match.params.dataFlowId);
+    setDataFlowData(dataFlow);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/response_DataflowById.json'
-        : getUrl(config.loadDataSetsByDataflowID.url, {
-            dataFlowId: match.params.dataFlowId
-          }),
-      queryString: {}
-    })
-      .then(response => {
-        setDataFlowData(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        setLoading(false);
-        console.log('error', error);
-        return error;
-      });
+    setLoading(true);
+    onLoadReportingDataFlow();
   }, [match.params.dataFlowId]);
 
   //Bread Crumbs settings
@@ -78,15 +64,16 @@ export const ReportingDataFlow = ({ history, match }) => {
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(
     <div className="rep-row">
+      {console.log('dataFlowData', dataFlowData)}
       <DataFlowColumn
-        navTitle={resources.messages['dataFlow']}
-        dataFlowTitle={dataFlowData.name}
         buttonTitle={resources.messages['subscribeThisButton']}
+        dataFlowTitle={dataFlowData.name}
+        navTitle={resources.messages['dataFlow']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <h2 className={styles.title}>
@@ -98,8 +85,8 @@ export const ReportingDataFlow = ({ history, match }) => {
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.dataSetItem}`}>
               <Button
-                label={resources.messages['do']}
                 className="p-button-warning"
+                label={resources.messages['do']}
                 onClick={e => {
                   handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`);
                 }}
