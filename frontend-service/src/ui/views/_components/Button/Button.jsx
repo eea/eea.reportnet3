@@ -4,7 +4,7 @@ import { config } from 'assets/conf';
 
 import { Button as PrimeButton } from 'primereact/button';
 
-export const Button = ({ disabled, icon, iconClasses, label, onClick, className, type, tooltip, style }) => {
+export const Button = ({ disabled, icon, iconClasses, iconPos, label, onClick, className, type, tooltip, style }) => {
   const iconClassName = `${config.icons[icon]} ${iconClasses ? iconClasses : ''}`;
 
   return (
@@ -12,6 +12,7 @@ export const Button = ({ disabled, icon, iconClasses, label, onClick, className,
       className={className}
       disabled={disabled}
       icon={iconClassName}
+      iconPos={iconPos}
       label={label}
       onClick={onClick}
       style={style}
