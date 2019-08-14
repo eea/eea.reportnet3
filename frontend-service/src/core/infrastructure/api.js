@@ -39,8 +39,23 @@ export const api = {
           }),
       queryString: {}
     });
-    console.log('response.data', response.data);
     return response.data;
+  },
+  acceptDataFlow: async dataFlowId => {
+    const response = await HTTPRequester.update({
+      url: getUrl(config.acceptDataFlow.url, { dataFlowId, type: 'ACCEPTED' }),
+      data: { id: dataFlowId },
+      queryString: {}
+    });
+    return response.status;
+  },
+  rejectDataFlow: async dataFlowId => {
+    const response = await HTTPRequester.update({
+      url: getUrl(config.rejectDataFlow.url, { dataFlowId, type: 'REJECTED' }),
+      data: { id: dataFlowId },
+      queryString: {}
+    });
+    return response.status;
   },
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const response = await HTTPRequester.get({
