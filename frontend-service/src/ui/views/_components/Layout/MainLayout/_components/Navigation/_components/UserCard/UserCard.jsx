@@ -2,22 +2,22 @@ import React, { useContext } from 'react';
 
 import styles from './UserCard.module.css';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Icon } from 'ui/views/_components/Icon';
 
 const UserCard = React.memo(() => {
-  const resources = useContext(ResourcesContext);
-
   return (
     <div id="userProfile" className={styles.userProfileCard}>
       <div className={styles.userProfile}>
         <a href="#userProfilePage" title="Edit user profile">
           <img className={styles.avatar} alt="User Profile" src="https://image.flaticon.com/icons/svg/149/149071.svg" />
           <h5 className={styles.userProfile}>User</h5>
-          <i className={resources.icons['logout']} />
+          <Icon icon="logout" />
         </a>
       </div>
       {/* <div className={styles.logOut}>
-                <a href="#logOut" title="Log out"><i className={resources.icons["logout"]}></i></a>
+                <a href="#logOut" title="Log out">
+                  <Icon icon="logout" />
+                </a>
             </div> */}
     </div>
   );

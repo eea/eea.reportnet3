@@ -22,7 +22,7 @@ export const ReportingDataFlow = ({ history, match }) => {
   const [loading, setLoading] = useState(true);
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 

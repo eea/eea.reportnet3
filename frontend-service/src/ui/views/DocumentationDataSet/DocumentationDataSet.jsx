@@ -36,7 +36,7 @@ export const DocumentationDataSet = ({ match, history }) => {
   const [webLinks, setWebLinks] = useState([]);
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 
