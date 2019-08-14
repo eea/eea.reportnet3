@@ -505,6 +505,7 @@ const DataViewer = withRouter(
               rowClassName={rowClassName}
               rows={numRows}
               rowsPerPageOptions={[5, 10, 20, 100]}
+              selectionMode="single"
               sortable={true}
               sortField={sortField}
               sortOrder={sortOrder}
@@ -570,7 +571,7 @@ const DataViewer = withRouter(
                   {Object.values(selectedRow)
                     .slice(1)
                     .map((row, i) => {
-                      return <td key={i}>{row}</td>;
+                      return <td key={i}>{row[row.fieldData]}</td>;
                     })}
                 </tr>
               </tbody>
