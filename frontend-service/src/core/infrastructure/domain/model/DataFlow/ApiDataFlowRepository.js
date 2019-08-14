@@ -42,9 +42,21 @@ const reporting = async dataFlowId => {
   return parseDataFlowDTO(reportingDataFlowDTO);
 };
 
+const accept = async dataFlowId => {
+  const status = await api.acceptDataFlow(dataFlowId);
+  return status;
+};
+
+const reject = async dataFlowId => {
+  const status = await api.rejectDataFlow(dataFlowId);
+  return status;
+};
+
 export const ApiDataFlowRepository = {
   pending,
   accepted,
   completed,
-  reporting
+  reporting,
+  accept,
+  reject
 };

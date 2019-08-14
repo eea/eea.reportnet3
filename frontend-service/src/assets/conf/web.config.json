@@ -46,5 +46,11 @@
 	},
 	"validateDataSetAPI":{
 		"url": "/validation/dataset/{:dataSetId}"
+	},
+	"acceptDataFlow":{
+		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	},
+	"rejectDataFlow":{
+		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
 	}
 }
