@@ -184,35 +184,35 @@ export const DocumentationDataSet = ({ match, history }) => {
               <Column
                 columnResizeMode="expand"
                 field="title"
-                header={resources.messages['title']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['title']}
               />
               <Column
                 field="description"
-                header={resources.messages['description']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['description']}
               />
               <Column
                 field="category"
-                header={resources.messages['category']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['category']}
               />
               <Column
                 field="language"
-                header={resources.messages['language']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['language']}
               />
               <Column
                 body={actionTemplate}
-                style={{ textAlign: 'center', width: '8em' }}
                 field="url"
-                header={resources.messages['file']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['file']}
+                style={{ textAlign: 'center', width: '8em' }}
               />
             </DataTable>
           }
