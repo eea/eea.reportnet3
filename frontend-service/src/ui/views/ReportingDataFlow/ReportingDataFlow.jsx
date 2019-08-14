@@ -7,7 +7,7 @@ import { config } from 'assets/conf';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -77,7 +77,7 @@ export const ReportingDataFlow = ({ history, match }) => {
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <h2 className={styles.title}>
-          <IconComponent icon={resources.icons['shoppingCart']} />
+          <Icon icon="shoppingCart" />
           {dataFlowData.name}
         </h2>
 

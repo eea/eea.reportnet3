@@ -10,11 +10,10 @@ import { ReporterDataSet } from 'ui/views/ReporterDataSet/ReporterDataSet';
 import { ReportingDataFlow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import iconsResources from 'assets/conf/prime.icons.json';
 import langResources from 'assets/conf/messages.en.json';
 
 const App = () => {
-  const [resources] = useState({ ...langResources, ...iconsResources });
+  const [resources] = useState({ ...langResources });
   return (
     <div className={styles.app}>
       <ResourcesContext.Provider value={resources}>

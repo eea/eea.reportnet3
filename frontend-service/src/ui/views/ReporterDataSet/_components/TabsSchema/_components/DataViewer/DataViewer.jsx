@@ -86,8 +86,8 @@ const DataViewer = withRouter(
             onClick: null
           },
           {
-            label: resources.messages['group-by'],
-            icon: 'group-by',
+            label: resources.messages['groupBy'],
+            icon: 'groupBy',
             group: 'left',
             disabled: true,
             onClick: null

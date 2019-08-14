@@ -14,7 +14,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -139,7 +139,7 @@ export const DocumentationDataSet = ({ match, history }) => {
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
-        <IconComponent icon={config.icons.archive} />
+        <Icon icon="archive" />
       </span>
     );
   };
