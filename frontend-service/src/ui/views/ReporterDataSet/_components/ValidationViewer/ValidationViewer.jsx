@@ -116,7 +116,6 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   };
 
   const onSort = event => {
-    console.log('Sorting ValidationViewer...');
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
     fetchData(event.sortField, event.sortOrder, firstRow, numRows);

@@ -69,7 +69,6 @@ export const ReportingDataFlow = ({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      {console.log('dataFlowData', dataFlowData)}
       <DataFlowColumn
         buttonTitle={resources.messages['subscribeThisButton']}
         dataFlowTitle={dataFlowData.name}

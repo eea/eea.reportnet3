@@ -123,7 +123,7 @@ export const api = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.log(`Error deleting dataSet data: ${error}`);
+      console.error(`Error deleting dataSet data: ${error}`);
       return false;
     }
   },
@@ -141,7 +141,7 @@ export const api = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.log(`Error deleting dataSet table data: ${error}`);
+      console.error(`Error deleting dataSet table data: ${error}`);
       return false;
     }
   },
@@ -171,7 +171,7 @@ export const api = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.log(`Error calling dataSet data validation: ${error}`);
+      console.error(`Error calling dataSet data validation: ${error}`);
       return false;
     }
   },
@@ -228,7 +228,7 @@ export const api = {
       });
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.log(`Error creating the snapshot: ${error}`);
+      console.error(`Error creating the snapshot: ${error}`);
       return false;
     }
   },
@@ -243,7 +243,7 @@ export const api = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.log(`Error deleting snapshot data: ${error}`);
+      console.error(`Error deleting snapshot data: ${error}`);
       return false;
     }
   },
@@ -258,7 +258,7 @@ export const api = {
       });
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.log(`Error restoring the snapshot: ${error}`);
+      console.error(`Error restoring the snapshot: ${error}`);
       return false;
     }
   },
