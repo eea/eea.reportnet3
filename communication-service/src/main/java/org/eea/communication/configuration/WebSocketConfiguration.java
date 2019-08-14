@@ -57,12 +57,13 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
           try {
             accessor.setUser(new StompPrincipal(((AccessToken) jwtTokenProvider
                 .retrieveToken(accessor.getFirstNativeHeader("token"))).getPreferredUsername()));
+            return message;
           } catch (VerificationException ex) {
             logger.error("Security token is not valid: {}", ex.getMessage());
           }
         }
 
-        return message;
+        return null;
       }
     });
   }
