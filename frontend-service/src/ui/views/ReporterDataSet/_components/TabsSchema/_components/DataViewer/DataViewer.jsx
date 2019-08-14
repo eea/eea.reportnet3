@@ -157,6 +157,14 @@ const DataViewer = withRouter(
             />
           );
         });
+        columnsArr.push(
+          <Column
+            key="actions"
+            body={row => actionTemplate(row)}
+            style={{ width: '250px', height: '45px' }}
+            frozen={true}
+          />
+        );
         let validationCol = (
           <Column
             body={validationsTemplate}
@@ -248,30 +256,36 @@ const DataViewer = withRouter(
         });
       };
 
-      const cellDataEditor = (props, field) => {
-        return inputTextEditor(props, field);
-      };
-
-      const inputTextEditor = (props, field) => {
+      const cellDataEditor = props => {
         return (
           <InputText
             type="text"
-            value={props.rowData[field]}
+            value={getCellValue(props, props.field)}
             onChange={e => onEditorValueChange(props, e.target.value)}
           />
         );
       };
 
       const requiredValidator = props => {
-        let value = props.rowData[props.field];
+        let value = getCellValue(props, props.field);
         return value && value.length > 0;
       };
 
       const onEditorValueChange = (props, value) => {
-        let updatedValue = [...props.value];
-        updatedValue[props.rowIndex][props.field] = value;
-        //this.setState({cars: updatedValue});
-        setFetchedData(updatedValue);
+        let updatedData = setCellValue([...props.value], props.rowIndex, props.field, value);
+        setFetchedData(updatedData);
+      };
+
+      const getCellValue = (tableData, field) => {
+        const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
+        return value.length > 0 ? value[0].fieldData[field] : '';
+      };
+
+      const setCellValue = (tableData, rowIndex, field, value) => {
+        tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[
+          field
+        ] = value;
+        return tableData;
       };
 
       const actionTemplate = row => {
@@ -288,6 +302,8 @@ const DataViewer = withRouter(
       };
 
       const onRowSelect = (event, value) => {
+        console.log(value, event);
+
         setSelectedRow(value);
       };
 
@@ -449,7 +465,13 @@ const DataViewer = withRouter(
               sortField={sortField}
               sortOrder={sortOrder}
               totalRecords={totalRecords}
-              value={fetchedData}>
+              value={fetchedData}
+              editable={true}
+              onRowSelect={e => onRowSelect(e, e.data)}
+              // scrollable={true}
+              // frozenWidth="200px"
+              // unfrozenWidth="600px"
+            >
               {columns}
             </DataTable>
           </div>
@@ -486,7 +508,7 @@ const DataViewer = withRouter(
             {resources.messages['deleteDatasetTableConfirm']}
           </ConfirmDialog>
           <ConfirmDialog
-            onConfirm={onConfirmDelete}
+            onConfirm={onConfirmDeleteRow}
             onHide={onHideConfirmDeleteDialog}
             visible={confirmDeleteVisible}
             header="Delete row"
