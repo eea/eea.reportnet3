@@ -8,6 +8,7 @@ import { RejectDataFlow } from './RejectDataFlow';
 
 export const DataFlowService = {
   accepted: GetAcceptedDataFlows({ dataFlowRepository }),
+  pending: GetPendingDataFlows({ dataFlowRepository }),
   completed: GetCompletedDataFlows({ dataFlowRepository }),
   reporting: GetReportingDataFlow({ dataFlowRepository }),
   accept: AcceptDataFlow({ dataFlowRepository }),
