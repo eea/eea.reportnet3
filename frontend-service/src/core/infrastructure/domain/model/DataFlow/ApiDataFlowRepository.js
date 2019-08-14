@@ -3,22 +3,23 @@ import { DataFlow } from 'core/domain/model/DataFlow/DataFlow';
 
 const parseDataFlowDTOs = dataFlowDTOs => {
   return dataFlowDTOs.map(dataFlowDTO => {
-    const datasets = [];
-    const documents = [];
-    const weblinks = [];
-    return new DataFlow(
-      dataFlowDTO.id,
-      datasets,
-      dataFlowDTO.description,
-      dataFlowDTO.name,
-      dataFlowDTO.deadlineDate,
-      dataFlowDTO.creationDate,
-      dataFlowDTO.userRequestStatus,
-      dataFlowDTO.status,
-      documents,
-      weblinks
-    );
+    return parseDataFlowDTO(dataFlowDTO);
   });
+};
+
+const parseDataFlowDTO = dataFlowDTO => {
+  return new DataFlow(
+    dataFlowDTO.id,
+    dataFlowDTO.datasets,
+    dataFlowDTO.description,
+    dataFlowDTO.name,
+    dataFlowDTO.deadlineDate,
+    dataFlowDTO.creationDate,
+    dataFlowDTO.userRequestStatus,
+    dataFlowDTO.status,
+    dataFlowDTO.documents,
+    dataFlowDTO.weblinks
+  );
 };
 
 const pending = async userId => {
@@ -36,8 +37,14 @@ const completed = async userId => {
   return parseDataFlowDTOs(completedDataflowsDTO);
 };
 
+const reporting = async dataFlowId => {
+  const reportingDataFlowDTO = await api.reportingDataFlow(dataFlowId);
+  return parseDataFlowDTO(reportingDataFlowDTO);
+};
+
 export const ApiDataFlowRepository = {
   pending,
   accepted,
-  completed
+  completed,
+  reporting
 };

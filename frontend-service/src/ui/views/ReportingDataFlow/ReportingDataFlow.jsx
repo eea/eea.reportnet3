@@ -13,16 +13,12 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'primereact/splitbutton';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-import { getUrl } from 'core/infrastructure/getUrl';
-
-/* import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json"; */
-//import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
+import { DataFlowService } from 'core/services/DataFlow';
 
 export const ReportingDataFlow = ({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataFlowData, setDataFlowData] = useState(null);
+  const [dataFlowData, setDataFlowData] = useState(undefined);
   const [loading, setLoading] = useState(true);
 
   const home = {
@@ -30,24 +26,15 @@ export const ReportingDataFlow = ({ history, match }) => {
     command: () => history.push('/')
   };
 
+  const onLoadReportingDataFlow = async () => {
+    const dataFlow = await DataFlowService.reporting(match.params.dataFlowId);
+    setDataFlowData(dataFlow);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/response_DataflowById.json'
-        : getUrl(config.loadDataSetsByDataflowID.url, {
-            dataFlowId: match.params.dataFlowId
-          }),
-      queryString: {}
-    })
-      .then(response => {
-        setDataFlowData(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        setLoading(false);
-        console.log('error', error);
-        return error;
-      });
+    setLoading(true);
+    onLoadReportingDataFlow();
   }, [match.params.dataFlowId]);
 
   //Bread Crumbs settings
@@ -82,6 +69,7 @@ export const ReportingDataFlow = ({ history, match }) => {
 
   return layout(
     <div className="rep-row">
+      {console.log('dataFlowData', dataFlowData)}
       <DataFlowColumn
         navTitle={resources.messages['dataFlow']}
         dataFlowTitle={dataFlowData.name}
