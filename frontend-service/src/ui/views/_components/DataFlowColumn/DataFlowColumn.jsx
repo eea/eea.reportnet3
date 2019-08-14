@@ -9,8 +9,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-
 const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }) => {
   const resources = useContext(ResourcesContext);
   const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
@@ -21,10 +19,6 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
 
   const onConfirmSubscribeHandler = () => {
     setSubscribeDialogVisible(false);
-    HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/subscribe/dataflow' : '/subscribe/dataflow',
-      queryString: {}
-    });
   };
 
   return (
@@ -35,7 +29,6 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
           <input
             type="text"
             id=""
-            /* onKeyUp="" */
             className={styles.searchInput}
             placeholder={resources.messages['searchDataFlow']}
             title={resources.messages['typeDataFlowName']}
