@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from 'ui/views/_components/Button';
-import { Toolbar } from 'primereact/toolbar';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 export const ButtonsBar = React.memo(({ buttonsList }) => {
   const leftButtons = [];
