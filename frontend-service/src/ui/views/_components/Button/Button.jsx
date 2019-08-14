@@ -1,17 +1,18 @@
 import React, { useContext } from 'react';
 
-import { Button as PrimeButton } from 'primereact/button';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { config } from 'assets/conf';
 
-export const Button = ({ disabled, icon, iconClasses, label, onClick, className, type, tooltip, style }) => {
-  const resources = useContext(ResourcesContext);
-  const iconClassName = `${resources.icons[icon]} ${iconClasses ? iconClasses : ''}`;
+import { Button as PrimeButton } from 'primereact/button';
+
+export const Button = ({ disabled, icon, iconClasses, iconPos, label, onClick, className, type, tooltip, style }) => {
+  const iconClassName = `${config.icons[icon]} ${iconClasses ? iconClasses : ''}`;
 
   return (
     <PrimeButton
       className={className}
       disabled={disabled}
       icon={iconClassName}
+      iconPos={iconPos}
       label={label}
       onClick={onClick}
       style={style}
