@@ -1,11 +1,12 @@
 /*
- * 
+ *
  */
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -226,5 +227,16 @@ public interface DatasetController {
   @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   void insertIdDataSchema(@PathVariable("id") Long datasetId,
       @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema);
+
+
+  /**
+   * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   */
+  @RequestMapping(value = "/{id}/updateField", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
 }
