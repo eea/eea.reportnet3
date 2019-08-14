@@ -8,11 +8,13 @@ import { config } from 'assets/conf';
 
 import styles from './DataViewer.module.css';
 
+import { Button } from 'ui/views/_components/Button';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
+import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
@@ -38,6 +40,7 @@ const DataViewer = withRouter(
       const [colOptions, setColOptions] = useState([{}]);
       const [cols, setCols] = useState(tableSchemaColumns);
       const [columns, setColumns] = useState([]);
+      const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
       const [fetchedData, setFetchedData] = useState([]);
@@ -47,6 +50,7 @@ const DataViewer = withRouter(
       const [isDataDeleted, setIsDataDeleted] = useState(false);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
+      const [selectedRow, setSelectedRow] = useState({});
       const [sortField, setSortField] = useState(undefined);
       const [sortOrder, setSortOrder] = useState(undefined);
       const [totalRecords, setTotalRecords] = useState(0);
@@ -144,6 +148,8 @@ const DataViewer = withRouter(
             <Column
               body={dataTemplate}
               className={visibleColumn}
+              editor={row => cellDataEditor(row, col.field)}
+              editorValidator={requiredValidator}
               field={col.field}
               header={col.header}
               key={col.field}
@@ -240,6 +246,59 @@ const DataViewer = withRouter(
           detail: detailContent,
           life: '5000'
         });
+      };
+
+      const cellDataEditor = (props, field) => {
+        return inputTextEditor(props, field);
+      };
+
+      const inputTextEditor = (props, field) => {
+        return (
+          <InputText
+            type="text"
+            value={props.rowData[field]}
+            onChange={e => onEditorValueChange(props, e.target.value)}
+          />
+        );
+      };
+
+      const requiredValidator = props => {
+        let value = props.rowData[props.field];
+        return value && value.length > 0;
+      };
+
+      const onEditorValueChange = (props, value) => {
+        let updatedValue = [...props.value];
+        updatedValue[props.rowIndex][props.field] = value;
+        //this.setState({cars: updatedValue});
+        setFetchedData(updatedValue);
+      };
+
+      const actionTemplate = row => {
+        return (
+          <div>
+            <Button type="button" icon="pi pi-search" className="p-button-success" style={{ marginRight: '.5em' }} />
+            <Button type="button" icon="pi pi-trash" className="p-button-danger" onClick={onDeleteRow} />
+          </div>
+        );
+      };
+
+      const onDeleteRow = () => {
+        setConfirmDeleteVisible(true);
+      };
+
+      const onRowSelect = (event, value) => {
+        setSelectedRow(value);
+      };
+
+      const onConfirmDeleteRow = () => {
+        let inmFetchedData = [...fetchedData];
+        inmFetchedData = inmFetchedData.filter(d => d.id !== selectedRow.id);
+        setFetchedData(inmFetchedData);
+      };
+
+      const onHideConfirmDeleteDialog = () => {
+        setConfirmDeleteVisible(false);
       };
 
       const filterDataResponse = data => {
@@ -425,6 +484,33 @@ const DataViewer = withRouter(
             onHide={() => onSetVisible(setDeleteDialogVisible, false)}
             visible={deleteDialogVisible}>
             {resources.messages['deleteDatasetTableConfirm']}
+          </ConfirmDialog>
+          <ConfirmDialog
+            onConfirm={onConfirmDelete}
+            onHide={onHideConfirmDeleteDialog}
+            visible={confirmDeleteVisible}
+            header="Delete row"
+            maximizable={false}
+            labelConfirm="Yes"
+            labelCancel="No">
+            Do you want to delete this row?
+            <hr />
+            <table className={styles.Table}>
+              <thead>
+                {cols.map((c, i) => {
+                  return <th key={i}>{c.header}</th>;
+                })}
+              </thead>
+              <tbody>
+                <tr>
+                  {Object.values(selectedRow)
+                    .slice(1)
+                    .map((r, i) => {
+                      return <td key={i}>{r}</td>;
+                    })}
+                </tr>
+              </tbody>
+            </table>
           </ConfirmDialog>
         </div>
       );
