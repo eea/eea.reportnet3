@@ -71,35 +71,35 @@ export const DocumentationDataSet = ({ match, history }) => {
     setButtons([
       {
         label: resources.messages['upload'],
-        icon: '0',
+        icon: 'export',
         group: 'left',
         disabled: false,
         onClick: () => setIsUploadDialogVisible(true)
       },
       {
         label: resources.messages['visibility'],
-        icon: '6',
+        icon: 'eye',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['filter'],
-        icon: '7',
+        icon: 'filter',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['export'],
-        icon: '1',
+        icon: 'import',
         group: 'left',
         disabled: true,
         onClick: null
       },
       {
         label: resources.messages['refresh'],
-        icon: '11',
+        icon: 'refresh',
         group: 'right',
         disabled: false,
         clickHandler: () => onLoadDocumentsAndWebLinks()

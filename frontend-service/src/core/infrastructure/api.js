@@ -80,6 +80,21 @@ export const api = {
     });
     return response.data;
   },
+  dataSetTableDataById: async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_dataset_values2.json'
+        : getUrl(config.dataviewerAPI.url, {
+            dataSetId: dataSetId,
+            tableSchemaId: tableSchemaId,
+            pageNum: pageNum,
+            pageSize: pageSize,
+            fields: fields
+          }),
+      queryString: {}
+    });
+    return response.data;
+  },
   deleteDataSetDataById: async dataSetId => {
     try {
       const response = await HTTPRequester.delete({

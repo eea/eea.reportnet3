@@ -41,3 +41,22 @@ td > .tooltip > span.tooltiptext {
   box-shadow: none !important;
   justify-self: flex-end !important;
 }
+
+.buttonCustom.warning {
+  color: var(--c-orange-300);
+}
+.buttonCustom.warning:hover {
+  color: var(--c-orange-300) !important;
+}
+.buttonCustom.error {
+  color: var(--errors);
+}
+.buttonCustom.error:hover {
+  color: var(--errors) !important;
+}
+.buttonCustom.blocker {
+  color: var(--errors);
+}
+.buttonCustom.blocker:hover {
+  color: var(--errors) !important;
+}

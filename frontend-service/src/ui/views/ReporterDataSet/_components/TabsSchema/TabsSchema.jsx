@@ -14,8 +14,7 @@ export const TabsSchema = ({
   recordPositionId,
   selectedRowId,
   tables,
-  tableSchemaColumns,
-  urlViewer
+  tableSchemaColumns
 }) => {
   const resources = useContext(ResourcesContext);
 
@@ -36,7 +35,6 @@ export const TabsSchema = ({
                   tableSchemaColumns={
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
-                  urlViewer={urlViewer}
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
                   selectedRowId={table.id === activeIndex ? selectedRowId : -1}
                 />

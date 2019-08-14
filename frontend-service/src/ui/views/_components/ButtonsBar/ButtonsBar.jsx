@@ -17,7 +17,7 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
             key={i}
             onClick={button.onClick}
             disabled={button.disabled}
-            ownButtonClasses={button.ownButtonClasses}
+            className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
             iconClasses={button.iconClasses}
           />
         )
@@ -29,7 +29,7 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
             key={i}
             onClick={button.onClick}
             disabled={button.disabled}
-            ownButtonClasses={button.ownButtonClasses}
+            className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
             iconClasses={button.iconClasses}
           />
         );

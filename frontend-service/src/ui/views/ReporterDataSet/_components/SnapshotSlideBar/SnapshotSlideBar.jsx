@@ -35,7 +35,6 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
       className={styles.sidebar}
       onHide={e => setIsVisible()}
       position="right"
-      className={styles.sidebar}
       visible={isVisible}>
       <div className={styles.content}>
         <div className={styles.title}>

@@ -29,35 +29,35 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   const [defaultButtonsList] = useState([
     {
       label: resources.messages['visibility'],
-      icon: '6',
+      icon: 'eye',
       group: 'left',
       disabled: true,
       onClick: null
     },
     {
       label: resources.messages['filter'],
-      icon: '7',
+      icon: 'filter',
       group: 'left',
       disabled: true,
       onClick: null
     },
     {
       label: resources.messages['group-by'],
-      icon: '8',
+      icon: 'group-by',
       group: 'left',
       disabled: true,
       onClick: null
     },
     {
       label: resources.messages['sort'],
-      icon: '9',
+      icon: 'sort',
       group: 'left',
       disabled: true,
       onClick: null
     },
     {
       label: resources.messages['refresh'],
-      icon: '11',
+      icon: 'refresh',
       group: 'right',
       disabled: false,
       onClick: () => fetchData('', sortOrder, firstRow, numRows)

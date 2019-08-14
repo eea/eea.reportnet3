@@ -4,7 +4,7 @@ import styles from './DataFlowColumn.module.css';
 
 import { config } from 'assets/conf';
 
-import { Button } from 'primereact/button';
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { IconComponent } from 'ui/views/_components/IconComponent';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -51,7 +51,7 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
         )}
 
         <Button
-          icon={config.icons.plus}
+          icon="plus"
           label={buttonTitle}
           className={styles.subscribeBtn}
           onClick={() => {
