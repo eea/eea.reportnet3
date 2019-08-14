@@ -88,6 +88,13 @@ export class CustomFileUpload extends Component {
     this.onSimpleUploaderClick = this.onSimpleUploaderClick.bind(this);
   }
 
+  clearInputElement() {
+    this.fileInput.value = '';
+    if (this.props.mode === 'basic') {
+      this.fileInput.style.display = 'inline';
+    }
+  }
+
   hasFiles() {
     return this.state.files && this.state.files.length > 0;
   }
@@ -101,13 +108,6 @@ export class CustomFileUpload extends Component {
     let currentFiles = [...this.state.files];
     currentFiles.splice(index, 1);
     this.setState({ files: currentFiles });
-  }
-
-  clearInputElement() {
-    this.fileInput.value = '';
-    if (this.props.mode === 'basic') {
-      this.fileInput.style.display = 'inline';
-    }
   }
 
   formatSize(bytes) {

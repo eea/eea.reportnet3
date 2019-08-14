@@ -5,8 +5,8 @@ import { GetCompletedDataFlows } from './GetCompletedDataFlows';
 import { GetReportingDataFlow } from './GetReportingDataFlow';
 
 export const DataFlowService = {
-  pending: GetPendingDataFlows({ dataFlowRepository }),
   accepted: GetAcceptedDataFlows({ dataFlowRepository }),
   completed: GetCompletedDataFlows({ dataFlowRepository }),
+  pending: GetPendingDataFlows({ dataFlowRepository }),
   reporting: GetReportingDataFlow({ dataFlowRepository })
 };

@@ -9,14 +9,14 @@ export const Button = ({ disabled, icon, iconClasses, label, onClick, className,
 
   return (
     <PrimeButton
-      type={type}
       className={className}
+      disabled={disabled}
       icon={iconClassName}
       label={label}
-      style={style}
       onClick={onClick}
-      disabled={disabled}
+      style={style}
       tooltip={tooltip}
+      type={type}
     />
   );
 };

@@ -23,22 +23,22 @@ export const ConfirmDialog = React.memo(
       <div>
         <Button label={labelConfirm} icon={iconConfirm ? iconConfirm : 'check'} onClick={onConfirm} />
         <Button
-          label={labelCancel}
-          icon={iconCancel ? iconCancel : 'cancel'}
-          onClick={onHide}
           className="p-button-secondary"
+          icon={iconCancel ? iconCancel : 'cancel'}
+          label={labelCancel}
+          onClick={onHide}
         />
       </div>
     );
 
     return (
       <Dialog
-        header={header}
-        visible={visible}
-        style={dialogStyle ? dialogStyle : { width: '50vw' }}
         footer={footer}
+        header={header}
+        maximizable={maximizable}
         onHide={onHide}
-        maximizable={maximizable}>
+        style={dialogStyle ? dialogStyle : { width: '50vw' }}
+        visible={visible}>
         {children}
       </Dialog>
     );

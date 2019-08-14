@@ -10,12 +10,12 @@ import { GetStatistics } from './GetStatistics';
 import { ValidateData } from './ValidateData';
 
 export const DataSetService = {
-  schemaById: GetSchema({ dataSetRepository }),
   deleteDataById: DeleteData({ dataSetRepository }),
   deleteTableDataById: DeleteTableData({ dataSetRepository }),
   errorsById: GetErrors({ dataSetRepository }),
   errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),
   errorStatisticsById: GetStatistics({ dataSetRepository }),
+  schemaById: GetSchema({ dataSetRepository }),
   tableDataById: GetData({ dataSetRepository }),
   validateDataById: ValidateData({ dataSetRepository })
 };

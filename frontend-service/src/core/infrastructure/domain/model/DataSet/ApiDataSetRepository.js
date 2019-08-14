@@ -207,12 +207,12 @@ const transposeMatrix = matrix => {
 };
 
 export const ApiDataSetRepository = {
-  schemaById,
   deleteDataById,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,
   errorStatisticsById,
+  schemaById,
   tableDataById,
   validateDataById
 };

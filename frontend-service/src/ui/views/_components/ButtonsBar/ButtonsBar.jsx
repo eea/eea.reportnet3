@@ -11,26 +11,26 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
     button.group === 'left'
       ? leftButtons.push(
           <Button
-            label={button.label}
-            title={button.title}
-            icon={button.icon}
-            key={i}
-            onClick={button.onClick}
-            disabled={button.disabled}
             className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
+            disabled={button.disabled}
+            icon={button.icon}
             iconClasses={button.iconClasses}
+            key={i}
+            label={button.label}
+            onClick={button.onClick}
+            title={button.title}
           />
         )
       : rightButtons.push(
           <Button
-            label={button.label}
-            title={button.title}
-            icon={button.icon}
-            key={i}
-            onClick={button.onClick}
-            disabled={button.disabled}
             className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
+            disabled={button.disabled}
+            icon={button.icon}
             iconClasses={button.iconClasses}
+            key={i}
+            label={button.label}
+            onClick={button.onClick}
+            title={button.title}
           />
         );
   });

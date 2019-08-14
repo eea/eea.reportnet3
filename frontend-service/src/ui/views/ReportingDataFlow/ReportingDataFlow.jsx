@@ -71,9 +71,9 @@ export const ReportingDataFlow = ({ history, match }) => {
     <div className="rep-row">
       {console.log('dataFlowData', dataFlowData)}
       <DataFlowColumn
-        navTitle={resources.messages['dataFlow']}
-        dataFlowTitle={dataFlowData.name}
         buttonTitle={resources.messages['subscribeThisButton']}
+        dataFlowTitle={dataFlowData.name}
+        navTitle={resources.messages['dataFlow']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <h2 className={styles.title}>
@@ -85,8 +85,8 @@ export const ReportingDataFlow = ({ history, match }) => {
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.dataSetItem}`}>
               <Button
-                label={resources.messages['do']}
                 className="p-button-warning"
+                label={resources.messages['do']}
                 onClick={e => {
                   handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`);
                 }}

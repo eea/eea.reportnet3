@@ -27,11 +27,11 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
       {search && (
         <div className="navSection">
           <input
-            type="text"
-            id=""
             className={styles.searchInput}
+            id=""
             placeholder={resources.messages['searchDataFlow']}
             title={resources.messages['typeDataFlowName']}
+            type="text"
           />
         </div>
       )}
@@ -44,21 +44,21 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
         )}
 
         <Button
+          className={styles.subscribeBtn}
           icon="plus"
           label={buttonTitle}
-          className={styles.subscribeBtn}
           onClick={() => {
             setVisibleHandler(setSubscribeDialogVisible, true);
           }}
         />
         <ConfirmDialog
-          onConfirm={onConfirmSubscribeHandler}
-          onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
-          visible={subscribeDialogVisible}
           header={resources.messages['subscribeButtonTitle']}
           maximizable={false}
+          labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['close']}>
+          onConfirm={onConfirmSubscribeHandler}
+          onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
+          visible={subscribeDialogVisible}>
           {resources.messages['subscribeDataFlow']}
         </ConfirmDialog>
       </div>
