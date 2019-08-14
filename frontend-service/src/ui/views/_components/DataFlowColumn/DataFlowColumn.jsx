@@ -6,7 +6,7 @@ import { config } from 'assets/conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }) => {
@@ -38,7 +38,7 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
       <div className="navSection">
         {dataFlowTitle && (
           <h4 className={styles.title}>
-            <IconComponent icon={config.icons.shoppingCart} />
+            <Icon icon="shoppingCart" />
             {dataFlowTitle}
           </h4>
         )}

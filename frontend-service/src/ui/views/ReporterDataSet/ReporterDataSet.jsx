@@ -4,6 +4,8 @@ import moment from 'moment';
 
 import styles from './ReporterDataSet.module.css';
 
+import { config } from 'assets/conf';
+
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -47,7 +49,7 @@ export const ReporterDataSet = ({ match, history }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 

@@ -4,7 +4,7 @@ import moment from 'moment';
 import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotItem.module.scss';
 
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { Icon } from 'ui/views/_components/Icon';
 import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 
 export function SnapshotItem({ itemData }) {
@@ -25,7 +25,7 @@ export function SnapshotItem({ itemData }) {
                   payload: { ...itemData }
                 })
               }>
-              <IconComponent icon={primeIcons.icons.replay} />
+              <Icon icon="replay" />
             </button>
             <button
               className="rp-btn warning"
@@ -35,7 +35,7 @@ export function SnapshotItem({ itemData }) {
                   payload: { ...itemData }
                 })
               }>
-              <IconComponent icon={primeIcons.icons.trash} />
+              <Icon icon="trash" />
             </button>
           </div>
         </div>
