@@ -2,9 +2,12 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
 
@@ -37,8 +40,9 @@ const DataViewer = withRouter(
       }
     }) => {
       //const contextReporterDataSet = useContext(ReporterDataSetContext);
-      const [colOptions, setColOptions] = useState([{}]);
-      const [cols, setCols] = useState(tableSchemaColumns);
+      const [addDialogVisible, setAddDialogVisible] = useState(false);
+      const [columnOptions, setColumnOptions] = useState([{}]);
+      const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
       const [columns, setColumns] = useState([]);
       const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
@@ -112,15 +116,15 @@ const DataViewer = withRouter(
           }
         ]);
 
-        let colOpt = [];
-        for (let col of cols) {
-          colOpt.push({ label: col.header, value: col });
+        let colOptions = [];
+        for (let colSchema of colsSchema) {
+          colOptions.push({ label: colSchema.header, value: colSchema });
         }
-        setColOptions(colOpt);
+        setColumnOptions(colOptions);
 
         const inmTableSchemaColumns = [...tableSchemaColumns];
         inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-        setCols(inmTableSchemaColumns);
+        setColsSchema(inmTableSchemaColumns);
 
         onFetchData(undefined, undefined, 0, numRows);
       }, []);
@@ -141,18 +145,18 @@ const DataViewer = withRouter(
       }, [recordPositionId]);
 
       useEffect(() => {
-        let columnsArr = cols.map(col => {
-          let sort = col.field === 'id' ? false : true;
-          let visibleColumn = col.field === 'id' ? styles.VisibleHeader : '';
+        let columnsArr = colsSchema.map(column => {
+          let sort = column.field === 'id' ? false : true;
+          let visibleColumn = column.field === 'id' ? styles.VisibleHeader : '';
           return (
             <Column
               body={dataTemplate}
               className={visibleColumn}
-              editor={row => cellDataEditor(row, col.field)}
+              editor={row => cellDataEditor(row, column.field)}
               editorValidator={requiredValidator}
-              field={col.field}
-              header={col.header}
-              key={col.field}
+              field={column.field}
+              header={column.header}
+              key={column.field}
               sortable={sort}
             />
           );
@@ -161,7 +165,7 @@ const DataViewer = withRouter(
           <Column
             key="actions"
             body={row => actionTemplate(row)}
-            style={{ width: '250px', height: '45px' }}
+            style={{ width: '100px', height: '45px' }}
             frozen={true}
           />
         );
@@ -176,7 +180,7 @@ const DataViewer = withRouter(
         );
         let newColumnsArr = [validationCol].concat(columnsArr);
         setColumns(newColumnsArr);
-      }, [cols, colOptions]);
+      }, [colsSchema, columnOptions]);
 
       const onChangePage = event => {
         setNumRows(event.rows);
@@ -190,6 +194,16 @@ const DataViewer = withRouter(
         if (dataDeleted) {
           setIsDataDeleted(true);
         }
+      };
+
+      const onConfirmDeleteRow = () => {
+        let inmFetchedData = [...fetchedData];
+        inmFetchedData = inmFetchedData.filter(d => d.id !== selectedRow.id);
+        setFetchedData(inmFetchedData);
+      };
+
+      const onDeleteRow = () => {
+        setConfirmDeleteVisible(true);
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -222,9 +236,21 @@ const DataViewer = withRouter(
         setImportDialogVisible(false);
       };
 
+      const onHideConfirmDeleteDialog = () => {
+        setConfirmDeleteVisible(false);
+      };
+
       const onRefresh = () => {
         onFetchData(sortField, sortOrder, firstRow, numRows);
       };
+
+      const onRowSelect = (event, value) => {
+        console.log(value, event);
+
+        setSelectedRow(value);
+      };
+
+      const onSaveRow = () => {};
 
       const onSetVisible = (fnUseState, visible) => {
         fnUseState(visible);
@@ -288,34 +314,49 @@ const DataViewer = withRouter(
         return tableData;
       };
 
-      const actionTemplate = row => {
+      const actionTemplate = () => {
         return (
           <div>
-            <Button type="button" icon="pi pi-search" className="p-button-success" style={{ marginRight: '.5em' }} />
-            <Button type="button" icon="pi pi-trash" className="p-button-danger" onClick={onDeleteRow} />
+            <Button type="button" icon="edit" className="p-button-warning" style={{ marginRight: '.5em' }} />
+            <Button type="button" icon="trash" className="p-button-danger" onClick={onDeleteRow} />
           </div>
         );
       };
 
-      const onDeleteRow = () => {
-        setConfirmDeleteVisible(true);
-      };
+      const addRowDialogFooter = (
+        <div className="ui-dialog-buttonpane p-clearfix">
+          <Button label={resources.messages['cancel']} icon="cancel" onClick={() => setAddDialogVisible(false)} />
+          <Button label={resources.messages['save']} icon="save" onClick={onSaveRow} />
+        </div>
+      );
 
-      const onRowSelect = (event, value) => {
-        console.log(value, event);
+      const addRowFooter = (
+        <div className="p-clearfix" style={{ width: '100%' }}>
+          <Button
+            style={{ float: 'left' }}
+            label={resources.messages['add']}
+            icon="add"
+            onClick={() => {
+              setAddDialogVisible(true);
+            }}
+          />
+        </div>
+      );
 
-        setSelectedRow(value);
-      };
-
-      const onConfirmDeleteRow = () => {
-        let inmFetchedData = [...fetchedData];
-        inmFetchedData = inmFetchedData.filter(d => d.id !== selectedRow.id);
-        setFetchedData(inmFetchedData);
-      };
-
-      const onHideConfirmDeleteDialog = () => {
-        setConfirmDeleteVisible(false);
-      };
+      const newRowForm = colsSchema.map((column, i) => {
+        if (i < colsSchema.length - 1) {
+          return (
+            <React.Fragment key={column.field}>
+              <div className="p-col-4" style={{ padding: '.75em' }}>
+                <label htmlFor={column.field}>{column.header}</label>
+              </div>
+              <div className="p-col-8" style={{ padding: '.5em' }}>
+                <InputText id={column.field} />
+              </div>
+            </React.Fragment>
+          );
+        }
+      });
 
       const filterDataResponse = data => {
         const dataFiltered = data.records.map(record => {
@@ -448,11 +489,14 @@ const DataViewer = withRouter(
           <div className={styles.Table}>
             <DataTable
               autoLayout={true}
-              header={header}
+              editable={true}
               first={firstRow}
+              footer={addRowFooter}
+              header={header}
               lazy={true}
               loading={loading}
               onPage={onChangePage}
+              onRowSelect={e => onRowSelect(e, e.data)}
               onSort={onSort}
               paginator={true}
               paginatorRight={totalCount}
@@ -466,10 +510,8 @@ const DataViewer = withRouter(
               sortOrder={sortOrder}
               totalRecords={totalRecords}
               value={fetchedData}
-              editable={true}
-              onRowSelect={e => onRowSelect(e, e.data)}
-              // scrollable={true}
-              // frozenWidth="200px"
+              //scrollable={true}
+              //frozenWidth="100px"
               // unfrozenWidth="600px"
             >
               {columns}
@@ -511,29 +553,41 @@ const DataViewer = withRouter(
             onConfirm={onConfirmDeleteRow}
             onHide={onHideConfirmDeleteDialog}
             visible={confirmDeleteVisible}
-            header="Delete row"
+            header={resources.messages['deleteRow']}
             maximizable={false}
             labelConfirm="Yes"
             labelCancel="No">
-            Do you want to delete this row?
+            {resources.messages['confirmDeleteRow']}
             <hr />
             <table className={styles.Table}>
               <thead>
-                {cols.map((c, i) => {
-                  return <th key={i}>{c.header}</th>;
+                {colsSchema.map((column, i) => {
+                  return <th key={i}>{column.header}</th>;
                 })}
               </thead>
               <tbody>
                 <tr>
                   {Object.values(selectedRow)
                     .slice(1)
-                    .map((r, i) => {
-                      return <td key={i}>{r}</td>;
+                    .map((row, i) => {
+                      return <td key={i}>{row}</td>;
                     })}
                 </tr>
               </tbody>
             </table>
           </ConfirmDialog>
+          <Dialog
+            blockScroll={false}
+            contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+            footer={addRowDialogFooter}
+            header={resources.messages['addNewRow']}
+            maximizable={true}
+            modal={true}
+            onHide={() => setAddDialogVisible(false)}
+            style={{ width: '50%', height: '80%', overflow: 'auto' }}
+            visible={addDialogVisible}>
+            <div className="p-grid p-fluid">{newRowForm}</div>
+          </Dialog>
         </div>
       );
     }

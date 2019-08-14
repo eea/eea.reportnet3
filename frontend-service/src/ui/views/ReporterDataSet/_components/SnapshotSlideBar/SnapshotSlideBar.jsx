@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect } from 'react';
 
-import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotSliderBar.module.scss';
 
 import { Formik, Field, Form } from 'formik';

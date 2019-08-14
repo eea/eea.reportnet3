@@ -6,7 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DocumentationDataSet.module.scss';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { ButtonsBar } from 'ui/views/_components/ButtonsBar';

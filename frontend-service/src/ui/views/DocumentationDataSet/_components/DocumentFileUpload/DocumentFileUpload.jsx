@@ -7,7 +7,7 @@ import { DocumentService } from 'core/services/Document';
 
 import styles from './DocumentFileUpload.module.css';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
   const resources = useContext(ResourcesContext);

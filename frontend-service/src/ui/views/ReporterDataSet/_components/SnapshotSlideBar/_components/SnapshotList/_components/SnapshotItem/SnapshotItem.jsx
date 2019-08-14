@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import moment from 'moment';
 
-import primeIcons from 'assets/conf/prime.icons';
 import styles from './SnapshotItem.module.scss';
 
 import { Icon } from 'ui/views/_components/Icon';

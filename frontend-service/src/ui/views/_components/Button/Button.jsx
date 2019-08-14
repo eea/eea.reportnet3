@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { Button as PrimeButton } from 'primereact/button';
 

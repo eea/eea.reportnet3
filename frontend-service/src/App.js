@@ -10,7 +10,7 @@ import { ReporterDataSet } from 'ui/views/ReporterDataSet/ReporterDataSet';
 import { ReportingDataFlow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import langResources from 'assets/conf/messages.en.json';
+import langResources from 'conf/messages.en.json';
 
 const App = () => {
   const [resources] = useState({ ...langResources });

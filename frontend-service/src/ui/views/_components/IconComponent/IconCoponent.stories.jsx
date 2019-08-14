@@ -2,7 +2,7 @@ import React from 'react';
 
 import { storiesOf } from '../../../../../.storybook/storiesOf';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 import { IconComponent } from './IconComponent';
 
 storiesOf('IconComponent', module)
@@ -15,6 +15,7 @@ storiesOf('IconComponent', module)
   .add('Clone Icon', () => <IconComponent icon={config.icons.clone} />)
   .add('Comment Icon', () => <IconComponent icon={config.icons.comment} />)
   .add('Dashboard Icon', () => <IconComponent icon={config.icons.dashboard} />)
+  .add('Edit Icon', () => <IconComponent icon={config.icons.edit} />)
   .add('Export Icon', () => <IconComponent icon={config.icons.export} />)
   .add('Eye Icon', () => <IconComponent icon={config.icons.eye} />)
   .add('Filter Icon', () => <IconComponent icon={config.icons.filter} />)
@@ -26,6 +27,7 @@ storiesOf('IconComponent', module)
   .add('Plus Icon', () => <IconComponent icon={config.icons.plus} />)
   .add('Refresh Icon', () => <IconComponent icon={config.icons.refresh} />)
   .add('Replay Icon', () => <IconComponent icon={config.icons.replay} />)
+  .add('Search Icon', () => <IconComponent icon={config.icons.search} />)
   .add('Share Icon', () => <IconComponent icon={config.icons.share} />)
   .add('Shopping Cart Icon', () => <IconComponent icon={config.icons.shoppingCart} />)
   .add('Sort Icon', () => <IconComponent icon={config.icons.sort} />)

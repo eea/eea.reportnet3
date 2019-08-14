@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import styles from './ReportingDataFlow.module.css';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
