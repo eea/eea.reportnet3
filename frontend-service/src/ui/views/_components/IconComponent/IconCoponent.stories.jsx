@@ -18,7 +18,7 @@ storiesOf('IconComponent', module)
   .add('Export Icon', () => <IconComponent icon={config.icons.export} />)
   .add('Eye Icon', () => <IconComponent icon={config.icons.eye} />)
   .add('Filter Icon', () => <IconComponent icon={config.icons.filter} />)
-  /*  .add('group-by Icon', () => <IconComponent icon={config.icons.group-by} />) */
+  .add('groupBy Icon', () => <IconComponent icon={config.icons.groupBy} />)
   .add('Home Icon', () => <IconComponent icon={config.icons.home} />)
   .add('Import Icon', () => <IconComponent icon={config.icons.import} />)
   .add('Info Icon', () => <IconComponent icon={config.icons.info} />)

@@ -1,24 +1,24 @@
 import React, { useContext } from 'react';
 
-import { Button as PrimeButton } from 'primereact/button';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { config } from 'assets/conf';
 
-export const Button = ({ disabled, icon, iconClasses, label, onClick }) => {
-  const resources = useContext(ResourcesContext);
+import { Button as PrimeButton } from 'primereact/button';
+
+export const Button = ({ disabled, icon, iconPos, iconClasses, label, onClick }) => {
   let icons = [
-    resources.icons['export'],
-    resources.icons['import'],
-    resources.icons['trash'],
-    resources.icons['warning'],
-    resources.icons['clock'],
-    resources.icons['dashboard'],
-    resources.icons['eye'],
-    resources.icons['filter'],
-    resources.icons['group-by'],
-    resources.icons['sort'],
-    resources.icons['validate'],
-    resources.icons['refresh'],
-    resources.icons['camera']
+    config.icons.export,
+    config.icons.import,
+    config.icons.trash,
+    config.icons.warning,
+    config.icons.clock,
+    config.icons.dashboard,
+    config.icons.eye,
+    config.icons.filter,
+    config.icons.groupBy,
+    config.icons.sort,
+    config.icons.validate,
+    config.icons.refresh,
+    config.icons.camera
   ];
 
   let disabledButton = disabled ? true : false;
@@ -29,6 +29,7 @@ export const Button = ({ disabled, icon, iconClasses, label, onClick }) => {
     <PrimeButton
       className={classes}
       icon={iconClassName}
+      iconPos={iconPos}
       label={label}
       style={{ marginRight: '.25em' }}
       onClick={onClick}

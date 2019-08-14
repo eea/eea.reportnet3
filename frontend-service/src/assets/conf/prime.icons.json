@@ -12,7 +12,7 @@
 		"export": "pi pi-download",
 		"eye": "pi pi-eye",
 		"filter": "pi pi-filter",
-		"group-by": "pi pi-sitemap",
+		"groupBy": "pi pi-sitemap",
 		"home": "pi pi-home",
 		"import": "pi pi-upload",
 		"info": "pi pi-info",

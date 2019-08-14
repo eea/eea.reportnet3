@@ -8,7 +8,7 @@ import { ButtonY } from './ButtonY';
 storiesOf('ButtonY', module)
   .add('Button ', () => <ButtonY label="Push" onClick={action('clicked')} />)
   .add('Button wit Icon Left', () => (
-    <ButtonY label="Click" icon={config.icons.check} iconPos="left" onClick={action('clicked')} />
+    <ButtonY label="Click" icon={config.icons.plus} iconPos="left" onClick={action('clicked')} />
   ))
   .add('Button wit Icon Right', () => (
     <ButtonY label="Button" icon={config.icons.check} iconPos="right" onClick={action('clicked')} />

@@ -43,7 +43,7 @@
 		"loading": "Loading...",
 		"visibility": "Visibility",
 		"filter": "Filter",
-		"group-by": "Group by",
+		"groupBy": "Group by",
 		"sort": "Sort",
 		"refresh": "Refresh",
 		"snapshots": "Snapshots",
