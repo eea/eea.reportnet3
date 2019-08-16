@@ -10,14 +10,17 @@ import org.springframework.stereotype.Repository;
 public interface FieldExtendedQueriesRepository {
 
 
+
   /**
    * Find all field values by field schem and name data set.
    *
-   * @param fieldSchema the field schema
-   * @param nameDataset the name dataset
-   * @return the list
+   * @param idFieldSchemaReference the id field schema reference
+   * @param idDatasetReference the id dataset reference
+   * @param recordCoordinateReference the record coordinate reference
+   * @param columnCoordinateReference the column coordinate reference
+   * @return the string
    */
-  Integer findAllFieldValuesByFieldSchemAndNameDataSet(String value, String fieldSchema,
-      Long idDataset);
+  String findAllFieldValuesByFieldSchemAndNameDataSet(String idFieldSchemaReference,
+      Long idDatasetReference, Long recordCoordinateReference, Long columnCoordinateReference);
 
 }

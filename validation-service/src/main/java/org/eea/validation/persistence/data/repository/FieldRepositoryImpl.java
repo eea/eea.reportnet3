@@ -1,6 +1,5 @@
 package org.eea.validation.persistence.data.repository;
 
-import java.math.BigInteger;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,26 +18,32 @@ public class FieldRepositoryImpl implements FieldExtendedQueriesRepository {
   @PersistenceContext
   private EntityManager entityManager;
 
+
   /**
    * Find all field values by field schem and name data set.
    *
-   * @param value the value
-   * @param fieldSchema the field schema
+   * @param idFieldSchema the id field schema
    * @param idDataset the id dataset
-   * @return the list
+   * @param recordCoordinate the record coordinate
+   * @param columnCoordinate the column coordinate
+   * @return the string
    */
   @SuppressWarnings("unchecked")
   @Override
-  public Integer findAllFieldValuesByFieldSchemAndNameDataSet(String value, String fieldSchema,
-      Long idDataset) {
-    String QUERY = "SELECT count(fv.value) FROM dataset_" + idDataset
-        + ".field_value fv where fv.id_Field_Schema = '" + fieldSchema
-        + "' and LOWER(fv.value)=LOWER('" + value + "')";
+  public String findAllFieldValuesByFieldSchemAndNameDataSet(String idFieldSchema, Long idDataset,
+      Long recordCoordinate, Long columnCoordinate) {
+
+    String QUERY = "SELECT fv.value FROM dataset_" + idDataset + ".field_value fv"
+        + " where fv.id_Field_Schema = '" + idFieldSchema + "' and fv.record_coordinate = "
+        + recordCoordinate + " and fv.column_coordinate = " + columnCoordinate;
+
     Query query = entityManager.createNativeQuery(QUERY);
-    List<BigInteger> countSameValue = query.getResultList();
-    return countSameValue.get(0).intValue();
+    List<String> value = query.getResultList();
+    if (null != value && !value.isEmpty()) {
+      return value.get(0);
+    } else {
+      return null;
+    }
   }
-
-
 }
 
