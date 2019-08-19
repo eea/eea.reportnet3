@@ -7,27 +7,27 @@ public enum ObjectAccessRoleEnum {
   /**
    * Dataflow provider object access role enum.
    */
-  DATAFLOW_PROVIDER("ROLE_DATAFLOW_%s_PROVIDER"),
+  DATAFLOW_PROVIDER("ROLE_DATAFLOW-%s-DATA_PROVIDER"),
   /**
    * Dataflow requestor object access role enum.
    */
-  DATAFLOW_REQUESTOR("ROLE_DATAFLOW_%s_REQUESTOR"),
+  DATAFLOW_REQUESTOR("ROLE_DATAFLOW-%s-DATA_REQUESTOR"),
   /**
    * Dataflow steward object access role enum.
    */
-  DATAFLOW_STEWARD("ROLE_DATAFLOW_%s_REQUESTOR"),
+  DATAFLOW_STEWARD("ROLE_DATAFLOW-%s-DATA_REQUESTOR"),
   /**
    * Dataset provider object access role enum.
    */
-  DATASET_PROVIDER("ROLE_DATASET_%s_PROVIDER"),
+  DATASET_PROVIDER("ROLE_DATASET-%s-DATA_PROVIDER"),
   /**
    * Dataset requestor object access role enum.
    */
-  DATASET_REQUESTOR("ROLE_DATASET_%s_REQUESTOR"),
+  DATASET_REQUESTOR("ROLE_DATASET-%s-DATA_REQUESTOR"),
   /**
    * Dataset steward object access role enum.
    */
-  DATASET_STEWARD("ROLE_DATASET_%s_REQUESTOR");
+  DATASET_STEWARD("ROLE_DATASET-%s-DATA_REQUESTOR");
 
 
   private String expression;
