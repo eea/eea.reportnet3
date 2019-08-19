@@ -1,8 +1,11 @@
 import React, { useContext } from 'react';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import logo from 'assets/images/logo.png';
 
 import styles from './Login.module.css';
+
+import logo from 'assets/images/logo.png';
+
+import { Button } from 'ui/views/_components/Button';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
@@ -24,9 +27,12 @@ const Login = ({ history }) => {
               <input type="password" placeholder={resources.messages.loginPassword} autoComplete="password" />
             </fieldset>
             <fieldset className={`${styles.buttonHolder}`}>
-              <button className="rp-btn primary" onClick={() => history.push('/data-flow-task/')}>
-                {resources.messages.loginLogin}
-              </button>
+              <Button
+                layout="simple"
+                label={resources.messages.loginLogin}
+                className="rp-btn primary"
+                onClick={() => history.push('/data-flow-task/')}
+              />
             </fieldset>
           </form>
         </div>

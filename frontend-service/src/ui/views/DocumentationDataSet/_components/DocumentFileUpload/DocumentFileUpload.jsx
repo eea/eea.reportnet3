@@ -1,13 +1,17 @@
 import React, { useContext } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+
 import * as Yup from 'yup';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isPlainObject, isEmpty } from 'lodash';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { DocumentService } from 'core/services/Document';
 
 import styles from './DocumentFileUpload.module.css';
 
 import { config } from 'conf';
+
+import { Button } from 'ui/views/_components/Button';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+
+import { DocumentService } from 'core/services/Document';
 
 const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
   const resources = useContext(ResourcesContext);
@@ -86,12 +90,14 @@ const DocumentFileUpload = ({ dataFlowId, onUpload }) => {
           </fieldset>
           <fieldset>
             <div className={styles.btnWrapper}>
-              <button className={styles.primaryBtn} type="submit" disabled={isSubmitting}>
-                {resources.messages.upload}
-              </button>
-              <button className={styles.defaultBtn} type="reset">
-                {resources.messages.reset}
-              </button>
+              <Button
+                type="submit"
+                className={styles.primaryBtn}
+                disabled={isSubmitting}
+                label={resources.messages.upload}
+                layout="simple"
+              />
+              <Button type="reset" className={styles.defaultBtn} label={resources.messages.reset} layout="simple" />
             </div>
           </fieldset>
         </Form>

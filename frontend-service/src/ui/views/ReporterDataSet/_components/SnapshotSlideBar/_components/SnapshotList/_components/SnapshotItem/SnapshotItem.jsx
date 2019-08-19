@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
+
 import moment from 'moment';
 
 import styles from './SnapshotItem.module.scss';
 
-import { Icon } from 'ui/views/_components/Icon';
+import { Button } from 'ui/views/_components/Button';
 import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 
 export function SnapshotItem({ itemData }) {
@@ -15,27 +16,30 @@ export function SnapshotItem({ itemData }) {
         <div className={styles.listItemData}>
           <h4>{moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}</h4>
           <div className={styles.listActions}>
-            <button
-              disabled
+            <Button
+              icon="replay"
+              layout="simple"
+              disabled={true}
               className="rp-btn secondary"
               onClick={() =>
                 snapshotContext.snapshotDispatch({
                   type: 'restore_snapshot',
                   payload: { ...itemData }
                 })
-              }>
-              <Icon icon="replay" />
-            </button>
-            <button
+              }
+            />
+            <Button
+              icon="trash"
+              layout="simple"
+              disabled={false}
               className="rp-btn warning"
               onClick={() =>
                 snapshotContext.snapshotDispatch({
                   type: 'delete_snapshot',
                   payload: { ...itemData }
                 })
-              }>
-              <Icon icon="trash" />
-            </button>
+              }
+            />
           </div>
         </div>
       </div>

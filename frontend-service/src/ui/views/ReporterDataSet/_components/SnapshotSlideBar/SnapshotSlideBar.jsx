@@ -1,16 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect } from 'react';
+import { Formik, Field, Form } from 'formik';
+import * as Yup from 'yup';
+
+import { isEmpty } from 'lodash';
 
 import styles from './SnapshotSliderBar.module.scss';
 
-import { Formik, Field, Form } from 'formik';
-import { Icon } from 'ui/views/_components/Icon';
-import { isEmpty } from 'lodash';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Button } from 'ui/views/_components/Button';
 import { Sidebar } from 'primereact/sidebar';
-import { SnapshotContext } from '../../ReporterDataSet';
 import { SnapshotList } from './_components/SnapshotList';
-import * as Yup from 'yup';
+
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SnapshotContext } from '../../ReporterDataSet';
 
 const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
@@ -64,9 +66,12 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
                     placeholder={resources.messages.createSnapshotPlaceholder}
                   />
                   <div className={styles.createButtonWrapper}>
-                    <button className={`${styles.createSnapshotButton} rp-btn primary`} type="submit">
-                      <Icon icon="plus" />
-                    </button>
+                    <Button
+                      className={`${styles.createSnapshotButton} rp-btn primary`}
+                      type="submit"
+                      icon="plus"
+                      layout="simple"
+                    />
                   </div>
                 </div>
                 {errors.createSnapshotDescription || touched.createSnapshotDescription ? (
