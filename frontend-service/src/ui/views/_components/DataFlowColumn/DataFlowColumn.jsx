@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 
 import styles from './DataFlowColumn.module.css';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';

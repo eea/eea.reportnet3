@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import styles from './TabsSchema.module.css';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { DataViewer } from './_components/DataViewer';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';

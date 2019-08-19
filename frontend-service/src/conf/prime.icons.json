@@ -1,5 +1,6 @@
 {
 	"icons": {
+		"add": "pi pi-plus",
 		"archive": "pi pi-file",
 		"banned": "pi pi-ban",
 		"cancel": "pi pi-times",
@@ -9,6 +10,7 @@
 		"clone": "pi pi-clone",
 		"comment": "pi pi-comment",
 		"dashboard": "pi pi-chart-bar",
+		"edit": "pi pi-pencil",
 		"export": "pi pi-download",
 		"eye": "pi pi-eye",
 		"filter": "pi pi-filter",
@@ -20,6 +22,8 @@
 		"plus": "pi pi-plus",
 		"refresh": "pi pi-refresh",
 		"replay": "pi pi-replay",
+		"save": "pi pi-save",
+		"search": "pi pi-search",
 		"share": "pi pi-share-alt",
 		"shoppingCart": "pi pi-shopping-cart",
 		"sort": "pi pi-sort",

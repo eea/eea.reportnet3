@@ -1,7 +1,7 @@
 import React from 'react';
 import { isNull } from 'lodash';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { Button as PrimeButton } from 'primereact/button';
 import { Icon } from 'ui/views/_components/Icon';

@@ -1,10 +1,7 @@
 import axios from 'axios';
-// import config from '../../conf/web.config.json';
 
 export const HTTPRequester = (function() {
-  //const baseURL = `${config.api.protocol}${config.api.url}${config.api.port}`;
   const baseURL = window.env.REACT_APP_BACKEND;
-  //TODO: Existe axios-hook para usar hooks. Posible mejora.
   //Maps object queryString to 'key=value' format. Checks if queryString is undefined or empty object
   const mapQueryString = queryString =>
     !queryString
@@ -22,8 +19,7 @@ export const HTTPRequester = (function() {
       return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`);
     },
     download: options => {
-      return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`,
-      {
+      return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`, {
         responseType: 'blob',
         headers: { 'Content-Type': 'application/octet-stream' }
       });

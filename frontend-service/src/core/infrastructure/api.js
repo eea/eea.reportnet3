@@ -1,4 +1,4 @@
-import { config } from 'assets/conf';
+import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
 

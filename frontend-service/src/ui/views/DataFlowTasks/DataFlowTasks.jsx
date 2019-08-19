@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState } from 'react';
 
 import styles from './DataFlowTasks.module.scss';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';

@@ -6,7 +6,7 @@ import { isPlainObject, isEmpty } from 'lodash';
 
 import styles from './DocumentFileUpload.module.css';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
