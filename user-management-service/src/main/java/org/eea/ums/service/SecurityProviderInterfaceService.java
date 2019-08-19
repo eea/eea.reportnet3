@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 
 /**
@@ -24,7 +24,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @return the string
    */
-  String doLogin(String username, String password, Object... extraParams);
+  TokenVO doLogin(String username, String password, Object... extraParams);
 
   /**
    * Check access permission boolean.
@@ -82,4 +82,12 @@ public interface SecurityProviderInterfaceService {
    */
   List<ResourceAccessVO> getResourcesByUser(String userId);
 
+  /**
+   * Refresh token token vo.
+   *
+   * @param refreshToken the refresh token
+   *
+   * @return the token vo
+   */
+  TokenVO refreshToken(String refreshToken);
 }

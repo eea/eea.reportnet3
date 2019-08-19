@@ -82,9 +82,26 @@ public class KeycloakConnectorServiceImplTest {
         .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
             Mockito.any(Class.class))).thenReturn(result);
 
-    String token = keycloakConnectorService.generateToken("user1", "1234");
+    TokenInfo token = keycloakConnectorService.generateToken("user1", "1234");
     Assert.assertNotNull(result);
-    Assert.assertEquals("JWT", token);
+    Assert.assertEquals("JWT", token.getAccessToken());
+
+  }
+
+  @Test
+  public void refreshToken() {
+    TokenInfo body = new TokenInfo();
+    body.setAccessToken("JWT");
+    ResponseEntity<TokenInfo> result = new ResponseEntity<>(
+        body,
+        HttpStatus.OK);
+    Mockito.when(restTemplate
+        .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(result);
+
+    TokenInfo token = keycloakConnectorService.refreshToken("1234");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("JWT", token.getAccessToken());
 
   }
 

@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.swing.text.html.Option;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.admin.TokenMonitor;
 import org.eea.ums.service.keycloak.model.CheckResourcePermissionRequest;
@@ -87,7 +85,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private void initKeycloakContext() {
     //As TokenMonitor has not been created yet (it depends on KeycloakConnectorService) it is necessary to get one adminToken to retrieve necessary information
     //such as clientId, resources...
-    String adminToken = this.generateToken(adminUser, adminPass);
+    TokenInfo tokenInfo = this.generateToken(adminUser, adminPass);
+
+    String adminToken = Optional.ofNullable(tokenInfo).map(info -> info.getAccessToken())
+        .orElse("");
     this.internalClientId = getReportnetClientInfo(adminToken).getId();
     List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
@@ -175,6 +176,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         .map(entity -> (GroupInfo[]) entity).orElse(null);
   }
 
+
   /**
    * Generate token string.
    *
@@ -184,12 +186,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * @return the string
    */
   @Override
-  public String generateToken(String username, String password) {
-    HttpHeaders headers = createBasicHeaders(null);
-    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-    Map<String, String> uriParams = new HashMap<>();
-    uriParams.put(URI_PARAM_REALM, realmName);
+  public TokenInfo generateToken(String username, String password) {
 
     MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
     map.add("username", username);
@@ -197,6 +194,28 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     map.add("password", password);
     map.add("client_secret", secret);
     map.add("client_id", clientId);
+
+    return retrieveTokenFromKeycloak(map);
+
+  }
+
+  @Override
+  public TokenInfo refreshToken(String refreshToken) {
+    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+    map.add("refresh_token", refreshToken);
+    map.add("grant_type", "refresh_token");
+    map.add("client_secret", secret);
+    map.add("client_id", clientId);
+
+    return retrieveTokenFromKeycloak(map);
+  }
+
+  private TokenInfo retrieveTokenFromKeycloak(MultiValueMap<String, String> map) {
+    HttpHeaders headers = createBasicHeaders(null);
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
         map, headers);
@@ -209,18 +228,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             request,
             TokenInfo.class);
 
-    String token = "";
+    TokenInfo responseBody = null;
     if (null != tokenInfo && null != tokenInfo.getBody()) {
-      TokenInfo responseBody = tokenInfo.getBody();
-
-      if (null != responseBody && !StringUtils.isBlank(responseBody.getAccessToken())) {
-        token = responseBody.getAccessToken();
-      }
+      responseBody = tokenInfo.getBody();
     }
-    return StringUtils.isBlank(token) ? "" : token;
-
+    return responseBody;
   }
-
 
   private ClientInfo getReportnetClientInfo(String adminToken) {
     Map<String, String> headerInfo = new HashMap<>();

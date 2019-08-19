@@ -1,8 +1,8 @@
 package org.eea.ums.service.keycloak.service;
 
-import java.util.List;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 
 /**
  * The interface Keycloak connector service.
@@ -27,7 +27,7 @@ public interface KeycloakConnectorService {
    *
    * @return the string
    */
-  String generateToken(String username, String password);
+  TokenInfo generateToken(String username, String password);
 
   /**
    * Gets groups by user.
@@ -37,4 +37,13 @@ public interface KeycloakConnectorService {
    * @return the groups by user
    */
   GroupInfo[] getGroupsByUser(String userId);
+
+  /**
+   * Refresh token token info.
+   *
+   * @param refreshToken the refresh token
+   *
+   * @return the token info
+   */
+  TokenInfo refreshToken(String refreshToken);
 }
