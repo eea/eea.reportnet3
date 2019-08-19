@@ -95,9 +95,9 @@ public class DatasetSchemaServiceTest {
   public void testCreateDataSchema() {
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables);;
-    dataSchemaServiceImpl.createDataSchema(1L);
-    dataschemaService.createDataSchema(1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+    dataSchemaServiceImpl.createDataSchema(1L, 1L);
+    dataschemaService.createDataSchema(1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
   }
 
 
@@ -123,9 +123,9 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-    dataSchemaServiceImpl.createDataSchema(1L);
-    dataschemaService.createDataSchema(1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+    dataSchemaServiceImpl.createDataSchema(1L, 1L);
+    dataschemaService.createDataSchema(1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
   }
 
 
@@ -151,9 +151,9 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-    dataSchemaServiceImpl.createDataSchema(1L);
-    dataschemaService.createDataSchema(1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+    dataSchemaServiceImpl.createDataSchema(1L, 1L);
+    dataschemaService.createDataSchema(1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
   }
 
 
@@ -180,9 +180,9 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-    dataSchemaServiceImpl.createDataSchema(1L);
-    dataschemaService.createDataSchema(1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+    dataSchemaServiceImpl.createDataSchema(1L, 1L);
+    dataschemaService.createDataSchema(1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -207,9 +207,9 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-    dataSchemaServiceImpl.createDataSchema(1L);
-    dataschemaService.createDataSchema(1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+    dataSchemaServiceImpl.createDataSchema(1L, 1L);
+    dataschemaService.createDataSchema(1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -234,9 +234,9 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
-    dataSchemaServiceImpl.createDataSchema(1L);
-    dataschemaService.createDataSchema(1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any());
+    dataSchemaServiceImpl.createDataSchema(1L, 1L);
+    dataschemaService.createDataSchema(1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
   }
 
   /**

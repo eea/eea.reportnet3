@@ -42,7 +42,9 @@ function boolean isCodeList( String value ,String codeList){
 function boolean isValid( String s ){
 
     try {
-        Double.valueOf( s );
+    	String aux = s.replace(".","");
+    	aux = aux.replace(",",".");
+        Double.valueOf( aux );
         return true;
     } catch( Exception e ){
         return false;

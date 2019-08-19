@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface DatasetSchemaController.
@@ -27,7 +28,8 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    */
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
-  void createDataSchema(@PathVariable("id") final Long datasetId);
+  void createDataSchema(@PathVariable("id") final Long datasetId,
+      @RequestParam("idDataflow") final Long dataflowId);
 
   /**
    * Find data schema by id.
