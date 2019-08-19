@@ -2,10 +2,12 @@ package org.eea.ums.service.impl;
 
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,11 +31,24 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
   @Test
   public void doLogin() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
     Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
-        .thenReturn("token");
-    String token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234");
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234");
     Assert.assertNotNull(token);
-    Assert.assertEquals("token", token);
+    Assert.assertEquals("token", token.getAccessToken());
+  }
+
+  @Test
+  public void refreshToken() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
+    Mockito.when(keycloakConnectorService.refreshToken(Mockito.anyString()))
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.refreshToken("1234");
+    Assert.assertNotNull(token);
+    Assert.assertEquals("token", token.getAccessToken());
   }
 
   @Test

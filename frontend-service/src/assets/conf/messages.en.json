@@ -110,6 +110,12 @@
 		"emptyDescriptionValidationError":"Please, enter a description",
 		"emptyLanguageValidationError":"Please, language must be selected",
 		"emptyFileValidationError":"Please, select a file",
-		"tooLargeFileValidationError":"File size is too large"
+		"tooLargeFileValidationError":"File size is too large",
+		"documentUploadingGrowlUploadingSummary": "Document upload",
+		"documentUploadingGrowlUploadingDetail": "Uploading document...",
+		"documentUploadingGrowlSuccessSummary": "Document upload",
+		"documentUploadingGrowlSuccessDetail": "Success",
+		"documentUploadingGrowlErrorSummary": "Document upload",
+		"documentUploadingGrowlErrorDetail": "Error"
 	}
 }

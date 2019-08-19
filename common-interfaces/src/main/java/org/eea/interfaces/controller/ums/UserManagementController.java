@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.ums;
 
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -32,8 +33,18 @@ public interface UserManagementController {
    * @return the string
    */
   @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
-  String generateToken(@RequestParam("username") String username,
+  TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password);
+
+  /**
+   * Refresh token token vo.
+   *
+   * @param refreshToken the refresh token
+   *
+   * @return the token vo
+   */
+  @RequestMapping(value = "/refreshToken", method = RequestMethod.POST)
+  TokenVO refreshToken(@RequestParam("refreshToken") String refreshToken);
 
   /**
    * Check resource access permission boolean.

@@ -7,13 +7,14 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
-import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,25 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
 
   @Override
-  public String doLogin(String username, String password, Object... extraParams) {
-    return keycloakConnectorService.generateToken(username, password);
+  public TokenVO doLogin(String username, String password, Object... extraParams) {
+    TokenInfo tokenInfo = keycloakConnectorService.generateToken(username, password);
+    TokenVO tokenVO = new TokenVO();
+    if (null != tokenInfo) {
+      tokenVO.setAccessToken(tokenInfo.getAccessToken());
+      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+    }
+    return tokenVO;
+  }
+
+  @Override
+  public TokenVO refreshToken(String refreshToken) {
+    TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
+    TokenVO tokenVO = new TokenVO();
+    if (null != tokenInfo) {
+      tokenVO.setAccessToken(tokenInfo.getAccessToken());
+      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+    }
+    return tokenVO;
   }
 
   @Override
@@ -77,4 +95,6 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     }
     return result;
   }
+
+
 }
