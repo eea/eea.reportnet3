@@ -139,7 +139,7 @@ export const ReporterDataSet = ({ match, history }) => {
         label: resources.messages['export'],
         icon: 'import',
         group: 'left',
-        disabled: true,
+        disabled: false,
         onClick: null
       },
       {

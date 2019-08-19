@@ -73,6 +73,13 @@ const DataViewer = withRouter(
             onClick: () => setImportDialogVisible(true)
           },
           {
+            label: resources.messages['exportTable'],
+            icon: 'import',
+            group: 'left',
+            disabled: false,
+            onClick: null
+          },
+          {
             label: resources.messages['deleteTable'],
             icon: 'trash',
             group: 'left',
