@@ -20,6 +20,9 @@
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
 	},
+	"exportDataSetTableData": {
+		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType=csv"
+	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	},	

@@ -97,6 +97,11 @@ const errorStatisticsById = async dataSetId => {
   return dataSet;
 };
 
+const exportTableDataById = async (dataSetId, tableSchemaId) => {
+  const dataSetTableData = await api.exportDataSetTableDataById(dataSetId, tableSchemaId);
+  return dataSetTableData;
+};
+
 const schemaById = async dataFlowId => {
   const dataSetSchemaDTO = await api.dataSetSchemaById(dataFlowId);
 
@@ -212,6 +217,7 @@ export const ApiDataSetRepository = {
   errorsById,
   errorPositionByObjectId,
   errorStatisticsById,
+  exportTableDataById,
   schemaById,
   tableDataById,
   validateDataById

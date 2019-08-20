@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import * as fileDownload from 'js-file-download';
+
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
@@ -47,6 +49,7 @@ const DataViewer = withRouter(
       const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+      const [exportTableData, setExportTableData] = useState(undefined);
       const [fetchedData, setFetchedData] = useState([]);
       const [firstRow, setFirstRow] = useState(0);
       const [header] = useState();
@@ -77,7 +80,7 @@ const DataViewer = withRouter(
             icon: 'import',
             group: 'left',
             disabled: false,
-            onClick: null
+            onClick: () => onExportTableData()
           },
           {
             label: resources.messages['deleteTable'],
@@ -189,6 +192,12 @@ const DataViewer = withRouter(
         setColumns(newColumnsArr);
       }, [colsSchema, columnOptions]);
 
+      useEffect(() => {
+        if (!isUndefined(exportTableData)) {
+          fileDownload(exportTableData);
+        }
+      }, [exportTableData]);
+
       const onChangePage = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
@@ -211,6 +220,10 @@ const DataViewer = withRouter(
 
       const onDeleteRow = () => {
         setConfirmDeleteVisible(true);
+      };
+
+      const onExportTableData = async () => {
+        setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId));
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {

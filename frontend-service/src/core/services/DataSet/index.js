@@ -2,6 +2,7 @@ import { dataSetRepository } from 'core/domain/model/DataSet/DataSetRepository';
 
 import { DeleteData } from './DeleteData';
 import { DeleteTableData } from './DeleteTableData';
+import { ExportTableData } from './ExportTableData';
 import { GetData } from './GetData';
 import { GetErrors } from './GetErrors';
 import { GetErrorPosition } from './GetErrorPosition';
@@ -15,6 +16,7 @@ export const DataSetService = {
   errorsById: GetErrors({ dataSetRepository }),
   errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),
   errorStatisticsById: GetStatistics({ dataSetRepository }),
+  exportTableDataById: ExportTableData({ dataSetRepository }),
   schemaById: GetSchema({ dataSetRepository }),
   tableDataById: GetData({ dataSetRepository }),
   validateDataById: ValidateData({ dataSetRepository })
