@@ -3,4 +3,8 @@ server:
 spring:
   application:
     name: dataflow
-  
+eea:
+ security:
+   authenticatedRequest: /dataflow/pendingaccepted,/dataflow/completed,/dataflow/request/*
+   roleProtectedRequest:
+     DATA_CUSTODIAN: /dataflow/createDataFlow

@@ -5,12 +5,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.SecurityContext;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,9 +31,15 @@ public class UserManagementControllerImpl implements UserManagementController {
 
   @Override
   @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
-  public String generateToken(@RequestParam("username") String username,
+  public TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password) {
     return securityProviderInterfaceService.doLogin(username, password);
+  }
+
+  @Override
+  @RequestMapping(value = "/refreshToken", method = RequestMethod.POST)
+  public TokenVO refreshToken(@RequestParam("refreshToken") String refreshToken) {
+    return securityProviderInterfaceService.refreshToken(refreshToken);
   }
 
   @Override
@@ -82,9 +90,9 @@ public class UserManagementControllerImpl implements UserManagementController {
         Collectors.toList());
   }
 
-//  @RequestMapping(value = "/test-security", method = RequestMethod.GET)
-//  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
-//  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
-//    return "OLEEEEE";
-//  }
+  @RequestMapping(value = "/test-security", method = RequestMethod.GET)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
+  public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
+    return "OLEEEEE";
+  }
 }

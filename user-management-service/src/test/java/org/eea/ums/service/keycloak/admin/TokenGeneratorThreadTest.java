@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
 import org.junit.After;
 import org.junit.Assert;
@@ -35,8 +36,10 @@ public class TokenGeneratorThreadTest {
 
   @Test
   public void run() throws InterruptedException {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
     Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
-        .thenReturn("token");
+        .thenReturn(tokenInfo);
 
     executor.submit(tokenGeneratorThread);
     executor.awaitTermination(2, TimeUnit.SECONDS);

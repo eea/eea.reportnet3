@@ -52,13 +52,12 @@ public interface DataFlowController {
   /**
    * Find completed.
    *
-   * @param userId the user id
    * @param pageNum the page num
    * @param pageSize the page size
    * @return the list
    */
-  @GetMapping(value = "/{userId}/completed", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findCompleted(@PathVariable(value = "userId") Long userId,
+  @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findCompleted(
       @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
 
@@ -66,24 +65,21 @@ public interface DataFlowController {
   /**
    * Find user dataflows by status.
    *
-   * @param userId the user id
    * @param type the type
    * @return the list
    */
-  @GetMapping(value = "/{userId}/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findUserDataflowsByStatus(@PathVariable(value = "userId") Long userId,
-      @PathVariable(value = "type") TypeRequestEnum type);
+  @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findUserDataflowsByStatus(@PathVariable(value = "type") TypeRequestEnum type);
 
 
 
   /**
    * Find pending accepted.
    *
-   * @param userId the user id
    * @return the list
    */
-  @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findPendingAccepted(@PathVariable(value = "userId") Long userId);
+  @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findPendingAccepted();
 
 
 
