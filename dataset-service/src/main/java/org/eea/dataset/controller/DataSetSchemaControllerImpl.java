@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
@@ -33,8 +34,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
-  public void createDataSchema(@PathVariable("id") final Long datasetId) {
-    dataschemaService.createDataSchema(datasetId);
+  public void createDataSchema(@PathVariable("id") final Long datasetId,
+      @RequestParam("idDataflow") final Long dataflowId) {
+    dataschemaService.createDataSchema(datasetId, dataflowId);
   }
 
 
