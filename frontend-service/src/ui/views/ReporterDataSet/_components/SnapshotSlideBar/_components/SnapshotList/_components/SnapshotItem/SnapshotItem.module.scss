@@ -18,13 +18,22 @@ p {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    button {
-      font-size: 0.9rem;
-      padding: 0.3rem;
+
+    .btn {
+      padding: 0;
+      margin: 0 3.5px;
+      border-radius: 5px;
+      font-size: 1.2rem;
+      width: 30px;
+      height: 32px;
+      border-color: transparent;
+      &:focus {
+        box-shadow: none;
+      }
     }
   }
 }
 
-.listItemData .listActions button:nth-of-type(1) {
-  margin-right: 0.5rem;
+.listItemData .listActions button:nth-last-of-type(1) {
+  margin-right: 0;
 }
