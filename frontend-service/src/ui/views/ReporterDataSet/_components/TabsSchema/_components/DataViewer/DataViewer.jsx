@@ -314,8 +314,17 @@ const DataViewer = withRouter(
       const actionTemplate = () => {
         return (
           <div className={styles.actionTemplate}>
-            <Button type="button" icon="edit" className={`${styles.editRowButton}`} />
-            <Button type="button" icon="trash" className={styles.deleteRowButton} onClick={onDeleteRow} />
+            <Button
+              type="button"
+              icon="edit"
+              className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+            />
+            <Button
+              type="button"
+              icon="trash"
+              className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
+              onClick={onDeleteRow}
+            />
           </div>
         );
       };
