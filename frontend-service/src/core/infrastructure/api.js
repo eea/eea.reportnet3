@@ -285,6 +285,10 @@ export const api = {
       queryString: {}
     });
     return response.data.weblinks;
-  }
+  },
   /* #endregion */
+  /* #region Login */
+  login: async (userName, password) => {},
+  logout: async userId => {},
+  refreshToken: async () => {}
 };

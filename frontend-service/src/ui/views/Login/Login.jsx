@@ -6,6 +6,7 @@ import logo from 'assets/images/logo.png';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { UserService } from 'core/services/User';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
