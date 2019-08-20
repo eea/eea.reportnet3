@@ -161,14 +161,10 @@ const DataViewer = withRouter(
             />
           );
         });
-        columnsArr.push(
-          <Column
-            key="actions"
-            body={row => actionTemplate(row)}
-            style={{ width: '100px', height: '45px' }}
-            frozen={true}
-          />
+        let editCol = (
+          <Column key="actions" body={row => actionTemplate(row)} style={{ width: '100px', height: '45px' }} />
         );
+
         let validationCol = (
           <Column
             body={validationsTemplate}
@@ -179,7 +175,8 @@ const DataViewer = withRouter(
           />
         );
         let newColumnsArr = [validationCol].concat(columnsArr);
-        setColumns(newColumnsArr);
+        let newColumnsArr2 = [editCol].concat(newColumnsArr);
+        setColumns(newColumnsArr2);
       }, [colsSchema, columnOptions]);
 
       const onChangePage = event => {
@@ -316,9 +313,9 @@ const DataViewer = withRouter(
 
       const actionTemplate = () => {
         return (
-          <div>
-            <Button type="button" icon="edit" className="p-button-warning" style={{ marginRight: '.5em' }} />
-            <Button type="button" icon="trash" className="p-button-danger" onClick={onDeleteRow} />
+          <div className={styles.actionTemplate}>
+            <Button type="button" icon="edit" className={`${styles.editRowButton}`} />
+            <Button type="button" icon="trash" className={styles.deleteRowButton} onClick={onDeleteRow} />
           </div>
         );
       };

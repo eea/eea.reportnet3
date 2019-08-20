@@ -1,3 +1,9 @@
 .VisibleHeader {
   display: none;
 }
+.actionTemplate {
+  display: flex;
+}
+.deleteRowButton {
+  margin-left: 3px !important;
+}
