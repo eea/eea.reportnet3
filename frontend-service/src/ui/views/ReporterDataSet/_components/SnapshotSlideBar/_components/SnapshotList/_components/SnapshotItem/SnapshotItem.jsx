@@ -17,7 +17,7 @@ export function SnapshotItem({ itemData }) {
     <li className={styles.listItem}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <h4>{moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}</h4>
+          <h5>{moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}</h5>
           <div className={styles.listActions}>
             <Button
               tooltip={resources.messages.restoreSnapshotTooltip}

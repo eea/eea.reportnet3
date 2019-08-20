@@ -137,9 +137,6 @@ body {
   color: var(--white);
   cursor: pointer;
 }
-.rp-btn span {
-  margin-top: -0.45em !important;
-}
 
 .rp-btn.default {
   color: var(--white);
