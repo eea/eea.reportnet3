@@ -137,9 +137,12 @@ body {
   color: var(--white);
   cursor: pointer;
 }
+.rp-btn span {
+  margin-top: -0.45em !important;
+}
 
 .rp-btn.default {
-  color: var(--c-black-400);
+  color: var(--white);
 }
 .rp-btn.rp-btn.default:hover {
   background-color: var(--c-orange-200);
@@ -178,7 +181,8 @@ body {
   color: var(--white);
 }
 .rp-btn.warning:hover {
-  background-color: var(--c-orange-400);
+  background-color: var(--c-orange-400) !important;
+  border: 1px solid var(--c-orange-400) !important;
   color: var(--white);
 }
 
