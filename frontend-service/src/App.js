@@ -67,8 +67,8 @@ const App = () => {
           <Router>
             <Switch>
               <Route exact path="/" component={Login} />
-              <PrivateRoute exact path={routes.DATAFLOW_TASKS} component={DataFlowTasks} />
-              <PrivateRoute path={routes.REPORTING_DATAFLOW} component={ReportingDataFlow} />
+              <PrivateRoute path={routes.DATAFLOW_TASKS} component={DataFlowTasks} />
+              <PrivateRoute exact path={routes.REPORTING_DATAFLOW} component={ReportingDataFlow} />
               <PrivateRoute path={routes.REPORTER_DATASET} component={ReporterDataSet} />
               <PrivateRoute path={routes.DOCUMENTATION_DATASET} component={DocumentationDataSet} />
             </Switch>

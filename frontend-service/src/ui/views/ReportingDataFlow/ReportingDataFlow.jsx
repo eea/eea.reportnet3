@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import styles from './ReportingDataFlow.module.css';
 
@@ -15,7 +16,7 @@ import { SplitButton } from 'primereact/splitbutton';
 
 import { DataFlowService } from 'core/services/DataFlow';
 
-export const ReportingDataFlow = ({ history, match }) => {
+export const ReportingDataFlow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(undefined);
@@ -128,4 +129,4 @@ export const ReportingDataFlow = ({ history, match }) => {
       </div>
     </div>
   );
-};
+});
