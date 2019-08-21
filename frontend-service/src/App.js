@@ -12,45 +12,24 @@ import { ReportingDataFlow } from 'ui/views/ReportingDataFlow/ReportingDataFlow'
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
+import { userReducer } from 'ui/views/_components/_context/UserReducer';
 
 import langResources from 'conf/messages.en.json';
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'login':
-      return {
-        ...state,
-        logged: true
-      };
-    case 'logout':
-      return {
-        ...state,
-        logged: false
-      };
-    case 'refreshToken':
-      break;
-
-    default:
-      return state;
-  }
-}
-
 const App = () => {
   const [resources] = useState({ ...langResources });
-  const userInitialContext = {
-    logged: false
-  };
-  const [state, dispatch] = useReducer(reducer, userInitialContext);
+  const [state, dispatch] = useReducer(userReducer, {});
   return (
     <div className={styles.app}>
       <UserContext.Provider
         value={{
           ...state,
-          onLogin: () => {
+          onLogin: user => {
             dispatch({
               type: 'login',
               payload: {
-                logged: true
+                user
               }
             });
           },
@@ -58,7 +37,7 @@ const App = () => {
             dispatch({
               type: 'logout',
               payload: {
-                logged: false
+                user: {}
               }
             });
           }

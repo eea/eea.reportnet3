@@ -5,6 +5,7 @@ import styles from './UserCard.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
 import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 
 const UserCard = React.memo(() => {
   const user = useContext(UserContext);
@@ -14,8 +15,9 @@ const UserCard = React.memo(() => {
         <a
           href="#userProfilePage"
           title="Edit user profile"
-          onClick={e => {
+          onClick={async e => {
             e.preventDefault();
+            const logout = await UserService.logout();
             user.onLogout();
           }}>
           <img className={styles.avatar} alt="User Profile" src="https://image.flaticon.com/icons/svg/149/149071.svg" />

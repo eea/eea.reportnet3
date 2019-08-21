@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isPlainObject, isEmpty } from 'lodash';
+import { isPlainObject, isEmpty, isUndefined } from 'lodash';
 
 import styles from './Login.module.css';
 
@@ -12,7 +12,6 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
-import { User } from 'core/domain/model/User/User';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
@@ -33,7 +32,7 @@ const Login = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
           </div>
-          {console.log('User is logged', user.logged)}
+          {console.log('User is logged', user)}
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -41,14 +40,14 @@ const Login = ({ history }) => {
               setSubmitting(true);
               try {
                 const userObject = await UserService.login(values.userName, values.password);
-                console.log('user', user);
-                user.onLogin();
+                user.onLogin(userObject);
                 history.push('/data-flow-task/');
               } catch (error) {
                 console.error(error);
-
+                const userObject = await UserService.logout();
+                user.onLogout();
                 const errorResponse = error.response;
-                if (errorResponse.data.message.includes('401')) {
+                if (!isUndefined(errorResponse) && errorResponse.data.message.includes('401')) {
                   console.error(errorResponse.data.message);
                 }
               }

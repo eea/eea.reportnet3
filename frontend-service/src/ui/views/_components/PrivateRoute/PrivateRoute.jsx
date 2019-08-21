@@ -1,15 +1,15 @@
 import React, { useContext } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { routes } from 'ui/routes';
-import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const PrivateRoute = ({ component: Component, ...rest }) => {
-  const user = useContext(UserContext);
+  console.log('userStorage', userStorage);
   return (
     <Route
       {...rest}
       render={props =>
-        user.logged ? (
+        userStorage.hasToken() ? (
           <Component />
         ) : (
           <Redirect

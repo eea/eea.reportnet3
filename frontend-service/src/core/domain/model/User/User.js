@@ -1,8 +1,9 @@
 export class User {
-  constructor(name, roles, preferredUsername, tokenExpireTime) {
+  constructor(id, name, roles, preferredUsername, tokenExpireTime) {
+    this.id = id;
     this.name = name;
     this.roles = roles;
-    this.preferredUsername = this.preferredUsername;
-    this.tokenExpireTime = this.tokenExpireTime;
+    this.preferredUsername = preferredUsername;
+    this.tokenExpireTime = tokenExpireTime;
   }
 }
