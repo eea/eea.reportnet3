@@ -16,6 +16,7 @@ export const Button = ({
   className = null,
   type = 'button',
   tooltip = null,
+  tooltipOptions = null,
   style = null,
   layout = null
 }) => {
@@ -41,6 +42,7 @@ export const Button = ({
         style={style}
         tooltip={tooltip}
         type={type}
+        tooltipOptions={tooltipOptions}
       />
     );
   }
