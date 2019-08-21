@@ -104,17 +104,11 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
         icon: 'refresh',
         group: 'right',
         disabled: false,
-        clickHandler: () => onLoadDocumentsAndWebLinks()
+        onClick: () => onLoadDocumentsAndWebLinks()
       }
     ]);
     //#end region Button initialization
   }, []);
-
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      fileDownload(fileToDownload, fileName);
-    }
-  }, [fileToDownload]);
 
   const onDownloadDocument = async rowData => {
     setFileName(createFileName(rowData.title));
@@ -124,6 +118,10 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const onHide = () => {
     setIsUploadDialogVisible(false);
     onLoadDocumentsAndWebLinks();
+  };
+
+  const onCancelDialog = () => {
+    setIsUploadDialogVisible(false);
   };
 
   const onLoadDocumentsAndWebLinks = async () => {
@@ -185,7 +183,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHide}>
+            onHide={onCancelDialog}>
             <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
           </Dialog>
           {
