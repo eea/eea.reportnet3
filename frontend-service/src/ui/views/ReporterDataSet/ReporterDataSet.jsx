@@ -101,6 +101,22 @@ export const ReporterDataSet = ({ match, history }) => {
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
+  const onReleaseSnapshot = async () => {
+    const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (snapshotReleased) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onRestoreSnapshot = async () => {
+    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (snapshotRestored) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
   const onLoadSnapshotList = async () => {
     setSnapshotListData(await SnapshotService.all(dataSetId));
   };
@@ -200,14 +216,6 @@ export const ReporterDataSet = ({ match, history }) => {
     setActiveIndex(tableSchemaId.index);
   };
 
-  const onRestoreSnapshot = async () => {
-    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
-    if (snapshotRestored) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
   const snapshotInitialState = {
     apiCall: '',
     createdAt: '',
@@ -243,6 +251,16 @@ export const ReporterDataSet = ({ match, history }) => {
           action: onDeleteSnapshot
         };
 
+      case 'release_snapshot':
+        onSetVisible(setSnapshotDialogVisible, true);
+        return {
+          ...state,
+          snapShotId: payload.id,
+          creationDate: payload.creationDate,
+          description: payload.description,
+          dialogMessage: resources.messages.releaseSnapshotMessage,
+          action: onReleaseSnapshot
+        };
       case 'restore_snapshot':
         onSetVisible(setSnapshotDialogVisible, true);
         return {

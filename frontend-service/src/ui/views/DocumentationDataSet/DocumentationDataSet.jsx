@@ -97,7 +97,7 @@ export const DocumentationDataSet = ({ match, history }) => {
         icon: 'refresh',
         group: 'right',
         disabled: false,
-        clickHandler: () => onLoadDocumentsAndWebLinks()
+        onClick: () => onLoadDocumentsAndWebLinks()
       }
     ]);
     //#end region Button initialization
@@ -117,6 +117,10 @@ export const DocumentationDataSet = ({ match, history }) => {
   const onHide = () => {
     setIsUploadDialogVisible(false);
     onLoadDocumentsAndWebLinks();
+  };
+
+  const onCancelDialog = () => {
+    setIsUploadDialogVisible(false);
   };
 
   const onLoadDocumentsAndWebLinks = async () => {
@@ -178,7 +182,7 @@ export const DocumentationDataSet = ({ match, history }) => {
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHide}>
+            onHide={onCancelDialog}>
             <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
           </Dialog>
           {
