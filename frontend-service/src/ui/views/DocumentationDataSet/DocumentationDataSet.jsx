@@ -109,12 +109,6 @@ export const DocumentationDataSet = ({ match, history }) => {
     //#end region Button initialization
   }, []);
 
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      fileDownload(fileToDownload, fileName);
-    }
-  }, [fileToDownload]);
-
   const onDownloadDocument = async rowData => {
     setFileName(createFileName(rowData.title));
     setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
