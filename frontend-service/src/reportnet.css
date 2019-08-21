@@ -180,7 +180,7 @@ body {
 .rp-btn.warning:hover {
   background-color: var(--c-orange-400) !important;
   border: 1px solid var(--c-orange-400) !important;
-  color: var(--white);
+  color: var(--white) !important;
 }
 
 .rep-container {

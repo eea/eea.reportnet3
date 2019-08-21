@@ -5,8 +5,8 @@ import moment from 'moment';
 import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 
 export function SnapshotItem({ itemData }) {
   const snapshotContext = useContext(SnapshotContext);
