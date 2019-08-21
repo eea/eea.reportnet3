@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import * as fileDownload from 'js-file-download';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -195,7 +195,7 @@ const DataViewer = withRouter(
 
       useEffect(() => {
         if (!isUndefined(exportTableData)) {
-          fileDownload(exportTableData, exportTableDataName);
+          DownloadFile(exportTableData, exportTableDataName);
         }
       }, [exportTableData]);
 
