@@ -4,7 +4,6 @@ import { routes } from 'ui/routes';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const PrivateRoute = ({ component: Component, ...rest }) => {
-  console.log('userStorage', userStorage);
   return (
     <Route
       {...rest}

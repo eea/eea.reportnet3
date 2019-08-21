@@ -5,7 +5,6 @@ const USER_TOKEN = 'reportnet_03';
 
 const get = () => {
   const tokens = JSON.parse(localStorage.getItem(USER_TOKEN));
-  console.log('tokens', tokens);
 
   if (isNil(tokens)) {
     return;

@@ -32,7 +32,6 @@ const Login = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
           </div>
-          {console.log('User is logged', user)}
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
