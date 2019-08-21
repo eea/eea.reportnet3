@@ -12,6 +12,7 @@
 		"comment": "pi pi-comment",
 		"dashboard": "pi pi-chart-bar",
 		"edit": "pi pi-pencil",
+		"ellipsis":"pi pi-ellipsis-v",
 		"export": "pi pi-download",
 		"eye": "pi pi-eye",
 		"filter": "pi pi-filter",
@@ -31,6 +32,7 @@
 		"trash": "pi pi-trash",
 		"upload": "pi pi-upload",
 		"user": "pi pi-user",
+		"users": "pi pi-users",
 		"validate": "pi pi-check-circle",
 		"warning": "pi pi-exclamation-triangle"
 	}
