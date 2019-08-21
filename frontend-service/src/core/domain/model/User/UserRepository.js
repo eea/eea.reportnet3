@@ -5,3 +5,5 @@ export const UserRepository = {
   logout: () => Promise.reject('[UserRepository#logout] must be implemented'),
   refreshToken: () => '[UserRepository#refreshToken] must be implemented'
 };
+
+export const userRepository = Object.assign({}, UserRepository, ApiUserRepository);

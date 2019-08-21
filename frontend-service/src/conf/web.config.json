@@ -52,5 +52,8 @@
 	},
 	"rejectDataFlow":{
 		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	},
+	"loginUser":{
+		"url": "/user/generateToken?password={:password}&username={:userName}"
 	}
 }

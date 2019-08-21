@@ -288,7 +288,18 @@ export const api = {
   },
   /* #endregion */
   /* #region Login */
-  login: async (userName, password) => {},
+  login: async (userName, password) => {
+    const tokens = await HTTPRequester.post({
+      url: window.env.REACT_APP_JSON
+        ? ''
+        : getUrl(config.loginUser.url, {
+            userName,
+            password
+          }),
+      queryString: {}
+    });
+    return tokens.data;
+  },
   logout: async userId => {},
   refreshToken: async () => {}
 };

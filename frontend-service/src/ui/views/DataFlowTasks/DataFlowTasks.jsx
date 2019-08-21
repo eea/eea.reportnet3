@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import styles from './DataFlowTasks.module.scss';
 
@@ -14,7 +15,7 @@ import { TabMenu } from 'primereact/tabmenu';
 
 import { DataFlowService } from 'core/services/DataFlow';
 
-export const DataFlowTasks = ({ match, history }) => {
+export const DataFlowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
@@ -120,4 +121,4 @@ export const DataFlowTasks = ({ match, history }) => {
       </div>
     </div>
   );
-};
+});
