@@ -50,6 +50,7 @@ const DataViewer = withRouter(
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
       const [exportTableData, setExportTableData] = useState(undefined);
+      const [exportTableDataName, setExportTableDataName] = useState('');
       const [fetchedData, setFetchedData] = useState([]);
       const [firstRow, setFirstRow] = useState(0);
       const [header] = useState();
@@ -194,7 +195,7 @@ const DataViewer = withRouter(
 
       useEffect(() => {
         if (!isUndefined(exportTableData)) {
-          fileDownload(exportTableData);
+          fileDownload(exportTableData, exportTableDataName);
         }
       }, [exportTableData]);
 
@@ -223,7 +224,10 @@ const DataViewer = withRouter(
       };
 
       const onExportTableData = async () => {
-        setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId));
+        setExportTableDataName(createTableName(tableName));
+        setExportTableData(
+          await DataSetService.exportTableDataById(dataSetId, tableId, config.dataSet.exportTypes.csv)
+        );
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -362,6 +366,10 @@ const DataViewer = withRouter(
           />
         </div>
       );
+
+      const createTableName = () => {
+        return `${tableName}.${config.dataSet.exportTypes.csv}`;
+      };
 
       const newRowForm = colsSchema.map((column, i) => {
         if (i < colsSchema.length - 1) {

@@ -158,11 +158,12 @@ export const api = {
     });
     return response.data;
   },
-  exportDataSetTableDataById: async (dataSetId, tableSchemaId) => {
+  exportDataSetTableDataById: async (dataSetId, tableSchemaId, fileType) => {
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetTableData.url, {
         dataSetId: dataSetId,
-        tableSchemaId: tableSchemaId
+        tableSchemaId: tableSchemaId,
+        fileType: fileType
       }),
       queryString: {}
     });

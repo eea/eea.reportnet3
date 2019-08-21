@@ -1,2 +1,2 @@
-export const ExportTableData = ({ dataSetRepository }) => async (dataSetId, tableSchemaId) =>
-  dataSetRepository.exportTableDataById(dataSetId, tableSchemaId);
+export const ExportTableData = ({ dataSetRepository }) => async (dataSetId, tableSchemaId, fileType) =>
+  dataSetRepository.exportTableDataById(dataSetId, tableSchemaId, fileType);

@@ -97,8 +97,8 @@ const errorStatisticsById = async dataSetId => {
   return dataSet;
 };
 
-const exportTableDataById = async (dataSetId, tableSchemaId) => {
-  const dataSetTableData = await api.exportDataSetTableDataById(dataSetId, tableSchemaId);
+const exportTableDataById = async (dataSetId, tableSchemaId, fileType) => {
+  const dataSetTableData = await api.exportDataSetTableDataById(dataSetId, tableSchemaId, fileType);
   return dataSetTableData;
 };
 

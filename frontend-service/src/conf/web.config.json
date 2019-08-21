@@ -21,7 +21,7 @@
 		"url": "/document/{:documentId}"
 	},
 	"exportDataSetTableData": {
-		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType=csv"
+		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
 	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
