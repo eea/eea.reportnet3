@@ -56,7 +56,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the data flow VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandler")
+  // @HystrixCommand(fallbackMethod = "errorHandler")
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
