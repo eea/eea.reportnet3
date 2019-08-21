@@ -495,6 +495,12 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   */
   @Override
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")

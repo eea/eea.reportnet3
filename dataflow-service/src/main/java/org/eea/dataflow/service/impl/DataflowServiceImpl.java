@@ -243,7 +243,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Creates the metabase data flow.
    *
-   * @param dataflow the dataflow
+   * @param dataflowVO the dataflow VO
    */
   @Transactional
   private void createMetabaseDataFlow(DataFlowVO dataflowVO) {

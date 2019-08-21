@@ -92,12 +92,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * The data set mapper.
@@ -552,7 +550,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * String to boolean.
    *
-   * @param string the string
+   * @param integer the integer
    * @return the boolean
    */
   private Boolean intToBoolean(Integer integer) {
@@ -1084,7 +1082,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Update records.
    *
    * @param datasetId the dataset id
-   * @param records the records
+   * @param field the field
    * @throws EEAException the EEA exception
    */
   @Override
