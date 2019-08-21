@@ -81,7 +81,10 @@ const DataViewer = withRouter(
             icon: 'import',
             group: 'left',
             disabled: false,
-            onClick: () => onExportTableData()
+            onClick: () =>
+              (window.location.href = `${
+                window.env.REACT_APP_BACKEND
+              }${'/dataset/exportFile?datasetId='}${dataSetId}${'&idTableSchema='}${tableId}${'&mimeType=csv'}`)
           },
           {
             label: resources.messages['deleteTable'],
