@@ -1,0 +1,19 @@
+.listContainer {
+  padding-left: 0px;
+  list-style: none;
+}
+.addContributorButton {
+  border-radius: 5px !important;
+  padding: 0 !important;
+  color: white;
+  max-width: 200px;
+
+  &:hover {
+    box-shadow: none !important;
+    box-sizing: border-box;
+    border: 1px solid var(--c-orange-200);
+  }
+  &:focus {
+    box-shadow: none !important;
+  }
+}

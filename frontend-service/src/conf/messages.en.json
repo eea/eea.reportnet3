@@ -125,6 +125,11 @@
 		"documentUploadingGrowlSuccessSummary": "Document upload",
 		"documentUploadingGrowlSuccessDetail": "Success",
 		"documentUploadingGrowlErrorSummary": "Document upload",
-		"documentUploadingGrowlErrorDetail": "Error"
+		"documentUploadingGrowlErrorDetail": "Error",
+		"dataProviderManageContributorsDialogTitle": "Manage roles for data flow",
+		"addContributor": "Add Contributor",
+		"deleteContributor":"Delete Contributor",
+		"selectContributorRole":"Select Role",
+		"manageRoles": "Manage Roles"
 	}
 }

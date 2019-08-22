@@ -1,0 +1,44 @@
+.listItem {
+  margin: 0;
+}
+.itemBox {
+  margin: 0;
+  align-items: baseline;
+}
+p {
+  margin: 0;
+}
+.listItemData {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  border: 1px solid gray;
+  border-top: 0.5px solid gray;
+  /* border-radius: 3px 3px 0 0; */
+  padding: 5px;
+
+  .listActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    .btn {
+      padding: 0;
+      margin: 0 3.5px;
+      border-radius: 5px;
+
+      width: 30px;
+      height: 32px;
+      border-color: transparent;
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+.listItemData .listActions button:nth-last-of-type(1) {
+  margin-right: 0;
+}
