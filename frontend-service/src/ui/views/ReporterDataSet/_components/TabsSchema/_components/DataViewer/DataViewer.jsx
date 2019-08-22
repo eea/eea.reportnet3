@@ -7,7 +7,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-import isUndefined from 'lodash/isUndefined';
+import { isUndefined } from 'lodash';
 
 import { config } from 'conf';
 
@@ -81,10 +81,7 @@ const DataViewer = withRouter(
             icon: 'import',
             group: 'left',
             disabled: false,
-            onClick: () =>
-              (window.location.href = `${
-                window.env.REACT_APP_BACKEND
-              }${'/dataset/exportFile?datasetId='}${dataSetId}${'&idTableSchema='}${tableId}${'&mimeType=csv'}`)
+            onClick: () => onExportTableData()
           },
           {
             label: resources.messages['deleteTable'],

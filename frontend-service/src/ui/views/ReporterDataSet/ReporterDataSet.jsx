@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useReducer } from 'react';
 import moment from 'moment';
+import { isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
 
@@ -11,6 +12,7 @@ import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -36,6 +38,8 @@ export const ReporterDataSet = ({ match, history }) => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [exportDataSetData, setExportDataSetData] = useState(undefined);
+  const [exportDataSetDataName, setExportDataSetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [recordPositionId, setRecordPositionId] = useState(-1);
@@ -72,6 +76,12 @@ export const ReporterDataSet = ({ match, history }) => {
     onLoadDataSetSchema();
   }, [isDataDeleted]);
 
+  useEffect(() => {
+    if (!isUndefined(exportDataSetData)) {
+      DownloadFile(exportDataSetData, exportDataSetDataName);
+    }
+  }, [exportDataSetData]);
+
   const onConfirmDelete = async () => {
     setDeleteDialogVisible(false);
     const dataDeleted = await DataSetService.deleteDataById(dataSetId);
@@ -99,6 +109,11 @@ export const ReporterDataSet = ({ match, history }) => {
       onLoadSnapshotList();
     }
     onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onExportData = async () => {
+    setExportDataSetDataName(createFileName());
+    setExportDataSetData(await DataSetService.exportDataById(dataSetId, config.dataSet.exportTypes.csv));
   };
 
   const onReleaseSnapshot = async () => {
@@ -155,8 +170,8 @@ export const ReporterDataSet = ({ match, history }) => {
         label: resources.messages['export'],
         icon: 'import',
         group: 'left',
-        disabled: false,
-        onClick: null
+        disabled: true,
+        onClick: () => onExportData()
       },
       {
         label: resources.messages['deleteDatasetData'],
@@ -214,6 +229,10 @@ export const ReporterDataSet = ({ match, history }) => {
 
   const onTabChange = tableSchemaId => {
     setActiveIndex(tableSchemaId.index);
+  };
+
+  const createFileName = () => {
+    return `${datasetTitle}.${config.dataSet.exportTypes.csv}`;
   };
 
   const snapshotInitialState = {
