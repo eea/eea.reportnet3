@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isPlainObject, isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Login.module.css';
 
@@ -16,6 +16,7 @@ import { UserService } from 'core/services/User';
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+  const [loginError, setLoginError] = useState();
   const initialValues = {
     userName: '',
     password: ''
@@ -31,6 +32,7 @@ const Login = ({ history }) => {
           <div className={styles.logo}>
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
+            {!isEmpty(loginError) && <div class={styles.error}>{loginError}</div>}
           </div>
           <Formik
             initialValues={initialValues}
@@ -47,38 +49,53 @@ const Login = ({ history }) => {
                 user.onLogout();
                 const errorResponse = error.response;
                 if (!isUndefined(errorResponse) && errorResponse.data.message.includes('401')) {
+                  setLoginError('Incorrect username or password');
                   console.error(errorResponse.data.message);
                 }
               }
 
               setSubmitting(false);
-            }}>
-            <Form>
-              <fieldset>
-                <label htmlFor="userName">{resources.messages.loginUserName}</label>
-                <Field name="userName" type="text" placeholder={resources.messages.loginUserName} />
-                <ErrorMessage className="error" name="userName" component="div" />
-              </fieldset>
-              <fieldset>
-                <label htmlFor="password">{resources.messages.loginPassword}</label>
-                <Field
-                  name="password"
-                  type="password"
-                  placeholder={resources.messages.loginPassword}
-                  autoComplete="password"
-                />
-                <ErrorMessage className="error" name="password" component="div" />
-              </fieldset>
-              <fieldset className={`${styles.buttonHolder}`}>
-                <Button
-                  layout="simple"
-                  type="submit"
-                  label={resources.messages.loginLogin}
-                  className="rp-btn primary"
-                />
-              </fieldset>
-            </Form>
-          </Formik>
+            }}
+            render={({ setFieldValue }) => (
+              <Form>
+                <fieldset>
+                  <label htmlFor="userName">{resources.messages.loginUserName}</label>
+                  <Field
+                    name="userName"
+                    type="text"
+                    placeholder={resources.messages.loginUserName}
+                    onChange={e => {
+                      setFieldValue('userName', e.target.value);
+                      setLoginError('');
+                    }}
+                  />
+                  <ErrorMessage className="error" name="userName" component="div" />
+                </fieldset>
+                <fieldset>
+                  <label htmlFor="password">{resources.messages.loginPassword}</label>
+                  <Field
+                    name="password"
+                    type="password"
+                    placeholder={resources.messages.loginPassword}
+                    autoComplete="password"
+                    onChange={e => {
+                      setFieldValue('password', e.target.value);
+                      setLoginError('');
+                    }}
+                  />
+                  <ErrorMessage className="error" name="password" component="div" />
+                </fieldset>
+                <fieldset className={`${styles.buttonHolder}`}>
+                  <Button
+                    layout="simple"
+                    type="submit"
+                    label={resources.messages.loginLogin}
+                    className="rp-btn primary"
+                  />
+                </fieldset>
+              </Form>
+            )}
+          />
         </div>
       </div>
     </div>
