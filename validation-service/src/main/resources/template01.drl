@@ -16,7 +16,9 @@ import org.eea.validation.util.*;
 import java.util.regex.*;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.validation.persistence.data.domain.RecordValue;
-
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 
 template "templateValidateRules"
@@ -32,17 +34,70 @@ end
 
 end template
 
+//QUERYS PART JAVA
 function boolean isQuery(String value, String fieldSchema, RecordValue record, Long recordCoordinate, Long columnCoordinate, String idFieldSchemaReference, Long idDatasetReference, Long recordCoordinateReference, Long columnCoordinateReference){
 	return ForeingKeyDrools.queryGetAllFieldValue(value,fieldSchema, record ,recordCoordinate,columnCoordinate, idFieldSchemaReference, idDatasetReference, recordCoordinateReference, columnCoordinateReference);
 }
+function boolean  isQueryDataWDFProtect(String value){
+	return ForeingKeyDrools.isQueryDataWDFProtect(value);
+}
 
+//CODE LIST PART
 function boolean isCodeList( String value ,String codeList){
 	return CodeListUtils.codeListValidate(value,codeList);
 }
-function boolean isValid( String s ){
 
+//RECORDS PART 
+function boolean isInSameRecord( String value ,RecordValue record, Integer position, String valueToHave){
+	return ForeingKeyDrools.isInSameRecord(value,record,position,valueToHave);
+}
+
+//URL PART
+function boolean isURL( String value ){
+
+	if(value == null || value.trim().equals("")){
+		return true;
+	}
     try {
-    	String aux = s.replace(".","");
+         new URL(value).toURI();
+         return true;
+    }catch (URISyntaxException exception) {
+         return false;
+    }catch (MalformedURLException exception) {
+         return false;
+    }
+ }
+
+
+//NUMBER PART 
+function boolean isNegativeValue(String value, String typeData){
+ 
+	if(typeData.equalsIgnoreCase("Integer")){
+		try {
+	        Integer dato = Integer.valueOf(value);
+	        if(dato < 0){
+	        	return false;        
+	        }
+	    } catch( Exception e ){
+	        return true;
+	    }
+ 	}
+ 	return true;
+}
+ 
+function boolean isValid( String value , String typeData){
+
+	if(typeData.equalsIgnoreCase("Integer")){
+	
+	 	try {
+	        Integer.valueOf( value );
+	        return true;
+	    } catch( Exception e ){
+	        return false;
+	    }
+	}
+    try {
+    	String aux = value.replace(".","");
     	aux = aux.replace(",",".");
         Double.valueOf( aux );
         return true;
@@ -51,10 +106,13 @@ function boolean isValid( String s ){
     }
  }
  
-function boolean isText( String s ){
+
+
+//TEXT AND NULL PART
+function boolean isText( String value){
     try {
         Pattern pat = Pattern.compile("[^a-zA-Z0-9 ._-]$");
-       	Matcher mat = pat.matcher(s);
+       	Matcher mat = pat.matcher(value);
         if(mat.find()){ 
         	return true;
         }else{
@@ -65,18 +123,27 @@ function boolean isText( String s ){
     }
  }
  
-function boolean isBlank(String s){
+function boolean isBlank(String value){
 
-	if(StringUtils.isBlank(s)){
+	if(StringUtils.isBlank(value)){
 		return false;
 	}else{
 		return true;
 	}
 } 
-function boolean isDateYYYYMMDD( String s ){
+
+//FUNCTIONS DATES AND JAVA METHODS DATES
+
+function boolean isIntervalYear( String value ,Integer initial, Integer end, Boolean interval){
+	return DateDroolsUtils.isIntervalYear(value,initial,end,interval);
+}
+function boolean actualDateCompare(String dateToCompare,String moreLess){	
+	return DateDroolsUtils.actualDateCompare(dateToCompare,moreLess);
+} 
+function boolean isDateYYYYMMDD( String value ){
     try {
         Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
-       	Matcher dataMatcher = dataValue.matcher(s);
+       	Matcher dataMatcher = dataValue.matcher(value);
         if(dataMatcher.find()){
         	return true;
         }else{
@@ -85,26 +152,35 @@ function boolean isDateYYYYMMDD( String s ){
     } catch( Exception e ){
         return false;
     }
- }
+}
  
- function boolean isCordenateLat( String s ){
-   if (s.contains(",")){
-   	s = s.replace(",",".");
+function boolean isDate9999(String date){
+	if(date.equalsIgnoreCase('9999-12-31')){
+		return false;
+	}	
+	return true;
+}
+ 
+ 
+ //LATITUDE AND LONGITUDE PART
+function boolean isCordenateLat( String value ){
+   if (value.contains(",")){
+   	value = value.replace(",",".");
    }
-   if(isValid(s)){
-    	if(Double.valueOf(s) >= -90 && Double.valueOf(s) <= 90){
+   if(isValid(value,'double')){
+    	if(Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90){
 		   return true;   	
     	}
     	return false;
    }
    return false;
- }  
-function boolean isCordenateLong( String s ){	
-   if (s.contains(",")){
-   	s = s.replace(",",".");
+}  
+function boolean isCordenateLong( String value ){	
+   if (value.contains(",")){
+   	value = value.replace(",",".");
    }
-   if(isValid(s)){
-    	if(Double.valueOf(s) >= -180 && Double.valueOf(s) <= 180){
+   if(isValid(value,'double')){
+    	if(Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180){
 		   return true;   	
     	}
     	return false;

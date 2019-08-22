@@ -2,12 +2,10 @@ package org.eea.validation.util;
 
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
 /**
  * The Class ValidationRuleDrools.
  */
-@Component("codeListUtils")
 public class CodeListUtils {
 
   /** The Constant listBWDStatus. */
@@ -25,7 +23,6 @@ public class CodeListUtils {
   /** The Constant listBWDObservationStatus. */
   final static List<String> listBWDObservationStatus =
       Arrays.asList("missingValue", "confirmedValue", "limitOfDetectionValue");
-
 
 
   /**
@@ -52,5 +49,6 @@ public class CodeListUtils {
         return false;
     }
   }
+
 }
 
