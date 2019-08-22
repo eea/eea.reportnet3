@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './ContributorsList.module.scss';
 
@@ -7,13 +7,17 @@ import { Contributor } from './_components/Contributor';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export function ContributorsList({
-  contributorsArray = [
-    { id: '1111', login: 'ygryc@ygryc.net', role: 'read_write' },
-    { id: '2222', login: 'igor@igor.com', role: 'read' }
-  ]
-}) {
+export function ContributorsList({ dataFlowId }) {
   const resources = useContext(ResourcesContext);
+  const [contributorsArray, setContributorsArray] = useState([]);
+  useEffect(() => {
+    const contributorsArray = [
+      { id: '1111', login: 'ygryc@ygryc.net', role: 'read_write' },
+      { id: '2222', login: 'igor@igor.com', role: 'read' }
+    ];
+    setContributorsArray(contributorsArray);
+  }, []);
+
   return (
     <div>
       <ul className={styles.listContainer}>

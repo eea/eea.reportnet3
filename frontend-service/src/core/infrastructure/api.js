@@ -3,10 +3,11 @@ import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
 
 export const api = {
+  /* #region Datasets and Everything */
   pendingDataFlows: async userId => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
-        ? '/jsons/DataFlaws2.json'
+        ? '/jsons/DataFlows2.json'
         : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
       queryString: {}
     });
@@ -15,7 +16,7 @@ export const api = {
   acceptedDataFlows: async userId => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
-        ? '/jsons/DataFlaws2.json'
+        ? '/jsons/DataFlows2.json'
         : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
       queryString: {}
     });
@@ -24,7 +25,7 @@ export const api = {
   completedDataFlows: async userId => {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
-        ? '/jsons/DataFlaws2.json'
+        ? '/jsons/DataFlows2.json'
         : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
       queryString: {}
     });
@@ -306,6 +307,27 @@ export const api = {
       queryString: {}
     });
     return response.data.weblinks;
+  },
+  /* #endregion */
+  /* #region Contributors */
+
+  contributors: async dataFlowId => {
+    console.log('Getting All Contributors from dataFlow ', dataFlowId);
+    const response = await HTTPRequester.get({
+      url: '/jsons/contributors.json',
+      queryString: {}
+    });
+    return response.data;
+  },
+  addContributorByLogin: async (dataFlowId, contributorLogin) => {
+    console.log('Adding Contributor to dataFlowId: ', dataFlowId, ' contributorLogin', contributorLogin);
+  },
+  deleteContributorById: async (dataFlowId, contributorId) => {
+    console.log('Deliting Contributor from dataFlowId: ', dataFlowId, ' contributorId', contributorId);
+  },
+  updateContributorById: async (dataFlowId, contributorId) => {
+    console.log('Updating Contributor from dataFlowId: ', dataFlowId, ' contributorId', contributorId);
   }
+
   /* #endregion */
 };
