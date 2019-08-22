@@ -6,6 +6,7 @@ import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
+import { ContributorsList } from './_components/ContributorsList';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -73,7 +74,7 @@ export const ReportingDataFlow = ({ history, match }) => {
 
   const dropDownItems = [
     {
-      label: 'Contributors',
+      label: resources.messages.manageRoles,
       icon: 'users',
       menuItemFunction: () => {
         showContributorsDialog();
@@ -81,14 +82,14 @@ export const ReportingDataFlow = ({ history, match }) => {
     },
 
     {
-      label: 'Some Random Text',
-      icon: 'plus',
+      label: resources.messages.delete,
+      icon: 'trash',
       menuItemFunction: () => {}
     },
 
     {
-      label: 'Second Random Function',
-      icon: 'plus',
+      label: resources.messages.properties,
+      icon: 'settings',
       menuItemFunction: () => {}
     }
   ];
@@ -163,12 +164,12 @@ export const ReportingDataFlow = ({ history, match }) => {
         </div>
 
         <Dialog
-          header="Contributors List"
+          header={`${resources.messages.dataProviderManageContributorsDialogTitle} "${dataFlowData.name}"`}
           visible={isActiveContributorsDialog}
           onHide={() => setIsActiveContributorsDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          Here Shold be a table with contributors Edit Add Delete
+          <ContributorsList />
         </Dialog>
       </div>
     </div>
