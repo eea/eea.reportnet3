@@ -1,6 +1,7 @@
 package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -50,4 +51,11 @@ public interface DataflowRepository
   List<Dataflow> findByStatusAndUserRequester(@Param("type") TypeRequestEnum typeRequest,
       @Param("idRequester") Long userIdRequester);
 
+  /**
+   * Find by name.
+   *
+   * @param name the name
+   * @return the optional
+   */
+  Optional<Dataflow> findByName(String name);
 }

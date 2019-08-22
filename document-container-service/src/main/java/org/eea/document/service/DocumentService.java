@@ -38,14 +38,16 @@ public interface DocumentService {
   FileResponse getDocument(final String documentName, final Long dataFlowId, final String language)
       throws EEAException;
 
+
   /**
    * Delete document.
    *
+   * @param documentId the document id
    * @param documentName the document name
    * @param dataFlowId the data flow id
    * @param language the language
    * @throws EEAException the EEA exception
    */
-  void deleteDocument(final String documentName, final Long dataFlowId, final String language)
-      throws EEAException;
+  void deleteDocument(final Long documentId, final String documentName, final Long dataFlowId,
+      final String language) throws EEAException;
 }

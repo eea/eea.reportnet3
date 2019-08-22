@@ -14,6 +14,12 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface RecordMapper extends IMapper<RecordValue, RecordVO> {
 
+  /**
+   * Fill ids.
+   *
+   * @param recordVO the record VO
+   * @param recordValue the record value
+   */
   @AfterMapping
   default void fillIds(RecordVO recordVO, @MappingTarget RecordValue recordValue) {
     recordValue.getFields().stream().forEach(field -> field.setRecord(recordValue));

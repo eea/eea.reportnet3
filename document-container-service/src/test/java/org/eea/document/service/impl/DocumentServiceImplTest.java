@@ -50,7 +50,7 @@ public class DocumentServiceImplTest {
    */
   @Before
   public void initMocks() throws RepositoryException {
-    fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -74,7 +74,7 @@ public class DocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void uploadDocumentException2Test() throws EEAException, IOException {
-    fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
+    fileMock = new MockMultipartFile("file", "fileOriginal.cs", null, (byte[]) null);
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
         fileMock.getOriginalFilename(), 1L, "ES", "desc");
@@ -119,6 +119,19 @@ public class DocumentServiceImplTest {
     when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn("");
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L, "ES", "desc");
+  }
+
+  /**
+   * Upload document exception 5 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = EEAException.class)
+  public void uploadDocumentException5Test() throws EEAException, IOException {
+    fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
         fileMock.getOriginalFilename(), 1L, "ES", "desc");
   }
@@ -226,7 +239,7 @@ public class DocumentServiceImplTest {
     doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument("filename", 1L, "ES");
+    documentService.deleteDocument(1L, "filename", 1L, "ES");
   }
 
   /**
@@ -246,7 +259,7 @@ public class DocumentServiceImplTest {
     doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
         Mockito.any(), Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument("filename", 1L, "ES");
+    documentService.deleteDocument(1L, "filename", 1L, "ES");
   }
 
   /**
@@ -263,9 +276,9 @@ public class DocumentServiceImplTest {
         .thenReturn("name");
     doNothing().when(oakRepositoryUtils).deleteFileNode(Mockito.any(), Mockito.any(),
         Mockito.any());
-    doNothing().when(oakRepositoryUtils).runGC(Mockito.any());
+    doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
-    documentService.deleteDocument("filename", 1L, "ES");
+    documentService.deleteDocument(1L, "filename", 1L, "ES");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 

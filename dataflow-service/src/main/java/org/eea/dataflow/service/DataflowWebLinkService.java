@@ -14,7 +14,7 @@ public interface DataflowWebLinkService {
   /**
    * Gets the web link.
    *
-   * @param idDataflow the id dataflow
+   * @param idLink the id link
    * @return the web link
    * @throws EEAException the EEA exception
    */
@@ -30,13 +30,14 @@ public interface DataflowWebLinkService {
    */
   void saveWebLink(Long idDataflow, String url, String description) throws EEAException;
 
+
   /**
    * Removes the web link.
    *
-   * @param webLink the web link
+   * @param webLinkId the web link id
    * @throws EEAException the EEA exception
    */
-  void removeWebLink(Long webLink) throws EEAException;
+  void removeWebLink(Long webLinkId) throws EEAException;
 
   /**
    * Update web link.

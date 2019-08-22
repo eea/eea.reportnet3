@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -117,5 +118,14 @@ public interface DataFlowController {
   void removeContributor(@PathVariable("idDataflow") Long idDataflow,
       @RequestParam(value = "idContributor") Long userId);
 
+
+
+  /**
+   * Creates the data flow.
+   *
+   * @param dataFlowVO the data flow VO
+   */
+  @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
+  void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
 
 }

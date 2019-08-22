@@ -91,26 +91,13 @@ public interface DataflowService {
    */
   void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
 
-  /**
-   * Insert document.
-   *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @param description the description
-   * @throws EEAException the EEA exception
-   */
-  void insertDocument(Long dataflowId, String filename, String language, String description)
-      throws EEAException;
+
 
   /**
-   * Delete document.
+   * Creates the data flow.
    *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @throws EEAException the EEA exception
+   * @param dataflowVO the dataflow VO
    */
-  void deleteDocument(Long dataflowId, String filename, String language) throws EEAException;
+  void createDataFlow(DataFlowVO dataflowVO);
 
 }

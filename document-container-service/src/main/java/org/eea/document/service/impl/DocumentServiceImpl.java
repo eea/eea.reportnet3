@@ -1,6 +1,5 @@
 package org.eea.document.service.impl;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -9,6 +8,7 @@ import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.eea.document.service.DocumentService;
@@ -36,6 +36,9 @@ public class DocumentServiceImpl implements DocumentService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant PATH_DELIMITER. */
   private static final String PATH_DELIMITER = "/";
@@ -68,7 +71,8 @@ public class DocumentServiceImpl implements DocumentService {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
-      if (filename == null || contentType == null) {
+      if (filename == null || contentType == null
+          || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
 
@@ -91,12 +95,14 @@ public class DocumentServiceImpl implements DocumentService {
       sendKafkaNotification(modifiedFilename.replace("-" + language, ""), dataFlowId, language,
           description, EventType.LOAD_DOCUMENT_COMPLETED_EVENT);
     } catch (RepositoryException | EEAException e) {
+      LOG_ERROR.error("Error in uploadDocument due to", e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
       oakRepositoryUtils.cleanUp(session, ns);
     }
   }
+
 
   /**
    * Gets the document.
@@ -113,7 +119,7 @@ public class DocumentServiceImpl implements DocumentService {
     Session session = null;
     FileResponse fileResponse = null;
     DocumentNodeStore ns = null;
-    try (FileOutputStream fos = new FileOutputStream(documentName)) {
+    try {
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -127,6 +133,7 @@ public class DocumentServiceImpl implements DocumentService {
           nameWithLanguage);
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
+      LOG_ERROR.error("Error in getDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -140,6 +147,7 @@ public class DocumentServiceImpl implements DocumentService {
   /**
    * Delete document.
    *
+   * @param documentId the document id
    * @param documentName the document name
    * @param dataFlowId the data flow id
    * @param language the language
@@ -148,8 +156,8 @@ public class DocumentServiceImpl implements DocumentService {
   @Override
   @Modified
   @Async
-  public void deleteDocument(String documentName, Long dataFlowId, final String language)
-      throws EEAException {
+  public void deleteDocument(Long documentId, String documentName, Long dataFlowId,
+      final String language) throws EEAException {
     Session session = null;
     DocumentNodeStore ns = null;
     try {
@@ -164,12 +172,12 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteFileNode(session, dataFlowId.toString(), nameWithLanguage);
       LOG.info("File deleted...");
 
-      oakRepositoryUtils.runGC(ns);
+      oakRepositoryUtils.deleteBlobsFromRepository(ns);
 
-      sendKafkaNotification(documentName, dataFlowId, language, null,
-          EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
+      sendKafkaNotification(documentId, EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
 
     } catch (Exception e) {
+      LOG_ERROR.error("Error in deleteDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -195,6 +203,18 @@ public class DocumentServiceImpl implements DocumentService {
     result.put("filename", filename);
     result.put("language", language);
     result.put("description", description);
+    kafkaSenderUtils.releaseKafkaEvent(eventType, result);
+  }
+
+  /**
+   * Send kafka notification.
+   *
+   * @param documentId the document id
+   * @param eventType the event type
+   */
+  public void sendKafkaNotification(final Long documentId, final EventType eventType) {
+    Map<String, Object> result = new HashMap<>();
+    result.put("documentId", documentId);
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
 

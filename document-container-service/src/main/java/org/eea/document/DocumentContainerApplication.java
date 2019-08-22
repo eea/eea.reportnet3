@@ -1,6 +1,7 @@
 package org.eea.document;
 
 
+import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +16,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableDiscoveryClient
 @EnableCircuitBreaker
 @EnableEEASwagger
+@EeaEnableSecurity
 public class DocumentContainerApplication {
 
   /**

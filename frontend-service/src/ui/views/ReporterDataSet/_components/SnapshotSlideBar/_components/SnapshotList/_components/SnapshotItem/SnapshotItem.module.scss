@@ -1,0 +1,32 @@
+.listItem {
+  margin: 0;
+}
+.itemBox {
+  margin: 0;
+}
+p {
+  margin: 0;
+  padding: 2px 0 2rem 0;
+}
+.listItemData {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  h4 {
+  }
+
+  .listActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    button {
+      font-size: 0.9rem;
+      padding: 0.3rem;
+    }
+  }
+}
+
+.listItemData .listActions button:nth-of-type(1) {
+  margin-right: 0.5rem;
+}

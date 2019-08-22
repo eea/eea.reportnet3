@@ -8,10 +8,8 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
-import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
-import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
@@ -45,10 +43,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /** The document repository. */
-  @Autowired
-  private DocumentRepository documentRepository;
-
   /** The dataflow mapper. */
   @Autowired
   private DataflowMapper dataflowMapper;
@@ -60,7 +54,6 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
-
 
   /**
    * The Constant LOG.
@@ -224,58 +217,30 @@ public class DataflowServiceImpl implements DataflowService {
 
   }
 
+
   /**
-   * Insert document.
+   * Creates the data flow.
    *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @param description the description
-   * @throws EEAException the EEA exception
+   * @param dataflowVO the dataflow VO
    */
   @Override
   @Transactional
-  public void insertDocument(Long dataflowId, String filename, String language, String description)
-      throws EEAException {
-    if (dataflowId == null || filename == null || language == null || description == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
-    if (dataflow != null) {
-      Document document = new Document();
-      document.setDescription(description);
-      document.setLanguage(language);
-      document.setName(filename);
-      document.setDataflow(dataflow);
-      documentRepository.save(document);
-      LOG.info("document saved");
-    } else {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
+  public void createDataFlow(DataFlowVO dataflowVO) {
+    createMetabaseDataFlow(dataflowVO);
   }
 
   /**
-   * Delete document.
+   * Creates the metabase data flow.
    *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @throws EEAException the EEA exception
+   * @param dataflow the dataflow
    */
-  @Override
   @Transactional
-  public void deleteDocument(Long dataflowId, String filename, String language)
-      throws EEAException {
-    if (dataflowId == null || filename == null || language == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    Document document =
-        documentRepository.findFirstByDataflowIdAndNameAndLanguage(dataflowId, filename, language);
-    if (document == null) {
-      throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
+  private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
     } else {
-      documentRepository.delete(document);
-      LOG.info("document deleted");
+      Dataflow dataflow = dataflowMapper.classToEntity(dataflowVO);
+      dataflowRepository.save(dataflow);
     }
   }
 

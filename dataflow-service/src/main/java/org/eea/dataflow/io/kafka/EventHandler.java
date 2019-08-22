@@ -1,6 +1,6 @@
 package org.eea.dataflow.io.kafka;
 
-import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -25,7 +25,7 @@ public class EventHandler implements EEAEventHandler {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   @Autowired
-  private DataflowService dataflowService;
+  private DataflowDocumentService dataflowService;
 
   /**
    * Gets the type.
@@ -61,14 +61,11 @@ public class EventHandler implements EEAEventHandler {
     }
 
     if (EventType.DELETE_DOCUMENT_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
-      Long dataflowId = (Long) eeaEventVO.getData().get("dataflow_id");
-      String filename = (String) eeaEventVO.getData().get("filename");
-      String language = (String) eeaEventVO.getData().get("language");
+      Long documentId = (Long) eeaEventVO.getData().get("documentId");
       try {
-        dataflowService.deleteDocument(dataflowId, filename, language);
+        dataflowService.deleteDocument(documentId);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error deleting document for dataflow {} due to exception {}", dataflowId,
-            e);
+        LOG_ERROR.error("Error deleting document {} due to exception {}", documentId, e);
       }
     }
 

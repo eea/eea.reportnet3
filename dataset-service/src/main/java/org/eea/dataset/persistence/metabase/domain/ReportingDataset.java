@@ -26,7 +26,7 @@ public class ReportingDataset extends DataSetMetabase {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

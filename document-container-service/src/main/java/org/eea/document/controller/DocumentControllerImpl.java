@@ -6,7 +6,9 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import feign.FeignException;
 
 /**
  * The type Document controller.
@@ -35,6 +38,11 @@ public class DocumentControllerImpl implements DocumentController {
   /** The document service. */
   @Autowired
   private DocumentService documentService;
+
+  /** The dataflow controller. */
+  @Autowired
+  private DataFlowDocumentControllerZuul dataflowController;
+
 
   /**
    * Upload document.
@@ -70,21 +78,22 @@ public class DocumentControllerImpl implements DocumentController {
   /**
    * Gets the document.
    *
-   * @param documentName the document name
-   * @param dataFlowId the data flow id
+   * @param documentId the document id
    * @return the document
    */
   @Override
-  @GetMapping
+  @GetMapping(value = "/{documentId}")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  public ResponseEntity<Resource> getDocument(
-      @RequestParam("documentName") final String documentName,
-      @RequestParam("dataFlowId") final Long dataFlowId,
-      @RequestParam("language") final String language) {
+  public ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId) {
     try {
-      FileResponse file = documentService.getDocument(documentName, dataFlowId, language);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
+      if (document == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      FileResponse file = documentService.getDocument(document.getName(), document.getDataflowId(),
+          document.getLanguage());
       HttpHeaders header = new HttpHeaders();
-      header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + documentName);
+      header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getName());
       header.add("Cache-Control", "no-cache, no-store, must-revalidate");
       header.add("Pragma", "no-cache");
       header.add("Expires", "0");
@@ -99,22 +108,25 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+
   /**
-   * Delete a document.
+   * Delete document.
    *
-   * @param documentName the document name
-   * @param dataFlowId the data flow id
-   * @param language the language
-   * @return the document
+   * @param documentId the document id
    * @throws Exception the exception
    */
   @Override
-  @DeleteMapping
-  public void deleteDocument(@RequestParam("documentName") final String documentName,
-      @RequestParam("dataFlowId") final Long dataFlowId,
-      @RequestParam("language") final String language) throws Exception {
+  @DeleteMapping(value = "/{documentId}")
+  public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
     try {
-      documentService.deleteDocument(documentName, dataFlowId, language);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
+      if (document == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      documentService.deleteDocument(documentId, document.getName(), document.getDataflowId(),
+          document.getLanguage());
+    } catch (final FeignException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);

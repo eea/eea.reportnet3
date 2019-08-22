@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -31,7 +31,7 @@ public class EventHandlerTest {
 
   /** The dataflow service. */
   @Mock
-  private DataflowService dataflowService;
+  private DataflowDocumentService dataflowService;
 
   /**
    * Inits the mocks.
@@ -95,14 +95,13 @@ public class EventHandlerTest {
    */
   @Test
   public void processMessageDeleteTest() throws EEAException {
-    doNothing().when(dataflowService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    doNothing().when(dataflowService).deleteDocument(Mockito.any());
     EEAEventVO event = new EEAEventVO();
     Map<String, Object> map = new HashMap<>();
     event.setData(map);
     event.setEventType(EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
     eventHandler.processMessage(event);
-    Mockito.verify(dataflowService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    Mockito.verify(dataflowService, times(1)).deleteDocument(Mockito.any());
   }
 
   /**
@@ -112,14 +111,12 @@ public class EventHandlerTest {
    */
   @Test
   public void processMessageDeleteexceptionTest() throws EEAException {
-    doThrow(new EEAException()).when(dataflowService).deleteDocument(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(dataflowService).deleteDocument(Mockito.any());
     EEAEventVO event = new EEAEventVO();
     Map<String, Object> map = new HashMap<>();
     event.setData(map);
     event.setEventType(EventType.DELETE_DOCUMENT_COMPLETED_EVENT);
     eventHandler.processMessage(event);
-    Mockito.verify(dataflowService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    Mockito.verify(dataflowService, times(1)).deleteDocument(Mockito.any());
   }
 }

@@ -38,6 +38,7 @@ public interface DatasetController {
 
   }
 
+
   /**
    * Gets the data tables values.
    *
@@ -46,8 +47,6 @@ public interface DatasetController {
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
-   * @param asc the asc
-   *
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,27 +54,30 @@ public interface DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+      @RequestParam(value = "fields", required = false) String fields);
+
 
   /**
-   * Update dataset data set vo.
+   * Update dataset.
    *
    * @param dataset the dataset
-   *
-   * @return the data set vo
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateDataset(@RequestBody DataSetVO dataset);
 
+
   /**
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
    */
   @RequestMapping(value = "/create", method = RequestMethod.POST)
-  void createEmptyDataSet(@RequestParam("datasetName") String datasetName);
+  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
+      @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
 
   /**
@@ -116,7 +118,6 @@ public interface DatasetController {
    *
    * @param id the id
    * @param idDataset the id dataset
-   * @param pageSize the page size
    * @param type the type
    * @return the table from any object id
    */
@@ -214,4 +215,16 @@ public interface DatasetController {
   ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam("mimeType") String mimeType) throws Exception;
+
+
+  /**
+   * Insert id data schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  void insertIdDataSchema(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema);
+
 }

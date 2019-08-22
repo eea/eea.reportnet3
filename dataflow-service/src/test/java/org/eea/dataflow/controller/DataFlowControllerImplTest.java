@@ -1,10 +1,14 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
@@ -298,6 +302,58 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
     Mockito.verify(dataflowService, times(1)).removeContributorFromDataflow(Mockito.any(),
         Mockito.any());
+  }
+
+  /**
+   * Creates the data flow throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createDataFlowThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date(-1));
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the data flow null throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createDataFlowNullThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the data flow date today throw.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createDataFlowDateTodayThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setDeadlineDate(new Date());
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+  }
+
+  /**
+   * Creates the data flow.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void createDataFlow() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    dataflowVO.setDeadlineDate(date);
+    doNothing().when(dataflowService).createDataFlow(dataflowVO);
+    dataFlowControllerImpl.createDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
 }
