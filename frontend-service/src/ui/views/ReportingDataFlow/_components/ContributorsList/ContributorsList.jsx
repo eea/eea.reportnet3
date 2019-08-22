@@ -23,7 +23,8 @@ export function ContributorsList({
       </ul>
       <Button
         icon="plus"
-        label={resources.messages.addContributor}
+        tooltip={resources.messages.addContributor}
+        label={resources.messages.add}
         className={`${styles.addContributorButton} rp-btn default`}
       />
     </div>
