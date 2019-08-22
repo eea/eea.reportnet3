@@ -2,10 +2,12 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-import isUndefined from 'lodash/isUndefined';
+import { isUndefined } from 'lodash';
 
 import { config } from 'conf';
 
@@ -47,6 +49,8 @@ const DataViewer = withRouter(
       const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+      const [exportTableData, setExportTableData] = useState(undefined);
+      const [exportTableDataName, setExportTableDataName] = useState('');
       const [fetchedData, setFetchedData] = useState([]);
       const [firstRow, setFirstRow] = useState(0);
       const [header] = useState();
@@ -71,6 +75,13 @@ const DataViewer = withRouter(
             group: 'left',
             disabled: false,
             onClick: () => setImportDialogVisible(true)
+          },
+          {
+            label: resources.messages['exportTable'],
+            icon: 'import',
+            group: 'left',
+            disabled: false,
+            onClick: () => onExportTableData()
           },
           {
             label: resources.messages['deleteTable'],
@@ -179,6 +190,12 @@ const DataViewer = withRouter(
         setColumns(newColumnsArr2);
       }, [colsSchema, columnOptions]);
 
+      useEffect(() => {
+        if (!isUndefined(exportTableData)) {
+          DownloadFile(exportTableData, exportTableDataName);
+        }
+      }, [exportTableData]);
+
       const onChangePage = event => {
         setNumRows(event.rows);
         setFirstRow(event.first);
@@ -201,6 +218,13 @@ const DataViewer = withRouter(
 
       const onDeleteRow = () => {
         setConfirmDeleteVisible(true);
+      };
+
+      const onExportTableData = async () => {
+        setExportTableDataName(createTableName(tableName));
+        setExportTableData(
+          await DataSetService.exportTableDataById(dataSetId, tableId, config.dataSet.exportTypes.csv)
+        );
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -348,6 +372,10 @@ const DataViewer = withRouter(
           />
         </div>
       );
+
+      const createTableName = () => {
+        return `${tableName}.${config.dataSet.exportTypes.csv}`;
+      };
 
       const newRowForm = colsSchema.map((column, i) => {
         if (i < colsSchema.length - 1) {
