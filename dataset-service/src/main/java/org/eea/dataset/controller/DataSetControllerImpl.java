@@ -453,7 +453,7 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("idTableSchema") String idTableSchema,
+      @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
       @RequestParam("mimeType") String mimeType) throws Exception {
     LOG.info("Init the export controller");
     byte[] file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
