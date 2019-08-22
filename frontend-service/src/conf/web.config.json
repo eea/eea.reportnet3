@@ -20,6 +20,9 @@
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
 	},
+	"exportDataSetData": {
+		"url": "/dataset/exportFile?datasetId={:dataSetId}&mimeType={:fileType}"
+	},
 	"exportDataSetTableData": {
 		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
 	},
