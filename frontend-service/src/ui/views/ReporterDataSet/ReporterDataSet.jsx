@@ -8,7 +8,7 @@ import styles from './ReporterDataSet.module.css';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -20,6 +20,7 @@ import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 
 import { DataSetService } from 'core/services/DataSet';
@@ -33,15 +34,16 @@ export const ReporterDataSet = ({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const [activeIndex, setActiveIndex] = useState();
-  const [buttonsList, setButtonsList] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState('');
+  const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportDataSetData, setExportDataSetData] = useState(undefined);
   const [exportDataSetDataName, setExportDataSetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRowId, setSelectedRowId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
@@ -112,8 +114,10 @@ export const ReporterDataSet = ({ match, history }) => {
   };
 
   const onExportData = async () => {
+    setLoadingFile(true);
     setExportDataSetDataName(createFileName());
     setExportDataSetData(await DataSetService.exportDataById(dataSetId, config.dataSet.exportTypes.csv));
+    setLoadingFile(false);
   };
 
   const onReleaseSnapshot = async () => {
@@ -165,61 +169,7 @@ export const ReporterDataSet = ({ match, history }) => {
       })
     );
 
-    setButtonsList([
-      {
-        label: resources.messages['export'],
-        icon: 'import',
-        group: 'left',
-        disabled: true,
-        onClick: () => onExportData()
-      },
-      {
-        label: resources.messages['deleteDatasetData'],
-        icon: 'trash',
-        group: 'left',
-        disabled: false,
-        onClick: () => onSetVisible(setDeleteDialogVisible, true)
-      },
-      {
-        label: resources.messages['events'],
-        icon: 'clock',
-        group: 'right',
-        disabled: true,
-        onClick: null
-      },
-      {
-        label: resources.messages['validate'],
-        icon: 'validate',
-        group: 'right',
-        disabled: false,
-        onClick: () => onSetVisible(setValidateDialogVisible, true),
-        ownButtonClasses: null,
-        iconClasses: null
-      },
-      {
-        label: resources.messages['showValidations'],
-        icon: 'warning',
-        group: 'right',
-        disabled: !dataSetStatistics.datasetErrors,
-        onClick: () => onSetVisible(setValidationsVisible, true),
-        ownButtonClasses: null,
-        iconClasses: dataSetStatistics.datasetErrors ? 'warning' : ''
-      },
-      {
-        label: resources.messages['dashboards'],
-        icon: 'dashboard',
-        group: 'right',
-        disabled: false,
-        onClick: () => onSetVisible(setDashDialogVisible, true)
-      },
-      {
-        label: resources.messages['snapshots'],
-        icon: 'camera',
-        group: 'right',
-        disabled: false,
-        onClick: () => onSetVisible(setSnapshotIsVisible, true)
-      }
-    ]);
+    setDatasetHasErrors(dataSetStatistics.datasetErrors);
     setLoading(false);
   };
 
@@ -314,7 +264,65 @@ export const ReporterDataSet = ({ match, history }) => {
     <div>
       <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
       <div className={styles.ButtonsBar}>
-        <ButtonsBar buttonsList={buttonsList} />
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              label={resources.messages['export']}
+              onClick={() => onExportData()}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'trash'}
+              label={resources.messages['deleteDatasetData']}
+              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'clock'}
+              label={resources.messages['events']}
+              onClick={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'validate'}
+              label={resources.messages['validate']}
+              onClick={() => onSetVisible(setValidateDialogVisible, true)}
+              ownButtonClasses={null}
+              iconClasses={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={!datasetHasErrors}
+              icon={'warning'}
+              label={resources.messages['showValidations']}
+              onClick={() => onSetVisible(setValidationsVisible, true)}
+              ownButtonClasses={null}
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'dashboard'}
+              label={resources.messages['dashboards']}
+              onClick={() => onSetVisible(setDashDialogVisible, true)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'camera'}
+              label={resources.messages['snapshots']}
+              onClick={() => onSetVisible(setSnapshotIsVisible, true)}
+            />
+          </div>
+        </Toolbar>
       </div>
       <ReporterDataSetContext.Provider
         value={{
