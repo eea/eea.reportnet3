@@ -324,7 +324,15 @@ export const api = {
       { id: '1111', login: 'ygryc@ygryc.net', role: 'read_write' },
       { id: '2222', login: 'pedro@pedro.net', role: 'read' },
       { id: '3333', login: 'jose@jose.net', role: 'read_write' },
-      { id: '4444', login: 'rambo@rambo.com', role: 'read' }
+      { id: '4444', login: 'rambo@rambo.com', role: 'read' },
+      { id: '5555', login: 'ygryc@ygryc.net', role: 'read_write' },
+      { id: '6666', login: 'pedro@pedro.net', role: 'read' },
+      { id: '7777', login: 'sony@sony.net', role: 'read_write' },
+      { id: '8888', login: 'sega@sega.net', role: 'read_write' },
+      /*  { id: '9999', login: 'play@play.net', role: 'read_write' },
+      { id: '1010', login: 'sudo@sudo.net', role: 'read_write' },
+      { id: '0101', login: 'bash@bash.net', role: 'read_write' }, */
+      { id: '0000', login: 'pong@pong.net', role: 'read' }
     ];
 
     return hardcodedResponseExample;
