@@ -169,7 +169,7 @@ export const ReportingDataFlow = ({ history, match }) => {
           onHide={() => setIsActiveContributorsDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <ContributorsList />
+          <ContributorsList dataFlowId={dataFlowData.id} />
         </Dialog>
       </div>
     </div>

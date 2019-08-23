@@ -5,17 +5,25 @@ import styles from './ContributorsList.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Contributor } from './_components/Contributor';
 
+import { ContributorService } from 'core/services/Contributor';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export function ContributorsList({ dataFlowId }) {
   const resources = useContext(ResourcesContext);
   const [contributorsArray, setContributorsArray] = useState([]);
+
+  const onLoadContributorsList = async () => {
+    setContributorsArray(await ContributorService.all(dataFlowId));
+  };
+
   useEffect(() => {
-    const contributorsArray = [
+    //TODO HERE SHOULD BE CALLED THE CONTRIBUTORS GET ALL USING DATAFLOW ID
+    /* const contributorsArray = [
       { id: '1111', login: 'ygryc@ygryc.net', role: 'read_write' },
       { id: '2222', login: 'igor@igor.com', role: 'read' }
     ];
-    setContributorsArray(contributorsArray);
+    setContributorsArray(contributorsArray); */
+    onLoadContributorsList();
   }, []);
 
   return (
