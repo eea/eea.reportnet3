@@ -55,5 +55,8 @@
 	},
 	"loginUser":{
 		"url": "/user/generateToken?password={:password}&username={:userName}"
+	},
+	"refreshToken":{
+		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	}
 }

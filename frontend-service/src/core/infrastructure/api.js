@@ -1,63 +1,89 @@
 import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/getUrl';
 import { HTTPRequester } from './HTTPRequester';
+import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const api = {
   pendingDataFlows: async userId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/DataFlaws2.json'
         : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   acceptedDataFlows: async userId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/DataFlaws2.json'
         : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   completedDataFlows: async userId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/DataFlaws2.json'
         : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId: userId }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   reportingDataFlow: async dataFlowId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_DataflowById.json'
         : getUrl(config.loadDataSetsByDataflowID.url, {
             dataFlowId: dataFlowId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   acceptDataFlow: async dataFlowId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(config.acceptDataFlow.url, { dataFlowId, type: 'ACCEPTED' }),
       data: { id: dataFlowId },
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.status;
   },
   rejectDataFlow: async dataFlowId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.update({
       url: getUrl(config.rejectDataFlow.url, { dataFlowId, type: 'REJECTED' }),
       data: { id: dataFlowId },
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.status;
   },
   dataSetErrorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'
@@ -68,34 +94,46 @@ export const api = {
             sortField: sortField,
             asc: asc
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
 
     return response.data;
   },
   dataSetStatisticsById: async dataSetId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/error-statistics.json'
         : getUrl(config.loadStatisticsAPI.url, {
             dataSetId: dataSetId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   dataSetSchemaById: async dataFlowId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
         : getUrl(config.dataSchemaAPI.url, {
             dataFlowId: dataFlowId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   dataSetTableDataById: async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_dataset_values2.json'
@@ -106,11 +144,15 @@ export const api = {
             pageSize: pageSize,
             fields: fields
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   deleteDataSetDataById: async dataSetId => {
+    const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
@@ -118,7 +160,10 @@ export const api = {
           : getUrl(config.deleteImportData.url, {
               dataSetId: dataSetId
             }),
-        queryString: {}
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -128,6 +173,7 @@ export const api = {
     }
   },
   deleteDataSetTableDataById: async (dataSetId, tableId) => {
+    const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
@@ -136,7 +182,10 @@ export const api = {
               dataSetId: dataSetId,
               tableId: tableId
             }),
-        queryString: {}
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -146,6 +195,7 @@ export const api = {
     }
   },
   errorPositionByObjectId: async (objectId, dataSetId, entityType) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_getTableFromAnyObjectId.json'
@@ -154,11 +204,15 @@ export const api = {
             dataSetId: dataSetId,
             entityType: entityType
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   validateDataSetById: async dataSetId => {
+    const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
@@ -166,7 +220,10 @@ export const api = {
           : getUrl(config.validateDataSetAPI.url, {
               dataSetId: dataSetId
             }),
-        queryString: {}
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -178,28 +235,38 @@ export const api = {
   /* #endregion */
   /* #region Documents */
   documents: async dataFlowId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
         : getUrl(config.loadDataSetsByDataflowID.url, {
             dataFlowId: dataFlowId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data.documents;
   },
   downloadDocumentById: async documentId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
         : getUrl(config.downloadDocumentByIdAPI.url, {
             documentId: documentId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
+      }
     });
     return response.data;
   },
   uploadDocument: async (dataFlowId, description, language, file) => {
+    const tokens = userStorage.get();
     const formData = new FormData();
     formData.append('file', file, file.name);
     const response = await HTTPRequester.postWithFiles({
@@ -209,13 +276,18 @@ export const api = {
         language: language
       }),
       queryString: {},
-      data: formData
+      data: formData,
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': undefined
+      }
     });
     return response.status;
   },
   /* #endregion */
   /* #region Snapshots */
   createSnapshotById: async (dataSetId, description) => {
+    const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: getUrl(config.createSnapshot.url, {
@@ -224,6 +296,9 @@ export const api = {
         }),
         data: {
           description: description
+        },
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
         }
       });
       return response.status >= 200 && response.status <= 299;
@@ -233,12 +308,16 @@ export const api = {
     }
   },
   deleteSnapshotById: async (dataSetId, snapshotId) => {
+    const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: getUrl(config.deleteSnapshotByID.url, {
           dataSetId,
           snapshotId: snapshotId
-        })
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -248,13 +327,17 @@ export const api = {
     }
   },
   restoreSnapshotById: async (dataFlowId, dataSetId, snapshotId) => {
+    const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: getUrl(config.restoreSnaphost.url, {
           dataFlowId,
           dataSetId,
           snapshotId: snapshotId
-        })
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
@@ -263,26 +346,34 @@ export const api = {
     }
   },
   snapshots: async dataSetId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/snapshots.json'
         : getUrl(config.loadSnapshotsListAPI.url, {
             dataSetId: dataSetId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   /* #endregion */
   /* #region WebLinks */
   webLinks: async dataFlowId => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
         : getUrl(config.loadDataSetsByDataflowID.url, {
             dataFlowId: dataFlowId
           }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data.weblinks;
   },
@@ -301,5 +392,15 @@ export const api = {
     return tokens.data;
   },
   logout: async userId => {},
-  refreshToken: async () => {}
+  refreshToken: async refreshToken => {
+    const tokens = await HTTPRequester.post({
+      url: window.env.REACT_APP_JSON
+        ? ''
+        : getUrl(config.refreshToken.url, {
+            refreshToken
+          }),
+      queryString: {}
+    });
+    return tokens.data;
+  }
 };

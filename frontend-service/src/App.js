@@ -40,6 +40,14 @@ const App = () => {
                 user: {}
               }
             });
+          },
+          onTokenRefresh: user => {
+            dispatch({
+              type: 'refreshToken',
+              payload: {
+                user
+              }
+            });
           }
         }}>
         <ResourcesContext.Provider value={resources}>
