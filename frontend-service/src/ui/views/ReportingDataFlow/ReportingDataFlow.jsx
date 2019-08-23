@@ -11,7 +11,7 @@ import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { SplitButton } from 'primereact/splitbutton';
+import { SplitButton } from 'ui/views/_components/SplitButton';
 
 import { DataFlowService } from 'core/services/DataFlow';
 
