@@ -14,7 +14,6 @@ import { config } from 'conf';
 import styles from './DataViewer.module.css';
 
 import { Button } from 'ui/views/_components/Button';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
@@ -24,6 +23,8 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SplitButton } from 'ui/views/_components/SplitButton';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/getUrl';
 import { DataSetService } from 'core/services/DataSet';
@@ -57,6 +58,7 @@ const DataViewer = withRouter(
       const [importDialogVisible, setImportDialogVisible] = useState(false);
       const [isDataDeleted, setIsDataDeleted] = useState(false);
       const [loading, setLoading] = useState(false);
+      const [loadingFile, setLoadingFile] = useState(false);
       const [numRows, setNumRows] = useState(10);
       const [selectedRow, setSelectedRow] = useState({});
       const [sortField, setSortField] = useState(undefined);
@@ -68,64 +70,13 @@ const DataViewer = withRouter(
       let growlRef = useRef();
 
       useEffect(() => {
-        setDefaultButtonsList([
-          {
-            label: resources.messages['import'],
-            icon: 'export',
-            group: 'left',
-            disabled: false,
-            onClick: () => setImportDialogVisible(true)
-          },
-          {
-            label: resources.messages['exportTable'],
-            icon: 'import',
-            group: 'left',
-            disabled: false,
-            onClick: () => onExportTableData()
-          },
-          {
-            label: resources.messages['deleteTable'],
-            icon: 'trash',
-            group: 'left',
-            disabled: false,
-            onClick: () => onSetVisible(setDeleteDialogVisible, true)
-          },
-          {
-            label: resources.messages['visibility'],
-            icon: 'eye',
-            group: 'left',
-            disabled: true,
-            onClick: null
-          },
-          {
-            label: resources.messages['filter'],
-            icon: 'filter',
-            group: 'left',
-            disabled: true,
-            onClick: null
-          },
-          {
-            label: resources.messages['groupBy'],
-            icon: 'groupBy',
-            group: 'left',
-            disabled: true,
-            onClick: null
-          },
-          {
-            label: resources.messages['sort'],
-            icon: 'sort',
-            group: 'left',
-            disabled: true,
-            onClick: null
-          },
-          {
-            label: resources.messages['refresh'],
-            icon: 'refresh',
-            group: 'right',
-            disabled: true,
-            onClick: onRefresh
-          }
-        ]);
+        setDefaultButtonsList(
+          config.exportTypes.map(type => ({
+            label: type.text,
+            icon: config.icons['archive'],
+            command: () => onExportTableData(type.code)
+          }))
+        );
 
         let colOptions = [];
         for (let colSchema of colsSchema) {
@@ -220,11 +171,11 @@ const DataViewer = withRouter(
         setConfirmDeleteVisible(true);
       };
 
-      const onExportTableData = async () => {
-        setExportTableDataName(createTableName(tableName));
-        setExportTableData(
-          await DataSetService.exportTableDataById(dataSetId, tableId, config.dataSet.exportTypes.csv)
-        );
+      const onExportTableData = async fileType => {
+        setLoadingFile(true);
+        setExportTableDataName(createTableName(tableName, fileType));
+        setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId, fileType));
+        setLoadingFile(false);
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -373,8 +324,10 @@ const DataViewer = withRouter(
         </div>
       );
 
-      const createTableName = () => {
-        return `${tableName}.${config.dataSet.exportTypes.csv}`;
+      const [first] = config.exportTypes;
+
+      const createTableName = (tableName, fileType) => {
+        return `${tableName}.${fileType}`;
       };
 
       const newRowForm = colsSchema.map((column, i) => {
@@ -519,7 +472,66 @@ const DataViewer = withRouter(
 
       return (
         <div>
-          <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} />
+          {/* <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} /> */}
+          <Toolbar>
+            <div className="p-toolbar-group-left">
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={'export'}
+                label={resources.messages['import']}
+                onClick={() => setImportDialogVisible(true)}
+              />
+              <SplitButton
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={loadingFile ? config.icons.spinnerAnimate : config.icons.import}
+                label={resources.messages['exportTable']}
+                model={defaultButtonsList}
+                onClick={() => onExportTableData(first.code)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={'trash'}
+                label={resources.messages['deleteTable']}
+                onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'eye'}
+                label={resources.messages['visibility']}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'filter'}
+                label={resources.messages['filter']}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'groupBy'}
+                label={resources.messages['groupBy']}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'sort'}
+                label={resources.messages['sort']}
+              />
+            </div>
+            <div className="p-toolbar-group-right">
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'refresh'}
+                label={resources.messages['refresh']}
+                onClick={() => onRefresh()}
+              />
+            </div>
+          </Toolbar>
           <div className={styles.Table}>
             <DataTable
               autoLayout={true}
