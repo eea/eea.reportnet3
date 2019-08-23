@@ -313,11 +313,21 @@ export const api = {
 
   contributors: async dataFlowId => {
     console.log('Getting All Contributors from dataFlow ', dataFlowId);
+    /* 
     const response = await HTTPRequester.get({
       url: '/jsons/contributors.json',
       queryString: {}
     });
-    return response.data;
+    return response.data; */
+
+    const hardcodedResponseExample = [
+      { id: '1111', login: 'ygryc@ygryc.net', role: 'read_write' },
+      { id: '2222', login: 'pedro@pedro.net', role: 'read' },
+      { id: '3333', login: 'jose@jose.net', role: 'read_write' },
+      { id: '4444', login: 'rambo@rambo.com', role: 'read' }
+    ];
+
+    return hardcodedResponseExample;
   },
   addContributorByLogin: async (dataFlowId, contributorLogin) => {
     console.log('Adding Contributor to dataFlowId: ', dataFlowId, ' contributorLogin', contributorLogin);

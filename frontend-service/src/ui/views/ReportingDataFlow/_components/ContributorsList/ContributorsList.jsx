@@ -17,12 +17,6 @@ export function ContributorsList({ dataFlowId }) {
   };
 
   useEffect(() => {
-    //TODO HERE SHOULD BE CALLED THE CONTRIBUTORS GET ALL USING DATAFLOW ID
-    /* const contributorsArray = [
-      { id: '1111', login: 'ygryc@ygryc.net', role: 'read_write' },
-      { id: '2222', login: 'igor@igor.com', role: 'read' }
-    ];
-    setContributorsArray(contributorsArray); */
     onLoadContributorsList();
   }, []);
 
