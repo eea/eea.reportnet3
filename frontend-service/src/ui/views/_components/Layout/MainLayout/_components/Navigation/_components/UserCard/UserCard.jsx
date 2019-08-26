@@ -1,5 +1,7 @@
 import React, { useContext } from 'react';
 
+import { isUndefined } from 'lodash';
+
 import styles from './UserCard.module.css';
 
 import { Icon } from 'ui/views/_components/Icon';
@@ -14,14 +16,23 @@ const UserCard = React.memo(() => {
       <div className={styles.userProfile}>
         <a
           href="#userProfilePage"
-          title="Edit user profile"
+          title="User profile details"
+          onClick={async e => {
+            e.preventDefault();
+          }}>
+          <img className={styles.avatar} alt="User Profile" src="https://image.flaticon.com/icons/svg/149/149071.svg" />
+          <h5 className={styles.userProfile}>
+            {!isUndefined(user.preferredUsername) ? user.preferredUsername : user.name}
+          </h5>
+        </a>
+        <a
+          href="#userProfilePage"
+          title="logout"
           onClick={async e => {
             e.preventDefault();
             const logout = await UserService.logout();
             user.onLogout();
           }}>
-          <img className={styles.avatar} alt="User Profile" src="https://image.flaticon.com/icons/svg/149/149071.svg" />
-          <h5 className={styles.userProfile}>User</h5>
           <Icon icon="logout" />
         </a>
       </div>
