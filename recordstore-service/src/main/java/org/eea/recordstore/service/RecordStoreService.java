@@ -68,5 +68,7 @@ public interface RecordStoreService {
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
       throws SQLException, IOException, RecordStoreAccessException;
 
+  void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
+
 
 }

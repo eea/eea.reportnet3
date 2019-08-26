@@ -140,4 +140,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
   }
 
+
+  @Override
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/delete", method = RequestMethod.POST)
+  public void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
+
+    try {
+      recordStoreService.deleteDataSnapshot(datasetId, idSnapshot);
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
+
 }

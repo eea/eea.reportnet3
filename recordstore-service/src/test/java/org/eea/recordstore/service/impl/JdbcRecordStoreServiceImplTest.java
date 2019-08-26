@@ -136,5 +136,12 @@ public class JdbcRecordStoreServiceImplTest {
     }
   }
 
+  @Test
+  public void testDeleteSnapshot() throws SQLException, IOException {
+
+    jdbcRecordStoreService.deleteDataSnapshot(1L, 1L);
+
+  }
+
 
 }

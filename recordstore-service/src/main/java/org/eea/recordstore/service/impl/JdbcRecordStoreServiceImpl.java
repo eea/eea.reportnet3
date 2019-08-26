@@ -232,8 +232,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     byte[] buf;
     CopyOut cpOut = cm.copyOut("COPY (SELECT id, id_dataset_schema FROM dataset_"
         + idReportingDataset + ".dataset_value) to STDOUT");
-    OutputStream to = new FileOutputStream(pathSnapshot + nameFileDatasetValue);
+    OutputStream to = null;
     try {
+      to = new FileOutputStream(pathSnapshot + nameFileDatasetValue);
       while ((buf = cpOut.readFromCopy()) != null) {
         to.write(buf);
       }
@@ -250,8 +251,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     byte[] buf2;
     CopyOut cpOut2 = cm.copyOut("COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
         + idReportingDataset + ".table_value) to STDOUT");
-    OutputStream to2 = new FileOutputStream(pathSnapshot + nameFileTableValue);
+    OutputStream to2 = null;
     try {
+      to2 = new FileOutputStream(pathSnapshot + nameFileTableValue);
       while ((buf2 = cpOut2.readFromCopy()) != null) {
         to2.write(buf2);
       }
@@ -270,8 +272,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         cm.copyOut("COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
             + idReportingDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
             + ") to STDOUT");
-    OutputStream to3 = new FileOutputStream(pathSnapshot + nameFileRecordValue);
+
+    OutputStream to3 = null;
     try {
+      to3 = new FileOutputStream(pathSnapshot + nameFileRecordValue);
       while ((buf3 = cpOut3.readFromCopy()) != null) {
         to3.write(buf3);
       }
@@ -291,8 +295,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
             + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
             + idPartitionDataset + ") to STDOUT");
-    OutputStream to4 = new FileOutputStream(pathSnapshot + nameFileFieldValue);
+
+    OutputStream to4 = null;
     try {
+      to4 = new FileOutputStream(pathSnapshot + nameFileFieldValue);
       while ((buf4 = cpOut4.readFromCopy()) != null) {
         to4.write(buf4);
       }
@@ -384,6 +390,30 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.SNAPSHOT_RESTORED_EVENT,
         idReportingDataset);
+  }
+
+
+  @Override
+  @Transactional
+  public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
+
+    String nameFileDatasetValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
+    String nameFileTableValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
+    String nameFileRecordValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+    String nameFileFieldValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+
+    Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
+    Files.deleteIfExists(path1);
+    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
+    Files.deleteIfExists(path2);
+    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
+    Files.deleteIfExists(path3);
+    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
+    Files.deleteIfExists(path4);
   }
 
 

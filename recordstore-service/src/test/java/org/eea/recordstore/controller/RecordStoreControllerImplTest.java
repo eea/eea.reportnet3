@@ -180,6 +180,11 @@ public class RecordStoreControllerImplTest {
     recordStoreControllerImpl.restoreSnapshotData(1L, 1L);
   }
 
+  @Test
+  public void testDeleteSnapshot() {
+    recordStoreControllerImpl.deleteSnapshotData(1L, 1L);
+  }
+
 
 
 }
