@@ -10,7 +10,9 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -49,8 +51,10 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "sqlGetDatasetsName",
         "select * from pg_namespace where nspname like 'dataset%'");
 
-
   }
+
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
 
   @Test(expected = UnsupportedOperationException.class)
   public void resetDatasetDatabase() throws RecordStoreAccessException {
@@ -110,11 +114,14 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testRestoreSnapshot() throws SQLException, IOException {
     List<String> datasets = new ArrayList<>();
-    datasets.add("dataset_X");
+    datasets.add("dataset_1");
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L);
+
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L);
+    deleteTemporarySnapshotFiles();
   }
 
   private void deleteTemporarySnapshotFiles() {
@@ -125,7 +132,6 @@ public class JdbcRecordStoreServiceImplTest {
       File pes = fList[i];
       if (pes.getName().contains(".snap")) {
         boolean success = pes.delete();
-        // System.out.println("he encontrado uno");
       }
     }
   }

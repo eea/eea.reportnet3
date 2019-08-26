@@ -325,14 +325,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     // Table value
     String nameFileTableValue =
         "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    Path path2 = Paths.get("C:/snapshots/" + nameFileTableValue);
+    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
     InputStream is2 = Files.newInputStream(path2);
     try {
+
       cm.copyIn("COPY dataset_" + idReportingDataset
           + ".table_value(id, id_table_schema, dataset_id) FROM STDIN", is2);
-      is2.close();
+
+
     } catch (PSQLException e) {
       LOG.error("Error restoring the table value. Restoring snapshot continues");
+    } finally {
+      is2.close();
     }
 
 
@@ -342,15 +346,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
     InputStream is3 = Files.newInputStream(path3);
     try {
+
       cm.copyIn(
           "COPY dataset_" + idReportingDataset
               + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN",
           is3);
+
     } catch (PSQLException e) {
       LOG.error("Error restoring the record value. Restoring snapshot continues");
+    } finally {
+      is3.close();
     }
 
-    is3.close();
+
 
     // Field value
     String nameFileFieldValue =
@@ -358,16 +366,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
     InputStream is4 = Files.newInputStream(path4);
     try {
+
       cm.copyIn("COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN", is4);
+
     } catch (PSQLException e) {
       LOG.error("Error restoring the field value. Restoring snapshot continues");
+    } finally {
+      is4.close();
     }
-    is4.close();
-
 
     con.close();
-
 
     // Send kafka event to launch Validation
     final EEAEventVO event = new EEAEventVO();
