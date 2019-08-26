@@ -5,6 +5,9 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const api = {
   pendingDataFlows: async userId => {
+    console.log('url', config.loadDataFlowTaskPendingAcceptedAPI.url);
+
+    console.log('pending call: ', getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url, { userId }));
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON

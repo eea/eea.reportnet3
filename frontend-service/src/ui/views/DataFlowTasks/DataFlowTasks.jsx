@@ -14,9 +14,11 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
 import { DataFlowService } from 'core/services/DataFlow';
+import { UserContext } from '../_components/_context/UserContext';
 
 export const DataFlowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
+  const userData = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [tabMenuItems] = useState([
@@ -44,7 +46,8 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
 
   const dataFetch = async () => {
     setLoading(true);
-    const userId = 2;
+    console.log('userData: ', userData);
+    const userId = userData.id;
     try {
       const pendingResponse = await DataFlowService.pending(userId);
       const acceptedResponse = await DataFlowService.accepted(userId);
