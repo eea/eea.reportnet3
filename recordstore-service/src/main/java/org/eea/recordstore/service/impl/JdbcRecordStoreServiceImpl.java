@@ -1,8 +1,16 @@
 package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,9 +22,13 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.copy.CopyOut;
+import org.postgresql.core.BaseConnection;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +39,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The type Jdbc record store service.
@@ -34,14 +47,13 @@ import org.springframework.stereotype.Service;
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
-  /**
-   * The kafka sender.
-   */
-  @Autowired
-  private KafkaSender kafkaSender;
 
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
+
+  /** The kafka sender helper. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
 
   /**
@@ -73,6 +85,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
+  @Value("${pathSnapshot}")
+  private String pathSnapshot;
+
   /**
    * The Constant LOG_ERROR.
    */
@@ -82,6 +97,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
+
 
   @Override
   public void resetDatasetDatabase() throws RecordStoreAccessException {
@@ -113,14 +129,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
 
     LOG.info("Empty dataset created");
-    final EEAEventVO event = new EEAEventVO();
-    event.setEventType(EventType.CONNECTION_CREATED_EVENT);
-    final Map<String, Object> data = new HashMap<>();
-    data.put("connectionDataVO", createConnectionDataVO(datasetName));
-    data.put("dataset_id", datasetName);
-    data.put("idDatasetSchema", idDatasetSchema);
-    event.setData(data);
-    kafkaSender.sendMessage(event);
+
+    // Send notification
+    Map<String, Object> result = new HashMap<>();
+    result.put("connectionDataVO", createConnectionDataVO(datasetName));
+    result.put("dataset_id", datasetName);
+    result.put("idDatasetSchema", idDatasetSchema);
+    kafkaSenderUtils.releaseKafkaEvent(EventType.CONNECTION_CREATED_EVENT, result);
 
   }
 
@@ -197,6 +212,171 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     });
   }
+
+
+  @Override
+  public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
+      throws SQLException, IOException {
+
+    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    Connection con = null;
+    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+        conexion.getPassword());
+
+    CopyManager cm = new CopyManager((BaseConnection) con);
+
+
+    // Copy dataset_value
+    String nameFileDatasetValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
+    byte[] buf;
+    CopyOut cpOut = cm.copyOut("COPY (SELECT id, id_dataset_schema FROM dataset_"
+        + idReportingDataset + ".dataset_value) to STDOUT");
+    OutputStream to = new FileOutputStream(pathSnapshot + nameFileDatasetValue);
+    try {
+      while ((buf = cpOut.readFromCopy()) != null) {
+        to.write(buf);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut.isActive()) {
+        cpOut.cancelCopy();
+      }
+      to.close();
+    }
+
+    // Copy table_value
+    String nameFileTableValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
+    byte[] buf2;
+    CopyOut cpOut2 = cm.copyOut("COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
+        + idReportingDataset + ".table_value) to STDOUT");
+    OutputStream to2 = new FileOutputStream(pathSnapshot + nameFileTableValue);
+    try {
+      while ((buf2 = cpOut2.readFromCopy()) != null) {
+        to2.write(buf2);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut2.isActive()) {
+        cpOut2.cancelCopy();
+      }
+      to2.close();
+    }
+
+    // Copy record_value
+    String nameFileRecordValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+    byte[] buf3;
+    CopyOut cpOut3 =
+        cm.copyOut("COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
+            + idReportingDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
+            + ") to STDOUT");
+    OutputStream to3 = new FileOutputStream(pathSnapshot + nameFileRecordValue);
+    try {
+      while ((buf3 = cpOut3.readFromCopy()) != null) {
+        to3.write(buf3);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut3.isActive()) {
+        cpOut3.cancelCopy();
+      }
+      to3.close();
+    }
+
+    // Copy field_value
+    String nameFileFieldValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    byte[] buf4;
+    CopyOut cpOut4 = cm.copyOut(
+        "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+            + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
+            + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
+            + idPartitionDataset + ") to STDOUT");
+    OutputStream to4 = new FileOutputStream(pathSnapshot + nameFileFieldValue);
+    try {
+      while ((buf4 = cpOut4.readFromCopy()) != null) {
+        to4.write(buf4);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut4.isActive()) {
+        cpOut4.cancelCopy();
+      }
+      to4.close();
+
+    }
+
+    con.close();
+
+  }
+
+
+  @Override
+  @Transactional
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+      throws SQLException, IOException {
+
+    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    Connection con = null;
+    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+        conexion.getPassword());
+
+    CopyManager cm = new CopyManager((BaseConnection) con);
+
+
+    // Table value
+    String nameFileTableValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
+    Path path2 = Paths.get("C:/snapshots/" + nameFileTableValue);
+    InputStream is2 = Files.newInputStream(path2);
+    try {
+      cm.copyIn("COPY dataset_" + idReportingDataset
+          + ".table_value(id, id_table_schema, dataset_id) FROM STDIN", is2);
+      is2.close();
+    } catch (PSQLException e) {
+      LOG.error("Error restoring the table value. Restoring snapshot continues");
+    }
+
+
+    // Record value
+    String nameFileRecordValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
+    InputStream is3 = Files.newInputStream(path3);
+    try {
+      cm.copyIn(
+          "COPY dataset_" + idReportingDataset
+              + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN",
+          is3);
+    } catch (PSQLException e) {
+      LOG.error("Error restoring the record value. Restoring snapshot continues");
+    }
+
+    is3.close();
+
+    // Field value
+    String nameFileFieldValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
+    InputStream is4 = Files.newInputStream(path4);
+    try {
+      cm.copyIn("COPY dataset_" + idReportingDataset
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN", is4);
+    } catch (PSQLException e) {
+      LOG.error("Error restoring the field value. Restoring snapshot continues");
+    }
+    is4.close();
+
+
+    con.close();
+
+
+    // Send kafka event to launch Validation
+    final EEAEventVO event = new EEAEventVO();
+    event.setEventType(EventType.SNAPSHOT_RESTORED_EVENT);
+
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.SNAPSHOT_RESTORED_EVENT,
+        idReportingDataset);
+  }
+
 
 
 }

@@ -1,5 +1,7 @@
 package org.eea.recordstore.controller;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -108,5 +110,34 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     return vo;
   }
 
+
+  @Override
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
+  public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
+
+    try {
+      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
+      LOG.info("Snapshot created");
+    } catch (SQLException | IOException | RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
+
+
+  @Override
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
+  public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
+
+    try {
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot);
+    } catch (SQLException | IOException | RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
 
 }

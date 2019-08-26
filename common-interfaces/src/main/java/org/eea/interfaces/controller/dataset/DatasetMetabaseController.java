@@ -65,4 +65,9 @@ public interface DatasetMetabaseController {
   void deleteSnapshot(@PathVariable("id") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
 
+
+  @PostMapping(value = "/{id}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+  void restoreSnapshot(@PathVariable("id") Long datasetId,
+      @RequestParam("idSnapshot") Long idSnapshot);
+
 }

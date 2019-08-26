@@ -15,7 +15,7 @@ CREATE TABLE public.dataflow (
 );
 
 CREATE TABLE public.dataset (
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	date_creation timestamp NULL,
 	DATASET_NAME varchar(255) NULL,
 	dataflowid int8 NULL,
@@ -63,13 +63,13 @@ CREATE TABLE public."document" (
 CREATE TABLE public.eu_dataset (
 	"name" varchar(255) NULL,
 	visible bool NULL,
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	CONSTRAINT eu_dataset_pkey PRIMARY KEY (id),
 	CONSTRAINT eu_dataset_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)
 );
 
 CREATE TABLE public.partition_dataset (
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	user_name varchar(255) NULL,
 	id_dataset serial NOT NULL,
 	CONSTRAINT partition_dataset_pkey PRIMARY KEY (id),
@@ -77,7 +77,7 @@ CREATE TABLE public.partition_dataset (
 );
 
 CREATE TABLE public.reporting_dataset (
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	CONSTRAINT reporting_dataset_pkey PRIMARY KEY (id),
 	CONSTRAINT reporting_dataset_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)
 );
@@ -86,7 +86,7 @@ CREATE TABLE public."snapshot" (
 	datacollection_id int8 NULL,
 	"description" varchar(255) NULL,
 	REPORTING_DATASET_ID int8 null,
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	CONSTRAINT snapshot_pkey PRIMARY KEY (id),
 	CONSTRAINT snapshot_data_collection_fkey FOREIGN KEY (datacollection_id) REFERENCES data_collection(id),
 	CONSTRAINT snapshot_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)
@@ -102,7 +102,7 @@ CREATE TABLE public.submission_agreement (
 );
 
 CREATE TABLE public.table_collection (
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	dataflow_id int8 NULL,
 	dataset_id int8 NULL,
 	table_name varchar(255) NULL,
@@ -110,7 +110,7 @@ CREATE TABLE public.table_collection (
 );
 
 CREATE TABLE public.table_headers_collection (
-	id serial NOT NULL,
+	id bigserial NOT NULL,
 	header_name varchar(255) NULL,
 	header_type varchar(255) NULL,
 	id_table serial NOT NULL,
@@ -137,7 +137,7 @@ CREATE TABLE public.USER_REQUEST (
 );
 
 CREATE TABLE public.dataflow_user_request (
-	dataflow_id serial NOT NULL,
+	dataflow_id bigserial NOT NULL,
 	user_request_id serial NOT NULL,
 	CONSTRAINT dataflow_user_request_pkey PRIMARY KEY (dataflow_id, user_request_id),
 	CONSTRAINT user_request_pkey FOREIGN KEY (user_request_id) REFERENCES user_request(id),
@@ -149,7 +149,7 @@ CREATE TABLE public.dataflow_user_request (
 GRANT USAGE ON SCHEMA public TO root ;
 GRANT USAGE ON SCHEMA public TO root ;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO root ;
-GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO root ;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO root ;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO root ;
 
 ALTER TABLE public.contributor OWNER TO root;

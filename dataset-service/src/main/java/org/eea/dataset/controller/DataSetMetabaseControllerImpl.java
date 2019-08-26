@@ -131,4 +131,24 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
   }
 
+
+  @Override
+  @PostMapping(value = "/{id}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void restoreSnapshot(@PathVariable("id") Long datasetId,
+      @RequestParam("idSnapshot") Long idSnapshot) {
+
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      datasetMetabaseService.restoreSnapshot(datasetId, idSnapshot);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+  }
+
 }

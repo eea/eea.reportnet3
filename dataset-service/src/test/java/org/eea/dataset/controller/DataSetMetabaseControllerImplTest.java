@@ -166,4 +166,26 @@ public class DataSetMetabaseControllerImplTest {
     dataSetMetabaseControllerImpl.deleteSnapshot(1L, 1L);
   }
 
+  @Test
+  public void testRestoreSnapshots() throws Exception {
+
+    dataSetMetabaseControllerImpl.restoreSnapshot(1L, 1L);
+    Mockito.verify(datasetMetabaseService, times(1)).restoreSnapshot(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testRestsoreSnapshotsException() throws Exception {
+
+    dataSetMetabaseControllerImpl.restoreSnapshot(null, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testRestoreSnapshotsException2() throws Exception {
+
+    doThrow(new EEAException()).when(datasetMetabaseService).restoreSnapshot(Mockito.any(),
+        Mockito.any());
+    dataSetMetabaseControllerImpl.restoreSnapshot(1L, 1L);
+
+  }
+
 }

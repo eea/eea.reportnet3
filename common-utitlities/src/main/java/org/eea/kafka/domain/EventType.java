@@ -33,7 +33,9 @@ public enum EventType {
   LOAD_DOCUMENT_COMPLETED_EVENT("Hello-Kafka2", "load_document_completed_key"),
 
   /** The delete document completed event. */
-  DELETE_DOCUMENT_COMPLETED_EVENT("Hello-Kafka2", "delete_document_completed_key");
+  DELETE_DOCUMENT_COMPLETED_EVENT("Hello-Kafka2", "delete_document_completed_key"),
+
+  SNAPSHOT_RESTORED_EVENT("Hello-Kafka2", "snapshot_restored_completed_key");
 
   /** The topic. */
   private String topic;

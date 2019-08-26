@@ -169,6 +169,17 @@ public class RecordStoreControllerImplTest {
     assertNull(FAILED, result);
   }
 
+  @Test
+  public void testCreateSnapshot() {
+    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L);
+  }
+
+
+  @Test
+  public void testRestoreSnapshot() {
+    recordStoreControllerImpl.restoreSnapshotData(1L, 1L);
+  }
+
 
 
 }

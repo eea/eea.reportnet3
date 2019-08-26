@@ -45,4 +45,7 @@ public interface DatasetMetabaseService {
    */
   void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
+
+  void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+
 }

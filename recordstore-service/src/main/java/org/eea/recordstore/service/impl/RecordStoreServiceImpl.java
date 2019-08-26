@@ -1,8 +1,16 @@
 package org.eea.recordstore.service.impl;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +26,9 @@ import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.copy.CopyOut;
+import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +97,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
+
+  @Value("${pathSnapshot}")
+  private String pathSnapshot;
 
 
   /**
@@ -303,6 +317,137 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     result.setPassword(passPostgreDb);
     result.setSchema(datasetName);
     return result;
+  }
+
+
+  @Override
+  public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
+      throws SQLException, IOException, RecordStoreAccessException {
+
+    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    Connection con = null;
+    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+        conexion.getPassword());
+
+    CopyManager cm = new CopyManager((BaseConnection) con);
+
+
+    // Copy dataset_value
+    String nameFileDatasetValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
+    byte[] buf;
+    CopyOut cpOut = cm.copyOut("COPY (SELECT id, id_dataset_schema FROM dataset_"
+        + idReportingDataset + ".dataset_value) to STDOUT");
+    OutputStream to = new FileOutputStream("C:/snapshots/" + nameFileDatasetValue);
+    try {
+      while ((buf = cpOut.readFromCopy()) != null) {
+        to.write(buf);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut.isActive()) {
+        cpOut.cancelCopy();
+      }
+      to.close();
+    }
+
+    // Copy table_value
+    String nameFileTableValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
+    byte[] buf2;
+    CopyOut cpOut2 = cm.copyOut("COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
+        + idReportingDataset + ".table_value) to STDOUT");
+    OutputStream to2 = new FileOutputStream("C:/snapshots/" + nameFileTableValue);
+    try {
+      while ((buf2 = cpOut2.readFromCopy()) != null) {
+        to2.write(buf2);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut2.isActive()) {
+        cpOut2.cancelCopy();
+      }
+      to2.close();
+    }
+
+    // Copy record_value
+    String nameFileRecordValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+    byte[] buf3;
+    CopyOut cpOut3 =
+        cm.copyOut("COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
+            + idReportingDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
+            + ") to STDOUT");
+    OutputStream to3 = new FileOutputStream("C:/snapshots/" + nameFileRecordValue);
+    try {
+      while ((buf3 = cpOut3.readFromCopy()) != null) {
+        to3.write(buf3);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut3.isActive()) {
+        cpOut3.cancelCopy();
+      }
+      to3.close();
+    }
+
+    // Copy field_value
+    String nameFileFieldValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    byte[] buf4;
+    CopyOut cpOut4 = cm.copyOut(
+        "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+            + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
+            + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
+            + idPartitionDataset + ") to STDOUT");
+    OutputStream to4 = new FileOutputStream("C:/snapshots/" + nameFileFieldValue);
+    try {
+      while ((buf4 = cpOut4.readFromCopy()) != null) {
+        to4.write(buf4);
+      }
+    } finally { // see to it that we do not leave the connection locked
+      if (cpOut4.isActive()) {
+        cpOut4.cancelCopy();
+      }
+      to4.close();
+
+    }
+
+    con.close();
+
+  }
+
+
+  @Override
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+      throws SQLException, IOException, RecordStoreAccessException {
+
+    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    Connection con = null;
+    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+        conexion.getPassword());
+
+    CopyManager cm = new CopyManager((BaseConnection) con);
+
+    // Record value
+    String nameFileRecordValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
+    InputStream is3 = Files.newInputStream(path3);
+    cm.copyIn(
+        "COPY dataset_" + idReportingDataset
+            + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN",
+        is3);
+    is3.close();
+
+    // Field value
+    String nameFileFieldValue =
+        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
+    InputStream is4 = Files.newInputStream(path4);
+    cm.copyIn("COPY dataset_" + idReportingDataset
+        + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN", is4);
+    is4.close();
+
+
+    con.close();
   }
 
 

@@ -782,5 +782,9 @@
   {
     "key": "config/dataset/spring.servlet.multipart.max-request-size",
     "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
+  },
+  {
+    "key": "config/recordstore/pathSnapshot",
+    "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
   }
 ]
