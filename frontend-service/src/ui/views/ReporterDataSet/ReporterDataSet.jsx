@@ -113,10 +113,10 @@ export const ReporterDataSet = ({ match, history }) => {
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
-  const onExportData = async () => {
+  const onExportData = async fileType => {
     setLoadingFile(true);
-    setExportDataSetDataName(createFileName());
-    setExportDataSetData(await DataSetService.exportDataById(dataSetId, config.dataSet.exportTypes.csv));
+    setExportDataSetDataName(createFileName(datasetTitle, fileType));
+    setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
     setLoadingFile(false);
   };
 
@@ -181,8 +181,8 @@ export const ReporterDataSet = ({ match, history }) => {
     setActiveIndex(tableSchemaId.index);
   };
 
-  const createFileName = () => {
-    return `${datasetTitle}.${config.dataSet.exportTypes.csv}`;
+  const createFileName = (datasetTitle, fileType) => {
+    return `${datasetTitle}.${fileType}`;
   };
 
   const snapshotInitialState = {
