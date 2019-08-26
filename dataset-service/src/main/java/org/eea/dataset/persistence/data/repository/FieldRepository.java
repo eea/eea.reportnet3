@@ -3,7 +3,10 @@ package org.eea.dataset.persistence.data.repository;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 
 /**
@@ -46,6 +49,16 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
    * @return the field value
    */
   FieldValue findFirstTypeByIdFieldSchema(String nameField);
+
+  /**
+   * Save value.
+   *
+   * @param id the id
+   * @param value the value
+   */
+  @Modifying
+  @Query(nativeQuery = true, value = "update field_value set value = :value where id = :id")
+  void saveValue(@Param("id") Long id, @Param("value") String value);
 
 
 

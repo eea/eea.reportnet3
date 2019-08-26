@@ -19,8 +19,12 @@ import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +75,10 @@ public class DataFlowServiceImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /** The user management controller zull. */
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
+
   /** The document mapper. */
   @Mock
   private DocumentMapper documentMapper;
@@ -112,10 +120,15 @@ public class DataFlowServiceImplTest {
   @Test
   public void getById() throws EEAException {
     DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceEnum.class)))
+        .thenReturn(new ArrayList<ResourceAccessVO>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findDataSetIdByDataflowId(1L)).thenReturn(new ArrayList<>());
-    dataflowServiceImpl.getById(1L);
-    dataFlowVO.setDatasets(new ArrayList<>());
+    when(datasetMetabaseController.findDataSetIdByDataflowId(1L)).thenReturn(reportingDatasetVOs);
+    dataFlowVO.setDatasets(reportingDatasetVOs);
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
   }
 
@@ -200,8 +213,8 @@ public class DataFlowServiceImplTest {
   public void getCompletedEmpty() throws EEAException {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+    dataflowServiceImpl.getCompleted("1L", pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
   }
 
   /**
@@ -213,13 +226,13 @@ public class DataFlowServiceImplTest {
   @Test
   public void getCompleted() throws EEAException {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
-    dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+    dataflowServiceImpl.getCompleted("1L", pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
     dataflows.add(new Dataflow());
     dataflows.add(new Dataflow());
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
-    dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+    dataflowServiceImpl.getCompleted("1L", pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
   }
 
 
@@ -232,7 +245,7 @@ public class DataFlowServiceImplTest {
   public void updateUserRequestStatus() throws EEAException {
     Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
+    dataflowServiceImpl.updateUserRequestStatus("1L", TypeRequestEnum.ACCEPTED);
     Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
   }

@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
@@ -15,9 +16,12 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +59,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
   /**
    * The Constant LOG.
    */
@@ -69,17 +77,20 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Transactional
   public DataFlowVO getById(Long id) throws EEAException {
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Dataflow result = dataflowRepository.findById(id).orElse(null);
-
+    // filter datasets showed to the user depending on permissions
+    List<ResourceAccessVO> datasets =
+        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATASET);
+    List<Long> datasetsIds =
+        datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-
-    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
+    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
@@ -108,7 +119,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
+  public List<DataFlowVO> getPendingAccepted(String userId) throws EEAException {
 
     List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
     List<Dataflow> dfs = new ArrayList<>();
@@ -139,7 +150,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException {
+  public List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findCompleted(userId, pageable);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
@@ -161,7 +172,8 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
+  public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
+      throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
@@ -177,7 +189,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
+  public void updateUserRequestStatus(String userRequestId, TypeRequestEnum type)
       throws EEAException {
 
     userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
@@ -232,7 +244,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Creates the metabase data flow.
    *
-   * @param dataflow the dataflow
+   * @param dataflowVO the dataflow VO
    */
   @Transactional
   private void createMetabaseDataFlow(DataFlowVO dataflowVO) {

@@ -880,4 +880,22 @@ public class DatasetServiceTest {
     assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
   }
 
+  @Test
+  public void updateFieldTest() throws EEAException {
+    datasetService.updateField(1L, new FieldVO());
+    Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldException1Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
+    datasetService.updateField(null, new FieldVO());
+  }
+
+  @Test
+  public void updateFieldException2Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
+    datasetService.updateField(1L, null);
+  }
+
 }

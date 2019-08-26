@@ -24,6 +24,12 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   private DataflowDocumentService dataflowService;
 
 
+  /**
+   * Gets the document info by id.
+   *
+   * @param documentId the document id
+   * @return the document info by id
+   */
   @Override
   public DocumentVO getDocumentInfoById(Long documentId) {
     if (documentId == null) {

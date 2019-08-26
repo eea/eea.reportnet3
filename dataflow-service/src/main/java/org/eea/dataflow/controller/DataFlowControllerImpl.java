@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +56,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the data flow VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandler")
+  // @HystrixCommand(fallbackMethod = "errorHandler")
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
@@ -91,12 +93,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   /**
    * Error handler list.
    *
-   * @param userId the user id
    * @return the list
    */
-  public static List<DataFlowVO> errorHandlerList(final Long userId) {
-    final String errorMessage =
-        String.format("User id: %d has problems to retrieve dataflows", userId);
+  public static List<DataFlowVO> errorHandlerList() {
+    final String errorMessage = String.format("User has problems to retrieve dataflows");
     final List<DataFlowVO> results = new ArrayList<>();
     LOG_ERROR.error(errorMessage);
     return results;
@@ -106,16 +106,15 @@ public class DataFlowControllerImpl implements DataFlowController {
   /**
    * Error handler list completed.
    *
-   * @param userId the user id
    * @param pageNum the page num
    * @param pageSize the page size
    * @return the list
    */
-  public static List<DataFlowVO> errorHandlerListCompleted(final Long userId, final Integer pageNum,
+  public static List<DataFlowVO> errorHandlerListCompleted(final Integer pageNum,
       final Integer pageSize) {
     final String errorMessage = String.format(
-        "User id: %d has problems to retrieve dataflows completed, form page %d with pageSize of %d",
-        userId, pageNum, pageSize);
+        "User has problems to retrieve dataflows completed, form page %d with pageSize of %d",
+        pageNum, pageSize);
     final List<DataFlowVO> results = new ArrayList<>();
     LOG_ERROR.error(errorMessage);
     return results;
@@ -146,16 +145,17 @@ public class DataFlowControllerImpl implements DataFlowController {
   /**
    * Find pending accepted.
    *
-   * @param userId the user id
    * @return the list
    */
   @Override
   @HystrixCommand(fallbackMethod = "errorHandlerList")
-  @GetMapping(value = "/pendingaccepted/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findPendingAccepted(Long userId) {
+  @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findPendingAccepted() {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
-
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
     try {
       dataflows = dataflowService.getPendingAccepted(userId);
     } catch (EEAException e) {
@@ -170,18 +170,20 @@ public class DataFlowControllerImpl implements DataFlowController {
   /**
    * Find completed.
    *
-   * @param userId the user id
    * @param pageNum the page num
    * @param pageSize the page size
    * @return the list
    */
   @Override
   @HystrixCommand(fallbackMethod = "errorHandlerListCompleted")
-  @GetMapping(value = "/{userId}/completed", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findCompleted(Long userId, Integer pageNum, Integer pageSize) {
+  @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findCompleted(Integer pageNum, Integer pageSize) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
     Pageable pageable = PageRequest.of(pageNum, pageSize);
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
     try {
       dataflows = dataflowService.getCompleted(userId, pageable);
     } catch (EEAException e) {
@@ -195,15 +197,17 @@ public class DataFlowControllerImpl implements DataFlowController {
   /**
    * Find user dataflows by status.
    *
-   * @param userId the user id
    * @param type the type
    * @return the list
    */
   @Override
-  @GetMapping(value = "/{userId}/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataFlowVO> findUserDataflowsByStatus(Long userId, TypeRequestEnum type) {
+  @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findUserDataflowsByStatus(TypeRequestEnum type) {
 
     List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
     try {
       dataflows = dataflowService.getPendingByUser(userId, type);
     } catch (EEAException e) {
@@ -222,7 +226,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateUserRequest(Long idUserRequest, TypeRequestEnum type) {
+  public void updateUserRequest(String idUserRequest, TypeRequestEnum type) {
 
     try {
       dataflowService.updateUserRequestStatus(idUserRequest, type);

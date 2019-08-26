@@ -9,10 +9,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +24,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -101,7 +107,7 @@ public class DataFlowControllerImplTest {
   public void testErrorHandlerList() {
     dataflowVO.setId(-1L);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
-    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerList(1L));
+    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerList());
   }
 
   /**
@@ -111,7 +117,7 @@ public class DataFlowControllerImplTest {
   public void testErrorHandlerListCompleted() {
     dataflowVO.setId(-1L);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
-    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerListCompleted(1L, 0, 10));
+    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerListCompleted(0, 10));
   }
 
 
@@ -146,8 +152,16 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void findPendingAcceptedThrows() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getPendingAccepted(Mockito.any())).thenThrow(EEAException.class);
-    dataFlowControllerImpl.findPendingAccepted(Mockito.any());
+    dataFlowControllerImpl.findPendingAccepted();
     Mockito.verify(dataflowService, times(1)).getPendingAccepted(Mockito.any());
   }
 
@@ -159,7 +173,7 @@ public class DataFlowControllerImplTest {
   @Test
   public void findPendingAccepted() throws EEAException {
     when(dataflowService.getPendingAccepted(Mockito.any())).thenReturn(new ArrayList<>());
-    dataFlowControllerImpl.findPendingAccepted(Mockito.any());
+    dataFlowControllerImpl.findPendingAccepted();
     assertEquals("fail", new ArrayList<>(), dataflowService.getPendingAccepted(Mockito.any()));
   }
 
@@ -171,7 +185,7 @@ public class DataFlowControllerImplTest {
   @Test
   public void findCompletedThrows() throws EEAException {
     when(dataflowService.getCompleted(Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
-    dataFlowControllerImpl.findCompleted(1L, 1, 1);
+    dataFlowControllerImpl.findCompleted(1, 1);
     Mockito.verify(dataflowService, times(1)).getCompleted(Mockito.any(), Mockito.any());
   }
 
@@ -183,7 +197,7 @@ public class DataFlowControllerImplTest {
   @Test
   public void findCompleted() throws EEAException {
     when(dataflowService.getCompleted(Mockito.any(), Mockito.any())).thenReturn(new ArrayList<>());
-    dataFlowControllerImpl.findCompleted(1L, 1, 1);
+    dataFlowControllerImpl.findCompleted(1, 1);
     assertEquals("fail", new ArrayList<>(),
         dataflowService.getCompleted(Mockito.any(), Mockito.any()));
   }
@@ -195,9 +209,17 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void findUserDataflowsByStatusThrows() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getPendingByUser(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    dataFlowControllerImpl.findUserDataflowsByStatus(Mockito.any(), Mockito.any());
+    dataFlowControllerImpl.findUserDataflowsByStatus(TypeRequestEnum.PENDING);
     Mockito.verify(dataflowService, times(1)).getPendingByUser(Mockito.any(), Mockito.any());
   }
 
@@ -208,9 +230,17 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void findUserDataflowsByStatus() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put("userId", "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getPendingByUser(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataFlowControllerImpl.findUserDataflowsByStatus(Mockito.any(), Mockito.any());
+    dataFlowControllerImpl.findUserDataflowsByStatus(TypeRequestEnum.PENDING);
     assertEquals("fail", new ArrayList<>(), dataflowService.getPendingAccepted(Mockito.any()));
   }
 

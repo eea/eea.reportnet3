@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -218,5 +219,10 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void insertSchema(@DatasetId Long datasetId, String idDatasetSchema) throws EEAException;
+
+  /**
+   * Update field.
+   */
+  void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
 
 }
