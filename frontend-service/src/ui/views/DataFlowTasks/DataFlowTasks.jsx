@@ -46,12 +46,10 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
 
   const dataFetch = async () => {
     setLoading(true);
-    console.log('userData: ', userData);
-    const userId = userData.id;
     try {
-      const pendingResponse = await DataFlowService.pending(userId);
-      const acceptedResponse = await DataFlowService.accepted(userId);
-      const completedResponse = await DataFlowService.completed(userId);
+      const pendingResponse = await DataFlowService.pending();
+      const acceptedResponse = await DataFlowService.accepted();
+      const completedResponse = await DataFlowService.completed();
       setpendingContent(pendingResponse);
       setacceptedContent(acceptedResponse);
       setcompletedContent(completedResponse);

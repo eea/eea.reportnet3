@@ -1,1 +1,1 @@
-export const GetCompletedDataFlows = ({ dataFlowRepository }) => async userId => dataFlowRepository.completed(userId);
+export const GetCompletedDataFlows = ({ dataFlowRepository }) => async () => dataFlowRepository.completed();
