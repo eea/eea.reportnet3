@@ -122,19 +122,25 @@ export function ContributorsList({ dataFlowId }) {
     );
   };
 /* #endregion */
+
+/* #region ADD */
+
+/* #endregion */
+
   return (
     <>
-      <DataTable value={contributorsArray} paginator={true} rows={5} rowsPerPageOptions={[4, 6, 8]}>
-        <Column key="login" field="login" header="Login" />
-        <Column body={roleDropdownColumnTemplate} header="Role" />
-        <Column body={deleteBtnColumnTemplate} />
-      </DataTable>
       <Button
         icon="plus"
         tooltip={resources.messages.addContributor}
         label={resources.messages.add}
         className={`${styles.addContributorButton} rp-btn default`}
       />
+      <DataTable value={contributorsArray} paginator={true} rows={5} rowsPerPageOptions={[4, 6, 8]}>
+        <Column key="login" field="login" header="Login" />
+        <Column body={roleDropdownColumnTemplate} header="Role" />
+        <Column body={deleteBtnColumnTemplate} style={{width:'60px'}}/>
+      </DataTable>
+    
     </>
   );
 }
