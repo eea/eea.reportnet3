@@ -6,7 +6,6 @@
   border-radius: 5px !important;
   padding: 0 !important;
   color: white;
-  max-width: 90px;
 
   &:hover {
     box-shadow: none !important;
@@ -28,4 +27,15 @@
   &:focus {
     box-shadow: none;
   }
+}
+.addContributorWrapper {
+  display: flex;
+  justify-items: center;
+  align-self: center;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.addContributorWrapper :global .formField {
+  width: 42%;
 }

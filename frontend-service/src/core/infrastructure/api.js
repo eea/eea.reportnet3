@@ -337,8 +337,15 @@ export const api = {
 
     return hardcodedResponseExample;
   },
-  addContributorByLogin: async (dataFlowId, contributorLogin) => {
-    console.log('Adding Contributor to dataFlowId: ', dataFlowId, ' contributorLogin', contributorLogin);
+  addContributorByLogin: async (dataFlowId, contributorLogin, contributorRole) => {
+    console.log(
+      'Adding Contributor to dataFlowId: ',
+      dataFlowId,
+      ' contributorLogin:',
+      contributorLogin,
+      ' role:',
+      contributorRole
+    );
   },
   deleteContributorById: async (dataFlowId, contributorId) => {
     console.log('Deliting Contributor from dataFlowId: ', dataFlowId, ' contributorId', contributorId);

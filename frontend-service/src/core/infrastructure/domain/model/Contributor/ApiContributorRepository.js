@@ -8,8 +8,8 @@ const all = async dataFlowId => {
   );
 };
 
-const addByLogin = async (dataFlowId, description) => {
-  return await api.createContributorByLogin(dataFlowId, description);
+const addByLogin = async (dataFlowId, login, role) => {
+  return await api.addContributorByLogin(dataFlowId, login, role);
 };
 
 const deleteById = async (dataFlowId, contributorId) => {

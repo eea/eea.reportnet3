@@ -131,6 +131,12 @@
 		"addContributor": "Add Contributor",
 		"deleteContributor":"Delete Contributor",
 		"selectContributorRole":"Select Role",
-		"manageRoles": "Manage Roles"
+		"manageRoles": "Manage Roles",
+		"addContributorPlaceholder": "New contributor Login",
+		"contributorLoginValidationMin": "Login is to short!",
+		"contributorLoginValidationMax": "Login is to long!",
+		"contributorLoginValidationRequired": "Login is required",
+		"contributorLoginValidationIsInList": "This user is already a contributor",
+		"contributorRoleValidationIsRequired": "Asign a role to contributor"
 	}
 }
