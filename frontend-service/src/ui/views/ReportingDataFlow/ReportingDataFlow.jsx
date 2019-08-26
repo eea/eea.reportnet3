@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
 
-import styles from './ReportingDataFlow.module.css';
+import styles from './ReportingDataFlow.module.scss';
 
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
+import { ContributorsList } from './_components/ContributorsList';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
+import { DropdownButton } from 'ui/views/_components/DropdownButton';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
+
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'primereact/splitbutton';
@@ -20,6 +24,7 @@ export const ReportingDataFlow = ({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
 
   const home = {
     icon: config.icons['home'],
@@ -67,6 +72,31 @@ export const ReportingDataFlow = ({ history, match }) => {
     return layout(<Spinner />);
   }
 
+  const dropDownItems = [
+    {
+      label: resources.messages.manageRoles,
+      icon: 'users',
+      menuItemFunction: () => {
+        showContributorsDialog();
+      }
+    },
+
+    {
+      label: resources.messages.delete,
+      icon: 'trash',
+      menuItemFunction: () => {}
+    },
+
+    {
+      label: resources.messages.properties,
+      icon: 'settings',
+      menuItemFunction: () => {}
+    }
+  ];
+  const showContributorsDialog = () => {
+    setIsActiveContributorsDialog(true);
+  };
+
   return layout(
     <div className="rep-row">
       <DataFlowColumn
@@ -75,10 +105,17 @@ export const ReportingDataFlow = ({ history, match }) => {
         navTitle={resources.messages['dataFlow']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
-        <h2 className={styles.title}>
-          <Icon icon="shoppingCart" />
-          {dataFlowData.name}
-        </h2>
+        <div className={styles.titleBar}>
+          <div className={styles.title_wrapper}>
+            <h2 className={styles.title}>
+              <Icon icon="shoppingCart" />
+              {dataFlowData.name}
+            </h2>
+          </div>
+          <div className={styles.option_btns_wrapper}>
+            <DropdownButton icon="ellipsis" model={dropDownItems} />
+          </div>
+        </div>
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
@@ -125,6 +162,15 @@ export const ReportingDataFlow = ({ history, match }) => {
             })}
           </div>
         </div>
+
+        <Dialog
+          header={`${resources.messages.dataProviderManageContributorsDialogTitle} "${dataFlowData.name}"`}
+          visible={isActiveContributorsDialog}
+          onHide={() => setIsActiveContributorsDialog(false)}
+          style={{ width: '50vw' }}
+          maximizable>
+          <ContributorsList dataFlowId={dataFlowData.id} />
+        </Dialog>
       </div>
     </div>
   );
