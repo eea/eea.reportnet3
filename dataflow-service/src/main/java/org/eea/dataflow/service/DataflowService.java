@@ -38,7 +38,7 @@ public interface DataflowService {
    * @return the pending accepted
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException;
+  List<DataFlowVO> getPendingAccepted(String userId) throws EEAException;
 
 
   /**
@@ -49,7 +49,7 @@ public interface DataflowService {
    * @return the completed
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException;
+  List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException;
 
 
   /**
@@ -60,7 +60,7 @@ public interface DataflowService {
    * @return the pending by user
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException;
+  List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
 
 
   /**
@@ -70,7 +70,7 @@ public interface DataflowService {
    * @param type the type
    * @throws EEAException the EEA exception
    */
-  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
+  void updateUserRequestStatus(String userRequestId, TypeRequestEnum type) throws EEAException;
 
 
   /**

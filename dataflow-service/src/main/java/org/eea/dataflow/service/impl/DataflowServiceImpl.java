@@ -119,7 +119,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
+  public List<DataFlowVO> getPendingAccepted(String userId) throws EEAException {
 
     List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
     List<Dataflow> dfs = new ArrayList<>();
@@ -150,7 +150,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException {
+  public List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findCompleted(userId, pageable);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
@@ -172,7 +172,8 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
+  public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
+      throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
@@ -188,7 +189,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
+  public void updateUserRequestStatus(String userRequestId, TypeRequestEnum type)
       throws EEAException {
 
     userRequestRepository.updateUserRequestStatus(userRequestId, type.name());

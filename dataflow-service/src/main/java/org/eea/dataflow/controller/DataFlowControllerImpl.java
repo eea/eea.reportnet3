@@ -93,7 +93,6 @@ public class DataFlowControllerImpl implements DataFlowController {
   /**
    * Error handler list.
    *
-   * @param userId the user id
    * @return the list
    */
   public static List<DataFlowVO> errorHandlerList() {
@@ -158,7 +157,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
     try {
-      dataflows = dataflowService.getPendingAccepted(Long.parseLong(userId));
+      dataflows = dataflowService.getPendingAccepted(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -186,7 +185,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
     try {
-      dataflows = dataflowService.getCompleted(Long.parseLong(userId), pageable);
+      dataflows = dataflowService.getCompleted(userId, pageable);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -210,7 +209,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
     try {
-      dataflows = dataflowService.getPendingByUser(Long.parseLong(userId), type);
+      dataflows = dataflowService.getPendingByUser(userId, type);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -227,7 +226,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateUserRequest(Long idUserRequest, TypeRequestEnum type) {
+  public void updateUserRequest(String idUserRequest, TypeRequestEnum type) {
 
     try {
       dataflowService.updateUserRequestStatus(idUserRequest, type);

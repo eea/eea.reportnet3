@@ -213,8 +213,8 @@ public class DataFlowServiceImplTest {
   public void getCompletedEmpty() throws EEAException {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+    dataflowServiceImpl.getCompleted("1L", pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
   }
 
   /**
@@ -226,13 +226,13 @@ public class DataFlowServiceImplTest {
   @Test
   public void getCompleted() throws EEAException {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
-    dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+    dataflowServiceImpl.getCompleted("1L", pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
     dataflows.add(new Dataflow());
     dataflows.add(new Dataflow());
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
-    dataflowServiceImpl.getCompleted(1L, pageable);
-    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted(1L, pageable));
+    dataflowServiceImpl.getCompleted("1L", pageable);
+    assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
   }
 
 
@@ -245,7 +245,7 @@ public class DataFlowServiceImplTest {
   public void updateUserRequestStatus() throws EEAException {
     Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
+    dataflowServiceImpl.updateUserRequestStatus("1L", TypeRequestEnum.ACCEPTED);
     Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
   }

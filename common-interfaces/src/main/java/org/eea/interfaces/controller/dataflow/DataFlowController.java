@@ -91,7 +91,7 @@ public interface DataFlowController {
    */
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest, TypeRequestEnum type);
+  void updateUserRequest(@PathVariable("idUserRequest") String idUserRequest, TypeRequestEnum type);
 
   /**
    * Adds the contributor.
