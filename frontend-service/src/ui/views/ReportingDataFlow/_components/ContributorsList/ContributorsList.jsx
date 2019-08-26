@@ -4,7 +4,6 @@ import styles from './ContributorsList.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { DataTable } from 'ui/views/_components/DataTable';
-import { Contributor } from './_components/Contributor';
 
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
@@ -16,60 +15,60 @@ export function ContributorsList({ dataFlowId }) {
   const resources = useContext(ResourcesContext);
   const [contributorsArray, setContributorsArray] = useState([]);
 
-  const onLoadContributorsList = async () => {
+  const loadContributorsList = async () => {
     setContributorsArray(await ContributorService.all(dataFlowId));
   };
 
   useEffect(() => {
-    onLoadContributorsList();
+    loadContributorsList();
   }, []);
-
-  const deleteBtnColumnTemplate = rowData => {
-    return (
-      <>
-        <Button
-          tooltip={resources.messages.deleteContributor}
-          tooltipOptions={{ position: 'left' }}
-          icon="trash"
-          disabled={false}
-          className={`${styles.btn} rp-btn warning`}
-          onClick={() => {}}
-        />
-      </>
-    );
-  };
-  //Reducer for role cell controll
-  const initialState = { role: '', contributorId: '' };
+ 
 
   const onContributorRoleUpdate = async (contributorId, newRole) => {
     await ContributorService.updateById(dataFlowId, contributorId, newRole);
   };
+
+  const onContributorDelete = async (contributorId) => {
+    await ContributorService.deleteById(dataFlowId, contributorId);
+  };
+/* #region Actions Reducer */
+  const initialState = { role: '', contributorId: '' };
+
   const roleReducer = (state, action) => {
     let newState;
     switch (action.type) {
-      case 'read':
-        onContributorRoleUpdate(action.payload, 'read');
-        /*  newState = { ...state, role: 'read', contributorId: action.payload };
-        console.log('roleState read:', newState); */
+      case 'DELETE_CONTRIBUTOR':
+        newState = { ...state, role: '', contributorId: action.payload };
+        
+        onContributorDelete(newState.contributorId);
+
         return newState;
-      case 'read_write':
-        newState = { ...state, role: 'read_write', contributorId: action.payload };
-        console.log('roleState read_write:', newState);
+
+      case 'UPDATE_TO_READ':
+        newState = {  role: 'read', contributorId: action.payload };
+
+        onContributorRoleUpdate(newState.contributorId, newState.role);
+      
+        return newState;
+
+      case 'UPDATE_TO_READ_WRITE':
+        newState = {  role: 'read_write', contributorId: action.payload };
+        
+        onContributorRoleUpdate(newState.contributorId, newState.role);
+
         return newState;
 
       default:
         return state;
     }
   };
-  const [roleState, roleDispatcher] = useReducer(roleReducer, initialState);
-  //End Reducer for role cell controll
+  const [contributorState, contributorDispatcher] = useReducer(roleReducer, initialState);
+/* #endregion */
 
-  const onRoleChange = async () => {
-    setContributorsArray(await ContributorService.all(dataFlowId));
-  };
+/* #region ROLES */
   useEffect(() => {
-    onRoleChange();
-  }, [roleState]);
+    loadContributorsList();
+  }, [contributorState]);
 
   const roleDropdownColumnTemplate = rowData => {
     const rolesList = [{ roleLabel: 'Read only', role: 'read' }, { roleLabel: 'Read/Write', role: 'read_write' }];
@@ -97,13 +96,32 @@ export function ContributorsList({ dataFlowId }) {
           options={rolesList}
           placeholder={resources.messages.selectContributorRole}
           onChange={e => {
-            roleDispatcher({ type: e.value.role, payload: rowData.id });
+            contributorDispatcher({ type: `UPDATE_TO_${e.value.role}`.toUpperCase(), payload: rowData.id });
           }}
         />
       </>
     );
   };
+/* #endregion */
 
+/* #region DELETE */
+ const deleteBtnColumnTemplate = rowData => {
+    return (
+      <>
+        <Button
+          tooltip={resources.messages.deleteContributor}
+          tooltipOptions={{ position: 'left' }}
+          icon="trash"
+          disabled={false}
+          className={`${styles.btn} rp-btn warning`}
+          onClick={e => {
+            contributorDispatcher({ type: 'DELETE_CONTRIBUTOR', payload: rowData.id });
+          }}
+        />
+      </>
+    );
+  };
+/* #endregion */
   return (
     <>
       <DataTable value={contributorsArray} paginator={true} rows={5} rowsPerPageOptions={[4, 6, 8]}>
