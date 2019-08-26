@@ -21,7 +21,6 @@ export function Contributor({ contributorData }) {
   const [selectedRole, setSelectedRole] = useState(initialRoleState);
 
   const roles = [{ roleText: 'Read', role: 'read' }, { roleText: 'Read/Write', role: 'read_write' }];
-  //TODO UPDATE ROLE ON SELECTED ROLE
   //TODO IMPLEMENT DELETE BUTTON
   //TODO FINISH EVERYTHING
 

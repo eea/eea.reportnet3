@@ -18,7 +18,7 @@ const deleteById = async (dataFlowId, contributorId) => {
 };
 
 const updateById = async (dataFlowId, contributorId, contributorRole) => {
-  return await api.retoreContributorById(dataFlowId, contributorId, contributorRole);
+  return await api.updateContributorById(dataFlowId, contributorId, contributorRole);
 };
 
 export const ApiContributorRepository = {

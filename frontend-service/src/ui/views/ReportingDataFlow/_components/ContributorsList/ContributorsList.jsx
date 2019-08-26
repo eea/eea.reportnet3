@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
 
 import styles from './ContributorsList.module.scss';
 
@@ -26,7 +26,7 @@ export function ContributorsList({ dataFlowId }) {
 
   const deleteBtnColumnTemplate = rowData => {
     return (
-      <div>
+      <>
         <Button
           tooltip={resources.messages.deleteContributor}
           tooltipOptions={{ position: 'left' }}
@@ -35,43 +35,77 @@ export function ContributorsList({ dataFlowId }) {
           className={`${styles.btn} rp-btn warning`}
           onClick={() => {}}
         />
-      </div>
+      </>
     );
   };
+  //Reducer for role cell controll
+  const initialState = { role: '', contributorId: '' };
+
+  const onContributorRoleUpdate = async (contributorId, newRole) => {
+    await ContributorService.updateById(dataFlowId, contributorId, newRole);
+  };
+  const roleReducer = (state, action) => {
+    let newState;
+    switch (action.type) {
+      case 'read':
+        onContributorRoleUpdate(action.payload, 'read');
+        /*  newState = { ...state, role: 'read', contributorId: action.payload };
+        console.log('roleState read:', newState); */
+        return newState;
+      case 'read_write':
+        newState = { ...state, role: 'read_write', contributorId: action.payload };
+        console.log('roleState read_write:', newState);
+        return newState;
+
+      default:
+        return state;
+    }
+  };
+  const [roleState, roleDispatcher] = useReducer(roleReducer, initialState);
+  //End Reducer for role cell controll
+
+  const onRoleChange = async () => {
+    setContributorsArray(await ContributorService.all(dataFlowId));
+  };
+  useEffect(() => {
+    onRoleChange();
+  }, [roleState]);
 
   const roleDropdownColumnTemplate = rowData => {
     const rolesList = [{ roleLabel: 'Read only', role: 'read' }, { roleLabel: 'Read/Write', role: 'read_write' }];
 
     const getActualRole = () => {
       if (rowData) {
-        if (rowData.role === 'read_write') {
-          return { roleLabel: 'Read/Write', role: 'read_write' };
-        } else if (rowData.role === 'read') {
-          return { roleLabel: 'Read only', role: 'read' };
-        } else {
-          return { roleLabel: '', role: '' };
+        switch (rowData.role) {
+          case 'read':
+            return { roleLabel: 'Read only', role: 'read' };
+
+          case 'read_write':
+            return { roleLabel: 'Read/Write', role: 'read_write' };
+
+          default:
+            return { roleLabel: '', role: '' };
         }
       }
     };
-    let actualRole = getActualRole();
 
     return (
-      <div>
+      <>
         <Dropdown
           optionLabel="roleLabel"
-          value={actualRole}
+          value={getActualRole()}
           options={rolesList}
           placeholder={resources.messages.selectContributorRole}
           onChange={e => {
-            actualRole = { roleLabel: e.value.roleLabel, role: e.value.role };
+            roleDispatcher({ type: e.value.role, payload: rowData.id });
           }}
         />
-      </div>
+      </>
     );
   };
 
   return (
-    <div>
+    <>
       <DataTable value={contributorsArray} paginator={true} rows={5} rowsPerPageOptions={[4, 6, 8]}>
         <Column key="login" field="login" header="Login" />
         <Column body={roleDropdownColumnTemplate} header="Role" />
@@ -83,6 +117,6 @@ export function ContributorsList({ dataFlowId }) {
         label={resources.messages.add}
         className={`${styles.addContributorButton} rp-btn default`}
       />
-    </div>
+    </>
   );
 }
