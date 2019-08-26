@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 
-import * as fileDownload from 'js-file-download';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './DocumentationDataSet.module.scss';
@@ -14,7 +13,9 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
+import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -43,12 +44,6 @@ export const DocumentationDataSet = ({ match, history }) => {
   useEffect(() => {
     onLoadDocumentsAndWebLinks();
   }, []);
-
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      fileDownload(fileToDownload, fileName);
-    }
-  }, [fileToDownload]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -102,7 +97,7 @@ export const DocumentationDataSet = ({ match, history }) => {
         icon: 'refresh',
         group: 'right',
         disabled: false,
-        clickHandler: () => onLoadDocumentsAndWebLinks()
+        onClick: () => onLoadDocumentsAndWebLinks()
       }
     ]);
     //#end region Button initialization
@@ -110,7 +105,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
-      fileDownload(fileToDownload, fileName);
+      DownloadFile(fileToDownload, fileName);
     }
   }, [fileToDownload]);
 
@@ -122,6 +117,10 @@ export const DocumentationDataSet = ({ match, history }) => {
   const onHide = () => {
     setIsUploadDialogVisible(false);
     onLoadDocumentsAndWebLinks();
+  };
+
+  const onCancelDialog = () => {
+    setIsUploadDialogVisible(false);
   };
 
   const onLoadDocumentsAndWebLinks = async () => {
@@ -153,11 +152,18 @@ export const DocumentationDataSet = ({ match, history }) => {
     );
   };
 
+  const onGrowlAlert = message => {
+    growlRef.current.show(message);
+  };
+
+  let growlRef = useRef();
+
   const layout = children => {
     return (
       <MainLayout>
         <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
+        <Growl ref={growlRef} />
       </MainLayout>
     );
   };
@@ -176,8 +182,8 @@ export const DocumentationDataSet = ({ match, history }) => {
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHide}>
-            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} />
+            onHide={onCancelDialog}>
+            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>

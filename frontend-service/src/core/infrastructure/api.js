@@ -158,6 +158,27 @@ export const api = {
     });
     return response.data;
   },
+  exportDataSetDataById: async (dataSetId, fileType) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(config.exportDataSetData.url, {
+        dataSetId: dataSetId,
+        fileType: fileType
+      }),
+      queryString: {}
+    });
+    return response.data;
+  },
+  exportDataSetTableDataById: async (dataSetId, tableSchemaId, fileType) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(config.exportDataSetTableData.url, {
+        dataSetId: dataSetId,
+        tableSchemaId: tableSchemaId,
+        fileType: fileType
+      }),
+      queryString: {}
+    });
+    return response.data;
+  },
   validateDataSetById: async dataSetId => {
     try {
       const response = await HTTPRequester.update({

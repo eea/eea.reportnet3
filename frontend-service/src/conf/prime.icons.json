@@ -8,6 +8,7 @@
 		"check": "pi pi-check",
 		"clock": "pi pi-clock",
 		"clone": "pi pi-clone",
+		"cloudUpload":"pi pi-cloud-upload",
 		"comment": "pi pi-comment",
 		"dashboard": "pi pi-chart-bar",
 		"edit": "pi pi-pencil",

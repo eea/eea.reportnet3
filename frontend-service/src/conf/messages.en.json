@@ -13,6 +13,7 @@
 		"deleteDatasetData": "Delete dataset data",
 		"deleteRow": "Delete row",
 		"deleteTable": "Delete table data",
+		"exportTable": "Export table data",
 		"events": "Events",
 		"validate": "Validate",
 		"showValidations": "Show Validations",
@@ -100,10 +101,15 @@
 		"createSnapshotPlaceholder": "Please, enter a description",
 		"createSnapshotMessage": "You are about to CREATE a snapshot...",
 		"deleteSnapshotMessage": "You are about to DELETE a snapshot...",
+		"releaseSnapshotMessage": "You are about to RELEASE a snapshot...",
 		"restoreSnapshotMessage": "You are about to RESTORE a snapshot...",
 		"snapshotDescriptionValidationMin": "Too short description!",
 		"snapshotDescriptionValidationMax": "Too long description!",
 		"snapshotDescriptionValidationRequired": "Description is required",
+		"createSnapshotTooltip": "Create snapshot",
+		"deleteSnapshotTooltip": "Delete snapshot",
+		"releaseSnapshotTooltip": "Release snapshot",
+		"restoreSnapshotTooltip": "Restore snapshot",
 		"creationDate": "Creation date",
 		"fileTitle":"File title",
 		"fileDescription": "File description",
@@ -114,6 +120,12 @@
 		"emptyDescriptionValidationError":"Please, enter a description",
 		"emptyLanguageValidationError":"Please, language must be selected",
 		"emptyFileValidationError":"Please, select a file",
-		"tooLargeFileValidationError":"File size is too large"
+		"tooLargeFileValidationError":"File size is too large",
+		"documentUploadingGrowlUploadingSummary": "Document upload",
+		"documentUploadingGrowlUploadingDetail": "Uploading document...",
+		"documentUploadingGrowlSuccessSummary": "Document upload",
+		"documentUploadingGrowlSuccessDetail": "Success",
+		"documentUploadingGrowlErrorSummary": "Document upload",
+		"documentUploadingGrowlErrorDetail": "Error"
 	}
 }

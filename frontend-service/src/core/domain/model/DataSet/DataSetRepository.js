@@ -7,6 +7,8 @@ export const DataSetRepository = {
   errorsById: () => Promise.reject('[DataSetRepository#errorsById] must be implemented'),
   errorPositionByObjectId: () => Promise.reject('[DataSetRepository#errorPositionByObjectId] must be implemented'),
   errorStatisticsById: () => Promise.reject('[DataSetRepository#errorStatisticsById] must be implemented'),
+  exportDataById: () => Promise.reject('[DataSetRepository#exportDataById] must be implemented'),
+  exportTableDataById: () => Promise.reject('[DataSetRepository#exportTableDataById] must be implemented'),
   tableDataById: () => Promise.reject('[DataSetRepository#tableDataById] must be implemented'),
   validateDataById: () => Promise.reject('[DataSetRepository#validateDataById] must be implemented')
 };

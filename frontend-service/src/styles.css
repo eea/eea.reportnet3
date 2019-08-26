@@ -3216,9 +3216,9 @@ body .p-overlaypanel.p-overlaypanel-flipped:before {
 }
 body .p-dialog {
   padding: 0;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
+  /* -moz-border-radius: 3px;
+  -webkit-border-radius: 3px; /*
+  border-radius: 3px; */
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
@@ -3230,12 +3230,12 @@ body .p-dialog .p-dialog-titlebar {
   padding: 1em;
   font-weight: 700;
   border-bottom: 0 none;
-  -moz-border-radius-topleft: 3px;
-  -webkit-border-top-left-radius: 3px;
-  border-top-left-radius: 3px;
-  -moz-border-radius-topright: 3px;
-  -webkit-border-top-right-radius: 3px;
-  border-top-right-radius: 3px;
+  /* -moz-border-radius-topleft: 3px; */
+  /* -webkit-border-top-left-radius: 3px; */
+  /* border-top-left-radius: 3px; */
+  /* -moz-border-radius-topright: 3px; */
+  /* -webkit-border-top-right-radius: 3px; */
+  /* border-top-right-radius: 3px; */
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-title {
   margin: 0;

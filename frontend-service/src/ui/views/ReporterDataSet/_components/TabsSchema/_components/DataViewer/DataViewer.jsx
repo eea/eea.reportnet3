@@ -2,10 +2,12 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-import isUndefined from 'lodash/isUndefined';
+import { isUndefined } from 'lodash';
 
 import { config } from 'conf';
 
@@ -47,6 +49,8 @@ const DataViewer = withRouter(
       const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+      const [exportTableData, setExportTableData] = useState(undefined);
+      const [exportTableDataName, setExportTableDataName] = useState('');
       const [fetchedData, setFetchedData] = useState([]);
       const [firstRow, setFirstRow] = useState(0);
       const [header] = useState();
@@ -71,6 +75,13 @@ const DataViewer = withRouter(
             group: 'left',
             disabled: false,
             onClick: () => setImportDialogVisible(true)
+          },
+          {
+            label: resources.messages['exportTable'],
+            icon: 'import',
+            group: 'left',
+            disabled: false,
+            onClick: () => onExportTableData()
           },
           {
             label: resources.messages['deleteTable'],
@@ -161,14 +172,10 @@ const DataViewer = withRouter(
             />
           );
         });
-        columnsArr.push(
-          <Column
-            key="actions"
-            body={row => actionTemplate(row)}
-            style={{ width: '100px', height: '45px' }}
-            frozen={true}
-          />
+        let editCol = (
+          <Column key="actions" body={row => actionTemplate(row)} style={{ width: '100px', height: '45px' }} />
         );
+
         let validationCol = (
           <Column
             body={validationsTemplate}
@@ -179,8 +186,15 @@ const DataViewer = withRouter(
           />
         );
         let newColumnsArr = [validationCol].concat(columnsArr);
-        setColumns(newColumnsArr);
+        let newColumnsArr2 = [editCol].concat(newColumnsArr);
+        setColumns(newColumnsArr2);
       }, [colsSchema, columnOptions]);
+
+      useEffect(() => {
+        if (!isUndefined(exportTableData)) {
+          DownloadFile(exportTableData, exportTableDataName);
+        }
+      }, [exportTableData]);
 
       const onChangePage = event => {
         setNumRows(event.rows);
@@ -204,6 +218,13 @@ const DataViewer = withRouter(
 
       const onDeleteRow = () => {
         setConfirmDeleteVisible(true);
+      };
+
+      const onExportTableData = async () => {
+        setExportTableDataName(createTableName(tableName));
+        setExportTableData(
+          await DataSetService.exportTableDataById(dataSetId, tableId, config.dataSet.exportTypes.csv)
+        );
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -316,9 +337,18 @@ const DataViewer = withRouter(
 
       const actionTemplate = () => {
         return (
-          <div>
-            <Button type="button" icon="edit" className="p-button-warning" style={{ marginRight: '.5em' }} />
-            <Button type="button" icon="trash" className="p-button-danger" onClick={onDeleteRow} />
+          <div className={styles.actionTemplate}>
+            <Button
+              type="button"
+              icon="edit"
+              className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+            />
+            <Button
+              type="button"
+              icon="trash"
+              className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
+              onClick={onDeleteRow}
+            />
           </div>
         );
       };
@@ -342,6 +372,10 @@ const DataViewer = withRouter(
           />
         </div>
       );
+
+      const createTableName = () => {
+        return `${tableName}.${config.dataSet.exportTypes.csv}`;
+      };
 
       const newRowForm = colsSchema.map((column, i) => {
         if (i < colsSchema.length - 1) {

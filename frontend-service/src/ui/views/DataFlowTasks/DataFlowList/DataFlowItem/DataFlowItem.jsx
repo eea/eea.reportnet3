@@ -4,6 +4,7 @@ import moment from 'moment';
 
 import styles from './DataFlowItem.module.scss';
 
+import { Button } from 'ui/views/_components/Button';
 import { Icon } from 'ui/views/_components/Icon';
 import { Link } from 'react-router-dom';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -75,13 +76,17 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
       <div className={`${styles.card_component_btn}`}>
         {listType === 'pending' ? (
           <>
-            <button type="button" className={`${styles.rep_button}`} onClick={() => onAcceptDataFlow()}>
-              {resources.messages['accept']}
-            </button>
-
-            <button type="button" className={`${styles.rep_button}`} onClick={() => onRejectDataFlow()}>
-              {resources.messages['reject']}
-            </button>
+            <Button
+              layout="simple"
+              className={`${styles.rep_button}`}
+              onClick={() => onAcceptDataFlow()}
+              label={resources.messages['accept']}
+            />
+            <Button
+              className={`${styles.rep_button}`}
+              onClick={() => onRejectDataFlow()}
+              label={resources.messages['reject']}
+            />
           </>
         ) : (
           <>

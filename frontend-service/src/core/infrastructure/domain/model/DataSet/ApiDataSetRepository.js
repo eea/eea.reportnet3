@@ -86,7 +86,7 @@ const errorStatisticsById = async dataSetId => {
     );
   });
 
-  //Transpose value matrix and delete undefined elements to fit Chart data structure
+  //Transpose value matrix to fit Chart data structure
   let transposedValues = transposeMatrix(tableStatisticValues);
 
   dataSet.tableStatisticValues = tableStatisticValues;
@@ -95,6 +95,16 @@ const errorStatisticsById = async dataSetId => {
   dataSet.tables = dataSetTables;
 
   return dataSet;
+};
+
+const exportDataById = async (dataSetId, fileType) => {
+  const dataSetData = await api.exportDataSetDataById(dataSetId, fileType);
+  return dataSetData;
+};
+
+const exportTableDataById = async (dataSetId, tableSchemaId, fileType) => {
+  const dataSetTableData = await api.exportDataSetTableDataById(dataSetId, tableSchemaId, fileType);
+  return dataSetTableData;
 };
 
 const schemaById = async dataFlowId => {
@@ -201,9 +211,7 @@ const getPercentage = valArr => {
 };
 
 const transposeMatrix = matrix => {
-  return Object.keys(matrix)
-    .map(c => matrix.map(r => r[c]))
-    .filter(t => t[0] !== undefined);
+  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
 };
 
 export const ApiDataSetRepository = {
@@ -212,6 +220,8 @@ export const ApiDataSetRepository = {
   errorsById,
   errorPositionByObjectId,
   errorStatisticsById,
+  exportDataById,
+  exportTableDataById,
   schemaById,
   tableDataById,
   validateDataById

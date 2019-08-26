@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useReducer } from 'react';
 import moment from 'moment';
+import { isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
 
@@ -11,6 +12,7 @@ import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -36,6 +38,8 @@ export const ReporterDataSet = ({ match, history }) => {
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [exportDataSetData, setExportDataSetData] = useState(undefined);
+  const [exportDataSetDataName, setExportDataSetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [recordPositionId, setRecordPositionId] = useState(-1);
@@ -72,6 +76,12 @@ export const ReporterDataSet = ({ match, history }) => {
     onLoadDataSetSchema();
   }, [isDataDeleted]);
 
+  useEffect(() => {
+    if (!isUndefined(exportDataSetData)) {
+      DownloadFile(exportDataSetData, exportDataSetDataName);
+    }
+  }, [exportDataSetData]);
+
   const onConfirmDelete = async () => {
     setDeleteDialogVisible(false);
     const dataDeleted = await DataSetService.deleteDataById(dataSetId);
@@ -96,6 +106,27 @@ export const ReporterDataSet = ({ match, history }) => {
   const onDeleteSnapshot = async () => {
     const snapshotDeleted = await SnapshotService.deleteById(dataSetId, snapshotState.snapShotId);
     if (snapshotDeleted) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onExportData = async () => {
+    setExportDataSetDataName(createFileName());
+    setExportDataSetData(await DataSetService.exportDataById(dataSetId, config.dataSet.exportTypes.csv));
+  };
+
+  const onReleaseSnapshot = async () => {
+    const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (snapshotReleased) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onRestoreSnapshot = async () => {
+    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (snapshotRestored) {
       onLoadSnapshotList();
     }
     onSetVisible(setSnapshotDialogVisible, false);
@@ -140,7 +171,7 @@ export const ReporterDataSet = ({ match, history }) => {
         icon: 'import',
         group: 'left',
         disabled: true,
-        onClick: null
+        onClick: () => onExportData()
       },
       {
         label: resources.messages['deleteDatasetData'],
@@ -200,12 +231,8 @@ export const ReporterDataSet = ({ match, history }) => {
     setActiveIndex(tableSchemaId.index);
   };
 
-  const onRestoreSnapshot = async () => {
-    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
-    if (snapshotRestored) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
+  const createFileName = () => {
+    return `${datasetTitle}.${config.dataSet.exportTypes.csv}`;
   };
 
   const snapshotInitialState = {
@@ -243,6 +270,16 @@ export const ReporterDataSet = ({ match, history }) => {
           action: onDeleteSnapshot
         };
 
+      case 'release_snapshot':
+        onSetVisible(setSnapshotDialogVisible, true);
+        return {
+          ...state,
+          snapShotId: payload.id,
+          creationDate: payload.creationDate,
+          description: payload.description,
+          dialogMessage: resources.messages.releaseSnapshotMessage,
+          action: onReleaseSnapshot
+        };
       case 'restore_snapshot':
         onSetVisible(setSnapshotDialogVisible, true);
         return {
