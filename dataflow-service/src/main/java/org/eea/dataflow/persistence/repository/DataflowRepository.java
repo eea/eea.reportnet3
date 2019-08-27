@@ -1,6 +1,7 @@
 package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -34,7 +35,7 @@ public interface DataflowRepository
   @Query("SELECT df as dataflow, ur.requestType as typeRequestEnum, ur.id as requestId from Dataflow df "
       + "JOIN df.userRequests ur WHERE ur.requestType in ('PENDING','ACCEPTED') "
       + " AND ur.userRequester = :idRequester AND df.status not in ('COMPLETED') ORDER BY df.deadlineDate ASC")
-  List<DataflowWithRequestType> findPendingAccepted(@Param("idRequester") Long userIdRequester);
+  List<DataflowWithRequestType> findPendingAccepted(@Param("idRequester") String userIdRequester);
 
 
 
@@ -48,6 +49,13 @@ public interface DataflowRepository
   @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType = :type "
       + " AND ur.userRequester = :idRequester ORDER BY df.deadlineDate ASC")
   List<Dataflow> findByStatusAndUserRequester(@Param("type") TypeRequestEnum typeRequest,
-      @Param("idRequester") Long userIdRequester);
+      @Param("idRequester") String userIdRequester);
 
+  /**
+   * Find by name.
+   *
+   * @param name the name
+   * @return the optional
+   */
+  Optional<Dataflow> findByName(String name);
 }

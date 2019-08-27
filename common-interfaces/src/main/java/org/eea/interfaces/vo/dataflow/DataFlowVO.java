@@ -7,7 +7,7 @@ import java.util.Objects;
 import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
@@ -30,7 +30,7 @@ public class DataFlowVO implements Serializable {
   private Long id;
 
   /** The datasets. */
-  private List<DataSetMetabaseVO> datasets;
+  private List<ReportingDatasetVO> datasets;
 
   /** The description. */
   private String description;

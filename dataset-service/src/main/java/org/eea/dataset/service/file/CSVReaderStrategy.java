@@ -50,18 +50,18 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /**
    * The parse common.
    */
-  private ParseCommon parseCommon;
+  private FileCommonUtils fileCommon;
 
 
   /**
    * Instantiates a new CSV reader strategy.
    *
    * @param delimiter the delimiter
-   * @param parseCommon the parse common
+   * @param fileCommon the parse common
    */
-  public CSVReaderStrategy(final char delimiter, final ParseCommon parseCommon) {
+  public CSVReaderStrategy(final char delimiter, final FileCommonUtils fileCommon) {
     this.delimiter = delimiter;
-    this.parseCommon = parseCommon;
+    this.fileCommon = fileCommon;
   }
 
 
@@ -103,7 +103,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     final DataSetVO dataset = new DataSetVO();
 
     // Get DataSetSchema
-    DataSetSchemaVO dataSetSchema = parseCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId);
 
     try (Reader buf =
         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -128,10 +128,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
-      if (null != dataSetSchema) {
-        dataset.setIdDatasetSchema(
-            null != dataSetSchema.getIdDataSetSchema() ? dataSetSchema.getIdDataSetSchema() : null);
-      }
+      dataset.setIdDatasetSchema(null != dataSetSchema ? dataSetSchema.getIdDataSetSchema() : null);
     } catch (final IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
@@ -176,7 +173,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final List<TableVO> tables, final List<String> values, DataSetSchemaVO dataSetSchema,
       List<FieldSchemaVO> headers, final String idTableSchema) throws InvalidFileException {
     // if the line is white then skip it
-    if (null != values && !values.isEmpty() && values.size() != 1 && !"".equals(values.get(0))) {
+    if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
       addRecordToTable(tableVO, tables, values, partitionId, dataSetSchema, headers, idTableSchema);
     }
 
@@ -209,12 +206,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
       DataSetSchemaVO dataSetSchema) {
     List<FieldSchemaVO> headers = new ArrayList<>();
 
-    for (final String value : values) {
-
+    for (String value : values) {
       final FieldSchemaVO header = new FieldSchemaVO();
       if (idTableSchema != null) {
         final FieldSchemaVO fieldSchema =
-            parseCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
+            fileCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
         if (null != fieldSchema) {
           header.setId(fieldSchema.getId());
           header.setType(fieldSchema.getType());
@@ -272,7 +268,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
-      record.setIdRecordSchema(parseCommon.findIdRecord(idTableSchema, dataSetSchema));
+      record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
     }
     record.setFields(createFieldsVO(values, headers));
     record.setDatasetPartitionId(partitionId);

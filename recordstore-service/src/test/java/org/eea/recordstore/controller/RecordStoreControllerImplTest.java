@@ -71,8 +71,8 @@ public class RecordStoreControllerImplTest {
    */
   @Test
   public void testCreateEmptyDataSet() throws RecordStoreAccessException {
-    recordStoreControllerImpl.createEmptyDataset(TEST);
-    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any());
+    recordStoreControllerImpl.createEmptyDataset(TEST, TEST);
+    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -82,9 +82,10 @@ public class RecordStoreControllerImplTest {
    */
   @Test
   public void testCreateEmptyDataSetException() throws RecordStoreAccessException {
-    doThrow(new RecordStoreAccessException()).when(recordStoreService).createEmptyDataSet(TEST);
-    recordStoreControllerImpl.createEmptyDataset(TEST);
-    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any());
+    doThrow(new RecordStoreAccessException()).when(recordStoreService).createEmptyDataSet(TEST,
+        TEST);
+    recordStoreControllerImpl.createEmptyDataset(TEST, TEST);
+    Mockito.verify(recordStoreService, times(1)).createEmptyDataSet(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -132,7 +133,8 @@ public class RecordStoreControllerImplTest {
    */
   @Test
   public void getConnectionToDatasetTestException() throws RecordStoreAccessException {
-    doThrow(new RecordStoreAccessException()).when(recordStoreService).getConnectionDataForDataset(TEST);
+    doThrow(new RecordStoreAccessException()).when(recordStoreService)
+        .getConnectionDataForDataset(TEST);
     ConnectionDataVO result = recordStoreControllerImpl.getConnectionToDataset(TEST);
     assertNull(FAILED, result);
   }
@@ -161,7 +163,8 @@ public class RecordStoreControllerImplTest {
    */
   @Test
   public void getDataSetConnectionsTestException() throws RecordStoreAccessException {
-    doThrow(new RecordStoreAccessException()).when(recordStoreService).getConnectionDataForDataset();
+    doThrow(new RecordStoreAccessException()).when(recordStoreService)
+        .getConnectionDataForDataset();
     List<ConnectionDataVO> result = recordStoreControllerImpl.getDataSetConnections();
     assertNull(FAILED, result);
   }

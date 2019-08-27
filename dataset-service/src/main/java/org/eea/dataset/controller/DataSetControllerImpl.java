@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import javax.ws.rs.Produces;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
@@ -12,6 +13,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -24,8 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,38 +71,45 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The file treatment helper. */
+  /**
+   * The file treatment helper.
+   */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /** The load validations helper. */
+  /**
+   * The load validations helper.
+   */
   @Autowired
   UpdateRecordHelper updateRecordHelper;
 
+  /**
+   * The delete helper.
+   */
   @Autowired
   DeleteHelper deleteHelper;
+
 
   /**
    * Gets the data tables values.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the mongo ID
+   * @param idTableSchema the id table schema
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
-   * @param asc the asc
    *
    * @return the data tables values
    */
   @Override
-  @HystrixCommand
+  // @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc) {
+      @RequestParam(value = "fields", required = false) String fields) {
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -108,8 +120,9 @@ public class DataSetControllerImpl implements DatasetController {
 
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields, asc);
+      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
       }
@@ -134,24 +147,35 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       datasetService.updateDataset(dataset.getId(), dataset);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
 
     }
   }
 
+
   /**
-   * Creates the removeDatasetData data set.
+   * Creates the empty data set.
    *
    * @param datasetname the datasetname
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
    */
   @Override
   @PostMapping(value = "/create")
-  public void createEmptyDataSet(final String datasetname) {
+  public void createEmptyDataSet(
+      @RequestParam(value = "datasetName", required = true) final String datasetname,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
+      @RequestParam(value = "idDataflow", required = false) Long idDataflow) {
     if (StringUtils.isBlank(datasetname)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    datasetService.createEmptyDataset(datasetname);
+    try {
+      datasetService.createEmptyDataset(datasetname, idDatasetSchema, idDataflow);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
   }
 
   /**
@@ -164,9 +188,10 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @PostMapping("{id}/loadTableData/{idTableSchema}")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void loadTableData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file,
-      @PathVariable("idTableSchema") String idTableSchema) {
+      @PathVariable(value = "idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -183,6 +208,7 @@ public class DataSetControllerImpl implements DatasetController {
       fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException | EEAException | InterruptedException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
@@ -195,6 +221,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportData")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void deleteImportData(@PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -233,6 +260,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
+   *
    * @return the table from any object id
    */
   @Override
@@ -258,13 +286,14 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
-
   /**
    * Gets the by id.
    *
-   * @deprecated this method is deprecated
    * @param datasetId the dataset id
+   *
    * @return the by id
+   *
+   * @deprecated this method is deprecated
    */
   @Override
   @RequestMapping(value = "{id}", method = RequestMethod.GET)
@@ -337,6 +366,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void updateRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
@@ -345,6 +375,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeUpdateProcess(datasetId, records);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -359,14 +390,16 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void deleteRecords(@PathVariable("id") final Long datasetId,
-      @RequestBody final List<Long> recordIds) {
+      @RequestParam final List<Long> recordIds) {
     if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     try {
       updateRecordHelper.executeDeleteProcess(datasetId, recordIds);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -376,11 +409,13 @@ public class DataSetControllerImpl implements DatasetController {
    * Insert records.
    *
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @param records the records
    */
   @Override
   @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
@@ -390,6 +425,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, idTableSchema);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
@@ -399,10 +435,10 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param dataSetId the data set id
    * @param idTableSchema the id table schema
-   * @throws EEAException
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema) {
     if (dataSetId == null || dataSetId < 1) {
@@ -416,7 +452,81 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       deleteHelper.executeDeleteProcess(dataSetId, idTableSchema);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
+
+
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param mimeType the mime type
+   *
+   * @return the response entity
+   *
+   * @throws Exception the exception
+   */
+  @Override
+  @GetMapping("/exportFile")
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
+  public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
+      @RequestParam("mimeType") String mimeType) throws Exception {
+    LOG.info("Init the export controller");
+    byte[] file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
+
+    // set file name and content type
+    String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+    return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+  }
+
+
+  /**
+   * Insert id data schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @Override
+  @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void insertIdDataSchema(@PathVariable("id") Long datasetId,
+      @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema) {
+
+    try {
+      datasetService.insertSchema(datasetId, idDatasetSchema);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   */
+  @Override
+  @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  public void updateField(@PathVariable("id") final Long datasetId,
+      @RequestBody final FieldVO field) {
+    if (datasetId == null || field == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NOT_FOUND);
+    }
+    try {
+      updateRecordHelper.executeFieldUpdateProcess(datasetId, field);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
 }

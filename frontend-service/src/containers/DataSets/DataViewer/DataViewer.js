@@ -117,9 +117,9 @@ const DataViewer = props => {
 	const onChangePageHandler = event => {
 		console.log("Refetching data...");
 		setNumRows(event.rows);
-    setFirstRow(event.first);
-    contextReporterDataSet.setPageHandler(event.first);
-    contextReporterDataSet.setIdSelectedRowHandler(-1);
+		setFirstRow(event.first);
+		contextReporterDataSet.setPageHandler(event.first);
+		contextReporterDataSet.setIdSelectedRowHandler(-1);
 		//fetchDataHandler(sortField, sortOrder, event.first, event.rows);
 	};
 
@@ -140,14 +140,14 @@ const DataViewer = props => {
 	const onSortHandler = event => {
 		console.log("Sorting...");
 		setSortOrder(event.sortOrder);
-    setSortField(event.sortField);
-    contextReporterDataSet.setPageHandler(0);
-    contextReporterDataSet.setIdSelectedRowHandler(-1);
-		fetchDataHandler(event.sortField, event.sortOrder, firstRow, numRows);
+		setSortField(event.sortField);
+		contextReporterDataSet.setPageHandler(0);
+		contextReporterDataSet.setIdSelectedRowHandler(-1);
 	};
 
 	const onRefreshClickHandler = () => {
-    contextReporterDataSet.setIdSelectedRowHandler(-1);
+		contextReporterDataSet.setPageHandler(0);
+    	contextReporterDataSet.setIdSelectedRowHandler(-1);
 		fetchDataHandler(null, sortOrder, firstRow, numRows);
 	};
 
@@ -171,9 +171,13 @@ const DataViewer = props => {
 			pageSize: nRows
 		};
 
-		if (sField !== undefined && sField !== null) {
-			queryString.fields = sField;
-			queryString.asc = sOrder === -1 ? 0 : 1;
+		if (sField !== undefined && sField !== null && sField != []) {
+			const myFields = sField.map((e) => {
+				return {[e.field]: e.order};
+			 });
+			const format = JSON.stringify(myFields).replace(/['" {} [\]]+/g, '')
+			queryString.fields = format;
+			//queryString.asc = sOrder === -1 ? 0 : 1;
 		}
 
 		// props.urlViewer

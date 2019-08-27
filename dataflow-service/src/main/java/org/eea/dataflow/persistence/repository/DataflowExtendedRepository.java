@@ -17,6 +17,6 @@ public interface DataflowExtendedRepository {
    * @param pageable the pageable
    * @return the list
    */
-  List<Dataflow> findCompleted(Long userIdRequester, Pageable pageable);
+  List<Dataflow> findCompleted(String userIdRequester, Pageable pageable);
 
 }
