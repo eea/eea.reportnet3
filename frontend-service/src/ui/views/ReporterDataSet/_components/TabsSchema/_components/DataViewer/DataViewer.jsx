@@ -472,11 +472,12 @@ const DataViewer = withRouter(
       const totalCount = <span>Total: {totalRecords} rows</span>;
 
       const getPosition = button => {
-        const position = button.style.positionY;
-        console.log('position', position);
+        const buttonTopPosition = button.style.top;
+        const buttonLeftPosition = button.style.left;
 
-        const menu = document.getElementById('menu');
-        menu.style.top = '0px';
+        const exportTableMenu = document.getElementById('exportTableMenu');
+        exportTableMenu.style.top = buttonTopPosition;
+        exportTableMenu.style.left = buttonLeftPosition;
       };
 
       return (
@@ -494,13 +495,13 @@ const DataViewer = withRouter(
                 className={`p-button-rounded p-button-secondary`}
                 icon={loadingFile ? 'spinnerAnimate' : 'import'}
                 label={resources.messages['exportTable']}
-                onClick={event => exportMenuRef.current.show(event.target)}
+                onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
                 model={exportButtonsList}
                 popup={true}
                 ref={exportMenuRef}
-                id="menu"
+                id="exportTableMenu"
                 onShow={e => {
                   getPosition(e.target);
                 }}

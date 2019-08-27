@@ -267,12 +267,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
   const getPosition = button => {
-    const buttonTopPosition = button.style.top;
-    const buttonLeftPosition = button.style.left;
+    const buttonTopPosition = button.top;
+    const buttonLeftPosition = button.left;
 
-    const menu = document.getElementById('menu');
-    menu.style.top = buttonTopPosition;
-    menu.style.left = buttonLeftPosition;
+    const exportDataSetMenu = document.getElementById('exportDataSetMenu');
+    exportDataSetMenu.style.top = buttonTopPosition;
+    exportDataSetMenu.style.left = buttonLeftPosition;
   };
 
   const layout = children => {
@@ -305,9 +305,9 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               model={exportButtonsList}
               popup={true}
               ref={exportMenuRef}
-              id="menu"
+              id="exportDataSetMenu"
               onShow={e => {
-                getPosition(e.target);
+                getPosition(e.target.style);
               }}
             />
             <Button
