@@ -1,6 +1,7 @@
 import { dataSetRepository } from 'core/domain/model/DataSet/DataSetRepository';
 
 import { DeleteData } from './DeleteData';
+import { DeleteRow } from './DeleteRow';
 import { DeleteTableData } from './DeleteTableData';
 import { ExportData } from './ExportData';
 import { ExportTableData } from './ExportTableData';
@@ -13,6 +14,7 @@ import { ValidateData } from './ValidateData';
 
 export const DataSetService = {
   deleteDataById: DeleteData({ dataSetRepository }),
+  deleteRowByIds: DeleteRow({ dataSetRepository }),
   deleteTableDataById: DeleteTableData({ dataSetRepository }),
   errorsById: GetErrors({ dataSetRepository }),
   errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),

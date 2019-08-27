@@ -13,6 +13,11 @@ const deleteDataById = async dataSetId => {
   return dataDeleted;
 };
 
+const deleteRowByIds = async (dataSetId, rowIds) => {
+  const rowDeleted = await api.deleteDataSetRowByIds(dataSetId, rowIds);
+  return rowDeleted;
+};
+
 const deleteTableDataById = async (dataSetId, tableId) => {
   const dataDeleted = await api.deleteDataSetTableDataById(dataSetId, tableId);
   return dataDeleted;
@@ -216,6 +221,7 @@ const transposeMatrix = matrix => {
 
 export const ApiDataSetRepository = {
   deleteDataById,
+  deleteRowByIds,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,

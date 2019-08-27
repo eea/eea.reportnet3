@@ -127,6 +127,26 @@ export const api = {
       return false;
     }
   },
+  deleteDataSetRowByIds: async (dataSetId, rowIds) => {
+    try {
+      const response = await HTTPRequester.delete({
+        url: window.env.REACT_APP_JSON
+          ? `/dataset/${dataSetId}/record/`
+          : getUrl(config.deleteRow.url, {
+              idDataset: dataSetId
+            }),
+        data: {
+          rowIds: rowIds
+        },
+        queryString: {}
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting dataSet table data: ${error}`);
+      return false;
+    }
+  },
   deleteDataSetTableDataById: async (dataSetId, tableId) => {
     try {
       const response = await HTTPRequester.delete({

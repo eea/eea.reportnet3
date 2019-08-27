@@ -33,7 +33,7 @@ const DataViewer = withRouter(
     ({
       buttonsList = undefined,
       recordPositionId,
-      selectedRowId,
+      selectedRowErrorId,
       tableId,
       tableName,
       tableSchemaColumns,
@@ -49,6 +49,8 @@ const DataViewer = withRouter(
       const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
       const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+      const [editedRow, setEditedRow] = useState({});
+      const [editDialogVisible, setEditDialogVisible] = useState(false);
       const [exportTableData, setExportTableData] = useState(undefined);
       const [exportTableDataName, setExportTableDataName] = useState('');
       const [fetchedData, setFetchedData] = useState([]);
@@ -56,6 +58,7 @@ const DataViewer = withRouter(
       const [header] = useState();
       const [importDialogVisible, setImportDialogVisible] = useState(false);
       const [isDataDeleted, setIsDataDeleted] = useState(false);
+      const [isRowDeleted, setIsRowDeleted] = useState(false);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
       const [selectedRow, setSelectedRow] = useState({});
@@ -145,6 +148,10 @@ const DataViewer = withRouter(
       }, [isDataDeleted]);
 
       useEffect(() => {
+        onRefresh();
+      }, [isRowDeleted]);
+
+      useEffect(() => {
         if (isUndefined(recordPositionId) || recordPositionId === -1) {
           return;
         }
@@ -210,14 +217,24 @@ const DataViewer = withRouter(
         }
       };
 
-      const onConfirmDeleteRow = () => {
-        let inmFetchedData = [...fetchedData];
-        inmFetchedData = inmFetchedData.filter(d => d.id !== selectedRow.id);
-        setFetchedData(inmFetchedData);
+      const onConfirmDeleteRow = async () => {
+        setDeleteDialogVisible(false);
+        let field = selectedRow.dataRow.filter(row => Object.keys(row.fieldData)[0] === 'id')[0];
+        const rowDeleted = await DataSetService.deleteRowByIds(dataSetId, field.fieldData['id']);
+        if (rowDeleted) {
+          setIsRowDeleted(true);
+        }
+      };
+      const onEditAddFormInput = (property, editedValue, field) => {
+        const row = { ...editedRow };
+        field.fieldData[property] = editedValue;
+        row.dataRow[field] = field;
+        setEditedRow(row);
       };
 
-      const onDeleteRow = () => {
-        setConfirmDeleteVisible(true);
+      const onEditorValueChange = (props, value) => {
+        let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
+        setFetchedData(updatedData);
       };
 
       const onExportTableData = async () => {
@@ -267,8 +284,8 @@ const DataViewer = withRouter(
 
       const onRowSelect = (event, value) => {
         console.log(value, event);
-
         setSelectedRow(value);
+        setEditedRow(value);
       };
 
       const onSaveRow = () => {};
@@ -303,38 +320,6 @@ const DataViewer = withRouter(
         });
       };
 
-      const cellDataEditor = props => {
-        return (
-          <InputText
-            type="text"
-            value={getCellValue(props, props.field)}
-            onChange={e => onEditorValueChange(props, e.target.value)}
-          />
-        );
-      };
-
-      const requiredValidator = props => {
-        let value = getCellValue(props, props.field);
-        return value && value.length > 0;
-      };
-
-      const onEditorValueChange = (props, value) => {
-        let updatedData = setCellValue([...props.value], props.rowIndex, props.field, value);
-        setFetchedData(updatedData);
-      };
-
-      const getCellValue = (tableData, field) => {
-        const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
-        return value.length > 0 ? value[0].fieldData[field] : '';
-      };
-
-      const setCellValue = (tableData, rowIndex, field, value) => {
-        tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[
-          field
-        ] = value;
-        return tableData;
-      };
-
       const actionTemplate = () => {
         return (
           <div className={styles.actionTemplate}>
@@ -342,12 +327,17 @@ const DataViewer = withRouter(
               type="button"
               icon="edit"
               className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+              onClick={() => {
+                setEditDialogVisible(true);
+              }}
             />
             <Button
               type="button"
               icon="trash"
               className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
-              onClick={onDeleteRow}
+              onClick={() => {
+                setConfirmDeleteVisible(true);
+              }}
             />
           </div>
         );
@@ -373,22 +363,63 @@ const DataViewer = withRouter(
         </div>
       );
 
+      const cellDataEditor = props => {
+        return (
+          <input
+            type="text"
+            value={getCellValue(props, props.field)}
+            //onChange={e => onEditorValueChange(props, e.target.value)}
+            onfocusout={() => console.log('SUBMIT!')}
+          />
+        );
+      };
+
+      const changeCellValue = (tableData, rowIndex, field, value) => {
+        tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[
+          field
+        ] = value;
+        return tableData;
+      };
+
       const createTableName = () => {
         return `${tableName}.${config.dataSet.exportTypes.csv}`;
       };
 
-      const newRowForm = colsSchema.map((column, i) => {
+      const editRowDialogFooter = (
+        <div className="ui-dialog-buttonpane p-clearfix">
+          <Button
+            label={resources.messages['cancel']}
+            icon="cancel"
+            onClick={() => {
+              console.log(fetchedData);
+              setEditedRow(selectedRow);
+              setEditDialogVisible(false);
+            }}
+          />
+          <Button label={resources.messages['save']} icon="save" onClick={''} />
+        </div>
+      );
+
+      const editRowForm = colsSchema.map((column, i) => {
+        //Avoid row id Field
         if (i < colsSchema.length - 1) {
-          return (
-            <React.Fragment key={column.field}>
-              <div className="p-col-4" style={{ padding: '.75em' }}>
-                <label htmlFor={column.field}>{column.header}</label>
-              </div>
-              <div className="p-col-8" style={{ padding: '.5em' }}>
-                <InputText id={column.field} />
-              </div>
-            </React.Fragment>
-          );
+          if (!isUndefined(editedRow.dataRow)) {
+            let field = editedRow.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            return (
+              <React.Fragment key={column.field}>
+                <div className="p-col-4" style={{ padding: '.75em' }}>
+                  <label htmlFor={column.field}>{column.header}</label>
+                </div>
+                <div className="p-col-8" style={{ padding: '.5em' }}>
+                  <InputText
+                    id={column.field}
+                    value={field.fieldData[column.field]}
+                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
+                  />
+                </div>
+              </React.Fragment>
+            );
+          }
         }
       });
 
@@ -411,6 +442,31 @@ const DataViewer = withRouter(
         });
 
         setFetchedData(dataFiltered);
+      };
+
+      const getCellValue = (tableData, field) => {
+        const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
+        return value.length > 0 ? value[0].fieldData[field] : '';
+      };
+
+      const newRowForm = colsSchema.map((column, i) => {
+        if (i < colsSchema.length - 1) {
+          return (
+            <React.Fragment key={column.field}>
+              <div className="p-col-4" style={{ padding: '.75em' }}>
+                <label htmlFor={column.field}>{column.header}</label>
+              </div>
+              <div className="p-col-8" style={{ padding: '.5em' }}>
+                <InputText id={column.field} />
+              </div>
+            </React.Fragment>
+          );
+        }
+      });
+
+      const requiredValidator = props => {
+        let value = getCellValue(props, props.field);
+        return value && value.length > 0;
       };
 
       //Template for Record validation
@@ -454,9 +510,9 @@ const DataViewer = withRouter(
 
       //Template for Field validation
       const dataTemplate = (rowData, column) => {
-        let row = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-        if (row !== null && row && row.fieldValidations !== null && !isUndefined(row.fieldValidations)) {
-          const validations = row.fieldValidations;
+        let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+        if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+          const validations = field.fieldValidations;
           let message = [];
           validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
           let levelError = '';
@@ -491,12 +547,12 @@ const DataViewer = withRouter(
                 justifyContent: 'space-between'
               }}>
               {' '}
-              {row ? row.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
+              {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
             </div>
           );
         } else {
           return (
-            <div style={{ display: 'flex', alignItems: 'center' }}>{row ? row.fieldData[column.field] : null}</div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
           );
         }
       };
@@ -512,7 +568,7 @@ const DataViewer = withRouter(
       const rowClassName = rowData => {
         let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
 
-        return { 'p-highlight': id === selectedRowId };
+        return { 'p-highlight': id === selectedRowErrorId };
       };
 
       const totalCount = <span>Total: {totalRecords} rows</span>;
@@ -593,23 +649,6 @@ const DataViewer = withRouter(
             labelConfirm="Yes"
             labelCancel="No">
             {resources.messages['confirmDeleteRow']}
-            <hr />
-            <table className={styles.Table}>
-              <thead>
-                {colsSchema.map((column, i) => {
-                  return <th key={i}>{column.header}</th>;
-                })}
-              </thead>
-              <tbody>
-                <tr>
-                  {Object.values(selectedRow)
-                    .slice(1)
-                    .map((row, i) => {
-                      return <td key={i}>{row[row.fieldData]}</td>;
-                    })}
-                </tr>
-              </tbody>
-            </table>
           </ConfirmDialog>
           <Dialog
             blockScroll={false}
@@ -622,6 +661,18 @@ const DataViewer = withRouter(
             style={{ width: '50%', height: '80%', overflow: 'auto' }}
             visible={addDialogVisible}>
             <div className="p-grid p-fluid">{newRowForm}</div>
+          </Dialog>
+          <Dialog
+            blockScroll={false}
+            contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+            footer={editRowDialogFooter}
+            header={resources.messages['editRow']}
+            maximizable={true}
+            modal={true}
+            onHide={() => setEditDialogVisible(false)}
+            style={{ width: '50%', height: '80%', overflow: 'auto' }}
+            visible={editDialogVisible}>
+            <div className="p-grid p-fluid">{editRowForm}</div>
           </Dialog>
         </div>
       );
