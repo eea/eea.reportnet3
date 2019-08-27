@@ -137,6 +137,7 @@
 		"contributorLoginValidationMax": "Login is to long!",
 		"contributorLoginValidationRequired": "Login is required",
 		"contributorLoginValidationIsInList": "This user is already a contributor",
-		"contributorRoleValidationIsRequired": "Asign a role to contributor"
+		"contributorRoleValidationIsRequired": "Asign a role to contributor",
+		"dataCustodianDashboards":"Data Custodian Dashboards"
 	}
 }
