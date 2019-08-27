@@ -58,7 +58,7 @@ const DataViewer = withRouter(
       const [header] = useState();
       const [importDialogVisible, setImportDialogVisible] = useState(false);
       const [isDataDeleted, setIsDataDeleted] = useState(false);
-      const [isRowDeleted, setIsRowDeleted] = useState(false);
+      const [isRecordDeleted, setIsRecordDeleted] = useState(false);
       const [loading, setLoading] = useState(false);
       const [numRows, setNumRows] = useState(10);
       const [selectedRow, setSelectedRow] = useState({});
@@ -149,7 +149,7 @@ const DataViewer = withRouter(
 
       useEffect(() => {
         onRefresh();
-      }, [isRowDeleted]);
+      }, [isRecordDeleted]);
 
       useEffect(() => {
         if (isUndefined(recordPositionId) || recordPositionId === -1) {
@@ -220,9 +220,9 @@ const DataViewer = withRouter(
       const onConfirmDeleteRow = async () => {
         setDeleteDialogVisible(false);
         let field = selectedRow.dataRow.filter(row => Object.keys(row.fieldData)[0] === 'id')[0];
-        const rowDeleted = await DataSetService.deleteRowByIds(dataSetId, field.fieldData['id']);
-        if (rowDeleted) {
-          setIsRowDeleted(true);
+        const recordDeleted = await DataSetService.deleteRecordByIds(dataSetId, field.fieldData['id']);
+        if (recordDeleted) {
+          setIsRecordDeleted(true);
         }
       };
       const onEditAddFormInput = (property, editedValue, field) => {

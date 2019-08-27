@@ -17,7 +17,7 @@
 	"deleteImportTable": {
 		"url":"/dataset/{:dataSetId}/deleteImportTable/{:tableId}"
 	},
-	"deleteRow":{
+	"deleteRecord":{
 		"url":"/dataset/{:idDataset}/record"
 	},
 	"downloadDocumentByIdAPI": {

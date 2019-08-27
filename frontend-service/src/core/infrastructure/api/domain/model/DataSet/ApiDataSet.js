@@ -25,12 +25,12 @@ export const apiDataSet = {
       return false;
     }
   },
-  deleteRowByIds: async (dataSetId, rowIds) => {
+  deleteRecordByIds: async (dataSetId, rowIds) => {
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${dataSetId}/record/`
-          : getUrl(config.deleteRow.url, {
+          : getUrl(config.deleteRecord.url, {
               idDataset: dataSetId
             }),
         data: {
