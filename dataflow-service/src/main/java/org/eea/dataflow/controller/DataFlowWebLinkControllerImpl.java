@@ -8,6 +8,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowWebLinkController;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+
 /**
  * The Class DataFlowWebLinkControllerImpl.
  */
@@ -27,14 +30,19 @@ import org.springframework.web.server.ResponseStatusException;
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The dataflow web link service. */
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
 
+
   /**
-   * Save link.
+   * Gets the link.
    *
-   * @param idDataflow the id dataflow
+   * @param idLink the id link
    * @return the link
    */
   @Override
@@ -90,8 +98,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
     }
   }
 

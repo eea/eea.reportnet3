@@ -23,21 +23,29 @@ import lombok.ToString;
 @Table(name = "CONTRIBUTOR")
 public class Contributor {
 
-  /** The id. */
+  /**
+   * The id.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The email. */
+  /**
+   * The email.
+   */
   @Column(name = "EMAIL")
   private String email;
 
-  /** The user id. */
+  /**
+   * The user id.
+   */
   @Column(name = "USER_ID")
-  private Long userId;
+  private String userId;
 
-  /** The dataflow. */
+  /**
+   * The dataflow.
+   */
   @ManyToOne
   @JoinColumn(name = "DATAFLOW_ID")
   private Dataflow dataflow;
@@ -47,6 +55,7 @@ public class Contributor {
    * Equals.
    *
    * @param o the o
+   *
    * @return true, if successful
    */
   @Override

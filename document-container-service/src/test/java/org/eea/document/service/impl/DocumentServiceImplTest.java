@@ -50,7 +50,7 @@ public class DocumentServiceImplTest {
    */
   @Before
   public void initMocks() throws RepositoryException {
-    fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -263,7 +263,7 @@ public class DocumentServiceImplTest {
         .thenReturn("name");
     doNothing().when(oakRepositoryUtils).deleteFileNode(Mockito.any(), Mockito.any(),
         Mockito.any());
-    doNothing().when(oakRepositoryUtils).runGC(Mockito.any());
+    doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.deleteDocument(1L, "filename", 1L, "ES");
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
