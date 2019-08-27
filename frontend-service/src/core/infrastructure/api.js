@@ -206,23 +206,31 @@ export const api = {
     return response.data;
   },
   exportDataSetDataById: async (dataSetId, fileType) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetData.url, {
         dataSetId: dataSetId,
         fileType: fileType
       }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
   exportDataSetTableDataById: async (dataSetId, tableSchemaId, fileType) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetTableData.url, {
         dataSetId: dataSetId,
         tableSchemaId: tableSchemaId,
         fileType: fileType
       }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
     });
     return response.data;
   },
