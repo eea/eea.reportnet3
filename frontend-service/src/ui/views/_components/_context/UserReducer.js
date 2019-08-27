@@ -1,13 +1,13 @@
 export const userReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'login':
+    case 'LOGIN':
       return {
         ...state,
         ...payload.user
       };
-    case 'logout':
+    case 'LOGOUT':
       return {};
-    case 'refreshToken':
+    case 'REFRESH_TOKEN':
       return {
         ...state,
         tokenExpireTime: payload.tokenExpireTime
