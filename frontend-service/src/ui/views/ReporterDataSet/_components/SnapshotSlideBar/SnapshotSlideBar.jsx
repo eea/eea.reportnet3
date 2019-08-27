@@ -1,25 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect } from 'react';
-
-import primeIcons from 'assets/conf/prime.icons';
-import styles from './SnapshotSliderBar.module.scss';
-
 import { Formik, Field, Form } from 'formik';
-import { IconComponent } from 'ui/views/_components/IconComponent';
-import { isEmpty } from 'lodash';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { Sidebar } from 'primereact/sidebar';
-import { SnapshotContext } from '../../ReporterDataSet';
-import { SnapshotList } from './_components/SnapshotList';
 import * as Yup from 'yup';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList, snapshotListData }) => {
+import { isEmpty } from 'lodash';
+
+import styles from './SnapshotSliderBar.module.scss';
+
+import { Button } from 'ui/views/_components/Button';
+import { Sidebar } from 'primereact/sidebar';
+import { SnapshotList } from './_components/SnapshotList';
+
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SnapshotContext } from '../../ReporterDataSet';
+
+const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
-
-  useEffect(() => {
-    setSnapshotList();
-  }, []);
 
   useEffect(() => {
     const bodySelector = document.querySelector('body');
@@ -35,11 +32,11 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
 
   return (
     <Sidebar
-      visible={isVisible}
-      onHide={e => setIsVisible()}
       blockScroll={true}
+      className={styles.sidebar}
+      onHide={e => setIsVisible()}
       position="right"
-      className={styles.sidebar}>
+      visible={isVisible}>
       <div className={styles.content}>
         <div className={styles.title}>
           <h3>{resources.messages.createSnapshotTitle}</h3>
@@ -69,9 +66,12 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, dataSetId, setSnapshotList,
                     placeholder={resources.messages.createSnapshotPlaceholder}
                   />
                   <div className={styles.createButtonWrapper}>
-                    <button className={`${styles.createSnapshotButton} rp-btn primary`} type="submit">
-                      <IconComponent icon={primeIcons.icons.plus} />
-                    </button>
+                    <Button
+                      tooltip={resources.messages.createSnapshotTooltip}
+                      className={`${styles.createSnapshotButton} rp-btn default`}
+                      type="submit"
+                      icon="plus"
+                    />
                   </div>
                 </div>
                 {errors.createSnapshotDescription || touched.createSnapshotDescription ? (

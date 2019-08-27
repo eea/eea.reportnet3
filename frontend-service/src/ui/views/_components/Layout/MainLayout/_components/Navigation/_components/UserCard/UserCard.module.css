@@ -1,10 +1,17 @@
-.userProfileCard div {
+.userProfileCard {
   /* padding: 5px; */
-  display: inline-block;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .userProfile {
   padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 .userProfile > a {
   display: flex;

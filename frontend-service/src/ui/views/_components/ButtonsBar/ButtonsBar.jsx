@@ -1,36 +1,36 @@
 import React from 'react';
 
-import { CustomButton } from 'ui/views/_components/CustomButton';
-import { Toolbar } from 'primereact/toolbar';
+import { Button } from 'ui/views/_components/Button';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 export const ButtonsBar = React.memo(({ buttonsList }) => {
   const leftButtons = [];
   const rightButtons = [];
 
-  const buttons = buttonsList.forEach((b, i) => {
-    b.group === 'left'
+  const buttons = buttonsList.forEach((button, i) => {
+    button.group === 'left'
       ? leftButtons.push(
-          <CustomButton
-            label={b.label}
-            title={b.title}
-            icon={b.icon}
+          <Button
+            className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
+            disabled={button.disabled}
+            icon={button.icon}
+            iconClasses={button.iconClasses}
             key={i}
-            handleClick={b.clickHandler}
-            disabled={b.disabled}
-            ownButtonClasses={b.ownButtonClasses}
-            iconClasses={b.iconClasses}
+            label={button.label}
+            onClick={button.onClick}
+            title={button.title}
           />
         )
       : rightButtons.push(
-          <CustomButton
-            label={b.label}
-            title={b.title}
-            icon={b.icon}
+          <Button
+            className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
+            disabled={button.disabled}
+            icon={button.icon}
+            iconClasses={button.iconClasses}
             key={i}
-            handleClick={b.clickHandler}
-            disabled={b.disabled}
-            ownButtonClasses={b.ownButtonClasses}
-            iconClasses={b.iconClasses}
+            label={button.label}
+            onClick={button.onClick}
+            title={button.title}
           />
         );
   });

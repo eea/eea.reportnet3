@@ -1,0 +1,68 @@
+{
+	"createSnapshot": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:description}"
+	},
+	"dataSchemaAPI": {
+		"url": "/dataschema/dataflow/{:dataFlowId}"
+	},
+	"dataviewerAPI": {
+		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}"
+	},	
+	"deleteSnapshotByID": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
+	},
+	"deleteImportData": {
+		"url": "/dataset/{:dataSetId}/deleteImportData"
+	},		
+	"deleteImportTable": {
+		"url":"/dataset/{:dataSetId}/deleteImportTable/{:tableId}"
+	},
+	"downloadDocumentByIdAPI": {
+		"url": "/document/{:documentId}"
+	},
+	"exportDataSetData": {
+		"url": "/dataset/exportFile?datasetId={:dataSetId}&mimeType={:fileType}"
+	},
+	"exportDataSetTableData": {
+		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
+	},
+	"listValidationsAPI": {
+		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
+	},	
+	"loadDataFlowTaskPendingAcceptedAPI": {
+		"url": "/dataflow/pendingaccepted"
+	},
+	"loadDataSetsByDataflowID": {
+		"url": "/dataflow/{:dataFlowId}"
+	},		
+	"loadDataTableAPI": {
+		"url": "/dataset/{:dataSetId}/loadTableData/{:tableId}"
+	},
+	"loadSnapshotsListAPI": {
+		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"
+	},
+	"loadStatisticsAPI": {
+		"url": "/dataset/loadStatistics/{:dataSetId}"
+	},
+	"uploadDocumentAPI": {
+		"url": "/document/upload/{:dataFlowId}?description={:description}&language={:language}"
+	},
+	"validationViewerAPI": {
+		"url": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:dataSetId}&type={:entityType}"
+	},
+	"validateDataSetAPI":{
+		"url": "/validation/dataset/{:dataSetId}"
+	},
+	"acceptDataFlow":{
+		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	},
+	"rejectDataFlow":{
+		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	},
+	"loginUser":{
+		"url": "/user/generateToken?password={:password}&username={:userName}"
+	},
+	"refreshToken":{
+		"url": "/user/refreshToken?refreshToken={:refreshToken}"
+	}
+}
