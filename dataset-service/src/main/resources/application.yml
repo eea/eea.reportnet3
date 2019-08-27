@@ -3,3 +3,6 @@ server:
 spring:
   application:
     name: dataset
+eea:
+ security:
+   authenticatedRequest: /dataset/exportFile

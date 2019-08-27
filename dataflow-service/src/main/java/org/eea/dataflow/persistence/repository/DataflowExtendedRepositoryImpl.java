@@ -30,7 +30,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @return the list
    */
   @Override
-  public List<Dataflow> findCompleted(Long userIdRequester, Pageable pageable) {
+  public List<Dataflow> findCompleted(String userIdRequester, Pageable pageable) {
 
     Query query = entityManager.createQuery(QUERY_FIND_COMPLETED);
     query.setParameter("idRequester", userIdRequester);

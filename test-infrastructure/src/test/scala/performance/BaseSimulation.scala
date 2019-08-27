@@ -20,7 +20,8 @@ import scala.collection.mutable.{ListBuffer, Map => MMap}
 class BaseSimulation extends Simulation {
 
   val configLoadTestFile = sys.env("LOAD_TEST_PATH");
-  val reader = new FileInputStream(new File("C:\\proyectos\\EEA\\desarrollo\\repornet\\test-infrastructure\\src\\test\\scala\\resources\\load_test.yml"));
+  //val reader = new FileInputStream(new File("C:\\proyectos\\EEA\\desarrollo\\repornet\\test-infrastructure\\src\\test\\scala\\resources\\load_test.yml"));
+  val reader = new FileInputStream(new File(configLoadTestFile));
   val mapper = new ObjectMapper(new YAMLFactory())
   mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
