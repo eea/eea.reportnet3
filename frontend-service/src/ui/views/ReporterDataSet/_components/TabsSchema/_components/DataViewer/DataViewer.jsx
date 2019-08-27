@@ -186,8 +186,8 @@ const DataViewer = withRouter(
           />
         );
         let newColumnsArr = [validationCol].concat(columnsArr);
-        // let newColumnsArr2 = [editCol].concat(newColumnsArr);
-        setColumns(newColumnsArr);
+        let newColumnsArr2 = [editCol].concat(newColumnsArr);
+        setColumns(newColumnsArr2);
       }, [colsSchema, columnOptions]);
 
       useEffect(() => {
@@ -525,7 +525,7 @@ const DataViewer = withRouter(
               autoLayout={true}
               editable={true}
               first={firstRow}
-              // footer={addRowFooter}
+              footer={addRowFooter}
               header={header}
               lazy={true}
               loading={loading}
