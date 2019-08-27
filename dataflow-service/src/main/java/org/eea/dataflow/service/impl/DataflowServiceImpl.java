@@ -35,31 +35,45 @@ import org.springframework.stereotype.Service;
 public class DataflowServiceImpl implements DataflowService {
 
 
-  /** The dataflow repository. */
+  /**
+   * The dataflow repository.
+   */
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /** The user request repository. */
+  /**
+   * The user request repository.
+   */
   @Autowired
   private UserRequestRepository userRequestRepository;
 
-  /** The contributor repository. */
+  /**
+   * The contributor repository.
+   */
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /** The dataflow mapper. */
+  /**
+   * The dataflow mapper.
+   */
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /** The dataflow no content mapper. */
+  /**
+   * The dataflow no content mapper.
+   */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /** The dataset metabase controller. */
+  /**
+   * The dataset metabase controller.
+   */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -73,7 +87,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -100,7 +116,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by status.
    *
    * @param status the status
+   *
    * @return the by status
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -115,7 +133,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the pending accepted.
    *
    * @param userId the user id
+   *
    * @return the pending accepted
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -146,7 +166,9 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userId the user id
    * @param pageable the pageable
+   *
    * @return the completed
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -168,7 +190,9 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userId the user id
    * @param type the type
+   *
    * @return the pending by user
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -186,6 +210,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userRequestId the user request id
    * @param type the type
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -201,10 +226,11 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException {
+  public void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException {
 
     Contributor contributor = new Contributor();
     contributor.setUserId(idContributor);
@@ -219,10 +245,11 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void removeContributorFromDataflow(Long idDataflow, Long idContributor)
+  public void removeContributorFromDataflow(Long idDataflow, String idContributor)
       throws EEAException {
 
     contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
@@ -246,7 +273,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param dataflowVO the dataflow VO
    */
-  @Transactional
+//  @Transactional
   private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
     if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());

@@ -44,7 +44,9 @@ public class DataFlowControllerImpl implements DataFlowController {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-  /** The dataflow service. */
+  /**
+   * The dataflow service.
+   */
   @Autowired
   private DataflowService dataflowService;
 
@@ -53,6 +55,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find by id.
    *
    * @param id the id
+   *
    * @return the data flow VO
    */
   @Override
@@ -108,6 +111,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    *
    * @param pageNum the page num
    * @param pageSize the page size
+   *
    * @return the list
    */
   public static List<DataFlowVO> errorHandlerListCompleted(final Integer pageNum,
@@ -124,6 +128,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find by status.
    *
    * @param status the status
+   *
    * @return the list
    */
   @Override
@@ -141,14 +146,13 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
-
   /**
    * Find pending accepted.
    *
    * @return the list
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandlerList")
+//  @HystrixCommand(fallbackMethod = "errorHandlerList")
   @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findPendingAccepted() {
 
@@ -166,16 +170,16 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
-
   /**
    * Find completed.
    *
    * @param pageNum the page num
    * @param pageSize the page size
+   *
    * @return the list
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandlerListCompleted")
+  //@HystrixCommand(fallbackMethod = "errorHandlerListCompleted")
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findCompleted(Integer pageNum, Integer pageSize) {
 
@@ -198,6 +202,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Find user dataflows by status.
    *
    * @param type the type
+   *
    * @return the list
    */
   @Override
@@ -245,7 +250,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping(value = "/{idDataflow}/contributor/add", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void addContributor(@PathVariable("idDataflow") Long idDataflow, Long userId) {
+  public void addContributor(@PathVariable("idDataflow") Long idDataflow, String userId) {
 
     try {
       dataflowService.addContributorToDataflow(idDataflow, userId);
@@ -265,7 +270,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @DeleteMapping(value = "{idDataflow}/contributor/remove")
-  public void removeContributor(@PathVariable("idDataflow") Long idDataflow, Long userId) {
+  public void removeContributor(@PathVariable("idDataflow") Long idDataflow, String userId) {
     try {
       dataflowService.removeContributorFromDataflow(idDataflow, userId);
     } catch (EEAException e) {
@@ -281,7 +286,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param dataFlowVO the data flow VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "createDataFlow")
+  // @HystrixCommand(fallbackMethod = "createDataFlow")
   @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
 

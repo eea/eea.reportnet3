@@ -13,6 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  * The Class RecordStoreConfiguration.
  */
 @Configuration
+@EeaEnableSecurity
 public class RecordStoreConfiguration {
 
   /**

@@ -16,7 +16,9 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   DataFlowVO getById(Long id) throws EEAException;
@@ -25,7 +27,9 @@ public interface DataflowService {
    * Gets the by status.
    *
    * @param status the status
+   *
    * @return the by status
+   *
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException;
@@ -35,7 +39,9 @@ public interface DataflowService {
    * Gets the pending accepted.
    *
    * @param userId the user id
+   *
    * @return the pending accepted
+   *
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getPendingAccepted(String userId) throws EEAException;
@@ -46,7 +52,9 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param pageable the pageable
+   *
    * @return the completed
+   *
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException;
@@ -57,7 +65,9 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param type the type
+   *
    * @return the pending by user
+   *
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
@@ -68,6 +78,7 @@ public interface DataflowService {
    *
    * @param userRequestId the user request id
    * @param type the type
+   *
    * @throws EEAException the EEA exception
    */
   void updateUserRequestStatus(String userRequestId, TypeRequestEnum type) throws EEAException;
@@ -78,19 +89,20 @@ public interface DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
-  void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException;
+  void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException;
 
   /**
    * Removes the contributor from dataflow.
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
-  void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
-
+  void removeContributorFromDataflow(Long idDataflow, String idContributor) throws EEAException;
 
 
   /**

@@ -4,7 +4,7 @@ spring:
   application:
     name: dataflow
 eea:
- security:
-   authenticatedRequest: /dataflow/*
-   roleProtectedRequest:
-     DATA_CUSTODIAN: /dataflow/createDataFlow
+  security:
+    authenticatedRequest: /dataflow/pendingaccepted
+    roleProtectedRequest:
+      DATA_CUSTODIAN: /dataflow/createDataFlow

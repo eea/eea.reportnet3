@@ -16,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableTransactionManagement
 @EntityScan(basePackages = "org.eea.dataflow.persistence.domain")
 @EnableWebMvc
+@EeaEnableSecurity
 public class DataflowConfiguration implements WebMvcConfigurer {
 
 

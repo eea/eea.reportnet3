@@ -71,15 +71,21 @@ public class DataSetControllerImpl implements DatasetController {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The file treatment helper. */
+  /**
+   * The file treatment helper.
+   */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /** The load validations helper. */
+  /**
+   * The load validations helper.
+   */
   @Autowired
   UpdateRecordHelper updateRecordHelper;
 
-  /** The delete helper. */
+  /**
+   * The delete helper.
+   */
   @Autowired
   DeleteHelper deleteHelper;
 
@@ -92,10 +98,11 @@ public class DataSetControllerImpl implements DatasetController {
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
+   *
    * @return the data tables values
    */
   @Override
-  @HystrixCommand
+  // @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
@@ -253,6 +260,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param id the id
    * @param idDataset the id dataset
    * @param type the type
+   *
    * @return the table from any object id
    */
   @Override
@@ -278,12 +286,13 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
-
   /**
    * Gets the by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the by id
+   *
    * @deprecated this method is deprecated
    */
   @Override
@@ -455,7 +464,9 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param mimeType the mime type
+   *
    * @return the response entity
+   *
    * @throws Exception the exception
    */
   @Override

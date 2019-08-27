@@ -43,6 +43,7 @@ public interface DataFlowController {
    * Find by status.
    *
    * @param status the status
+   *
    * @return the list
    */
   @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -54,6 +55,7 @@ public interface DataFlowController {
    *
    * @param pageNum the page num
    * @param pageSize the page size
+   *
    * @return the list
    */
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,11 +68,11 @@ public interface DataFlowController {
    * Find user dataflows by status.
    *
    * @param type the type
+   *
    * @return the list
    */
   @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findUserDataflowsByStatus(@PathVariable(value = "type") TypeRequestEnum type);
-
 
 
   /**
@@ -80,7 +82,6 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findPendingAccepted();
-
 
 
   /**
@@ -101,7 +102,7 @@ public interface DataFlowController {
    */
   @PostMapping(value = "/{idDataflow}/contributor/add", produces = MediaType.APPLICATION_JSON_VALUE)
   void addContributor(@PathVariable("idDataflow") Long idDataflow,
-      @RequestParam(value = "idContributor") Long userId);
+      @RequestParam(value = "idContributor") String userId);
 
 
   /**
@@ -112,8 +113,7 @@ public interface DataFlowController {
    */
   @DeleteMapping(value = "{idDataflow}/contributor/remove")
   void removeContributor(@PathVariable("idDataflow") Long idDataflow,
-      @RequestParam(value = "idContributor") Long userId);
-
+      @RequestParam(value = "idContributor") String userId);
 
 
   /**

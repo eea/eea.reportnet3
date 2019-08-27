@@ -1,5 +1,6 @@
 package org.eea.document.configuration;
 
+import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,14 +16,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableAspectJAutoProxy
 @EnableWebMvc
+@EeaEnableSecurity
 public class DocumentConfiguration implements WebMvcConfigurer {
 
-  /** The max file size. */
+  /**
+   * The max file size.
+   */
   @Value("${spring.servlet.multipart.max-file-size}")
   private Long maxFileSize;
 
 
-  /** The max request size. */
+  /**
+   * The max request size.
+   */
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
 

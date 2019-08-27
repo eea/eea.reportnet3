@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.MultiTenantDataSource;
+import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     transactionManagerRef = "dataSetsTransactionManager",
     basePackages = "org.eea.validation.persistence.data.repository")
 @EnableWebMvc
+@EeaEnableSecurity
 public class DatasetConfiguration implements WebMvcConfigurer {
 
 

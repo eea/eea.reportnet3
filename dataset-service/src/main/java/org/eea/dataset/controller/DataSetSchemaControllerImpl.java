@@ -48,7 +48,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandlerSchema")
+  // @HystrixCommand(fallbackMethod = "errorHandlerSchema")
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
@@ -66,7 +66,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandlerSchemaDataFlow")
+  // @HystrixCommand(fallbackMethod = "errorHandlerSchemaDataFlow")
   @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {

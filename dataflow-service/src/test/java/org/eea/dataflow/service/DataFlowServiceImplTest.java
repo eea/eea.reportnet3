@@ -3,6 +3,7 @@ package org.eea.dataflow.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,51 +43,75 @@ import org.springframework.data.domain.Pageable;
 @RunWith(MockitoJUnitRunner.class)
 public class DataFlowServiceImplTest {
 
-  /** The dataflow service impl. */
+  /**
+   * The dataflow service impl.
+   */
   @InjectMocks
   private DataflowServiceImpl dataflowServiceImpl;
 
-  /** The dataflow repository. */
+  /**
+   * The dataflow repository.
+   */
   @Mock
   private DataflowRepository dataflowRepository;
 
 
-  /** The user request repository. */
+  /**
+   * The user request repository.
+   */
   @Mock
   private UserRequestRepository userRequestRepository;
 
-  /** The contributor repository. */
+  /**
+   * The contributor repository.
+   */
   @Mock
   private ContributorRepository contributorRepository;
 
-  /** The document repository. */
+  /**
+   * The document repository.
+   */
   @Mock
   private DocumentRepository documentRepository;
 
-  /** The dataflow mapper. */
+  /**
+   * The dataflow mapper.
+   */
   @Mock
   private DataflowMapper dataflowMapper;
 
-  /** The dataflow no content mapper. */
+  /**
+   * The dataflow no content mapper.
+   */
   @Mock
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /** The dataset controller. */
+  /**
+   * The dataset controller.
+   */
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
-  /** The user management controller zull. */
+  /**
+   * The user management controller zull.
+   */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The document mapper. */
+  /**
+   * The document mapper.
+   */
   @Mock
   private DocumentMapper documentMapper;
 
-  /** The dataflows. */
+  /**
+   * The dataflows.
+   */
   private List<Dataflow> dataflows;
 
-  /** The pageable. */
+  /**
+   * The pageable.
+   */
   private Pageable pageable;
 
   /**
@@ -104,6 +129,7 @@ public class DataFlowServiceImplTest {
    * Gets the by id throws.
    *
    * @return the by id throws
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -115,6 +141,7 @@ public class DataFlowServiceImplTest {
    * Gets the by id.
    *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -125,7 +152,7 @@ public class DataFlowServiceImplTest {
     List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
     reportingDatasetVOs.add(reportingDatasetVO);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceEnum.class)))
-        .thenReturn(new ArrayList<ResourceAccessVO>());
+        .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findDataSetIdByDataflowId(1L)).thenReturn(reportingDatasetVOs);
     dataFlowVO.setDatasets(reportingDatasetVOs);
@@ -137,6 +164,7 @@ public class DataFlowServiceImplTest {
    * Gets the by status.
    *
    * @return the by status
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -150,6 +178,7 @@ public class DataFlowServiceImplTest {
    * Gets the pending accepted.
    *
    * @return the pending accepted
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -192,6 +221,7 @@ public class DataFlowServiceImplTest {
    * Gets the pending by user.
    *
    * @return the pending by user
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -207,6 +237,7 @@ public class DataFlowServiceImplTest {
    * Gets the completed empty.
    *
    * @return the completed empty
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -221,6 +252,7 @@ public class DataFlowServiceImplTest {
    * Gets the completed.
    *
    * @return the completed
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -259,7 +291,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void addContributor() throws EEAException {
     when(contributorRepository.save(Mockito.any())).thenReturn(new Contributor());
-    dataflowServiceImpl.addContributorToDataflow(1L, 1L);
+    dataflowServiceImpl.addContributorToDataflow(1L, "");
     Mockito.verify(contributorRepository, times(1)).save(Mockito.any());
   }
 
@@ -272,7 +304,7 @@ public class DataFlowServiceImplTest {
   public void removeContributor() throws EEAException {
     Mockito.doNothing().when(contributorRepository).removeContributorFromDataset(Mockito.any(),
         Mockito.any());
-    dataflowServiceImpl.removeContributorFromDataflow(1L, 1L);
+    dataflowServiceImpl.removeContributorFromDataflow(1L, "");
     Mockito.verify(contributorRepository, times(1)).removeContributorFromDataset(Mockito.any(),
         Mockito.any());
   }
