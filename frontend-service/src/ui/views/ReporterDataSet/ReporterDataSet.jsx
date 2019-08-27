@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
@@ -15,6 +15,7 @@ import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { Menu } from 'primereact/menu';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
@@ -40,6 +41,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [datasetTitle, setDatasetTitle] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDataSetData, setExportDataSetData] = useState(undefined);
   const [exportDataSetDataName, setExportDataSetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
@@ -54,6 +56,8 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+
+  let exportMenuRef = useRef();
 
   const home = {
     icon: config.icons['home'],
@@ -73,6 +77,20 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       { label: resources.messages['viewData'] }
     ]);
     onLoadSnapshotList();
+  }, []);
+
+  useEffect(() => {
+    let exportOptions = config.exportTypes;
+
+    const exportOptionsFilter = exportOptions.filter(type => type.code >= 'xls', 'xlsx');
+
+    setExportButtonsList(
+      exportOptionsFilter.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportData(type.code)
+      }))
+    );
   }, []);
 
   useEffect(() => {
@@ -248,6 +266,15 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
+  const getPosition = button => {
+    const buttonTopPosition = button.style.top;
+    const buttonLeftPosition = button.style.left;
+
+    const menu = document.getElementById('menu');
+    menu.style.top = buttonTopPosition;
+    menu.style.left = buttonLeftPosition;
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -269,10 +296,19 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={true}
+              disabled={false}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
-              onClick={() => onExportData()}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              model={exportButtonsList}
+              popup={true}
+              ref={exportMenuRef}
+              id="menu"
+              onShow={e => {
+                getPosition(e.target);
+              }}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
