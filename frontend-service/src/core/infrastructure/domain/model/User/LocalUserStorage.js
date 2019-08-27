@@ -1,4 +1,3 @@
-import { User } from 'core/domain/model/User/User';
 import { isNil } from 'lodash';
 
 const USER_TOKEN = 'reportnet_03';
