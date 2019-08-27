@@ -43,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type Data set controller.
@@ -107,8 +106,8 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "pageNum", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields) {
 
     if (null == datasetId || null == idTableSchema) {
@@ -116,7 +115,15 @@ public class DataSetControllerImpl implements DatasetController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    // check if the parameters received from the frontend are the needed to get the table values
+    // WITHOUT PAGINATION
+    Pageable pageable = null;
+    if (pageSize == null && pageNum == null) {
+      pageable = PageRequest.of(0, 9999);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize);
+    }
+
 
     TableVO result = null;
     try {

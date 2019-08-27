@@ -73,6 +73,7 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -456,13 +457,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      final Pageable pageable, final String fields) throws EEAException {
+      Pageable pageable, final String fields) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
 
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
+
+    // Check if we need to put all the records without pagination
+    if (pageable.getPageSize() == 9999 && pageable.getPageNumber() == 0) {
+      pageable = PageRequest.of(pageable.getPageNumber(), totalRecords.intValue());
+    }
 
     if (null == fields) {
 
