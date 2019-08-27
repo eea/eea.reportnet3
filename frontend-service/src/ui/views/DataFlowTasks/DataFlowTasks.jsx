@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import styles from './DataFlowTasks.module.scss';
 
@@ -13,9 +14,11 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
 import { DataFlowService } from 'core/services/DataFlow';
+import { UserContext } from '../_components/_context/UserContext';
 
-export const DataFlowTasks = ({ match, history }) => {
+export const DataFlowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
+  const userData = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [tabMenuItems] = useState([
@@ -43,11 +46,10 @@ export const DataFlowTasks = ({ match, history }) => {
 
   const dataFetch = async () => {
     setLoading(true);
-    const userId = 2;
     try {
-      const pendingResponse = await DataFlowService.pending(userId);
-      const acceptedResponse = await DataFlowService.accepted(userId);
-      const completedResponse = await DataFlowService.completed(userId);
+      const pendingResponse = await DataFlowService.pending();
+      const acceptedResponse = await DataFlowService.accepted();
+      const completedResponse = await DataFlowService.completed();
       setpendingContent(pendingResponse);
       setacceptedContent(acceptedResponse);
       setcompletedContent(completedResponse);
@@ -120,4 +122,4 @@ export const DataFlowTasks = ({ match, history }) => {
       </div>
     </div>
   );
-};
+});

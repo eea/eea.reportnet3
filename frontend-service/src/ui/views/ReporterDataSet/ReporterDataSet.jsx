@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useReducer } from 'react';
 import moment from 'moment';
+import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
@@ -28,7 +29,7 @@ import { SnapshotService } from 'core/services/Snapshot';
 
 export const SnapshotContext = React.createContext();
 
-export const ReporterDataSet = ({ match, history }) => {
+export const ReporterDataSet = withRouter(({ match, history }) => {
   const {
     params: { dataFlowId, dataSetId }
   } = match;
@@ -428,4 +429,4 @@ export const ReporterDataSet = ({ match, history }) => {
       </SnapshotContext.Provider>
     </div>
   );
-};
+});

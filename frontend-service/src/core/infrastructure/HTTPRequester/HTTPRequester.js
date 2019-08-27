@@ -16,26 +16,32 @@ export const HTTPRequester = (function() {
   const HTTPRequesterAPI = {
     /* AXIOS */
     get: options => {
-      return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`);
+      const headers = options.headers;
+      return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`, { headers });
     },
     download: options => {
+      const headers = options.headers;
       return axios.get(`${baseURL}${options.url}${mapQueryString(options.queryString)}`, {
         responseType: 'blob',
-        headers: { 'Content-Type': 'application/octet-stream' }
+        headers
       });
     },
     post: options => {
-      return axios.post(`${baseURL}${options.url}`, options.data);
+      const headers = options.headers;
+      return axios.post(`${baseURL}${options.url}`, options.data, { headers });
     },
     update: options => {
-      return axios.put(`${baseURL}${options.url}`, options.data);
+      const headers = options.headers;
+      return axios.put(`${baseURL}${options.url}`, options.data, { headers });
     },
     delete: options => {
-      return axios.delete(`${baseURL}${options.url}`, options.data);
+      const headers = options.headers;
+      return axios.delete(`${baseURL}${options.url}`, options.data, { headers });
     },
     postWithFiles: options => {
+      const headers = options.headers;
       return axios.post(`${baseURL}${options.url}`, options.data, {
-        headers: { 'Content-Type': undefined }
+        headers
       });
     }
   };
