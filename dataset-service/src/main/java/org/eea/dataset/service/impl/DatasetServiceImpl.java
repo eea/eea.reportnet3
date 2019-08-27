@@ -466,8 +466,8 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     // Check if we need to put all the records without pagination
-    if (pageable.getPageSize() == 9999 && pageable.getPageNumber() == 0) {
-      pageable = PageRequest.of(pageable.getPageNumber(), totalRecords.intValue());
+    if (pageable == null) {
+      pageable = PageRequest.of(0, totalRecords.intValue());
     }
 
     if (null == fields) {
