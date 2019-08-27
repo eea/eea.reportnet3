@@ -1,1 +1,1 @@
-export const GetAcceptedDataFlows = ({ dataFlowRepository }) => async userId => dataFlowRepository.accepted(userId);
+export const GetAcceptedDataFlows = ({ dataFlowRepository }) => async () => dataFlowRepository.accepted();

@@ -30,7 +30,7 @@
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	},	
 	"loadDataFlowTaskPendingAcceptedAPI": {
-		"url": "/dataflow/pendingaccepted/{:userId}"
+		"url": "/dataflow/pendingaccepted"
 	},
 	"loadDataSetsByDataflowID": {
 		"url": "/dataflow/{:dataFlowId}"
@@ -58,5 +58,11 @@
 	},
 	"rejectDataFlow":{
 		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	},
+	"loginUser":{
+		"url": "/user/generateToken?password={:password}&username={:userName}"
+	},
+	"refreshToken":{
+		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	}
 }

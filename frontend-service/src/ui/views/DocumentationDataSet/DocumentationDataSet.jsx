@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -24,7 +25,7 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const DocumentationDataSet = ({ match, history }) => {
+export const DocumentationDataSet = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
@@ -249,4 +250,4 @@ export const DocumentationDataSet = ({ match, history }) => {
   } else {
     return <></>;
   }
-};
+});
