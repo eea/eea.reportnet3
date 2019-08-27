@@ -22,8 +22,8 @@ import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
+import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SplitButton } from 'ui/views/_components/SplitButton';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/getUrl';
@@ -48,8 +48,8 @@ const DataViewer = withRouter(
       const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
       const [columns, setColumns] = useState([]);
       const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
-      const [defaultButtonsList, setDefaultButtonsList] = useState([]);
       const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+      const [exportButtonsList, setExportButtonsList] = useState([]);
       const [exportTableData, setExportTableData] = useState(undefined);
       const [exportTableDataName, setExportTableDataName] = useState('');
       const [fetchedData, setFetchedData] = useState([]);
@@ -68,9 +68,10 @@ const DataViewer = withRouter(
       const resources = useContext(ResourcesContext);
 
       let growlRef = useRef();
+      let exportMenuRef = useRef();
 
       useEffect(() => {
-        setDefaultButtonsList(
+        setExportButtonsList(
           config.exportTypes.map(type => ({
             label: type.text,
             icon: config.icons['archive'],
@@ -470,9 +471,16 @@ const DataViewer = withRouter(
 
       const totalCount = <span>Total: {totalRecords} rows</span>;
 
+      const getPosition = button => {
+        const position = button.style.positionY;
+        console.log('position', position);
+
+        const menu = document.getElementById('menu');
+        menu.style.top = '0px';
+      };
+
       return (
         <div>
-          {/* <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} /> */}
           <Toolbar>
             <div className="p-toolbar-group-left">
               <Button
@@ -482,13 +490,20 @@ const DataViewer = withRouter(
                 label={resources.messages['import']}
                 onClick={() => setImportDialogVisible(true)}
               />
-              <SplitButton
+              <Button
                 className={`p-button-rounded p-button-secondary`}
-                disabled={false}
-                icon={loadingFile ? config.icons.spinnerAnimate : config.icons.import}
+                icon={loadingFile ? 'spinnerAnimate' : 'import'}
                 label={resources.messages['exportTable']}
-                model={defaultButtonsList}
-                onClick={() => onExportTableData(first.code)}
+                onClick={event => exportMenuRef.current.show(event.target)}
+              />
+              <Menu
+                model={exportButtonsList}
+                popup={true}
+                ref={exportMenuRef}
+                id="menu"
+                onShow={e => {
+                  getPosition(e.target);
+                }}
               />
               <Button
                 className={`p-button-rounded p-button-secondary`}
