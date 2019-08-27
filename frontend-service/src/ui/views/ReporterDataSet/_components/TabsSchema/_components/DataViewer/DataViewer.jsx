@@ -186,8 +186,8 @@ const DataViewer = withRouter(
           />
         );
         let newColumnsArr = [validationCol].concat(columnsArr);
-        let newColumnsArr2 = [editCol].concat(newColumnsArr);
-        setColumns(newColumnsArr2);
+        // let newColumnsArr2 = [editCol].concat(newColumnsArr);
+        setColumns(newColumnsArr);
       }, [colsSchema, columnOptions]);
 
       useEffect(() => {
@@ -525,7 +525,7 @@ const DataViewer = withRouter(
               autoLayout={true}
               editable={true}
               first={firstRow}
-              footer={addRowFooter}
+              // footer={addRowFooter}
               header={header}
               lazy={true}
               loading={loading}
@@ -593,23 +593,6 @@ const DataViewer = withRouter(
             labelConfirm="Yes"
             labelCancel="No">
             {resources.messages['confirmDeleteRow']}
-            <hr />
-            <table className={styles.Table}>
-              <thead>
-                {colsSchema.map((column, i) => {
-                  return <th key={i}>{column.header}</th>;
-                })}
-              </thead>
-              <tbody>
-                <tr>
-                  {Object.values(selectedRow)
-                    .slice(1)
-                    .map((row, i) => {
-                      return <td key={i}>{row[row.fieldData]}</td>;
-                    })}
-                </tr>
-              </tbody>
-            </table>
           </ConfirmDialog>
           <Dialog
             blockScroll={false}
