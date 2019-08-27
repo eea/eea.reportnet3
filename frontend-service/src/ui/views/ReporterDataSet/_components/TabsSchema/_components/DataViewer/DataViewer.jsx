@@ -25,7 +25,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { getUrl } from 'core/infrastructure/getUrl';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
 
 const DataViewer = withRouter(
@@ -232,6 +232,10 @@ const DataViewer = withRouter(
         setEditedRow(row);
       };
 
+      const onEditorSubmitValue = async (props, value) => {
+        await DataSetService.updateFieldById(dataSetId, props.field, value);
+      };
+
       const onEditorValueChange = (props, value) => {
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
         setFetchedData(updatedData);
@@ -363,13 +367,13 @@ const DataViewer = withRouter(
         </div>
       );
 
-      const cellDataEditor = props => {
+      const cellDataEditor = cell => {
         return (
-          <input
+          <InputText
             type="text"
-            value={getCellValue(props, props.field)}
-            //onChange={e => onEditorValueChange(props, e.target.value)}
-            onfocusout={() => console.log('SUBMIT!')}
+            value={getCellValue(cell, cell.field)}
+            onChange={e => onEditorValueChange(cell, e.target.value)}
+            onBlur={e => onEditorSubmitValue(cell, e.target.value)}
           />
         );
       };
