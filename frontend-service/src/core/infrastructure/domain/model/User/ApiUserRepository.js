@@ -45,7 +45,7 @@ const refreshToken = async refreshToken => {
   const remain = userTDO.exp - moment().unix();
   timeOut((remain - 10) * 1000);
   userStorage.set(userTokensTDO);
-  return;
+  return user;
 };
 
 export const ApiUserRepository = {
