@@ -1,1 +1,1 @@
-export const GetPendingDataFlows = ({ dataFlowRepository }) => async userId => dataFlowRepository.pending(userId);
+export const GetPendingDataFlows = ({ dataFlowRepository }) => async () => dataFlowRepository.pending();

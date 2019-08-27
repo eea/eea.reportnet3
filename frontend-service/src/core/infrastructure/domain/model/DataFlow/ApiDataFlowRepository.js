@@ -1,13 +1,13 @@
 import { api } from 'core/infrastructure/api';
 import { DataFlow } from 'core/domain/model/DataFlow/DataFlow';
 
-const accepted = async userId => {
-  const acceptedDataflowsDTO = await api.acceptedDataFlows(userId);
+const accepted = async () => {
+  const acceptedDataflowsDTO = await api.acceptedDataFlows();
   return parseDataFlowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
-const completed = async userId => {
-  const completedDataflowsDTO = await api.completedDataFlows(userId);
+const completed = async () => {
+  const completedDataflowsDTO = await api.completedDataFlows();
   return parseDataFlowDTOs(completedDataflowsDTO);
 };
 
@@ -32,8 +32,8 @@ const parseDataFlowDTOs = dataFlowDTOs => {
   });
 };
 
-const pending = async userId => {
-  const pendingDataflowsDTO = await api.pendingDataFlows(userId);
+const pending = async () => {
+  const pendingDataflowsDTO = await api.pendingDataFlows();
   return parseDataFlowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
 };
 
