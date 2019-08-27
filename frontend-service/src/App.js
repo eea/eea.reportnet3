@@ -27,7 +27,7 @@ const App = () => {
           ...state,
           onLogin: user => {
             dispatch({
-              type: 'login',
+              type: 'LOGIN',
               payload: {
                 user
               }
@@ -35,7 +35,7 @@ const App = () => {
           },
           onLogout: () => {
             dispatch({
-              type: 'logout',
+              type: 'LOGOUT',
               payload: {
                 user: {}
               }
@@ -43,7 +43,7 @@ const App = () => {
           },
           onTokenRefresh: user => {
             dispatch({
-              type: 'refreshToken',
+              type: 'REFRESH_TOKEN',
               payload: {
                 user
               }
