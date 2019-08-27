@@ -9,7 +9,7 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class DocumentControllerImplTest {
 
   /** The dataflow controller. */
   @Mock
-  private DataFlowControllerZuul dataflowController;
+  private DataFlowDocumentControllerZuul dataflowController;
 
   /**
    * Inits the mocks.
@@ -140,7 +140,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void getDocumentExceptionNullTest() throws EEAException {
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(null);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
     documentController.getDocument(1L);
   }
 
@@ -152,7 +152,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void getDocumentExceptionTest() throws EEAException {
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.getDocument(1L);
@@ -166,7 +166,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void getDocumentException2Test() throws EEAException {
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.getDocument(1L);
@@ -183,7 +183,7 @@ public class DocumentControllerImplTest {
   public void getDocumentSuccessTest() throws EEAException, IOException {
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     when(documentService.getDocument(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(content);
     documentController.getDocument(1L);
@@ -198,7 +198,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionNullTest() throws Exception {
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(null);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
     documentController.deleteDocument(1L);
   }
 
@@ -209,7 +209,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionTest() throws Exception {
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     documentController.deleteDocument(1L);
@@ -222,7 +222,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException2Test() throws Exception {
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     documentController.deleteDocument(1L);
@@ -235,7 +235,7 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException3Test() throws Exception {
-    doThrow(FeignException.class).when(dataflowController).getDocumentById(Mockito.any());
+    doThrow(FeignException.class).when(dataflowController).getDocumentInfoById(Mockito.any());
     documentController.deleteDocument(1L);
   }
 
@@ -248,7 +248,7 @@ public class DocumentControllerImplTest {
   public void deleteDocumentSuccessTest() throws Exception {
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-    when(dataflowController.getDocumentById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());
     documentController.deleteDocument(1L);

@@ -14,13 +14,19 @@ import lombok.ToString;
 @ToString
 public class ContributorVO implements Serializable {
 
-  /** The Constant serialVersionUID. */
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = -6722104829767052100L;
 
-  /** The user id. */
-  private Long userId;
+  /**
+   * The user id.
+   */
+  private String userId;
 
-  /** The email. */
+  /**
+   * The email.
+   */
   private String email;
 
 }

@@ -22,16 +22,16 @@ public class FileExportContextImpl implements IFileExportContext {
     this.writerStrategy = writerStrategy;
   }
 
+
   /**
-   * Parses the.
+   * File writer.
    *
-   * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
-   * @return the data set VO
+   * @return the byte[]
    * @throws InvalidFileException the invalid file exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema)

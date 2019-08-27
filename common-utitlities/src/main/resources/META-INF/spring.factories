@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.eea.kafka.KafkaConfiguration, org.eea.security.SecondLevelAuthorizationConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.eea.kafka.KafkaConfiguration
