@@ -3,6 +3,7 @@ package org.eea.interfaces.vo.dataset;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +26,7 @@ public class FieldVO implements Serializable {
   /**
    * The type.
    */
-  private String type;
+  private TypeData type;
 
   /**
    * The value.

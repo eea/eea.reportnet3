@@ -11,12 +11,14 @@ gatling_config:
       #headers:
       #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
       #requestBody: '{"title":"example"}'
-    - requestName: queryConnection
-      endpoint: /recordstore/connection/dataset_1
+    - requestName: uploadFile
+      endpoint: /dataset/1/loadTableData/5d13810fcbe9834a902d5f65
       usersNumber: 11
       numberExecutions: 12
       useFeeder: false
-      method: get
+      method: post
+      uploadFileName: C:/Users/extjo/Downloads/BWQ_2006_SPAIN_2018_V1_BWQD_2006_Identified_BW6kREGISTROS.csv
+      uploadFileKey: file
       puaseTime: 1
       timeOut: 1000
       #headers:

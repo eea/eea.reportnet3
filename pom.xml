@@ -26,6 +26,7 @@
     <module>common-interfaces</module>
     <module>common-utitlities</module>
     <module>document-container-service</module>
+    <module>user-management-service</module>
   </modules>
   <properties>
     <java.version>1.8</java.version>
@@ -90,8 +91,12 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-
-
+    <!--To avoid problems in javadoc generation adding the version of interceptor required for the version of SPRINT-TX 5.1.5-->
+    <dependency>
+      <groupId>javax.interceptor</groupId>
+      <artifactId>javax.interceptor-api</artifactId>
+      <version>1.2.2</version>
+    </dependency>
     <!-- Metrics -->
     <dependency>
       <groupId>io.micrometer</groupId>

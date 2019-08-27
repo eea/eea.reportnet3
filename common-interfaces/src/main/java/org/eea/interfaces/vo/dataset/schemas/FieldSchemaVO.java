@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleFieldVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,7 @@ public class FieldSchemaVO {
   private String name;
 
   /** The type. */
-  private String type;
+  private TypeData type;
 
   /** The rule field. */
   private List<RuleFieldVO> ruleField;

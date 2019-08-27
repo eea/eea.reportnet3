@@ -26,6 +26,11 @@ public enum SchemasDrools {
     this.value = value;
   }
 
+  /**
+   * Gets the value.
+   *
+   * @return the value
+   */
   public String getValue() {
     return value;
   }

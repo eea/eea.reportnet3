@@ -71,11 +71,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
     this.mimeType = String.valueOf(mimeType);
   }
 
+
   /**
    * Write file.
    *
    * @param dataflowId the dataflow id
-   * @param partitionId the partition id
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @return the byte[]
    */

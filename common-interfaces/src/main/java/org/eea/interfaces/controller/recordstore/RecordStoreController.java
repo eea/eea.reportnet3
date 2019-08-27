@@ -59,4 +59,5 @@ public interface RecordStoreController {
    */
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
   List<ConnectionDataVO> getDataSetConnections();
+
 }

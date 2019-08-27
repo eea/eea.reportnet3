@@ -1,9 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,14 +23,42 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * The Constant DEFAULT_SORT_CRITERIA.
    */
-  private static final String DEFAULT_SORT_CRITERIA = "' '";
+  private static final String DEFAULT_STRING_SORT_CRITERIA = "' '";
+
+  /** The Constant DEFAULT_NUMERIC_SORT_CRITERIA. */
+  private static final String DEFAULT_NUMERIC_SORT_CRITERIA = "0";
+
+  /** The Constant DEFAULT_DATE_SORT_CRITERIA. */
+  private static final String DEFAULT_DATE_SORT_CRITERIA = "cast('01/01/1970' as java.sql.Date)";
 
   /**
    * The Constant SORT_QUERY.
    */
-  private final static String SORT_QUERY =
+  private final static String SORT_STRING_QUERY =
       "COALESCE(( select distinct fv.value from FieldValue fv where fv.record.id=rv.id and fv.idFieldSchema ='%s' ), "
-          + DEFAULT_SORT_CRITERIA + ") as order_criteria_%s";
+          + DEFAULT_STRING_SORT_CRITERIA + ") as order_criteria_%s";
+
+  /** The Constant SORT_NUMERIC_QUERY. */
+  private final static String SORT_NUMERIC_QUERY =
+      "COALESCE((select distinct case when is_numeric(fv.value) = true "
+          + "then CAST(fv.value as java.math.BigDecimal) when is_numeric( fv.value)=false "
+          + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
+          + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
+
+
+  private final static String SORT_COORDINATE_QUERY =
+      "COALESCE((select distinct case when is_double(fv.value) = true "
+          + "then CAST(fv.value as java.lang.Double) when is_double( fv.value)=false "
+          + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
+          + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
+
+  /** The Constant SORT_DATE_QUERY. */
+  private final static String SORT_DATE_QUERY =
+      "COALESCE((select distinct case when is_date(fv.value) = true "
+          + "then CAST(fv.value as java.sql.Date) " + "when is_date( fv.value)=false "
+          + "then cast('01/01/1970' as java.sql.Date) " + "end from FieldValue fv "
+          + "where fv.record.id = rv.id and fv.idFieldSchema = '%s')," + DEFAULT_DATE_SORT_CRITERIA
+          + ") as order_criteria_%s ";
 
   /**
    * The Constant MASTER_QUERY.
@@ -58,6 +83,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    *
    * @return the list
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<RecordValue> findByTableValueWithOrder(String idTableSchema, Pageable pageable,
       SortField... sortFields) {
@@ -68,10 +94,43 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     for (SortField field : sortFields) {
-      sortQueryBuilder.append(",")
-          .append(String.format(SORT_QUERY, field.getFieldName(), criteriaNumber)).append(" ");
-      directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
-          .append(" ").append(field.getAsc() ? "asc" : "desc");
+      switch (field.getTypefield()) {
+        case COORDINATE_LAT:
+          sortQueryBuilder.append(",")
+              .append(String.format(SORT_COORDINATE_QUERY, field.getFieldName(), criteriaNumber))
+              .append(" ");
+          directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+              .append(" ").append(field.getAsc() ? "asc" : "desc");
+          break;
+        case COORDINATE_LONG:
+          sortQueryBuilder.append(",")
+              .append(String.format(SORT_COORDINATE_QUERY, field.getFieldName(), criteriaNumber))
+              .append(" ");
+          directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+              .append(" ").append(field.getAsc() ? "asc" : "desc");
+          break;
+        case NUMBER:
+          sortQueryBuilder.append(",")
+              .append(String.format(SORT_NUMERIC_QUERY, field.getFieldName(), criteriaNumber))
+              .append(" ");
+          directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+              .append(" ").append(field.getAsc() ? "asc" : "desc");
+          break;
+        case DATE:
+          sortQueryBuilder.append(",")
+              .append(String.format(SORT_DATE_QUERY, field.getFieldName(), criteriaNumber))
+              .append(" ");
+          directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+              .append(" ").append(field.getAsc() ? "asc" : "desc");
+          break;
+        default:
+          sortQueryBuilder.append(",")
+              .append(String.format(SORT_STRING_QUERY, field.getFieldName(), criteriaNumber))
+              .append(" ");
+          directionQueryBuilder.append(",").append(" order_criteria_").append(criteriaNumber)
+              .append(" ").append(field.getAsc() ? "asc" : "desc");
+          break;
+      }
     }
     Query query = entityManager.createQuery(String.format(MASTER_QUERY, sortQueryBuilder.toString(),
         directionQueryBuilder.toString().substring(1)));
@@ -92,6 +151,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param pageable the pageable
    * @return the list
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable) {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
@@ -103,27 +163,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return query.getResultList();
   }
 
-
-  /**
-   * Removes duplicated records in the query.
-   *
-   * @param records the records
-   *
-   * @return the list
-   */
-  private List<RecordValue> sanitizeUnOrderedRecords(List<RecordValue> records) {
-    List<RecordValue> sanitizedRecords = new ArrayList<>();
-    Set<Long> processedRecords = new HashSet<>();
-    for (RecordValue recordValue : records) {
-      if (!processedRecords.contains(recordValue.getId())) {
-        processedRecords.add(recordValue.getId());
-        sanitizedRecords.add(recordValue);
-      }
-
-    }
-    return sanitizedRecords;
-
-  }
 
   /**
    * Sanitize ordered records.

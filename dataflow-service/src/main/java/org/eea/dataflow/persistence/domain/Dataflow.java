@@ -89,27 +89,6 @@ public class Dataflow {
   private Set<UserRequest> userRequests;
 
   /**
-   * Instantiates a new dataflow.
-   */
-  public Dataflow() {}
-
-  /**
-   * Instantiates a new dataflow.
-   *
-   * @param description the description
-   * @param name the name
-   * @param deadDate the dead date
-   * @param creationDate the creation date
-   */
-  public Dataflow(String description, String name, Date creationDate, Date deadDate) {
-    this.name = name;
-    this.description = description;
-    this.creationDate = creationDate;
-    this.deadlineDate = deadDate;
-    this.status = TypeStatusEnum.PENDING;
-  }
-
-  /**
    * Equals.
    *
    * @param o the o

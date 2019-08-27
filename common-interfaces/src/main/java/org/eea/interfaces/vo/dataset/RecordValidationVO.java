@@ -14,9 +14,9 @@ import lombok.ToString;
 public class RecordValidationVO implements Serializable {
 
   /**
-   * 
+   *
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 918058325040983759L;
 
   /** The id. */
   private Long id;

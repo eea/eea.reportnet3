@@ -33,11 +33,11 @@ public class UserRequest {
 
   /** The user requester. */
   @Column(name = "USER_REQUESTER")
-  private Long userRequester;
+  private String userRequester;
 
   /** The user requested. */
   @Column(name = "USER_REQUESTED")
-  private Long userRequested;
+  private String userRequested;
 
   /** The request type. */
   @Column(name = "REQUEST_TYPE")

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -38,6 +39,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Autowired
   private KafkaSender kafkaSender;
+
+  @Autowired
+  private DataSetControllerZuul datasetControllerZuul;
 
 
   /**
@@ -193,4 +197,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     });
   }
+
+
 }

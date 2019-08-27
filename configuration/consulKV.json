@@ -536,6 +536,14 @@
     "value": "JHtSSUJCT05fUkVUUllfU1RBVFVTX0NPREU6NTAwLDQwNH0="
   },
   {
+    "key": "config/apiGateway/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDczNzQxODI0fQ=="
+  },
+  {
+    "key": "config/apiGateway/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToxMDczNzQxODI0fQ=="
+  },
+  {
     "key": "config/validation/mongodb.hibernate.ddl-auto",
     "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -698,26 +706,81 @@
   {
     "key": "config/ums/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
-  }, {
-    "key": "config/document/spring.application.servlet.multipart.max-file-size",
-    "value": "MTA0ODU3NjAw"
-  }, {
-    "key": "config/document/spring.application.servlet.multipart.max-request-size",
-    "value": "MjA5NzE1MjAw"
-  }, {
+  },
+  {
+    "key": "config/application/eea.keycloak.realmName",
+    "value": "JHtLRVlDTE9BS19SRUFNX05BTUU6UmVwb3J0bmV0fQ=="
+  },
+  {
+    "key": "config/application/eea.keycloak.secret",
+    "value": "JHtLRVlDTE9BS19TRUNSRVQ6YmNkN2RjZDItZDBkMC00ODY5LWI5NjUtMzU2ZDJjNzEyOWQ3fQ=="
+  },
+  {
+    "key": "config/application/eea.keycloak.clientId",
+    "value": "JHtLRVlDTE9BS19DTElFTlRfSUQ6cmVwb3J0bmV0fQ=="
+  },
+  {
+    "key": "config/application/eea.keycloak.host",
+    "value": "JHtLRVlDTE9BS19IT1NUOms4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzIyOTF9"
+  },
+  {
+    "key": "config/application/eea.keycloak.scheme",
+    "value": "JHtLRVlDTE9BS19TQ0hFTUU6aHR0cH0="
+  },
+  {
+    "key": "config/application/eea.keycloak.publicKey",
+    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTBVUzZiNDlIdUxkZ0dEYXltVzFqOXR5VWlqdjQrN3J0WTh2eEVGeVRGbDZmdFFxK3N2Sm5RNUlWWEw0aFM2c0ltbFFnbEx1WER2UDAvU2UxVHlNSzB2T3pzWXA2aVd0WUtUSmFvaFU0dVlUMnN3OWRJU0dhdjVMN25ZT0R5dlV0bHZqa2x2bzloRUNPaVRLaEJsa0VoUDhlV1dFWG1WOURHMERYL0l0eGZZbnpVd1JZSGJxZ2tYZWZZbmhmRTBxQ3p2Um9oYnNyZ1lSaitibmFmL1VkOHkwWHdGVTJaQTArK2dYT2JHalBoQy9JTFk3S2JxNnFLa1Z2TnVDam00MmdjUTNvWXRvVUYrR1M1TUZ4QjZ5c3BPMmcxcTNSN0t3VU9hS1h5bjh6OVlsY2RVZkVOQ2R0eXhTbFBqb1FLdkg2Y3hSSmRseE9Ha3RlK0V0WEN2TENIUUlEQVFBQn0="
+  },
+  {
+    "key": "config/ums/eea.keycloak.admin.user",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
+  },
+  {
+    "key": "config/ums/eea.keycloak.admin.password",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9QQVNTV09SRDphZG1pbn0="
+  },
+  {
+    "key": "config/ums/eea.keycloak.admin.token.expiration",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9UT0tFTl9USU1FT1VUOjMwMDAwMH0="
+  },
+  {
+    "key": "config/document/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/document/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
+  },
+  {
+    "key": "config/document/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
+  },
+  {
     "key": "config/document/targetDirectory",
-    "value": "Li90YXJnZXQ="
-  }, {
+    "value": "JHtPQUtfRElSRUNUT1JZX0dDOi4vdGFyZ2V0fQ=="
+  },
+  {
     "key": "config/document/oakRepositoryUrl",
-    "value": "bG9jYWxob3N0"
-  }, {
+    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
+  },
+  {
     "key": "config/document/nameOakCollection",
-    "value": "b2Fr"
-  }, {
+    "value": "JHtNT05HT19EQl9ERUZBVUxUX0NPTExFQ1RJT046b2FrfQ=="
+  },
+  {
     "key": "config/document/oakPort",
-    "value": "MjcwMTc="
-  }, {
+    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
+  },
+  {
     "key": "config/document/oakUser",
-    "value": "YWRtaW4="
+    "value": "JHtNT05HT19EQl9VU0VSTkFNRTphZG1pbn0="
+  },
+  {
+    "key": "config/dataset/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
+  },
+  {
+    "key": "config/dataset/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
   }
 ]
