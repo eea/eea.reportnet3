@@ -8,14 +8,19 @@ import { DataSetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSe
 import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
+const addRecordById = async (dataSetId, tableSchemaId, record) => {
+  const recordAdded = await api.addRecordById(dataSetId, tableSchemaId, record);
+  return recordAdded;
+};
+
 const deleteDataById = async dataSetId => {
   const dataDeleted = await api.deleteDataSetDataById(dataSetId);
   return dataDeleted;
 };
 
-const deleteRowByIds = async (dataSetId, rowIds) => {
-  const rowDeleted = await api.deleteDataSetRowByIds(dataSetId, rowIds);
-  return rowDeleted;
+const deleteRecordByIds = async (dataSetId, recordIds) => {
+  const recordDeleted = await api.deleteDataSetRecordByIds(dataSetId, recordIds);
+  return recordDeleted;
 };
 
 const deleteTableDataById = async (dataSetId, tableId) => {
@@ -220,8 +225,9 @@ const transposeMatrix = matrix => {
 };
 
 export const ApiDataSetRepository = {
+  addRecordById,
   deleteDataById,
-  deleteRowByIds,
+  deleteRecordByIds,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,
