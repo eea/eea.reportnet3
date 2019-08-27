@@ -1,0 +1,21 @@
+.dropdown {
+  position: relative;
+  display: inline-block;
+
+  .dropdown_content {
+    display: none;
+    right: 0px;
+  }
+
+  &:hover {
+    cursor: pointer;
+
+    .dropdown_content {
+      display: block;
+    }
+  }
+}
+
+.icon {
+  font-size: 1.5rem;
+}
