@@ -471,13 +471,13 @@ const DataViewer = withRouter(
 
       const totalCount = <span>Total: {totalRecords} rows</span>;
 
-      const getPosition = button => {
+      const getExportButtonPosition = button => {
+        const buttonLeftPosition = document.getElementById('buttonExportTable').offsetLeft;
         const buttonTopPosition = button.style.top;
-        const buttonLeftPosition = button.style.left;
 
         const exportTableMenu = document.getElementById('exportTableMenu');
         exportTableMenu.style.top = buttonTopPosition;
-        exportTableMenu.style.left = buttonLeftPosition;
+        exportTableMenu.style.left = `${buttonLeftPosition}px`;
       };
 
       return (
@@ -492,6 +492,7 @@ const DataViewer = withRouter(
                 onClick={() => setImportDialogVisible(true)}
               />
               <Button
+                id="buttonExportTable"
                 className={`p-button-rounded p-button-secondary`}
                 icon={loadingFile ? 'spinnerAnimate' : 'import'}
                 label={resources.messages['exportTable']}
@@ -503,7 +504,7 @@ const DataViewer = withRouter(
                 ref={exportMenuRef}
                 id="exportTableMenu"
                 onShow={e => {
-                  getPosition(e.target);
+                  getExportButtonPosition(e.target);
                 }}
               />
               <Button
