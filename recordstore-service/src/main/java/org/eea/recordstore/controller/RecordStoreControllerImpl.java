@@ -1,5 +1,6 @@
 package org.eea.recordstore.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -41,6 +42,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * Reste data set data base.
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/reset", method = RequestMethod.POST)
   public void resteDataSetDataBase() {
     try {
@@ -58,6 +60,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idDatasetSchema the id dataset schema
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/dataset/create/{datasetName}", method = RequestMethod.POST)
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
@@ -79,6 +82,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @return the connection to dataset
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/connection/{datasetName}", method = RequestMethod.GET)
   public ConnectionDataVO getConnectionToDataset(
       @PathVariable("datasetName") final String datasetName) {
@@ -97,6 +101,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @return the connection to dataset
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
   public List<ConnectionDataVO> getDataSetConnections() {
     List<ConnectionDataVO> vo = null;

@@ -59,7 +59,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the data flow VO
    */
   @Override
-  // @HystrixCommand(fallbackMethod = "errorHandler")
+  @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
@@ -77,52 +77,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
-  /**
-   * Error handler data flow vo.
-   *
-   * @param id the id
-   *
-   * @return the data flow vo
-   */
-  public static DataFlowVO errorHandler(@PathVariable("id") final Long id) {
-    final String errorMessage = String.format("Dataflow with id: %d has a problem", id);
-    final DataFlowVO result = new DataFlowVO();
-    result.setId(-1L);
-    LOG_ERROR.error(errorMessage);
-    return result;
-  }
-
-
-  /**
-   * Error handler list.
-   *
-   * @return the list
-   */
-  public static List<DataFlowVO> errorHandlerList() {
-    final String errorMessage = String.format("User has problems to retrieve dataflows");
-    final List<DataFlowVO> results = new ArrayList<>();
-    LOG_ERROR.error(errorMessage);
-    return results;
-  }
-
-
-  /**
-   * Error handler list completed.
-   *
-   * @param pageNum the page num
-   * @param pageSize the page size
-   *
-   * @return the list
-   */
-  public static List<DataFlowVO> errorHandlerListCompleted(final Integer pageNum,
-      final Integer pageSize) {
-    final String errorMessage = String.format(
-        "User has problems to retrieve dataflows completed, form page %d with pageSize of %d",
-        pageNum, pageSize);
-    final List<DataFlowVO> results = new ArrayList<>();
-    LOG_ERROR.error(errorMessage);
-    return results;
-  }
 
   /**
    * Find by status.
@@ -132,6 +86,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findByStatus(TypeStatusEnum status) {
 
@@ -152,7 +107,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-//  @HystrixCommand(fallbackMethod = "errorHandlerList")
+  @HystrixCommand
   @GetMapping(value = "/pendingaccepted", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findPendingAccepted() {
 
@@ -179,7 +134,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
-  //@HystrixCommand(fallbackMethod = "errorHandlerListCompleted")
+  @HystrixCommand
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findCompleted(Integer pageNum, Integer pageSize) {
 
@@ -206,6 +161,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataFlowVO> findUserDataflowsByStatus(TypeRequestEnum type) {
 
@@ -229,6 +185,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param type the type
    */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUserRequest(String idUserRequest, TypeRequestEnum type) {
@@ -249,6 +206,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param userId the user id
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/{idDataflow}/contributor/add", produces = MediaType.APPLICATION_JSON_VALUE)
   public void addContributor(@PathVariable("idDataflow") Long idDataflow, String userId) {
 
@@ -269,6 +227,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param userId the user id
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "{idDataflow}/contributor/remove")
   public void removeContributor(@PathVariable("idDataflow") Long idDataflow, String userId) {
     try {
@@ -286,7 +245,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param dataFlowVO the data flow VO
    */
   @Override
-  // @HystrixCommand(fallbackMethod = "createDataFlow")
+  @HystrixCommand
   @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createDataFlow(@RequestBody DataFlowVO dataFlowVO) {
 
