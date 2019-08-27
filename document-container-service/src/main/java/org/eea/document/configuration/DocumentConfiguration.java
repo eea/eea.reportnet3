@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableAspectJAutoProxy
 @EnableWebMvc
-@EeaEnableSecurity
 public class DocumentConfiguration implements WebMvcConfigurer {
 
   /**

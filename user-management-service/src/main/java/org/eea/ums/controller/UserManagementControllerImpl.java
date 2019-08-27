@@ -1,5 +1,6 @@
 package org.eea.ums.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
   public TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password) {
@@ -37,12 +39,14 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/refreshToken", method = RequestMethod.POST)
   public TokenVO refreshToken(@RequestParam("refreshToken") String refreshToken) {
     return securityProviderInterfaceService.refreshToken(refreshToken);
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/checkAccess", method = RequestMethod.GET)
   public Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
       @RequestParam("scopes") AccessScopeEnum[] scopes) {
@@ -50,6 +54,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser() {
     Map<String, String> details = (Map<String, String>) SecurityContextHolder.getContext()
@@ -62,6 +67,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources_by_type", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceEnum resourceType) {
@@ -71,6 +77,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources_by_role", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("securityRole") SecurityRoleEnum securityRole) {
@@ -80,6 +87,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources_by_type_role", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceEnum resourceType,
@@ -91,6 +99,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
+  @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";
