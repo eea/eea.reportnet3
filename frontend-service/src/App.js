@@ -12,7 +12,6 @@ import { ReportingDataFlow } from 'ui/views/ReportingDataFlow/ReportingDataFlow'
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { UserService } from 'core/services/User';
 import { userReducer } from 'ui/views/_components/_context/UserReducer';
 
 import langResources from 'conf/messages.en.json';
