@@ -1,6 +1,6 @@
 import isNull from 'lodash/isNull';
 
-import { api } from 'core/infrastructure/api';
+import { apiDataSet } from 'core/infrastructure/api/domain/model/DataSet';
 import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
 import { DataSet } from 'core/domain/model/DataSet/DataSet';
 import { DataSetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
@@ -8,18 +8,28 @@ import { DataSetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSe
 import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
+const addRecordById = async (dataSetId, tableSchemaId, record) => {
+  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, record);
+  return recordAdded;
+};
+
 const deleteDataById = async dataSetId => {
-  const dataDeleted = await api.deleteDataSetDataById(dataSetId);
+  const dataDeleted = await apiDataSet.deleteDataById(dataSetId);
   return dataDeleted;
 };
 
+const deleteRecordByIds = async (dataSetId, recordIds) => {
+  const recordDeleted = await apiDataSet.deleteRecordByIds(dataSetId, recordIds);
+  return recordDeleted;
+};
+
 const deleteTableDataById = async (dataSetId, tableId) => {
-  const dataDeleted = await api.deleteDataSetTableDataById(dataSetId, tableId);
+  const dataDeleted = await apiDataSet.deleteTableDataById(dataSetId, tableId);
   return dataDeleted;
 };
 
 const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
-  const dataSetErrorsDTO = await api.dataSetErrorsById(dataSetId, pageNum, pageSize, sortField, asc);
+  const dataSetErrorsDTO = await apiDataSet.errorsById(dataSetId, pageNum, pageSize, sortField, asc);
 
   const dataSet = new DataSet(
     null,
@@ -51,7 +61,7 @@ const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
 };
 
 const errorPositionByObjectId = async (objectId, dataSetId, entityType) => {
-  const dataSetErrorDTO = await api.errorPositionByObjectId(objectId, dataSetId, entityType);
+  const dataSetErrorDTO = await apiDataSet.errorPositionByObjectId(objectId, dataSetId, entityType);
 
   const dataSetError = new DataSetError();
   dataSetError.position = dataSetErrorDTO.position;
@@ -63,7 +73,7 @@ const errorPositionByObjectId = async (objectId, dataSetId, entityType) => {
 };
 
 const errorStatisticsById = async dataSetId => {
-  const dataSetTablesDTO = await api.dataSetStatisticsById(dataSetId);
+  const dataSetTablesDTO = await apiDataSet.statisticsById(dataSetId);
 
   const dataSet = new DataSet();
   dataSet.dataSetSchemaName = dataSetTablesDTO.nameDataSetSchema;
@@ -98,17 +108,17 @@ const errorStatisticsById = async dataSetId => {
 };
 
 const exportDataById = async (dataSetId, fileType) => {
-  const dataSetData = await api.exportDataSetDataById(dataSetId, fileType);
+  const dataSetData = await apiDataSet.exportDataById(dataSetId, fileType);
   return dataSetData;
 };
 
 const exportTableDataById = async (dataSetId, tableSchemaId, fileType) => {
-  const dataSetTableData = await api.exportDataSetTableDataById(dataSetId, tableSchemaId, fileType);
+  const dataSetTableData = await apiDataSet.exportTableDataById(dataSetId, tableSchemaId, fileType);
   return dataSetTableData;
 };
 
 const schemaById = async dataFlowId => {
-  const dataSetSchemaDTO = await api.dataSetSchemaById(dataFlowId);
+  const dataSetSchemaDTO = await apiDataSet.schemaById(dataFlowId);
 
   const dataSet = new DataSet();
   dataSet.dataSetSchemaId = dataSetSchemaDTO.idDatasetSchema;
@@ -143,7 +153,7 @@ const schemaById = async dataFlowId => {
 };
 
 const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
-  const tableDataDTO = await api.dataSetTableDataById(dataSetId, tableSchemaId, pageNum, pageSize, fields);
+  const tableDataDTO = await apiDataSet.tableDataById(dataSetId, tableSchemaId, pageNum, pageSize, fields);
   const table = new DataSetTable();
 
   if (tableDataDTO.totalRecords > 0) {
@@ -200,8 +210,13 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
   return table;
 };
 
+const updateFieldById = async (dataSetId, fieldSchemaId, fieldValue) => {
+  const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, fieldSchemaId, fieldValue);
+  return fieldUpdated;
+};
+
 const validateDataById = async dataSetId => {
-  const dataValidation = await api.validateDataSetById(dataSetId);
+  const dataValidation = await apiDataSet.validateById(dataSetId);
   return dataValidation;
 };
 
@@ -215,7 +230,9 @@ const transposeMatrix = matrix => {
 };
 
 export const ApiDataSetRepository = {
+  addRecordById,
   deleteDataById,
+  deleteRecordByIds,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,
@@ -224,5 +241,6 @@ export const ApiDataSetRepository = {
   exportTableDataById,
   schemaById,
   tableDataById,
+  updateFieldById,
   validateDataById
 };

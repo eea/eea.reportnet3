@@ -17,6 +17,9 @@
 	"deleteImportTable": {
 		"url":"/dataset/{:dataSetId}/deleteImportTable/{:tableId}"
 	},
+	"deleteRecord":{
+		"url":"/dataset/{:dataSetId}/record"
+	},
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
 	},
@@ -64,5 +67,8 @@
 	},
 	"refreshToken":{
 		"url": "/user/refreshToken?refreshToken={:refreshToken}"
+	},
+	"logout":{
+		"url": "/user/logout?refreshToken={:refreshToken}"
 	}
 }

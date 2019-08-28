@@ -30,8 +30,13 @@ const UserCard = React.memo(() => {
           title="logout"
           onClick={async e => {
             e.preventDefault();
-            const logout = await UserService.logout();
-            user.onLogout();
+            try {
+              const logout = await UserService.logout();
+            } catch (error) {
+              console.error(error);
+            } finally {
+              user.onLogout();
+            }
           }}>
           <Icon icon="logout" />
         </a>

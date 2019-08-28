@@ -1,7 +1,7 @@
 import jwt_decode from 'jwt-decode';
 import moment from 'moment';
 
-import { api } from 'core/infrastructure/api';
+import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
@@ -12,7 +12,7 @@ const timeOut = time => {
 };
 
 const login = async (userName, password) => {
-  const userTokensTDO = await api.login(userName, password);
+  const userTokensTDO = await apiUser.login(userName, password);
   const userTDO = jwt_decode(userTokensTDO.accessToken);
   const user = new User(
     userTDO.sub,
@@ -28,12 +28,14 @@ const login = async (userName, password) => {
   return user;
 };
 const logout = async userId => {
+  const currentTokens = userStorage.get();
   userStorage.remove();
-  return;
+  const response = await apiUser.logout(currentTokens.refreshToken);
+  return response;
 };
 const refreshToken = async refreshToken => {
   const currentTokens = userStorage.get();
-  const userTokensTDO = await api.refreshToken(currentTokens.refreshToken);
+  const userTokensTDO = await apiUser.refreshToken(currentTokens.refreshToken);
   const userTDO = jwt_decode(userTokensTDO.accessToken);
   const user = new User(
     userTDO.sub,
