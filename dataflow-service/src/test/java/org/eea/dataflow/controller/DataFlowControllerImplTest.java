@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,14 +36,20 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DataFlowControllerImplTest {
 
-  /** The data flow controller impl. */
+  /**
+   * The data flow controller impl.
+   */
   @InjectMocks
   DataFlowControllerImpl dataFlowControllerImpl;
 
-  /** The dataflow VO. */
+  /**
+   * The dataflow VO.
+   */
   private DataFlowVO dataflowVO;
 
-  /** The dataflow service. */
+  /**
+   * The dataflow service.
+   */
   @Mock
   private DataflowService dataflowService;
 
@@ -89,35 +96,6 @@ public class DataFlowControllerImplTest {
     when(dataflowService.getById(Mockito.any())).thenReturn(dataflowVO);
     dataFlowControllerImpl.findById(1L);
     assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L));
-  }
-
-  /**
-   * Test error handler.
-   */
-  @Test
-  public void testErrorHandler() {
-    dataflowVO.setId(-1L);
-    assertEquals("fail", dataflowVO, DataFlowControllerImpl.errorHandler(1L));
-  }
-
-  /**
-   * Test error handler list.
-   */
-  @Test
-  public void testErrorHandlerList() {
-    dataflowVO.setId(-1L);
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerList());
-  }
-
-  /**
-   * Test error handler list completed.
-   */
-  @Test
-  public void testErrorHandlerListCompleted() {
-    dataflowVO.setId(-1L);
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-    assertEquals("fail", dataflowVOs, DataFlowControllerImpl.errorHandlerListCompleted(0, 10));
   }
 
 

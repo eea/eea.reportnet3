@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -157,6 +158,7 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+
   @Test
   public void getGroupsByUser() {
 
@@ -177,6 +179,45 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertNotNull(result);
     Assert.assertTrue(result.length > 0);
     Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_PROVIDER");
+
+  }
+
+  @Test(expected = RestClientException.class)
+  public void getGroupsByUserError() {
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate)
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+
+    try {
+      GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
+    } catch (RestClientException e) {
+      Assert.assertEquals("error test", e.getMessage());
+      throw e;
+    }
+
+
+  }
+
+  @Test
+  public void logout() {
+    keycloakConnectorService.logout("refreshToken");
+    Mockito.verify(restTemplate, Mockito.times(1))
+        .postForEntity(Mockito.anyString(),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+  }
+
+  @Test(expected = RestClientException.class)
+  public void logoutException() {
+
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate)
+        .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+    try {
+      keycloakConnectorService.logout("refreshToken");
+    } catch (RestClientException e) {
+      Assert.assertEquals("error test", e.getMessage());
+      throw e;
+    }
 
   }
 }

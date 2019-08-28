@@ -102,4 +102,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertEquals(result.get(0).getResource(), ResourceEnum.DATAFLOW);
     Assert.assertEquals(result.get(0).getRole(), SecurityRoleEnum.DATA_PROVIDER);
   }
+
+  @Test
+  public void doLogout() {
+    keycloakSecurityProviderInterfaceService.doLogout("refreshToken");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .logout(Mockito.anyString());
+  }
 }

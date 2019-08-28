@@ -90,4 +90,11 @@ public interface SecurityProviderInterfaceService {
    * @return the token vo
    */
   TokenVO refreshToken(String refreshToken);
+
+  /**
+   * Do logout.
+   *
+   * @param refreshToken the refresh token
+   */
+  void doLogout(String refreshToken);
 }

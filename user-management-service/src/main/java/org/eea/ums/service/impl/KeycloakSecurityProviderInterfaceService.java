@@ -50,6 +50,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   @Override
+  public void doLogout(String refreshToken) {
+    keycloakConnectorService.logout(refreshToken);
+  }
+
+  @Override
   public Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes) {
     return !keycloakConnectorService.checkUserPermision(resource, scopes).equals("DENY");
   }
