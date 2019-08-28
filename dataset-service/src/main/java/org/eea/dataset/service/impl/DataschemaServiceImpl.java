@@ -3,8 +3,12 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
@@ -23,6 +27,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 
@@ -318,5 +323,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   }
 
+  @Autowired
+  RecordRepository rr;
+
+  @Override
+  @Transactional
+  @Async
+  public CompletableFuture<Boolean> pruebaAsync(List<RecordValue> taka) {
+    long preSave = System.currentTimeMillis();
+    rr.saveAll(taka);
+    long postSave = System.currentTimeMillis();
+    LOG.info("datasetRepository.saveAndFlush(): {}", postSave - preSave);
+    return CompletableFuture.completedFuture(true);
+  }
+
+  @Override
+  @Transactional
+  public void pruebaTransactional(List<List<RecordValue>> listaGeneral) {
+    long preSave = System.currentTimeMillis();
+    listaGeneral.parallelStream().forEach(taki -> rr.saveAll(taki));
+    long postSave = System.currentTimeMillis();
+    LOG.info("datasetRepository.saveAndFlush(): {}", postSave - preSave);
+  }
 
 }

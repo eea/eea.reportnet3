@@ -48,6 +48,7 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -215,6 +216,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
+  @Autowired
+  private DatasetSchemaService datasetschemaservice;
+
 
 
   /**
@@ -250,6 +254,11 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  @Autowired
+  TableRepository tr;
+
+  @Autowired
+  RecordRepository rr;
 
   /**
    * Process file.
@@ -263,7 +272,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
   public void processFile(final Long datasetId, final String fileName, final InputStream is,
       final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
@@ -276,32 +284,70 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
-
       // Get the dataFlowId from the metabase
       final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
+      long preParse = System.currentTimeMillis();
       final DataSetVO datasetVO =
           context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
-      // map the VO to the entity
+
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
       }
-      datasetVO.setId(datasetId);
 
+      datasetVO.getTableVO().get(0).getRecords();
+      long postParse = System.currentTimeMillis();
+      LOG.info("context.parse(): " + (postParse - preParse));
+
+      // map the VO to the entity
+      datasetVO.setId(datasetId);
+      long preSave = System.currentTimeMillis();
       final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-      if (dataset == null) {
-        throw new IOException("Error mapping file");
-      }
+
+      // **********************************************************************************
+      // **********************************************************************************
+
+      // Guardar tabla vacía
+      List<RecordValue> todosRecords = dataset.getTableValues().get(0).getRecords();
+      dataset.getTableValues().get(0).setRecords(new ArrayList<>());
+
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
       fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
-      // save dataset to the database
-      datasetRepository.saveAndFlush(dataset);
+
+      if (null == oldTableId) {
+        tr.saveAndFlush(dataset.getTableValues().get(0));
+      }
+
+      List<List<RecordValue>> listaGeneral = new ArrayList<>();
+      final int BATCH = 1000;
+
+      int nListas = (int) Math.ceil(todosRecords.size() / (double) BATCH);
+      if (nListas > 1) {
+        for (int i = 0; i < (nListas - 1); i++) {
+          listaGeneral.add(new ArrayList<>(todosRecords.subList(BATCH * i, BATCH * (i + 1))));
+        }
+      }
+      listaGeneral
+          .add(new ArrayList<>(todosRecords.subList(BATCH * (nListas - 1), todosRecords.size())));
+
+      for (int i = 0; i < listaGeneral.size(); i++) {
+        LOG.info("Lista {} tiene {} elementos", i, listaGeneral.get(i).size());
+      }
+
+      datasetschemaservice.pruebaTransactional(listaGeneral);
+
       LOG.info("File processed and saved into DB");
+    } catch (Exception e) {
+      LOG.info(e.getMessage());
     } finally {
       is.close();
     }
+  }
+
+  public void dividirDataset(DatasetValue dataset) {
+    dataset.getTableValues().get(0).getRecords().size();
   }
 
 
