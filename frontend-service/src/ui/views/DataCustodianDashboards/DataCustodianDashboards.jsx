@@ -18,7 +18,7 @@ import { Chart } from 'primereact/chart';
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userData = useContext(UserContext);
-  const [loading, setLoading] = useState(false); //TODO change to true & false when loaded
+  const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
   const [dashboardData, setDashboardData] = useState({});
@@ -35,26 +35,27 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, [history, match.params.dataFlowId, resources.messages]);
 
   useEffect(() => {
+    setLoading(true);
     setDashboardData({
-      labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      labels: ['FIRST', 'SECOND', 'FIRD', 'FOURTH', 'FIFTH', 'SIXTH', 'SEVENTH'],
       datasets: [
         {
           type: 'bar',
           label: 'Dataset 1',
           backgroundColor: '#66BB6A',
-          data: [50, 25, 12, 48, 90, 76, 42]
+          data: [50, 25, 12, 48, 90, 76, 85]
         },
         {
           type: 'bar',
           label: 'Dataset 2',
           backgroundColor: '#FFCA28',
-          data: [21, 84, 24, 75, 37, 65, 34]
+          data: [21, 84, 24, 75, 37, 65, 85]
         },
         {
           type: 'bar',
           label: 'Dataset 3',
           backgroundColor: '#42A5F5',
-          data: [41, 52, 24, 74, 23, 21, 32]
+          data: [41, 52, 24, 74, 23, 21, 85]
         }
       ]
     });
@@ -78,7 +79,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         ]
       }
     });
+
+    setLoading(false);
   }, []);
+
   const layout = children => {
     return (
       <MainLayout>
