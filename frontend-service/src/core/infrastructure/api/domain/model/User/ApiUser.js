@@ -15,7 +15,17 @@ export const apiUser = {
     });
     return tokens.data;
   },
-  logout: async userId => {},
+  logout: async refreshToken => {
+    const response = await HTTPRequester.post({
+      url: window.env.REACT_APP_JSON
+        ? ''
+        : getUrl(config.logout.url, {
+            refreshToken
+          }),
+      queryString: {}
+    });
+    return response;
+  },
   refreshToken: async refreshToken => {
     const tokens = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON
