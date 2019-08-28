@@ -136,11 +136,6 @@ function boolean isBlank(String value){
 //FUNCTIONS DATES AND JAVA METHODS DATES
 
 
-
-function boolean compareDate( Object listFields ,Long positionColumnInit,Long positionColumnEnd){
-	return DateDroolsUtils.compareDate(listFields,positionColumnInit,positionColumnEnd);
-}
-
 function boolean isIntervalYear( String value ,Integer initial, Integer end, Boolean interval){
 	return DateDroolsUtils.isIntervalYear(value,initial,end,interval);
 }
