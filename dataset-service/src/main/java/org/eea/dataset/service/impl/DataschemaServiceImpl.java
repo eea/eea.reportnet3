@@ -50,35 +50,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
 
-  /** The Constant GENERAL_WARNING. */
   private static final String GENERAL_WARNING = "WARNING";
-
-  /** The Constant VALIDATION_WARNING. */
   private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
-
-  /** The Constant GENERAL_ERROR. */
   private static final String GENERAL_ERROR = "ERROR";
-
-  /** The Constant STRING_WARNING. */
   private static final String STRING_WARNING =
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
-
-  /** The Constant INTEGER_ERROR. */
   private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
-
-  /** The Constant BOOLEAN_ERROR. */
   private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
-
-  /** The Constant COORDINATE_LAT_ERROR. */
   private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
-
-  /** The Constant COORDINATE_LONG_ERROR. */
   private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
-
-  /** The Constant DATE_ERROR. */
   private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
-  /** The Constant WARNING. */
   private static final String WARNING = "WARNING";
 
   /** The Constant NULL. */
@@ -88,7 +70,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Creates the data schema.
    *
    * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
    */
   @Override
   public void createDataSchema(Long datasetId, Long dataflowId) {
@@ -104,21 +85,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
-    for (int w = 0; w < 5; w++) {
-      RuleDataSet ruleDataset = new RuleDataSet();
-      List<String> listaStrinsDataset = new ArrayList<String>();
-      listaStrinsDataset.add(GENERAL_ERROR);
-      listaStrinsDataset.add(GENERAL_WARNING);
-      ruleDataset.setThenCondition(listaStrinsDataset);
+    RuleDataSet ruleDataset = new RuleDataSet();
+    List<String> listaStrinsDataset = new ArrayList<String>();
+    listaStrinsDataset.add(GENERAL_ERROR);
+    listaStrinsDataset.add(GENERAL_WARNING);
+    ruleDataset.setThenCondition(listaStrinsDataset);
 
-      ruleDataset.setRuleId(new ObjectId());
-      ruleDataset.setDataFlowId(dataflowId);
-      ruleDataset.setIdDataSetSchema(idDataSetSchema);
-      ruleDataset.setScope(TypeEntityEnum.DATASET);
-      ruleDataset.setWhenCondition(NULL);
-      ruleDataset.setRuleName("dataset regla_" + w);
-      ruleDataSetList.add(ruleDataset);
-    }
+    ruleDataset.setRuleId(new ObjectId());
+    ruleDataset.setDataFlowId(dataflowId);
+    ruleDataset.setIdDataSetSchema(idDataSetSchema);
+    ruleDataset.setScope(TypeEntityEnum.DATASET);
+    ruleDataset.setWhenCondition(NULL);
+    ruleDataset.setRuleName("dataset regla");
+    ruleDataSetList.add(ruleDataset);
     dataSetSchema.setRuleDataSet(ruleDataSetList);
 
     for (int i = 1; i <= values.size(); i++) {
@@ -128,24 +107,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.setIdTableSchema(idTableSchema);
 
 
-
       List<RuleTable> ruleTableList = new ArrayList<RuleTable>();
-      for (int w = 0; w < 5; w++) {
-        RuleTable ruleTable = new RuleTable();
-        List<String> listaStrinsRuleTable = new ArrayList<String>();
-        listaStrinsRuleTable.add(VALIDATION_WARNING);
-        listaStrinsRuleTable.add(GENERAL_ERROR);
-        ruleTable.setThenCondition(listaStrinsRuleTable);
+      RuleTable ruleTable = new RuleTable();
+      List<String> listaStrinsRuleTable = new ArrayList<String>();
+      listaStrinsRuleTable.add(VALIDATION_WARNING);
+      listaStrinsRuleTable.add(GENERAL_ERROR);
+      ruleTable.setThenCondition(listaStrinsRuleTable);
 
-        ruleTable.setRuleId(new ObjectId());
-        ruleTable.setDataFlowId(dataflowId);
-        ruleTable.setIdTableSchema(idTableSchema);
-        ruleTable.setWhenCondition(NULL);
-        ruleTable.setRuleName("table regla" + i + "_" + w);
-        ruleTable.setScope(TypeEntityEnum.TABLE);
-        ruleTableList.add(ruleTable);
+      ruleTable.setRuleId(new ObjectId());
+      ruleTable.setDataFlowId(dataflowId);
+      ruleTable.setIdTableSchema(idTableSchema);
+      ruleTable.setWhenCondition(NULL);
+      ruleTable.setRuleName("table regla" + i);
+      ruleTable.setScope(TypeEntityEnum.TABLE);
+      ruleTableList.add(ruleTable);
 
-      }
+
       tableSchema.setNameTableSchema(table.getTableName());
       ObjectId idRecordSchema = new ObjectId();
       RecordSchema recordSchema = new RecordSchema();
@@ -164,20 +141,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       createRuleFields(i, table, recordSchema, fieldSchemas, headersSize, dataflowId);
 
 
-      for (int w = 0; w < 10; w++) {
-        RuleRecord ruleRecord = new RuleRecord();
-        List<String> listaStrinsRuleRecord = new ArrayList<String>();
-        ruleRecord.setRuleId(new ObjectId());
-        ruleRecord.setDataFlowId(dataflowId);
-        ruleRecord.setScope(TypeEntityEnum.RECORD);
-        ruleRecord.setIdRecordSchema(idRecordSchema);
-        ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
-        ruleRecord.setRuleName("RecordRule_" + i + "_" + w);
-        listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
-        listaStrinsRuleRecord.add(GENERAL_ERROR);
-        ruleRecord.setThenCondition(listaStrinsRuleRecord);
-        ruleRecordList.add(ruleRecord);
-      }
+      RuleRecord ruleRecord = new RuleRecord();
+      List<String> listaStrinsRuleRecord = new ArrayList<String>();
+      ruleRecord.setRuleId(new ObjectId());
+      ruleRecord.setDataFlowId(dataflowId);
+      ruleRecord.setScope(TypeEntityEnum.RECORD);
+      ruleRecord.setIdRecordSchema(idRecordSchema);
+      ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
+      ruleRecord.setRuleName("RecordRule_" + i + "_");
+      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
+      listaStrinsRuleRecord.add(GENERAL_ERROR);
+      ruleRecord.setThenCondition(listaStrinsRuleRecord);
+      ruleRecordList.add(ruleRecord);
+
       recordSchema.setRuleRecord(ruleRecordList);
       recordSchema.setFieldSchema(fieldSchemas);
       tableSchema.setRecordSchema(recordSchema);
@@ -220,93 +196,31 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rule.setScope(TypeEntityEnum.FIELD);
 
       RuleField rule2 = new RuleField();
-      RuleField rule3 = new RuleField();
-      RuleField rule4 = new RuleField();
-      RuleField rule5 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<String>();
       switch (header.getHeaderType().toString().toLowerCase().trim()) {
-        case "text":
+        case "string":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("isText(value)");
-          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 2);
+          rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add("that text have invalid caracteres");
           listaMsgTypeValidation.add("ERROR");
           rule2.setThenCondition(listaMsgTypeValidation);
-          rule2.setScope(TypeEntityEnum.FIELD);
           ruleField.add(rule2);
-
-          rule3.setRuleId(new ObjectId());
-          rule3.setDataFlowId(dataflowId);
-          rule3.setIdFieldSchema(idFieldSchema);
-          rule3.setWhenCondition("isText(value)");
-          rule3.setRuleName("FieldRule_" + i + "." + j + "." + 3);
-          rule3.setThenCondition(listaMsgTypeValidation);
-          rule3.setScope(TypeEntityEnum.FIELD);
-          rule3.setRuleId(new ObjectId());
-          ruleField.add(rule3);
-          rule4.setRuleId(new ObjectId());
-          rule4.setDataFlowId(dataflowId);
-          rule4.setIdFieldSchema(idFieldSchema);
-          rule4.setWhenCondition("isText(value)");
-          rule4.setRuleName("FieldRule_" + i + "." + j + "." + 4);
-          rule4.setThenCondition(listaMsgTypeValidation);
-          rule4.setScope(TypeEntityEnum.FIELD);
-          rule4.setRuleId(new ObjectId());
-          ruleField.add(rule4);
-          rule5.setRuleId(new ObjectId());
-          rule5.setDataFlowId(dataflowId);
-          rule5.setIdFieldSchema(idFieldSchema);
-          rule5.setWhenCondition("isText(value)");
-          rule5.setRuleName("FieldRule_" + i + "." + j + "." + 5);
-          rule5.setThenCondition(listaMsgTypeValidation);
-          rule5.setScope(TypeEntityEnum.FIELD);
-          rule5.setRuleId(new ObjectId());
-          ruleField.add(rule5);
-
-
+          rule2.setScope(TypeEntityEnum.FIELD);
           break;
         case "number":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isValid(value, 'double')");
+          rule2.setWhenCondition("!isValid(value) || value == null");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(INTEGER_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
-
-          rule3.setRuleId(new ObjectId());
-          rule3.setDataFlowId(dataflowId);
-          rule3.setIdFieldSchema(idFieldSchema);
-          rule3.setWhenCondition("isText(value)");
-          rule3.setRuleName("FieldRule_" + i + "." + j + "." + 3);
-          rule3.setThenCondition(listaMsgTypeValidation);
-          rule3.setScope(TypeEntityEnum.FIELD);
-          rule3.setRuleId(new ObjectId());
-          ruleField.add(rule3);
-          rule4.setRuleId(new ObjectId());
-          rule4.setDataFlowId(dataflowId);
-          rule4.setIdFieldSchema(idFieldSchema);
-          rule4.setWhenCondition("isText(value)");
-          rule4.setRuleName("FieldRule_" + i + "." + j + "." + 4);
-          rule4.setThenCondition(listaMsgTypeValidation);
-          rule4.setScope(TypeEntityEnum.FIELD);
-          rule4.setRuleId(new ObjectId());
-          ruleField.add(rule4);
-          rule5.setRuleId(new ObjectId());
-          rule5.setDataFlowId(dataflowId);
-          rule5.setIdFieldSchema(idFieldSchema);
-          rule5.setWhenCondition("isText(value)");
-          rule5.setRuleName("FieldRule_" + i + "." + j + "." + 5);
-          rule5.setThenCondition(listaMsgTypeValidation);
-          rule5.setScope(TypeEntityEnum.FIELD);
-          rule5.setRuleId(new ObjectId());
-          ruleField.add(rule5);
-
           break;
         case "boolean":
           rule2.setRuleId(new ObjectId());
@@ -319,35 +233,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
-
-          rule3.setRuleId(new ObjectId());
-          rule3.setDataFlowId(dataflowId);
-          rule3.setIdFieldSchema(idFieldSchema);
-          rule3.setWhenCondition("isText(value)");
-          rule3.setRuleName("FieldRule_" + i + "." + j + "." + 3);
-          rule3.setThenCondition(listaMsgTypeValidation);
-          rule3.setScope(TypeEntityEnum.FIELD);
-          rule3.setRuleId(new ObjectId());
-          ruleField.add(rule3);
-          rule4.setRuleId(new ObjectId());
-          rule4.setDataFlowId(dataflowId);
-          rule4.setIdFieldSchema(idFieldSchema);
-          rule4.setWhenCondition("isText(value)");
-          rule4.setRuleName("FieldRule_" + i + "." + j + "." + 4);
-          rule4.setThenCondition(listaMsgTypeValidation);
-          rule4.setScope(TypeEntityEnum.FIELD);
-          rule4.setRuleId(new ObjectId());
-          ruleField.add(rule4);
-          rule5.setRuleId(new ObjectId());
-          rule5.setDataFlowId(dataflowId);
-          rule5.setIdFieldSchema(idFieldSchema);
-          rule5.setWhenCondition("isText(value)");
-          rule5.setRuleName("FieldRule_" + i + "." + j + "." + 5);
-          rule5.setThenCondition(listaMsgTypeValidation);
-          rule5.setScope(TypeEntityEnum.FIELD);
-          rule5.setRuleId(new ObjectId());
-          ruleField.add(rule5);
-
           break;
         case "coordinate_lat":
           rule2.setRuleId(new ObjectId());
@@ -360,35 +245,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
-
-          rule3.setRuleId(new ObjectId());
-          rule3.setDataFlowId(dataflowId);
-          rule3.setIdFieldSchema(idFieldSchema);
-          rule3.setWhenCondition("isText(value)");
-          rule3.setRuleName("FieldRule_" + i + "." + j + "." + 3);
-          rule3.setThenCondition(listaMsgTypeValidation);
-          rule3.setScope(TypeEntityEnum.FIELD);
-          rule3.setRuleId(new ObjectId());
-          ruleField.add(rule3);
-          rule4.setRuleId(new ObjectId());
-          rule4.setDataFlowId(dataflowId);
-          rule4.setIdFieldSchema(idFieldSchema);
-          rule4.setWhenCondition("isText(value)");
-          rule4.setRuleName("FieldRule_" + i + "." + j + "." + 4);
-          rule4.setThenCondition(listaMsgTypeValidation);
-          rule4.setScope(TypeEntityEnum.FIELD);
-          rule4.setRuleId(new ObjectId());
-          ruleField.add(rule4);
-          rule5.setRuleId(new ObjectId());
-          rule5.setDataFlowId(dataflowId);
-          rule5.setIdFieldSchema(idFieldSchema);
-          rule5.setWhenCondition("isText(value)");
-          rule5.setRuleName("FieldRule_" + i + "." + j + "." + 5);
-          rule5.setThenCondition(listaMsgTypeValidation);
-          rule5.setScope(TypeEntityEnum.FIELD);
-          rule5.setRuleId(new ObjectId());
-          ruleField.add(rule5);
-
           break;
         case "coordinate_long":
           rule2.setRuleId(new ObjectId());
@@ -401,35 +257,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
-
-          rule3.setRuleId(new ObjectId());
-          rule3.setDataFlowId(dataflowId);
-          rule3.setIdFieldSchema(idFieldSchema);
-          rule3.setWhenCondition("isText(value)");
-          rule3.setRuleName("FieldRule_" + i + "." + j + "." + 3);
-          rule3.setThenCondition(listaMsgTypeValidation);
-          rule3.setScope(TypeEntityEnum.FIELD);
-          rule3.setRuleId(new ObjectId());
-          ruleField.add(rule3);
-          rule4.setRuleId(new ObjectId());
-          rule4.setDataFlowId(dataflowId);
-          rule4.setIdFieldSchema(idFieldSchema);
-          rule4.setWhenCondition("isText(value)");
-          rule4.setRuleName("FieldRule_" + i + "." + j + "." + 4);
-          rule4.setThenCondition(listaMsgTypeValidation);
-          rule4.setScope(TypeEntityEnum.FIELD);
-          rule4.setRuleId(new ObjectId());
-          ruleField.add(rule4);
-          rule5.setRuleId(new ObjectId());
-          rule5.setDataFlowId(dataflowId);
-          rule5.setIdFieldSchema(idFieldSchema);
-          rule5.setWhenCondition("isText(value)");
-          rule5.setRuleName("FieldRule_" + i + "." + j + "." + 5);
-          rule5.setThenCondition(listaMsgTypeValidation);
-          rule5.setScope(TypeEntityEnum.FIELD);
-          rule5.setRuleId(new ObjectId());
-          ruleField.add(rule5);
-
           break;
         case "date":
           rule2.setRuleId(new ObjectId());
@@ -442,37 +269,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setThenCondition(listaMsgTypeValidation);
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
-
-          rule3.setRuleId(new ObjectId());
-          rule3.setDataFlowId(dataflowId);
-          rule3.setIdFieldSchema(idFieldSchema);
-          rule3.setWhenCondition("isText(value)");
-          rule3.setRuleName("FieldRule_" + i + "." + j + "." + 3);
-          rule3.setThenCondition(listaMsgTypeValidation);
-          rule3.setScope(TypeEntityEnum.FIELD);
-          rule3.setRuleId(new ObjectId());
-          ruleField.add(rule3);
-          rule4.setRuleId(new ObjectId());
-          rule4.setDataFlowId(dataflowId);
-          rule4.setIdFieldSchema(idFieldSchema);
-          rule4.setWhenCondition("isText(value)");
-          rule4.setRuleName("FieldRule_" + i + "." + j + "." + 4);
-          rule4.setThenCondition(listaMsgTypeValidation);
-          rule4.setScope(TypeEntityEnum.FIELD);
-          rule4.setRuleId(new ObjectId());
-          ruleField.add(rule4);
-          rule5.setRuleId(new ObjectId());
-          rule5.setDataFlowId(dataflowId);
-          rule5.setIdFieldSchema(idFieldSchema);
-          rule5.setWhenCondition("isText(value)");
-          rule5.setRuleName("FieldRule_" + i + "." + j + "." + 5);
-          rule5.setThenCondition(listaMsgTypeValidation);
-          rule5.setScope(TypeEntityEnum.FIELD);
-          rule5.setRuleId(new ObjectId());
-          ruleField.add(rule5);
-
           break;
       }
+      ruleField.add(rule2);
       FieldSchema fieldSchema = new FieldSchema();
       fieldSchema.setIdFieldSchema(idFieldSchema);
       fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
