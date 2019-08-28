@@ -1004,19 +1004,19 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteRecords(final Long datasetId, final List<Long> recordIds) throws EEAException {
-    if (datasetId == null || recordIds == null) {
+  public void deleteRecord(final Long datasetId, final Long recordId) throws EEAException {
+    if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
-    recordRepository.deleteRecordsWithIds(recordIds);
+    recordRepository.deleteRecordWithId(recordId);
   }
 
   /**
