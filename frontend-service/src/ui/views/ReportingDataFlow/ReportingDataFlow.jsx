@@ -104,7 +104,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         buttonTitle={resources.messages['subscribeThisButton']}
         dataFlowTitle={dataFlowData.name}
         navTitle={resources.messages['dataFlow']}
-        components={[]}
+        components={['dashboard']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <div className={styles.titleBar}>

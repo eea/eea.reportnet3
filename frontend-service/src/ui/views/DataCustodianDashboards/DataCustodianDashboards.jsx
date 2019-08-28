@@ -45,22 +45,78 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   useEffect(() => {
     setLoading(true);
     setDashboardData({
-      labels: ['FIRST', 'SECOND', 'FIRD', 'FOURTH', 'FIFTH', 'SIXTH', 'SEVENTH'],
+      labels: [
+        'FIRST',
+        'SECOND',
+        'FIRD',
+        'FOURTH',
+        'FIFTH',
+        'SIXTH',
+        'SEVENTH',
+        'DataSet name 8',
+        'DataSet name 9',
+        'DataSet name 10',
+        'DataSet name 11',
+        'DataSet name 12',
+        'DataSet name 13',
+        'DataSet name 14',
+        'DataSet name 15',
+        'DataSet name 16',
+        'DataSet name 17',
+        'DataSet name 18',
+        'DataSet name 19',
+        'DataSet name 20',
+        'DataSet name 21',
+        'DataSet name 22',
+        'DataSet name 23',
+        'DataSet name 24',
+        'DataSet name 25',
+        'DataSet name 26',
+        'DataSet name 27'
+      ],
       datasets: [
         {
           label: 'Correct',
           backgroundColor: '#004494',
-          data: [50, 25, 12, 48, 90, 76, 85]
+          data: [
+            50,
+            25,
+            70,
+            95,
+            90,
+            100,
+            5,
+            33,
+            50,
+            25,
+            70,
+            95,
+            90,
+            100,
+            5,
+            33,
+            50,
+            25,
+            70,
+            95,
+            90,
+            100,
+            5,
+            33,
+            100,
+            85,
+            0
+          ]
         },
         {
           label: 'Warning',
           backgroundColor: '#ffd617',
-          data: [21, 84, 24, 75, 37, 65, 85]
+          data: [25, 25, 20, 5, 5, 0, 10, 34, 25, 25, 20, 5, 5, 0, 10, 34, 25, 25, 20, 5, 5, 0, 10, 34, 0, 15, 1]
         },
         {
           label: 'Error',
           backgroundColor: '#DA2131',
-          data: [41, 52, 24, 74, 23, 21, 85]
+          data: [25, 50, 10, 0, 5, 0, 85, 33, 25, 50, 10, 0, 5, 0, 85, 33, 25, 50, 10, 0, 5, 0, 85, 33, 0, 0, 99]
         }
       ]
     });
@@ -74,12 +130,24 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       scales: {
         xAxes: [
           {
-            stacked: true
+            stacked: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Datasets'
+            }
           }
         ],
         yAxes: [
           {
-            stacked: true
+            stacked: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Percentage'
+            },
+            ticks: {
+              // Include a % sign in the ticks
+              callback: (value, index, values) => `${value} %`
+            }
           }
         ]
       }
@@ -102,11 +170,16 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <div className="rep-row">
-      <React.Fragment>
+    <>
+      <div className="rep-row">
         <h1>Title Hardcoded</h1>
+      </div>
+      <div className="rep-row">
+        <Chart type="bar" data={dashboardData} options={dashboardOptions} width="80%" height="30%" />
+      </div>
+      <div className={`rep-row ${styles.chart_released}`}>
         <Chart type="bar" data={dashboardData} options={dashboardOptions} width="50%" height="35%" />
-      </React.Fragment>
-    </div>
+      </div>
+    </>
   );
 });
