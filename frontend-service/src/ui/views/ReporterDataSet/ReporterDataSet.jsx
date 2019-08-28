@@ -48,7 +48,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRowId, setSelectedRowId] = useState(-1);
+  const [selectedRowErrorId, setSelectedRowErrorId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -364,17 +364,17 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       <ReporterDataSetContext.Provider
         value={{
           validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowId(selectedRowId);
+            setSelectedRowErrorId(selectedRowErrorId);
           }
         }}>
         <TabsSchema
           activeIndex={activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
           recordPositionId={recordPositionId}
-          selectedRowId={selectedRowId}
+          selectedRowErrorId={selectedRowErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
         />
@@ -393,10 +393,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
           },
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowId(selectedRowId);
+            setSelectedRowErrorId(selectedRowErrorId);
           }
         }}>
         <Dialog

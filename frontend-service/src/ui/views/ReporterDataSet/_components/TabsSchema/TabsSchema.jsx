@@ -14,7 +14,7 @@ export const TabsSchema = ({
   buttonsList = undefined,
   onTabChange,
   recordPositionId,
-  selectedRowId,
+  selectedRowErrorId,
   tables,
   tableSchemaColumns
 }) => {
@@ -35,7 +35,7 @@ export const TabsSchema = ({
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
-                  selectedRowId={table.id === activeIndex ? selectedRowId : -1}
+                  selectedRowErrorId={table.id === activeIndex ? selectedRowErrorId : -1}
                 />
               </div>
             </TabPanel>
