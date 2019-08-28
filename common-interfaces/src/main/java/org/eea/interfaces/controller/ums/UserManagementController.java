@@ -100,4 +100,11 @@ public interface UserManagementController {
   List<ResourceAccessVO> getResourcesByUser(@RequestParam("resourceType") ResourceEnum resourceType,
       @RequestParam("securityRole") SecurityRoleEnum securityRole);
 
+  /**
+   * Do log out invalidating the user session.
+   *
+   * @param refreshToken the refresh token
+   */
+  @RequestMapping(value = "/logout", method = RequestMethod.POST)
+  void doLogOut(@RequestParam("refreshToken") String refreshToken);
 }

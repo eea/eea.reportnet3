@@ -46,4 +46,11 @@ public interface KeycloakConnectorService {
    * @return the token info
    */
   TokenInfo refreshToken(String refreshToken);
+
+  /**
+   * Logout.
+   *
+   * @param refreshToken the refresh token
+   */
+  void logout(String refreshToken);
 }

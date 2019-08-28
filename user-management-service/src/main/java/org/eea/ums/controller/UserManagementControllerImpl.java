@@ -98,6 +98,12 @@ public class UserManagementControllerImpl implements UserManagementController {
         Collectors.toList());
   }
 
+  @Override
+  @RequestMapping(value = "/logout", method = RequestMethod.POST)
+  public void doLogOut(@RequestParam("refreshToken") String refreshToken) {
+    securityProviderInterfaceService.doLogout(refreshToken);
+  }
+
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
