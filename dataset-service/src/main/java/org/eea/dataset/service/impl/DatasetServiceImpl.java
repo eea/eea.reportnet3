@@ -48,13 +48,13 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.helper.SaveDBHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -217,7 +217,7 @@ public class DatasetServiceImpl implements DatasetService {
   private RecordValidationMapper recordValidationMapper;
 
   @Autowired
-  private DatasetSchemaService datasetschemaservice;
+  private SaveDBHelper saveHelper;
 
 
 
@@ -320,23 +320,9 @@ public class DatasetServiceImpl implements DatasetService {
         tr.saveAndFlush(dataset.getTableValues().get(0));
       }
 
-      List<List<RecordValue>> listaGeneral = new ArrayList<>();
-      final int BATCH = 1000;
+      List<List<RecordValue>> listaGeneral = getListOfRecords(todosRecords);
 
-      int nListas = (int) Math.ceil(todosRecords.size() / (double) BATCH);
-      if (nListas > 1) {
-        for (int i = 0; i < (nListas - 1); i++) {
-          listaGeneral.add(new ArrayList<>(todosRecords.subList(BATCH * i, BATCH * (i + 1))));
-        }
-      }
-      listaGeneral
-          .add(new ArrayList<>(todosRecords.subList(BATCH * (nListas - 1), todosRecords.size())));
-
-      for (int i = 0; i < listaGeneral.size(); i++) {
-        LOG.info("Lista {} tiene {} elementos", i, listaGeneral.get(i).size());
-      }
-
-      datasetschemaservice.pruebaTransactional(listaGeneral);
+      saveHelper.saveListsOfRecords(listaGeneral);
 
       LOG.info("File processed and saved into DB");
     } catch (Exception e) {
@@ -344,6 +330,25 @@ public class DatasetServiceImpl implements DatasetService {
     } finally {
       is.close();
     }
+  }
+
+  private List<List<RecordValue>> getListOfRecords(List<RecordValue> todosRecords) {
+    List<List<RecordValue>> listaGeneral = new ArrayList<>();
+    final int BATCH = 1000;
+
+    int nListas = (int) Math.ceil(todosRecords.size() / (double) BATCH);
+    if (nListas > 1) {
+      for (int i = 0; i < (nListas - 1); i++) {
+        listaGeneral.add(new ArrayList<>(todosRecords.subList(BATCH * i, BATCH * (i + 1))));
+      }
+    }
+    listaGeneral
+        .add(new ArrayList<>(todosRecords.subList(BATCH * (nListas - 1), todosRecords.size())));
+
+    for (int i = 0; i < listaGeneral.size(); i++) {
+      LOG.info("Lista {} tiene {} elementos", i, listaGeneral.get(i).size());
+    }
+    return listaGeneral;
   }
 
   public void dividirDataset(DatasetValue dataset) {

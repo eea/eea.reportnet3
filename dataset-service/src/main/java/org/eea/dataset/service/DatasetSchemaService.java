@@ -1,8 +1,5 @@
 package org.eea.dataset.service;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 
 /**
@@ -35,11 +32,5 @@ public interface DatasetSchemaService {
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
 
-
-
-  CompletableFuture pruebaAsync(List<RecordValue> taka);
-
-
-  void pruebaTransactional(List<List<RecordValue>> taka);
 
 }
