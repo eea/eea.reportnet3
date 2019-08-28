@@ -51,7 +51,6 @@ const Login = ({ history }) => {
                 history.push('/data-flow-task/');
               } catch (error) {
                 console.error(error);
-                const userObject = await UserService.logout();
                 user.onLogout();
                 const errorResponse = error.response;
                 if (!isUndefined(errorResponse) && errorResponse.data.message.includes('401')) {
