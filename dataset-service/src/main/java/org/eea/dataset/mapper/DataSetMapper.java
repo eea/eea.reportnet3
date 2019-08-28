@@ -2,6 +2,7 @@ package org.eea.dataset.mapper;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -66,15 +67,22 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
   @AfterMapping
   default void fillIds(DataSetVO dataSetVO, @MappingTarget DatasetValue dataset) {
     List<TableValue> tableValues = dataset.getTableValues();
+
     tableValues.stream().forEach(tableValue -> {
+      AtomicInteger recordInteger = new AtomicInteger(0);
       tableValue.setDatasetId(dataset);
       tableValue.getRecords().stream().forEach(record -> {
+        AtomicInteger fieldInteger = new AtomicInteger(0);
         record.setTableValue(tableValue);
-        record.getFields().stream().forEach(field -> field.setRecord(record));
+        int r = recordInteger.getAndIncrement();
+        record.getFields().stream().forEach(field -> {
+          field.setRecord(record);
+          // Set Coordinates
+          field.setRecordCoordinate(r + 1L);
+          field.setColumnCoordinate(fieldInteger.getAndIncrement() + 1L);
+        });
       });
     });
-
-
   }
 
 

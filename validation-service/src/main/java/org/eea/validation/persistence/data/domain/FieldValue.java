@@ -60,6 +60,18 @@ public class FieldValue {
   private String idFieldSchema;
 
   /**
+   * The Record coordinate. X
+   */
+  @Column(name = "RECORD_COORDINATE")
+  private Long recordCoordinate;
+
+  /**
+   * The column long coordinate. Y
+   */
+  @Column(name = "COLUMN_COORDINATE")
+  private Long columnCoordinate;
+
+  /**
    * The record.
    */
   @ManyToOne
