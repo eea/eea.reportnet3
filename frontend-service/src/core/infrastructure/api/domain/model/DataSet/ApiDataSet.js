@@ -114,7 +114,8 @@ export const apiDataSet = {
       }),
       queryString: {},
       headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
       }
     });
     return response.data;
@@ -129,7 +130,8 @@ export const apiDataSet = {
       }),
       queryString: {},
       headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
       }
     });
     return response.data;
