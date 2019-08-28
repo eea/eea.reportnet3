@@ -179,4 +179,15 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_PROVIDER");
 
   }
+
+  @Test
+  public void logout() {
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(null);
+    keycloakConnectorService.logout("refreshToken");
+    Mockito.verify(restTemplate, Mockito.times(1))
+        .postForEntity(Mockito.anyString(),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+  }
 }
