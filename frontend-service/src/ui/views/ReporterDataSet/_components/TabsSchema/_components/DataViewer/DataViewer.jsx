@@ -354,7 +354,7 @@ const DataViewer = withRouter(
               setEditDialogVisible(false);
             }}
           />
-          <Button label={resources.messages['save']} icon="save" onClick={''} />
+          <Button label={resources.messages['save']} icon="save" onClick={() => {}} />
         </div>
       );
 

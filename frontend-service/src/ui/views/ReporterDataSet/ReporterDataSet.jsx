@@ -65,8 +65,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
-    console.log('call to onLoadDataSetSchema');
-
     onLoadDataSetSchema();
   }, [isDataDeleted]);
 
@@ -88,6 +86,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     let exportOptions = config.exportTypes;
     const exportOptionsFilter = exportOptions.filter(type => type.code !== 'csv');
+
     setExportButtonsList(
       exportOptionsFilter.map(type => ({
         label: type.text,
@@ -95,7 +94,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         command: () => onExportData(type.code)
       }))
     );
-  }, []);
+  }, [datasetTitle]);
 
   useEffect(() => {
     if (!isUndefined(exportDataSetData)) {
@@ -200,7 +199,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const createFileName = (fileName, fileType) => {
-    console.log('fileName', fileName);
     return `${fileName}.${fileType}`;
   };
 
