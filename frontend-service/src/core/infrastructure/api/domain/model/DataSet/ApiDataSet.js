@@ -32,7 +32,7 @@ export const apiDataSet = {
         url: window.env.REACT_APP_JSON
           ? `/dataset/${dataSetId}/record/`
           : getUrl(config.deleteRecord.url, {
-              idDataset: dataSetId
+              dataSetId: dataSetId
             }),
         data: {
           rowIds: rowIds
