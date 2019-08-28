@@ -3,6 +3,8 @@ package org.eea.validation.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import org.eea.validation.persistence.data.domain.FieldValue;
 import org.joda.time.LocalDate;
 
 /**
@@ -16,6 +18,47 @@ public class DateDroolsUtils {
 
   /** The Constant actualDate. */
   final static Date actualDate = new Date();
+
+
+  public static Boolean compareDate(Object listFields, Long positionColumnInit,
+      Long positionColumnEnd) {
+    List<FieldValue> fields = (List<FieldValue>) listFields;
+    String valueInitial = null;
+    String valueEnd = null;
+
+    for (FieldValue field : fields) {
+      if (null != field.getColumnCoordinate()
+          && field.getColumnCoordinate() == positionColumnInit) {
+        valueInitial = field.getValue();
+      }
+      if (null != field.getColumnCoordinate() && field.getColumnCoordinate() == positionColumnEnd) {
+        valueEnd = field.getValue();
+      }
+      if (null != valueInitial && null != valueEnd) {
+        break;
+      }
+    }
+    final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date dateDroolsInit = null;
+    Date dateDroolsEnd = null;
+    try {
+      dateDroolsInit = sdf.parse(valueInitial);
+      dateDroolsEnd = sdf.parse(valueEnd);
+    } catch (ParseException e) {
+      return true;
+    } catch (Exception e) {
+      return true;
+    }
+
+    if (dateDroolsInit.after(dateDroolsEnd)) {
+      return false;
+    }
+
+    return true;
+
+
+
+  }
 
   // este metodo es complejo, si tiene interval a true, los años se restan al total que te digan, si
   // no es calcular entre 2 fechas

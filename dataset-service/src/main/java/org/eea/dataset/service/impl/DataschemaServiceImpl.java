@@ -85,19 +85,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
-    RuleDataSet ruleDataset = new RuleDataSet();
-    List<String> listaStrinsDataset = new ArrayList<String>();
-    listaStrinsDataset.add(GENERAL_ERROR);
-    listaStrinsDataset.add(GENERAL_WARNING);
-    ruleDataset.setThenCondition(listaStrinsDataset);
+    for (int w = 0; w < 5; w++) {
+      RuleDataSet ruleDataset = new RuleDataSet();
+      List<String> listaStrinsDataset = new ArrayList<String>();
+      listaStrinsDataset.add(GENERAL_ERROR);
+      listaStrinsDataset.add(GENERAL_WARNING);
+      ruleDataset.setThenCondition(listaStrinsDataset);
 
-    ruleDataset.setRuleId(new ObjectId());
-    ruleDataset.setDataFlowId(dataflowId);
-    ruleDataset.setIdDataSetSchema(idDataSetSchema);
-    ruleDataset.setScope(TypeEntityEnum.DATASET);
-    ruleDataset.setWhenCondition(NULL);
-    ruleDataset.setRuleName("dataset regla");
-    ruleDataSetList.add(ruleDataset);
+      ruleDataset.setRuleId(new ObjectId());
+      ruleDataset.setDataFlowId(dataflowId);
+      ruleDataset.setIdDataSetSchema(idDataSetSchema);
+      ruleDataset.setScope(TypeEntityEnum.DATASET);
+      ruleDataset.setWhenCondition(NULL);
+      ruleDataset.setRuleName("dataset regla_" + w);
+      ruleDataSetList.add(ruleDataset);
+    }
     dataSetSchema.setRuleDataSet(ruleDataSetList);
 
     for (int i = 1; i <= values.size(); i++) {
@@ -107,22 +109,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.setIdTableSchema(idTableSchema);
 
 
+
       List<RuleTable> ruleTableList = new ArrayList<RuleTable>();
-      RuleTable ruleTable = new RuleTable();
-      List<String> listaStrinsRuleTable = new ArrayList<String>();
-      listaStrinsRuleTable.add(VALIDATION_WARNING);
-      listaStrinsRuleTable.add(GENERAL_ERROR);
-      ruleTable.setThenCondition(listaStrinsRuleTable);
+      for (int w = 0; w < 5; w++) {
+        RuleTable ruleTable = new RuleTable();
+        List<String> listaStrinsRuleTable = new ArrayList<String>();
+        listaStrinsRuleTable.add(VALIDATION_WARNING);
+        listaStrinsRuleTable.add(GENERAL_ERROR);
+        ruleTable.setThenCondition(listaStrinsRuleTable);
 
-      ruleTable.setRuleId(new ObjectId());
-      ruleTable.setDataFlowId(dataflowId);
-      ruleTable.setIdTableSchema(idTableSchema);
-      ruleTable.setWhenCondition(NULL);
-      ruleTable.setRuleName("table regla" + i);
-      ruleTable.setScope(TypeEntityEnum.TABLE);
-      ruleTableList.add(ruleTable);
+        ruleTable.setRuleId(new ObjectId());
+        ruleTable.setDataFlowId(dataflowId);
+        ruleTable.setIdTableSchema(idTableSchema);
+        ruleTable.setWhenCondition(NULL);
+        ruleTable.setRuleName("table regla" + i + "_" + w);
+        ruleTable.setScope(TypeEntityEnum.TABLE);
+        ruleTableList.add(ruleTable);
 
-
+      }
       tableSchema.setNameTableSchema(table.getTableName());
       ObjectId idRecordSchema = new ObjectId();
       RecordSchema recordSchema = new RecordSchema();
@@ -141,19 +145,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       createRuleFields(i, table, recordSchema, fieldSchemas, headersSize, dataflowId);
 
 
-      RuleRecord ruleRecord = new RuleRecord();
-      List<String> listaStrinsRuleRecord = new ArrayList<String>();
-      ruleRecord.setRuleId(new ObjectId());
-      ruleRecord.setDataFlowId(dataflowId);
-      ruleRecord.setScope(TypeEntityEnum.RECORD);
-      ruleRecord.setIdRecordSchema(idRecordSchema);
-      ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
-      ruleRecord.setRuleName("RecordRule_" + i + "_");
-      listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
-      listaStrinsRuleRecord.add(GENERAL_ERROR);
-      ruleRecord.setThenCondition(listaStrinsRuleRecord);
-      ruleRecordList.add(ruleRecord);
-
+      for (int w = 0; w < 10; w++) {
+        RuleRecord ruleRecord = new RuleRecord();
+        List<String> listaStrinsRuleRecord = new ArrayList<String>();
+        ruleRecord.setRuleId(new ObjectId());
+        ruleRecord.setDataFlowId(dataflowId);
+        ruleRecord.setScope(TypeEntityEnum.RECORD);
+        ruleRecord.setIdRecordSchema(idRecordSchema);
+        ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
+        ruleRecord.setRuleName("RecordRule_" + i + "_" + w);
+        listaStrinsRuleRecord.add("ERROR IN RECORD LEVEL DIFFERENT DATA THAN SCHEMA");
+        listaStrinsRuleRecord.add(GENERAL_ERROR);
+        ruleRecord.setThenCondition(listaStrinsRuleRecord);
+        ruleRecordList.add(ruleRecord);
+      }
       recordSchema.setRuleRecord(ruleRecordList);
       recordSchema.setFieldSchema(fieldSchemas);
       tableSchema.setRecordSchema(recordSchema);
