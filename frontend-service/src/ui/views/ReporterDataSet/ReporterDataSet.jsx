@@ -65,6 +65,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
+    console.log('call to onLoadDataSetSchema');
+
+    onLoadDataSetSchema();
+  }, [isDataDeleted]);
+
+  useEffect(() => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowTask'],
@@ -81,9 +87,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   useEffect(() => {
     let exportOptions = config.exportTypes;
-
-    const exportOptionsFilter = exportOptions.filter(type => type.code >= 'xls', 'xlsx');
-
+    const exportOptionsFilter = exportOptions.filter(type => type.code !== 'csv');
     setExportButtonsList(
       exportOptionsFilter.map(type => ({
         label: type.text,
@@ -92,10 +96,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       }))
     );
   }, []);
-
-  useEffect(() => {
-    onLoadDataSetSchema();
-  }, [isDataDeleted]);
 
   useEffect(() => {
     if (!isUndefined(exportDataSetData)) {
@@ -162,7 +162,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const onLoadDataSetSchema = async () => {
     const dataSetSchema = await DataSetService.schemaById(dataFlowId);
     const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
-
     setDatasetTitle(dataSetSchema.dataSetSchemaName);
     setTableSchema(
       dataSetSchema.tables.map(tableSchema => {
@@ -200,8 +199,9 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setActiveIndex(tableSchemaId.index);
   };
 
-  const createFileName = (datasetTitle, fileType) => {
-    return `${datasetTitle}.${fileType}`;
+  const createFileName = (fileName, fileType) => {
+    console.log('fileName', fileName);
+    return `${fileName}.${fileType}`;
   };
 
   const snapshotInitialState = {
