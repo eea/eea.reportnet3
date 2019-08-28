@@ -4,6 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataSet = {
+  addRecord: async (dataSetId, tableSchemaId, record) => {},
   deleteDataById: async dataSetId => {
     const tokens = userStorage.get();
     try {
