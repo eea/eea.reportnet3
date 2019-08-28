@@ -31,7 +31,15 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages.dataCustodianDashboards }]);
+    setBreadCrumbItems([
+      {
+        label: resources.messages['dataFlowTask'],
+        command: () => history.push('/data-flow-task')
+      },
+      {
+        label: resources.messages.dataCustodianDashboards
+      }
+    ]);
   }, [history, match.params.dataFlowId, resources.messages]);
 
   useEffect(() => {
@@ -40,21 +48,18 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       labels: ['FIRST', 'SECOND', 'FIRD', 'FOURTH', 'FIFTH', 'SIXTH', 'SEVENTH'],
       datasets: [
         {
-          type: 'bar',
-          label: 'Dataset 1',
-          backgroundColor: '#66BB6A',
+          label: 'Correct',
+          backgroundColor: '#004494',
           data: [50, 25, 12, 48, 90, 76, 85]
         },
         {
-          type: 'bar',
-          label: 'Dataset 2',
-          backgroundColor: '#FFCA28',
+          label: 'Warning',
+          backgroundColor: '#ffd617',
           data: [21, 84, 24, 75, 37, 65, 85]
         },
         {
-          type: 'bar',
-          label: 'Dataset 3',
-          backgroundColor: '#42A5F5',
+          label: 'Error',
+          backgroundColor: '#DA2131',
           data: [41, 52, 24, 74, 23, 21, 85]
         }
       ]
