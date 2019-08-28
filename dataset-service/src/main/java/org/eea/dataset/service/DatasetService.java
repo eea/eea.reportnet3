@@ -155,14 +155,15 @@ public interface DatasetService {
    */
   void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
+
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
-  void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
+  void deleteRecord(@DatasetId Long datasetId, Long recordId) throws EEAException;
 
   /**
    * Delete table by schema.
@@ -222,6 +223,10 @@ public interface DatasetService {
 
   /**
    * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   * @throws EEAException the EEA exception
    */
   void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
 

@@ -794,19 +794,19 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void deleteRecordsNullTest() throws Exception {
-    datasetService.deleteRecords(null, new ArrayList<Long>());
+    datasetService.deleteRecord(null, 1L);
   }
 
   @Test(expected = EEAException.class)
   public void deleteRecordsNull2Test() throws Exception {
-    datasetService.deleteRecords(1L, null);
+    datasetService.deleteRecord(1L, null);
   }
 
   @Test
   public void deleteRecordsTest() throws Exception {
-    doNothing().when(recordRepository).deleteRecordsWithIds(Mockito.any());
-    datasetService.deleteRecords(1L, new ArrayList<Long>());
-    Mockito.verify(recordRepository, times(1)).deleteRecordsWithIds(Mockito.any());
+    doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
+    datasetService.deleteRecord(1L, 1L);
+    Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
 
   @Test
