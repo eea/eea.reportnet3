@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-
+import { routes } from 'ui/routes';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
@@ -38,9 +38,11 @@ const DataViewer = withRouter(
       tableId,
       tableName,
       tableSchemaColumns,
+      match,
       match: {
-        params: { dataSetId }
-      }
+        params: { dataSetId, dataFlowId }
+      },
+      history
     }) => {
       //const contextReporterDataSet = useContext(ReporterDataSetContext);
       const [addDialogVisible, setAddDialogVisible] = useState(false);
@@ -202,25 +204,33 @@ const DataViewer = withRouter(
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
         setLoading(true);
+        try {
+          let fields;
+          if (!isUndefined(sField) && sField !== null) {
+            fields = `${sField}:${sOrder}`;
+          }
 
-        let fields;
-        if (!isUndefined(sField) && sField !== null) {
-          fields = `${sField}:${sOrder}`;
-        }
+          const tableData = await DataSetService.tableDataById(
+            dataSetId,
+            tableId,
+            Math.floor(fRow / nRows),
+            nRows,
+            fields
+          );
 
-        const tableData = await DataSetService.tableDataById(
-          dataSetId,
-          tableId,
-          Math.floor(fRow / nRows),
-          nRows,
-          fields
-        );
-
-        if (!isUndefined(tableData.records)) {
-          filterDataResponse(tableData);
-        }
-        if (tableData.totalRecords !== totalRecords) {
-          setTotalRecords(tableData.totalRecords);
+          if (!isUndefined(tableData.records)) {
+            filterDataResponse(tableData);
+          }
+          if (tableData.totalRecords !== totalRecords) {
+            setTotalRecords(tableData.totalRecords);
+          }
+        } catch (error) {
+          console.error('DataViewer error: ', error);
+          const errorResponse = error.response;
+          console.error('DataViewer errorResponse: ', errorResponse);
+          if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+            history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+          }
         }
 
         setLoading(false);
