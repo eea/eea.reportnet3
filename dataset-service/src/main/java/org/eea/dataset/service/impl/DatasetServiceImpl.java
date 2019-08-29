@@ -308,8 +308,8 @@ public class DatasetServiceImpl implements DatasetService {
       // **********************************************************************************
       // **********************************************************************************
 
-      // Guardar tabla vacía
-      List<RecordValue> todosRecords = dataset.getTableValues().get(0).getRecords();
+      // Save empty table
+      List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
       dataset.getTableValues().get(0).setRecords(new ArrayList<>());
 
       // Check if the table with idTableSchema has been populated already
@@ -320,7 +320,7 @@ public class DatasetServiceImpl implements DatasetService {
         tr.saveAndFlush(dataset.getTableValues().get(0));
       }
 
-      List<List<RecordValue>> listaGeneral = getListOfRecords(todosRecords);
+      List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
 
       saveHelper.saveListsOfRecords(listaGeneral);
 
@@ -332,23 +332,22 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
-  private List<List<RecordValue>> getListOfRecords(List<RecordValue> todosRecords) {
-    List<List<RecordValue>> listaGeneral = new ArrayList<>();
+  private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
+    List<List<RecordValue>> generalList = new ArrayList<>();
     final int BATCH = 1000;
 
-    int nListas = (int) Math.ceil(todosRecords.size() / (double) BATCH);
-    if (nListas > 1) {
-      for (int i = 0; i < (nListas - 1); i++) {
-        listaGeneral.add(new ArrayList<>(todosRecords.subList(BATCH * i, BATCH * (i + 1))));
+    int nLists = (int) Math.ceil(allRecords.size() / (double) BATCH);
+    if (nLists > 1) {
+      for (int i = 0; i < (nLists - 1); i++) {
+        generalList.add(new ArrayList<>(allRecords.subList(BATCH * i, BATCH * (i + 1))));
       }
     }
-    listaGeneral
-        .add(new ArrayList<>(todosRecords.subList(BATCH * (nListas - 1), todosRecords.size())));
+    generalList.add(new ArrayList<>(allRecords.subList(BATCH * (nLists - 1), allRecords.size())));
 
-    for (int i = 0; i < listaGeneral.size(); i++) {
-      LOG.info("Lista {} tiene {} elementos", i, listaGeneral.get(i).size());
+    for (int i = 0; i < generalList.size(); i++) {
+      LOG.info("List {} have {} elements", i, generalList.get(i).size());
     }
-    return listaGeneral;
+    return generalList;
   }
 
   public void dividirDataset(DatasetValue dataset) {
