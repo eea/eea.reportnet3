@@ -39,6 +39,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         command: () => history.push('/data-flow-task')
       },
       {
+        label: resources.messages.reportingDataFlow,
+        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+      },
+      {
         label: resources.messages.dataCustodianDashboards
       }
     ]);
