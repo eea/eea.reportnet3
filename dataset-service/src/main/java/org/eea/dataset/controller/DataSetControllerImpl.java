@@ -445,7 +445,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema) {
     if (dataSetId == null || dataSetId < 1) {
@@ -522,7 +522,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (datasetId == null || field == null) {
