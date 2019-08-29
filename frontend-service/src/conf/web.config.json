@@ -76,6 +76,9 @@
 	},
 	"logout":{
 		"url": "/user/logout?refreshToken={:refreshToken}"
+	},
+	"REPORTING_DATAFLOW": {
+		"url": "/reporting-data-flow/{:dataFlowId}"
 		},
 	"updateTableDataField":{
 		"url": "/dataset/{:dataSetId}/updateField"
