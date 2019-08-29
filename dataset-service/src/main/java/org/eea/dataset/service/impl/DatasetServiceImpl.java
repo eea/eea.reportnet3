@@ -254,12 +254,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
-  @Autowired
-  TableRepository tr;
-
-  @Autowired
-  RecordRepository rr;
-
   /**
    * Process file.
    *
@@ -317,7 +311,7 @@ public class DatasetServiceImpl implements DatasetService {
       fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
 
       if (null == oldTableId) {
-        tr.saveAndFlush(dataset.getTableValues().get(0));
+        saveHelper.saveTable(dataset.getTableValues().get(0));
       }
 
       List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
