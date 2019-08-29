@@ -14,6 +14,7 @@ import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
 import { Chart } from 'primereact/chart';
+import { async } from 'q';
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
@@ -46,11 +47,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         label: resources.messages.dataCustodianDashboards
       }
     ]);
-  }, [history, match.params.dataFlowId, resources.messages]);
+  }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    setDatasetsDashboardData({
+  function getDatasetsDashboardData() {
+    const datasetDataObject = {
       labels: [
         'Austria',
         'Belgium',
@@ -125,9 +125,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           data: [25, 50, 10, 0, 5, 0, 85, 33, 25, 50, 10, 0, 5, 0, 85, 33, 25, 50, 10, 0, 5, 0, 85, 33, 0, 0, 99]
         }
       ]
-    });
-
-    setDatasetsDashboardOptions({
+    };
+    return datasetDataObject;
+  }
+  function getDatasetsDashboardOptions() {
+    const datasetOptionsObject = {
       tooltips: {
         mode: 'index',
         intersect: false
@@ -157,9 +159,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           }
         ]
       }
-    });
-
-    setReleasedDashboardData({
+    };
+    return datasetOptionsObject;
+  }
+  function getReleasedDashboardData() {
+    const releasedDataObject = {
       labels: [
         'Austria',
         'Belgium',
@@ -257,9 +261,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           ]
         }
       ]
-    });
-
-    setReleasedDashboardOptions({
+    };
+    return releasedDataObject;
+  }
+  function getReleasedDashboardOptions() {
+    const releasedOptionsObject = {
       tooltips: {
         mode: 'index',
         intersect: false
@@ -271,7 +277,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             stacked: true,
             scaleLabel: {
               display: true,
-              labelString: 'Released'
+              labelString: 'Datasets'
             }
           }
         ],
@@ -289,7 +295,21 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           }
         ]
       }
-    });
+    };
+    return releasedOptionsObject;
+  }
+
+  const onPageLoad = async () => {
+    await setDatasetsDashboardData(getDatasetsDashboardData());
+    await setDatasetsDashboardOptions(getDatasetsDashboardOptions());
+    await setReleasedDashboardData(getReleasedDashboardData());
+    await setReleasedDashboardOptions(getReleasedDashboardOptions());
+  };
+
+  useEffect(() => {
+    setLoading(true);
+
+    onPageLoad();
 
     setLoading(false);
   }, []);
