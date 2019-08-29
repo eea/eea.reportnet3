@@ -134,9 +134,14 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onExportData = async fileType => {
     setLoadingFile(true);
-    setExportDataSetDataName(createFileName(datasetTitle, fileType));
-    setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
-    setLoadingFile(false);
+    try {
+      setExportDataSetDataName(createFileName(datasetTitle, fileType));
+      setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingFile(false);
+    }
   };
 
   const onReleaseSnapshot = async () => {
