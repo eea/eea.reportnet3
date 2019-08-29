@@ -38,13 +38,11 @@ const DataViewer = withRouter(
       tableId,
       tableName,
       tableSchemaColumns,
-      match,
       match: {
         params: { dataSetId, dataFlowId }
       },
       history
     }) => {
-      //const contextReporterDataSet = useContext(ReporterDataSetContext);
       const [addDialogVisible, setAddDialogVisible] = useState(false);
       const [columnOptions, setColumnOptions] = useState([{}]);
       const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -197,9 +195,14 @@ const DataViewer = withRouter(
 
       const onExportTableData = async fileType => {
         setLoadingFile(true);
-        setExportTableDataName(createTableName(tableName, fileType));
-        setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId, fileType));
-        setLoadingFile(false);
+        try {
+          setExportTableDataName(createTableName(tableName, fileType));
+          setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId, fileType));
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoadingFile(false);
+        }
       };
 
       const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -231,9 +234,9 @@ const DataViewer = withRouter(
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
             history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
           }
+        } finally {
+          setLoading(false);
         }
-
-        setLoading(false);
       };
 
       const onHide = () => {
