@@ -1,5 +1,7 @@
 import React, { useContext } from 'react';
+
 import styles from './Footer.module.css';
+
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const Footer = () => {

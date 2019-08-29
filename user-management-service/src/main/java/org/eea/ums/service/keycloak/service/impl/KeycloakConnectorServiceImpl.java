@@ -67,6 +67,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private RestTemplate restTemplate;
 
   private static final String GENERATE_TOKEN_URL = "/auth/realms/{realm}/protocol/openid-connect/token";
+  private static final String LOGOUT_URL = "/auth/realms/{realm}/protocol/openid-connect/logout";
   private static final String LIST_USERS_URL = "";
   private static final String LIST_USER_GROUPS_URL = "";
   private static final String CREATE_USER_GROUP_URL = "";
@@ -208,6 +209,28 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     map.add("client_id", clientId);
 
     return retrieveTokenFromKeycloak(map);
+  }
+
+  @Override
+  public void logout(String refreshToken) {
+    HttpHeaders headers = createBasicHeaders(null);
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+    map.add("refresh_token", refreshToken);
+    map.add("client_secret", secret);
+    map.add("client_id", clientId);
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
+        map, headers);
+    this.restTemplate
+        .postForEntity(
+            uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LOGOUT_URL)
+                .buildAndExpand(uriParams).toString(),
+            request,
+            Void.class);
   }
 
   private TokenInfo retrieveTokenFromKeycloak(MultiValueMap<String, String> map) {

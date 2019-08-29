@@ -60,4 +60,12 @@ public class UserManagementControllerImplTest {
     Assert.assertTrue(checkedAccessPermission);
   }
 
+  @Test
+  public void doLogOut() {
+
+    userManagementController
+        .doLogOut("refreshToken");
+    Mockito.verify(securityProviderInterfaceService, Mockito.times(1))
+        .doLogout(Mockito.anyString());
+  }
 }

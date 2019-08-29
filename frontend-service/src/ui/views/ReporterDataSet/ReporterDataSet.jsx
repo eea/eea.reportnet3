@@ -1,57 +1,72 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
 import moment from 'moment';
+import { withRouter } from 'react-router-dom';
+import { isUndefined } from 'lodash';
 
 import styles from './ReporterDataSet.module.css';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { Menu } from 'primereact/menu';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 
+import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
-
-import { getUrl } from 'core/infrastructure/getUrl';
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const SnapshotContext = React.createContext();
 
-export const ReporterDataSet = ({ match, history }) => {
+export const ReporterDataSet = withRouter(({ match, history }) => {
   const {
     params: { dataFlowId, dataSetId }
   } = match;
   const resources = useContext(ResourcesContext);
-  const [datasetTitle, setDatasetTitle] = useState('');
-  const [customButtons, setCustomButtons] = useState([]);
-  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [tableSchema, setTableSchema] = useState();
-  const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [dashDialogVisible, setDashDialogVisible] = useState(false);
-  const [validationsVisible, setValidationsVisible] = useState(false);
-  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
-  const [positionIdRecord, setPositionIdRecord] = useState(-1);
-  const [idSelectedRow, setIdSelectedRow] = useState(-1);
+  const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [datasetTitle, setDatasetTitle] = useState('');
+  const [datasetHasErrors, setDatasetHasErrors] = useState(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [exportButtonsList, setExportButtonsList] = useState([]);
+  const [exportDataSetData, setExportDataSetData] = useState(undefined);
+  const [exportDataSetDataName, setExportDataSetDataName] = useState('');
+  const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [recordPositionId, setRecordPositionId] = useState(-1);
+  const [selectedRowErrorId, setSelectedRowErrorId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
+  const [tableSchema, setTableSchema] = useState();
+  const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
+  const [validationsVisible, setValidationsVisible] = useState(false);
+
+  let exportMenuRef = useRef();
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
+
+  useEffect(() => {
+    onLoadDataSetSchema();
+  }, [isDataDeleted]);
 
   useEffect(() => {
     setBreadCrumbItems([
@@ -65,205 +80,129 @@ export const ReporterDataSet = ({ match, history }) => {
       },
       { label: resources.messages['viewData'] }
     ]);
+    onLoadSnapshotList();
+  }, []);
 
-    const dataPromise = HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/datosDataSchema2.json'
-        : getUrl(config.dataSchemaAPI.url, { dataFlowId }),
-      queryString: {}
-    });
-    dataPromise
-      .then(response => {
-        const dataPromiseError = HTTPRequester.get({
-          url: window.env.REACT_APP_JSON
-            ? '/jsons/error-statistics.json'
-            : `${config.loadStatisticsAPI.url}${dataSetId}`,
-          queryString: {}
-        });
+  useEffect(() => {
+    let exportOptions = config.exportTypes;
+    const exportOptionsFilter = exportOptions.filter(type => type.code !== 'csv');
 
-        //Parse JSON to array statistic values
-        dataPromiseError.then(res => {
-          setDatasetTitle(res.data.nameDataSetSchema);
-          setTableSchema(
-            response.data.tableSchemas.map((item, i) => {
-              return {
-                id: item['idTableSchema'],
-                name: item['nameTableSchema'],
-                hasErrors: {
-                  ...res.data.tables.filter(t => t['idTableSchema'] === item['idTableSchema'])[0]
-                }.tableErrors
-              };
-            })
-          );
+    setExportButtonsList(
+      exportOptionsFilter.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportData(type.code)
+      }))
+    );
+  }, [datasetTitle]);
 
-          setTableSchemaColumns(
-            response.data.tableSchemas.map(table => {
-              return table.recordSchema.fieldSchema.map(item => {
-                return {
-                  table: table['nameTableSchema'],
-                  field: item['id'],
-                  header: `${item['name'].charAt(0).toUpperCase()}${item['name'].slice(1)}`
-                };
-              });
-            })
-          );
+  useEffect(() => {
+    if (!isUndefined(exportDataSetData)) {
+      DownloadFile(exportDataSetData, exportDataSetDataName);
+    }
+  }, [exportDataSetData]);
 
-          //#region Button inicialization
+  const onConfirmDelete = async () => {
+    setDeleteDialogVisible(false);
+    const dataDeleted = await DataSetService.deleteDataById(dataSetId);
+    if (dataDeleted) {
+      setIsDataDeleted(true);
+    }
+  };
 
-          setCustomButtons([
-            {
-              label: resources.messages['export'],
-              icon: '1',
-              group: 'left',
-              disabled: true,
-              clickHandler: null
-            },
-            {
-              label: resources.messages['deleteDatasetData'],
-              icon: '2',
-              group: 'left',
-              disabled: false,
-              clickHandler: () => setVisibleHandler(setDeleteDialogVisible, true)
-            },
-            {
-              label: resources.messages['events'],
-              icon: '4',
-              group: 'right',
-              disabled: true,
-              clickHandler: null
-            },
-            {
-              label: resources.messages['validate'],
-              icon: '10',
-              group: 'right',
-              disabled: false,
-              //!validationError,
-              clickHandler: () => setVisibleHandler(setValidateDialogVisible, true),
-              ownButtonClasses: null,
-              iconClasses: null
-            },
-            {
-              label: resources.messages['showValidations'],
-              icon: '3',
-              group: 'right',
-              disabled: !res.data.datasetErrors,
-              clickHandler: () => setVisibleHandler(setValidationsVisible, true),
-              ownButtonClasses: null,
-              iconClasses: response.data.datasetErrors ? 'warning' : ''
-            },
-            {
-              //title: "Dashboards",
-              label: resources.messages['dashboards'],
-              icon: '5',
-              group: 'right',
-              disabled: false,
-              clickHandler: () => setVisibleHandler(setDashDialogVisible, true)
-            },
-            {
-              label: resources.messages['snapshots'],
-              icon: '12',
-              group: 'right',
-              disabled: false,
-              clickHandler: () => setSnapshotIsVisible(true)
-            }
-          ]);
-          //#endregion Button inicialization
+  const onConfirmValidate = async () => {
+    setValidateDialogVisible(false);
+    await DataSetService.validateDataById(dataSetId);
+  };
+
+  const onCreateSnapshot = async () => {
+    const snapshotCreated = await SnapshotService.createById(dataSetId, snapshotState.description);
+    if (snapshotCreated) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onDeleteSnapshot = async () => {
+    const snapshotDeleted = await SnapshotService.deleteById(dataSetId, snapshotState.snapShotId);
+    if (snapshotDeleted) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onExportData = async fileType => {
+    setLoadingFile(true);
+    setExportDataSetDataName(createFileName(datasetTitle, fileType));
+    setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
+    setLoadingFile(false);
+  };
+
+  const onReleaseSnapshot = async () => {
+    const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (snapshotReleased) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onRestoreSnapshot = async () => {
+    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (snapshotRestored) {
+      onLoadSnapshotList();
+    }
+    onSetVisible(setSnapshotDialogVisible, false);
+  };
+
+  const onLoadSnapshotList = async () => {
+    setSnapshotListData(await SnapshotService.all(dataSetId));
+  };
+
+  const onLoadDataSetSchema = async () => {
+    const dataSetSchema = await DataSetService.schemaById(dataFlowId);
+    const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
+    setDatasetTitle(dataSetStatistics.dataSetSchemaName);
+    setTableSchema(
+      dataSetSchema.tables.map(tableSchema => {
+        return {
+          id: tableSchema['tableSchemaId'],
+          name: tableSchema['tableSchemaName'],
+          hasErrors: {
+            ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+          }.hasErrors
+        };
+      })
+    );
+
+    setTableSchemaColumns(
+      dataSetSchema.tables.map(table => {
+        return table.records[0].fields.map(field => {
+          return {
+            table: table['tableSchemaName'],
+            field: field['fieldId'],
+            header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`
+          };
         });
       })
-      .catch(error => {
-        console.log(error);
-        return error;
-      });
-  }, [isDataDeleted]);
+    );
 
-  const setVisibleHandler = (fnUseState, visible) => {
+    setDatasetHasErrors(dataSetStatistics.datasetErrors);
+    setLoading(false);
+  };
+
+  const onSetVisible = (fnUseState, visible) => {
     fnUseState(visible);
   };
 
-  const onConfirmDeleteHandler = () => {
-    setDeleteDialogVisible(false);
-    HTTPRequester.delete({
-      url: window.env.REACT_APP_JSON
-        ? `/dataset/${dataSetId}/deleteImportData`
-        : `/dataset/${dataSetId}/deleteImportData`,
-      queryString: {}
-    }).then(res => {
-      setIsDataDeleted(true);
-    });
+  const onTabChange = tableSchemaId => {
+    setActiveIndex(tableSchemaId.index);
   };
 
-  const onConfirmValidateHandler = () => {
-    setValidateDialogVisible(false);
-    HTTPRequester.update({
-      url: window.env.REACT_APP_JSON ? '/jsons/list-of-errors.json' : `/validation/dataset/${dataSetId}`,
-      queryString: {}
-    });
+  const createFileName = (fileName, fileType) => {
+    return `${fileName}.${fileType}`;
   };
 
-  const onTabChangeHandler = idTableSchema => {
-    setActiveIndex(idTableSchema.index);
-  };
-
-  const setSnapshotList = async () => {
-    setSnapshotListData(await SnapshotService.all(getUrl(config.loadSnapshotsListAPI.url, { dataSetId })));
-  };
-
-  const createSnapshot = () => {
-    HTTPRequester.post({
-      url: getUrl(config.createSnapshot.url, {
-        // dataFlowId,
-        dataSetId,
-        snapshotDescription: snapshotState.description
-      }),
-      data: {
-        // date: snapshotState.createdAt,
-        description: snapshotState.description
-      }
-    })
-      .then(response => {
-        setSnapshotList();
-      })
-      .catch(error => {});
-    setVisibleHandler(setSnapshotDialogVisible, false);
-  };
-
-  const restoreSnapshot = () => {
-    HTTPRequester.update({
-      url: getUrl(config.restoreSnaphost.url, {
-        dataFlowId,
-        dataSetId,
-        snapshotId: snapshotState.snapShotId
-      })
-    })
-      .then(response => {
-        setSnapshotList();
-        console.log('restoreSnapshot response', response);
-      })
-      .catch(error => {
-        console.log('restoreSnapshot error', error);
-      });
-    setVisibleHandler(setSnapshotDialogVisible, false);
-  };
-
-  const deleteSnapshot = () => {
-    HTTPRequester.delete({
-      url: getUrl(config.deleteSnapshotByID.url, {
-        // dataFlowId,
-        dataSetId,
-        snapshotId: snapshotState.snapShotId
-      })
-    })
-      .then(response => {
-        setSnapshotList();
-        console.log('deleteSnapshot response', response);
-      })
-      .catch(error => {
-        console.error('deleteSnapshot error', error);
-      });
-    setVisibleHandler(setSnapshotDialogVisible, false);
-  };
-
-  const snapshotInitialStateObj = {
+  const snapshotInitialState = {
     apiCall: '',
     createdAt: '',
     description: '',
@@ -277,169 +216,251 @@ export const ReporterDataSet = ({ match, history }) => {
   const snapshotReducer = (state, { type, payload }) => {
     switch (type) {
       case 'create_snapshot':
-        setVisibleHandler(setSnapshotDialogVisible, true);
+        onSetVisible(setSnapshotDialogVisible, true);
         return {
           ...state,
           snapShotId: '',
           creationDate: Date.now(),
           description: payload.description,
           dialogMessage: resources.messages.createSnapshotMessage,
-          action: createSnapshot
+          action: onCreateSnapshot
         };
 
       case 'delete_snapshot':
-        setVisibleHandler(setSnapshotDialogVisible, true);
+        onSetVisible(setSnapshotDialogVisible, true);
         return {
           ...state,
           snapShotId: payload.id,
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.deleteSnapshotMessage,
-          action: deleteSnapshot
+          action: onDeleteSnapshot
         };
 
+      case 'release_snapshot':
+        onSetVisible(setSnapshotDialogVisible, true);
+        return {
+          ...state,
+          snapShotId: payload.id,
+          creationDate: payload.creationDate,
+          description: payload.description,
+          dialogMessage: resources.messages.releaseSnapshotMessage,
+          action: onReleaseSnapshot
+        };
       case 'restore_snapshot':
-        setVisibleHandler(setSnapshotDialogVisible, true);
+        onSetVisible(setSnapshotDialogVisible, true);
         return {
           ...state,
           snapShotId: payload.id,
           creationDate: payload.creationDate,
           description: payload.description,
           dialogMessage: resources.messages.restoreSnapshotMessage,
-          action: restoreSnapshot
+          action: onRestoreSnapshot
         };
       default:
         return state;
-      // break;
     }
   };
 
-  const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialStateObj);
+  const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
-  return (
-    <MainLayout>
-      <BreadCrumb model={breadCrumbItems} home={home} />
+  const getPosition = button => {
+    const buttonTopPosition = button.top;
+    const buttonLeftPosition = button.left;
 
-      <div className="rep-container">
-        <div className="titleDiv">
-          <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
-        </div>
-        <div className={styles.ButtonsBar}>
-          <ButtonsBar buttonsList={customButtons} />
-        </div>
-        <ReporterDataSetContext.Provider
-          value={{
-            validationsVisibleHandler: null,
-            setValidationHandler: (idTableSchema, posIdRecord, selectedRowId) => {
-              setActiveIndex(idTableSchema);
-              setPositionIdRecord(posIdRecord);
-              setIdSelectedRow(selectedRowId);
-            }
-          }}>
-          <TabsSchema
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            urlViewer={`${config.dataviewerAPI.url}${dataSetId}`}
-            activeIndex={activeIndex}
-            positionIdRecord={positionIdRecord}
-            onTabChangeHandler={idTableSchema => onTabChangeHandler(idTableSchema)}
-            idSelectedRow={idSelectedRow}
-          />
-        </ReporterDataSetContext.Provider>
-        <Dialog
-          visible={dashDialogVisible}
-          onHide={() => setVisibleHandler(setDashDialogVisible, false)}
-          header={resources.messages['titleDashboard']}
-          maximizable
-          dismissableMask={true}
-          style={{ width: '80%' }}>
-          <Dashboard refresh={dashDialogVisible} />
-        </Dialog>
-        {/* TODO: ¿Merece la pena utilizar ContextAPI a un único nivel? */}
-        <ReporterDataSetContext.Provider
-          value={{
-            validationsVisibleHandler: () => {
-              setVisibleHandler(setValidationsVisible, false);
-            },
-            setValidationHandler: (idTableSchema, posIdRecord, selectedRowId) => {
-              setActiveIndex(idTableSchema);
-              setPositionIdRecord(posIdRecord);
-              setIdSelectedRow(selectedRowId);
-              // setState({
-              //   activeIndex: idTableSchema,
-              //   positionIdRecord: posIdRecord,
-              //   idSelectedRow: selectedRowId
-              // });
-            }
-          }}>
-          <Dialog
-            visible={validationsVisible}
-            onHide={() => setVisibleHandler(setValidationsVisible, false)}
-            header={resources.messages['titleValidations']}
-            maximizable
-            dismissableMask={true}
-            style={{ width: '80%' }}>
-            <ValidationViewer dataSetId={dataSetId} visible={validationsVisible} />
-          </Dialog>
-        </ReporterDataSetContext.Provider>
-        <ConfirmDialog
-          onConfirm={onConfirmDeleteHandler}
-          onHide={() => setVisibleHandler(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}
-          header={resources.messages['deleteDatasetHeader']}
-          maximizable={false}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['deleteDatasetConfirm']}
-        </ConfirmDialog>
-        <ConfirmDialog
-          onConfirm={onConfirmValidateHandler}
-          onHide={() => setVisibleHandler(setValidateDialogVisible, false)}
-          visible={validateDialogVisible}
-          header={resources.messages['validateDataSet']}
-          maximizable={false}
-          labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
-          {resources.messages['validateDataSetConfirm']}
-        </ConfirmDialog>
+    const exportDataSetMenu = document.getElementById('exportDataSetMenu');
+    exportDataSetMenu.style.top = buttonTopPosition;
+    exportDataSetMenu.style.left = buttonLeftPosition;
+  };
 
-        <SnapshotContext.Provider
-          value={{
-            snapshotState: snapshotState,
-            snapshotDispatch: snapshotDispatch
-          }}>
-          <SnapshotSlideBar
-            dataSetId={dataSetId}
-            isVisible={snapshotIsVisible}
-            setIsVisible={setSnapshotIsVisible}
-            setSnapshotDialogVisible={setSnapshotDialogVisible}
-            setVisibleHandler={setVisibleHandler}
-            setSnapshotList={setSnapshotList}
-            snapshotListData={snapshotListData}
-          />
-          <ConfirmDialog
-            onConfirm={snapshotState.action}
-            className={styles.snapshotDialog}
-            onHide={() => setVisibleHandler(setSnapshotDialogVisible, false)}
-            visible={snapshotDialogVisible}
-            showHeader={false}
-            maximizable={false}
-            labelConfirm={resources.messages['yes']}
-            labelCancel={resources.messages['no']}
-            header={snapshotState.dialogMessage}>
-            <ul>
-              <li>
-                <strong>{resources.messages.creationDate}: </strong>
-                {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-              </li>
-              <li>
-                <strong>{resources.messages.description}: </strong>
-                {snapshotState.description}
-              </li>
-            </ul>
-          </ConfirmDialog>
-        </SnapshotContext.Provider>
+  const layout = children => {
+    return (
+      <MainLayout>
+        <BreadCrumb model={breadCrumbItems} home={home} />
+        <div className="rep-container">{children}</div>
+      </MainLayout>
+    );
+  };
+
+  if (loading) {
+    return layout(<Spinner />);
+  }
+
+  return layout(
+    <div>
+      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
+      <div className={styles.ButtonsBar}>
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              label={resources.messages['export']}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              model={exportButtonsList}
+              popup={true}
+              ref={exportMenuRef}
+              id="exportDataSetMenu"
+              onShow={e => {
+                getPosition(e.target.style);
+              }}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'trash'}
+              label={resources.messages['deleteDatasetData']}
+              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'clock'}
+              label={resources.messages['events']}
+              onClick={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'validate'}
+              label={resources.messages['validate']}
+              onClick={() => onSetVisible(setValidateDialogVisible, true)}
+              ownButtonClasses={null}
+              iconClasses={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={!datasetHasErrors}
+              icon={'warning'}
+              label={resources.messages['showValidations']}
+              onClick={() => onSetVisible(setValidationsVisible, true)}
+              ownButtonClasses={null}
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'dashboard'}
+              label={resources.messages['dashboards']}
+              onClick={() => onSetVisible(setDashDialogVisible, true)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'camera'}
+              label={resources.messages['snapshots']}
+              onClick={() => onSetVisible(setSnapshotIsVisible, true)}
+            />
+          </div>
+        </Toolbar>
       </div>
-    </MainLayout>
+      <ReporterDataSetContext.Provider
+        value={{
+          validationsVisibleHandler: null,
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
+            setActiveIndex(tableSchemaId);
+            setRecordPositionId(posIdRecord);
+            setSelectedRowErrorId(selectedRowErrorId);
+          }
+        }}>
+        <TabsSchema
+          activeIndex={activeIndex}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          recordPositionId={recordPositionId}
+          selectedRowErrorId={selectedRowErrorId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+        />
+      </ReporterDataSetContext.Provider>
+      <Dialog
+        dismissableMask={true}
+        header={resources.messages['titleDashboard']}
+        maximizable
+        onHide={() => onSetVisible(setDashDialogVisible, false)}
+        style={{ width: '80%' }}
+        visible={dashDialogVisible}>
+        <Dashboard refresh={dashDialogVisible} />
+      </Dialog>
+      <ReporterDataSetContext.Provider
+        value={{
+          onValidationsVisible: () => {
+            onSetVisible(setValidationsVisible, false);
+          },
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
+            setActiveIndex(tableSchemaId);
+            setRecordPositionId(posIdRecord);
+            setSelectedRowErrorId(selectedRowErrorId);
+          }
+        }}>
+        <Dialog
+          dismissableMask={true}
+          header={resources.messages['titleValidations']}
+          maximizable
+          onHide={() => onSetVisible(setValidationsVisible, false)}
+          style={{ width: '80%' }}
+          visible={validationsVisible}>
+          <ValidationViewer dataSetId={dataSetId} visible={validationsVisible} />
+        </Dialog>
+      </ReporterDataSetContext.Provider>
+      <ConfirmDialog
+        header={resources.messages['deleteDatasetHeader']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={onConfirmDelete}
+        onHide={() => onSetVisible(setDeleteDialogVisible, false)}
+        visible={deleteDialogVisible}>
+        {resources.messages['deleteDatasetConfirm']}
+      </ConfirmDialog>
+      <ConfirmDialog
+        header={resources.messages['validateDataSet']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={onConfirmValidate}
+        onHide={() => onSetVisible(setValidateDialogVisible, false)}
+        visible={validateDialogVisible}>
+        {resources.messages['validateDataSetConfirm']}
+      </ConfirmDialog>
+
+      <SnapshotContext.Provider
+        value={{
+          snapshotState: snapshotState,
+          snapshotDispatch: snapshotDispatch
+        }}>
+        <SnapshotSlideBar
+          isVisible={snapshotIsVisible}
+          setIsVisible={setSnapshotIsVisible}
+          setSnapshotDialogVisible={setSnapshotDialogVisible}
+          snapshotListData={snapshotListData}
+        />
+        <ConfirmDialog
+          className={styles.snapshotDialog}
+          header={snapshotState.dialogMessage}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={snapshotState.action}
+          onHide={() => onSetVisible(setSnapshotDialogVisible, false)}
+          showHeader={false}
+          visible={snapshotDialogVisible}>
+          <ul>
+            <li>
+              <strong>{resources.messages.creationDate}: </strong>
+              {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            </li>
+            <li>
+              <strong>{resources.messages.description}: </strong>
+              {snapshotState.description}
+            </li>
+          </ul>
+        </ConfirmDialog>
+      </SnapshotContext.Provider>
+    </div>
   );
-};
+});

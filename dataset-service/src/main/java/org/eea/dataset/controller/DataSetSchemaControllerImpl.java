@@ -33,6 +33,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param datasetId the dataset id
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
   public void createDataSchema(@PathVariable("id") final Long datasetId,
       @RequestParam("idDataflow") final Long dataflowId) {
@@ -48,7 +49,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandlerSchema")
+  @HystrixCommand
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
@@ -66,37 +67,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand(fallbackMethod = "errorHandlerSchemaDataFlow")
+  @HystrixCommand
   @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
 
     return dataschemaService.getDataSchemaByIdFlow(idFlow);
 
-  }
-
-  /**
-   * Error handler schema.
-   *
-   * @param id the id
-   *
-   * @return the data set schema VO
-   */
-  public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
-
-    return new DataSetSchemaVO();
-  }
-
-  /**
-   * Error handler schema data flow.
-   *
-   * @param id the id
-   *
-   * @return the data set schema VO
-   */
-  public DataSetSchemaVO errorHandlerSchemaDataFlow(@PathVariable("id") Long id) {
-
-    return new DataSetSchemaVO();
   }
 
 

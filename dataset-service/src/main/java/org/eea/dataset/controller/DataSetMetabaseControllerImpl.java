@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.List;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -30,24 +31,32 @@ import org.springframework.web.server.ResponseStatusException;
 public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
 
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The reporting dataset service. */
+  /**
+   * The reporting dataset service.
+   */
   @Autowired
   private ReportingDatasetService reportingDatasetService;
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Find data set id by dataflow id.
    *
    * @param idDataflow the id dataflow
+   *
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetVO> findDataSetIdByDataflowId(Long idDataflow) {
 
@@ -60,9 +69,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the snapshots by id dataset
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "/{id}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("id") Long datasetId) {
 
@@ -88,6 +99,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * @param description the description
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/{id}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
   public void createSnapshot(@PathVariable("id") Long datasetId,
       @RequestParam("description") String description) {
@@ -114,6 +126,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * @param idSnapshot the id snapshot
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "/{id}/snapshot/delete/{idSnapshot}")
   public void deleteSnapshot(@PathVariable("id") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {

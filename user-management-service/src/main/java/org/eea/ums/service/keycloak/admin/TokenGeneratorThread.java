@@ -2,9 +2,8 @@ package org.eea.ums.service.keycloak.admin;
 
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.eea.ums.service.keycloak.model.TokenInfo;
-import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ public class TokenGeneratorThread implements Runnable {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-  private KeycloakConnectorServiceImpl keycloakConnectorService;
+  private KeycloakConnectorService keycloakConnectorService;
   private Boolean exit = false;
   private String adminUser;
   private String adminPass;
@@ -36,7 +35,7 @@ public class TokenGeneratorThread implements Runnable {
    * @param tokenExpiration the token expiration
    */
   public TokenGeneratorThread(
-      KeycloakConnectorServiceImpl keycloakConnectorService, String adminUser, String adminPass,
+      KeycloakConnectorService keycloakConnectorService, String adminUser, String adminPass,
       Long tokenExpiration) {
 
     this.keycloakConnectorService = keycloakConnectorService;

@@ -1,55 +1,49 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import { withRouter } from 'react-router-dom';
 
-import * as fileDownload from 'js-file-download';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './DocumentationDataSet.module.scss';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
-import { Dialog } from 'primereact/dialog';
+import { DataTable } from 'ui/views/_components/DataTable';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Icon } from 'ui/views/_components/Icon';
 import { Growl } from 'primereact/growl';
-import { IconComponent } from 'ui/views/_components/IconComponent';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView, TabPanel } from 'primereact/tabview';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const DocumentationDataSet = ({ match, history }) => {
+export const DocumentationDataSet = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
-  const [documents, setDocuments] = useState([]);
-  const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [fileName, setFileName] = useState('');
-  const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [customButtons, setCustomButtons] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [fileName, setFileName] = useState('');
+  const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [webLinks, setWebLinks] = useState([]);
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 
-  const setDocumentsAndWebLinks = async () => {
-    setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
-    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
-  };
-
   useEffect(() => {
-    setIsLoading(true);
-    setDocumentsAndWebLinks();
-    setIsLoading(false);
+    onLoadDocumentsAndWebLinks();
   }, []);
 
   //Bread Crumbs settings
@@ -67,69 +61,31 @@ export const DocumentationDataSet = ({ match, history }) => {
     ]);
   }, [history, match.params.dataFlowId, resources.messages]);
 
-  //Data Fetching
-  useEffect(() => {
-    //#region Button initialization
-    setCustomButtons([
-      {
-        label: resources.messages['upload'],
-        icon: '0',
-        group: 'left',
-        disabled: false,
-        clickHandler: () => setIsUploadDialogVisible(true)
-      },
-      {
-        label: resources.messages['visibility'],
-        icon: '6',
-        group: 'left',
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages['filter'],
-        icon: '7',
-        group: 'left',
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages['export'],
-        icon: '1',
-        group: 'left',
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages['refresh'],
-        icon: '11',
-        group: 'right',
-        disabled: false,
-        clickHandler: () => onRefreshDocumentAndWebLinks()
-      }
-    ]);
-    //#end region Button initialization
-  }, []);
-
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
-      fileDownload(fileToDownload, fileName);
+      DownloadFile(fileToDownload, fileName);
     }
   }, [fileToDownload]);
 
-  const onRefreshDocumentAndWebLinks = () => {
-    setIsLoading(true);
-    setDocumentsAndWebLinks();
-    setIsLoading(false);
-  };
-
-  const onHideHandler = () => {
-    setIsUploadDialogVisible(false);
-    setDocumentsAndWebLinks();
-  };
-
-  const downloadDocument = async rowData => {
+  const onDownloadDocument = async rowData => {
     setFileName(createFileName(rowData.title));
     setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+  };
+
+  const onHide = () => {
+    setIsUploadDialogVisible(false);
+    onLoadDocumentsAndWebLinks();
+  };
+
+  const onCancelDialog = () => {
+    setIsUploadDialogVisible(false);
+  };
+
+  const onLoadDocumentsAndWebLinks = async () => {
+    setIsLoading(true);
+    setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
+    setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
+    setIsLoading(false);
   };
 
   const createFileName = title => {
@@ -138,9 +94,9 @@ export const DocumentationDataSet = ({ match, history }) => {
 
   const actionTemplate = (rowData, column) => {
     return (
-      <span className={styles.downloadIcon} onClick={() => downloadDocument(rowData)}>
+      <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
-        <IconComponent icon={config.icons.archive} />
+        <Icon icon="archive" />
       </span>
     );
   };
@@ -163,9 +119,7 @@ export const DocumentationDataSet = ({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <div className="titleDiv">
-          <BreadCrumb model={breadCrumbItems} home={home} />
-        </div>
+        <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
         <Growl ref={growlRef} />
       </MainLayout>
@@ -173,60 +127,96 @@ export const DocumentationDataSet = ({ match, history }) => {
   };
 
   if (isLoading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   if (documents) {
     return layout(
       <TabView>
         <TabPanel header={resources.messages['documents']}>
-          <ButtonsBar buttonsList={customButtons} />
+          <Toolbar>
+            <div className="p-toolbar-group-left">
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={'export'}
+                label={resources.messages['upload']}
+                onClick={() => setIsUploadDialogVisible(true)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'eye'}
+                label={resources.messages['visibility']}
+                onClick={null}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'filter'}
+                label={resources.messages['filter']}
+                onClick={null}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'import'}
+                label={resources.messages['export']}
+                onClick={null}
+              />
+            </div>
+            <div className="p-toolbar-group-right">
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={'refresh'}
+                label={resources.messages['refresh']}
+                onClick={() => onLoadDocumentsAndWebLinks()}
+              />
+            </div>
+          </Toolbar>
           <Dialog
             header={resources.messages['upload']}
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHideHandler}>
-            <DocumentFileUpload
-              dataFlowId={match.params.dataFlowId}
-              onUpload={onHideHandler}
-              onGrowlAlert={onGrowlAlert}
-            />
+            onHide={onCancelDialog}>
+            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="title"
-                header={resources.messages['title']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['title']}
               />
               <Column
                 field="description"
-                header={resources.messages['description']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['description']}
               />
               <Column
                 field="category"
-                header={resources.messages['category']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['category']}
               />
               <Column
                 field="language"
-                header={resources.messages['language']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['language']}
               />
               <Column
                 body={actionTemplate}
-                style={{ textAlign: 'center', width: '8em' }}
                 field="url"
-                header={resources.messages['file']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['file']}
+                style={{ textAlign: 'center', width: '8em' }}
               />
             </DataTable>
           }
@@ -257,4 +247,4 @@ export const DocumentationDataSet = ({ match, history }) => {
   } else {
     return <></>;
   }
-};
+});

@@ -1,0 +1,62 @@
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 15px;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 999;
+  bottom: 0;
+
+  margin-left: -0;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+td > .tooltip > span.tooltiptext {
+  overflow: visible !important;
+}
+
+.buttonCustom {
+  padding: 0px !important;
+  margin: 0px !important;
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  justify-self: flex-end !important;
+}
+
+.buttonCustom.warning {
+  color: var(--c-orange-300);
+}
+.buttonCustom.warning:hover {
+  color: var(--c-orange-300) !important;
+}
+.buttonCustom.error {
+  color: var(--errors);
+}
+.buttonCustom.error:hover {
+  color: var(--errors) !important;
+}
+.buttonCustom.blocker {
+  color: var(--errors);
+}
+.buttonCustom.blocker:hover {
+  color: var(--errors) !important;
+}

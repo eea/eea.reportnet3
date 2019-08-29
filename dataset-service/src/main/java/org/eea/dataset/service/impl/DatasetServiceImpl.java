@@ -58,6 +58,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
@@ -72,6 +73,7 @@ import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -91,12 +93,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * The data set mapper.
@@ -457,13 +457,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      final Pageable pageable, final String fields) throws EEAException {
+      Pageable pageable, final String fields) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
-    Map<String, Integer> mapFields = new HashMap<String, Integer>();
+    Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
 
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
+
+    // Check if we need to put all the records without pagination
+    if (pageable == null) {
+      pageable = PageRequest.of(0, totalRecords.intValue());
+    }
 
     if (null == fields) {
 
@@ -551,7 +556,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * String to boolean.
    *
-   * @param string the string
+   * @param integer the integer
    * @return the boolean
    */
   private Boolean intToBoolean(Integer integer) {
@@ -561,7 +566,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /**
    * Retrieves in a controlled way the data from database
-   * 
+   *
    * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
    * @param idTableSchema the id table schema
@@ -999,19 +1004,19 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteRecords(final Long datasetId, final List<Long> recordIds) throws EEAException {
-    if (datasetId == null || recordIds == null) {
+  public void deleteRecord(final Long datasetId, final Long recordId) throws EEAException {
+    if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
-    recordRepository.deleteRecordsWithIds(recordIds);
+    recordRepository.deleteRecordWithId(recordId);
   }
 
   /**
@@ -1077,5 +1082,22 @@ public class DatasetServiceImpl implements DatasetService {
     ds.setId(datasetId);
     datasetRepository.save(ds);
 
+  }
+
+  /**
+   * Update records.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void updateField(final Long datasetId, final FieldVO field) throws EEAException {
+    if (datasetId == null || field == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
+
+    }
+    fieldRepository.saveValue(field.getId(), field.getValue());
   }
 }
