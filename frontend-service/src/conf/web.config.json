@@ -1,4 +1,7 @@
 {
+	"addNewRecord": {
+		"url":"/dataset/{:dataSetId}/table/{:tableSchemaId}/record"
+	},
 	"createSnapshot": {
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:description}"
 	},
@@ -28,6 +31,9 @@
 	},
 	"exportDataSetTableData": {
 		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
+	},
+	"insertRecordData":{
+		"url": "/dataset/{:datasetId}/table/{:tableSchemaId}/record"
 	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
@@ -67,5 +73,8 @@
 	},
 	"refreshToken":{
 		"url": "/user/refreshToken?refreshToken={:refreshToken}"
+	},
+	"updateTableDataField":{
+		"url": "/dataset/{:dataSetId}/updateField"
 	}
 }

@@ -160,7 +160,9 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           return {
             table: table['tableSchemaName'],
             field: field['fieldId'],
-            header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`
+            header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`,
+            type: field['type'],
+            recordId: field['recordId']
           };
         });
       })
