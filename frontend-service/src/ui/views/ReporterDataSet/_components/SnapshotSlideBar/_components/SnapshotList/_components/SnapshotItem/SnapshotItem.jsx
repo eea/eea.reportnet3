@@ -15,8 +15,10 @@ export function SnapshotItem({ itemData }) {
 
   const [isReleasedSnapshot, setIsReleasedSnapshot] = useState();
 
+  console.log('itemData', itemData);
+
   useEffect(() => {
-    setIsReleasedSnapshot(/* itemData.isReleased */ false);
+    setIsReleasedSnapshot(itemData.isReleased);
   }, []);
 
   return (
