@@ -186,7 +186,6 @@ const DataViewer = withRouter(
 
     const onEditAddFormInput = (property, value, field) => {
       let record = {};
-      console.log(selectedRecord);
       if (!isNewRecord) {
         record = { ...editedRecord };
         field.fieldData[property] = value;
@@ -236,9 +235,11 @@ const DataViewer = withRouter(
           fields
         );
 
+        if (!isUndefined(colsSchema)) {
+          setNewRecord(createEmptyObject(colsSchema));
+        }
         if (!isUndefined(tableData.records)) {
           filterDataResponse(tableData);
-          setNewRecord(createEmptyObject(tableData));
         }
         if (tableData.totalRecords !== totalRecords) {
           setTotalRecords(tableData.totalRecords);
@@ -276,7 +277,16 @@ const DataViewer = withRouter(
     const onSaveRow = async record => {
       console.log(isNewRecord, record);
       if (isNewRecord) {
-        await DataSetService.addRecordById(dataSetId, tableId, record);
+        try {
+          await DataSetService.addRecordById(dataSetId, tableId, record);
+        } catch (error) {
+          console.error('DataViewer error: ', error);
+          const errorResponse = error.response;
+          console.error('DataViewer errorResponse: ', errorResponse);
+          if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+            history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+          }
+        }
       } else {
         await DataSetService.updateRecordById(dataSetId, tableId, record);
       }
@@ -385,20 +395,22 @@ const DataViewer = withRouter(
       return tableData;
     };
 
-    const createEmptyObject = data => {
+    const createEmptyObject = columnsSchema => {
+      console.log(columnsSchema);
       let fields;
-      if (!isUndefined(data)) {
-        fields = data.records[0].fields.map(field => {
+      if (!isUndefined(columnsSchema)) {
+        fields = columnsSchema.map(column => {
           return {
-            fieldData: { [field.fieldSchemaId]: field.value, type: field.type }
+            fieldData: { [column.field]: null, type: column.type }
           };
         });
-      } else {
       }
-      const obj = {
-        dataRow: fields
-      };
 
+      const obj = {
+        dataRow: fields,
+        recordId: columnsSchema[0].recordId
+      };
+      console.log(obj);
       return obj;
     };
 

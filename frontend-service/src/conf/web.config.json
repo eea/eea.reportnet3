@@ -21,7 +21,7 @@
 		"url":"/dataset/{:dataSetId}/deleteImportTable/{:tableId}"
 	},
 	"deleteRecord":{
-		"url":"/dataset/{:dataSetId}/record"
+		"url":"/dataset/{:dataSetId}/record/{:recordId}"
 	},
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
