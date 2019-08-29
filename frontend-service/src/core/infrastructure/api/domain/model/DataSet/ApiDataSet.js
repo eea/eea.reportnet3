@@ -28,6 +28,7 @@ export const apiDataSet = {
   },
   deleteRecordByIds: async (dataSetId, rowIds) => {
     try {
+      const tokens = userStorage.get();
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${dataSetId}/record/`
@@ -37,7 +38,10 @@ export const apiDataSet = {
         data: {
           rowIds: rowIds
         },
-        queryString: {}
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
 
       return response.status >= 200 && response.status <= 299;

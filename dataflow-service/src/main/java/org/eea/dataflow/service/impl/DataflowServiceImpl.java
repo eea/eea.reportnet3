@@ -142,6 +142,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getPendingAccepted(String userId) throws EEAException {
 
+    //get pending
     List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
     List<Dataflow> dfs = new ArrayList<>();
     LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
@@ -157,6 +158,13 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVOs.get(i).setRequestId(df.getRequestId());
         }
       }
+    }
+    //Get user's dataflows
+    List<ResourceAccessVO> usersDataflows =
+        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATAFLOW);
+    for (ResourceAccessVO userDataflow : usersDataflows) {
+      dataflowVOs.add(dataflowNoContentMapper
+          .entityToClass(dataflowRepository.findById(userDataflow.getId()).get()));
     }
     return dataflowVOs;
   }
