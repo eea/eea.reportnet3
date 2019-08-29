@@ -38,13 +38,11 @@ const DataViewer = withRouter(
       tableId,
       tableName,
       tableSchemaColumns,
-      match,
       match: {
         params: { dataSetId, dataFlowId }
       },
       history
     }) => {
-      //const contextReporterDataSet = useContext(ReporterDataSetContext);
       const [addDialogVisible, setAddDialogVisible] = useState(false);
       const [columnOptions, setColumnOptions] = useState([{}]);
       const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
