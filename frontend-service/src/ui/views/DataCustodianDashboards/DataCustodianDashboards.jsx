@@ -21,8 +21,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
-  const [dashboardData, setDashboardData] = useState({});
-  const [dashboardOptions, setDashboardOptions] = useState({});
+  const [dashboardData, setDatasetDashboardData] = useState({});
+  const [dashboardOptions, setDatasetsDashboardOptions] = useState({});
 
   const home = {
     icon: config.icons['home'],
@@ -44,7 +44,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   useEffect(() => {
     setLoading(true);
-    setDashboardData({
+    setDatasetDashboardData({
       labels: [
         'FIRST',
         'SECOND',
@@ -121,7 +121,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       ]
     });
 
-    setDashboardOptions({
+    setDatasetsDashboardOptions({
       tooltips: {
         mode: 'index',
         intersect: false
@@ -140,10 +140,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         yAxes: [
           {
             stacked: true,
-            scaleLabel: {
+            /*  scaleLabel: {
               display: true,
               labelString: 'Percentage'
-            },
+            }, */
             ticks: {
               // Include a % sign in the ticks
               callback: (value, index, values) => `${value} %`
