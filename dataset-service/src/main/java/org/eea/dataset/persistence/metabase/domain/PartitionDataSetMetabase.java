@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,8 +31,10 @@ public class PartitionDataSetMetabase {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "ID", columnDefinition = "serial")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "partition_dataset_id_seq")
+  @SequenceGenerator(name = "partition_dataset_id_seq", sequenceName = "partition_dataset_id_seq",
+      allocationSize = 1)
   private Long id;
 
   /** The id data set. */
