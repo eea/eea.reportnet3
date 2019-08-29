@@ -104,7 +104,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
@@ -194,7 +194,7 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void loadTableData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file,
       @PathVariable(value = "idTableSchema") String idTableSchema) {
@@ -227,7 +227,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportData(@PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -245,6 +245,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PostMapping("{id}/loadDatasetSchema")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
       TableCollectionVO tableCollection) {
     if (datasetId == null || dataFlowId == null || tableCollection == null) {
@@ -444,7 +445,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema) {
     if (dataSetId == null || dataSetId < 1) {
@@ -478,7 +479,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','READ') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
       @RequestParam("mimeType") String mimeType) throws Exception {
