@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
@@ -142,8 +143,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getPendingAccepted(String userId) throws EEAException {
 
-    //get pending
-    List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
+    // get pending
+    List<DataflowWithRequestType> dataflows = dataflowRepository.findPending(userId);
     List<Dataflow> dfs = new ArrayList<>();
     LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
     for (DataflowWithRequestType df : dataflows) {
@@ -159,12 +160,16 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     }
-    //Get user's dataflows
+    // Get user's dataflows
     List<ResourceAccessVO> usersDataflows =
         userManagementControllerZull.getResourcesByUser(ResourceEnum.DATAFLOW);
     for (ResourceAccessVO userDataflow : usersDataflows) {
-      dataflowVOs.add(dataflowNoContentMapper
-          .entityToClass(dataflowRepository.findById(userDataflow.getId()).get()));
+      Optional<Dataflow> df = dataflowRepository.findById(userDataflow.getId());
+      if (df.isPresent()) {
+        DataFlowVO dfVO = dataflowNoContentMapper.entityToClass(df.get());
+        dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
+        dataflowVOs.add(dfVO);
+      }
     }
     return dataflowVOs;
   }
@@ -282,7 +287,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param dataflowVO the dataflow VO
    */
-//  @Transactional
+  // @Transactional
   private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
     if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
