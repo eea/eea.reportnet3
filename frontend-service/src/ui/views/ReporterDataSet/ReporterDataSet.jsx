@@ -27,6 +27,7 @@ import { ValidationViewer } from './_components/ValidationViewer';
 
 import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const SnapshotContext = React.createContext();
 
@@ -159,34 +160,45 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onLoadDataSetSchema = async () => {
-    const dataSetSchema = await DataSetService.schemaById(dataFlowId);
-    const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
-    setDatasetTitle(dataSetStatistics.dataSetSchemaName);
-    setTableSchema(
-      dataSetSchema.tables.map(tableSchema => {
-        return {
-          id: tableSchema['tableSchemaId'],
-          name: tableSchema['tableSchemaName'],
-          hasErrors: {
-            ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
-          }.hasErrors
-        };
-      })
-    );
-
-    setTableSchemaColumns(
-      dataSetSchema.tables.map(table => {
-        return table.records[0].fields.map(field => {
+    try {
+      const dataSetSchema = await DataSetService.schemaById(dataFlowId);
+      const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
+      setDatasetTitle(dataSetStatistics.dataSetSchemaName);
+      setTableSchema(
+        dataSetSchema.tables.map(tableSchema => {
           return {
-            table: table['tableSchemaName'],
-            field: field['fieldId'],
-            header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`
+            id: tableSchema['tableSchemaId'],
+            name: tableSchema['tableSchemaName'],
+            hasErrors: {
+              ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+            }.hasErrors
           };
-        });
-      })
-    );
+        })
+      );
 
-    setDatasetHasErrors(dataSetStatistics.datasetErrors);
+      setTableSchemaColumns(
+        dataSetSchema.tables.map(table => {
+          return table.records[0].fields.map(field => {
+            return {
+              table: table['tableSchemaName'],
+              field: field['fieldId'],
+              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`
+            };
+          });
+        })
+      );
+
+      setDatasetHasErrors(dataSetStatistics.datasetErrors);
+    } catch (error) {
+      const errorResponse = error.response;
+      if (
+        !isUndefined(errorResponse) &&
+        (errorResponse.data.message.includes('401') || errorResponse.data.message.includes('403'))
+      ) {
+        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+      }
+    }
+
     setLoading(false);
   };
 
