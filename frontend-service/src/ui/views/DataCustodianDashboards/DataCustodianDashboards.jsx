@@ -21,8 +21,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
-  const [dashboardData, setDatasetDashboardData] = useState({});
-  const [dashboardOptions, setDatasetsDashboardOptions] = useState({});
+  const [datasetsDashboardData, setDatasetsDashboardData] = useState({});
+  const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
+  const [releasedDashboardData, setReleasedDashboardData] = useState({});
+  const [releasedDashboardOptions, setReleasedDashboardOptions] = useState({});
 
   const home = {
     icon: config.icons['home'],
@@ -44,7 +46,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   useEffect(() => {
     setLoading(true);
-    setDatasetDashboardData({
+    setDatasetsDashboardData({
       labels: [
         'FIRST',
         'SECOND',
@@ -153,6 +155,138 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       }
     });
 
+    setReleasedDashboardData({
+      labels: [
+        'FIRST',
+        'SECOND',
+        'FIRD',
+        'FOURTH',
+        'FIFTH',
+        'SIXTH',
+        'SEVENTH',
+        'DataSet name 8',
+        'DataSet name 9',
+        'DataSet name 10',
+        'DataSet name 11',
+        'DataSet name 12',
+        'DataSet name 13',
+        'DataSet name 14',
+        'DataSet name 15',
+        'DataSet name 16',
+        'DataSet name 17',
+        'DataSet name 18',
+        'DataSet name 19',
+        'DataSet name 20',
+        'DataSet name 21',
+        'DataSet name 22',
+        'DataSet name 23',
+        'DataSet name 24',
+        'DataSet name 25',
+        'DataSet name 26',
+        'DataSet name 27'
+      ],
+      datasets: [
+        {
+          label: 'Released',
+          backgroundColor: '#32CD32',
+          data: [
+            50,
+            75,
+            25,
+            100,
+            0,
+            30,
+            20,
+            45,
+            35,
+            80,
+            50,
+            75,
+            25,
+            100,
+            0,
+            30,
+            20,
+            45,
+            35,
+            80,
+            50,
+            75,
+            25,
+            100,
+            0,
+            30,
+            20
+          ]
+        },
+        {
+          label: 'Unreleased',
+          backgroundColor: '#8FBC8F',
+          data: [
+            50,
+            25,
+            75,
+            0,
+            100,
+            70,
+            80,
+            55,
+            65,
+            20,
+            50,
+            25,
+            75,
+            0,
+            100,
+            70,
+            80,
+            55,
+            65,
+            20,
+            50,
+            25,
+            75,
+            0,
+            100,
+            70,
+            80
+          ]
+        }
+      ]
+    });
+
+    setReleasedDashboardOptions({
+      tooltips: {
+        mode: 'index',
+        intersect: false
+      },
+      responsive: true,
+      scales: {
+        xAxes: [
+          {
+            stacked: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Released'
+            }
+          }
+        ],
+        yAxes: [
+          {
+            stacked: true,
+            /*  scaleLabel: {
+              display: true,
+              labelString: 'Percentage'
+            }, */
+            ticks: {
+              // Include a % sign in the ticks
+              callback: (value, index, values) => `${value} %`
+            }
+          }
+        ]
+      }
+    });
+
     setLoading(false);
   }, []);
 
@@ -175,10 +309,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <h1>Title Hardcoded</h1>
       </div>
       <div className="rep-row">
-        <Chart type="bar" data={dashboardData} options={dashboardOptions} width="80%" height="30%" />
+        <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="80%" height="30%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={dashboardData} options={dashboardOptions} width="50%" height="35%" />
+        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="80%" height="35%" />
       </div>
     </>
   );
