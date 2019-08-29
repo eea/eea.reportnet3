@@ -36,9 +36,6 @@ end
 end template
 
 //QUERYS PART JAVA
-function boolean isQuery(String value, String fieldSchema, RecordValue record, Long recordCoordinate, Long columnCoordinate, String idFieldSchemaReference, Long idDatasetReference, Long recordCoordinateReference, Long columnCoordinateReference){
-	return ForeingKeyDrools.queryGetAllFieldValue(value,fieldSchema, record ,recordCoordinate,columnCoordinate, idFieldSchemaReference, idDatasetReference, recordCoordinateReference, columnCoordinateReference);
-}
 function boolean  isQueryDataWDFProtect(String value){
 	return ForeingKeyDrools.isQueryDataWDFProtect(value);
 }

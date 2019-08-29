@@ -1,7 +1,5 @@
 package org.eea.validation.util;
 
-import org.apache.commons.lang.StringUtils;
-import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.service.ValidationService;
@@ -50,39 +48,6 @@ public class ForeingKeyDrools {
     ForeingKeyDrools.validationService = validationService;
   }
 
-  /**
-   * Query get all field value.
-   *
-   * @param value the value
-   * @param idFieldSchema the id field schema
-   * @param record the record
-   * @param recordCoordinate the record coordinate
-   * @param columnCoordinate the column coordinate
-   * @param idFieldSchemaReference the id field schema reference
-   * @param idDatasetReference the id dataset reference
-   * @param recordCoordinateReference the record coordinate reference
-   * @param columnCoordinateReference the column coordinate reference
-   * @return the boolean
-   */
-  public static Boolean queryGetAllFieldValue(String value, String idFieldSchema,
-      RecordValue record, Long recordCoordinate, Long columnCoordinate,
-      String idFieldSchemaReference, Long idDatasetReference, Long recordCoordinateReference,
-      Long columnCoordinateReference) {
-
-    Long idDataset = record.getTableValue().getDatasetId().getId();
-
-    FieldValue fieldReference = new FieldValue();
-    fieldReference.setColumnCoordinate(columnCoordinateReference);
-    fieldReference.setRecordCoordinate(recordCoordinateReference);
-    fieldReference.setIdFieldSchema(idFieldSchemaReference);
-
-    if (!StringUtils.isBlank(idFieldSchema)) {
-      return validationService.findReferenceDrools(value, idDataset, idFieldSchema,
-          recordCoordinate, columnCoordinate, idDatasetReference, fieldReference);
-    } else {
-      return false;
-    }
-  }
 
   /**
    * Checks if is query data WDF protect.

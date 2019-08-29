@@ -78,8 +78,6 @@ public interface DataSetMapper extends IMapper<DatasetValue, DataSetVO> {
         record.getFields().stream().forEach(field -> {
           field.setRecord(record);
           // Set Coordinates
-          field.setRecordCoordinate(r + 1L);
-          field.setColumnCoordinate(fieldInteger.getAndIncrement() + 1L);
         });
       });
     });

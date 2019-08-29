@@ -186,22 +186,4 @@ public interface ValidationService {
       List<Long> idValidations);
 
 
-
-  /**
-   * Find reference drools.
-   *
-   * @param value the value
-   * @param datasetId the dataset id
-   * @param idFieldSchema the id field schema
-   * @param recordCoordinate the record coordinate
-   * @param columnCoordinateLong the column coordinate long
-   * @param idDatasetReference the id dataset reference
-   * @param fieldReference the field reference
-   * @return the boolean
-   */
-  Boolean findReferenceDrools(String value, @DatasetId Long datasetId, String idFieldSchema,
-      Long recordCoordinate, Long columnCoordinateLong, Long idDatasetReference,
-      FieldValue fieldReference);
-
-
 }

@@ -683,42 +683,4 @@ public class ValidationServiceImpl implements ValidationService {
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
   }
 
-
-
-  /**
-   * Find reference drools.
-   *
-   * @param value the value
-   * @param idDataset the id dataset
-   * @param idFieldSchema the id field schema
-   * @param recordCoordinate the record coordinate
-   * @param columnCoordinate the column coordinate
-   * @param idDatasetReference the id dataset reference
-   * @param fieldReference the field reference
-   * @return the boolean
-   */
-  @Override
-  public Boolean findReferenceDrools(String value, Long idDataset, String idFieldSchema,
-      Long recordCoordinate, Long columnCoordinate, Long idDatasetReference,
-      FieldValue fieldReference) {
-
-    String compareValue = fieldRepositoryImpl.findAllFieldValuesByFieldSchemAndNameDataSet(
-        fieldReference.getIdFieldSchema(), idDatasetReference, fieldReference.getRecordCoordinate(),
-        fieldReference.getColumnCoordinate());
-
-    if (null != compareValue) {
-      if (fieldReference.getRecordCoordinate().equals(recordCoordinate)
-          && fieldReference.getColumnCoordinate().equals(columnCoordinate)) {
-        if (compareValue != value) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
 }
