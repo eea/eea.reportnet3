@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import moment from 'moment';
 
@@ -13,11 +13,19 @@ export function SnapshotItem({ itemData }) {
 
   const resources = useContext(ResourcesContext);
 
+  const [isReleasedSnapshot, setIsReleasedSnapshot] = useState();
+
+  useEffect(() => {
+    setIsReleasedSnapshot(/* itemData.isReleased */ false);
+  }, []);
+
   return (
     <li className={styles.listItem}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <h5>{moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}</h5>
+          <h5 className={isReleasedSnapshot ? `${styles.is_released_snapshot}` : null}>
+            {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+          </h5>
           <div className={styles.listActions}>
             <Button
               tooltip={resources.messages.restoreSnapshotTooltip}
@@ -35,9 +43,9 @@ export function SnapshotItem({ itemData }) {
             <Button
               tooltip={resources.messages.releaseSnapshotTooltip}
               tooltipOptions={{ position: 'top' }}
-              icon="cloudUpload"
-              disabled={false}
-              className={`${styles.btn} rp-btn default`}
+              icon={isReleasedSnapshot ? 'check' : 'cloudUpload'}
+              disabled={isReleasedSnapshot ? true : false}
+              className={`${styles.btn} rp-btn ${isReleasedSnapshot ? 'success' : `default`}`}
               onClick={() =>
                 snapshotContext.snapshotDispatch({
                   type: 'release_snapshot',
