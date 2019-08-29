@@ -81,13 +81,13 @@ public class DataSetControllerImpl implements DatasetController {
    * The load validations helper.
    */
   @Autowired
-  UpdateRecordHelper updateRecordHelper;
+  private UpdateRecordHelper updateRecordHelper;
 
   /**
    * The delete helper.
    */
   @Autowired
-  DeleteHelper deleteHelper;
+  private DeleteHelper deleteHelper;
 
 
   /**
@@ -123,7 +123,6 @@ public class DataSetControllerImpl implements DatasetController {
       pageable = PageRequest.of(pageNum, pageSize);
     }
     // else pageable will be null, it will be created inside the service
-
 
     TableVO result = null;
     try {
