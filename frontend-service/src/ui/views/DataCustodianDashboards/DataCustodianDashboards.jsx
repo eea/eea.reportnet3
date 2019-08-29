@@ -48,33 +48,33 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setLoading(true);
     setDatasetsDashboardData({
       labels: [
-        'FIRST',
-        'SECOND',
-        'FIRD',
-        'FOURTH',
-        'FIFTH',
-        'SIXTH',
-        'SEVENTH',
-        'DataSet name 8',
-        'DataSet name 9',
-        'DataSet name 10',
-        'DataSet name 11',
-        'DataSet name 12',
-        'DataSet name 13',
-        'DataSet name 14',
-        'DataSet name 15',
-        'DataSet name 16',
-        'DataSet name 17',
-        'DataSet name 18',
-        'DataSet name 19',
-        'DataSet name 20',
-        'DataSet name 21',
-        'DataSet name 22',
-        'DataSet name 23',
-        'DataSet name 24',
-        'DataSet name 25',
-        'DataSet name 26',
-        'DataSet name 27'
+        'Austria',
+        'Belgium',
+        'Bulgaria',
+        'Croatia',
+        'Cyprus',
+        'Denmark',
+        'Estonia',
+        'Finland',
+        'France',
+        'Germany',
+        'Greece',
+        'Hungary',
+        'Ireland',
+        'Italy',
+        'Latvia',
+        'Lithuania',
+        'Luxembourg',
+        'Malta',
+        'Netherlands',
+        'Poland',
+        'Portugal',
+        'Romania',
+        'Slovakia',
+        'Slovenia',
+        'Spain',
+        'Sweeden',
+        'United Kingdom'
       ],
       datasets: [
         {
@@ -157,33 +157,33 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
     setReleasedDashboardData({
       labels: [
-        'FIRST',
-        'SECOND',
-        'FIRD',
-        'FOURTH',
-        'FIFTH',
-        'SIXTH',
-        'SEVENTH',
-        'DataSet name 8',
-        'DataSet name 9',
-        'DataSet name 10',
-        'DataSet name 11',
-        'DataSet name 12',
-        'DataSet name 13',
-        'DataSet name 14',
-        'DataSet name 15',
-        'DataSet name 16',
-        'DataSet name 17',
-        'DataSet name 18',
-        'DataSet name 19',
-        'DataSet name 20',
-        'DataSet name 21',
-        'DataSet name 22',
-        'DataSet name 23',
-        'DataSet name 24',
-        'DataSet name 25',
-        'DataSet name 26',
-        'DataSet name 27'
+        'Austria',
+        'Belgium',
+        'Bulgaria',
+        'Croatia',
+        'Cyprus',
+        'Denmark',
+        'Estonia',
+        'Finland',
+        'France',
+        'Germany',
+        'Greece',
+        'Hungary',
+        'Ireland',
+        'Italy',
+        'Latvia',
+        'Lithuania',
+        'Luxembourg',
+        'Malta',
+        'Netherlands',
+        'Poland',
+        'Portugal',
+        'Romania',
+        'Slovakia',
+        'Slovenia',
+        'Spain',
+        'Sweeden',
+        'United Kingdom'
       ],
       datasets: [
         {
@@ -213,8 +213,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             50,
             75,
             25,
-            100,
             0,
+            100,
             30,
             20
           ]
@@ -246,8 +246,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             50,
             25,
             75,
-            0,
             100,
+            0,
             70,
             80
           ]
@@ -309,10 +309,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <h1>Title Hardcoded</h1>
       </div>
       <div className="rep-row">
-        <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="80%" height="30%" />
+        <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="100%" height="35%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="80%" height="35%" />
+        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="35%" />
       </div>
     </>
   );
