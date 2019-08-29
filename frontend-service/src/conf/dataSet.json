@@ -1,7 +1,0 @@
-{
-    "exportTypes": {
-        "csv": "csv",
-        "xls": "xls",
-        "xlsx": "xlsx"
-    }
-}

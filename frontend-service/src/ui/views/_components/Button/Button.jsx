@@ -7,6 +7,7 @@ import { Button as PrimeButton } from 'primereact/button';
 import { Icon } from 'ui/views/_components/Icon';
 
 export const Button = ({
+  id = null,
   disabled = false,
   icon = null,
   iconClasses = null,
@@ -33,6 +34,7 @@ export const Button = ({
   if (isNull(layout)) {
     return (
       <PrimeButton
+        id={id}
         className={className}
         disabled={disabled}
         icon={iconClassName}
