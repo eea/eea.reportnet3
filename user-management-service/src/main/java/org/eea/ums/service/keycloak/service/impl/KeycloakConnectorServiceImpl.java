@@ -225,7 +225,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
         map, headers);
-    ResponseEntity<Void> tokenInfo = this.restTemplate
+    this.restTemplate
         .postForEntity(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LOGOUT_URL)
                 .buildAndExpand(uriParams).toString(),

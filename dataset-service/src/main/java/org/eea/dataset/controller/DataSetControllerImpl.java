@@ -195,7 +195,7 @@ public class DataSetControllerImpl implements DatasetController {
 
   @Override
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void loadTableData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file,
       @PathVariable(value = "idTableSchema") String idTableSchema) {
@@ -228,7 +228,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
   public void deleteImportData(@PathVariable("id") final Long dataSetId) {
     if (dataSetId == null || dataSetId < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -373,7 +373,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void updateRecords(@PathVariable("id") final Long datasetId,
       @RequestBody final List<RecordVO> records) {
     if (datasetId == null || records == null || records.isEmpty()) {
@@ -392,19 +392,19 @@ public class DataSetControllerImpl implements DatasetController {
    * Delete records.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    */
   @Override
-  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
-  public void deleteRecords(@PathVariable("id") final Long datasetId,
-      @RequestParam final List<Long> recordIds) {
-    if (datasetId == null || recordIds == null || recordIds.isEmpty()) {
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
+  public void deleteRecord(@PathVariable("id") final Long datasetId,
+      @PathVariable("recordId") final Long recordId) {
+    if (datasetId == null || recordId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     try {
-      updateRecordHelper.executeDeleteProcess(datasetId, recordIds);
+      updateRecordHelper.executeDeleteProcess(datasetId, recordId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -422,7 +422,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void insertRecords(@PathVariable("id") final Long datasetId,
       @PathVariable("idTableSchema") final String idTableSchema,
       @RequestBody final List<RecordVO> records) {
@@ -445,7 +445,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportTable(@PathVariable("id") final Long dataSetId,
       @PathVariable("idTableSchema") final String idTableSchema) {
     if (dataSetId == null || dataSetId < 1) {
@@ -522,7 +522,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATASET_PROVIDER') AND checkPermission('Dataset','UPDATE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void updateField(@PathVariable("id") final Long datasetId,
       @RequestBody final FieldVO field) {
     if (datasetId == null || field == null) {

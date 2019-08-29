@@ -181,15 +181,14 @@ public interface DatasetController {
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
-   * Delete records.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    */
-  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteRecords(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "recordIds", required = true) List<Long> recordIds);
+  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") Long recordId);
 
   /**
    * Delete import table.
