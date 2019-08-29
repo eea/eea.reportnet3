@@ -209,6 +209,7 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
   }
   return table;
 };
+const webFormDataById = async (dataSetId, tableSchemaId) => {};
 
 const updateFieldById = async (dataSetId, fieldSchemaId, fieldValue) => {
   const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, fieldSchemaId, fieldValue);

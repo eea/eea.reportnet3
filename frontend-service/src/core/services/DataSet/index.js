@@ -11,6 +11,7 @@ import { GetErrors } from './GetErrors';
 import { GetErrorPosition } from './GetErrorPosition';
 import { GetSchema } from './GetSchema';
 import { GetStatistics } from './GetStatistics';
+import { GetWebFormData } from './GetWebFormData';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { ValidateData } from './ValidateData';
@@ -29,5 +30,6 @@ export const DataSetService = {
   tableDataById: GetData({ dataSetRepository }),
   updateFieldById: UpdateField({ dataSetRepository }),
   updateRecordById: UpdateRecord({ dataSetRepository }),
-  validateDataById: ValidateData({ dataSetRepository })
+  validateDataById: ValidateData({ dataSetRepository }),
+  webFormDataById: GetWebFormData({ dataSetRepository })
 };
