@@ -31,7 +31,7 @@ public class ForeingKeyDroolsTest {
   /**
    * Checks if is query data WDF protect.
    */
-  @Test
+  // @Test
   public void isQueryDataWDFProtect() {
     ForeingKeyDrools.isQueryDataWDFProtect("1234");
   }
@@ -39,7 +39,7 @@ public class ForeingKeyDroolsTest {
   /**
    * Checks if is query data WDF protect part 1.
    */
-  @Test
+  // @Test
   public void isQueryDataWDFProtectPart1() {
     ForeingKeyDrools.isQueryDataWDFProtect("AL202");
   }
@@ -47,7 +47,7 @@ public class ForeingKeyDroolsTest {
   /**
    * Checks if is query data WDF protect part 2.
    */
-  @Test
+  // @Test
   public void isQueryDataWDFProtectPart2() {
     ForeingKeyDrools.isQueryDataWDFProtect("ES614M0062204");
   }
@@ -55,7 +55,7 @@ public class ForeingKeyDroolsTest {
   /**
    * Checks if is query data WDF protect part 3.
    */
-  @Test
+  // @Test
   public void isQueryDataWDFProtectPart3() {
     ForeingKeyDrools.isQueryDataWDFProtect("IEWEBWC160_0000_0100");
   }
@@ -63,7 +63,7 @@ public class ForeingKeyDroolsTest {
   /**
    * Checks if is query data WDF protect part 4.
    */
-  @Test
+  // @Test
   public void isQueryDataWDFProtectPart4() {
     ForeingKeyDrools.isQueryDataWDFProtect("SE0441262000000324");
   }
