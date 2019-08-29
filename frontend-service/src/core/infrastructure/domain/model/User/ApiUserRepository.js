@@ -28,8 +28,10 @@ const login = async (userName, password) => {
   return user;
 };
 const logout = async userId => {
+  const currentTokens = userStorage.get();
   userStorage.remove();
-  return;
+  const response = await apiUser.logout(currentTokens.refreshToken);
+  return response;
 };
 const refreshToken = async refreshToken => {
   const currentTokens = userStorage.get();

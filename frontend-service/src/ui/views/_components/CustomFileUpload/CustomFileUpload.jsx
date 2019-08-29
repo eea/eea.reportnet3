@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import { Button } from 'ui/views/_components/Button';
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
+import { userStorage } from 'core/domain/model/User/UserStorage';
 
 import DomHandler from 'ui/DomHandler';
 
@@ -239,6 +240,8 @@ export class CustomFileUpload extends Component {
     };
 
     xhr.open('POST', this.props.url, true);
+    const tokens = userStorage.get();
+    xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (this.props.onBeforeSend) {
       this.props.onBeforeSend({

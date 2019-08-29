@@ -74,6 +74,9 @@
 	"refreshToken":{
 		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	},
+	"logout":{
+		"url": "/user/logout?refreshToken={:refreshToken}"
+		},
 	"updateTableDataField":{
 		"url": "/dataset/{:dataSetId}/updateField"
 	}

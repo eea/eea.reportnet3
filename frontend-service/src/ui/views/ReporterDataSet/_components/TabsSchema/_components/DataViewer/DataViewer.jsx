@@ -15,7 +15,6 @@ import { config } from 'conf';
 import styles from './DataViewer.module.css';
 
 import { Button } from 'ui/views/_components/Button';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
@@ -24,7 +23,9 @@ import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
+import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
@@ -51,6 +52,7 @@ const DataViewer = withRouter(
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
+    const [exportButtonsList, setExportButtonsList] = useState([]);
     const [exportTableData, setExportTableData] = useState(undefined);
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
@@ -61,6 +63,7 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loadingFile, setLoadingFile] = useState(false);
     const [newRecord, setNewRecord] = useState({});
     const [numRows, setNumRows] = useState(10);
     const [selectedRecord, setSelectedRecord] = useState({});
@@ -71,66 +74,16 @@ const DataViewer = withRouter(
     const resources = useContext(ResourcesContext);
 
     let growlRef = useRef();
+    let exportMenuRef = useRef();
 
     useEffect(() => {
-      setDefaultButtonsList([
-        {
-          label: resources.messages['import'],
-          icon: 'export',
-          group: 'left',
-          disabled: false,
-          onClick: () => setImportDialogVisible(true)
-        },
-        {
-          label: resources.messages['exportTable'],
-          icon: 'import',
-          group: 'left',
-          disabled: false,
-          onClick: () => onExportTableData()
-        },
-        {
-          label: resources.messages['deleteTable'],
-          icon: 'trash',
-          group: 'left',
-          disabled: false,
-          onClick: () => onSetVisible(setDeleteDialogVisible, true)
-        },
-        {
-          label: resources.messages['visibility'],
-          icon: 'eye',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['filter'],
-          icon: 'filter',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['groupBy'],
-          icon: 'groupBy',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['sort'],
-          icon: 'sort',
-          group: 'left',
-          disabled: true,
-          onClick: null
-        },
-        {
-          label: resources.messages['refresh'],
-          icon: 'refresh',
-          group: 'right',
-          disabled: true,
-          onClick: onRefresh
-        }
-      ]);
+      setExportButtonsList(
+        config.exportTypes.map(type => ({
+          label: type.text,
+          icon: config.icons['archive'],
+          command: () => onExportTableData(type.code)
+        }))
+      );
 
       let colOptions = [];
       for (let colSchema of colsSchema) {
@@ -259,9 +212,11 @@ const DataViewer = withRouter(
       setFetchedData(updatedData);
     };
 
-    const onExportTableData = async () => {
-      setExportTableDataName(createTableName(tableName));
-      setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId, config.dataSet.exportTypes.csv));
+    const onExportTableData = async fileType => {
+      setLoadingFile(true);
+      setExportTableDataName(createTableName(tableName, fileType));
+      setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId, fileType));
+      setLoadingFile(false);
     };
 
     const onFetchData = async (sField, sOrder, fRow, nRows) => {
@@ -433,8 +388,8 @@ const DataViewer = withRouter(
       return obj;
     };
 
-    const createTableName = () => {
-      return `${tableName}.${config.dataSet.exportTypes.csv}`;
+    const createTableName = (tableName, fileType) => {
+      return `${tableName}.${fileType}`;
     };
 
     const editRowDialogFooter = (
@@ -501,6 +456,15 @@ const DataViewer = withRouter(
     const getCellValue = (tableData, field) => {
       const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
       return value.length > 0 ? value[0].fieldData[field] : '';
+    };
+
+    const getExportButtonPosition = button => {
+      const buttonLeftPosition = document.getElementById('buttonExportTable').offsetLeft;
+      const buttonTopPosition = button.style.top;
+
+      const exportTableMenu = document.getElementById('exportTableMenu');
+      exportTableMenu.style.top = buttonTopPosition;
+      exportTableMenu.style.left = `${buttonLeftPosition}px`;
     };
 
     const newRecordForm = colsSchema.map((column, i) => {
@@ -632,7 +596,73 @@ const DataViewer = withRouter(
 
     return (
       <div>
-        <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} />
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'export'}
+              label={resources.messages['import']}
+              onClick={() => setImportDialogVisible(true)}
+            />
+            <Button
+              id="buttonExportTable"
+              className={`p-button-rounded p-button-secondary`}
+              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              label={resources.messages['exportTable']}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              model={exportButtonsList}
+              popup={true}
+              ref={exportMenuRef}
+              id="exportTableMenu"
+              onShow={e => {
+                getExportButtonPosition(e.target);
+              }}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'trash'}
+              label={resources.messages['deleteTable']}
+              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'eye'}
+              label={resources.messages['visibility']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'filter'}
+              label={resources.messages['filter']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'groupBy'}
+              label={resources.messages['groupBy']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'sort'}
+              label={resources.messages['sort']}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => onRefresh()}
+            />
+          </div>
+        </Toolbar>
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}

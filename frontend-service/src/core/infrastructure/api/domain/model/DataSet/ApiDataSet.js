@@ -52,6 +52,7 @@ export const apiDataSet = {
   },
   deleteRecordByIds: async (dataSetId, rowIds) => {
     try {
+      const tokens = userStorage.get();
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${dataSetId}/record/`
@@ -61,7 +62,10 @@ export const apiDataSet = {
         data: {
           rowIds: rowIds
         },
-        queryString: {}
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
       });
 
       return response.status >= 200 && response.status <= 299;
@@ -130,23 +134,33 @@ export const apiDataSet = {
     return response.data;
   },
   exportDataById: async (dataSetId, fileType) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetData.url, {
         dataSetId: dataSetId,
         fileType: fileType
       }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
+      }
     });
     return response.data;
   },
   exportTableDataById: async (dataSetId, tableSchemaId, fileType) => {
+    const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetTableData.url, {
         dataSetId: dataSetId,
         tableSchemaId: tableSchemaId,
         fileType: fileType
       }),
-      queryString: {}
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
+      }
     });
     return response.data;
   },
