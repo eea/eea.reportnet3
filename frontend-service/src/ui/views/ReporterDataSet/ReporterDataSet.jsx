@@ -147,10 +147,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onRestoreSnapshot = async () => {
-    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
-    if (snapshotRestored) {
-      onLoadSnapshotList();
-    }
+    await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
     onSetVisible(setSnapshotDialogVisible, false);
   };
 

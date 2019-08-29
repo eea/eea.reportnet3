@@ -47,14 +47,17 @@ export const apiSnapshot = {
   restoreById: async (dataFlowId, dataSetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
-      const response = await HTTPRequester.update({
-        url: getUrl(config.restoreSnaphost.url, {
+      const response = await HTTPRequester.post({
+        url: getUrl(config.restoreSnapshot.url, {
           dataFlowId,
           dataSetId,
-          snapshotId: snapshotId
+          snapshotId
         }),
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
+        },
+        data:{
+          snapshotId
         }
       });
       return response.status >= 200 && response.status <= 299;

@@ -11,6 +11,9 @@
 	"deleteSnapshotByID": {
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
 	},
+	"restoreSnapshot": {
+		"url": "/datasetmetabase/{:dataSetId}/snapshot/restore?idSnapshot={:snapshotId}"
+	},
 	"deleteImportData": {
 		"url": "/dataset/{:dataSetId}/deleteImportData"
 	},		
