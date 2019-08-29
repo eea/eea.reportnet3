@@ -27,47 +27,6 @@ public class ForeingKeyDroolsTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
-  /**
-   * Checks if is query data WDF protect.
-   */
-  // @Test
-  public void isQueryDataWDFProtect() {
-    ForeingKeyDrools.isQueryDataWDFProtect("1234");
-  }
-
-  /**
-   * Checks if is query data WDF protect part 1.
-   */
-  // @Test
-  public void isQueryDataWDFProtectPart1() {
-    ForeingKeyDrools.isQueryDataWDFProtect("AL202");
-  }
-
-  /**
-   * Checks if is query data WDF protect part 2.
-   */
-  // @Test
-  public void isQueryDataWDFProtectPart2() {
-    ForeingKeyDrools.isQueryDataWDFProtect("ES614M0062204");
-  }
-
-  /**
-   * Checks if is query data WDF protect part 3.
-   */
-  // @Test
-  public void isQueryDataWDFProtectPart3() {
-    ForeingKeyDrools.isQueryDataWDFProtect("IEWEBWC160_0000_0100");
-  }
-
-  /**
-   * Checks if is query data WDF protect part 4.
-   */
-  // @Test
-  public void isQueryDataWDFProtectPart4() {
-    ForeingKeyDrools.isQueryDataWDFProtect("SE0441262000000324");
-  }
-
   /**
    * Checks if is same record true.
    */

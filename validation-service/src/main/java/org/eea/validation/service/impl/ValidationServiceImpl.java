@@ -294,56 +294,53 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     dataset.getTableValues().stream().forEach(table -> {
-      if (!table.getIdTableSchema().equalsIgnoreCase("5d5e907738a84f33484e511b")
-          && !table.getIdTableSchema().equalsIgnoreCase("5d5e907738a84f33484e50f3")) {
-        List<TableValidation> tableValList = new ArrayList<TableValidation>();
+      List<TableValidation> tableValList = new ArrayList<TableValidation>();
 
-        List<RecordValue> validatedRecords = sanitizeRecordsValidations(
-            recordRepository.findAllRecordsByTableValueId(table.getId()));
+      List<RecordValue> validatedRecords =
+          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
 
-        List<TypeErrorEnum> errorsList = new ArrayList<>();
-        List<String> orig = new ArrayList<>();
+      List<TypeErrorEnum> errorsList = new ArrayList<>();
+      List<String> orig = new ArrayList<>();
 
-        validatedRecords.stream().filter(row -> null != row.getRecordValidations()).forEach(row -> {
+      validatedRecords.stream().filter(row -> null != row.getRecordValidations()).forEach(row -> {
 
 
-          row.getRecordValidations().stream().forEach(rowVal -> {
-            orig.add(rowVal.getValidation().getOriginName());
-            if (TypeErrorEnum.ERROR.equals(rowVal.getValidation().getLevelError())) {
-              errorsList.add(TypeErrorEnum.ERROR);
-            } else {
-              errorsList.add(TypeErrorEnum.WARNING);
-            }
-          });
-
-        });
-        if (null != errorsList) {
-          TableValidation tableVal = new TableValidation();
-          Validation validation = new Validation();
-          if (errorsList.contains(TypeErrorEnum.ERROR)) {
-            validation.setLevelError(TypeErrorEnum.ERROR);
-            validation.setMessage("ONE OR MORE RECORDS HAVE ERRORS");
+        row.getRecordValidations().stream().forEach(rowVal -> {
+          orig.add(rowVal.getValidation().getOriginName());
+          if (TypeErrorEnum.ERROR.equals(rowVal.getValidation().getLevelError())) {
+            errorsList.add(TypeErrorEnum.ERROR);
           } else {
-            if (errorsList.contains(TypeErrorEnum.WARNING)
-                && !errorsList.contains(TypeErrorEnum.ERROR)) {
-              validation.setLevelError(TypeErrorEnum.WARNING);
-              validation.setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
-            } else {
-              return;
-            }
+            errorsList.add(TypeErrorEnum.WARNING);
           }
-          validation.setIdRule(new ObjectId().toString());
-          validation.setTypeEntity(TypeEntityEnum.TABLE);
-          validation.setValidationDate(new Date().toString());
-          validation.setOriginName(orig.get(0));
-          tableVal.setValidation(validation);
-          tableVal.setTableValue(table);
-          table.getTableValidations().add(tableVal);
-          tableValList.add(tableVal);
-        }
+        });
 
-        tableValidationRepository.saveAll((Iterable<TableValidation>) tableValList);
+      });
+      if (null != errorsList) {
+        TableValidation tableVal = new TableValidation();
+        Validation validation = new Validation();
+        if (errorsList.contains(TypeErrorEnum.ERROR)) {
+          validation.setLevelError(TypeErrorEnum.ERROR);
+          validation.setMessage("ONE OR MORE RECORDS HAVE ERRORS");
+        } else {
+          if (errorsList.contains(TypeErrorEnum.WARNING)
+              && !errorsList.contains(TypeErrorEnum.ERROR)) {
+            validation.setLevelError(TypeErrorEnum.WARNING);
+            validation.setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
+          } else {
+            return;
+          }
+        }
+        validation.setIdRule(new ObjectId().toString());
+        validation.setTypeEntity(TypeEntityEnum.TABLE);
+        validation.setValidationDate(new Date().toString());
+        validation.setOriginName(orig.get(0));
+        tableVal.setValidation(validation);
+        tableVal.setTableValue(table);
+        table.getTableValidations().add(tableVal);
+        tableValList.add(tableVal);
       }
+
+      tableValidationRepository.saveAll((Iterable<TableValidation>) tableValList);
     });
   }
 
