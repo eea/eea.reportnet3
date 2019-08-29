@@ -175,12 +175,28 @@ export const apiDataSet = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_dataset_values2.json'
-        : getUrl(config.dataviewerAPI.url, {
+        : getUrl(config.dataViewerAPI.url, {
             dataSetId: dataSetId,
             tableSchemaId: tableSchemaId,
             pageNum: pageNum,
             pageSize: pageSize,
             fields: fields
+          }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
+  webFormDataById: async (dataSetId, tableSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_dataset_values2.json'
+        : getUrl(config.webFormDataViewerAPI.url, {
+            dataSetId: dataSetId,
+            tableSchemaId: tableSchemaId
           }),
       queryString: {},
       headers: {
