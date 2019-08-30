@@ -2,41 +2,29 @@ package org.eea.dataset.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
-import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
-import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * The Class DatasetMetabaseServiceImpl.
- */
-@Service("datasetMetabaseService")
-public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
+@Service("datasetSnapshotService")
+public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
-  /** The data set metabase repository. */
   @Autowired
-  private DataSetMetabaseRepository dataSetMetabaseRepository;
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The data set metabase mapper. */
-  @Autowired
-  private DataSetMetabaseMapper dataSetMetabaseMapper;
 
   /** The snapshot repository. */
   @Autowired
@@ -46,20 +34,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private SnapshotMapper snapshotMapper;
 
-  /**
-   * The table repository.
-   */
-  @Autowired
-  private TableRepository tableRepository;
-
   @Autowired
   private RecordRepository recordRepository;
-
-  /**
-   * The partition data set metabase repository.
-   */
-  @Autowired
-  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
   /**
    * The record store controller zull.
@@ -72,27 +48,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
+
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-  /**
-   * Gets the data set id by dataflow id.
-   *
-   * @param idFlow the id flow
-   * @return the data set id by dataflow id
-   */
-  @Override
-  public List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow) {
-
-
-    List<DataSetMetabase> datasets = dataSetMetabaseRepository.findByDataflowId(idFlow);
-
-
-    return dataSetMetabaseMapper.entityListToClass(datasets);
-  }
 
   /**
    * Gets the snapshots by id dataset.
@@ -191,5 +153,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
     return partition;
   }
+
 
 }

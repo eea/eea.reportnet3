@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -68,6 +69,11 @@ public interface DatasetMetabaseController {
 
   @PostMapping(value = "/{id}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
   void restoreSnapshot(@PathVariable("id") Long datasetId,
+      @RequestParam("idSnapshot") Long idSnapshot);
+
+
+  @PutMapping(value = "/{id}/snapshot/release", produces = MediaType.APPLICATION_JSON_VALUE)
+  void releaseSnapshot(@PathVariable("id") Long datasetId,
       @RequestParam("idSnapshot") Long idSnapshot);
 
 }

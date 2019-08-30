@@ -1,12 +1,10 @@
 package org.eea.dataset.controller;
 
 import java.util.List;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,46 +22,23 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
-/**
- * The Class DataSetMetabaseControllerImpl.
- */
 @RestController
-@RequestMapping("/datasetmetabase")
-public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
+@RequestMapping("/snapshot")
+public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
 
 
   /**
    * The dataset metabase service.
    */
   @Autowired
-  private DatasetMetabaseService datasetMetabaseService;
+  private DatasetSnapshotService datasetSnapshotService;
 
-  /**
-   * The reporting dataset service.
-   */
-  @Autowired
-  private ReportingDatasetService reportingDatasetService;
+
 
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
-   * Find data set id by dataflow id.
-   *
-   * @param idDataflow the id dataflow
-   *
-   * @return the list
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ReportingDatasetVO> findDataSetIdByDataflowId(Long idDataflow) {
-
-    return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
-
-  }
 
 
   /**
@@ -75,8 +50,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{id}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("id") Long datasetId) {
+  @GetMapping(value = "/{idDataset}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -84,7 +59,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
     List<SnapshotVO> snapshots = null;
     try {
-      snapshots = datasetMetabaseService.getSnapshotsByIdDataset(datasetId);
+      snapshots = datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -101,8 +76,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{id}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void createSnapshot(@PathVariable("id") Long datasetId,
+  @PostMapping(value = "/{idDataset}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void createSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description) {
 
     if (datasetId == null) {
@@ -110,7 +85,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetMetabaseService.addSnapshot(datasetId, description);
+      datasetSnapshotService.addSnapshot(datasetId, description);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -128,8 +103,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{id}/snapshot/delete/{idSnapshot}")
-  public void deleteSnapshot(@PathVariable("id") Long datasetId,
+  @DeleteMapping(value = "/{idDataset}/snapshot/delete/{idSnapshot}")
+  public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
@@ -137,7 +112,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetMetabaseService.removeSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -147,8 +122,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
 
   @Override
-  @PostMapping(value = "/{id}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void restoreSnapshot(@PathVariable("id") Long datasetId,
+  @PostMapping(value = "/{idDataset}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
@@ -156,7 +131,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetMetabaseService.restoreSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -167,8 +142,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
 
   @Override
-  @PutMapping(value = "/{id}/snapshot/release", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void releaseSnapshot(@PathVariable("id") Long datasetId,
+  @PutMapping(value = "/{idDataset}/snapshot/release", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
@@ -176,7 +151,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetMetabaseService.releaseSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -184,5 +159,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
 
   }
+
+
 
 }

@@ -2,21 +2,9 @@ package org.eea.dataset.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 
-/**
- * The Interface DatasetMetabaseService.
- */
-public interface DatasetMetabaseService {
-
-  /**
-   * Gets the data set id by dataflow id.
-   *
-   * @param idFlow the id flow
-   * @return the data set id by dataflow id
-   */
-  List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
+public interface DatasetSnapshotService {
 
   /**
    * Gets the snapshots by id dataset.
@@ -49,5 +37,6 @@ public interface DatasetMetabaseService {
   void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
   void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+
 
 }
