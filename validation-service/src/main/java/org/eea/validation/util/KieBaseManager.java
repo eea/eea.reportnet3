@@ -64,36 +64,33 @@ public class KieBaseManager {
               rule.getThenCondition().get(1), schema.getNameDataSetSchema()));
     });
     schema.getTableSchemas().stream().forEach(tableSchema -> {
-      if (!tableSchema.getNameTableSchema().equalsIgnoreCase("legacySeasonalPeriod3columns")
-          && !tableSchema.getNameTableSchema().equalsIgnoreCase("WISE_SPATIAL_R2")) {
-        tableSchema.getRuleTable().stream().filter(Objects::nonNull).forEach(ruleTable -> {
+      tableSchema.getRuleTable().stream().filter(Objects::nonNull).forEach(ruleTable -> {
 
-          ruleAttributes.add(passDataToMap(ruleTable.getIdTableSchema().toString(),
-              ruleTable.getRuleId().toString(), TypeValidation.TABLE,
-              SchemasDrools.ID_TABLE_SCHEMA.getValue(), ruleTable.getWhenCondition(),
-              ruleTable.getThenCondition().get(0), ruleTable.getThenCondition().get(1),
-              tableSchema.getNameTableSchema()));
-        });
-        tableSchema.getRecordSchema().getRuleRecord().stream().forEach(ruleRecord -> {
-          ruleAttributes.add(passDataToMap(ruleRecord.getIdRecordSchema().toString(),
-              ruleRecord.getRuleId().toString(), TypeValidation.RECORD,
-              SchemasDrools.ID_RECORD_SCHEMA.getValue(), ruleRecord.getWhenCondition(),
-              ruleRecord.getThenCondition().get(0), ruleRecord.getThenCondition().get(1),
-              tableSchema.getNameTableSchema()));
-        });
-        tableSchema.getRecordSchema().getFieldSchema().stream()
-            .filter(fieldSchema -> fieldSchema.getIdFieldSchema() != null
-                && StringUtils.isNotBlank(fieldSchema.getIdFieldSchema().toString()))
-            .forEach(fieldSchema -> {
-              fieldSchema.getRuleField().forEach(ruleField -> {
-                ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
-                    ruleField.getRuleId().toString(), TypeValidation.FIELD,
-                    SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
-                    ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1),
-                    tableSchema.getNameTableSchema()));
-              });
+        ruleAttributes.add(
+            passDataToMap(ruleTable.getIdTableSchema().toString(), ruleTable.getRuleId().toString(),
+                TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(),
+                ruleTable.getWhenCondition(), ruleTable.getThenCondition().get(0),
+                ruleTable.getThenCondition().get(1), tableSchema.getNameTableSchema()));
+      });
+      tableSchema.getRecordSchema().getRuleRecord().stream().forEach(ruleRecord -> {
+        ruleAttributes.add(passDataToMap(ruleRecord.getIdRecordSchema().toString(),
+            ruleRecord.getRuleId().toString(), TypeValidation.RECORD,
+            SchemasDrools.ID_RECORD_SCHEMA.getValue(), ruleRecord.getWhenCondition(),
+            ruleRecord.getThenCondition().get(0), ruleRecord.getThenCondition().get(1),
+            tableSchema.getNameTableSchema()));
+      });
+      tableSchema.getRecordSchema().getFieldSchema().stream()
+          .filter(fieldSchema -> fieldSchema.getIdFieldSchema() != null
+              && StringUtils.isNotBlank(fieldSchema.getIdFieldSchema().toString()))
+          .forEach(fieldSchema -> {
+            fieldSchema.getRuleField().forEach(ruleField -> {
+              ruleAttributes.add(passDataToMap(ruleField.getIdFieldSchema().toString(),
+                  ruleField.getRuleId().toString(), TypeValidation.FIELD,
+                  SchemasDrools.ID_FIELD_SCHEMA.getValue(), ruleField.getWhenCondition(),
+                  ruleField.getThenCondition().get(0), ruleField.getThenCondition().get(1),
+                  tableSchema.getNameTableSchema()));
             });
-      }
+          });
     });
 
     ObjectDataCompiler compiler = new ObjectDataCompiler();
