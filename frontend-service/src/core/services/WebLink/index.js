@@ -1,6 +1,6 @@
-import { GetAllWebLinks } from './GetAllWebLinks';
+import { GetAll } from './GetAll';
 import { webLinkRepository } from 'core/domain/model/WebLink/WebLinkRepository';
 
 export const WebLinkService = {
-  all: GetAllWebLinks({ webLinkRepository })
+  all: GetAll({ webLinkRepository })
 };

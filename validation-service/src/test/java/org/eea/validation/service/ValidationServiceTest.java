@@ -366,6 +366,10 @@ public class ValidationServiceTest {
   @Test
   public void testValidateRecord() throws FileNotFoundException, EEAException {
 
+    datasetValue.getTableValues().get(0).setId(1L);
+    datasetValue.getTableValues().get(0).setIdTableSchema("123123");
+    datasetValue.getTableValues().get(1).setId(2L);
+    datasetValue.getTableValues().get(1).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     Validation validation = new Validation();
     validation.setId(1L);
@@ -397,6 +401,7 @@ public class ValidationServiceTest {
     recordValue.setFields(fields);
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
+
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateRecord(1L, kieSession);
 
@@ -410,7 +415,8 @@ public class ValidationServiceTest {
    */
   @Test
   public void testValidateRecordWarningPart() throws FileNotFoundException, EEAException {
-
+    datasetValue.getTableValues().remove(1);
+    datasetValue.getTableValues().get(0).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     Validation validation = new Validation();
     validation.setId(1L);
@@ -485,6 +491,9 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
     datasetValue.getTableValues().get(0).setId(1L);
+    datasetValue.getTableValues().get(0).setIdTableSchema("123123");
+    datasetValue.getTableValues().get(1).setId(2L);
+    datasetValue.getTableValues().get(1).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateFields(1L, kieSession);
@@ -879,6 +888,8 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
     datasetValue.getTableValues().remove(1);
+    datasetValue.getTableValues().get(0).setId(2L);
+    datasetValue.getTableValues().get(0).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateTable(1L, kieSession);
@@ -922,6 +933,8 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
     datasetValue.getTableValues().remove(1);
+    datasetValue.getTableValues().get(0).setId(2L);
+    datasetValue.getTableValues().get(0).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateTable(1L, kieSession);

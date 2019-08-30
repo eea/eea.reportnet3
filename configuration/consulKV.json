@@ -538,7 +538,7 @@
   {
     "key": "config/apiGateway/spring.servlet.multipart.max-file-size",
     "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDczNzQxODI0fQ=="
-  }, 
+  },
   {
     "key": "config/apiGateway/spring.servlet.multipart.max-request-size",
     "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToxMDczNzQxODI0fQ=="
@@ -713,7 +713,7 @@
   },
   {
     "key": "config/application/eea.keycloak.secret",
-    "value": "JHtLRVlDTE9BS19TRUNSRVQ6MzU0ZTIxMjgtYTMzMC00MjBmLWE1NTAtMWZiNzAwOTc1ZDE5fQ=="
+    "value": "JHtLRVlDTE9BS19TRUNSRVQ6YmNkN2RjZDItZDBkMC00ODY5LWI5NjUtMzU2ZDJjNzEyOWQ3fQ=="
   },
   {
     "key": "config/application/eea.keycloak.clientId",
@@ -729,7 +729,11 @@
   },
   {
     "key": "config/application/eea.keycloak.publicKey",
-    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXNvakpDaGs1VWZKT0h1T0xRMVNadFlCNUp6U3JXUmtKM2dCTUdyeUhHRGdBR3FqZitnSE5Bd0hzd1ZieDZrMGRlS3I0SFNkckQrVklra00xQUdDL0NOYS9TVEkxaXI0em1ZUVBwZXdBY0t2TTdCRi9DSmx3TWpWNmM5R2lKdXRDN2g1OERSRnRkZ3o0TzJLVnFEa1o1bC9wWmVLS3huRVhLNU04eCtIbUlxRCtGMytCV2dDSUpGN1RjdTFzRm5XakpXS081eXlBUFh5cTdZWUY1OXRWN0pQY2ZvSnFQTXFzdnhOcVA0OEsxOVJRTjluZHUxcWZYbUxPTkxZaFUwcmRlRHBFUlhZTG9QR3BjaFlMNVpDZDZEdCtScERwYzJGbk9pczQyREpEL2V2Mi9MV1NVdWdaRlp4NlpxZmg0bldoemxZUHJuZmlTRnl4WkVYOU9ZOGVJUUlEQVFBQn0="
+    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTBVUzZiNDlIdUxkZ0dEYXltVzFqOXR5VWlqdjQrN3J0WTh2eEVGeVRGbDZmdFFxK3N2Sm5RNUlWWEw0aFM2c0ltbFFnbEx1WER2UDAvU2UxVHlNSzB2T3pzWXA2aVd0WUtUSmFvaFU0dVlUMnN3OWRJU0dhdjVMN25ZT0R5dlV0bHZqa2x2bzloRUNPaVRLaEJsa0VoUDhlV1dFWG1WOURHMERYL0l0eGZZbnpVd1JZSGJxZ2tYZWZZbmhmRTBxQ3p2Um9oYnNyZ1lSaitibmFmL1VkOHkwWHdGVTJaQTArK2dYT2JHalBoQy9JTFk3S2JxNnFLa1Z2TnVDam00MmdjUTNvWXRvVUYrR1M1TUZ4QjZ5c3BPMmcxcTNSN0t3VU9hS1h5bjh6OVlsY2RVZkVOQ2R0eXhTbFBqb1FLdkg2Y3hSSmRseE9Ha3RlK0V0WEN2TENIUUlEQVFBQn0="
+  },
+  {
+    "key": "config/application/hystrix.shareSecurityContext",
+    "value": "dHJ1ZQ=="
   },
   {
     "key": "config/ums/eea.keycloak.admin.user",
@@ -775,7 +779,7 @@
     "key": "config/document/oakUser",
     "value": "JHtNT05HT19EQl9VU0VSTkFNRTphZG1pbn0="
   },
-    {
+  {
     "key": "config/dataset/spring.servlet.multipart.max-file-size",
     "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
   },

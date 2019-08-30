@@ -1,51 +1,46 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { withRouter } from 'react-router-dom';
 
-import styles from './ReportingDataFlow.module.css';
+import styles from './ReportingDataFlow.module.scss';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
+import { ContributorsList } from './_components/ContributorsList';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { DropdownButton } from 'ui/views/_components/DropdownButton';
+import { Dialog } from 'ui/views/_components/Dialog';
+import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
+
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
+import { SplitButton } from 'ui/views/_components/SplitButton';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { Button } from 'primereact/button';
-import { ProgressSpinner } from 'primereact/progressspinner';
-import { SplitButton } from 'primereact/splitbutton';
+import { DataFlowService } from 'core/services/DataFlow';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
-
-/* import jsonDataSchema from "../../../assets/jsons/datosDataSchema3.json"; */
-//import jsonDataSchemaErrors from '../../../assets/jsons/errorsDataSchema.json';
-
-export const ReportingDataFlow = ({ history, match }) => {
+export const ReportingDataFlow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataFlowData, setDataFlowData] = useState(null);
+  const [dataFlowData, setDataFlowData] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 
+  const onLoadReportingDataFlow = async () => {
+    const dataFlow = await DataFlowService.reporting(match.params.dataFlowId);
+    setDataFlowData(dataFlow);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/response_DataflowById.json'
-        : `${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`,
-      queryString: {}
-    })
-      .then(response => {
-        setDataFlowData(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        setLoading(false);
-        console.log('error', error);
-        return error;
-      });
+    setLoading(true);
+    onLoadReportingDataFlow();
   }, [match.params.dataFlowId]);
 
   //Bread Crumbs settings
@@ -68,37 +63,67 @@ export const ReportingDataFlow = ({ history, match }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <div className="titleDiv">
-          <BreadCrumb model={breadCrumbItems} home={home} />
-        </div>
+        <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
+
+  const dropDownItems = [
+    {
+      label: resources.messages.manageRoles,
+      icon: 'users',
+      menuItemFunction: () => {
+        showContributorsDialog();
+      }
+    },
+
+    {
+      label: resources.messages.delete,
+      icon: 'trash',
+      menuItemFunction: () => {}
+    },
+
+    {
+      label: resources.messages.properties,
+      icon: 'settings',
+      menuItemFunction: () => {}
+    }
+  ];
+  const showContributorsDialog = () => {
+    setIsActiveContributorsDialog(true);
+  };
 
   return layout(
     <div className="rep-row">
       <DataFlowColumn
-        navTitle={resources.messages['dataFlow']}
-        dataFlowTitle={dataFlowData.name}
         buttonTitle={resources.messages['subscribeThisButton']}
+        dataFlowTitle={dataFlowData.name}
+        navTitle={resources.messages['dataFlow']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
-        <h2 className={styles.title}>
-          <IconComponent icon={resources.icons['shoppingCart']} />
-          {dataFlowData.name}
-        </h2>
+        <div className={styles.titleBar}>
+          <div className={styles.title_wrapper}>
+            <h2 className={styles.title}>
+              <Icon icon="shoppingCart" />
+              {dataFlowData.name}
+            </h2>
+          </div>
+          <div className={styles.option_btns_wrapper}>
+            <DropdownButton icon="ellipsis" model={dropDownItems} />
+          </div>
+        </div>
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.dataSetItem}`}>
               <Button
-                label={resources.messages['do']}
                 className="p-button-warning"
+                label={resources.messages['do']}
                 onClick={e => {
                   handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`);
                 }}
@@ -138,7 +163,16 @@ export const ReportingDataFlow = ({ history, match }) => {
             })}
           </div>
         </div>
+
+        <Dialog
+          header={`${resources.messages.dataProviderManageContributorsDialogTitle} "${dataFlowData.name}"`}
+          visible={isActiveContributorsDialog}
+          onHide={() => setIsActiveContributorsDialog(false)}
+          style={{ width: '50vw' }}
+          maximizable>
+          <ContributorsList dataFlowId={dataFlowData.id} />
+        </Dialog>
       </div>
     </div>
   );
-};
+});

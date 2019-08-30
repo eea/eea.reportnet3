@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,5 +100,23 @@ public interface UserManagementController {
   @RequestMapping(value = "/resources_by_type_role", method = RequestMethod.GET)
   List<ResourceAccessVO> getResourcesByUser(@RequestParam("resourceType") ResourceEnum resourceType,
       @RequestParam("securityRole") SecurityRoleEnum securityRole);
+
+  /**
+   * Do log out invalidating the user session.
+   *
+   * @param refreshToken the refresh token
+   */
+  @RequestMapping(value = "/logout", method = RequestMethod.POST)
+  void doLogOut(@RequestParam("refreshToken") String refreshToken);
+
+  /**
+   * Add contributor to resource.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   */
+  @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
+  void addContributorToResource(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroupEnum") ResourceGroupEnum resourceGroupEnum);
 
 }

@@ -1,5 +1,6 @@
 package org.eea.ums.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -7,11 +8,12 @@ import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/generateToken", method = RequestMethod.POST)
   public TokenVO generateToken(@RequestParam("username") String username,
       @RequestParam("password") String password) {
@@ -37,12 +40,14 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/refreshToken", method = RequestMethod.POST)
   public TokenVO refreshToken(@RequestParam("refreshToken") String refreshToken) {
     return securityProviderInterfaceService.refreshToken(refreshToken);
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/checkAccess", method = RequestMethod.GET)
   public Boolean checkResourceAccessPermission(@RequestParam("resource") String resource,
       @RequestParam("scopes") AccessScopeEnum[] scopes) {
@@ -50,6 +55,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser() {
     Map<String, String> details = (Map<String, String>) SecurityContextHolder.getContext()
@@ -62,6 +68,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources_by_type", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceEnum resourceType) {
@@ -71,6 +78,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources_by_role", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("securityRole") SecurityRoleEnum securityRole) {
@@ -80,6 +88,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/resources_by_type_role", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
       @RequestParam("resourceType") ResourceEnum resourceType,
@@ -90,7 +99,25 @@ public class UserManagementControllerImpl implements UserManagementController {
         Collectors.toList());
   }
 
+  @Override
+  @RequestMapping(value = "/logout", method = RequestMethod.POST)
+  public void doLogOut(@RequestParam("refreshToken") String refreshToken) {
+    securityProviderInterfaceService.doLogout(refreshToken);
+  }
+
+  @Override
+  @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
+  public void addContributorToResource(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroupEnum") ResourceGroupEnum resourceGroupEnum) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    securityProviderInterfaceService
+        .addUserToUserGroup(userId, resourceGroupEnum.getGroupName(idResource));
+  }
+
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
+  @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";

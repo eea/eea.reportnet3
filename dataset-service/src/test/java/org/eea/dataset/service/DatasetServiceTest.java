@@ -780,19 +780,19 @@ public class DatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void deleteRecordsNullTest() throws Exception {
-    datasetService.deleteRecords(null, new ArrayList<Long>());
+    datasetService.deleteRecord(null, 1L);
   }
 
   @Test(expected = EEAException.class)
   public void deleteRecordsNull2Test() throws Exception {
-    datasetService.deleteRecords(1L, null);
+    datasetService.deleteRecord(1L, null);
   }
 
   @Test
   public void deleteRecordsTest() throws Exception {
-    doNothing().when(recordRepository).deleteRecordsWithIds(Mockito.any());
-    datasetService.deleteRecords(1L, new ArrayList<Long>());
-    Mockito.verify(recordRepository, times(1)).deleteRecordsWithIds(Mockito.any());
+    doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
+    datasetService.deleteRecord(1L, 1L);
+    Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
 
   @Test
@@ -864,6 +864,24 @@ public class DatasetServiceTest {
     when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(new DataSetSchemaVO());
     when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
     assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
+  }
+
+  @Test
+  public void updateFieldTest() throws EEAException {
+    datasetService.updateField(1L, new FieldVO());
+    Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldException1Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
+    datasetService.updateField(null, new FieldVO());
+  }
+
+  @Test
+  public void updateFieldException2Test() throws EEAException {
+    thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
+    datasetService.updateField(1L, null);
   }
 
 }

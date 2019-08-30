@@ -139,7 +139,7 @@ body {
 }
 
 .rp-btn.default {
-  color: var(--c-black-400);
+  color: var(--white);
 }
 .rp-btn.rp-btn.default:hover {
   background-color: var(--c-orange-200);
@@ -178,8 +178,9 @@ body {
   color: var(--white);
 }
 .rp-btn.warning:hover {
-  background-color: var(--c-orange-400);
-  color: var(--white);
+  background-color: var(--c-orange-400) !important;
+  border: 1px solid var(--c-orange-400) !important;
+  color: var(--white) !important;
 }
 
 .rep-container {
@@ -1765,6 +1766,7 @@ body {
 
 .p-progress-spinner {
   left: 50%;
+  transform: translate(-50%);
   top: 30vh;
   width: 75px;
   height: 75px;
@@ -1812,18 +1814,16 @@ form .error {
 /* buttons */
 
 @keyframes p-progress-spinner-color {
-  100%,
   0% {
     stroke: var(--blue-120);
   }
-  40% {
+  25% {
+    stroke: var(--yellow-120);
+  }
+  50% {
     stroke: var(--blue-120);
   }
-  66% {
-    stroke: var(--blue-120);
-  }
-  80%,
-  90% {
-    stroke: var(--blue-120);
+  100% {
+    stroke: var(--yellow-120);
   }
 }

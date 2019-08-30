@@ -1,9 +1,12 @@
 import React, { useContext } from 'react';
-import UserCard from './_components/UserCard/UserCard';
+import { withRouter } from 'react-router-dom';
+
 import logo from 'assets/images/logo.png';
 import styles from './Navigation.module.css';
+
+import { UserCard } from './_components/UserCard';
+
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { withRouter } from 'react-router-dom';
 
 const Navigation = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);

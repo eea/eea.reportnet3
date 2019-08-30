@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
+import { Button } from 'ui/views/_components/Button';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const ConfirmDialog = React.memo(
@@ -21,24 +21,24 @@ export const ConfirmDialog = React.memo(
     const resources = useContext(ResourcesContext);
     const footer = (
       <div>
-        <Button label={labelConfirm} icon={iconConfirm ? iconConfirm : resources.icons['check']} onClick={onConfirm} />
+        <Button label={labelConfirm} icon={iconConfirm ? iconConfirm : 'check'} onClick={onConfirm} />
         <Button
-          label={labelCancel}
-          icon={iconCancel ? iconCancel : resources.icons['cancel']}
-          onClick={onHide}
           className="p-button-secondary"
+          icon={iconCancel ? iconCancel : 'cancel'}
+          label={labelCancel}
+          onClick={onHide}
         />
       </div>
     );
 
     return (
       <Dialog
-        header={header}
-        visible={visible}
-        style={dialogStyle ? dialogStyle : { width: '50vw' }}
         footer={footer}
+        header={header}
+        maximizable={maximizable}
         onHide={onHide}
-        maximizable={maximizable}>
+        style={dialogStyle ? dialogStyle : { width: '50vw' }}
+        visible={visible}>
         {children}
       </Dialog>
     );

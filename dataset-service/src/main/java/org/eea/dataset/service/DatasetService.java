@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -154,14 +155,15 @@ public interface DatasetService {
    */
   void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
+
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
-  void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
+  void deleteRecord(@DatasetId Long datasetId, Long recordId) throws EEAException;
 
   /**
    * Delete table by schema.
@@ -218,5 +220,14 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void insertSchema(@DatasetId Long datasetId, String idDatasetSchema) throws EEAException;
+
+  /**
+   * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   * @throws EEAException the EEA exception
+   */
+  void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
 
 }

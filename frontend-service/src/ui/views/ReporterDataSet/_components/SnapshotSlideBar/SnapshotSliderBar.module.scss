@@ -28,10 +28,6 @@
   margin: 0px;
 }
 
-.section {
-  margin-bottom: 1rem;
-  padding: 0.5rem 0;
-}
 .sidebar {
   overflow-x: hidden;
   overflow-y: auto;
@@ -59,8 +55,17 @@
 }
 
 .createSnapshotButton {
-  padding: 0.3rem !important;
-  font-size: 0.9rem !important;
+  border-radius: 5px !important;
+  padding: 0 !important;
+  color: white !important;
+  width: 30px !important;
+  height: 32px !important;
+  &:hover {
+    color: var(--blue-120) !important;
+  }
+  &:focus {
+    box-shadow: none !important;
+  }
 }
 
 .snapshotForm {

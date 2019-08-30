@@ -1,5 +1,6 @@
 package org.eea.document.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import javax.ws.rs.Produces;
 import org.eea.document.service.DocumentService;
@@ -35,11 +36,15 @@ import feign.FeignException;
 @RequestMapping("/document")
 public class DocumentControllerImpl implements DocumentController {
 
-  /** The document service. */
+  /**
+   * The document service.
+   */
   @Autowired
   private DocumentService documentService;
 
-  /** The dataflow controller. */
+  /**
+   * The dataflow controller.
+   */
   @Autowired
   private DataFlowDocumentControllerZuul dataflowController;
 
@@ -53,6 +58,7 @@ public class DocumentControllerImpl implements DocumentController {
    * @param language the language
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/upload/{dataFlowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
       @PathVariable("dataFlowId") final Long dataFlowId, @RequestParam final String description,
@@ -79,10 +85,12 @@ public class DocumentControllerImpl implements DocumentController {
    * Gets the document.
    *
    * @param documentId the document id
+   *
    * @return the document
    */
   @Override
   @GetMapping(value = "/{documentId}")
+  @HystrixCommand
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId) {
     try {
@@ -113,9 +121,11 @@ public class DocumentControllerImpl implements DocumentController {
    * Delete document.
    *
    * @param documentId the document id
+   *
    * @throws Exception the exception
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
   public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
     try {
