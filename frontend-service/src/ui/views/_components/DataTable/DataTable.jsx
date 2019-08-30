@@ -1260,7 +1260,8 @@ export class DataTable extends Component {
         sortField={this.getSortField()}
         rowClassName={this.props.rowClassName}
         onRowReorder={this.props.onRowReorder}
-        onPaste={this.props.onPaste}>
+        //onPaste={this.props.onPaste}
+      >
         {columns}
       </TableBody>
     );
@@ -1516,7 +1517,8 @@ export class DataTable extends Component {
         <ConfirmDialog
           onConfirm={this.onPasteAccept}
           onHide={this.onPasteCancel}
-          visible={this.state.confirmVisible}
+          //visible={this.state.confirmVisible}
+          visible={false}
           header="Paste data"
           maximizable={false}
           labelConfirm="Yes"
