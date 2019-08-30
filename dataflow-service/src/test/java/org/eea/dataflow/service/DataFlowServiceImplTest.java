@@ -275,7 +275,7 @@ public class DataFlowServiceImplTest {
   public void updateUserRequestStatus() throws EEAException {
     Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus("1L", TypeRequestEnum.ACCEPTED);
+    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
     Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
   }

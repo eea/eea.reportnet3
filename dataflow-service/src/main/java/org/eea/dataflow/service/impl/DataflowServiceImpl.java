@@ -10,6 +10,7 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
@@ -23,6 +24,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,11 +230,25 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateUserRequestStatus(String userRequestId, TypeRequestEnum type)
+  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
       throws EEAException {
 
     userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
-    LOG.info("Update the request status of the requestId: {}. New status: {}", userRequestId, type);
+    LOG.info("Update the Metabase request status of the requestId: {}. New status: {}",
+        userRequestId, type);
+    if (TypeRequestEnum.ACCEPTED.equals(type)) {
+      // add the resource to the user id in keycloak
+      Long dataflowId = 0L;
+      UserRequest ur = userRequestRepository.findById(userRequestId).orElse(new UserRequest());
+      if (ur.getDataflows() != null) {
+        for (Dataflow df : ur.getDataflows()) {
+          dataflowId = df.getId();
+        }
+        userManagementControllerZull.addContributorToResource(dataflowId,
+            ResourceGroupEnum.DATAFLOW_PROVIDER);
+        LOG.info("The dataflow {} has been added into keycloak", dataflowId);
+      }
+    }
   }
 
   /**
