@@ -48,18 +48,16 @@ export const apiDataSet = {
       return false;
     }
   },
-  deleteRecordByIds: async (dataSetId, rowIds) => {
+  deleteRecordById: async (dataSetId, recordId) => {
     try {
       const tokens = userStorage.get();
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/record/`
+          ? `/dataset/${dataSetId}/record/${recordId}`
           : getUrl(config.deleteRecord.url, {
-              dataSetId: dataSetId
+              dataSetId,
+              recordId
             }),
-        data: {
-          rowIds: rowIds
-        },
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -68,7 +66,7 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet table data: ${error}`);
+      console.error(`Error deleting dataSet table record: ${error}`);
       return false;
     }
   },

@@ -93,7 +93,6 @@ const DataViewer = withRouter(
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-      console.log(inmTableSchemaColumns);
       setColsSchema(inmTableSchemaColumns);
 
       onFetchData(undefined, undefined, 0, numRows);
@@ -105,7 +104,12 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       onRefresh();
+      setConfirmDeleteVisible(false);
     }, [isRecordDeleted]);
+
+    useEffect(() => {
+      setIsRecordDeleted(false);
+    }, [confirmDeleteVisible]);
 
     useEffect(() => {
       if (isUndefined(recordPositionId) || recordPositionId === -1) {
@@ -174,10 +178,9 @@ const DataViewer = withRouter(
     };
 
     const onConfirmDeleteRow = async () => {
-      console.log(selectedRecord);
       setDeleteDialogVisible(false);
       let field = selectedRecord.dataRow.filter(row => Object.keys(row.fieldData)[0] === 'id')[0];
-      const recordDeleted = await DataSetService.deleteRecordByIds(dataSetId, field.fieldData['id']);
+      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, field.fieldData['id']);
       if (recordDeleted) {
         setIsRecordDeleted(true);
       }
@@ -199,6 +202,7 @@ const DataViewer = withRouter(
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
+        console.log(field, value);
         const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
         if (!fieldUpdated) {
           console.error('Error!');
@@ -274,14 +278,12 @@ const DataViewer = withRouter(
     };
 
     const onSelectRecord = (event, value) => {
-      console.log(value, event);
       setIsNewRecord(false);
       setSelectedRecord(value);
       setEditedRecord(value);
     };
 
     const onSaveRecord = async record => {
-      console.log(isNewRecord, record);
       if (isNewRecord) {
         try {
           await DataSetService.addRecordById(dataSetId, tableId, record);
@@ -299,6 +301,7 @@ const DataViewer = withRouter(
       } else {
         try {
           await DataSetService.updateRecordById(dataSetId, tableId, record);
+          setEditDialogVisible(false);
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -417,7 +420,6 @@ const DataViewer = withRouter(
 
     const createEmptyObject = (columnsSchema, data) => {
       let fields;
-      console.log(columnsSchema);
       if (!isUndefined(columnsSchema)) {
         fields = columnsSchema.map(column => {
           return {
@@ -437,7 +439,6 @@ const DataViewer = withRouter(
       } else {
         obj.dataSetPartitionId = null;
       }
-      console.log(obj);
       return obj;
     };
 
@@ -451,7 +452,6 @@ const DataViewer = withRouter(
           label={resources.messages['cancel']}
           icon="cancel"
           onClick={() => {
-            console.log(fetchedData);
             setEditedRecord(selectedRecord);
             setEditDialogVisible(false);
           }}
@@ -494,18 +494,26 @@ const DataViewer = withRouter(
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
         const recordValidations = record.validations;
+        const recordId = record.recordId;
+        const recordSchemaId = record.recordSchemaId;
         const arrayDataFields = record.fields.map(field => {
           return {
-            fieldData: { [field.fieldSchemaId]: field.value, type: field.type, id: field.fieldId },
+            fieldData: {
+              [field.fieldSchemaId]: field.value,
+              type: field.type,
+              id: field.fieldId,
+              fieldSchemaId: field.fieldSchemaId
+            },
             fieldValidations: field.validations
           };
         });
         arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
         const arrayDataAndValidations = {
           dataRow: arrayDataFields,
-          recordValidations
+          recordValidations,
+          recordId,
+          recordSchemaId
         };
-
         return arrayDataAndValidations;
       });
 
