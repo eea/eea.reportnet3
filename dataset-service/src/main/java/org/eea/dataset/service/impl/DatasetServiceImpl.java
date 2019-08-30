@@ -512,7 +512,8 @@ public class DatasetServiceImpl implements DatasetService {
     // Check if we need to put all the records without pagination
     if (pageable == null && totalRecords > 0) {
       pageable = PageRequest.of(0, totalRecords.intValue());
-    } else if (pageable == null && totalRecords == 0) {
+    }
+    if (pageable == null && totalRecords == 0) {
       pageable = PageRequest.of(0, 20);
     }
 
