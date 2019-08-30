@@ -209,7 +209,11 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
   }
   return table;
 };
-const webFormDataById = async (dataSetId, tableSchemaId) => {};
+
+const webFormDataById = async (dataSetId, tableSchemaId) => {
+  const webFormDataDTO = await apiDataSet.webFormDataById(dataSetId, tableSchemaId);
+  console.log('webFormDataDTO', webFormDataDTO);
+};
 
 const updateFieldById = async (dataSetId, fieldSchemaId, fieldValue) => {
   const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, fieldSchemaId, fieldValue);
@@ -243,5 +247,6 @@ export const ApiDataSetRepository = {
   schemaById,
   tableDataById,
   updateFieldById,
-  validateDataById
+  validateDataById,
+  webFormDataById
 };
