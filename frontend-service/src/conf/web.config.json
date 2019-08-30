@@ -79,5 +79,8 @@
 		},
 	"updateTableDataField":{
 		"url": "/dataset/{:dataSetId}/updateField"
+	},
+	"DATAFLOW_TASKS":{
+		"url":"/data-flow-task"
 	}
 }
