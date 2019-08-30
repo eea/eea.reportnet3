@@ -285,6 +285,7 @@ const DataViewer = withRouter(
       if (isNewRecord) {
         try {
           await DataSetService.addRecordById(dataSetId, tableId, record);
+          setAddDialogVisible(false);
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -455,7 +456,13 @@ const DataViewer = withRouter(
             setEditDialogVisible(false);
           }}
         />
-        <Button label={resources.messages['save']} icon="save" onClick={''} />
+        <Button
+          label={resources.messages['save']}
+          icon="save"
+          onClick={() => {
+            onSaveRecord(editedRecord);
+          }}
+        />
       </div>
     );
 
