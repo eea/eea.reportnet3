@@ -70,5 +70,8 @@
 	},
 	"logout":{
 		"url": "/user/logout?refreshToken={:refreshToken}"
+	},
+	"REPORTING_DATAFLOW": {
+		"url": "/reporting-data-flow/{:dataFlowId}"
 	}
 }
