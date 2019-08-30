@@ -16,6 +16,17 @@ export const apiDataFlow = {
     });
     return response.status;
   },
+  all: async () => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON ? '/jsons/DataFlaws2.json' : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
   accepted: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
