@@ -58,6 +58,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [webFormData, setWebFormData] = useState();
 
   let exportMenuRef = useRef();
 
@@ -169,6 +170,11 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     try {
       const dataSetSchema = await DataSetService.schemaById(dataFlowId);
       const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
+      if (dataSetId == 5) {
+        let tableSchemaId = dataSetSchema.tables[0].tableSchemaId;
+        const formData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+        setWebFormData(formData);
+      }
       setDatasetTitle(dataSetStatistics.dataSetSchemaName);
       setTableSchema(
         dataSetSchema.tables.map(tableSchema => {
@@ -388,15 +394,15 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             setSelectedRowErrorId(selectedRowErrorId);
           }
         }}>
-        <TabsSchema
+        {/* <TabsSchema
           activeIndex={activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
           recordPositionId={recordPositionId}
           selectedRowErrorId={selectedRowErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
-        />
-        <WebFormData dataSetId={dataSetId} tables={tableSchema} tableSchemaColumns={tableSchemaColumns} />
+        /> */}
+        <WebFormData data={webFormData} />
       </ReporterDataSetContext.Provider>
       <Dialog
         dismissableMask={true}
