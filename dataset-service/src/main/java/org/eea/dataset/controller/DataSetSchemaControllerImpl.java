@@ -68,7 +68,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand()
   @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
@@ -76,6 +76,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
     return dataschemaService.getDataSchemaByIdFlow(idFlow);
 
+  }
+
+  /**
+   * Error handler schema.
+   *
+   * @param id the id
+   *
+   * @return the data set schema VO
+   */
+  public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
+
+    return new DataSetSchemaVO();
   }
 
 
