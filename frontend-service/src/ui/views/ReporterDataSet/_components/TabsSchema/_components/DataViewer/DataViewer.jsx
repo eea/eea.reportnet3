@@ -93,7 +93,6 @@ const DataViewer = withRouter(
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-      console.log(inmTableSchemaColumns);
       setColsSchema(inmTableSchemaColumns);
 
       onFetchData(undefined, undefined, 0, numRows);
@@ -274,7 +273,6 @@ const DataViewer = withRouter(
     };
 
     const onSelectRecord = (event, value) => {
-      console.log(value, event);
       setIsNewRecord(false);
       setSelectedRecord(value);
       setEditedRecord(value);
@@ -404,7 +402,6 @@ const DataViewer = withRouter(
     };
 
     const createEmptyObject = columnsSchema => {
-      console.log(columnsSchema);
       let fields;
       if (!isUndefined(columnsSchema)) {
         fields = columnsSchema.map(column => {
@@ -418,7 +415,6 @@ const DataViewer = withRouter(
         dataRow: fields,
         recordId: columnsSchema[0].recordId
       };
-      console.log(obj);
       return obj;
     };
 

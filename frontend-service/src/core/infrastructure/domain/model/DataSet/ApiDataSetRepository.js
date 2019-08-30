@@ -215,7 +215,37 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
 
 const webFormDataById = async (dataSetId, tableSchemaId) => {
   const webFormDataDTO = await apiDataSet.webFormDataById(dataSetId, tableSchemaId);
-  console.log('webFormDataDTO', webFormDataDTO);
+  const webForm = new DataSetTable();
+
+  if (webFormDataDTO.totalRecords > 0) {
+    webForm.tableSchemaId = webFormDataDTO.idTableSchema;
+    webForm.totalRecords = webFormDataDTO.totalRecords;
+
+    let field, record;
+
+    const records = webFormDataDTO.records.map(webFormRecordDTO => {
+      record = new DataSetTableRecord();
+      const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
+        field = new DataSetTableField();
+        field.fieldId = webFormFieldDTO.id;
+        field.fieldSchemaId = webFormFieldDTO.idFieldSchema;
+        field.recordId = webFormRecordDTO.idRecordSchema;
+        field.name = webFormFieldDTO.name;
+        field.type = webFormFieldDTO.type;
+        field.value = webFormFieldDTO.value;
+
+        return field;
+      });
+
+      record.recordId = webFormRecordDTO.id;
+      record.recordSchemaId = webFormRecordDTO.idRecordSchema;
+      record.fields = fields;
+
+      return record;
+    });
+    webForm.records = records;
+  }
+  return webForm;
 };
 
 const updateFieldById = async (dataSetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {

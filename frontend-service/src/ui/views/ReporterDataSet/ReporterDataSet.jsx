@@ -24,6 +24,7 @@ import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
+import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
@@ -395,6 +396,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
         />
+        <WebFormData dataSetId={dataSetId} tables={tableSchema} tableSchemaColumns={tableSchemaColumns} />
       </ReporterDataSetContext.Provider>
       <Dialog
         dismissableMask={true}
