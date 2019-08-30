@@ -44,10 +44,7 @@ public class SaveDBHelper {
    */
   @Transactional
   public void saveListsOfRecords(List<List<RecordValue>> listaGeneral) {
-    long preSave = System.currentTimeMillis();
     listaGeneral.parallelStream().forEach(taki -> recordRepository.saveAll(taki));
-    long postSave = System.currentTimeMillis();
-    LOG.info("datasetRepository.saveAndFlush(): {}", postSave - preSave);
   }
 
   /**

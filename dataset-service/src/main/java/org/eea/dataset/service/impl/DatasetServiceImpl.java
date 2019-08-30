@@ -216,6 +216,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
+  /** The save helper. */
   @Autowired
   private SaveDBHelper saveHelper;
 
@@ -278,11 +279,12 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, ROOT);
+
       // Get the dataFlowId from the metabase
       final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
+
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
-      long preParse = System.currentTimeMillis();
       final DataSetVO datasetVO =
           context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
 
@@ -290,14 +292,12 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Empty dataset");
       }
 
-      datasetVO.getTableVO().get(0).getRecords();
-      long postParse = System.currentTimeMillis();
-      LOG.info("context.parse(): " + (postParse - preParse));
-
       // map the VO to the entity
       datasetVO.setId(datasetId);
-      long preSave = System.currentTimeMillis();
       final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+      if (dataset == null) {
+        throw new IOException("Error mapping file");
+      }
 
       // **********************************************************************************
       // **********************************************************************************
@@ -319,17 +319,23 @@ public class DatasetServiceImpl implements DatasetService {
       saveHelper.saveListsOfRecords(listaGeneral);
 
       LOG.info("File processed and saved into DB");
-    } catch (Exception e) {
-      LOG.info(e.getMessage());
     } finally {
       is.close();
     }
   }
 
+  /**
+   * Gets the list of records.
+   *
+   * @param allRecords the all records
+   * @return the list of records
+   */
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
     List<List<RecordValue>> generalList = new ArrayList<>();
+    // lists size
     final int BATCH = 1000;
 
+    // dividing the number of records in different lists
     int nLists = (int) Math.ceil(allRecords.size() / (double) BATCH);
     if (nLists > 1) {
       for (int i = 0; i < (nLists - 1); i++) {
@@ -338,15 +344,9 @@ public class DatasetServiceImpl implements DatasetService {
     }
     generalList.add(new ArrayList<>(allRecords.subList(BATCH * (nLists - 1), allRecords.size())));
 
-    for (int i = 0; i < generalList.size(); i++) {
-      LOG.info("List {} have {} elements", i, generalList.get(i).size());
-    }
     return generalList;
   }
 
-  public void dividirDataset(DatasetValue dataset) {
-    dataset.getTableValues().get(0).getRecords().size();
-  }
 
 
   /**
@@ -595,7 +595,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * String to boolean.
    *
-   * @param string the string
+   * @param integer the integer
    * @return the boolean
    */
   private Boolean intToBoolean(Integer integer) {
