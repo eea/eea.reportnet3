@@ -44,7 +44,7 @@ public class SaveDBHelper {
    */
   @Transactional
   public void saveListsOfRecords(List<List<RecordValue>> listaGeneral) {
-    listaGeneral.parallelStream().forEach(taki -> recordRepository.saveAll(taki));
+    listaGeneral.parallelStream().forEach(value -> recordRepository.saveAll(value));
   }
 
   /**
