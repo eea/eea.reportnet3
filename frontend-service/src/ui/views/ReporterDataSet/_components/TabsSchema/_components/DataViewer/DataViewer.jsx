@@ -166,7 +166,7 @@ const DataViewer = withRouter(
 
     const onConfirmDelete = async () => {
       setDeleteDialogVisible(false);
-      const dataDeleted = await DataSetService.deleteTableDataById(dataSetId);
+      const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
       if (dataDeleted) {
         setIsDataDeleted(true);
       }
