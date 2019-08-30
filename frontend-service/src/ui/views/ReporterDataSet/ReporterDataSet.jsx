@@ -134,9 +134,14 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onExportData = async fileType => {
     setLoadingFile(true);
-    setExportDataSetDataName(createFileName(datasetTitle, fileType));
-    setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
-    setLoadingFile(false);
+    try {
+      setExportDataSetDataName(createFileName(datasetTitle, fileType));
+      setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingFile(false);
+    }
   };
 
   const onReleaseSnapshot = async () => {
@@ -182,7 +187,9 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             return {
               table: table['tableSchemaName'],
               field: field['fieldId'],
-              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`
+              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`,
+              type: field['type'],
+              recordId: field['recordId']
             };
           });
         })

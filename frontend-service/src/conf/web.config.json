@@ -1,4 +1,7 @@
 {
+	"addNewRecord": {
+		"url":"/dataset/{:dataSetId}/table/{:tableSchemaId}/record"
+	},
 	"createSnapshot": {
 		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:description}"
 	},
@@ -21,7 +24,7 @@
 		"url":"/dataset/{:dataSetId}/deleteImportTable/{:tableId}"
 	},
 	"deleteRecord":{
-		"url":"/dataset/{:dataSetId}/record"
+		"url":"/dataset/{:dataSetId}/record/{:recordId}"
 	},
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
@@ -31,6 +34,9 @@
 	},
 	"exportDataSetTableData": {
 		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
+	},
+	"insertRecordData":{
+		"url": "/dataset/{:datasetId}/table/{:tableSchemaId}/record"
 	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
@@ -76,5 +82,8 @@
 	},
 	"REPORTING_DATAFLOW": {
 		"url": "/reporting-data-flow/{:dataFlowId}"
+		},
+	"updateTableDataField":{
+		"url": "/dataset/{:dataSetId}/updateField"
 	}
 }

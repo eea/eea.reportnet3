@@ -4,7 +4,31 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataSet = {
-  addRecord: async (dataSetId, tableSchemaId, record) => {},
+  addRecord: async (dataSetId, tableSchemaId, dataSetTableRecord) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: window.env.REACT_APP_JSON
+          ? `/dataset/${dataSetId}/table/${tableSchemaId}/record`
+          : getUrl(config.insertRecordData.url, {
+              dataSetId: dataSetId,
+              tableSchemaId: tableSchemaId
+            }),
+        data: {
+          record: dataSetTableRecord
+        },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting dataSet data: ${error}`);
+      return false;
+    }
+  },
   deleteDataById: async dataSetId => {
     const tokens = userStorage.get();
     try {
@@ -205,7 +229,30 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  updateFieldById: async (dataSetId, fieldSchemaId, fieldValue) => {},
+  updateFieldById: async (dataSetId, dataSetTableField) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataset/${dataSetId}/updateField`
+          : getUrl(config.updateTableDataField.url, {
+              dataSetId: dataSetId
+            }),
+        data: {
+          field: JSON.stringify(dataSetTableField)
+        },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataSet field: ${error}`);
+      return false;
+    }
+  },
   validateById: async dataSetId => {
     const tokens = userStorage.get();
     try {
