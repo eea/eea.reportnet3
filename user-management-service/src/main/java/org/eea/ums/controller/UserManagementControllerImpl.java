@@ -8,11 +8,12 @@ import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,6 +103,17 @@ public class UserManagementControllerImpl implements UserManagementController {
   @RequestMapping(value = "/logout", method = RequestMethod.POST)
   public void doLogOut(@RequestParam("refreshToken") String refreshToken) {
     securityProviderInterfaceService.doLogout(refreshToken);
+  }
+
+  @Override
+  @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
+  public void addContributorToResource(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroupEnum") ResourceGroupEnum resourceGroupEnum) {
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get("userId");
+    securityProviderInterfaceService
+        .addUserToUserGroup(userId, resourceGroupEnum.getGroupName(idResource));
   }
 
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
