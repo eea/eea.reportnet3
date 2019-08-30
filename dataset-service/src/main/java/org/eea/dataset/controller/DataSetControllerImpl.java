@@ -145,6 +145,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataset the dataset
    */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateDataset(@RequestBody final DataSetVO dataset) {
     if (dataset == null) {
@@ -168,6 +169,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param idDataflow the id dataflow
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/create")
   public void createEmptyDataSet(
       @RequestParam(value = "datasetName", required = true) final String datasetname,
@@ -193,6 +195,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
 
   @Override
+  @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void loadTableData(@PathVariable("id") final Long datasetId,
@@ -226,6 +229,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param dataSetId id import
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportData")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportData(@PathVariable("id") final Long dataSetId) {
@@ -244,6 +248,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param tableCollection the table collection
    */
   @Override
+  @HystrixCommand
   @PostMapping("{id}/loadDatasetSchema")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void loadDatasetSchema(@PathVariable("id") final Long datasetId, Long dataFlowId,
@@ -271,6 +276,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the table from any object id
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "findPositionFromAnyObject/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") Long id,
       @RequestParam(value = "datasetId", required = true) Long idDataset,
@@ -303,6 +309,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @deprecated this method is deprecated
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "{id}", method = RequestMethod.GET)
   @Deprecated
   public DataSetVO getById(Long datasetId) {
@@ -328,6 +335,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the data flow id by id
    */
   @Override
+  @HystrixCommand
+  @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
   public Long getDataFlowIdById(Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -351,6 +360,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the statistics by id
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
 
@@ -372,6 +382,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param records the records
    */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/{id}/updateRecord", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void updateRecords(@PathVariable("id") final Long datasetId,
@@ -395,6 +406,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param recordId the record id
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
@@ -420,6 +432,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param records the records
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/{id}/table/{idTableSchema}/record", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
@@ -444,6 +457,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param idTableSchema the id table schema
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "{id}/deleteImportTable/{idTableSchema}")
   @PreAuthorize("secondLevelAuthorize(#dataSetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteImportTable(@PathVariable("id") final Long dataSetId,
@@ -477,6 +491,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @throws Exception the exception
    */
   @Override
+  @HystrixCommand
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTOR'))")
@@ -502,6 +517,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param idDatasetSchema the id dataset schema
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   public void insertIdDataSchema(@PathVariable("id") Long datasetId,
       @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema) {
@@ -521,6 +537,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param field the field
    */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/{id}/updateField", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void updateField(@PathVariable("id") final Long datasetId,

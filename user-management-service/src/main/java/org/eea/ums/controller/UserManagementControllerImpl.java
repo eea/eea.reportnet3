@@ -108,7 +108,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
   public void addContributorToResource(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceGroupEnum") ResourceGroupEnum resourceGroupEnum) {
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get("userId");
