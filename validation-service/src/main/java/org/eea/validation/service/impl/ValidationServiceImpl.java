@@ -235,7 +235,7 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    List<DatasetValidation> dataSetValList = new ArrayList<DatasetValidation>();
+    List<DatasetValidation> dataSetValList = new ArrayList<>();
     List<TypeErrorEnum> errorsList = new ArrayList<>();
     List<String> orig = new ArrayList<>();
 
@@ -294,7 +294,7 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     dataset.getTableValues().stream().forEach(table -> {
-      List<TableValidation> tableValList = new ArrayList<TableValidation>();
+      List<TableValidation> tableValList = new ArrayList<>();
 
       List<RecordValue> validatedRecords =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
@@ -361,7 +361,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     dataset.getTableValues().stream().forEach(table -> {
-      List<RecordValidation> recordValList = new ArrayList<RecordValidation>();
+      List<RecordValidation> recordValList = new ArrayList<>();
       List<RecordValue> validatedFields =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
       validatedFields.stream().forEach(row -> {
