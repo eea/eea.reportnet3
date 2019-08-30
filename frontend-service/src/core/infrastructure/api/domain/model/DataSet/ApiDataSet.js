@@ -4,18 +4,19 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataSet = {
-  addRecord: async (dataSetId, tableSchemaId, dataSetTableRecord) => {
+  addRecordById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
+    console.log(JSON.stringify(dataSetTableRecords[0]));
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${dataSetId}/table/${tableSchemaId}/record`
-          : getUrl(config.insertRecordData.url, {
+          : getUrl(config.addNewRecord.url, {
               dataSetId: dataSetId,
               tableSchemaId: tableSchemaId
             }),
         data: {
-          record: dataSetTableRecord
+          records: JSON.stringify(dataSetTableRecords[0])
         },
         queryString: {},
         headers: {

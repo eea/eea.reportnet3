@@ -240,7 +240,7 @@ const DataViewer = withRouter(
         );
 
         if (!isUndefined(colsSchema)) {
-          setNewRecord(createEmptyObject(colsSchema));
+          setNewRecord(createEmptyObject(colsSchema, tableData));
         }
         if (!isUndefined(tableData.records)) {
           filterDataResponse(tableData);
@@ -280,7 +280,7 @@ const DataViewer = withRouter(
       setEditedRecord(value);
     };
 
-    const onSaveRow = async record => {
+    const onSaveRecord = async record => {
       console.log(isNewRecord, record);
       if (isNewRecord) {
         try {
@@ -296,7 +296,18 @@ const DataViewer = withRouter(
           setLoading(false);
         }
       } else {
-        await DataSetService.updateRecordById(dataSetId, tableId, record);
+        try {
+          await DataSetService.updateRecordById(dataSetId, tableId, record);
+        } catch (error) {
+          console.error('DataViewer error: ', error);
+          const errorResponse = error.response;
+          console.error('DataViewer errorResponse: ', errorResponse);
+          if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+            history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+          }
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
@@ -367,7 +378,7 @@ const DataViewer = withRouter(
           label={resources.messages['save']}
           icon="save"
           onClick={e => {
-            onSaveRow(newRecord);
+            onSaveRecord(newRecord);
           }}
         />
       </div>
@@ -403,21 +414,28 @@ const DataViewer = withRouter(
       return tableData;
     };
 
-    const createEmptyObject = columnsSchema => {
-      console.log(columnsSchema);
+    const createEmptyObject = (columnsSchema, data) => {
       let fields;
+      console.log(columnsSchema);
       if (!isUndefined(columnsSchema)) {
         fields = columnsSchema.map(column => {
           return {
-            fieldData: { [column.field]: null, type: column.type }
+            fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
           };
         });
       }
 
       const obj = {
         dataRow: fields,
-        recordId: columnsSchema[0].recordId
+        recordSchemaId: columnsSchema[0].recordId
       };
+
+      //dataSetPartitionId is needed for checking the rows owned by delegated contributors
+      if (!isUndefined(data.records) && data.records.length > 0) {
+        obj.dataSetPartitionId = data.records[0].dataSetPartitionId;
+      } else {
+        obj.dataSetPartitionId = null;
+      }
       console.log(obj);
       return obj;
     };

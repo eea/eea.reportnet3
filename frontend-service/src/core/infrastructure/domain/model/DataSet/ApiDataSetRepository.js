@@ -9,10 +9,25 @@ import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataS
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordById = async (dataSetId, tableSchemaId, record) => {
-  console.log(record);
+  const fields = record.dataRow.map(DataTableFieldDTO => {
+    let newField = new DataSetTableField();
+    newField.id = null;
+    newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
+    newField.type = DataTableFieldDTO.fieldData.type;
+    newField.value = DataTableFieldDTO.fieldData[DataTableFieldDTO.fieldData.fieldSchemaId];
+
+    return newField;
+  });
+  console.log(fields);
   const dataSetTableRecord = new DataSetTableRecord();
 
-  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, record);
+  dataSetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+  dataSetTableRecord.fields = fields;
+  dataSetTableRecord.idRecordSchema = record.recordSchemaId;
+  dataSetTableRecord.id = null;
+  console.log([dataSetTableRecord]);
+  //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
+  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, [dataSetTableRecord]);
   return recordAdded;
 };
 
@@ -137,7 +152,7 @@ const schemaById = async dataFlowId => {
           DataTableFieldDTO.type
         );
       });
-      return new DataSetTableRecord(dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
+      return new DataSetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
     });
     return new DataSetTable(
       null,
@@ -151,7 +166,6 @@ const schemaById = async dataFlowId => {
   });
 
   dataSet.tables = tables;
-
   return dataSet;
 };
 
@@ -190,6 +204,7 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
         return field;
       });
 
+      record.dataSetPartitionId = dataTableRecordDTO.datasetPartitionId;
       record.recordId = dataTableRecordDTO.id;
       record.recordSchemaId = dataTableRecordDTO.idRecordSchema;
       record.fields = fields;
