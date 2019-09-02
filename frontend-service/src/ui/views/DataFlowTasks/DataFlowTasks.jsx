@@ -47,12 +47,10 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
   const dataFetch = async () => {
     setLoading(true);
     try {
-      const pendingResponse = await DataFlowService.pending();
-      const acceptedResponse = await DataFlowService.accepted();
-      const completedResponse = await DataFlowService.completed();
-      setpendingContent(pendingResponse);
-      setacceptedContent(acceptedResponse);
-      setcompletedContent(completedResponse);
+      const allDataFlows = await DataFlowService.all();
+      setpendingContent(allDataFlows.pending);
+      setacceptedContent(allDataFlows.accepted);
+      setcompletedContent(allDataFlows.completed);
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
