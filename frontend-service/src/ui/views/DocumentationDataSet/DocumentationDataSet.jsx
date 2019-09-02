@@ -25,6 +25,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const DocumentationDataSet = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
@@ -83,9 +84,16 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
-    setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
-    setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
-    setIsLoading(false);
+    try {
+      setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
+      setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(config.DATAFLOW_TASKS.url));
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const createFileName = title => {
