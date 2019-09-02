@@ -99,7 +99,7 @@ public class ValidationControllerImpl implements ValidationController {
     FailedValidationsDatasetVO validations = null;
     Pageable pageable = null;
     if (StringUtils.isNotBlank(fields)) {
-      fields = fields.replace("nameTableSchema", "originName");
+      fields = fields.replace("tableSchemaName", "originName");
       Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
       PageRequest.of(pageNum, pageSize, order);
       pageable = PageRequest.of(pageNum, pageSize, order);
