@@ -9,10 +9,23 @@ import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataS
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordById = async (dataSetId, tableSchemaId, record) => {
-  console.log(record);
+  const fields = record.dataRow.map(DataTableFieldDTO => {
+    let newField = new DataSetTableField();
+    newField.id = null;
+    newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
+    newField.type = DataTableFieldDTO.fieldData.type;
+    newField.value = DataTableFieldDTO.fieldData[DataTableFieldDTO.fieldData.fieldSchemaId];
+
+    return newField;
+  });
   const dataSetTableRecord = new DataSetTableRecord();
 
-  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, record);
+  dataSetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+  dataSetTableRecord.fields = fields;
+  dataSetTableRecord.idRecordSchema = record.recordSchemaId;
+  dataSetTableRecord.id = null;
+  //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
+  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, [dataSetTableRecord]);
   return recordAdded;
 };
 
@@ -21,8 +34,8 @@ const deleteDataById = async dataSetId => {
   return dataDeleted;
 };
 
-const deleteRecordByIds = async (dataSetId, recordIds) => {
-  const recordDeleted = await apiDataSet.deleteRecordByIds(dataSetId, recordIds);
+const deleteRecordById = async (dataSetId, recordId) => {
+  const recordDeleted = await apiDataSet.deleteRecordById(dataSetId, recordId);
   return recordDeleted;
 };
 
@@ -137,7 +150,7 @@ const schemaById = async dataFlowId => {
           DataTableFieldDTO.type
         );
       });
-      return new DataSetTableRecord(dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
+      return new DataSetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
     });
     return new DataSetTable(
       null,
@@ -151,7 +164,6 @@ const schemaById = async dataFlowId => {
   });
 
   dataSet.tables = tables;
-
   return dataSet;
 };
 
@@ -190,6 +202,7 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
         return field;
       });
 
+      record.dataSetPartitionId = dataTableRecordDTO.datasetPartitionId;
       record.recordId = dataTableRecordDTO.id;
       record.recordSchemaId = dataTableRecordDTO.idRecordSchema;
       record.fields = fields;
@@ -215,17 +228,34 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
 
 const updateFieldById = async (dataSetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
   const dataSetTableField = new DataSetTableField();
-  //dataSetTableField.fieldId = fieldId;
-  //dataSetTableField.fieldSchemaId = fieldSchemaId;
   dataSetTableField.id = fieldId;
   dataSetTableField.idFieldSchema = fieldSchemaId;
   dataSetTableField.type = fieldType;
   dataSetTableField.value = fieldValue;
 
-  console.log(JSON.stringify(dataSetTableField));
-
   const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, dataSetTableField);
   return fieldUpdated;
+};
+
+const updateRecordById = async (dataSetId, tableSchemaId, record) => {
+  const fields = record.dataRow.map(DataTableFieldDTO => {
+    let newField = new DataSetTableField();
+    newField.id = DataTableFieldDTO.fieldData.id;
+    newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
+    newField.type = DataTableFieldDTO.fieldData.type;
+    newField.value = DataTableFieldDTO.fieldData[DataTableFieldDTO.fieldData.fieldSchemaId];
+
+    return newField;
+  });
+  const dataSetTableRecord = new DataSetTableRecord();
+
+  dataSetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+  dataSetTableRecord.fields = fields;
+  dataSetTableRecord.idRecordSchema = record.recordSchemaId;
+  dataSetTableRecord.id = record.recordId;
+  //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
+  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, [dataSetTableRecord]);
+  return recordAdded;
 };
 
 const validateDataById = async dataSetId => {
@@ -245,7 +275,7 @@ const transposeMatrix = matrix => {
 export const ApiDataSetRepository = {
   addRecordById,
   deleteDataById,
-  deleteRecordByIds,
+  deleteRecordById,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,
@@ -255,5 +285,6 @@ export const ApiDataSetRepository = {
   schemaById,
   tableDataById,
   updateFieldById,
+  updateRecordById,
   validateDataById
 };
