@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -63,7 +64,8 @@ public class KieBaseManager {
               rule.getThenCondition().get(1), schema.getNameDataSetSchema()));
     });
     schema.getTableSchemas().stream().forEach(tableSchema -> {
-      tableSchema.getRuleTable().stream().forEach(ruleTable -> {
+      tableSchema.getRuleTable().stream().filter(Objects::nonNull).forEach(ruleTable -> {
+
         ruleAttributes.add(
             passDataToMap(ruleTable.getIdTableSchema().toString(), ruleTable.getRuleId().toString(),
                 TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(),

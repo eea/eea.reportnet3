@@ -38,8 +38,7 @@ public class FieldValue {
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "field_sequence_generator", sequenceName = "field_sequence",
-      allocationSize = 1)
+  @SequenceGenerator(name = "field_sequence_generator", sequenceName = "field_sequence")
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "field_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;

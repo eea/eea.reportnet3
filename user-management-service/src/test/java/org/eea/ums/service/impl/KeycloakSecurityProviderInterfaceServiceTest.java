@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.OngoingStubbing;
 
 public class KeycloakSecurityProviderInterfaceServiceTest {
 
@@ -74,14 +75,10 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     keycloakSecurityProviderInterfaceService.createResourceInstance("", null);
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void addUserToUserGroup() {
-    keycloakSecurityProviderInterfaceService.addUserToUserGroup("", "", "");
-  }
 
   @Test(expected = UnsupportedOperationException.class)
   public void removeUserFromUserGroup() {
-    keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "", "");
+    keycloakSecurityProviderInterfaceService.removeUserFromUserGroup("", "");
   }
 
   @Test
@@ -108,5 +105,20 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     keycloakSecurityProviderInterfaceService.doLogout("refreshToken");
     Mockito.verify(keycloakConnectorService, Mockito.times(1))
         .logout(Mockito.anyString());
+  }
+
+  @Test
+  public void addUserToUserGroup() {
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setId("idGroupInfo");
+    groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
+    groupInfos[0] = groupInfo;
+    Mockito
+        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    keycloakSecurityProviderInterfaceService
+        .addUserToUserGroup("user1", "DATAFLOW-1-DATA_CUSTODIAN");
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .addUserToGroup("user1", "idGroupInfo");
   }
 }

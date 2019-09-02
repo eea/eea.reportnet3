@@ -53,4 +53,19 @@ public interface KeycloakConnectorService {
    * @param refreshToken the refresh token
    */
   void logout(String refreshToken);
+
+  /**
+   * Get groups group info [ ].
+   *
+   * @return the group info [ ]
+   */
+  GroupInfo[] getGroups();
+
+  /**
+   * Add user to group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   */
+  void addUserToGroup(String userId, String groupId);
 }

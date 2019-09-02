@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,6 +62,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTOR'))")
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
     if (id == null) {
@@ -188,7 +190,8 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateUserRequest(String idUserRequest, TypeRequestEnum type) {
+  public void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
+      TypeRequestEnum type) {
 
     try {
       dataflowService.updateUserRequestStatus(idUserRequest, type);

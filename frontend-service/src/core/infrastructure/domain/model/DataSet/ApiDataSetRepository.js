@@ -9,6 +9,9 @@ import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataS
 import { Validation } from 'core/domain/model/Validation/Validation';
 
 const addRecordById = async (dataSetId, tableSchemaId, record) => {
+  console.log(record);
+  const dataSetTableRecord = new DataSetTableRecord();
+
   const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, record);
   return recordAdded;
 };
@@ -210,8 +213,18 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
   return table;
 };
 
-const updateFieldById = async (dataSetId, fieldSchemaId, fieldValue) => {
-  const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, fieldSchemaId, fieldValue);
+const updateFieldById = async (dataSetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
+  const dataSetTableField = new DataSetTableField();
+  //dataSetTableField.fieldId = fieldId;
+  //dataSetTableField.fieldSchemaId = fieldSchemaId;
+  dataSetTableField.id = fieldId;
+  dataSetTableField.idFieldSchema = fieldSchemaId;
+  dataSetTableField.type = fieldType;
+  dataSetTableField.value = fieldValue;
+
+  console.log(JSON.stringify(dataSetTableField));
+
+  const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, dataSetTableField);
   return fieldUpdated;
 };
 

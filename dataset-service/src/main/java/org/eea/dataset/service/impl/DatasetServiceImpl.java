@@ -54,6 +54,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.helper.SaveDBHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -215,6 +216,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
+  /** The save helper. */
+  @Autowired
+  private SaveDBHelper saveHelper;
+
 
 
   /**
@@ -250,7 +255,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
-
   /**
    * Process file.
    *
@@ -263,7 +267,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
   public void processFile(final Long datasetId, final String fileName, final InputStream is,
       final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
@@ -279,30 +282,71 @@ public class DatasetServiceImpl implements DatasetService {
 
       // Get the dataFlowId from the metabase
       final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
+
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
           context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
-      // map the VO to the entity
+
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
       }
-      datasetVO.setId(datasetId);
 
+      // map the VO to the entity
+      datasetVO.setId(datasetId);
       final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
       if (dataset == null) {
         throw new IOException("Error mapping file");
       }
+
+      // **********************************************************************************
+      // **********************************************************************************
+
+      // Save empty table
+      List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
+      dataset.getTableValues().get(0).setRecords(new ArrayList<>());
+
       // Check if the table with idTableSchema has been populated already
       Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
       fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
-      // save dataset to the database
-      datasetRepository.saveAndFlush(dataset);
+
+      if (null == oldTableId) {
+        saveHelper.saveTable(dataset.getTableValues().get(0));
+      }
+
+      List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
+
+      saveHelper.saveListsOfRecords(listaGeneral);
+
       LOG.info("File processed and saved into DB");
     } finally {
       is.close();
     }
   }
+
+  /**
+   * Gets the list of records.
+   *
+   * @param allRecords the all records
+   * @return the list of records
+   */
+  private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
+    List<List<RecordValue>> generalList = new ArrayList<>();
+    // lists size
+    final int BATCH = 1000;
+
+    // dividing the number of records in different lists
+    int nLists = (int) Math.ceil(allRecords.size() / (double) BATCH);
+    if (nLists > 1) {
+      for (int i = 0; i < (nLists - 1); i++) {
+        generalList.add(new ArrayList<>(allRecords.subList(BATCH * i, BATCH * (i + 1))));
+      }
+    }
+    generalList.add(new ArrayList<>(allRecords.subList(BATCH * (nLists - 1), allRecords.size())));
+
+    return generalList;
+  }
+
 
 
   /**
@@ -466,8 +510,11 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     // Check if we need to put all the records without pagination
-    if (pageable == null) {
+    if (pageable == null && totalRecords > 0) {
       pageable = PageRequest.of(0, totalRecords.intValue());
+    }
+    if (pageable == null && totalRecords == 0) {
+      pageable = PageRequest.of(0, 20);
     }
 
     if (null == fields) {
