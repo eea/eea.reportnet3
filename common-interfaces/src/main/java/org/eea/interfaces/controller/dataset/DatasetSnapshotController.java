@@ -29,8 +29,7 @@ public interface DatasetSnapshotController {
    * @param datasetId the dataset id
    * @param description the description
    */
-  @PostMapping(value = "/dataset/{idDataset}/snapshot/create",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   void createSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description);
 
