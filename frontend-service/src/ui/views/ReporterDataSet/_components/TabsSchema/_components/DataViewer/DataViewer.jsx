@@ -202,7 +202,6 @@ const DataViewer = withRouter(
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        console.log(field, value);
         const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
         if (!fieldUpdated) {
           console.error('Error!');
@@ -655,7 +654,6 @@ const DataViewer = withRouter(
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
-
       return { 'p-highlight': id === selectedRecordErrorId };
     };
 
