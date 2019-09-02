@@ -130,7 +130,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            editor={row => cellDataEditor(row, selectedRecord)}
+            //editor={row => cellDataEditor(row, selectedRecord)}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -152,9 +152,9 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      let newColumnsArr = [validationCol].concat(columnsArr);
-      let newColumnsArr2 = [editCol].concat(newColumnsArr);
-      setColumns(newColumnsArr2);
+      //columnsArr.unshift(editCol, validationCol);
+      columnsArr.unshift(validationCol);
+      setColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord]);
 
     useEffect(() => {
@@ -202,7 +202,6 @@ const DataViewer = withRouter(
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        console.log(field, value);
         const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
         if (!fieldUpdated) {
           console.error('Error!');
@@ -655,7 +654,6 @@ const DataViewer = withRouter(
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
-
       return { 'p-highlight': id === selectedRecordErrorId };
     };
 
@@ -733,7 +731,7 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
-            editable={true}
+            //editable={true}
             first={firstRow}
             footer={addRowFooter}
             header={header}
@@ -741,7 +739,7 @@ const DataViewer = withRouter(
             loading={loading}
             onPage={onChangePage}
             onPaste={() => console.log('Paste')}
-            onRowSelect={e => onSelectRecord(e, e.data)}
+            // onRowSelect={e => onSelectRecord(e, e.data)}
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
@@ -750,7 +748,7 @@ const DataViewer = withRouter(
             rowClassName={rowClassName}
             rows={numRows}
             rowsPerPageOptions={[5, 10, 20, 100]}
-            selectionMode="single"
+            // selectionMode="single"
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
