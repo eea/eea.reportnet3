@@ -18,7 +18,8 @@ public interface DatasetSnapshotController {
 
   }
 
-  @GetMapping(value = "/{idDataset}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
 
 
@@ -28,7 +29,8 @@ public interface DatasetSnapshotController {
    * @param datasetId the dataset id
    * @param description the description
    */
-  @PostMapping(value = "/{idDataset}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/dataset/{idDataset}/snapshot/create",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   void createSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description);
 
@@ -38,19 +40,21 @@ public interface DatasetSnapshotController {
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    */
-  @DeleteMapping(value = "/{idDataset}/snapshot/delete/{idSnapshot}")
+  @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
   void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
 
 
-  @PostMapping(value = "/{idDataset}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
-      @RequestParam("idSnapshot") Long idSnapshot);
+      @PathVariable("idSnapshot") Long idSnapshot);
 
 
-  @PutMapping(value = "/{idDataset}/snapshot/release", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @RequestParam("idSnapshot") Long idSnapshot);
+      @PathVariable("idSnapshot") Long idSnapshot);
 
 
 }

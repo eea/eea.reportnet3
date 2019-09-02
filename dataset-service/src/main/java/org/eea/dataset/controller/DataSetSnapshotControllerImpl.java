@@ -50,7 +50,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{idDataset}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
@@ -76,7 +77,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/{idDataset}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/dataset/{idDataset}/snapshot/create",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public void createSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description) {
 
@@ -103,7 +105,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{idDataset}/snapshot/delete/{idSnapshot}")
+  @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -122,9 +124,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
 
   @Override
-  @PostMapping(value = "/{idDataset}/snapshot/restore", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
-      @RequestParam("idSnapshot") Long idSnapshot) {
+      @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -142,9 +145,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
 
   @Override
-  @PutMapping(value = "/{idDataset}/snapshot/release", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @RequestParam("idSnapshot") Long idSnapshot) {
+      @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
