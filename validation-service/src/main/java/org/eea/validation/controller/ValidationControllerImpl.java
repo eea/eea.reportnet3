@@ -100,6 +100,7 @@ public class ValidationControllerImpl implements ValidationController {
     Pageable pageable = null;
     if (StringUtils.isNotBlank(fields)) {
       fields = fields.replace("tableSchemaName", "originName");
+      fields = fields.replace("entityType", "typeEntity");
       Sort order = asc ? Sort.by(fields).ascending() : Sort.by(fields).descending();
       PageRequest.of(pageNum, pageSize, order);
       pageable = PageRequest.of(pageNum, pageSize, order);
