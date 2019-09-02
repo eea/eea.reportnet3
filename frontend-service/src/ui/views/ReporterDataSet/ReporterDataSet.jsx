@@ -198,10 +198,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       setDatasetHasErrors(dataSetStatistics.datasetErrors);
     } catch (error) {
       const errorResponse = error.response;
-      if (
-        !isUndefined(errorResponse) &&
-        (errorResponse.data.message.includes('401') || errorResponse.data.message.includes('403'))
-      ) {
+      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
         history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
       }
     }
