@@ -70,8 +70,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String LOGOUT_URL = "/auth/realms/{realm}/protocol/openid-connect/logout";
   private static final String LIST_USERS_URL = "";
   private static final String LIST_USER_GROUPS_URL = "";
+  private static final String LIST_GROUPS_URL = "/auth/admin/realms/Reportnet/groups";
   private static final String CREATE_USER_GROUP_URL = "";
-  private static final String ADD_USER_TO_USER_GROUP_URL = "";
+  private static final String ADD_USER_TO_USER_GROUP_URL = "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
   private static final String CHECK_USER_PERMISSION = "/auth/admin/realms/{realm}/clients/{clientInterenalId}/authz/resource-server/policy/evaluate";
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
   private static final String GET_RESOURCE_SET = "/auth/realms/{realm}/authz/protection/resource_set";
@@ -80,6 +81,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String URI_PARAM_REALM = "realm";
   private static final String URI_PARAM_RESOURCE_ID = "resourceId";
   private static final String URI_PARAM_USER_ID = "userId";
+  private static final String URI_PARAM_GROUP_ID = "groupId";
 
 
   @PostConstruct
@@ -225,12 +227,59 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(
         map, headers);
-    ResponseEntity<Void> tokenInfo = this.restTemplate
+    this.restTemplate
         .postForEntity(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LOGOUT_URL)
                 .buildAndExpand(uriParams).toString(),
             request,
             Void.class);
+  }
+
+  @Override
+  public GroupInfo[] getGroups() {
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+
+    HttpHeaders headers = createBasicHeaders(headerInfo);
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = new HttpEntity<>(
+        null, headers);
+    ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate
+        .exchange(
+            uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+                .path(LIST_GROUPS_URL)
+                .buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+            GroupInfo[].class);
+    Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+        .map(entity -> (GroupInfo[]) entity).orElse(null);
+    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+        .map(entity -> (GroupInfo[]) entity).orElse(null);
+  }
+
+  @Override
+  public void addUserToGroup(String userId, String groupId) {
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+
+    HttpHeaders headers = createBasicHeaders(headerInfo);
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+    uriParams.put(URI_PARAM_USER_ID, userId);
+
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+    HttpEntity<Void> request = new HttpEntity<>(
+        null, headers);
+    this.restTemplate
+        .exchange(
+            uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+                .path(ADD_USER_TO_USER_GROUP_URL)
+                .buildAndExpand(uriParams).toString(), HttpMethod.PUT, request,
+            Void.class);
+
   }
 
   private TokenInfo retrieveTokenFromKeycloak(MultiValueMap<String, String> map) {

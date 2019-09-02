@@ -10,9 +10,8 @@ export const userReducer = (state, { type, payload }) => {
     case 'REFRESH_TOKEN':
       return {
         ...state,
-        tokenExpireTime: payload.tokenExpireTime
+        ...payload.user
       };
-      break;
 
     default:
       return state;

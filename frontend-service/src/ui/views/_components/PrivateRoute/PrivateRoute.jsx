@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { routes } from 'ui/routes';
 import { userStorage } from 'core/domain/model/User/UserStorage';

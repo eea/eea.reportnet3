@@ -1,10 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isUndefined } from 'lodash';
-import moment from 'moment';
 
 import styles from './Login.module.css';
 
@@ -14,7 +12,6 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
-import { isNull } from 'util';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
@@ -54,7 +51,6 @@ const Login = ({ history }) => {
                 history.push('/data-flow-task/');
               } catch (error) {
                 console.error(error);
-                const userObject = await UserService.logout();
                 user.onLogout();
                 const errorResponse = error.response;
                 if (!isUndefined(errorResponse) && errorResponse.data.message.includes('401')) {

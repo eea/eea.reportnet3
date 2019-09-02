@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useReducer } from 'react';
+import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
@@ -9,22 +9,25 @@ import styles from './ReporterDataSet.module.css';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
+import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { Menu } from 'primereact/menu';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 
 import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const SnapshotContext = React.createContext();
 
@@ -34,17 +37,19 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const [activeIndex, setActiveIndex] = useState();
-  const [buttonsList, setButtonsList] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState('');
+  const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDataSetData, setExportDataSetData] = useState(undefined);
   const [exportDataSetDataName, setExportDataSetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRowId, setSelectedRowId] = useState(-1);
+  const [selectedRowErrorId, setSelectedRowErrorId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -53,10 +58,16 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
 
+  let exportMenuRef = useRef();
+
   const home = {
     icon: config.icons['home'],
     command: () => history.push('/')
   };
+
+  useEffect(() => {
+    onLoadDataSetSchema();
+  }, [isDataDeleted]);
 
   useEffect(() => {
     setBreadCrumbItems([
@@ -74,8 +85,17 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    onLoadDataSetSchema();
-  }, [isDataDeleted]);
+    let exportOptions = config.exportTypes;
+    const exportOptionsFilter = exportOptions.filter(type => type.code !== 'csv');
+
+    setExportButtonsList(
+      exportOptionsFilter.map(type => ({
+        label: type.text,
+        icon: config.icons['archive'],
+        command: () => onExportData(type.code)
+      }))
+    );
+  }, [datasetTitle]);
 
   useEffect(() => {
     if (!isUndefined(exportDataSetData)) {
@@ -112,9 +132,16 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
-  const onExportData = async () => {
-    setExportDataSetDataName(createFileName());
-    setExportDataSetData(await DataSetService.exportDataById(dataSetId, config.dataSet.exportTypes.csv));
+  const onExportData = async fileType => {
+    setLoadingFile(true);
+    try {
+      setExportDataSetDataName(createFileName(datasetTitle, fileType));
+      setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingFile(false);
+    }
   };
 
   const onReleaseSnapshot = async () => {
@@ -138,89 +165,47 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onLoadDataSetSchema = async () => {
-    const dataSetSchema = await DataSetService.schemaById(dataFlowId);
-    const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
-
-    setDatasetTitle(dataSetSchema.dataSetSchemaName);
-    setTableSchema(
-      dataSetSchema.tables.map(tableSchema => {
-        return {
-          id: tableSchema['tableSchemaId'],
-          name: tableSchema['tableSchemaName'],
-          hasErrors: {
-            ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
-          }.hasErrors
-        };
-      })
-    );
-
-    setTableSchemaColumns(
-      dataSetSchema.tables.map(table => {
-        return table.records[0].fields.map(field => {
+    try {
+      const dataSetSchema = await DataSetService.schemaById(dataFlowId);
+      const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
+      setDatasetTitle(dataSetStatistics.dataSetSchemaName);
+      setTableSchema(
+        dataSetSchema.tables.map(tableSchema => {
           return {
-            table: table['tableSchemaName'],
-            field: field['fieldId'],
-            header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`
+            id: tableSchema['tableSchemaId'],
+            name: tableSchema['tableSchemaName'],
+            hasErrors: {
+              ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+            }.hasErrors
           };
-        });
-      })
-    );
+        })
+      );
 
-    setButtonsList([
-      {
-        label: resources.messages['export'],
-        icon: 'import',
-        group: 'left',
-        disabled: true,
-        onClick: () => onExportData()
-      },
-      {
-        label: resources.messages['deleteDatasetData'],
-        icon: 'trash',
-        group: 'left',
-        disabled: false,
-        onClick: () => onSetVisible(setDeleteDialogVisible, true)
-      },
-      {
-        label: resources.messages['events'],
-        icon: 'clock',
-        group: 'right',
-        disabled: true,
-        onClick: null
-      },
-      {
-        label: resources.messages['validate'],
-        icon: 'validate',
-        group: 'right',
-        disabled: false,
-        onClick: () => onSetVisible(setValidateDialogVisible, true),
-        ownButtonClasses: null,
-        iconClasses: null
-      },
-      {
-        label: resources.messages['showValidations'],
-        icon: 'warning',
-        group: 'right',
-        disabled: !dataSetStatistics.datasetErrors,
-        onClick: () => onSetVisible(setValidationsVisible, true),
-        ownButtonClasses: null,
-        iconClasses: dataSetStatistics.datasetErrors ? 'warning' : ''
-      },
-      {
-        label: resources.messages['dashboards'],
-        icon: 'dashboard',
-        group: 'right',
-        disabled: false,
-        onClick: () => onSetVisible(setDashDialogVisible, true)
-      },
-      {
-        label: resources.messages['snapshots'],
-        icon: 'camera',
-        group: 'right',
-        disabled: false,
-        onClick: () => onSetVisible(setSnapshotIsVisible, true)
+      setTableSchemaColumns(
+        dataSetSchema.tables.map(table => {
+          return table.records[0].fields.map(field => {
+            return {
+              table: table['tableSchemaName'],
+              field: field['fieldId'],
+              header: `${field['name'].charAt(0).toUpperCase()}${field['name'].slice(1)}`,
+              type: field['type'],
+              recordId: field['recordId']
+            };
+          });
+        })
+      );
+
+      setDatasetHasErrors(dataSetStatistics.datasetErrors);
+    } catch (error) {
+      const errorResponse = error.response;
+      if (
+        !isUndefined(errorResponse) &&
+        (errorResponse.data.message.includes('401') || errorResponse.data.message.includes('403'))
+      ) {
+        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
       }
-    ]);
+    }
+
     setLoading(false);
   };
 
@@ -232,8 +217,8 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setActiveIndex(tableSchemaId.index);
   };
 
-  const createFileName = () => {
-    return `${datasetTitle}.${config.dataSet.exportTypes.csv}`;
+  const createFileName = (fileName, fileType) => {
+    return `${fileName}.${fileType}`;
   };
 
   const snapshotInitialState = {
@@ -298,6 +283,15 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
+  const getPosition = button => {
+    const buttonTopPosition = button.top;
+    const buttonLeftPosition = button.left;
+
+    const exportDataSetMenu = document.getElementById('exportDataSetMenu');
+    exportDataSetMenu.style.top = buttonTopPosition;
+    exportDataSetMenu.style.left = buttonLeftPosition;
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -315,22 +309,89 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     <div>
       <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
       <div className={styles.ButtonsBar}>
-        <ButtonsBar buttonsList={buttonsList} />
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              label={resources.messages['export']}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              model={exportButtonsList}
+              popup={true}
+              ref={exportMenuRef}
+              id="exportDataSetMenu"
+              onShow={e => {
+                getPosition(e.target.style);
+              }}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'trash'}
+              label={resources.messages['deleteDatasetData']}
+              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'clock'}
+              label={resources.messages['events']}
+              onClick={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'validate'}
+              label={resources.messages['validate']}
+              onClick={() => onSetVisible(setValidateDialogVisible, true)}
+              ownButtonClasses={null}
+              iconClasses={null}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={!datasetHasErrors}
+              icon={'warning'}
+              label={resources.messages['showValidations']}
+              onClick={() => onSetVisible(setValidationsVisible, true)}
+              ownButtonClasses={null}
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'dashboard'}
+              label={resources.messages['dashboards']}
+              onClick={() => onSetVisible(setDashDialogVisible, true)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'camera'}
+              label={resources.messages['snapshots']}
+              onClick={() => onSetVisible(setSnapshotIsVisible, true)}
+            />
+          </div>
+        </Toolbar>
       </div>
       <ReporterDataSetContext.Provider
         value={{
           validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowId(selectedRowId);
+            setSelectedRowErrorId(selectedRowErrorId);
           }
         }}>
         <TabsSchema
           activeIndex={activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
           recordPositionId={recordPositionId}
-          selectedRowId={selectedRowId}
+          selectedRowErrorId={selectedRowErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
         />
@@ -349,10 +410,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
           },
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowId(selectedRowId);
+            setSelectedRowErrorId(selectedRowErrorId);
           }
         }}>
         <Dialog
