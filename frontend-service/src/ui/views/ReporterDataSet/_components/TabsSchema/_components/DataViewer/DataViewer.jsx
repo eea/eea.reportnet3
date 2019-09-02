@@ -104,7 +104,12 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       onRefresh();
+      setConfirmDeleteVisible(false);
     }, [isRecordDeleted]);
+
+    useEffect(() => {
+      setIsRecordDeleted(false);
+    }, [confirmDeleteVisible]);
 
     useEffect(() => {
       if (isUndefined(recordPositionId) || recordPositionId === -1) {
@@ -173,10 +178,9 @@ const DataViewer = withRouter(
     };
 
     const onConfirmDeleteRow = async () => {
-      console.log(selectedRecord);
       setDeleteDialogVisible(false);
       let field = selectedRecord.dataRow.filter(row => Object.keys(row.fieldData)[0] === 'id')[0];
-      const recordDeleted = await DataSetService.deleteRecordByIds(dataSetId, field.fieldData['id']);
+      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, field.fieldData['id']);
       if (recordDeleted) {
         setIsRecordDeleted(true);
       }
@@ -198,6 +202,7 @@ const DataViewer = withRouter(
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
+        console.log(field, value);
         const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
         if (!fieldUpdated) {
           console.error('Error!');
@@ -239,7 +244,7 @@ const DataViewer = withRouter(
         );
 
         if (!isUndefined(colsSchema)) {
-          setNewRecord(createEmptyObject(colsSchema));
+          setNewRecord(createEmptyObject(colsSchema, tableData));
         }
         if (!isUndefined(tableData.records)) {
           filterDataResponse(tableData);
@@ -278,11 +283,11 @@ const DataViewer = withRouter(
       setEditedRecord(value);
     };
 
-    const onSaveRow = async record => {
-      console.log(isNewRecord, record);
+    const onSaveRecord = async record => {
       if (isNewRecord) {
         try {
           await DataSetService.addRecordById(dataSetId, tableId, record);
+          setAddDialogVisible(false);
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -294,7 +299,19 @@ const DataViewer = withRouter(
           setLoading(false);
         }
       } else {
-        await DataSetService.updateRecordById(dataSetId, tableId, record);
+        try {
+          await DataSetService.updateRecordById(dataSetId, tableId, record);
+          setEditDialogVisible(false);
+        } catch (error) {
+          console.error('DataViewer error: ', error);
+          const errorResponse = error.response;
+          console.error('DataViewer errorResponse: ', errorResponse);
+          if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+            history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+          }
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
@@ -365,7 +382,7 @@ const DataViewer = withRouter(
           label={resources.messages['save']}
           icon="save"
           onClick={e => {
-            onSaveRow(newRecord);
+            onSaveRecord(newRecord);
           }}
         />
       </div>
@@ -401,20 +418,27 @@ const DataViewer = withRouter(
       return tableData;
     };
 
-    const createEmptyObject = columnsSchema => {
+    const createEmptyObject = (columnsSchema, data) => {
       let fields;
       if (!isUndefined(columnsSchema)) {
         fields = columnsSchema.map(column => {
           return {
-            fieldData: { [column.field]: null, type: column.type }
+            fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
           };
         });
       }
 
       const obj = {
         dataRow: fields,
-        recordId: columnsSchema[0].recordId
+        recordSchemaId: columnsSchema[0].recordId
       };
+
+      //dataSetPartitionId is needed for checking the rows owned by delegated contributors
+      if (!isUndefined(data.records) && data.records.length > 0) {
+        obj.dataSetPartitionId = data.records[0].dataSetPartitionId;
+      } else {
+        obj.dataSetPartitionId = null;
+      }
       return obj;
     };
 
@@ -428,12 +452,17 @@ const DataViewer = withRouter(
           label={resources.messages['cancel']}
           icon="cancel"
           onClick={() => {
-            console.log(fetchedData);
             setEditedRecord(selectedRecord);
             setEditDialogVisible(false);
           }}
         />
-        <Button label={resources.messages['save']} icon="save" onClick={''} />
+        <Button
+          label={resources.messages['save']}
+          icon="save"
+          onClick={() => {
+            onSaveRecord(editedRecord);
+          }}
+        />
       </div>
     );
 
@@ -465,18 +494,26 @@ const DataViewer = withRouter(
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
         const recordValidations = record.validations;
+        const recordId = record.recordId;
+        const recordSchemaId = record.recordSchemaId;
         const arrayDataFields = record.fields.map(field => {
           return {
-            fieldData: { [field.fieldSchemaId]: field.value, type: field.type, id: field.fieldId },
+            fieldData: {
+              [field.fieldSchemaId]: field.value,
+              type: field.type,
+              id: field.fieldId,
+              fieldSchemaId: field.fieldSchemaId
+            },
             fieldValidations: field.validations
           };
         });
         arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
         const arrayDataAndValidations = {
           dataRow: arrayDataFields,
-          recordValidations
+          recordValidations,
+          recordId,
+          recordSchemaId
         };
-
         return arrayDataAndValidations;
       });
 

@@ -19,7 +19,7 @@ import { ValidateData } from './ValidateData';
 export const DataSetService = {
   addRecordById: AddRecord({ dataSetRepository }),
   deleteDataById: DeleteData({ dataSetRepository }),
-  deleteRecordByIds: DeleteRecord({ dataSetRepository }),
+  deleteRecordById: DeleteRecord({ dataSetRepository }),
   deleteTableDataById: DeleteTableData({ dataSetRepository }),
   errorsById: GetErrors({ dataSetRepository }),
   errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),

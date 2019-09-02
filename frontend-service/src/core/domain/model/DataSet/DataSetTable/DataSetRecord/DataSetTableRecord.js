@@ -1,5 +1,6 @@
 export class DataSetTableRecord {
-  constructor(recordId, recordSchemaId, fields, validations) {
+  constructor(dataSetPartitionId, recordId, recordSchemaId, fields, validations) {
+    this.dataSetPartitionId = dataSetPartitionId;
     this.fields = fields;
     this.recordId = recordId;
     this.recordSchemaId = recordSchemaId;
