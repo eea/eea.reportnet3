@@ -387,6 +387,18 @@
     "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
     "value": "ZmFsc2U="
   },
+    {
+    "key": "config/apiGateway/zuul.routes.snapshot.path",
+    "value": "L3NuYXBzaG90Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.snapshot.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.snapshot.stripPrefix",
+    "value": "ZmFsc2U="
+  },
   {
     "key": "config/apiGateway/zuul.routes.dataschema.path",
     "value": "L2RhdGFzY2hlbWEvKio="
