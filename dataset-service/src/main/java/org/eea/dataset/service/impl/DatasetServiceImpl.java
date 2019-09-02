@@ -296,6 +296,12 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
+  /**
+   * Save all records.
+   *
+   * @param datasetId the dataset id
+   * @param listaGeneral the lista general
+   */
   @Override
   @Transactional
   public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
