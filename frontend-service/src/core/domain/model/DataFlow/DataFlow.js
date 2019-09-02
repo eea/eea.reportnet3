@@ -9,7 +9,8 @@ export class DataFlow {
     userRequestStatus,
     status,
     documents,
-    weblinks
+    weblinks,
+    requestId
   ) {
     this.creationDate = creationDate;
     this.datasets = datasets;
@@ -21,5 +22,6 @@ export class DataFlow {
     this.status = status;
     this.userRequestStatus = userRequestStatus;
     this.weblinks = weblinks;
+    this.requestId  = requestId;
   }
 }

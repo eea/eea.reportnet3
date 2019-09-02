@@ -66,6 +66,28 @@ export const apiSnapshot = {
       return false;
     }
   },
+  releaseById: async (dataFlowId, dataSetId, snapshotId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: getUrl(config.releaseSnapshot.url, {
+          dataFlowId,
+          dataSetId,
+          snapshotId
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        },
+        data:{
+          snapshotId
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error releasing the snapshot: ${error}`);
+      return false;
+    }
+  },
   all: async dataSetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({

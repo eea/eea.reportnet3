@@ -21,9 +21,14 @@ const restoreById = async (dataFlowId, dataSetId, snapshotId) => {
   return await apiSnapshot.restoreById(dataFlowId, dataSetId, snapshotId);
 };
 
+const releaseById = async (dataFlowId, dataSetId, snapshotId) => {
+  return await apiSnapshot.releaseById(dataFlowId, dataSetId, snapshotId);
+};
+
 export const ApiSnapshotRepository = {
   all,
   createById,
   deleteById,
-  restoreById
+  restoreById,
+  releaseById
 };
