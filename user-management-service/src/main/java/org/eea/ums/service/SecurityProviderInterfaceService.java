@@ -59,19 +59,17 @@ public interface SecurityProviderInterfaceService {
    * Add user to user group.
    *
    * @param userId the user id
-   * @param groupId the group id
-   * @param securityToken the security token
+   * @param groupName the group name
    */
-  void addUserToUserGroup(String userId, String groupId, String securityToken);
+  void addUserToUserGroup(String userId, String groupName);
 
   /**
    * Remove user from user group.
    *
    * @param userId the user id
    * @param groupId the group id
-   * @param securityToken the security token
    */
-  void removeUserFromUserGroup(String userId, String groupId, String securityToken);
+  void removeUserFromUserGroup(String userId, String groupId);
 
   /**
    * Gets resources by user.
