@@ -5,8 +5,10 @@ import { GetCompletedDataFlows } from './GetCompletedDataFlows';
 import { GetReportingDataFlow } from './GetReportingDataFlow';
 import { AcceptDataFlow } from './AcceptDataFlow';
 import { RejectDataFlow } from './RejectDataFlow';
+import { GetAllDataFlows } from './GetAllDataFlows';
 
 export const DataFlowService = {
+  all: GetAllDataFlows({ dataFlowRepository }),
   accepted: GetAcceptedDataFlows({ dataFlowRepository }),
   pending: GetPendingDataFlows({ dataFlowRepository }),
   completed: GetCompletedDataFlows({ dataFlowRepository }),

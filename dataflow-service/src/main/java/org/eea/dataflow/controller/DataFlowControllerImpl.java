@@ -190,7 +190,8 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PutMapping(value = "/updateStatusRequest/{idUserRequest}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateUserRequest(String idUserRequest, TypeRequestEnum type) {
+  public void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
+      TypeRequestEnum type) {
 
     try {
       dataflowService.updateUserRequestStatus(idUserRequest, type);

@@ -23,7 +23,7 @@ public interface UserRequestRepository extends PagingAndSortingRepository<UserRe
   @Modifying
   @Query(nativeQuery = true,
       value = "UPDATE user_request SET request_type=:type WHERE id=:userRequestId")
-  void updateUserRequestStatus(@Param("userRequestId") String userRequestId,
+  void updateUserRequestStatus(@Param("userRequestId") Long userRequestId,
       @Param("type") String typeStatus);
 
 }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isUndefined } from 'lodash';
+
 import styles from './ReportingDataFlow.module.scss';
 
 import { config } from 'conf';
@@ -19,6 +21,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'ui/views/_components/SplitButton';
 
 import { DataFlowService } from 'core/services/DataFlow';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const ReportingDataFlow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
@@ -33,9 +36,16 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   };
 
   const onLoadReportingDataFlow = async () => {
-    const dataFlow = await DataFlowService.reporting(match.params.dataFlowId);
-    setDataFlowData(dataFlow);
-    setLoading(false);
+    try {
+      const dataFlow = await DataFlowService.reporting(match.params.dataFlowId);
+      setDataFlowData(dataFlow);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(config.DATAFLOW_TASKS.url));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -69,7 +79,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     );
   };
 
-  if (loading) {
+  if (loading || isUndefined(dataFlowData)) {
     return layout(<Spinner />);
   }
 
@@ -113,9 +123,9 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               {dataFlowData.name}
             </h2>
           </div>
-          <div className={styles.option_btns_wrapper}>
+          {/* <div className={styles.option_btns_wrapper}>
             <DropdownButton icon="ellipsis" model={dropDownItems} />
-          </div>
+          </div> */}
         </div>
 
         <div className={`${styles.buttonsWrapper}`}>

@@ -117,6 +117,6 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
   void addContributorToResource(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceGroupEnum") ResourceGroupEnum resourceGroupEnum);
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
 }
