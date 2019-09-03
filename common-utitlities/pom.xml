@@ -4,12 +4,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>library-pom</artifactId>
+    <groupId>org.eea</groupId>
+    <version>3.0-SNAPSHOT</version>
+    <relativePath>../parent-poms/lib</relativePath>
+  </parent>
 
   <groupId>org.eea.utils</groupId>
   <artifactId>common-utitlities</artifactId>
   <version>3.0-SNAPSHOT</version>
   <properties>
-    <spring.version>5.1.5.RELEASE</spring.version>
     <spring.security.version>5.1.4.RELEASE</spring.security.version>
     <aspectj.version>1.9.2</aspectj.version>
 
@@ -138,51 +143,5 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.sonarsource.scanner.maven</groupId>
-        <artifactId>sonar-maven-plugin</artifactId>
-        <version>3.2</version>
-      </plugin>
-    </plugins>
-  </build>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>nexus-snapshots</id>
-      <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <profiles>
-    <profile>
-      <id>sonar</id>
-      <properties>
-        <sonar.projectKey>${project.groupId}:${project.artifactId}:${sonar.jenkins.branch}
-        </sonar.projectKey>
-        <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonarsource.scanner.maven</groupId>
-            <artifactId>sonar-maven-plugin</artifactId>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>
