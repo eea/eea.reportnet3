@@ -12,8 +12,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface RecordRepository.
  */
-public interface RecordRepository extends PagingAndSortingRepository<RecordValue, Integer>,
-    RecordExtendedQueriesRepository {
+public interface RecordRepository
+    extends PagingAndSortingRepository<RecordValue, Integer>, RecordExtendedQueriesRepository {
 
   /**
    * Find by table value id.
@@ -58,12 +58,12 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   RecordValue findByIdAndTableValue_DatasetId_Id(Long id, Long idDataset);
 
   /**
-   * Delete records with ids.
+   * Delete record with id.
    *
-   * @param recordIds the record ids
+   * @param recordId the record id
    */
   @Modifying
-  @Query("delete from RecordValue record where record.id in ?1")
-  void deleteRecordsWithIds(List<Long> recordIds);
+  @Query("delete from RecordValue record where record.id = ?1")
+  void deleteRecordWithId(Long recordId);
 
 }

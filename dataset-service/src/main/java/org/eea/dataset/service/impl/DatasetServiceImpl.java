@@ -70,9 +70,12 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -249,7 +252,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
-
   /**
    * Process file.
    *
@@ -262,8 +264,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
-  public void processFile(final Long datasetId, final String fileName, final InputStream is,
+  public DataSetVO processFile(final Long datasetId, final String fileName, final InputStream is,
       final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
@@ -278,46 +279,52 @@ public class DatasetServiceImpl implements DatasetService {
 
       // Get the dataFlowId from the metabase
       final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
+
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
           context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
-      // map the VO to the entity
+
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
       }
-      datasetVO.setId(datasetId);
 
-      final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-      if (dataset == null) {
-        throw new IOException("Error mapping file");
-      }
-      // Check if the table with idTableSchema has been populated already
-      Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-      fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
-      // save dataset to the database
-      datasetRepository.saveAndFlush(dataset);
-      LOG.info("File processed and saved into DB");
+      return datasetVO;
+
     } finally {
       is.close();
     }
   }
 
+  /**
+   * Save all records.
+   *
+   * @param datasetId the dataset id
+   * @param listaGeneral the lista general
+   */
+  @Override
+  @Transactional
+  public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
+
+    LOG.debug("{}", getTenantName());
+    recordRepository.saveAll(listaGeneral);
+  }
+
+  public static String getTenantName() {
+    return TenantResolver.getTenantName();
+  }
 
   /**
-   * Fill table id.
+   * Save table.
    *
-   * @param idTableSchema the id table schema
-   * @param listTableValues the list table values
-   * @param oldTableId the old table id
+   * @param tableValue the dataset
    */
-  private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
-      Long oldTableId) {
-    if (oldTableId != null) {
-      listTableValues.stream()
-          .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
-          .forEach(tableValue -> tableValue.setId(oldTableId));
-    }
+  @Override
+  @Transactional
+  public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
+    DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
+    tableValue.setDatasetId(datasetValue);
+    tableRepository.saveAndFlush(tableValue);
   }
 
 
@@ -456,13 +463,21 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      final Pageable pageable, final String fields) throws EEAException {
+      Pageable pageable, final String fields) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
 
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
+
+    // Check if we need to put all the records without pagination
+    if (pageable == null && totalRecords > 0) {
+      pageable = PageRequest.of(0, totalRecords.intValue());
+    }
+    if (pageable == null && totalRecords == 0) {
+      pageable = PageRequest.of(0, 20);
+    }
 
     if (null == fields) {
 
@@ -998,19 +1013,19 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteRecords(final Long datasetId, final List<Long> recordIds) throws EEAException {
-    if (datasetId == null || recordIds == null) {
+  public void deleteRecord(final Long datasetId, final Long recordId) throws EEAException {
+    if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
-    recordRepository.deleteRecordsWithIds(recordIds);
+    recordRepository.deleteRecordWithId(recordId);
   }
 
   /**

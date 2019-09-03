@@ -111,6 +111,9 @@ export const apiDataSet = {
   },
   errorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const tokens = userStorage.get();
+    if (asc === -1) {
+      asc = 0;
+    }
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'

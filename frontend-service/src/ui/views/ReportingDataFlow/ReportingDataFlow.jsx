@@ -124,9 +124,9 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               {dataFlowData.name}
             </h2>
           </div>
-          <div className={styles.option_btns_wrapper}>
+          {/* <div className={styles.option_btns_wrapper}>
             <DropdownButton icon="ellipsis" model={dropDownItems} />
-          </div>
+          </div> */}
         </div>
 
         <div className={`${styles.buttonsWrapper}`}>
