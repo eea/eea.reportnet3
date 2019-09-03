@@ -3,6 +3,8 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -39,12 +41,13 @@ public interface DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   * @return
    *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
-      throws EEAException, IOException;
+  DataSetVO processFile(@DatasetId Long datasetId, String fileName, InputStream is,
+      String idTableSchema) throws EEAException, IOException;
 
 
   /**
@@ -229,5 +232,11 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
+
+
+  void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral);
+
+
+  void saveTable(@DatasetId Long datasetId, TableValue tableValue);
 
 }
