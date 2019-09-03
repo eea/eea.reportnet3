@@ -39,7 +39,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     transactionManagerRef = "dataSetsTransactionManager",
     basePackages = "org.eea.validation.persistence.data.repository")
 @EnableWebMvc
-@EeaEnableSecurity
 public class DatasetConfiguration implements WebMvcConfigurer {
 
 

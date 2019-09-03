@@ -2,6 +2,7 @@ import { ApiDataFlowRepository } from 'core/infrastructure/domain/model/DataFlow
 
 export const DataFlowRepository = {
   accept: () => Promise.reject('[DataFlowRepository#accept] must be implemented'),
+  all: () => Promise.reject('[DataFlowRepository#all] must be implemented'),
   accepted: () => Promise.reject('[DataFlowRepository#accepted] must be implemented'),
   completed: () => Promise.reject('[DataFlowRepository#completed] must be implemented'),
   pending: () => Promise.reject('[DataFlowRepository#pending] must be implemented'),

@@ -103,9 +103,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setNameDataSetSchema("dataSet_" + datasetId);
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    List<RuleDataSet> ruleDataSetList = new ArrayList<>();
+    List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
     RuleDataSet ruleDataset = new RuleDataSet();
-    List<String> listaStrinsDataset = new ArrayList<>();
+    List<String> listaStrinsDataset = new ArrayList<String>();
     listaStrinsDataset.add(GENERAL_ERROR);
     listaStrinsDataset.add(GENERAL_WARNING);
     ruleDataset.setThenCondition(listaStrinsDataset);
@@ -234,7 +234,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isValid(value) || value == null");
+          rule2.setWhenCondition("!isValid(value,'') || value == null");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(INTEGER_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
@@ -291,13 +291,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
       }
-
+      ruleField.add(rule2);
       FieldSchema fieldSchema = new FieldSchema();
       fieldSchema.setIdFieldSchema(idFieldSchema);
       fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
       fieldSchema.setHeaderName(header.getHeaderName());
       fieldSchema.setType(header.getHeaderType());
       fieldSchema.setRuleField(ruleField);
+
       fieldSchemas.add(fieldSchema);
     }
   }
@@ -338,6 +339,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return dataSchemaMapper.entityToClass(dataschema);
 
   }
-
 
 }
