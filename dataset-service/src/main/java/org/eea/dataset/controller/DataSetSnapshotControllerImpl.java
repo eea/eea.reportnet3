@@ -143,6 +143,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Release snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)

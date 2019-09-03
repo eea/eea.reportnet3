@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
+  /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
@@ -79,12 +80,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
+  /** The jdbc template. */
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
+  /** The resource file. */
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
+  /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
@@ -99,11 +103,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
 
+  /**
+   * Reset dataset database.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   */
   @Override
   public void resetDatasetDatabase() throws RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
+  /**
+   * Creates the empty data set.
+   *
+   * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @throws RecordStoreAccessException the record store access exception
+   */
   @Override
   public void createEmptyDataSet(String datasetName, String idDatasetSchema)
       throws RecordStoreAccessException {
@@ -139,11 +155,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   }
 
+  /**
+   * Creates the data set from other.
+   *
+   * @param sourceDatasetName the source dataset name
+   * @param destinationDataSetName the destination data set name
+   */
   @Override
   public void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName) {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
+  /**
+   * Gets the connection data for dataset.
+   *
+   * @param datasetName the dataset name
+   * @return the connection data for dataset
+   */
   @Override
   public ConnectionDataVO getConnectionDataForDataset(String datasetName) {
     final List<String> datasets = getAllDataSetsName(datasetName);
@@ -158,6 +186,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     return result;
   }
 
+  /**
+   * Gets the connection data for dataset.
+   *
+   * @return the connection data for dataset
+   */
   @Override
   public List<ConnectionDataVO> getConnectionDataForDataset() {
     final List<String> datasets = getAllDataSetsName("");
@@ -188,9 +221,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * Gets the all data sets name.
    *
+   * @param datasetName the dataset name
    * @return the all data sets name
-   *
-   * @throws RecordStoreAccessException the docker access exception
    */
   private List<String> getAllDataSetsName(String datasetName) {
 
@@ -214,6 +246,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+  /**
+   * Creates the data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param idPartitionDataset the id partition dataset
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException {
@@ -306,6 +347,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+  /**
+   * Restore data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Transactional
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
@@ -384,6 +433,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+  /**
+   * Delete data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Transactional
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {

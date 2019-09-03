@@ -37,6 +37,12 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   void removeSnaphot(@Param("idDataset") Long idDataset, @Param("idSnapshot") Long idSnapshot);
 
 
+  /**
+   * Release snaphot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   */
   @Transactional
   @Modifying
   @Query(nativeQuery = true,

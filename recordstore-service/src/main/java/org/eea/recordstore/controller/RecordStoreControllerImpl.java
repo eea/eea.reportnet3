@@ -117,6 +117,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
+  /**
+   * Creates the snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartitionDataset the id partition dataset
+   */
   @Override
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
@@ -133,6 +140,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
+  /**
+   * Restore snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
@@ -147,6 +160,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
+  /**
+   * Delete snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/delete", method = RequestMethod.POST)
   public void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
