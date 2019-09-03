@@ -12,7 +12,8 @@ const parseDataFlowDTO = dataFlowDTO => {
     dataFlowDTO.userRequestStatus,
     dataFlowDTO.status,
     dataFlowDTO.documents,
-    dataFlowDTO.weblinks
+    dataFlowDTO.weblinks,
+    dataFlowDTO.requestId
   );
 };
 

@@ -51,7 +51,6 @@ import org.eea.dataset.service.file.FileParseContextImpl;
 import org.eea.dataset.service.file.FileParserFactory;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
-import org.eea.dataset.service.helper.SaveDBHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -184,9 +183,6 @@ public class DatasetServiceTest {
   @Mock
   private FileCommonUtils fileCommon;
 
-  @Mock
-  private SaveDBHelper saveHelper;
-
   private FieldValue fieldValue;
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -316,28 +312,13 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
-  @Test(expected = IOException.class)
-  public void testProcessFileMappingError() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(reportingDatasetRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new ReportingDataset()));
-    when(fileParserFactory.createContext("csv")).thenReturn(context);
-    final DataSetVO dataSetVO = new DataSetVO();
-    dataSetVO.setId(1L);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(dataSetVO);
-    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(null);
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
 
 
   @Test
   public void testProcessFileSuccessUpdateTable() throws Exception {
     final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(reportingDatasetRepository.findById(Mockito.anyLong()))
@@ -347,52 +328,24 @@ public class DatasetServiceTest {
     dataSetVO.setId(1L);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(dataSetVO);
-    final DatasetValue entityValue = new DatasetValue();
-    final ArrayList<TableValue> tableValues = new ArrayList<>();
-    final TableValue tableValue = new TableValue();
-    ArrayList<RecordValue> records = new ArrayList<>();
-    RecordValue record = new RecordValue();
-    records.add(record);
-    records.add(record);
-    tableValue.setIdTableSchema("schema");
-    tableValue.setRecords(records);
-    tableValues.add(tableValue);
-    entityValue.setId(1L);
-    entityValue.setTableValues(tableValues);
-    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(2L);
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), "schema");
-    Mockito.verify(saveHelper, times(1)).saveListsOfRecords(Mockito.any());
+    assertEquals(dataSetVO,
+        datasetService.processFile(1L, "fileOriginal.csv", file.getInputStream(), ""));
   }
 
   @Test
-  public void testProcessFileSuccessNewTable() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(reportingDatasetRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new ReportingDataset()));
-    when(fileParserFactory.createContext("csv")).thenReturn(context);
-    final DataSetVO dataSetVO = new DataSetVO();
-    dataSetVO.setId(1L);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(dataSetVO);
-    final DatasetValue entityValue = new DatasetValue();
-    final ArrayList<TableValue> tableValues = new ArrayList<>();
-    ArrayList<RecordValue> records = new ArrayList<>();
-    TableValue table = new TableValue();
-    RecordValue record = new RecordValue();
-    records.add(record);
-    table.setRecords(records);
-    tableValues.add(table);
-    entityValue.setId(1L);
-    entityValue.setTableValues(tableValues);
-    when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(null);
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-    Mockito.verify(saveHelper, times(1)).saveListsOfRecords(Mockito.any());
+  public void testSaveAllRecords() {
+    datasetService.saveAllRecords(1L, new ArrayList<>());
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
+
+  @Test
+  public void testSaveTable() {
+    Mockito.when(datasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DatasetValue()));
+    datasetService.saveTable(1L, new TableValue());
+    Mockito.verify(tableRepository, times(1)).saveAndFlush(Mockito.any());
+  }
+
 
 
   @Test
