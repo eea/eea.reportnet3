@@ -49,7 +49,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRowErrorId, setSelectedRowErrorId] = useState(-1);
+  const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -198,10 +198,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       setDatasetHasErrors(dataSetStatistics.datasetErrors);
     } catch (error) {
       const errorResponse = error.response;
-      if (
-        !isUndefined(errorResponse) &&
-        (errorResponse.data.message.includes('401') || errorResponse.data.message.includes('403'))
-      ) {
+      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
         history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
       }
     }
@@ -381,17 +378,17 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       <ReporterDataSetContext.Provider
         value={{
           validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowErrorId(selectedRowErrorId);
+            setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
         <TabsSchema
           activeIndex={activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
           recordPositionId={recordPositionId}
-          selectedRowErrorId={selectedRowErrorId}
+          selectedRecordErrorId={selectedRecordErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
         />
@@ -410,10 +407,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
           },
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowErrorId(selectedRowErrorId);
+            setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
         <Dialog

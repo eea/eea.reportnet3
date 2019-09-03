@@ -36,8 +36,8 @@ export function SnapshotItem({ itemData }) {
               tooltip={resources.messages.releaseSnapshotTooltip}
               tooltipOptions={{ position: 'top' }}
               icon="cloudUpload"
-              disabled={false}
-              className={`${styles.btn} rp-btn default`}
+              disabled={true}
+              className={`${styles.btn} rp-btn secondary`}
               onClick={() =>
                 snapshotContext.snapshotDispatch({
                   type: 'release_snapshot',

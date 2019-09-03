@@ -54,7 +54,6 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
-import org.eea.dataset.service.helper.SaveDBHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -71,6 +70,8 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,10 +217,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /** The save helper. */
-  @Autowired
-  private SaveDBHelper saveHelper;
-
 
 
   /**
@@ -267,7 +264,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public void processFile(final Long datasetId, final String fileName, final InputStream is,
+  public DataSetVO processFile(final Long datasetId, final String fileName, final InputStream is,
       final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
@@ -292,77 +289,42 @@ public class DatasetServiceImpl implements DatasetService {
         throw new IOException("Empty dataset");
       }
 
-      // map the VO to the entity
-      datasetVO.setId(datasetId);
-      final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-      if (dataset == null) {
-        throw new IOException("Error mapping file");
-      }
+      return datasetVO;
 
-      // **********************************************************************************
-      // **********************************************************************************
-
-      // Save empty table
-      List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
-      dataset.getTableValues().get(0).setRecords(new ArrayList<>());
-
-      // Check if the table with idTableSchema has been populated already
-      Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-      fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
-
-      if (null == oldTableId) {
-        saveHelper.saveTable(dataset.getTableValues().get(0));
-      }
-
-      List<List<RecordValue>> listaGeneral = getListOfRecords(allRecords);
-
-      saveHelper.saveListsOfRecords(listaGeneral);
-
-      LOG.info("File processed and saved into DB");
     } finally {
       is.close();
     }
   }
 
   /**
-   * Gets the list of records.
+   * Save all records.
    *
-   * @param allRecords the all records
-   * @return the list of records
+   * @param datasetId the dataset id
+   * @param listaGeneral the lista general
    */
-  private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
-    List<List<RecordValue>> generalList = new ArrayList<>();
-    // lists size
-    final int BATCH = 1000;
+  @Override
+  @Transactional
+  public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
 
-    // dividing the number of records in different lists
-    int nLists = (int) Math.ceil(allRecords.size() / (double) BATCH);
-    if (nLists > 1) {
-      for (int i = 0; i < (nLists - 1); i++) {
-        generalList.add(new ArrayList<>(allRecords.subList(BATCH * i, BATCH * (i + 1))));
-      }
-    }
-    generalList.add(new ArrayList<>(allRecords.subList(BATCH * (nLists - 1), allRecords.size())));
-
-    return generalList;
+    LOG.debug("{}", getTenantName());
+    recordRepository.saveAll(listaGeneral);
   }
 
-
+  public static String getTenantName() {
+    return TenantResolver.getTenantName();
+  }
 
   /**
-   * Fill table id.
+   * Save table.
    *
-   * @param idTableSchema the id table schema
-   * @param listTableValues the list table values
-   * @param oldTableId the old table id
+   * @param tableValue the dataset
    */
-  private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
-      Long oldTableId) {
-    if (oldTableId != null) {
-      listTableValues.stream()
-          .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
-          .forEach(tableValue -> tableValue.setId(oldTableId));
-    }
+  @Override
+  @Transactional
+  public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
+    DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
+    tableValue.setDatasetId(datasetValue);
+    tableRepository.saveAndFlush(tableValue);
   }
 
 
