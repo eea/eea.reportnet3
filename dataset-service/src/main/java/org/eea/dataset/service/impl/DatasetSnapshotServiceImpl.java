@@ -115,10 +115,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    */
+
+
   @Override
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
     // Remove from the metabase
-    snapshotRepository.removeSnaphot(idDataset, idSnapshot);
+    snapshotRepository.deleteById(idSnapshot);
     // Delete the file
     recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
     LOG.info("Snapshot {} removed", idSnapshot);
