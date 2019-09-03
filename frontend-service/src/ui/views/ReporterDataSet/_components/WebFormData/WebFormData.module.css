@@ -1,0 +1,9 @@
+.divWebForm {
+  display: flex;
+  margin: 5px !important;
+}
+.formColumn {
+  margin: 5px;
+  width: 12%;
+  text-align: center;
+}
