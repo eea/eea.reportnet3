@@ -59,6 +59,7 @@ const DataViewer = withRouter(
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
+    const [initialCellValue, setInitialCellValue] = useState();
     const [isDataDeleted, setIsDataDeleted] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
@@ -130,7 +131,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            //editor={row => cellDataEditor(row, selectedRecord)}
+            editor={row => cellDataEditor(row, selectedRecord)}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -152,8 +153,7 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      //columnsArr.unshift(editCol, validationCol);
-      columnsArr.unshift(validationCol);
+      columnsArr.unshift(editCol, validationCol);
       setColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord]);
 
@@ -202,9 +202,12 @@ const DataViewer = withRouter(
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
-        if (!fieldUpdated) {
-          console.error('Error!');
+        console.log(value, initialCellValue);
+        if (value !== initialCellValue) {
+          const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
+          if (!fieldUpdated) {
+            console.error('Error!');
+          }
         }
       }
     };
@@ -212,6 +215,11 @@ const DataViewer = withRouter(
     const onEditorValueChange = (props, value) => {
       let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
+    };
+
+    const onEditorValueFocus = value => {
+      console.log(value);
+      setInitialCellValue(value);
     };
 
     const onExportTableData = async fileType => {
@@ -407,6 +415,7 @@ const DataViewer = withRouter(
           type="text"
           value={getCellValue(cell, cell.field)}
           onChange={e => onEditorValueChange(cell, e.target.value)}
+          onFocus={e => onEditorValueFocus(e.target.value)}
           onBlur={e => onEditorSubmitValue(cell, e.target.value, record)}
         />
       );
@@ -731,7 +740,7 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
-            //editable={true}
+            editable={true}
             first={firstRow}
             footer={addRowFooter}
             header={header}
@@ -739,7 +748,7 @@ const DataViewer = withRouter(
             loading={loading}
             onPage={onChangePage}
             onPaste={() => console.log('Paste')}
-            // onRowSelect={e => onSelectRecord(e, e.data)}
+            onRowSelect={e => onSelectRecord(e, e.data)}
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
@@ -748,7 +757,7 @@ const DataViewer = withRouter(
             rowClassName={rowClassName}
             rows={numRows}
             rowsPerPageOptions={[5, 10, 20, 100]}
-            // selectionMode="single"
+            selectionMode="single"
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
