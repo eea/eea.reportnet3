@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import styles from './DataFlowColumn.module.css';
 
@@ -9,7 +10,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }) => {
+const DataFlowColumn = withRouter(({ navTitle, dataFlowTitle, components = [], buttonTitle, history, match }) => {
   const resources = useContext(ResourcesContext);
   const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
 
@@ -24,7 +25,7 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
   return (
     <div className="nav rep-col-12 rep-col-sm-3">
       <h2 className={styles.title}>{navTitle}</h2>
-      {search && (
+      {components.includes('search') && (
         <div className="navSection">
           <input
             className={styles.searchInput}
@@ -51,6 +52,20 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
             setVisibleHandler(setSubscribeDialogVisible, true);
           }}
         />
+        {components.includes('dashboard') ? (
+          <>
+            <hr />
+            <Button
+              className={styles.subscribeBtn}
+              icon="dashboard"
+              label={'View Dashboard'}
+              onClick={e => {
+                e.preventDefault();
+                history.push(`/reporting-data-flow/${match.params.dataFlowId}/data-custodian-dashboards/`);
+              }}
+            />
+          </>
+        ) : null}
         <ConfirmDialog
           header={resources.messages['subscribeButtonTitle']}
           maximizable={false}
@@ -64,6 +79,6 @@ const DataFlowColumn = ({ navTitle, dataFlowTitle, search = false, buttonTitle }
       </div>
     </div>
   );
-};
+});
 
 export { DataFlowColumn };
