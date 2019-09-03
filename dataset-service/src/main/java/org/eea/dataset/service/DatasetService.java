@@ -3,6 +3,8 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -39,12 +41,13 @@ public interface DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   * @return
    *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void processFile(@DatasetId Long datasetId, String fileName, InputStream is, String idTableSchema)
-      throws EEAException, IOException;
+  DataSetVO processFile(@DatasetId Long datasetId, String fileName, InputStream is,
+      String idTableSchema) throws EEAException, IOException;
 
 
   /**
@@ -155,14 +158,15 @@ public interface DatasetService {
    */
   void updateRecords(@DatasetId Long datasetId, List<RecordVO> records) throws EEAException;
 
+
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
-  void deleteRecords(@DatasetId Long datasetId, List<Long> recordIds) throws EEAException;
+  void deleteRecord(@DatasetId Long datasetId, Long recordId) throws EEAException;
 
   /**
    * Delete table by schema.
@@ -222,7 +226,17 @@ public interface DatasetService {
 
   /**
    * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   * @throws EEAException the EEA exception
    */
   void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
+
+
+  void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral);
+
+
+  void saveTable(@DatasetId Long datasetId, TableValue tableValue);
 
 }

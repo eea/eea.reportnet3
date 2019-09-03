@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -19,7 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(value = "/dataflowDocument")
 public class DataFlowDocumentControllerImpl implements DataFlowDocumentController {
 
-  /** The dataflow service. */
+  /**
+   * The dataflow service.
+   */
   @Autowired
   private DataflowDocumentService dataflowService;
 
@@ -28,9 +31,11 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
    * Gets the document info by id.
    *
    * @param documentId the document id
+   *
    * @return the document info by id
    */
   @Override
+  @HystrixCommand
   public DocumentVO getDocumentInfoById(Long documentId) {
     if (documentId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND);

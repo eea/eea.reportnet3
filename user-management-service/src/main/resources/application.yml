@@ -5,4 +5,4 @@ spring:
     name: ums
 eea:
   security:
-    authenticatedRequest: /user/checkAccess,/user/resources*
+    authenticatedRequest: /user/checkAccess,/user/resources*,/user/add_contributtor_to_resource

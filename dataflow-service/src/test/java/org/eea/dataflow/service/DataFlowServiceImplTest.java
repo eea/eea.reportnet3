@@ -3,7 +3,6 @@ package org.eea.dataflow.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +23,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.junit.Before;
 import org.junit.Test;
@@ -207,7 +205,7 @@ public class DataFlowServiceImplTest {
       }
     };
     dataflows.add(df);
-    when(dataflowRepository.findPendingAccepted(Mockito.any())).thenReturn(dataflows);
+    when(dataflowRepository.findPending(Mockito.any())).thenReturn(dataflows);
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setId(1L);
     List<DataFlowVO> dataflowsVO = new ArrayList<>();
@@ -277,7 +275,7 @@ public class DataFlowServiceImplTest {
   public void updateUserRequestStatus() throws EEAException {
     Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus("1L", TypeRequestEnum.ACCEPTED);
+    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
     Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
   }

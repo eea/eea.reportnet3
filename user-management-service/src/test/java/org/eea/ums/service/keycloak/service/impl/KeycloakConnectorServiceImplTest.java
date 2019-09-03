@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -157,6 +158,7 @@ public class KeycloakConnectorServiceImplTest {
 
   }
 
+
   @Test
   public void getGroupsByUser() {
 
@@ -178,5 +180,104 @@ public class KeycloakConnectorServiceImplTest {
     Assert.assertTrue(result.length > 0);
     Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_PROVIDER");
 
+  }
+
+  @Test(expected = RestClientException.class)
+  public void getGroupsByUserError() {
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate)
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+
+    try {
+      GroupInfo[] result = keycloakConnectorService.getGroupsByUser("user1");
+    } catch (RestClientException e) {
+      Assert.assertEquals("error test", e.getMessage());
+      throw e;
+    }
+
+
+  }
+
+  @Test
+  public void logout() {
+    keycloakConnectorService.logout("refreshToken");
+    Mockito.verify(restTemplate, Mockito.times(1))
+        .postForEntity(Mockito.anyString(),
+            Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+  }
+
+  @Test(expected = RestClientException.class)
+  public void logoutException() {
+
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate)
+        .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+    try {
+      keycloakConnectorService.logout("refreshToken");
+    } catch (RestClientException e) {
+      Assert.assertEquals("error test", e.getMessage());
+      throw e;
+    }
+
+  }
+
+  @Test
+  public void getGroups() {
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setId("idGroupInfo");
+    groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
+    groupInfos[0] = groupInfo;
+    ResponseEntity<GroupInfo[]> responseGroupInfo = new ResponseEntity<>(groupInfos,
+        HttpStatus.OK);
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(responseGroupInfo);
+    GroupInfo[] result = keycloakConnectorService.getGroups();
+    Assert.assertNotNull(result);
+    Assert.assertEquals(result.length, 1);
+    Assert.assertEquals(result[0].getName(), "Dataflow-1-DATA_CUSTODIAN");
+    Assert.assertEquals(result[0].getId(), "idGroupInfo");
+  }
+
+  @Test(expected = RestClientException.class)
+  public void getGroupsError() {
+
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate)
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+    try {
+      keycloakConnectorService.getGroups();
+    } catch (RestClientException e) {
+      Assert.assertEquals("error test", e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void addUserToGroup() {
+    ResponseEntity<Void> responseAddUserToGroup = new ResponseEntity<>(null,
+        HttpStatus.OK);
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(responseAddUserToGroup);
+    keycloakConnectorService.addUserToGroup("", "");
+    Mockito.verify(restTemplate, Mockito.times(1))
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+
+  }
+
+  @Test(expected = RestClientException.class)
+  public void addUserToGroupError() {
+    Mockito.doThrow(new RestClientException("error test")).when(restTemplate)
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+    try {
+      keycloakConnectorService.addUserToGroup("user1", "");
+    } catch (RestClientException e) {
+      Assert.assertEquals("error test", e.getMessage());
+      throw e;
+    }
   }
 }
