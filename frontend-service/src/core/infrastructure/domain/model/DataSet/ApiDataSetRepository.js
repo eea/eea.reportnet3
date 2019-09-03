@@ -56,7 +56,7 @@ const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
   );
 
   const errors = dataSetErrorsDTO.errors.map(
-    dataSetErrorDTO =>
+    dataSetErrorDTO => dataSetErrorDTO && 
       new DataSetError(
         dataSetErrorDTO.typeEntity,
         dataSetErrorDTO.levelError,
