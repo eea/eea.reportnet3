@@ -3289,6 +3289,15 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   margin-right: 0.35em;
   font-size: 16px;
 }
+.p-component-overlay.p-dialog-mask,
+.p-component-overlay.p-sidebar-mask {
+  display: none !important;
+}
+
+.p-dialog {
+  -webkit-transform: none;
+  transform: none;
+}
 body .p-sidebar {
   background-color: #ffffff;
   color: #404040;
