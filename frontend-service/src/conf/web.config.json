@@ -38,9 +38,6 @@
 	"exportDataSetTableData": {
 		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
 	},
-	"insertRecordData":{
-		"url": "/dataset/{:datasetId}/table/{:tableSchemaId}/record"
-	},
 	"listValidationsAPI": {
 		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	},	

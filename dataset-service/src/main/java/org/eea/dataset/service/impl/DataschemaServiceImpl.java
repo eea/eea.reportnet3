@@ -234,7 +234,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isValid(value) || value == null");
+          rule2.setWhenCondition("!isValid(value,'') || value == null");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(INTEGER_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);

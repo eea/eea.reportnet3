@@ -435,7 +435,6 @@ export class DataTable extends Component {
   onPasteAccept() {
     let data = this.props.value;
     let pastedData = this.state.pastedData;
-    console.log(Object.keys(data[0]));
     let keys = Object.keys(data[0]);
     let copiedRows = pastedData.split('\n').filter(l => l.length > 0);
     let rows = [];
