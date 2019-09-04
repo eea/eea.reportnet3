@@ -13,6 +13,7 @@
 
   <properties>
     <droolsVersion>7.20.0.Final</droolsVersion>
+    <sonar.moduleKey>org.eea:reportnet:validation-service</sonar.moduleKey>
   </properties>
 
   <artifactId>validation-service</artifactId>

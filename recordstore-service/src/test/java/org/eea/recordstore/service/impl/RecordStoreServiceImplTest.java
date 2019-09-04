@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -66,6 +67,9 @@ public class RecordStoreServiceImplTest {
   /** The docker. */
   @Mock
   private DockerClient docker;
+
+  @Mock
+  private JdbcTemplate jdbcTemplate;
 
   /** The Constant DATASET. */
   private static final String DATASET = "dataset_1";

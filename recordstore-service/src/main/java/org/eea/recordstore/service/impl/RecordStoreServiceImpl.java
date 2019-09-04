@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +87,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
+
+  /** The path snapshot. */
+  @Value("${pathSnapshot}")
+  private String pathSnapshot;
 
 
   /**
@@ -304,6 +309,50 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     result.setSchema(datasetName);
     return result;
   }
+
+
+  /**
+   * Creates the data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param idPartitionDataset the id partition dataset
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
+      throws SQLException, IOException, RecordStoreAccessException {
+
+  }
+
+
+  /**
+   * Restore data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+      throws SQLException, IOException, RecordStoreAccessException {}
+
+  /**
+   * Delete data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
+
+  }
+
 
 
 }

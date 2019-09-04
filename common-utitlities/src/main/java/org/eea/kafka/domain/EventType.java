@@ -5,47 +5,75 @@ package org.eea.kafka.domain;
  */
 public enum EventType {
 
-  /** The connection created event. */
+  /**
+   * The connection created event.
+   */
   /*
    * DATAFLOW_CREATED("ReportingTopic"), DATASET_CREATED("ReportingTopic"),
    * DATACOLLECTION_CREATED("ReportingTopic")
    */
-  CONNECTION_CREATED_EVENT("Hello-Kafka2", "connection_key"),
+  CONNECTION_CREATED_EVENT("DATA_REPORTING_TOPIC", "connection_key"),
 
-  /** The hello kafka event. */
-  HELLO_KAFKA_EVENT("Hello-Kafka2", "hello_kafka_key"),
+  /**
+   * The hello kafka event.
+   */
+  HELLO_KAFKA_EVENT("DATA_REPORTING_TOPIC", "hello_kafka_key"),
 
-  /** The validation finished event. */
-  VALIDATION_FINISHED_EVENT("Hello-Kafka2", "validation_finished_key"),
+  /**
+   * The validation finished event.
+   */
+  VALIDATION_FINISHED_EVENT("DATA_REPORTING_TOPIC", "validation_finished_key"),
 
-  /** The load data completed event. */
-  LOAD_DATA_COMPLETED_EVENT("Hello-Kafka2", "load_data_completed_key"),
+  /**
+   * The load data completed event.
+   */
+  LOAD_DATA_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "load_data_completed_key"),
 
-  /** The load record completed event. */
-  RECORD_UPDATED_COMPLETED_EVENT("Hello-Kafka2", "upload_record_completed_key"),
+  /**
+   * The load record completed event.
+   */
+  RECORD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "upload_record_completed_key"),
 
-  /** The record created completed event. */
-  RECORD_CREATED_COMPLETED_EVENT("Hello-Kafka2", "created_record_completed_key"),
+  /**
+   * The record created completed event.
+   */
+  RECORD_CREATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "created_record_completed_key"),
 
-  /** The record created completed event. */
-  RECORD_DELETED_COMPLETED_EVENT("Hello-Kafka2", "created_record_completed_key"),
+  /**
+   * The record created completed event.
+   */
+  RECORD_DELETED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "created_record_completed_key"),
 
-  DELETED_TABLE("Hello-Kafka2", "deleted_table"),
+  DELETED_TABLE("DATA_REPORTING_TOPIC", "deleted_table"),
 
-  /** The load document completed event. */
-  LOAD_DOCUMENT_COMPLETED_EVENT("Hello-Kafka2", "load_document_completed_key"),
+  /**
+   * The load document completed event.
+   */
+  LOAD_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "load_document_completed_key"),
 
-  /** The delete document completed event. */
-  DELETE_DOCUMENT_COMPLETED_EVENT("Hello-Kafka2", "delete_document_completed_key"),
+  /**
+   * The delete document completed event.
+   */
+  DELETE_DOCUMENT_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "delete_document_completed_key"),
 
-  /** The field updated completed event. */
-  FIELD_UPDATED_COMPLETED_EVENT("Hello-Kafka2", "updated_field_completed_key");
+  /**
+   * The field updated completed event.
+   */
+  FIELD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "updated_field_completed_key"),
 
-  /** The topic. */
+  /** The snapshot restored event. */
+  SNAPSHOT_RESTORED_EVENT("DATA_REPORTING_TOPIC", "snapshot_restored_completed_key");
+
+
+  /**
+   * The topic.
+   */
   private String topic;
 
 
-  /** The key. */
+  /**
+   * The key.
+   */
   private String key;
 
   /**

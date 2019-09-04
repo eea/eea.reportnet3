@@ -1,6 +1,8 @@
 package org.eea.recordstore.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -113,5 +116,67 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     return vo;
   }
 
+
+  /**
+   * Creates the snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartitionDataset the id partition dataset
+   */
+  @Override
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
+  public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
+
+    try {
+      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
+      LOG.info("Snapshot created");
+    } catch (SQLException | IOException | RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
+
+
+  /**
+   * Restore snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
+  @Override
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
+  public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
+
+    try {
+      recordStoreService.restoreDataSnapshot(datasetId, idSnapshot);
+    } catch (SQLException | IOException | RecordStoreAccessException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
+
+
+  /**
+   * Delete snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
+  @Override
+  @RequestMapping(value = "/dataset/{datasetId}/snapshot/delete", method = RequestMethod.POST)
+  public void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
+
+    try {
+      recordStoreService.deleteDataSnapshot(datasetId, idSnapshot);
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
 
 }
