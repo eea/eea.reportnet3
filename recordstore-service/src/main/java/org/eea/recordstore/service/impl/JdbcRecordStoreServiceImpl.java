@@ -260,8 +260,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throws SQLException, IOException {
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
-    Connection con = null;
-    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+    Connection con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
         conexion.getPassword());
 
     CopyManager cm = new CopyManager((BaseConnection) con);

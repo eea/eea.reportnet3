@@ -38,6 +38,7 @@ public class JdbcRecordStoreServiceImplTest {
   private KafkaSenderUtils kafkaSender;
 
 
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -106,8 +107,16 @@ public class JdbcRecordStoreServiceImplTest {
   public void testCreateSnapshot() throws SQLException, IOException {
     List<String> datasets = new ArrayList<>();
     datasets.add("dataset_1");
+
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
+
+    /*
+     * Mockito.when( DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
+     * Mockito.anyString())) .thenReturn(conexion);
+     */
+
+
 
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L);
     deleteTemporarySnapshotFiles();

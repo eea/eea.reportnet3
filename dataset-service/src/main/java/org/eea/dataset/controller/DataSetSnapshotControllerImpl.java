@@ -123,6 +123,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
 
 
   @Override
+  @HystrixCommand
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
@@ -150,6 +151,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    * @param idSnapshot the id snapshot
    */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
