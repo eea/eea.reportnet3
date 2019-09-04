@@ -330,7 +330,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       printToFile(nameFileFieldValue, copyQueryField, cm);
     } finally {
-      con.close();
+      if (null != con) {
+        con.close();
+      }
+
     }
 
 
@@ -401,7 +404,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
     } finally {
-      con.close();
+      if (null != con) {
+        con.close();
+      }
     }
 
     // Send kafka event to launch Validation
