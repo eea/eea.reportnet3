@@ -5,14 +5,24 @@ import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery11;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery11par1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery12;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery12part1;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery1par1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery2;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery21;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery21part1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery22;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery22part1;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery2part1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery3;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery31;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery31part1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery32;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery32part1;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery3part1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery4;
+import org.eea.validation.util.clasesToQueryDrools.DataToQuery41;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -72,6 +82,49 @@ public class ForeingKeyDrools {
     DataToQuery31 part31 = new DataToQuery31();
     DataToQuery32 part32 = new DataToQuery32();
     DataToQuery4 part4 = new DataToQuery4();
+
+    DataToQuery1par1 dataToQuery1part = new DataToQuery1par1();
+    DataToQuery11par1 dataToQuery11par1 = new DataToQuery11par1();
+    DataToQuery12part1 dataToQuery12part1 = new DataToQuery12part1();
+    DataToQuery2part1 dataToQuery2part1 = new DataToQuery2part1();
+    DataToQuery21part1 dtaToQuery21part1 = new DataToQuery21part1();
+    DataToQuery22part1 dataToQuery22part1 = new DataToQuery22part1();
+    DataToQuery3part1 dataToQuery3part1 = new DataToQuery3part1();
+    DataToQuery31part1 dataToQuery31part1 = new DataToQuery31part1();
+    DataToQuery32part1 dataToQuery32part1 = new DataToQuery32part1();
+    DataToQuery41 dataToQuery41 = new DataToQuery41();
+
+
+
+    if (dataToQuery1part.getListData().stream()
+        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dataToQuery11par1.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dataToQuery12part1.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+
+    if (dataToQuery2part1.getListData().stream()
+        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dtaToQuery21part1.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dataToQuery22part1.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+
+    if (dataToQuery3part1.getListData().stream()
+        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dataToQuery31part1.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dataToQuery32part1.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || dataToQuery41.getListData().stream()
+            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+
     if (part1.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || part2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || part3.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
@@ -91,6 +144,7 @@ public class ForeingKeyDrools {
             .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
       return true;
     }
+
     return false;
   }
 
