@@ -341,9 +341,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     byte[] buffer;
     CopyOut copyOut = copyManager.copyOut(query);
 
-    try (OutputStream to4 = new FileOutputStream(fileName)) {
+    try (OutputStream to = new FileOutputStream(fileName)) {
       while ((buffer = copyOut.readFromCopy()) != null) {
-        to4.write(buffer);
+        to.write(buffer);
       }
     } finally {
       if (copyOut.isActive()) {
@@ -368,63 +368,41 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
-    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-        conexion.getPassword());
-
-    CopyManager cm = new CopyManager((BaseConnection) con);
-
-    // Table value
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
-    InputStream is2 = Files.newInputStream(path2);
     try {
+      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+          conexion.getPassword());
 
-      cm.copyIn("COPY dataset_" + idReportingDataset
-          + ".table_value(id, id_table_schema, dataset_id) FROM STDIN", is2);
+      CopyManager cm = new CopyManager((BaseConnection) con);
 
+      // Table value
 
-    } catch (PSQLException e) {
-      LOG.error("Error restoring the table value. Restoring snapshot continues");
+      String nameFileTableValue = pathSnapshot + String
+          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_TableValue.snap");
+
+      String copyQueryTable = "COPY dataset_" + idReportingDataset
+          + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+
+      copyFromFile(copyQueryTable, nameFileTableValue, cm);
+
+      // Record value
+
+      String nameFileRecordValue = pathSnapshot + String
+          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_RecordValue.snap");
+
+      String copyQueryRecord = "COPY dataset_" + idReportingDataset
+          + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN";
+      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+      // Field value
+      String nameFileFieldValue = pathSnapshot + String
+          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_FieldValue.snap");
+
+      String copyQueryField = "COPY dataset_" + idReportingDataset
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
     } finally {
-      is2.close();
+      con.close();
     }
-
-    // Record value
-    String nameFileRecordValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
-    InputStream is3 = Files.newInputStream(path3);
-    try {
-
-      cm.copyIn(
-          "COPY dataset_" + idReportingDataset
-              + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN",
-          is3);
-
-    } catch (PSQLException e) {
-      LOG.error("Error restoring the record value. Restoring snapshot continues");
-    } finally {
-      is3.close();
-    }
-
-    // Field value
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
-    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    InputStream is4 = Files.newInputStream(path4);
-    try {
-
-      cm.copyIn("COPY dataset_" + idReportingDataset
-          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN", is4);
-
-    } catch (PSQLException e) {
-      LOG.error("Error restoring the field value. Restoring snapshot continues");
-    } finally {
-      is4.close();
-    }
-
-    con.close();
 
     // Send kafka event to launch Validation
     final EEAEventVO event = new EEAEventVO();
@@ -434,6 +412,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         idReportingDataset);
   }
 
+  private void copyFromFile(String query, String fileName, CopyManager copyManager)
+      throws IOException, SQLException {
+    Path path = Paths.get(fileName);
+    InputStream inputStream = Files.newInputStream(path);
+    try {
+
+      copyManager.copyIn(query, inputStream);
+
+    } catch (PSQLException e) {
+      LOG.error("Error restoring the file {}. Restoring snapshot continues", fileName);
+    } finally {
+      inputStream.close();
+    }
+  }
 
   /**
    * Delete data snapshot.
