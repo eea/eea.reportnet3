@@ -837,4 +837,11 @@ public class DatasetServiceTest {
     datasetService.updateField(1L, null);
   }
 
+  @Test
+  public void testInsertSchema() throws EEAException {
+
+    datasetService.insertSchema(1L, "");
+    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+  }
+
 }

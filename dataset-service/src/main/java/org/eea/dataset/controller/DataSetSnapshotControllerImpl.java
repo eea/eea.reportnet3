@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+/**
+ * The Class DataSetSnapshotControllerImpl.
+ */
 @RestController
 @RequestMapping("/snapshot")
 public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
@@ -122,6 +125,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @HystrixCommand
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",

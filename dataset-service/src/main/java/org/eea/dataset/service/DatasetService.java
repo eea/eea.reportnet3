@@ -41,8 +41,7 @@ public interface DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
-   * @return
-   *
+   * @return the data set VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -234,9 +233,22 @@ public interface DatasetService {
   void updateField(@DatasetId Long datasetId, FieldVO field) throws EEAException;
 
 
+  /**
+   * Save all records.
+   *
+   * @param datasetId the dataset id
+   * @param listaGeneral the lista general
+   */
   void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral);
 
 
+  /**
+   * Save table.
+   *
+   * @param datasetId the dataset id
+   * @param tableValue the table value
+   */
   void saveTable(@DatasetId Long datasetId, TableValue tableValue);
+
 
 }
