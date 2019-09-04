@@ -9,6 +9,9 @@
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
+  <properties>
+    <sonar.moduleKey>org.eea:reportnet:communication-service</sonar.moduleKey>
+  </properties>
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.eea.communication</groupId>

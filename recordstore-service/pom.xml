@@ -9,6 +9,10 @@
     <relativePath>../parent-poms/microservice</relativePath>
 
   </parent>
+
+  <properties>
+    <sonar.moduleKey>org.eea:reportnet:recordstore-service</sonar.moduleKey>
+  </properties>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eea.recordstore</groupId>
   <artifactId>recordstore-service</artifactId>
