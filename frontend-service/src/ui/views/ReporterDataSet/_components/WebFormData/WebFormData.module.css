@@ -4,6 +4,26 @@
 }
 .formColumn {
   margin: 5px;
-  width: 12%;
+  /* width: auto; */
   text-align: center;
+}
+.inputColumn {
+  width: auto !important;
+}
+.divRowsWebForms {
+  display: flex;
+}
+.divColumnHeader {
+  display: flex;
+  width: 100%;
+}
+.columnHeader {
+  width: 100%;
+  text-align: center;
+}
+.headersLeft {
+  width: 20%;
+}
+.tdInputFields {
+  width: 10%;
 }
