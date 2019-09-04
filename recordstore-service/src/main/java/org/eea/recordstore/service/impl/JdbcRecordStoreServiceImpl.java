@@ -1,7 +1,6 @@
 package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -274,30 +273,29 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException {
 
-    ConnectionDataVO connectionDataVO = getConnectionDataForDataset(
-        "dataset_" + idReportingDataset);
+    ConnectionDataVO connectionDataVO =
+        getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
     try {
-      con = DriverManager
-          .getConnection(connectionDataVO.getConnectionString(), connectionDataVO.getUser(),
-              connectionDataVO.getPassword());
+      con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+          connectionDataVO.getUser(), connectionDataVO.getPassword());
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy dataset_value
-//      String nameFileDatasetValue =
-//          "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
-      String nameFileDatasetValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_DatasetValue.snap");
+      // String nameFileDatasetValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
+      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_DatasetValue.snap");
       String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
           + idReportingDataset + ".dataset_value) to STDOUT";
 
       printToFile(nameFileDatasetValue, copyQueryDataset, cm);
       // Copy table_value
-//      String nameFileTableValue =
-//          "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-      String nameFileTableValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_TableValue.snap");
+      // String nameFileTableValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_TableValue.snap");
 
       String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
           + idReportingDataset + ".table_value) to STDOUT";
@@ -305,23 +303,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileTableValue, copyQueryTable, cm);
 
       // Copy record_value
-//      String nameFileRecordValue =
-//          "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-      String nameFileRecordValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_RecordValue.snap");
+      // String nameFileRecordValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_RecordValue.snap");
       String copyQueryRecord =
           "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
               + idReportingDataset + ".record_value WHERE dataset_partition_id="
-              + idPartitionDataset
-              + ") to STDOUT";
+              + idPartitionDataset + ") to STDOUT";
 
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
       // Copy field_value
-//      String nameFileFieldValue =
-//          "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
-      String nameFileFieldValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_FieldValue.snap");
+      // String nameFileFieldValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_FieldValue.snap");
       String copyQueryField =
           "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
               + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
@@ -379,8 +376,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Table value
 
-      String nameFileTableValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_TableValue.snap");
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_TableValue.snap");
 
       String copyQueryTable = "COPY dataset_" + idReportingDataset
           + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -389,16 +386,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Record value
 
-      String nameFileRecordValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_RecordValue.snap");
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_RecordValue.snap");
 
       String copyQueryRecord = "COPY dataset_" + idReportingDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN";
       copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
 
       // Field value
-      String nameFileFieldValue = pathSnapshot + String
-          .format(FILE_PATTERN_NAME, idSnapshot, idReportingDataset, "_table_FieldValue.snap");
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_FieldValue.snap");
 
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";

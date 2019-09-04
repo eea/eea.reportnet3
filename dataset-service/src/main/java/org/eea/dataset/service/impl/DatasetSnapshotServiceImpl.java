@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -86,6 +87,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Async
   public void addSnapshot(Long idDataset, String description) throws EEAException {
 
     // 1. Create the snapshot in the metabase
@@ -118,6 +120,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
   @Override
+  @Async
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
     // Remove from the metabase
     snapshotRepository.deleteById(idSnapshot);
@@ -134,6 +137,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Async
   public void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
     // 1. Delete the dataset values implied
