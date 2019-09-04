@@ -29,6 +29,10 @@ const MainLayout = ({ children }) => {
   return (
     <Fragment>
       <Navigation />
+      <div className={styles.disclaimer}>
+        <span className="p-messages-icon pi  pi-info-circle"></span>
+        This is test Data. Any change would not affect the real data. So feel free trying your stuff.
+      </div>
       <div className={styles.mainContent}>{children}</div>
       <Footer />
     </Fragment>
