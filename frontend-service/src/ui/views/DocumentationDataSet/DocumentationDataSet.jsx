@@ -34,7 +34,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const [documents, setDocuments] = useState([]);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [webLinks, setWebLinks] = useState([]);
 
