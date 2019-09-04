@@ -50,17 +50,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
 
+  /** The Constant GENERAL_WARNING. */
   private static final String GENERAL_WARNING = "WARNING";
+
+  /** The Constant VALIDATION_WARNING. */
   private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
+
+  /** The Constant GENERAL_ERROR. */
   private static final String GENERAL_ERROR = "ERROR";
+
+  /** The Constant STRING_WARNING. */
   private static final String STRING_WARNING =
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
+
+  /** The Constant INTEGER_ERROR. */
   private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
+
+  /** The Constant BOOLEAN_ERROR. */
   private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
+
+  /** The Constant COORDINATE_LAT_ERROR. */
   private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
+
+  /** The Constant COORDINATE_LONG_ERROR. */
   private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
+
+  /** The Constant DATE_ERROR. */
   private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
+  /** The Constant WARNING. */
   private static final String WARNING = "WARNING";
 
   /** The Constant NULL. */
@@ -70,9 +88,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Creates the data schema.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    */
   @Override
-  public void createDataSchema(Long datasetId) {
+  public void createDataSchema(Long datasetId, Long dataflowId) {
 
     DataSetSchema dataSetSchema = new DataSetSchema();
     Iterable<TableCollection> tables = dataSetMetabaseTableCollection.findAllByDataSetId(datasetId);
@@ -82,7 +101,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     ObjectId idDataSetSchema = new ObjectId();
     dataSetSchema.setNameDataSetSchema("dataSet_" + datasetId);
-    dataSetSchema.setIdDataFlow(1L);
+    dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
     RuleDataSet ruleDataset = new RuleDataSet();
@@ -92,7 +111,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleDataset.setThenCondition(listaStrinsDataset);
 
     ruleDataset.setRuleId(new ObjectId());
-    ruleDataset.setDataFlowId(1L);
+    ruleDataset.setDataFlowId(dataflowId);
     ruleDataset.setIdDataSetSchema(idDataSetSchema);
     ruleDataset.setScope(TypeEntityEnum.DATASET);
     ruleDataset.setWhenCondition(NULL);
@@ -107,15 +126,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.setIdTableSchema(idTableSchema);
 
 
-      List<RuleTable> ruleTableList = new ArrayList<RuleTable>();
+      List<RuleTable> ruleTableList = new ArrayList<>();
       RuleTable ruleTable = new RuleTable();
-      List<String> listaStrinsRuleTable = new ArrayList<String>();
+      List<String> listaStrinsRuleTable = new ArrayList<>();
       listaStrinsRuleTable.add(VALIDATION_WARNING);
       listaStrinsRuleTable.add(GENERAL_ERROR);
       ruleTable.setThenCondition(listaStrinsRuleTable);
 
       ruleTable.setRuleId(new ObjectId());
-      ruleTable.setDataFlowId(1L);
+      ruleTable.setDataFlowId(dataflowId);
       ruleTable.setIdTableSchema(idTableSchema);
       ruleTable.setWhenCondition(NULL);
       ruleTable.setRuleName("table regla" + i);
@@ -130,7 +149,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       recordSchema.setIdTableSchema(tableSchema.getIdTableSchema());
 
       // Create Records in the Schema
-      List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
+      List<RuleRecord> ruleRecordList = new ArrayList<>();
 
 
 
@@ -138,13 +157,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
-      createRuleFields(i, table, recordSchema, fieldSchemas, headersSize);
+      createRuleFields(i, table, recordSchema, fieldSchemas, headersSize, dataflowId);
 
 
       RuleRecord ruleRecord = new RuleRecord();
-      List<String> listaStrinsRuleRecord = new ArrayList<String>();
+      List<String> listaStrinsRuleRecord = new ArrayList<>();
       ruleRecord.setRuleId(new ObjectId());
-      ruleRecord.setDataFlowId(1L);
+      ruleRecord.setDataFlowId(dataflowId);
       ruleRecord.setScope(TypeEntityEnum.RECORD);
       ruleRecord.setIdRecordSchema(idRecordSchema);
       ruleRecord.setWhenCondition("fields.size() != " + fieldSchemas.size());
@@ -174,21 +193,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param recordSchema the record schema
    * @param fieldSchemas the field schemas
    * @param headersSize the headers size
+   * @param dataflowId the dataflow id
    */
   private void createRuleFields(int i, TableCollection table, RecordSchema recordSchema,
-      List<FieldSchema> fieldSchemas, int headersSize) {
+      List<FieldSchema> fieldSchemas, int headersSize, Long dataflowId) {
     for (int j = 1; j <= headersSize; j++) {
       ObjectId idFieldSchema = new ObjectId();
       TableHeadersCollection header = table.getTableHeadersCollections().get(j - 1);
 
-      List<RuleField> ruleField = new ArrayList<RuleField>();
+      List<RuleField> ruleField = new ArrayList<>();
       RuleField rule = new RuleField();
       rule.setRuleId(new ObjectId());
-      rule.setDataFlowId(1L);
+      rule.setDataFlowId(dataflowId);
       rule.setIdFieldSchema(idFieldSchema);
       rule.setWhenCondition("!isBlank(value)");
       rule.setRuleName("FieldRule_" + i + "." + j);
-      List<String> listaMsgValidation = new ArrayList<String>();
+      List<String> listaMsgValidation = new ArrayList<>();
       listaMsgValidation.add("that field must be filled");
       listaMsgValidation.add(GENERAL_WARNING);
       rule.setThenCondition(listaMsgValidation);
@@ -196,11 +216,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       rule.setScope(TypeEntityEnum.FIELD);
 
       RuleField rule2 = new RuleField();
-      List<String> listaMsgTypeValidation = new ArrayList<String>();
+      List<String> listaMsgTypeValidation = new ArrayList<>();
       switch (header.getHeaderType().toString().toLowerCase().trim()) {
         case "string":
           rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(1L);
+          rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("isText(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
@@ -210,11 +230,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
-        case "integer":
+        case "number":
           rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(1L);
+          rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
-          rule2.setWhenCondition("!isValid(value) || value == null");
+          rule2.setWhenCondition("!isValid(value,'') || value == null");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
           listaMsgTypeValidation.add(INTEGER_ERROR);
           listaMsgTypeValidation.add(GENERAL_ERROR);
@@ -224,7 +244,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           break;
         case "boolean":
           rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(1L);
+          rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("value==true || value==false");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
@@ -234,9 +254,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
-        case "coordinatelat":
+        case "coordinate_lat":
           rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(1L);
+          rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("!isCordenateLat(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
@@ -246,9 +266,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           ruleField.add(rule2);
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
-        case "coordinatelong":
+        case "coordinate_long":
           rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(1L);
+          rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("!isCordenateLong(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
@@ -260,7 +280,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           break;
         case "date":
           rule2.setRuleId(new ObjectId());
-          rule2.setDataFlowId(1L);
+          rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
           rule2.setWhenCondition("!isDateYYYYMMDD(value)");
           rule2.setRuleName("FieldRule_" + i + "." + j + "." + 1);
@@ -271,13 +291,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           rule2.setScope(TypeEntityEnum.FIELD);
           break;
       }
-
+      ruleField.add(rule2);
       FieldSchema fieldSchema = new FieldSchema();
       fieldSchema.setIdFieldSchema(idFieldSchema);
       fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
       fieldSchema.setHeaderName(header.getHeaderName());
       fieldSchema.setType(header.getHeaderType());
       fieldSchema.setRuleField(ruleField);
+
       fieldSchemas.add(fieldSchema);
     }
   }
@@ -305,9 +326,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Find the dataschema per idDataFlow
-   * 
+   * Find the dataschema per idDataFlow.
+   *
    * @param idFlow the idDataFlow to look for
+   * @return the data schema by id flow
    */
   @Override
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
@@ -317,6 +339,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return dataSchemaMapper.entityToClass(dataschema);
 
   }
-
 
 }

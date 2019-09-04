@@ -3,8 +3,6 @@ package org.eea.dataset.persistence.metabase.domain;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -17,21 +15,40 @@ import lombok.ToString;
  * The type Snapshot.
  */
 @Entity
+
+/**
+ * Gets the release.
+ *
+ * @return the release
+ */
 @Getter
+
+/**
+ * Sets the release.
+ *
+ * @param release the new release
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Table(name = "SNAPSHOT")
 public class Snapshot extends DataSetMetabase {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The description. */
   @Column(name = "DESCRIPTION")
   private String description;
 
+  /** The reporting dataset. */
   @ManyToOne
   @JoinColumn(name = "REPORTING_DATASET_ID")
   private ReportingDataset reportingDataset;
@@ -39,6 +56,10 @@ public class Snapshot extends DataSetMetabase {
   /** The datacollection. */
   @Column(name = "DATACOLLECTION_ID")
   private Long datacollection;
+
+  /** The release. */
+  @Column(name = "RELEASE")
+  private Boolean release;
 
 
   /**

@@ -1,11 +1,12 @@
 /*
- * 
+ *
  */
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -38,6 +39,7 @@ public interface DatasetController {
 
   }
 
+
   /**
    * Gets the data tables values.
    *
@@ -46,24 +48,20 @@ public interface DatasetController {
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
-   * @param asc the asc
-   *
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true") Boolean asc);
+      @RequestParam(value = "pageSize", required = false) Integer pageSize,
+      @RequestParam(value = "fields", required = false) String fields);
+
 
   /**
-   * Update dataset data set vo.
+   * Update dataset.
    *
    * @param dataset the dataset
-   *
-   * @return the data set vo
    */
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -183,15 +181,14 @@ public interface DatasetController {
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
-   * Delete records.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    */
-  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteRecords(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "recordIds", required = true) List<Long> recordIds);
+  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") Long recordId);
 
   /**
    * Delete import table.
@@ -216,7 +213,7 @@ public interface DatasetController {
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("idTableSchema") String idTableSchema,
+      @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
       @RequestParam("mimeType") String mimeType) throws Exception;
 
 
@@ -229,5 +226,16 @@ public interface DatasetController {
   @PostMapping(value = "/{id}/insertIdSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   void insertIdDataSchema(@PathVariable("id") Long datasetId,
       @RequestParam(value = "idDatasetSchema", required = true) String idDatasetSchema);
+
+
+  /**
+   * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   */
+  @RequestMapping(value = "/{id}/updateField", method = RequestMethod.PUT,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field);
 
 }

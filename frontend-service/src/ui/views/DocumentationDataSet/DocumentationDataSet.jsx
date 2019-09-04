@@ -1,46 +1,52 @@
-import React, { useState, useEffect, useContext } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { withRouter } from 'react-router-dom';
+
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DocumentationDataSet.module.scss';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
-import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
-import { DataTable } from 'primereact/datatable';
-import { Dialog } from 'primereact/dialog';
-import { IconComponent } from 'ui/views/_components/IconComponent';
+import { DataTable } from 'ui/views/_components/DataTable';
+import { Dialog } from 'ui/views/_components/Dialog';
+import { DocumentFileUpload } from './_components/DocumentFileUpload';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Icon } from 'ui/views/_components/Icon';
+import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView, TabPanel } from 'primereact/tabview';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
-export const DocumentationDataSet = ({ match, history }) => {
+export const DocumentationDataSet = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
-  // const [documentsAndWebLinksData, setDocumentsAndWebLinksData] = useState();
-  const [documents, setDocuments] = useState([]);
-  const [webLinks, setWebLinks] = useState([]);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [customButtons, setCustomButtons] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [fileName, setFileName] = useState('');
+  const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [webLinks, setWebLinks] = useState([]);
 
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 
-  useEffect(async () => {
-    setIsLoading(true);
-    setDocuments(await DocumentService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
-    setWebLinks(await WebLinkService.all(`${config.loadDatasetsByDataflowID.url}${match.params.dataFlowId}`));
-    setIsLoading(false);
+  useEffect(() => {
+    onLoadDocumentsAndWebLinks();
   }, []);
+
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
@@ -56,136 +62,169 @@ export const DocumentationDataSet = ({ match, history }) => {
     ]);
   }, [history, match.params.dataFlowId, resources.messages]);
 
-  //Data Fetching
   useEffect(() => {
-    //#region Button inicialization
-    setCustomButtons([
-      {
-        label: resources.messages['upload'],
-        icon: '0',
-        group: 'left',
-        disabled: false,
-        clickHandler: () => setIsUploadDialogVisible(true)
-      },
-      {
-        label: resources.messages['visibility'],
-        icon: '6',
-        group: 'left',
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages['filter'],
-        icon: '7',
-        group: 'left',
-        disabled: true,
-        clickHandler: null
-      },
-      {
-        label: resources.messages['export'],
-        icon: '1',
-        group: 'left',
-        disabled: true,
-        clickHandler: null
-      }
-    ]);
-    //#end region Button inicialization
-  }, []);
+    if (!isUndefined(fileToDownload)) {
+      DownloadFile(fileToDownload, fileName);
+    }
+  }, [fileToDownload]);
 
-  const onHideHandler = () => {
+  const onDownloadDocument = async rowData => {
+    setFileName(createFileName(rowData.title));
+    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+  };
+
+  const onHide = () => {
     setIsUploadDialogVisible(false);
+    onLoadDocumentsAndWebLinks();
+  };
+
+  const onCancelDialog = () => {
+    setIsUploadDialogVisible(false);
+  };
+
+  const onLoadDocumentsAndWebLinks = async () => {
+    setIsLoading(true);
+    try {
+      setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
+      setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(config.DATAFLOW_TASKS.url));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createFileName = title => {
+    return `${title.split(' ').join('_')}`;
   };
 
   const actionTemplate = (rowData, column) => {
     return (
-      <a href={rowData.url} target="_blank">
+      <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
-        <IconComponent icon="pi pi-file" />
-      </a>
+        <Icon icon="archive" />
+      </span>
     );
   };
 
   const actionWeblink = (rowData, column) => {
     return (
-      <a href={rowData.url} target="_blank">
+      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
         {' '}
         {rowData.url}
       </a>
     );
   };
 
+  const onGrowlAlert = message => {
+    growlRef.current.show(message);
+  };
+
+  let growlRef = useRef();
+
   const layout = children => {
     return (
       <MainLayout>
-        <div className="titleDiv">
-          <BreadCrumb model={breadCrumbItems} home={home} />
-        </div>
+        <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
+        <Growl ref={growlRef} />
       </MainLayout>
     );
   };
 
   if (isLoading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   if (documents) {
     return layout(
       <TabView>
         <TabPanel header={resources.messages['documents']}>
-          <ButtonsBar buttonsList={customButtons} />
+          <Toolbar>
+            <div className="p-toolbar-group-left">
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={'export'}
+                label={resources.messages['upload']}
+                onClick={() => setIsUploadDialogVisible(true)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'eye'}
+                label={resources.messages['visibility']}
+                onClick={null}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'filter'}
+                label={resources.messages['filter']}
+                onClick={null}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={true}
+                icon={'import'}
+                label={resources.messages['export']}
+                onClick={null}
+              />
+            </div>
+            <div className="p-toolbar-group-right">
+              <Button
+                className={`p-button-rounded p-button-secondary`}
+                disabled={false}
+                icon={'refresh'}
+                label={resources.messages['refresh']}
+                onClick={() => onLoadDocumentsAndWebLinks()}
+              />
+            </div>
+          </Toolbar>
           <Dialog
             header={resources.messages['upload']}
             visible={isUploadDialogVisible}
             className={styles.Dialog}
             dismissableMask={false}
-            onHide={onHideHandler}>
-            <CustomFileUpload
-              mode="advanced"
-              name="file"
-              /* url={`${window.env.REACT_APP_BACKEND}/dataset/${dataSetId}/loadTableData/${props.id}`} */
-              /* onUpload={onUploadHandler} */
-              multiple={false}
-              chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv|doc)$/"
-              fileLimit={1}
-              className={styles.FileUpload}
-              maxFileSize={1024}
-            />
+            onHide={onCancelDialog}>
+            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
           </Dialog>
           {
-            <DataTable value={documents} autoLayout={true}>
+            <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="title"
-                header={resources.messages['title']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['title']}
               />
               <Column
                 field="description"
-                header={resources.messages['description']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['description']}
               />
               <Column
                 field="category"
-                header={resources.messages['category']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['category']}
               />
               <Column
                 field="language"
-                header={resources.messages['language']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['language']}
               />
               <Column
                 body={actionTemplate}
-                style={{ textAlign: 'center', width: '8em' }}
                 field="url"
-                header={resources.messages['url']}
                 filter={false}
                 filterMatchMode="contains"
+                header={resources.messages['file']}
+                style={{ textAlign: 'center', width: '8em' }}
               />
             </DataTable>
           }
@@ -193,7 +232,7 @@ export const DocumentationDataSet = ({ match, history }) => {
 
         <TabPanel header={resources.messages['webLinks']}>
           {
-            <DataTable value={webLinks} autoLayout={true}>
+            <DataTable value={webLinks} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
               <Column
                 columnResizeMode="expand"
                 field="description"
@@ -216,4 +255,4 @@ export const DocumentationDataSet = ({ match, history }) => {
   } else {
     return <></>;
   }
-};
+});

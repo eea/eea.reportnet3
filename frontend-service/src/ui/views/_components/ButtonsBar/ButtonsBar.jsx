@@ -1,36 +1,36 @@
 import React from 'react';
 
-import { CustomButton } from 'ui/views/_components/CustomButton';
-import { Toolbar } from 'primereact/toolbar';
+import { Button } from 'ui/views/_components/Button';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 export const ButtonsBar = React.memo(({ buttonsList }) => {
   const leftButtons = [];
   const rightButtons = [];
 
-  const buttons = buttonsList.forEach((b, i) => {
-    b.group === 'left'
+  const buttons = buttonsList.forEach((button, i) => {
+    button.group === 'left'
       ? leftButtons.push(
-          <CustomButton
-            label={b.label}
-            title={b.title}
-            icon={b.icon}
+          <Button
+            className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
+            disabled={button.disabled}
+            icon={button.icon}
+            iconClasses={button.iconClasses}
             key={i}
-            handleClick={b.clickHandler}
-            disabled={b.disabled}
-            ownButtonClasses={b.ownButtonClasses}
-            iconClasses={b.iconClasses}
+            label={button.label}
+            onClick={button.onClick}
+            title={button.title}
           />
         )
       : rightButtons.push(
-          <CustomButton
-            label={b.label}
-            title={b.title}
-            icon={b.icon}
+          <Button
+            className={`p-button-rounded p-button-secondary ${button.ownButtonClasses}`}
+            disabled={button.disabled}
+            icon={button.icon}
+            iconClasses={button.iconClasses}
             key={i}
-            handleClick={b.clickHandler}
-            disabled={b.disabled}
-            ownButtonClasses={b.ownButtonClasses}
-            iconClasses={b.iconClasses}
+            label={button.label}
+            onClick={button.onClick}
+            title={button.title}
           />
         );
   });
@@ -40,17 +40,6 @@ export const ButtonsBar = React.memo(({ buttonsList }) => {
       {buttons}
       <div className="p-toolbar-group-left">{leftButtons}</div>
       <div className="p-toolbar-group-right">{rightButtons}</div>
-
-      {/* <div className="p-toolbar-group-left">
-                <CustomButton label="Import" icon="0" />
-                <CustomButton label="Export" icon="1" />
-                <CustomButton label="Delete" icon="2" />
-            </div>
-            <div className="p-toolbar-group-right">
-                <CustomButton label="Events" icon="4" />
-                <CustomButton label="Validations" icon="3" />
-                <CustomButton label="Dashboards" icon="5" />
-            </div> */}
     </Toolbar>
   );
 });

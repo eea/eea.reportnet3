@@ -1,7 +1,9 @@
 package org.eea.ums.service.keycloak.admin;
 
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.eea.ums.service.keycloak.service.impl.KeycloakConnectorServiceImpl;
+import org.eea.ums.service.keycloak.model.TokenInfo;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ public class TokenGeneratorThread implements Runnable {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-  private KeycloakConnectorServiceImpl keycloakConnectorService;
+  private KeycloakConnectorService keycloakConnectorService;
   private Boolean exit = false;
   private String adminUser;
   private String adminPass;
@@ -33,7 +35,7 @@ public class TokenGeneratorThread implements Runnable {
    * @param tokenExpiration the token expiration
    */
   public TokenGeneratorThread(
-      KeycloakConnectorServiceImpl keycloakConnectorService, String adminUser, String adminPass,
+      KeycloakConnectorService keycloakConnectorService, String adminUser, String adminPass,
       Long tokenExpiration) {
 
     this.keycloakConnectorService = keycloakConnectorService;
@@ -48,12 +50,20 @@ public class TokenGeneratorThread implements Runnable {
 
     log.info("Starting token generator thread");
     while (!exit) {
-      TokenMonitor.updateAdminToken(keycloakConnectorService.generateToken(adminUser, adminPass));
-      try {
-        Thread.sleep(this.tokenExpiration);
-      } catch (InterruptedException e) {
+      TokenInfo tokenInfo = keycloakConnectorService.generateToken(adminUser, adminPass);
+      if (null != tokenInfo) {
+        String accessToken = Optional.ofNullable(tokenInfo.getAccessToken()).orElse("");
+        TokenMonitor.updateAdminToken(accessToken);
+        try {
+          Thread.sleep(this.tokenExpiration);
+        } catch (InterruptedException e) {
+          LOG_ERROR.error(
+              "Error sleeping token generator thread during {} miliseconds. Thread will finish", e);
+          stopThread();
+        }
+      } else {
         LOG_ERROR.error(
-            "Error sleeping token generator thread during {} miliseconds. Thread will finish", e);
+            "Error getting admin access token, finishing Token Generator thread ");
         stopThread();
       }
     }

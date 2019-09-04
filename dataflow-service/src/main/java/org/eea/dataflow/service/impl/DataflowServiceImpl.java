@@ -2,26 +2,29 @@ package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
-import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
-import org.eea.dataflow.persistence.domain.Document;
+import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
-import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,36 +38,47 @@ import org.springframework.stereotype.Service;
 public class DataflowServiceImpl implements DataflowService {
 
 
-  /** The dataflow repository. */
+  /**
+   * The dataflow repository.
+   */
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /** The user request repository. */
+  /**
+   * The user request repository.
+   */
   @Autowired
   private UserRequestRepository userRequestRepository;
 
-  /** The contributor repository. */
+  /**
+   * The contributor repository.
+   */
   @Autowired
   private ContributorRepository contributorRepository;
 
-  /** The document repository. */
-  @Autowired
-  private DocumentRepository documentRepository;
-
-  /** The dataflow mapper. */
+  /**
+   * The dataflow mapper.
+   */
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /** The dataflow no content mapper. */
+  /**
+   * The dataflow no content mapper.
+   */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
-  /** The dataset metabase controller. */
+  /**
+   * The dataset metabase controller.
+   */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  /**
+   * The user management controller zull.
+   */
   @Autowired
-  private DocumentMapper documentMapper;
+  private UserManagementControllerZull userManagementControllerZull;
 
   /**
    * The Constant LOG.
@@ -76,7 +90,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -87,10 +103,14 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Dataflow result = dataflowRepository.findById(id).orElse(null);
-
+    // filter datasets showed to the user depending on permissions
+    List<ResourceAccessVO> datasets =
+        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATASET);
+    List<Long> datasetsIds =
+        datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-
-    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
+    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
@@ -100,7 +120,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by status.
    *
    * @param status the status
+   *
    * @return the by status
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -115,13 +137,16 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the pending accepted.
    *
    * @param userId the user id
+   *
    * @return the pending accepted
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException {
+  public List<DataFlowVO> getPendingAccepted(String userId) throws EEAException {
 
-    List<DataflowWithRequestType> dataflows = dataflowRepository.findPendingAccepted(userId);
+    // get pending
+    List<DataflowWithRequestType> dataflows = dataflowRepository.findPending(userId);
     List<Dataflow> dfs = new ArrayList<>();
     LOG.info("Get the dataflows pending and accepted of the user id: {}", userId);
     for (DataflowWithRequestType df : dataflows) {
@@ -137,6 +162,17 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     }
+    // Get user's dataflows
+    List<ResourceAccessVO> usersDataflows =
+        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATAFLOW);
+    for (ResourceAccessVO userDataflow : usersDataflows) {
+      Optional<Dataflow> df = dataflowRepository.findById(userDataflow.getId());
+      if (df.isPresent()) {
+        DataFlowVO dfVO = dataflowNoContentMapper.entityToClass(df.get());
+        dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
+        dataflowVOs.add(dfVO);
+      }
+    }
     return dataflowVOs;
   }
 
@@ -146,11 +182,13 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userId the user id
    * @param pageable the pageable
+   *
    * @return the completed
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException {
+  public List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findCompleted(userId, pageable);
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
@@ -168,11 +206,14 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userId the user id
    * @param type the type
+   *
    * @return the pending by user
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException {
+  public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
+      throws EEAException {
 
     List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
@@ -185,6 +226,7 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param userRequestId the user request id
    * @param type the type
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -192,7 +234,21 @@ public class DataflowServiceImpl implements DataflowService {
       throws EEAException {
 
     userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
-    LOG.info("Update the request status of the requestId: {}. New status: {}", userRequestId, type);
+    LOG.info("Update the Metabase request status of the requestId: {}. New status: {}",
+        userRequestId, type);
+    if (TypeRequestEnum.ACCEPTED.equals(type)) {
+      // add the resource to the user id in keycloak
+      Long dataflowId = 0L;
+      UserRequest ur = userRequestRepository.findById(userRequestId).orElse(new UserRequest());
+      if (ur.getDataflows() != null) {
+        for (Dataflow df : ur.getDataflows()) {
+          dataflowId = df.getId();
+        }
+        userManagementControllerZull.addContributorToResource(dataflowId,
+            ResourceGroupEnum.DATAFLOW_PROVIDER);
+        LOG.info("The dataflow {} has been added into keycloak", dataflowId);
+      }
+    }
   }
 
   /**
@@ -200,10 +256,11 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException {
+  public void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException {
 
     Contributor contributor = new Contributor();
     contributor.setUserId(idContributor);
@@ -218,109 +275,42 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void removeContributorFromDataflow(Long idDataflow, Long idContributor)
+  public void removeContributorFromDataflow(Long idDataflow, String idContributor)
       throws EEAException {
 
     contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
 
   }
 
+
   /**
    * Creates the data flow.
    *
-   * @param nameDataFlow the name data flow
+   * @param dataflowVO the dataflow VO
    */
   @Override
   @Transactional
-  public void createDataFlow(Dataflow dataflow) {
-    createMetabaseDataFlow(dataflow);
-    // createDatasetfromDataFlow(nameDataFlow);
-    // createSchemaDataFlow(nameDataFlow);
-
+  public void createDataFlow(DataFlowVO dataflowVO) {
+    createMetabaseDataFlow(dataflowVO);
   }
 
   /**
    * Creates the metabase data flow.
    *
-   * @param nameDataFlow the name data flow
+   * @param dataflowVO the dataflow VO
    */
-  @Transactional
-  private void createMetabaseDataFlow(Dataflow dataflow) {
-    if (dataflowRepository.findByName(dataflow.getName()).isPresent()) {
-      LOG.info("The dataflow: {} already exists.", dataflow.getName());
+  // @Transactional
+  private void createMetabaseDataFlow(DataFlowVO dataflowVO) {
+    if (dataflowRepository.findByName(dataflowVO.getName()).isPresent()) {
+      LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
     } else {
+      Dataflow dataflow = dataflowMapper.classToEntity(dataflowVO);
       dataflowRepository.save(dataflow);
     }
-  }
-
-  /**
-   * Insert document.
-   *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @param description the description
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void insertDocument(Long dataflowId, String filename, String language, String description)
-      throws EEAException {
-    if (dataflowId == null || filename == null || language == null || description == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
-    if (dataflow != null) {
-      Document document = new Document();
-      document.setDescription(description);
-      document.setLanguage(language);
-      document.setName(filename);
-      document.setDataflow(dataflow);
-      documentRepository.save(document);
-      LOG.info("document saved");
-    } else {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-  }
-
-  /**
-   * Delete document.
-   *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void deleteDocument(Long documentId) throws EEAException {
-    if (documentId == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    documentRepository.deleteById(documentId);
-    LOG.info("document deleted");
-  }
-
-  /**
-   * Gets the document by id.
-   *
-   * @param documentId the document id
-   * @return the document by id
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public DocumentVO getDocumentById(Long documentId) throws EEAException {
-    if (documentId == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    Document document = documentRepository.findById(documentId).orElse(null);
-    if (document == null) {
-      throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
-    }
-    return documentMapper.entityToClass(document);
   }
 
 }

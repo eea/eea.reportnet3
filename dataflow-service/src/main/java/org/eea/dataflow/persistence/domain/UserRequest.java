@@ -5,6 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -33,11 +34,11 @@ public class UserRequest {
 
   /** The user requester. */
   @Column(name = "USER_REQUESTER")
-  private Long userRequester;
+  private String userRequester;
 
   /** The user requested. */
   @Column(name = "USER_REQUESTED")
-  private Long userRequested;
+  private String userRequested;
 
   /** The request type. */
   @Column(name = "REQUEST_TYPE")
@@ -45,7 +46,7 @@ public class UserRequest {
   private TypeRequestEnum requestType;
 
   /** The dataflows. */
-  @ManyToMany(mappedBy = "userRequests")
+  @ManyToMany(mappedBy = "userRequests", fetch = FetchType.EAGER)
   private Set<Dataflow> dataflows;
 
 }

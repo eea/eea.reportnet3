@@ -58,6 +58,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
@@ -69,9 +70,12 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -91,12 +95,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * The data set mapper.
@@ -250,7 +252,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
-
   /**
    * Process file.
    *
@@ -263,8 +264,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
-  public void processFile(final Long datasetId, final String fileName, final InputStream is,
+  public DataSetVO processFile(final Long datasetId, final String fileName, final InputStream is,
       final String idTableSchema) throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
@@ -279,46 +279,52 @@ public class DatasetServiceImpl implements DatasetService {
 
       // Get the dataFlowId from the metabase
       final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
+
       // create the right file parser for the file type
       final IFileParseContext context = fileParserFactory.createContext(mimeType);
       final DataSetVO datasetVO =
           context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
-      // map the VO to the entity
+
       if (datasetVO == null) {
         throw new IOException("Empty dataset");
       }
-      datasetVO.setId(datasetId);
 
-      final DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-      if (dataset == null) {
-        throw new IOException("Error mapping file");
-      }
-      // Check if the table with idTableSchema has been populated already
-      Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-      fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
-      // save dataset to the database
-      datasetRepository.saveAndFlush(dataset);
-      LOG.info("File processed and saved into DB");
+      return datasetVO;
+
     } finally {
       is.close();
     }
   }
 
+  /**
+   * Save all records.
+   *
+   * @param datasetId the dataset id
+   * @param listaGeneral the lista general
+   */
+  @Override
+  @Transactional
+  public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
+
+    LOG.debug("{}", getTenantName());
+    recordRepository.saveAll(listaGeneral);
+  }
+
+  public static String getTenantName() {
+    return TenantResolver.getTenantName();
+  }
 
   /**
-   * Fill table id.
+   * Save table.
    *
-   * @param idTableSchema the id table schema
-   * @param listTableValues the list table values
-   * @param oldTableId the old table id
+   * @param tableValue the dataset
    */
-  private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
-      Long oldTableId) {
-    if (oldTableId != null) {
-      listTableValues.stream()
-          .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
-          .forEach(tableValue -> tableValue.setId(oldTableId));
-    }
+  @Override
+  @Transactional
+  public void saveTable(@DatasetId Long datasetId, TableValue tableValue) {
+    DatasetValue datasetValue = datasetRepository.findById(datasetId).get();
+    tableValue.setDatasetId(datasetValue);
+    tableRepository.saveAndFlush(tableValue);
   }
 
 
@@ -443,34 +449,61 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
-   * Gets the table values by id. It additionally can page the results and sort them
-   *
-   * sort is handmade since the criteria is the idFieldValue of the Fields inside the records.
+   * Gets the table values by id.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the mongo ID
+   * @param idTableSchema the id table schema
    * @param pageable the pageable
-   * @param idFieldSchema the id field schema
-   * @param asc the asc
-   *
+   * @param fields the fields
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      final Pageable pageable, final String idFieldSchema, final Boolean asc) throws EEAException {
+      Pageable pageable, final String fields) throws EEAException {
+    List<String> commonShortFields = new ArrayList<>();
+    Map<String, Integer> mapFields = new HashMap<>();
+    List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
+
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
-    if (StringUtils.isBlank(idFieldSchema)) {
+
+    // Check if we need to put all the records without pagination
+    if (pageable == null && totalRecords > 0) {
+      pageable = PageRequest.of(0, totalRecords.intValue());
+    }
+    if (pageable == null && totalRecords == 0) {
+      pageable = PageRequest.of(0, 20);
+    }
+
+    if (null == fields) {
+
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+
     } else {
-      SortField sortField = new SortField();
-      sortField.setFieldName(idFieldSchema);
-      sortField.setAsc(asc);
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable, sortField);
+
+      String[] pairs = fields.split(",");
+      for (int i = 0; i < pairs.length; i++) {
+        String pair = pairs[i];
+        String[] keyValue = pair.split(":");
+        mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
+        commonShortFields.add(keyValue[0]);
+      }
+
+      for (String nameField : commonShortFields) {
+        FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
+        SortField sortField = new SortField();
+        sortField.setFieldName(nameField);
+        sortField.setAsc((intToBoolean(mapFields.get(nameField))));
+        sortField.setTypefield(typefield.getType());
+        sortFieldsArray.add(sortField);
+      }
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable,
+          sortFieldsArray.stream().toArray(SortField[]::new));
+
     }
 
     if (records == null) {
@@ -492,8 +525,8 @@ public class DatasetServiceImpl implements DatasetService {
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
           datasetId, idTableSchema, recordVOs.size(), pageable.getPageNumber(),
           pageable.getPageSize());
-      if (StringUtils.isNotBlank(idFieldSchema)) {
-        LOG.info("Ordered by idFieldSchema {}", idFieldSchema);
+      if (null != fields) {
+        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
       }
 
       // 5º retrieve validations to set them into the final result
@@ -529,10 +562,20 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
+  /**
+   * String to boolean.
+   *
+   * @param integer the integer
+   * @return the boolean
+   */
+  private Boolean intToBoolean(Integer integer) {
+    return integer == 1;
+  }
+
 
   /**
    * Retrieves in a controlled way the data from database
-   * 
+   *
    * This method ensures that Sorting Field Criteria is cleaned after every invocation.
    *
    * @param idTableSchema the id table schema
@@ -970,19 +1013,19 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
-   * Delete.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void deleteRecords(final Long datasetId, final List<Long> recordIds) throws EEAException {
-    if (datasetId == null || recordIds == null) {
+  public void deleteRecord(final Long datasetId, final Long recordId) throws EEAException {
+    if (datasetId == null || recordId == null) {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
-    recordRepository.deleteRecordsWithIds(recordIds);
+    recordRepository.deleteRecordWithId(recordId);
   }
 
   /**
@@ -1041,12 +1084,29 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void insertSchema(Long datasetId, String idDatasetSchema) throws EEAException {
+  public void insertSchema(final Long datasetId, String idDatasetSchema) throws EEAException {
 
     DatasetValue ds = new DatasetValue();
     ds.setIdDatasetSchema(idDatasetSchema);
     ds.setId(datasetId);
     datasetRepository.save(ds);
 
+  }
+
+  /**
+   * Update records.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void updateField(final Long datasetId, final FieldVO field) throws EEAException {
+    if (datasetId == null || field == null) {
+      throw new EEAException(EEAErrorMessage.FIELD_NOT_FOUND);
+
+    }
+    fieldRepository.saveValue(field.getId(), field.getValue());
   }
 }

@@ -1,12 +1,13 @@
 package org.eea.document.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.io.IOException;
 import javax.ws.rs.Produces;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,18 @@ import feign.FeignException;
 @RequestMapping("/document")
 public class DocumentControllerImpl implements DocumentController {
 
-  /** The document service. */
+  /**
+   * The document service.
+   */
   @Autowired
   private DocumentService documentService;
 
-  /** The dataflow controller. */
+  /**
+   * The dataflow controller.
+   */
   @Autowired
-  private DataFlowControllerZuul dataflowController;
+  private DataFlowDocumentControllerZuul dataflowController;
+
 
   /**
    * Upload document.
@@ -52,6 +58,7 @@ public class DocumentControllerImpl implements DocumentController {
    * @param language the language
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/upload/{dataFlowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
       @PathVariable("dataFlowId") final Long dataFlowId, @RequestParam final String description,
@@ -78,14 +85,16 @@ public class DocumentControllerImpl implements DocumentController {
    * Gets the document.
    *
    * @param documentId the document id
+   *
    * @return the document
    */
   @Override
   @GetMapping(value = "/{documentId}")
+  @HystrixCommand
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   public ResponseEntity<Resource> getDocument(@PathVariable("documentId") final Long documentId) {
     try {
-      DocumentVO document = dataflowController.getDocumentById(documentId);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
@@ -107,18 +116,20 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+
   /**
-   * Delete a document.
+   * Delete document.
    *
    * @param documentId the document id
-   * @return the document
+   *
    * @throws Exception the exception
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
   public void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception {
     try {
-      DocumentVO document = dataflowController.getDocumentById(documentId);
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }

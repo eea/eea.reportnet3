@@ -33,9 +33,9 @@ public interface DataflowRepository
    * @return the list
    */
   @Query("SELECT df as dataflow, ur.requestType as typeRequestEnum, ur.id as requestId from Dataflow df "
-      + "JOIN df.userRequests ur WHERE ur.requestType in ('PENDING','ACCEPTED') "
+      + "JOIN df.userRequests ur WHERE ur.requestType in ('PENDING') "
       + " AND ur.userRequester = :idRequester AND df.status not in ('COMPLETED') ORDER BY df.deadlineDate ASC")
-  List<DataflowWithRequestType> findPendingAccepted(@Param("idRequester") Long userIdRequester);
+  List<DataflowWithRequestType> findPending(@Param("idRequester") String userIdRequester);
 
 
 
@@ -49,7 +49,7 @@ public interface DataflowRepository
   @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType = :type "
       + " AND ur.userRequester = :idRequester ORDER BY df.deadlineDate ASC")
   List<Dataflow> findByStatusAndUserRequester(@Param("type") TypeRequestEnum typeRequest,
-      @Param("idRequester") Long userIdRequester);
+      @Param("idRequester") String userIdRequester);
 
   /**
    * Find by name.

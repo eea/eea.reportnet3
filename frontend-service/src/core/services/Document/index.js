@@ -1,6 +1,10 @@
-import { GetAllDocuments } from './GetAllDocuments';
 import { documentRepository } from 'core/domain/model/Document/DocumentRepository';
+import { GetAll } from './GetAll';
+import { DownloadById } from './DownloadById';
+import { Upload } from './Upload';
 
 export const DocumentService = {
-  all: GetAllDocuments({ documentRepository })
+  all: GetAll({ documentRepository }),
+  downloadDocumentById: DownloadById({ documentRepository }),
+  uploadDocument: Upload({ documentRepository })
 };

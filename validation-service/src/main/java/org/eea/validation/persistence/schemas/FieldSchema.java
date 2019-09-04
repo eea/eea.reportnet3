@@ -5,7 +5,10 @@ package org.eea.validation.persistence.schemas;
 
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.validation.persistence.schemas.rule.RuleField;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -34,7 +37,8 @@ public class FieldSchema {
 
   /** The type. */
   @Field(value = "typeData")
-  private String type;
+  @Enumerated(EnumType.STRING)
+  private TypeData type;
 
   /** The type. */
   @Field(value = "headerName")

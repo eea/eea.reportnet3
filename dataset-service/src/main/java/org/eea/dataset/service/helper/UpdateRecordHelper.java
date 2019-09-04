@@ -3,6 +3,7 @@ package org.eea.dataset.service.helper;
 import java.util.List;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -72,15 +73,29 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * Execute delete process.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    * @throws EEAException the EEA exception
    */
-  public void executeDeleteProcess(Long datasetId, List<Long> recordIds) throws EEAException {
-    datasetService.deleteRecords(datasetId, recordIds);
+  public void executeDeleteProcess(Long datasetId, Long recordId) throws EEAException {
+    datasetService.deleteRecord(datasetId, recordId);
     LOG.info("Records have been deleted");
     // after the records have been deleted, an event is sent to notify it
-    releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);
+    releaseDatasetKafkaEvent(EventType.RECORD_DELETED_COMPLETED_EVENT, datasetId);
+  }
 
+
+  /**
+   * Execute field update process.
+   *
+   * @param datasetId the dataset id
+   * @param field the field
+   * @throws EEAException the EEA exception
+   */
+  public void executeFieldUpdateProcess(Long datasetId, FieldVO field) throws EEAException {
+    datasetService.updateField(datasetId, field);
+    LOG.info("Field is modified");
+    // after the field has been saved, an event is sent to notify it
+    releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }
 
 }

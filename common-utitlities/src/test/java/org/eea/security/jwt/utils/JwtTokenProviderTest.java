@@ -1,5 +1,6 @@
 package org.eea.security.jwt.utils;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
@@ -29,16 +30,18 @@ public class JwtTokenProviderTest {
   @Test
   public void createPublicKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKeyValue", SUPER_SECRET_PUBLIC_KEY);
-    jwtTokenProvider.createPublicKey();
+    ReflectionTestUtils.invokeMethod(jwtTokenProvider, "createPublicKey");
     Assert.assertNotNull(ReflectionTestUtils.getField(jwtTokenProvider, "publicKey"));
   }
 
   @Test(expected = InvalidKeySpecException.class)
   public void createPublicKeyKoInvalidKeySpecException()
-      throws InvalidKeySpecException, NoSuchAlgorithmException {
+      throws Throwable {
     ReflectionTestUtils.setField(jwtTokenProvider, "publicKeyValue", "KO");
     try {
-      jwtTokenProvider.createPublicKey();
+      ReflectionTestUtils.invokeMethod(jwtTokenProvider, "createPublicKey");
+    } catch (UndeclaredThrowableException e) {
+      throw e.getCause();
     } finally {
       Assert.assertNull(ReflectionTestUtils.getField(jwtTokenProvider, "publicKey"));
     }

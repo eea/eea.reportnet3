@@ -41,7 +41,6 @@
   font-size: 1rem;
   margin-bottom: 1rem;
   border-radius: 3px;
-  border: 1px solid var(--grey-25);
   box-sizing: border-box;
 }
 .loginBoxContainer .loginBox form fieldset.buttonHolder {
@@ -51,4 +50,18 @@
 :global .rp-btn {
   width: 100%;
   border-radius: 5px;
+}
+
+.error {
+  padding: 1rem;
+  border: 2px solid var(--errors);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--errors);
+  /* width: 80%; */
+  margin: 1rem;
 }

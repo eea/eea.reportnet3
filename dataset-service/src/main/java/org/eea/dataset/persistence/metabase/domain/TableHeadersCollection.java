@@ -3,12 +3,16 @@ package org.eea.dataset.persistence.metabase.domain;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.TypeData;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -27,7 +31,9 @@ public class TableHeadersCollection {
   /** The Id. */
   @Id
   @Column(name = "ID", columnDefinition = "serial")
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "table_headers_collection_id_seq")
+  @SequenceGenerator(name = "table_headers_collection_id_seq",
+      sequenceName = "table_headers_collection_id_seq", allocationSize = 1)
   private Long id;
 
   /** The table collection id. */
@@ -41,7 +47,8 @@ public class TableHeadersCollection {
 
   /** The header type. */
   @Column(name = "HEADER_TYPE")
-  private String headerType;
+  @Enumerated(EnumType.STRING)
+  private TypeData headerType;
 
   /**
    * Hash code.

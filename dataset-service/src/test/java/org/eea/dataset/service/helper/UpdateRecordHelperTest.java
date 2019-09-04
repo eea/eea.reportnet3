@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -63,11 +64,18 @@ public class UpdateRecordHelperTest {
 
   @Test
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
-    List<Long> recordIds = new ArrayList<>();
-    doNothing().when(datasetService).deleteRecords(Mockito.any(), Mockito.any());
+    doNothing().when(datasetService).deleteRecord(Mockito.any(), Mockito.any());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeDeleteProcess(1L, recordIds);
+    updateRecordHelper.executeDeleteProcess(1L, 1L);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
+  @Test
+  public void executeUpdateFieldProcessTest()
+      throws EEAException, IOException, InterruptedException {
+    doNothing().when(datasetService).updateField(Mockito.any(), Mockito.any());
+    doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    updateRecordHelper.executeFieldUpdateProcess(1L, new FieldVO());
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+  }
 }

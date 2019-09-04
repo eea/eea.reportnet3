@@ -17,6 +17,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import lombok.Getter;
@@ -41,7 +42,8 @@ public class Dataflow {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dataflow_id_seq")
+  @SequenceGenerator(name = "dataflow_id_seq", sequenceName = "dataflow_id_seq", allocationSize = 1)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
@@ -87,27 +89,6 @@ public class Dataflow {
   @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
       inverseJoinColumns = @JoinColumn(name = "user_request_id"))
   private Set<UserRequest> userRequests;
-
-  /**
-   * Instantiates a new dataflow.
-   */
-  public Dataflow() {}
-
-  /**
-   * Instantiates a new dataflow.
-   *
-   * @param description the description
-   * @param name the name
-   * @param deadDate the dead date
-   * @param creationDate the creation date
-   */
-  public Dataflow(String description, String name, Date creationDate, Date deadDate) {
-    this.name = name;
-    this.description = description;
-    this.creationDate = creationDate;
-    this.deadlineDate = deadDate;
-    this.status = TypeStatusEnum.PENDING;
-  }
 
   /**
    * Equals.

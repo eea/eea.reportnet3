@@ -1,13 +1,14 @@
-import { api } from 'core/infrastructure/api';
+import { apiDocument } from 'core/infrastructure/api/domain/model/Document';
 import { Document } from 'core/domain/model/Document/Document';
 
-const all = async url => {
-  const documentsDTO = await api.documents(url);
+const all = async dataFlowId => {
+  const documentsDTO = await apiDocument.all(dataFlowId);
 
   return documentsDTO.map(
     documentDTO =>
       new Document(
-        documentDTO.title,
+        documentDTO.id,
+        documentDTO.name,
         documentDTO.description,
         documentDTO.category,
         documentDTO.language,
@@ -16,6 +17,18 @@ const all = async url => {
   );
 };
 
+const downloadDocumentById = async documentId => {
+  const fileData = await apiDocument.downloadById(documentId);
+  return fileData;
+};
+
+const uploadDocument = async (dataFlowId, description, language, file) => {
+  const responseData = await apiDocument.upload(dataFlowId, description, language, file);
+  return responseData;
+};
+
 export const ApiDocumentRepository = {
-  all
+  all,
+  downloadDocumentById,
+  uploadDocument
 };

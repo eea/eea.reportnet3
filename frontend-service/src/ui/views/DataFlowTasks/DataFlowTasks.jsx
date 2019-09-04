@@ -1,26 +1,27 @@
 import React, { useEffect, useContext, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import styles from './DataFlowTasks.module.scss';
 
-import { config } from 'assets/conf';
+import { config } from 'conf';
 
-import { BreadCrumb } from 'primereact/breadcrumb';
+import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DataFlowList } from './DataFlowList';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+import { DataFlowService } from 'core/services/DataFlow';
+import { UserContext } from '../_components/_context/UserContext';
 
-const i18nKey = 'app.components.pages.dataFlowTasks';
-
-export const DataFlowTasks = ({ match, history }) => {
+export const DataFlowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
+  const userData = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [tabMenuItems, setTabMenuItems] = useState([
+  const [tabMenuItems] = useState([
     {
       label: resources.messages['dataFlowAcceptedPendingTab'],
       className: styles.flow_tab,
@@ -34,54 +35,26 @@ export const DataFlowTasks = ({ match, history }) => {
     }
   ]);
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
-  const [tabData, setTabData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingContent, setpendingContent] = useState([]);
+  const [acceptedContent, setacceptedContent] = useState([]);
+  const [completedContent, setcompletedContent] = useState([]);
   const home = {
-    icon: resources.icons['home'],
+    icon: config.icons['home'],
     command: () => history.push('/')
   };
 
-  const dataFetch = () => {
+  const dataFetch = async () => {
     setLoading(true);
-    const c = {
-      listKeys: [],
-      apiUrl: '',
-      userId: 2,
-      queryString: {}
-    };
-    if (tabMenuActiveItem.tabKey === 'pending') {
-      c.listKeys.push('pending');
-      c.listKeys.push('accepted');
-      // c.apiUrl = `${config.loadDataFlowTaskPendingAcceptedAPI.url}${c.userId}`;
-      c.apiUrl = '/jsons/DataFlaws2.json';
-      c.queryString = {};
-    } else {
-      c.listKeys.push('completed');
-      c.apiUrl = '';
+    try {
+      const allDataFlows = await DataFlowService.all();
+      setpendingContent(allDataFlows.pending);
+      setacceptedContent(allDataFlows.accepted);
+      setcompletedContent(allDataFlows.completed);
+    } catch (error) {
+      console.error('dataFetch error: ', error);
     }
-
-    HTTPRequester.get({
-      url: c.apiUrl,
-      queryString: c.queryString
-    })
-      .then(response => {
-        setTabData(
-          c.listKeys.map(key => {
-            return {
-              listContent: response.data.filter(data => data.userRequestStatus.toLowerCase() === key),
-              listType: key,
-              listTitle: resources.messages[`${key}DataFlowTitle`],
-              listDescription: resources.messages[`${key}DataFlowText`]
-            };
-          })
-        );
-        setLoading(false);
-      })
-      .catch(error => {
-        console.log('error', error);
-        setLoading(false);
-        return error;
-      });
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -97,27 +70,54 @@ export const DataFlowTasks = ({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
-        <div className="titleDiv">
-          <BreadCrumb model={breadCrumbItems} home={home} />
-        </div>
+        <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
   };
 
   if (loading) {
-    return layout(<ProgressSpinner />);
+    return layout(<Spinner />);
   }
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn navTitle={resources.messages['dataFlow']} search={false} />
+      <DataFlowColumn
+        navTitle={resources.messages['dataFlow']}
+        search={true}
+        buttonTitle={resources.messages['subscribeButton']}
+      />
       <div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
-        {tabData.map((data, i) => (
-          <DataFlowList {...data} key={i} dataFetch={dataFetch} />
-        ))}
+        {tabMenuActiveItem.tabKey === 'pending' ? (
+          <>
+            <DataFlowList
+              listTitle={resources.messages.pendingDataFlowTitle}
+              listDescription={resources.messages.pendingDataFlowText}
+              listContent={pendingContent}
+              dataFetch={dataFetch}
+              listType="pending"
+            />
+            <DataFlowList
+              listTitle={resources.messages.acceptedDataFlowTitle}
+              listDescription={resources.messages.acceptedDataFlowText}
+              listContent={acceptedContent}
+              dataFetch={dataFetch}
+              listType="accepted"
+            />
+          </>
+        ) : (
+          <>
+            <DataFlowList
+              listTitle={resources.messages.completedDataFlowTitle}
+              listDescription={resources.messages.completedDataFlowText}
+              listContent={completedContent}
+              dataFetch={dataFetch}
+              listType="completed"
+            />
+          </>
+        )}
       </div>
     </div>
   );
-};
+});

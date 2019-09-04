@@ -30,6 +30,7 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -113,6 +114,11 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private DataSetControllerZuul datasetController;
+
+
+  /** The dataset repository. */
+  @Autowired
+  private FieldRepositoryImpl fieldRepositoryImpl;
 
   /**
    * Gets the element lenght.
@@ -229,7 +235,7 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    List<DatasetValidation> dataSetValList = new ArrayList<DatasetValidation>();
+    List<DatasetValidation> dataSetValList = new ArrayList<>();
     List<TypeErrorEnum> errorsList = new ArrayList<>();
     List<String> orig = new ArrayList<>();
 
@@ -288,7 +294,7 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     dataset.getTableValues().stream().forEach(table -> {
-      List<TableValidation> tableValList = new ArrayList<TableValidation>();
+      List<TableValidation> tableValList = new ArrayList<>();
 
       List<RecordValue> validatedRecords =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
@@ -353,8 +359,9 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
+
     dataset.getTableValues().stream().forEach(table -> {
-      List<RecordValidation> recordValList = new ArrayList<RecordValidation>();
+      List<RecordValidation> recordValList = new ArrayList<>();
       List<RecordValue> validatedFields =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
       validatedFields.stream().forEach(row -> {
@@ -408,6 +415,7 @@ public class ValidationServiceImpl implements ValidationService {
         }
       });
       validationRecordRepository.saveAll((Iterable<RecordValidation>) recordValList);
+
     });
 
   }
@@ -447,6 +455,7 @@ public class ValidationServiceImpl implements ValidationService {
           });
         }
       });
+
     }
   }
 

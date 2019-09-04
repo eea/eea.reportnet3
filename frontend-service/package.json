@@ -7,6 +7,9 @@
     "bootstrap": "^4.3.1",
     "chart.js": "^2.8.0",
     "classnames": "^2.2.6",
+    "formik": "^1.5.8",
+    "js-file-download": "^0.4.7",
+    "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "node-sass": "^4.12.0",
@@ -18,13 +21,16 @@
     "react-perf-devtool": "^3.1.8",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
-    "react-tooltip": "^3.10.0"
+    "react-tooltip": "^3.10.0",
+    "yup": "^0.27.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -42,6 +48,13 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@storybook/addon-actions": "^5.1.11",
+    "@storybook/addon-knobs": "^5.1.11",
+    "@storybook/addon-links": "^5.1.11",
+    "@storybook/addons": "^5.1.11",
+    "@storybook/react": "^5.1.11",
+    "babel-loader": "8.0.5",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.13.2",
     "react-test-renderer": "^16.8.6"

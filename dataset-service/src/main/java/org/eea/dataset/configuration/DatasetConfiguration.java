@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.MultiTenantDataSource;
-import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +24,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -90,6 +91,16 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
+
+
+  /** The max file size. */
+  @Value("${spring.servlet.multipart.max-file-size}")
+  private Long maxFileSize;
+
+
+  /** The max request size. */
+  @Value("${spring.servlet.multipart.max-request-size}")
+  private Long maxRequestSize;
 
 
   /**
@@ -200,6 +211,20 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
     schemastransactionManager.setEntityManagerFactory(dataSetsEntityManagerFactory().getObject());
     return schemastransactionManager;
+  }
+
+
+  /**
+   * Multipart resolver.
+   *
+   * @return the multipart resolver
+   */
+  @Bean
+  public MultipartResolver multipartResolver() {
+    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+    multipartResolver.setMaxUploadSize(maxFileSize);
+    multipartResolver.setMaxUploadSizePerFile(maxRequestSize);
+    return multipartResolver;
   }
 
 

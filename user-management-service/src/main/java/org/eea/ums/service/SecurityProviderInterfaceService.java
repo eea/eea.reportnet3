@@ -4,8 +4,9 @@ package org.eea.ums.service;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.ums.service.vo.UserGroupVO;
 import org.eea.ums.service.vo.UserVO;
 
 /**
@@ -23,7 +24,7 @@ public interface SecurityProviderInterfaceService {
    *
    * @return the string
    */
-  String doLogin(String username, String password, Object... extraParams);
+  TokenVO doLogin(String username, String password, Object... extraParams);
 
   /**
    * Check access permission boolean.
@@ -35,51 +36,63 @@ public interface SecurityProviderInterfaceService {
    */
   Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes);
 
-  /**
-   * Gets user group info.
-   *
-   * @param securityToken the security token
-   *
-   * @return the user group info
-   */
-  List<UserGroupVO> getUserGroupInfo(String securityToken);
 
   /**
    * Gets users.
    *
    * @param userId the user id
-   * @param securityToken the security token
    *
    * @return the users
    */
-  List<UserVO> getUsers(@Nullable String userId, String securityToken);
+  List<UserVO> getUsers(@Nullable String userId);
+
 
   /**
-   * Create user group.
+   * Create resource instance.
    *
    * @param userGroupName the user group name
-   * @param securityToken the security token
    * @param attributes the attributes
    */
-  void createUserGroup(String userGroupName, String securityToken, Map<String, String> attributes);
+  void createResourceInstance(String userGroupName, Map<String, String> attributes);
 
   /**
    * Add user to user group.
    *
    * @param userId the user id
-   * @param groupId the group id
-   * @param securityToken the security token
+   * @param groupName the group name
    */
-  void addUserToUserGroup(String userId, String groupId, String securityToken);
+  void addUserToUserGroup(String userId, String groupName);
 
   /**
    * Remove user from user group.
    *
    * @param userId the user id
    * @param groupId the group id
-   * @param securityToken the security token
    */
-  void removeUserFromUserGroup(String userId, String groupId, String securityToken);
+  void removeUserFromUserGroup(String userId, String groupId);
 
+  /**
+   * Gets resources by user.
+   *
+   * @param userId the user id
+   *
+   * @return the resources by user
+   */
+  List<ResourceAccessVO> getResourcesByUser(String userId);
 
+  /**
+   * Refresh token token vo.
+   *
+   * @param refreshToken the refresh token
+   *
+   * @return the token vo
+   */
+  TokenVO refreshToken(String refreshToken);
+
+  /**
+   * Do logout.
+   *
+   * @param refreshToken the refresh token
+   */
+  void doLogout(String refreshToken);
 }

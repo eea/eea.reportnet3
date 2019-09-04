@@ -13,7 +13,7 @@ public interface DatasetSchemaService {
    *
    * @param datasetId the dataset id
    */
-  void createDataSchema(Long datasetId);
+  void createDataSchema(Long datasetId, Long dataflowId);
 
 
   /**
@@ -31,5 +31,6 @@ public interface DatasetSchemaService {
    * @return the data schema by id flow
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
+
 
 }

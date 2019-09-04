@@ -1,43 +1,67 @@
 import React, { useContext } from 'react';
+
 import moment from 'moment';
 
 import styles from './SnapshotItem.module.scss';
 
+import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
 
 export function SnapshotItem({ itemData }) {
   const snapshotContext = useContext(SnapshotContext);
+
   const resources = useContext(ResourcesContext);
 
   return (
     <li className={styles.listItem}>
-      <div className={styles.listItemData}>
-        <h4>{moment(itemData.created_at).format()}</h4>
-        <p>{itemData.description}</p>
+      <div className={styles.itemBox}>
+        <div className={styles.listItemData}>
+          <h5>{moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}</h5>
+          <div className={styles.listActions}>
+            <Button
+              tooltip={resources.messages.restoreSnapshotTooltip}
+              tooltipOptions={{ position: 'top' }}
+              icon="replay"
+              disabled={true}
+              className={`${styles.btn} rp-btn secondary`}
+              onClick={() =>
+                snapshotContext.snapshotDispatch({
+                  type: 'restore_snapshot',
+                  payload: { ...itemData }
+                })
+              }
+            />
+            <Button
+              tooltip={resources.messages.releaseSnapshotTooltip}
+              tooltipOptions={{ position: 'top' }}
+              icon="cloudUpload"
+              disabled={true}
+              className={`${styles.btn} rp-btn secondary`}
+              onClick={() =>
+                snapshotContext.snapshotDispatch({
+                  type: 'release_snapshot',
+                  payload: { ...itemData }
+                })
+              }
+            />
+            <Button
+              tooltip={resources.messages.deleteSnapshotTooltip}
+              tooltipOptions={{ position: 'left' }}
+              icon="trash"
+              disabled={false}
+              className={`${styles.btn} rp-btn warning`}
+              onClick={() =>
+                snapshotContext.snapshotDispatch({
+                  type: 'delete_snapshot',
+                  payload: { ...itemData }
+                })
+              }
+            />
+          </div>
+        </div>
       </div>
-      <div className={styles.listActions}>
-        <button
-          className="rp-btn success"
-          onClick={() =>
-            snapshotContext.snapshotDispatch({
-              type: 'restore_snapshot',
-              payload: { ...itemData }
-            })
-          }>
-          {resources.messages.restore}
-        </button>
-        <button
-          className="rp-btn warning"
-          onClick={() =>
-            snapshotContext.snapshotDispatch({
-              type: 'delete_snapshot',
-              payload: { ...itemData }
-            })
-          }>
-          {resources.messages.delete}
-        </button>
-      </div>
+      <p>{itemData.description}</p>
     </li>
   );
 }

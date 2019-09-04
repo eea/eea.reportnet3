@@ -1,12 +1,10 @@
 package org.eea.dataflow.service;
 
 import java.util.List;
-import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -18,7 +16,9 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    */
   DataFlowVO getById(Long id) throws EEAException;
@@ -27,7 +27,9 @@ public interface DataflowService {
    * Gets the by status.
    *
    * @param status the status
+   *
    * @return the by status
+   *
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException;
@@ -37,10 +39,12 @@ public interface DataflowService {
    * Gets the pending accepted.
    *
    * @param userId the user id
+   *
    * @return the pending accepted
+   *
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getPendingAccepted(Long userId) throws EEAException;
+  List<DataFlowVO> getPendingAccepted(String userId) throws EEAException;
 
 
   /**
@@ -48,10 +52,12 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param pageable the pageable
+   *
    * @return the completed
+   *
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getCompleted(Long userId, Pageable pageable) throws EEAException;
+  List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException;
 
 
   /**
@@ -59,10 +65,12 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param type the type
+   *
    * @return the pending by user
+   *
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getPendingByUser(Long userId, TypeRequestEnum type) throws EEAException;
+  List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
 
 
   /**
@@ -70,6 +78,7 @@ public interface DataflowService {
    *
    * @param userRequestId the user request id
    * @param type the type
+   *
    * @throws EEAException the EEA exception
    */
   void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
@@ -80,55 +89,27 @@ public interface DataflowService {
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
-  void addContributorToDataflow(Long idDataflow, Long idContributor) throws EEAException;
+  void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException;
 
   /**
    * Removes the contributor from dataflow.
    *
    * @param idDataflow the id dataflow
    * @param idContributor the id contributor
+   *
    * @throws EEAException the EEA exception
    */
-  void removeContributorFromDataflow(Long idDataflow, Long idContributor) throws EEAException;
+  void removeContributorFromDataflow(Long idDataflow, String idContributor) throws EEAException;
+
 
   /**
    * Creates the data flow.
    *
-   * @param dataflowId the dataflow id
+   * @param dataflowVO the dataflow VO
    */
-  void createDataFlow(Dataflow dataflow);
-
-  /**
-   * Insert document.
-   *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @param description the description
-   * @throws EEAException the EEA exception
-   */
-  void insertDocument(Long dataflowId, String filename, String language, String description)
-      throws EEAException;
-
-  /**
-   * Delete document.
-   *
-   * @param dataflowId the dataflow id
-   * @param filename the filename
-   * @param language the language
-   * @throws EEAException the EEA exception
-   */
-  void deleteDocument(Long documentId) throws EEAException;
-
-  /**
-   * Gets the document by id.
-   *
-   * @param documentId the document id
-   * @return the document by id
-   * @throws EEAException
-   */
-  DocumentVO getDocumentById(Long documentId) throws EEAException;
+  void createDataFlow(DataFlowVO dataflowVO);
 
 }

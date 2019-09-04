@@ -95,6 +95,7 @@ public class KieBaseManagerTest {
     record.setRuleRecord(ruleRecordList);
     tableSchema.setRecordSchema(record);
     tableSchema.setRuleTable(ruleTableList);
+    tableSchema.setNameTableSchema("paco");
     tableSchemasList.add(tableSchema);
     dataSchema.setRuleDataSet(ruleDataSetList);
     dataSchema.setTableSchemas(tableSchemasList);

@@ -8,6 +8,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -15,6 +17,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -54,7 +57,7 @@ public class DataSetControllerImplTest {
   List<RecordVO> records;
 
   /** The record ids. */
-  List<Long> recordIds;
+  Long recordId;
 
   @Mock
   UpdateRecordHelper updateRecordHelper;
@@ -69,8 +72,7 @@ public class DataSetControllerImplTest {
   public void initMocks() {
     records = new ArrayList<>();
     records.add(new RecordVO());
-    recordIds = new ArrayList<>();
-    recordIds.add(1L);
+    recordId = 1L;
     MockitoAnnotations.initMocks(this);
   }
 
@@ -174,7 +176,8 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
-    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, "field", true);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields);
   }
 
   /**
@@ -184,7 +187,10 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry2() throws Exception {
-    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, "field", true);
+    List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
+    Collections.fill(order, Boolean.TRUE);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields);
   }
 
   /**
@@ -195,9 +201,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
   }
 
   /**
@@ -207,9 +212,9 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry4() throws Exception {
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, true);
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
   }
 
   /**
@@ -220,8 +225,9 @@ public class DataSetControllerImplTest {
   // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", false);
+        Mockito.any())).thenReturn(new TableVO());
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
   }
 
   /**
@@ -232,11 +238,14 @@ public class DataSetControllerImplTest {
   @Test
   public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, "field", true);
+        Mockito.any())).thenReturn(new TableVO());
+    List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
+    Collections.fill(order, Boolean.TRUE);
+    String fields = "field_1,fields_2,fields_3";
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -584,32 +593,27 @@ public class DataSetControllerImplTest {
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.deleteRecords(null, new ArrayList<Long>());
+  public void testdeleteRecordNullEntry() throws Exception {
+    dataSetControllerImpl.deleteRecord(null, 1L);
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsNull() throws Exception {
-    dataSetControllerImpl.deleteRecords(-2L, null);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsEmpty() throws Exception {
-    dataSetControllerImpl.deleteRecords(1L, new ArrayList<Long>());
+  public void testdeleteRecordNull() throws Exception {
+    dataSetControllerImpl.deleteRecord(-2L, null);
   }
 
   @Test
-  public void testdeleteRecordsSuccess() throws Exception {
+  public void testdeleteRecordSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.deleteRecords(1L, recordIds);
+    dataSetControllerImpl.deleteRecord(1L, recordId);
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsNotFoundException() throws Exception {
+  public void testdeleteRecordNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
         Mockito.any());
-    dataSetControllerImpl.deleteRecords(1L, recordIds);
+    dataSetControllerImpl.deleteRecord(1L, recordId);
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -648,5 +652,31 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.exportFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("".getBytes());
     dataSetControllerImpl.exportFile(1L, "id", "csv");
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateFieldNullEntry() throws Exception {
+    dataSetControllerImpl.updateField(null, new FieldVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateFieldNull() throws Exception {
+    dataSetControllerImpl.updateField(-2L, null);
+  }
+
+  @Test
+  public void testupdateFieldSuccess() throws Exception {
+    doNothing().when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(), Mockito.any());
+    dataSetControllerImpl.updateField(1L, new FieldVO());
+    Mockito.verify(updateRecordHelper, times(1)).executeFieldUpdateProcess(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testupdateFieldNotFoundException() throws Exception {
+    doThrow(new EEAException()).when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.updateField(1L, new FieldVO());
   }
 }
