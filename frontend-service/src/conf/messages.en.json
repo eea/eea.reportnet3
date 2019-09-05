@@ -90,6 +90,7 @@
 		"manageRoles": "Manage Roles",
 		"newDataset": "New Dataset",
 		"no": "No",
+		"noDataInDataTable": "There is no data to show",
 		"noErrorData": "There is no error data to show",
 		"origin": "Origin",
 		"pendingDataFlowText": "You are required to accept and report data to these data flows",
