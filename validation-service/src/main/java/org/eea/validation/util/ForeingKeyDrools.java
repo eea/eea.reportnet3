@@ -1,7 +1,6 @@
 package org.eea.validation.util;
 
 import org.eea.validation.persistence.data.domain.RecordValue;
-import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery1;
 import org.eea.validation.util.clasesToQueryDrools.DataToQuery11;
@@ -32,22 +31,6 @@ import org.springframework.stereotype.Component;
  */
 @Component("foreingKeyDrools")
 public class ForeingKeyDrools {
-
-
-  /** The field repository impl. */
-  private static FieldRepositoryImpl fieldRepositoryImpl;
-
-  /**
-   * Sets the dataset repository.
-   *
-   * @param fieldRepositoryImpl the new dataset repository
-   */
-  @Autowired
-  private void setDatasetRepository(FieldRepositoryImpl fieldRepositoryImpl) {
-    ForeingKeyDrools.fieldRepositoryImpl = fieldRepositoryImpl;
-  }
-
-
 
   /** The validation service. */
   @Qualifier("proxyValidationService")

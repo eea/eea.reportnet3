@@ -186,3 +186,39 @@ function boolean isCordenateLong( String value ){
    }
    return false;
  }
+ 
+ //// PART OF TABLE
+ 
+ 
+ // PART OF DATASET
+
+ 
+ 
+ //PART RECORD
+ 
+//SEASIONALPERIOD TABLE
+function boolean periodTypeValidation(Long idRecord, String idFieldSchemaPeriodeType,
+      String idFieldShemaStartDate, String idFieldSchemaEnddate){
+	return RecordValidationDrools.periodTypeValidation(idRecord,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
+}
+
+
+function boolean startDateGoodDatesOrder(Long idRecord, String idFieldShemaStartDate, String idFieldSchemaEnddate){    
+	return RecordValidationDrools.startDateGoodDatesOrder(idRecord,idFieldShemaStartDate,idFieldSchemaEnddate);
+}
+
+
+function boolean unknownDateStart(Long idRecord, String idFieldShemaPeriodType, String idFieldShemaStartDate){
+	return RecordValidationDrools.unknownDateStart(idRecord,idFieldShemaPeriodType,idFieldShemaStartDate);
+}
+
+function boolean sameYearValidation(Long idRecord, String idFieldShemaStartDate, String idFieldSchemaSeason){
+	return RecordValidationDrools.sameYearValidation(idRecord,idFieldShemaStartDate,idFieldSchemaSeason);
+}
+
+
+function boolean bathingSeasonDurationValidation(Long idRecord, String idFieldSchemaPeriodeType
+,String idFieldShemaStartDate, String idFieldSchemaEnddate){
+	return RecordValidationDrools.bathingSeasonDurationValidation(idRecord,idFieldShemaPeriodType,idFieldShemaStartDate,idFieldSchemaEnddate);
+}
+

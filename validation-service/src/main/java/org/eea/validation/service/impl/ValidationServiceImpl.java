@@ -30,7 +30,6 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -114,11 +113,6 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private DataSetControllerZuul datasetController;
-
-
-  /** The dataset repository. */
-  @Autowired
-  private FieldRepositoryImpl fieldRepositoryImpl;
 
   /**
    * Gets the element lenght.
