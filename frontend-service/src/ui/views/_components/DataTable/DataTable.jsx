@@ -426,6 +426,7 @@ export class DataTable extends Component {
   onPaste(event) {
     let clipboardData = event.clipboardData || window.clipboardData;
     let pastedData = clipboardData.getData('Text');
+    console.log(pastedData);
     this.setState({
       confirmVisible: true,
       pastedData: pastedData
@@ -1259,8 +1260,7 @@ export class DataTable extends Component {
         sortField={this.getSortField()}
         rowClassName={this.props.rowClassName}
         onRowReorder={this.props.onRowReorder}
-        //onPaste={this.props.onPaste}
-      >
+        onPaste={this.props.onPaste}>
         {columns}
       </TableBody>
     );
@@ -1516,8 +1516,7 @@ export class DataTable extends Component {
         <ConfirmDialog
           onConfirm={this.onPasteAccept}
           onHide={this.onPasteCancel}
-          //visible={this.state.confirmVisible}
-          visible={false}
+          visible={this.state.confirmVisible}
           header="Paste data"
           maximizable={false}
           labelConfirm="Yes"
