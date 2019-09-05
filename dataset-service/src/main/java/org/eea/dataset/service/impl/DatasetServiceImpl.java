@@ -112,7 +112,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DataSetTablesMapper dataSetTablesMapper;
 
-  /** The record mapper. */
+  /**
+   * The record mapper.
+   */
   @Autowired
   private RecordMapper recordMapper;
 
@@ -128,12 +130,16 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TableRepository tableRepository;
 
-  /** The parse common. */
+  /**
+   * The parse common.
+   */
   @Autowired
   private FileCommonUtils fileCommon;
 
 
-  /** The reporting dataset repository. */
+  /**
+   * The reporting dataset repository.
+   */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
@@ -143,7 +149,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
   /**
@@ -176,7 +184,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private IFileParserFactory fileParserFactory;
 
-  /** The file export factory. */
+  /**
+   * The file export factory.
+   */
   @Autowired
   private IFileExportFactory fileExportFactory;
 
@@ -218,13 +228,13 @@ public class DatasetServiceImpl implements DatasetService {
   private RecordValidationMapper recordValidationMapper;
 
 
-
   /**
    * Creates the empty dataset.
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
    * @param idDataflow the id dataflow
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -305,14 +315,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveAllRecords(@DatasetId Long datasetId, List<RecordValue> listaGeneral) {
-
-    LOG.debug("{}", getTenantName());
     recordRepository.saveAll(listaGeneral);
   }
 
-  public static String getTenantName() {
-    return TenantResolver.getTenantName();
-  }
 
   /**
    * Save table.
@@ -449,7 +454,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-
   /**
    * Gets the table values by id.
    *
@@ -457,7 +461,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param pageable the pageable
    * @param fields the fields
+   *
    * @return the table values by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -566,6 +572,7 @@ public class DatasetServiceImpl implements DatasetService {
    * String to boolean.
    *
    * @param integer the integer
+   *
    * @return the boolean
    */
   private Boolean intToBoolean(Integer integer) {
@@ -580,7 +587,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param idTableSchema the id table schema
    * @param idFieldSchema the id field schema
+   *
    * @return the list
+   *
    * @deprecated this method is deprecated
    */
   @Deprecated
@@ -644,7 +653,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the by id.
    *
    * @param datasetId the dataset id
+   *
    * @return the by id
+   *
    * @throws EEAException the EEA exception
    * @deprecated this method is deprecated
    */
@@ -969,6 +980,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param records the records
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -991,6 +1003,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param records the records
    * @param idTableSchema the id table schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1001,7 +1014,7 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
     }
     Long tableId = tableRepository.findIdByIdTableSchema(idTableSchema);
-    if (tableId == 0) {
+    if (null == tableId || tableId == 0) {
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
@@ -1017,6 +1030,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param recordId the record id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1034,7 +1048,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param mimeType the mime type
    * @param idTableSchema the id table schema
+   *
    * @return the byte[]
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -1060,7 +1076,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param mimeType the mime type
    * @param idTableSchema the id table schema
    * @param datasetId the dataset id
+   *
    * @return the file name
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1080,6 +1098,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1098,6 +1117,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param field the field
+   *
    * @throws EEAException the EEA exception
    */
   @Override
