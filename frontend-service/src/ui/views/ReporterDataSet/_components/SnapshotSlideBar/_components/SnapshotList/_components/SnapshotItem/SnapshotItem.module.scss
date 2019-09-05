@@ -32,7 +32,9 @@ p {
     }
   }
 }
-
+.is_released_snapshot {
+  color: green;
+}
 .listItemData .listActions button:nth-last-of-type(1) {
   margin-right: 0;
 }

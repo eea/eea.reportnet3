@@ -38,8 +38,11 @@ public enum EventType {
   /** The delete document completed event. */
   DELETE_DOCUMENT_COMPLETED_EVENT("Hello-Kafka2", "delete_document_completed_key"),
 
+  SNAPSHOT_RESTORED_EVENT("Hello-Kafka2", "snapshot_restored_completed_key"),
+
   /** The field updated completed event. */
   FIELD_UPDATED_COMPLETED_EVENT("Hello-Kafka2", "updated_field_completed_key");
+
 
   /** The topic. */
   private String topic;

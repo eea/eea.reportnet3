@@ -57,11 +57,11 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowTask'],
+        label: resources.messages.dataFlowTask,
         command: () => history.push('/data-flow-task')
       },
       {
-        label: resources.messages['reportingDataFlow']
+        label: resources.messages.reportingDataFlow
       }
     ]);
   }, [history, match.params.dataFlowId, resources.messages]);
@@ -114,6 +114,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         buttonTitle={resources.messages['subscribeThisButton']}
         dataFlowTitle={dataFlowData.name}
         navTitle={resources.messages['dataFlow']}
+        components={['dashboard']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <div className={styles.titleBar}>
@@ -123,9 +124,9 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               {dataFlowData.name}
             </h2>
           </div>
-          {/* <div className={styles.option_btns_wrapper}>
+          <div className={styles.option_btns_wrapper}>
             <DropdownButton icon="ellipsis" model={dropDownItems} />
-          </div> */}
+          </div>
         </div>
 
         <div className={`${styles.buttonsWrapper}`}>
