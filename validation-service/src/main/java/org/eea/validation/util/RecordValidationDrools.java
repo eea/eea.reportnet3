@@ -112,13 +112,13 @@ public class RecordValidationDrools {
   }
 
 
-  public static Boolean sameYearValidation(Long idRecord, String idFieldShemaStartDate,
+  public static Boolean sameYearValidation(Long idRecord, String idFieldShemaDate,
       String idFieldSchemaSeason) {
 
     String season = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaSeason);
-    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate);
+    String date = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaDate);
 
-    if (!"".equalsIgnoreCase(season) && !"".equalsIgnoreCase(startDate)) {
+    if (!"".equalsIgnoreCase(season) && !"".equalsIgnoreCase(date)) {
 
       try {
         Integer.valueOf(season);
@@ -126,14 +126,14 @@ public class RecordValidationDrools {
         return true;
       }
       try {
-        Date dateInit = sdf.parse(startDate);
+        Date dateCalculate = sdf.parse(date);
       } catch (ParseException e) {
         return true;
       }
-      if ("9999-12-31".equalsIgnoreCase(startDate)) {
+      if ("9999-12-31".equalsIgnoreCase(date)) {
         return true;
       }
-      if (!startDate.substring(0, 4).equalsIgnoreCase(season)) {
+      if (!date.substring(0, 4).equalsIgnoreCase(season)) {
         return false;
       }
     }
@@ -160,9 +160,67 @@ public class RecordValidationDrools {
       } catch (ParseException e) {
         return true;
       }
+
+      if ((dateend.getTime() - dateInit.getTime()) / (1000 * 60 * 60 * 24) > 365) {
+        return false;
+      }
+
     }
 
-    return null;
+    return true;
   }
 
+  public static Boolean startAndEndUnknown(Long idRecord, String idFieldShemaStartDate,
+      String idFieldSchemaEnddate) {
+    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate);
+    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate);
+
+    if ("9999-12-31".equalsIgnoreCase(startDate) && "9999-12-31".equalsIgnoreCase(endDate)) {
+      return false;
+    }
+    return true;
+  }
+
+  public static Boolean endUnknownPeriod(Long idRecord, String idFieldShemaPeriodType,
+      String idFieldSchemaEnddate) {
+    String periodeType = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaPeriodType);
+    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate);
+
+    if (("abnormalSituation".equalsIgnoreCase(periodeType)
+        || "bathingProhibition".equalsIgnoreCase(periodeType))
+        && "9999-12-31".equalsIgnoreCase(endDate)) {
+      return false;
+    }
+    return true;
+  }
+
+
+
+  /////////////////////// MONITORING PART//////////////////////////////////////////////
+
+  public static Boolean sameYearValidatioMonitoring(Long idRecord, String idFieldShemaDate,
+      String idFieldSchemaSeason) {
+
+    String season = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaSeason);
+    String date = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaDate);
+
+    if (!"".equalsIgnoreCase(season) && !"".equalsIgnoreCase(date)) {
+
+      try {
+        Integer.valueOf(season);
+      } catch (Exception e) {
+        return true;
+      }
+      try {
+        Date dateCalculate = sdf.parse(date);
+      } catch (ParseException e) {
+        return true;
+      }
+      if (!date.substring(0, 4).equalsIgnoreCase(season)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }

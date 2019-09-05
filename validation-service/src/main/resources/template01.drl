@@ -212,8 +212,8 @@ function boolean unknownDateStart(Long idRecord, String idFieldShemaPeriodType, 
 	return RecordValidationDrools.unknownDateStart(idRecord,idFieldShemaPeriodType,idFieldShemaStartDate);
 }
 
-function boolean sameYearValidation(Long idRecord, String idFieldShemaStartDate, String idFieldSchemaSeason){
-	return RecordValidationDrools.sameYearValidation(idRecord,idFieldShemaStartDate,idFieldSchemaSeason);
+function boolean sameYearValidation(Long idRecord, String idFieldShemaDate, String idFieldSchemaSeason){
+	return RecordValidationDrools.sameYearValidation(idRecord,idFieldShemaDate,idFieldSchemaSeason);
 }
 
 
@@ -222,3 +222,16 @@ function boolean bathingSeasonDurationValidation(Long idRecord, String idFieldSc
 	return RecordValidationDrools.bathingSeasonDurationValidation(idRecord,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
 }
 
+function boolean startAndEndUnknown(Long idRecord,String idFieldShemaStartDate, String idFieldSchemaEnddate){
+	return RecordValidationDrools.startAndEndUnknown(idRecord,idFieldShemaStartDate,idFieldSchemaEnddate);
+}
+
+
+function boolean endUnknownPeriod(Long idRecord,String idFieldSchemaPeriodeType, String idFieldSchemaEnddate){
+	return RecordValidationDrools.endUnknownPeriod(idRecord,idFieldSchemaPeriodeType,idFieldSchemaEnddate);
+}
+
+// MONITORING PART OF TABLES
+function boolean sameYearValidatioMonitoring(Long idRecord, String idFieldShemaDate, String idFieldSchemaSeason){
+	return RecordValidationDrools.sameYearValidatioMonitoring(idRecord,idFieldShemaDate,idFieldSchemaSeason);
+}
