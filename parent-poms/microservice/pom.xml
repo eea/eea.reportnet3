@@ -234,6 +234,9 @@
             <exclude>
               org.eea.*.mapper
             </exclude>
+            <exclude>
+              org.eea.validation.util.*
+            </exclude>
           </excludes>
         </configuration>
         <executions>
@@ -303,7 +306,7 @@
         </sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
         <sonar.coverage.exclusions>
-          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**
+          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,org.eea.validation.util/**
         </sonar.coverage.exclusions>
       </properties>
       <build>
