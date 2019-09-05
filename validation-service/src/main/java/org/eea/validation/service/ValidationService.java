@@ -45,36 +45,7 @@ public interface ValidationService {
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
-  /**
-   * Run table validations.
-   *
-   * @param list the list
-   * @param kieSession the kie session
-   *
-   * @return the list
-   */
-  List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
 
-  /**
-   * Run record validations.
-   *
-   * @param recordsPaged the records paged
-   * @param kieSession the kie session
-   *
-   * @return the list
-   */
-  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
-      KieSession kieSession);
-
-  /**
-   * Run field validations.
-   *
-   * @param fields the fields
-   * @param kieSession the kie session
-   *
-   * @return the list
-   */
-  List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
 
   /**
    * Delete all validation.
@@ -184,6 +155,37 @@ public interface ValidationService {
    */
   Future<Map<Long, ErrorsValidationVO>> getFieldErrors(@DatasetId Long datasetId,
       List<Long> idValidations);
+
+
+  /**
+   * Run field validations.
+   *
+   * @param field the field
+   * @param kieSession the kie session
+   * @return the list
+   */
+  List<FieldValidation> runFieldValidations(FieldValue field, KieSession kieSession);
+
+
+  /**
+   * Run record validations.
+   *
+   * @param record the record
+   * @param kieSession the kie session
+   * @return the list
+   */
+  List<RecordValidation> runRecordValidations(RecordValue record, KieSession kieSession);
+
+
+  /**
+   * Run table validations.
+   *
+   * @param table the table
+   * @param kieSession the kie session
+   * @return the list
+   */
+  List<TableValidation> runTableValidations(TableValue table, KieSession kieSession);
+
 
 
 }
