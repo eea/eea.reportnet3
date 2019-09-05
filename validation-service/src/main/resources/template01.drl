@@ -219,6 +219,6 @@ function boolean sameYearValidation(Long idRecord, String idFieldShemaStartDate,
 
 function boolean bathingSeasonDurationValidation(Long idRecord, String idFieldSchemaPeriodeType
 ,String idFieldShemaStartDate, String idFieldSchemaEnddate){
-	return RecordValidationDrools.bathingSeasonDurationValidation(idRecord,idFieldShemaPeriodType,idFieldShemaStartDate,idFieldSchemaEnddate);
+	return RecordValidationDrools.bathingSeasonDurationValidation(idRecord,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
 }
 

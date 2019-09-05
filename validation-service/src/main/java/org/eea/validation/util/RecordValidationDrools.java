@@ -146,7 +146,21 @@ public class RecordValidationDrools {
 
     String periodeType = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaPeriodType);
     String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate);
-    String season = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate);
+    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate);
+
+
+    if ("bathingSeason".equalsIgnoreCase(periodeType) && !"".equalsIgnoreCase(startDate)
+        && !"".equalsIgnoreCase(endDate)) {
+
+      Date dateInit;
+      Date dateend;
+      try {
+        dateInit = sdf.parse(startDate);
+        dateend = sdf.parse(endDate);
+      } catch (ParseException e) {
+        return true;
+      }
+    }
 
     return null;
   }
