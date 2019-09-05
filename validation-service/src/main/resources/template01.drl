@@ -192,7 +192,29 @@ function boolean isCordenateLong( String value ){
  
  // PART OF DATASET
 
- 
+function Boolean datasetValidationDO02() {
+return DatasetValidations.datasetValidationDO02();
+}
+  
+function Boolean datasetValidationDO03() {
+return DatasetValidations.datasetValidationDO03();
+}
+  
+function Boolean datasetValidationDC01A() {
+return DatasetValidations.datasetValidationDC01A();
+}
+  
+function Boolean datasetValidationDC01B() {
+return DatasetValidations.datasetValidationDC01B();
+}
+  
+function Boolean datasetValidationDC02() {
+return DatasetValidations.datasetValidationDC02();
+}
+  
+function Boolean datasetValidationDC03() {
+return DatasetValidations.datasetValidationDC03();
+}
  
  //PART RECORD
  

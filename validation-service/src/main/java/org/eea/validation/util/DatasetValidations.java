@@ -151,7 +151,32 @@ public class DatasetValidations {
       + "WHERE b.bathingWaterIdentifier IS null and  a.bathingWaterIdentifier is not null;";
 
 
-  public static Boolean datasetValidation1(Long Datasetid) {
+  public static Boolean datasetValidationDO02() {
+
+    return false;
+  }
+
+  public static Boolean datasetValidationDO03() {
+
+    return false;
+  }
+
+  public static Boolean datasetValidationDC01A() {
+
+    return false;
+  }
+
+  public static Boolean datasetValidationDC01B() {
+
+    return false;
+  }
+
+  public static Boolean datasetValidationDC02() {
+
+    return false;
+  }
+
+  public static Boolean datasetValidationDC03() {
 
     return false;
   }
