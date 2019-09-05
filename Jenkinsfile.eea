@@ -30,5 +30,17 @@ pipeline {
                 }
             }
         }
+        stage('Docker push') {
+            steps {
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/dataflow-service:1.0", "--build-arg JAR_FILE=dataflow-service/target/dataflow-service-1.0-SNAPSHOT.jar --build-arg MS_PORT=8020 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'jekinsdockerhub') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+            }
+        }
     }
 }
