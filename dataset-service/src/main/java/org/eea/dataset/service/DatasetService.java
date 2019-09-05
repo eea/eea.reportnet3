@@ -271,4 +271,12 @@ public interface DatasetService {
   void saveTable(@DatasetId Long datasetId, TableValue tableValue);
 
 
+  /**
+   * Find table id by table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idSchema the id schema
+   * @return the long
+   */
+  Long findTableIdByTableSchema(@DatasetId Long datasetId, String idSchema);
 }

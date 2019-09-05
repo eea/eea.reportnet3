@@ -70,7 +70,7 @@ public class FileTreatmentHelperTest {
     entityValue.setId(1L);
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(null);
+    when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
     fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
@@ -98,7 +98,7 @@ public class FileTreatmentHelperTest {
     entityValue.setId(1L);
     entityValue.setTableValues(tableValues);
     when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(entityValue);
-    when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
+    when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(1L);
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
     fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),

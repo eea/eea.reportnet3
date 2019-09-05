@@ -71,7 +71,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
-import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1128,5 +1127,10 @@ public class DatasetServiceImpl implements DatasetService {
 
     }
     fieldRepository.saveValue(field.getId(), field.getValue());
+  }
+
+  @Override
+  public Long findTableIdByTableSchema(Long datasetId, String idTableSchema) {
+    return tableRepository.findIdByIdTableSchema(idTableSchema);
   }
 }
