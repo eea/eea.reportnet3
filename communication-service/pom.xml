@@ -10,7 +10,7 @@
 
   </parent>
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:communication-service</sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:communication-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
   <modelVersion>4.0.0</modelVersion>
 

@@ -11,7 +11,7 @@
   </parent>
 
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:recordstore-service</sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:recordstore-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
