@@ -1,14 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { routes } from 'ui/routes';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-
-import { isUndefined } from 'lodash';
 
 import { config } from 'conf';
 
@@ -69,6 +64,7 @@ const DataViewer = withRouter(
     const [loadingFile, setLoadingFile] = useState(false);
     const [newRecord, setNewRecord] = useState({});
     const [numRows, setNumRows] = useState(10);
+    const [pastedRecords, setPastedRecords] = useState();
     const [selectedRecord, setSelectedRecord] = useState({});
     const [selectedCellId, setSelectedCellId] = useState();
     const [sortField, setSortField] = useState(undefined);
@@ -82,6 +78,8 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
 
     useEffect(() => {
+      //document.addEventListener('paste', event => onPaste(event));
+
       setExportButtonsList(
         config.exportTypes.map(type => ({
           label: type.text,
@@ -300,6 +298,36 @@ const DataViewer = withRouter(
       setConfirmDeleteVisible(false);
     };
 
+    const onPaste = async event => {
+      if (!isUndefined(event)) {
+        let clipboardData = event.clipboardData || window.clipboardData;
+        let pastedData = clipboardData.getData('Text');
+        console.log(pastedData);
+        let keys = colsSchema.map(column => column.field);
+        let copiedRows = pastedData.split('\n').filter(l => l.length > 0);
+        // console.log(copiedRows);
+        let rows = [];
+        let cols = [];
+
+        copiedRows.forEach(row => {
+          let emptyRecord = createEmptyObject(colsSchema, fetchedData);
+          // console.log(emptyRecord);
+
+          let copiedCols = row.split('\t');
+          copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
+          for (let i = 0; i < keys.length; i++) {
+            cols[keys[i]] = copiedCols[i];
+          }
+          rows.push({ ...cols });
+          cols = [];
+        });
+        // console.log(pastedData);
+      }
+    };
+    const onPasteAccept = schema => {
+      console.log('Paste Accept');
+      console.log(schema);
+    };
     const onRefresh = () => {
       onFetchData(sortField, sortOrder, firstRow, numRows);
     };
@@ -314,6 +342,7 @@ const DataViewer = withRouter(
     const onSaveRecord = async record => {
       if (isNewRecord) {
         try {
+          console.log(record);
           await DataSetService.addRecordById(dataSetId, tableId, record);
           setAddDialogVisible(false);
         } catch (error) {
@@ -425,6 +454,14 @@ const DataViewer = withRouter(
           onClick={() => {
             setIsNewRecord(true);
             setAddDialogVisible(true);
+          }}
+        />
+        <Button
+          style={{ float: 'right' }}
+          label={resources.messages['paste']}
+          icon="clipboard"
+          onClick={e => {
+            onPaste(e);
           }}
         />
       </div>
@@ -804,17 +841,21 @@ const DataViewer = withRouter(
             autoLayout={true}
             editable={true}
             //emptyMessage={resources.messages['noDataInDataTable']}
+            id={tableId}
             first={firstRow}
             footer={addRowFooter}
             header={header}
             lazy={true}
             loading={loading}
             onPage={onChangePage}
-            onPaste={() => console.log('Paste')}
+            onPaste={onPaste}
+            onPasteAccept={() => onPasteAccept(colsSchema)}
             onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
+            pastedRecords={pastedRecords}
+            recordsPreviewNumber={5}
             ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}

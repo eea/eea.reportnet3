@@ -223,7 +223,7 @@ export class DataTable extends Component {
     this.onPasteAccept = this.onPasteAccept.bind(this);
     this.onPasteCancel = this.onPasteCancel.bind(this);
     this.frozenSelectionMode = null;
-    document.addEventListener('paste', event => this.onPaste(event));
+    //document.addEventListener('paste', event => this.onPaste(event));
   }
 
   getFirst() {
@@ -424,42 +424,56 @@ export class DataTable extends Component {
   }
 
   onPaste(event) {
-    let clipboardData = event.clipboardData || window.clipboardData;
-    let pastedData = clipboardData.getData('Text');
-    console.log(pastedData);
-    this.setState({
-      confirmVisible: true,
-      pastedData: pastedData
-    });
+    if (!this.props.onPaste) {
+      console.log('No viene onPaste');
+      let clipboardData = event.clipboardData || window.clipboardData;
+      let pastedData = clipboardData.getData('Text');
+      this.setState({
+        confirmVisible: true,
+        pastedData: pastedData
+      });
+    } else {
+      console.log('Viene onPaste');
+      this.props.onPaste();
+      this.setState({
+        confirmVisible: true
+      });
+    }
   }
 
   onPasteAccept() {
-    let data = this.props.value;
-    let pastedData = this.state.pastedData;
-    let keys = Object.keys(data[0]);
-    let copiedRows = pastedData.split('\n').filter(l => l.length > 0);
-    let rows = [];
-    let cols = [];
+    if (this.props.onPasteAccept) {
+      this.props.onPasteAccept();
+    } else {
+      let data = this.props.value;
+      console.log(this.props.children);
+      console.log(this.props.children[3].key);
+      let pastedData = this.state.pastedData;
+      let keys = Object.keys(data[0]);
+      let copiedRows = pastedData.split('\n').filter(l => l.length > 0);
+      let rows = [];
+      let cols = [];
 
-    copiedRows.forEach(row => {
-      let copiedCols = row.split('\t');
-      copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
-      for (let i = 0; i < keys.length; i++) {
-        cols[keys[i]] = copiedCols[i];
-      }
-      rows.push({ ...cols });
-      cols = [];
-    });
+      copiedRows.forEach(row => {
+        let copiedCols = row.split('\t');
+        copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
+        for (let i = 0; i < keys.length; i++) {
+          cols[keys[i]] = copiedCols[i];
+        }
+        rows.push({ ...cols });
+        cols = [];
+      });
 
-    data.push(...rows);
+      data.push(...rows);
+      this.setState({
+        value: data,
+        confirmVisible: false
+      });
+    }
+
     this.setState({
-      value: data,
       confirmVisible: false
     });
-
-    if (this.props.onPaste) {
-      this.props.onPaste();
-    }
 
     // console.log(dataFiltered)
     // let auxFiltered = {}
@@ -1377,6 +1391,7 @@ export class DataTable extends Component {
     if (this.isStateful() && this.props.resizableColumns) {
       this.restoreColumnWidths();
     }
+    this.container.addEventListener('paste', event => this.onPaste(event));
   }
 
   componentDidUpdate() {
