@@ -36,7 +36,7 @@ export function SnapshotItem({ itemData }) {
             <Button
               tooltip={
                 itemData.isReleased
-                  ? resources.messages.releaseSnapshotTooltip
+                  ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
               tooltipOptions={{ position: 'top' }}
