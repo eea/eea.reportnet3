@@ -1,5 +1,7 @@
 package org.eea.recordstore.service;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -58,6 +60,15 @@ public interface RecordStoreService {
    * @throws RecordStoreAccessException the docker access exception
    */
   List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException;
+
+
+  void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
+      throws SQLException, IOException, RecordStoreAccessException;
+
+  void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+      throws SQLException, IOException, RecordStoreAccessException;
+
+  void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
 
 
 }

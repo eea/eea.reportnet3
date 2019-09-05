@@ -37,6 +37,9 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "DATACOLLECTION_ID")
   private Long datacollection;
 
+  @Column(name = "RELEASE")
+  private Boolean release;
+
 
   /**
    * Equals.

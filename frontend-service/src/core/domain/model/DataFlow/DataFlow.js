@@ -10,7 +10,7 @@ export class DataFlow {
     status,
     documents,
     weblinks,
-    requestId,
+    requestId
   ) {
     this.creationDate = creationDate;
     this.datasets = datasets;

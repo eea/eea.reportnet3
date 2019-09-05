@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +87,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
+
+  @Value("${pathSnapshot}")
+  private String pathSnapshot;
 
 
   /**
@@ -304,6 +308,24 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     result.setSchema(datasetName);
     return result;
   }
+
+
+  @Override
+  public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
+      throws SQLException, IOException, RecordStoreAccessException {
+
+  }
+
+
+  @Override
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+      throws SQLException, IOException, RecordStoreAccessException {}
+
+  @Override
+  public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
+
+  }
+
 
 
 }

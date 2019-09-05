@@ -5,10 +5,11 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dashboard.module.css';
 
-import { Chart } from 'primereact/chart';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { DataSetService } from 'core/services/DataSet';
+
+import { Chart } from 'primereact/chart';
 
 const Dashboard = withRouter(
   React.memo(({ refresh, match: { params: { dataSetId } } }) => {
