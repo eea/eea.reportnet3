@@ -30,6 +30,7 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -250,7 +251,8 @@ public class ValidationServiceImpl implements ValidationService {
       List<TableValidation> validations = runTableValidations(table, session);
       table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
         tableValidation.setTableValue(table);
-        if (validation.getLevelError() == null || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+        if (validation.getLevelError() == null
+            || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
           if (TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
             validation.setLevelError(TypeErrorEnum.ERROR);
           } else {
@@ -306,7 +308,8 @@ public class ValidationServiceImpl implements ValidationService {
         if (null != row.getRecordValidations()) {
           row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
             rowValidation.setRecordValue(row);
-            if (validation.getLevelError() == null || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+            if (validation.getLevelError() == null
+                || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
               if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
                 validation.setLevelError(TypeErrorEnum.ERROR);
               } else {
@@ -622,6 +625,46 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
+  }
+
+  /** The dataset repository. */
+  @Autowired
+  private DatasetRepositoryImpl datasetRepositoryImpl;
+
+  /**
+   * Dataset validation DO 02 query.
+   *
+   * @param do02 the do 02
+   * @return the boolean
+   */
+  @Override
+  public Boolean datasetValidationDO02Query(String DO02) {
+    return datasetRepositoryImpl.datasetValidationQuery(DO02);
+  }
+
+  @Override
+  public Boolean datasetValidationDO03Query(String DO03) {
+    return datasetRepositoryImpl.datasetValidationQuery(DO03);
+  }
+
+  @Override
+  public Boolean datasetValidationDC01AQuery(String DC01A) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC01A);
+  }
+
+  @Override
+  public Boolean datasetValidationDC01BQuery(String DC01B) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC01B);
+  }
+
+  @Override
+  public Boolean datasetValidationDC02Query(String DC02) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC02);
+  }
+
+  @Override
+  public Boolean datasetValidationDC03Query(String DC03) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC03);
   }
 
 }

@@ -187,5 +187,54 @@ public interface ValidationService {
   List<TableValidation> runTableValidations(TableValue table, KieSession kieSession);
 
 
+  /**
+   * Dataset validation DO 02 query.
+   *
+   * @param DO02 the do02
+   * @return the boolean
+   */
+  Boolean datasetValidationDO02Query(String DO02);
+
+  /**
+   * Dataset validation DO 03 query.
+   *
+   * @param DO03 the do03
+   * @return the boolean
+   */
+  Boolean datasetValidationDO03Query(String DO03);
+
+  /**
+   * Dataset validation DC 01 A query.
+   *
+   * @param DC01A the dc01a
+   * @return the boolean
+   */
+  Boolean datasetValidationDC01AQuery(String DC01A);
+
+  /**
+   * Dataset validation DC 01 B query.
+   *
+   * @param DC01B the dc01b
+   * @return the boolean
+   */
+  Boolean datasetValidationDC01BQuery(String DC01B);
+
+  /**
+   * Dataset validation DC 02 query.
+   *
+   * @param DC02 the dc02
+   * @return the boolean
+   */
+  Boolean datasetValidationDC02Query(String DC02);
+
+  /**
+   * Dataset validation DC 03 query.
+   *
+   * @param DC03 the dc03
+   * @return the boolean
+   */
+  Boolean datasetValidationDC03Query(String DC03);
+
+
 
 }
