@@ -15,20 +15,26 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
-
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'ui/views/_components/SplitButton';
 
 import { DataFlowService } from 'core/services/DataFlow';
+import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+
+import { ScrollPanel } from 'primereact/scrollpanel';
 
 export const ReportingDataFlow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(undefined);
+  const [snapshotListData, setSnapshotListData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
+  const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
+  const [dataSetIdToProps, setDataSetIdToProps] = useState();
 
   const home = {
     icon: config.icons['home'],
@@ -46,6 +52,9 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     } finally {
       setLoading(false);
     }
+  };
+  const onLoadSnapshotList = async dataSetId => {
+    setSnapshotListData(await SnapshotService.all(dataSetId));
   };
 
   useEffect(() => {
@@ -107,13 +116,18 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   const showContributorsDialog = () => {
     setIsActiveContributorsDialog(true);
   };
+  const showReleaseSnapshotDialog = async dataSetId => {
+    setDataSetIdToProps(dataSetId);
+    onLoadSnapshotList(dataSetId);
+    setIsActiveReleaseSnapshotDialog(true);
+  };
 
   return layout(
     <div className="rep-row">
       <DataFlowColumn
-        buttonTitle={resources.messages['subscribeThisButton']}
+        buttonTitle={resources.messages.subscribeThisButton}
         dataFlowTitle={dataFlowData.name}
-        navTitle={resources.messages['dataFlow']}
+        navTitle={resources.messages.dataFlow}
         components={['dashboard']}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
@@ -134,41 +148,44 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
             <div className={`${styles.dataSetItem}`}>
               <Button
                 className="p-button-warning"
-                label={resources.messages['do']}
+                label={resources.messages.do}
                 onClick={e => {
                   handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`);
                 }}
               />
-              <p className={styles.caption}>{resources.messages['documents']}</p>
+              <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
-            {dataFlowData.datasets.map(item => {
+            {dataFlowData.datasets.map(dataSet => {
               return (
-                <div className={`${styles.dataSetItem}`} key={item.id}>
+                <div className={`${styles.dataSetItem}`} key={dataSet.id}>
                   <SplitButton
-                    label={resources.messages['ds']}
+                    label={resources.messages.ds}
                     model={[
                       {
-                        label: resources.messages['releaseDataCollection'],
-                        icon: config.icons.archive
+                        label: resources.messages.releaseDataCollection,
+                        icon: config.icons.cloudUpload,
+                        command: () => {
+                          showReleaseSnapshotDialog(dataSet.id);
+                        }
                       },
                       {
-                        label: resources.messages['importFromFile'],
+                        label: resources.messages.importFromFile,
                         icon: config.icons.import
                       },
                       {
-                        label: resources.messages['duplicate'],
+                        label: resources.messages.duplicate,
                         icon: config.icons.clone
                       },
                       {
-                        label: resources.messages['properties'],
+                        label: resources.messages.properties,
                         icon: config.icons.info
                       }
                     ]}
-                    onClick={e => {
-                      handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${item.id}`);
+                    onClick={() => {
+                      handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${dataSet.id}`);
                     }}
                   />
-                  <p className={styles.caption}>{item.dataSetName}</p>
+                  <p className={styles.caption}>{dataSet.dataSetName}</p>
                 </div>
               );
             })}
@@ -182,6 +199,20 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
           style={{ width: '50vw' }}
           maximizable>
           <ContributorsList dataFlowId={dataFlowData.id} />
+        </Dialog>
+        <Dialog
+          header={dataFlowData.name}
+          visible={isActiveReleaseSnapshotDialog}
+          onHide={() => setIsActiveReleaseSnapshotDialog(false)}
+          style={{ width: '30vw' }}>
+          <ScrollPanel style={{ width: '100%', height: '50vh' }}>
+            <SnapshotList
+              snapshotListData={snapshotListData}
+              onLoadSnapshotList={onLoadSnapshotList}
+              dataFlowId={match.params.dataFlowId}
+              dataSetId={dataSetIdToProps}
+            />
+          </ScrollPanel>
         </Dialog>
       </div>
     </div>

@@ -102,6 +102,7 @@
 		"reject": "Reject",
 		"releaseDataCollection": "Release to data collection",
 		"releaseSnapshotMessage": "You are about to RELEASE a snapshot...",
+		"releasedSnapshotTooltip": "Released",
 		"releaseSnapshotTooltip": "Release snapshot",
 		"restoreSnapshotMessage": "You are about to RESTORE a snapshot...",		
 		"restoreSnapshotTooltip": "Restore snapshot",

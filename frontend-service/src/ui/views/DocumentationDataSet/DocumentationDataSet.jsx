@@ -199,24 +199,28 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['title']}
+                sortable={true}
               />
               <Column
                 field="description"
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['description']}
+                sortable={true}
               />
               <Column
                 field="category"
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['category']}
+                sortable={true}
               />
               <Column
                 field="language"
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['language']}
+                sortable={true}
               />
               <Column
                 body={actionTemplate}
