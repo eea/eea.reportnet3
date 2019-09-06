@@ -194,7 +194,7 @@ const DataViewer = withRouter(
       }
     };
 
-    const onEditAddFormInput = (property, value, field) => {
+    const onEditAddFormInput = (property, value) => {
       let record = {};
       if (!isNewRecord) {
         record = Object.create(editedRecord);
@@ -298,35 +298,43 @@ const DataViewer = withRouter(
       setConfirmDeleteVisible(false);
     };
 
-    const onPaste = async event => {
-      if (!isUndefined(event)) {
-        let clipboardData = event.clipboardData || window.clipboardData;
-        let pastedData = clipboardData.getData('Text');
-        console.log(pastedData);
-        let keys = colsSchema.map(column => column.field);
-        let copiedRows = pastedData.split('\n').filter(l => l.length > 0);
-        // console.log(copiedRows);
-        let rows = [];
-        let cols = [];
+    const onPaste = async () => {
+      const pastedData = await navigator.clipboard.readText();
+      //event.clipboardData || window.clipboardData;
+      //let pastedData = clipboardData.getData('Text');
+      const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
+      const copiedRecords = [];
+      copiedClipboardRecords.forEach(row => {
+        let emptyRecord = createEmptyObject(colsSchema, fetchedData);
+        const copiedCols = row.split('\t');
+        //copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
 
-        copiedRows.forEach(row => {
-          let emptyRecord = createEmptyObject(colsSchema, fetchedData);
-          // console.log(emptyRecord);
-
-          let copiedCols = row.split('\t');
-          copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
-          for (let i = 0; i < keys.length; i++) {
-            cols[keys[i]] = copiedCols[i];
-          }
-          rows.push({ ...cols });
-          cols = [];
+        emptyRecord.dataRow.forEach((record, i) => {
+          emptyRecord = changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
         });
-        // console.log(pastedData);
-      }
+
+        copiedRecords.push(emptyRecord);
+      });
+
+      setPastedRecords(copiedRecords);
     };
-    const onPasteAccept = schema => {
-      console.log('Paste Accept');
-      console.log(schema);
+    const onPasteAccept = async () => {
+      try {
+        await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
+        growlRef.current.show({
+          severity: 'success',
+          summary: resources.messages['dataPasted'],
+          life: '3000'
+        });
+      } catch (error) {
+        console.error('DataViewer error: ', error);
+        const errorResponse = error.response;
+        console.error('DataViewer errorResponse: ', errorResponse);
+        if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+          history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+        }
+      } finally {
+      }
     };
     const onRefresh = () => {
       onFetchData(sortField, sortOrder, firstRow, numRows);
@@ -342,8 +350,7 @@ const DataViewer = withRouter(
     const onSaveRecord = async record => {
       if (isNewRecord) {
         try {
-          console.log(record);
-          await DataSetService.addRecordById(dataSetId, tableId, record);
+          await DataSetService.addRecordsById(dataSetId, tableId, [record]);
           setAddDialogVisible(false);
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -389,15 +396,15 @@ const DataViewer = withRouter(
 
       const detailContent = (
         <span>
-          {resources.messages['datasetLoadingMessage']}
+          {resources.messages['dataSetLoadingMessage']}
           <strong>{editLargeStringWithDots(tableName, 22)}</strong>
-          {resources.messages['datasetLoading']}
+          {resources.messages['dataSetLoading']}
         </span>
       );
 
       growlRef.current.show({
         severity: 'info',
-        summary: resources.messages['datasetLoadingTitle'],
+        summary: resources.messages['dataSetLoadingTitle'],
         detail: detailContent,
         life: '5000'
       });
@@ -460,8 +467,8 @@ const DataViewer = withRouter(
           style={{ float: 'right' }}
           label={resources.messages['paste']}
           icon="clipboard"
-          onClick={e => {
-            onPaste(e);
+          onClick={() => {
+            datatableRef.current.onPaste();
           }}
         />
       </div>
@@ -563,7 +570,7 @@ const DataViewer = withRouter(
                   <InputText
                     id={column.field}
                     value={field.fieldData[column.field]}
-                    onChange={e => onEditAddFormInput(column.field, e.target.value, Object.create(field))}
+                    onChange={e => onEditAddFormInput(column.field, e.target.value)}
                   />
                 </div>
               </React.Fragment>
@@ -839,6 +846,7 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
+            columnsPreviewNumber={5}
             editable={true}
             //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
@@ -849,7 +857,7 @@ const DataViewer = withRouter(
             loading={loading}
             onPage={onChangePage}
             onPaste={onPaste}
-            onPasteAccept={() => onPasteAccept(colsSchema)}
+            onPasteAccept={onPasteAccept}
             onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
             onSort={onSort}
             paginator={true}
