@@ -249,9 +249,9 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-
+    DatasetValidation dsValidation = new DatasetValidation();
     dataset.getTableValues().stream().forEach(table -> {
-      DatasetValidation dsValidation = new DatasetValidation();
+
       Validation validation = new Validation();
       List<TableValidation> validations = runTableValidations(table, session);
       table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
@@ -282,10 +282,9 @@ public class ValidationServiceImpl implements ValidationService {
         validation.setValidationDate(new Date().toString());
         dsValidation.setValidation(validation);
       }
-      validationDatasetRepository.save(dsValidation);
       tableValidationRepository.saveAll(validations);
     });
-
+    validationDatasetRepository.save(dsValidation);
 
   }
 
