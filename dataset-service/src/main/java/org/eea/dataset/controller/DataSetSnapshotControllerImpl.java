@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+/**
+ * The Class DataSetSnapshotControllerImpl.
+ */
 @RestController
 @RequestMapping("/snapshot")
 public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
@@ -52,6 +56,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (hasRole('DATA_CUSTODIAN'))")
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
@@ -78,6 +83,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void createSnapshot(@PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description) {
 
@@ -105,6 +111,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -122,9 +129,17 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -143,9 +158,17 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Release snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 

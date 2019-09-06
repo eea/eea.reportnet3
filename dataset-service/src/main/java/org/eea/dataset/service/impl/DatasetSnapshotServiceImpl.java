@@ -17,11 +17,16 @@ import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class DatasetSnapshotServiceImpl.
+ */
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
+  /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
@@ -34,6 +39,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SnapshotMapper snapshotMapper;
 
+  /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
@@ -81,6 +87,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Async
   public void addSnapshot(Long idDataset, String description) throws EEAException {
 
     // 1. Create the snapshot in the metabase
@@ -110,16 +117,27 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    */
+
+
   @Override
+  @Async
   public void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
     // Remove from the metabase
-    snapshotRepository.removeSnaphot(idDataset, idSnapshot);
+    snapshotRepository.deleteById(idSnapshot);
     // Delete the file
     recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
     LOG.info("Snapshot {} removed", idSnapshot);
   }
 
+  /**
+   * Restore snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   */
   @Override
+  @Async
   public void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
     // 1. Delete the dataset values implied
@@ -134,6 +152,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
+  /**
+   * Release snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   */
   @Override
   public void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
 
@@ -143,6 +168,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
 
+  /**
+   * Obtain partition.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
   private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException {
     final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository

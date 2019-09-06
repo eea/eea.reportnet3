@@ -108,7 +108,8 @@ public class DatasetSnapshotServiceTest {
   public void testDeleteSnapshots() throws Exception {
 
     datasetSnapshotService.removeSnapshot(1L, 1L);
-    Mockito.verify(snapshotRepository, times(1)).removeSnaphot(Mockito.any(), Mockito.any());
+    Mockito.verify(snapshotRepository, times(1)).deleteById(Mockito.anyLong());
+
 
   }
 
