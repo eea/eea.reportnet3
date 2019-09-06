@@ -37,16 +37,25 @@ end template
 
 //QUERYS PART JAVA
 function boolean  isQueryDataWDFProtect(String value){
+	if(!isBlank(value)){
+		value = "";
+	}
 	return ForeingKeyDrools.isQueryDataWDFProtect(value);
 }
 
 //CODE LIST PART
 function boolean isCodeList( String value ,String codeList){
+	if(!isBlank(value)){
+		value = "";
+	}
 	return CodeListUtils.codeListValidate(value,codeList);
 }
 
 //RECORDS PART 
 function boolean isInSameRecord( String value ,RecordValue record, Integer position, String valueToHave){
+	if(!isBlank(value)){
+		value = "";
+	}
 	return ForeingKeyDrools.isInSameRecord(value,record,position,valueToHave);
 }
 
@@ -70,7 +79,7 @@ function boolean isURL( String value ){
 //NUMBER PART 
 function boolean isNegativeValue(String value, String typeData){
  
-	if(typeData.equalsIgnoreCase("Integer")){
+	if("Integer".equalsIgnoreCase(typeData)){
 		try {
 	        Integer dato = Integer.valueOf(value);
 	        if(dato < 0){
@@ -85,7 +94,7 @@ function boolean isNegativeValue(String value, String typeData){
  
 function boolean isValid( String value , String typeData){
 
-	if(typeData.equalsIgnoreCase("Integer")){
+	if("Integer".equalsIgnoreCase(typeData)){
 	
 	 	try {
 	        Integer.valueOf( value );
@@ -134,6 +143,9 @@ function boolean isBlank(String value){
 
 
 function boolean isIntervalYear( String value ,Integer initial, Integer end, Boolean interval){
+	if(!isBlank(value)){
+		value = "";
+	}
 	return DateDroolsUtils.isIntervalYear(value,initial,end,interval);
 }
 function boolean actualDateCompare(String dateToCompare,String moreLess){	
@@ -154,7 +166,7 @@ function boolean isDateYYYYMMDD( String value ){
 }
  
 function boolean isDate9999(String date){
-	if(date.equalsIgnoreCase('9999-12-31')){
+	if('9999-12-31'.equalsIgnoreCase(date)){
 		return true;
 	}	
 	return false;
@@ -163,6 +175,9 @@ function boolean isDate9999(String date){
  
  //LATITUDE AND LONGITUDE PART
 function boolean isCordenateLat( String value ){
+	if(!isBlank(value)){
+		value = "";
+	}
    if (value.contains(",")){
    	value = value.replace(",",".");
    }
@@ -175,6 +190,9 @@ function boolean isCordenateLat( String value ){
    return false;
 }  
 function boolean isCordenateLong( String value ){	
+	if(!isBlank(value)){
+		value = "";
+	}
    if (value.contains(",")){
    	value = value.replace(",",".");
    }
@@ -186,6 +204,7 @@ function boolean isCordenateLong( String value ){
    }
    return false;
  }
+ 
  
  //// PART OF TABLE
  
@@ -254,6 +273,42 @@ function boolean endUnknownPeriod(Long idRecord,String idFieldSchemaPeriodeType,
 }
 
 // MONITORING PART OF TABLES
+//1
 function boolean sameYearValidatioMonitoring(Long idRecord, String idFieldShemaDate, String idFieldSchemaSeason){
 	return RecordValidationDrools.sameYearValidatioMonitoring(idRecord,idFieldShemaDate,idFieldSchemaSeason);
+}
+
+//2
+
+function boolean maxValueintestinal(Long idRecord, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemaIntestinalEnterococciStatus){
+	return RecordValidationDrools.maxValueintestinal(idRecord,idFieldShemaIntestinalEnterococciValue,idFieldSchemaIntestinalEnterococciStatus);
+}
+//3
+function boolean maxValueEscherichiaColi(Long idRecord, String idFieldSchemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
+	return RecordValidationDrools.maxValueEscherichiaColi(idRecord,idFieldSchemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
+}
+//4
+function boolean generalStatusValidation(Long idRecord, String idFieldShemaIntestinalEnterococciStatus , 
+String idFieldSchemaEscherichiaColiStatus,String idFieldSchemaSampleStatus ){
+	return RecordValidationDrools.generalStatusValidation(idRecord,idFieldShemaIntestinalEnterococciStatus,
+	idFieldSchemaEscherichiaColiStatus,idFieldSchemaSampleStatus);
+}
+
+//5
+
+
+//6
+
+//7
+
+
+//8
+function boolean intestinalEnterococciValueValidation(Long idRecord, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemIntestinalEnterococciStatus){
+	return RecordValidationDrools.intestinalEnterococciValueValidation(idRecord,idFieldShemaIntestinalEnterococciValue,idFieldSchemIntestinalEnterococciStatus);
+}
+
+
+//9
+function boolean escherichiaColiStatusValidation(Long idRecord, String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
+	return RecordValidationDrools.escherichiaColiStatusValidation(idRecord,idFieldShemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
 }
