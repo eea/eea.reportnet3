@@ -13,9 +13,6 @@ export function SnapshotItem({ itemData, dataFlowId, dataSetId, onLoadSnapshotLi
   const resources = useContext(ResourcesContext);
 
   const onReleaseSnapshot = async snapShotId => {
-    console.log('snapShotId', snapShotId);
-    console.log('dataFlowId', dataFlowId);
-    console.log('dataSetId', dataSetId);
     const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapShotId);
 
     if (snapshotReleased) {
