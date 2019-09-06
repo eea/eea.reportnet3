@@ -25,6 +25,8 @@ const MainLayout = ({ children }) => {
       }
     }
     fetchData();
+    const bodySelector = document.querySelector('body');
+    bodySelector.style.overflow = 'hidden auto';
   }, []);
   return (
     <Fragment>
