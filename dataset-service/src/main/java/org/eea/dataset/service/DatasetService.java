@@ -267,4 +267,15 @@ public interface DatasetService {
    * @return the long
    */
   Long findTableIdByTableSchema(@DatasetId Long datasetId, String idSchema);
+
+
+  /**
+   * Delete record values to restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param partitionId the partition id
+   * @throws EEAException the EEA exception
+   */
+  void deleteRecordValuesToRestoreSnapshot(@DatasetId Long datasetId, Long partitionId)
+      throws EEAException;
 }

@@ -234,7 +234,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
-   *
+   * @return the data set VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -287,6 +287,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Save table.
    *
+   * @param datasetId the dataset id
    * @param tableValue the dataset
    */
   @Override
@@ -1095,8 +1096,29 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.saveValue(field.getId(), field.getValue());
   }
 
+  /**
+   * Find table id by table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
   @Override
   public Long findTableIdByTableSchema(Long datasetId, String idTableSchema) {
     return tableRepository.findIdByIdTableSchema(idTableSchema);
+  }
+
+  /**
+   * Delete record values to restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idPartition the id partition
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteRecordValuesToRestoreSnapshot(Long datasetId, Long idPartition)
+      throws EEAException {
+    recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
   }
 }

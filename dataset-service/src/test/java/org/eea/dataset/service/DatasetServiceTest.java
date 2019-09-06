@@ -829,4 +829,16 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }
 
+  @Test
+  public void testFindTableIdByTableSchema() {
+    datasetService.findTableIdByTableSchema(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(tableRepository, times(1)).findIdByIdTableSchema(Mockito.any());
+  }
+
+  @Test
+  public void testDeleteRecordValuesToRestoreSnapshot() throws EEAException {
+    datasetService.deleteRecordValuesToRestoreSnapshot(1L, 1L);
+    Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
+  }
+
 }
