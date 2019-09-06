@@ -17,14 +17,19 @@ import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'ui/views/_components/SplitButton';
 
 import { DataFlowService } from 'core/services/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
+const componentKey = 'app.ui.views.reportingDataFlow';
+
 export const ReportingDataFlow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(undefined);
   const [loading, setLoading] = useState(true);
@@ -108,6 +113,16 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     setIsActiveContributorsDialog(true);
   };
 
+  const checkPermissions = permissions => {
+    const permission = UserService.hasPermission(
+      user,
+      permissions,
+      `${config.permissions.DATA_FLOW}${dataFlowData.id}`
+    );
+    console.log('permission: ', permission);
+    return permission;
+  };
+
   return layout(
     <div className="rep-row">
       <DataFlowColumn
@@ -115,6 +130,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         dataFlowTitle={dataFlowData.name}
         navTitle={resources.messages['dataFlow']}
         components={['dashboard']}
+        entity={`${config.permissions.DATA_FLOW}${dataFlowData.id}`}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <div className={styles.titleBar}>
@@ -125,7 +141,9 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
             </h2>
           </div>
           <div className={styles.option_btns_wrapper}>
-            <DropdownButton icon="ellipsis" model={dropDownItems} />
+            {checkPermissions([config.permissions.PROVIDER]) && (
+              <DropdownButton icon="ellipsis" model={dropDownItems} />
+            )}
           </div>
         </div>
 
@@ -146,24 +164,60 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                 <div className={`${styles.dataSetItem}`} key={item.id}>
                   <SplitButton
                     label={resources.messages['ds']}
-                    model={[
-                      {
-                        label: resources.messages['releaseDataCollection'],
-                        icon: config.icons.archive
-                      },
-                      {
-                        label: resources.messages['importFromFile'],
-                        icon: config.icons.import
-                      },
-                      {
-                        label: resources.messages['duplicate'],
-                        icon: config.icons.clone
-                      },
-                      {
-                        label: resources.messages['properties'],
-                        icon: config.icons.info
-                      }
-                    ]}
+                    model={
+                      checkPermissions([config.permissions.PROVIDER])
+                        ? [
+                            {
+                              label: resources.messages['releaseDataCollection'],
+                              icon: config.icons.archive
+                            },
+                            {
+                              label: resources.messages['importFromFile'],
+                              icon: config.icons.import
+                            },
+                            {
+                              label: resources.messages['duplicate'],
+                              icon: config.icons.clone
+                            },
+                            {
+                              label: resources.messages['properties'],
+                              icon: config.icons.info
+                            }
+                          ]
+                        : [
+                            {
+                              label: resources.messages['properties'],
+                              icon: config.icons.info
+                            }
+                          ]
+                    }
+                    // model={
+                    //   checkPermissions([config.permissions.PROVIDER])
+                    //     ? [
+                    //         ({
+                    //           label: resources.messages['releaseDataCollection'],
+                    //           icon: config.icons.archive
+                    //         },
+                    //         {
+                    //           label: resources.messages['importFromFile'],
+                    //           icon: config.icons.import
+                    //         },
+                    //         {
+                    //           label: resources.messages['duplicate'],
+                    //           icon: config.icons.clone
+                    //         },
+                    //         {
+                    //           label: resources.messages['properties'],
+                    //           icon: config.icons.info
+                    //         })
+                    //       ]
+                    //     : [
+                    //         {
+                    //           label: resources.messages['properties'],
+                    //           icon: config.icons.info
+                    //         }
+                    //       ]
+                    // }
                     onClick={e => {
                       handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${item.id}`);
                     }}

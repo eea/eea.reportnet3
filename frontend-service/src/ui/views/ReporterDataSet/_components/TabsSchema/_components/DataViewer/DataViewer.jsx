@@ -32,6 +32,7 @@ import { DataSetService } from 'core/services/DataSet';
 
 const DataViewer = withRouter(
   ({
+    hasWritePermissions,
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
@@ -665,12 +666,13 @@ const DataViewer = withRouter(
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={'export'}
               label={resources.messages['import']}
               onClick={() => setImportDialogVisible(true)}
             />
             <Button
+              disabled={!hasWritePermissions}
               id="buttonExportTable"
               className={`p-button-rounded p-button-secondary`}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
@@ -688,7 +690,7 @@ const DataViewer = withRouter(
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={'trash'}
               label={resources.messages['deleteTable']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
