@@ -4,8 +4,7 @@ import { Snapshot } from 'core/domain/model/Snapshot/Snapshot';
 const all = async dataSetId => {
   const snapshotsDTO = await apiSnapshot.all(dataSetId);
   return snapshotsDTO.map(
-    snapshotDTO =>
-      new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.isReleased)
+    snapshotDTO => new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
   );
 };
 

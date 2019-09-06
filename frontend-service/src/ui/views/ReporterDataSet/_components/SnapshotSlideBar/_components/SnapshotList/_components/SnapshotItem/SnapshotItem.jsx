@@ -34,16 +34,23 @@ export function SnapshotItem({ itemData }) {
               }
             />
             <Button
-              tooltip={resources.messages.releaseSnapshotTooltip}
+              tooltip={
+                itemData.isReleased
+                  ? resources.messages.releasedSnapshotTooltip
+                  : resources.messages.releaseSnapshotTooltip
+              }
               tooltipOptions={{ position: 'top' }}
               icon={itemData.isReleased ? 'check' : 'cloudUpload'}
-              disabled={itemData.isReleased ? true : false}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() =>
-                snapshotContext.snapshotDispatch({
-                  type: 'release_snapshot',
-                  payload: { ...itemData }
-                })
+                snapshotContext.snapshotDispatch(
+                  itemData.isReleased
+                    ? {}
+                    : {
+                        type: 'release_snapshot',
+                        payload: { ...itemData }
+                      }
+                )
               }
             />
             <Button
