@@ -9,16 +9,15 @@ export function SnapshotList({ snapshotListData, onLoadSnapshotList, dataFlowId,
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
         {snapshotListData.map(item => (
-          <>
+          <div key={item.id}>
             <SnapshotItem
               itemData={item}
-              key={item.id}
               onLoadSnapshotList={onLoadSnapshotList}
               dataFlowId={dataFlowId}
               dataSetId={dataSetId}
             />
             <hr />
-          </>
+          </div>
         ))}
       </ul>
     </div>

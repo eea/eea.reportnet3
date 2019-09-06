@@ -13,17 +13,18 @@ export function SnapshotItem({ itemData, dataFlowId, dataSetId, onLoadSnapshotLi
   const resources = useContext(ResourcesContext);
 
   const onReleaseSnapshot = async snapShotId => {
-    const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapShotId);
     console.log('snapShotId', snapShotId);
     console.log('dataFlowId', dataFlowId);
     console.log('dataSetId', dataSetId);
+    const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapShotId);
+
     if (snapshotReleased) {
-      onLoadSnapshotList();
+      onLoadSnapshotList(dataSetId);
     }
   };
 
   return (
-    <li className={styles.listItem}>
+    <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
           <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
