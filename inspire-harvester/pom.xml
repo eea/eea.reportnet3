@@ -3,14 +3,17 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>reportnet</artifactId>
+    <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
     <version>3.0-SNAPSHOT</version>
+    <relativePath>../parent-poms/microservice</relativePath>
+
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
     <geotools.version>21.0</geotools.version>
+    <sonar.moduleKey>org.eea:reportnet:inspire-harvester:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
 
   <groupId>org.eea.inspire</groupId>

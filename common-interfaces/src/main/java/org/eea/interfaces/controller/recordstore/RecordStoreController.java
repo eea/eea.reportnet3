@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,5 +60,39 @@ public interface RecordStoreController {
    */
   @RequestMapping(value = "/connections", method = RequestMethod.GET)
   List<ConnectionDataVO> getDataSetConnections();
+
+  /**
+   * Creates the snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartitionDataset the id partition dataset
+   */
+  @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
+  void createSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset);
+
+
+  /**
+   * Restore snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
+  @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
+  void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot);
+
+  /**
+   * Delete snapshot data.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
+  @PostMapping(value = "/dataset/{datasetId}/snapshot/delete")
+  void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot);
+
 
 }

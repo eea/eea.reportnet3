@@ -2,10 +2,8 @@ package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,33 +34,16 @@ public interface DatasetMetabaseController {
 
 
   /**
-   * Gets the snapshots by id dataset.
+   * Creates the empty data set.
    *
-   * @param datasetId the dataset id
-   * @return the snapshots by id dataset
+   * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
    */
-  @GetMapping(value = "/{id}/listSnapshots", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("id") Long datasetId);
+  @PostMapping(value = "/create")
+  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
+      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
+      @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
-
-  /**
-   * Creates the snapshot.
-   *
-   * @param datasetId the dataset id
-   * @param description the description
-   */
-  @PostMapping(value = "/{id}/snapshot/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  void createSnapshot(@PathVariable("id") Long datasetId,
-      @RequestParam("description") String description);
-
-  /**
-   * Delete snapshot.
-   *
-   * @param datasetId the dataset id
-   * @param idSnapshot the id snapshot
-   */
-  @DeleteMapping(value = "/{id}/snapshot/delete/{idSnapshot}")
-  void deleteSnapshot(@PathVariable("id") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot);
 
 }
