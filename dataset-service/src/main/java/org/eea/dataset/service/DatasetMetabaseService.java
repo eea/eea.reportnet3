@@ -18,4 +18,12 @@ public interface DatasetMetabaseService {
 
 
 
+  /**
+   * Gets the dataset name.
+   *
+   * @param idDataset the id dataset
+   * @return the dataset name
+   */
+  DataSetMetabaseVO findDatasetMetabase(Long idDataset);
+
 }

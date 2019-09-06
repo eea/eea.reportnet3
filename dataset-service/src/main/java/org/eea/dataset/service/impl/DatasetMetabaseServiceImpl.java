@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -42,5 +43,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+  }
+
+  /**
+   * Gets the dataset name.
+   *
+   * @param idDataset the id dataset
+   * @return the dataset name
+   */
+  @Override
+  public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
+    Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
+    return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
 
 }

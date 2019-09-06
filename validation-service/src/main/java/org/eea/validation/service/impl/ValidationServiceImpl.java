@@ -17,6 +17,8 @@ import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -114,6 +116,9 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private DataSetControllerZuul datasetController;
+
+  @Autowired
+  private DatasetMetabaseController metabaseController;
 
   /**
    * Gets the element lenght.
@@ -244,9 +249,9 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-
+    DatasetValidation dsValidation = new DatasetValidation();
     dataset.getTableValues().stream().forEach(table -> {
-      DatasetValidation dsValidation = new DatasetValidation();
+
       Validation validation = new Validation();
       List<TableValidation> validations = runTableValidations(table, session);
       table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
@@ -271,15 +276,15 @@ public class ValidationServiceImpl implements ValidationService {
         }
         dsValidation.setDatasetValue(dataset);
         validation.setIdRule(new ObjectId().toString());
-        validation.setOriginName("dataSet_ " + dataset.getId());
+        DataSetMetabaseVO datasetMetabase = metabaseController.findDatasetMetabaseById(datasetId);
+        validation.setOriginName(datasetMetabase == null ? "" : datasetMetabase.getDataSetName());
         validation.setTypeEntity(TypeEntityEnum.DATASET);
         validation.setValidationDate(new Date().toString());
         dsValidation.setValidation(validation);
       }
-      validationDatasetRepository.save(dsValidation);
       tableValidationRepository.saveAll(validations);
     });
-
+    validationDatasetRepository.save(dsValidation);
 
   }
 
