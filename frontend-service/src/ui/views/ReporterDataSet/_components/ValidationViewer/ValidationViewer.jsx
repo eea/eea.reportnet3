@@ -9,9 +9,10 @@ import styles from './ValidationViewer.module.css';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Column } from 'primereact/column';
 
-import { ButtonsBar } from 'ui/views/_components/ButtonsBar';
+import { Button } from 'ui/views/_components/Button';
 import { ReporterDataSetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataSetService } from 'core/services/DataSet';
 
@@ -26,43 +27,6 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [defaultButtonsList] = useState([
-    {
-      label: resources.messages['visibility'],
-      icon: 'eye',
-      group: 'left',
-      disabled: true,
-      onClick: null
-    },
-    {
-      label: resources.messages['filter'],
-      icon: 'filter',
-      group: 'left',
-      disabled: true,
-      onClick: null
-    },
-    {
-      label: resources.messages['groupBy'],
-      icon: 'groupBy',
-      group: 'left',
-      disabled: true,
-      onClick: null
-    },
-    {
-      label: resources.messages['sort'],
-      icon: 'sort',
-      group: 'left',
-      disabled: true,
-      onClick: null
-    },
-    {
-      label: resources.messages['refresh'],
-      icon: 'refresh',
-      group: 'right',
-      disabled: false,
-      onClick: () => fetchData('', sortOrder, firstRow, numRows)
-    }
-  ]);
 
   useEffect(() => {
     const headers = [
@@ -151,7 +115,47 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
 
   return (
     <div>
-      <ButtonsBar buttonsList={!isUndefined(buttonsList) ? buttonsList : defaultButtonsList} />
+      {!isUndefined(buttonsList) ? (
+        buttonsList
+      ) : (
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'eye'}
+              label={resources.messages['visibility']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'filter'}
+              label={resources.messages['filter']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'groupBy'}
+              label={resources.messages['groupBy']}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon={'sort'}
+              label={resources.messages['sort']}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={() => fetchData('', sortOrder, firstRow, numRows)}
+            />
+          </div>
+        </Toolbar>
+      )}
       <div>
         <DataTable
           autoLayout={true}

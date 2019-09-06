@@ -29,6 +29,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
+import { Object } from 'es6-shim';
 
 const DataViewer = withRouter(
   ({
@@ -60,6 +61,8 @@ const DataViewer = withRouter(
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
+    const [initialCellValue, setInitialCellValue] = useState();
+    const [initialRecordValue, setInitialRecordValue] = useState();
     const [isDataDeleted, setIsDataDeleted] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
@@ -68,6 +71,7 @@ const DataViewer = withRouter(
     const [newRecord, setNewRecord] = useState({});
     const [numRows, setNumRows] = useState(10);
     const [selectedRecord, setSelectedRecord] = useState({});
+    const [selectedCellId, setSelectedCellId] = useState();
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -76,6 +80,7 @@ const DataViewer = withRouter(
 
     let growlRef = useRef();
     let exportMenuRef = useRef();
+    let datatableRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -131,7 +136,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            //editor={row => cellDataEditor(row, selectedRecord)}
+            editor={row => cellDataEditor(row, selectedRecord)}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -153,16 +158,21 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      //columnsArr.unshift(editCol, validationCol);
-      columnsArr.unshift(validationCol);
+      columnsArr.unshift(editCol, validationCol);
       setColumns(columnsArr);
-    }, [colsSchema, columnOptions, selectedRecord]);
+    }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
         DownloadFile(exportTableData, exportTableDataName);
       }
     }, [exportTableData]);
+
+    const onCancelRowEdit = () => {
+      let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
+      setEditDialogVisible(false);
+      setFetchedData(updatedValue);
+    };
 
     const onChangePage = event => {
       setNumRows(event.rows);
@@ -190,22 +200,35 @@ const DataViewer = withRouter(
     const onEditAddFormInput = (property, value, field) => {
       let record = {};
       if (!isNewRecord) {
-        record = { ...editedRecord };
-        field.fieldData[property] = value;
-        setEditedRecord(record);
+        record = Object.create(editedRecord);
+        let updatedRecord = changeRecordValue(record, property, value);
+        // field.fieldData[property] = value;
+        setEditedRecord(updatedRecord);
       } else {
         record = { ...newRecord };
-        field.fieldData[property] = value;
-        setNewRecord(record);
+        //field.fieldData[property] = value;
+        let updatedRecord = changeRecordValue(record, property, value);
+        setNewRecord(updatedRecord);
+      }
+    };
+
+    //When pressing "Escape" cell data resets to initial value
+    const onEditorEscapeChange = (props, event) => {
+      if (event.key === 'Escape') {
+        let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
+        datatableRef.current.closeEditingCell();
+        setFetchedData(updatedData);
       }
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
-        if (!fieldUpdated) {
-          console.error('Error!');
+        if (value !== initialCellValue && selectedCellId === getCellId(cell, cell.field)) {
+          const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
+          if (!fieldUpdated) {
+            console.error('Error!');
+          }
         }
       }
     };
@@ -213,6 +236,11 @@ const DataViewer = withRouter(
     const onEditorValueChange = (props, value) => {
       let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
+    };
+
+    const onEditorValueFocus = (props, value) => {
+      setSelectedCellId(getCellId(props, props.field));
+      setInitialCellValue(value);
     };
 
     const onExportTableData = async fileType => {
@@ -277,10 +305,11 @@ const DataViewer = withRouter(
       onFetchData(sortField, sortOrder, firstRow, numRows);
     };
 
-    const onSelectRecord = (event, value) => {
+    const onSelectRecord = val => {
       setIsNewRecord(false);
-      setSelectedRecord(value);
-      setEditedRecord(value);
+      setSelectedRecord({ ...val });
+      setInitialRecordValue(getInitialRecordValues(val));
+      setEditedRecord({ ...val });
     };
 
     const onSaveRecord = async record => {
@@ -310,6 +339,7 @@ const DataViewer = withRouter(
             history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
           }
         } finally {
+          onCancelRowEdit();
           setLoading(false);
         }
       }
@@ -375,7 +405,6 @@ const DataViewer = withRouter(
           icon="cancel"
           onClick={() => {
             setAddDialogVisible(false);
-            setNewRecord({});
           }}
         />
         <Button
@@ -402,20 +431,38 @@ const DataViewer = withRouter(
       </div>
     );
 
-    const cellDataEditor = (cell, record) => {
+    const cellDataEditor = (cells, record) => {
       return (
         <InputText
           type="text"
-          value={getCellValue(cell, cell.field)}
-          onChange={e => onEditorValueChange(cell, e.target.value)}
-          onBlur={e => onEditorSubmitValue(cell, e.target.value, record)}
+          value={getCellValue(cells, cells.field)}
+          onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+          onChange={e => onEditorValueChange(cells, e.target.value)}
+          onFocus={e => onEditorValueFocus(cells, e.target.value)}
+          onKeyDown={e => onEditorEscapeChange(cells, e)}
         />
       );
+    };
+
+    const changeRecordInTable = (tableData, rowIndex) => {
+      let record = tableData[rowIndex];
+
+      for (let i = 0; i < initialRecordValue.length; i++) {
+        record = changeRecordValue(record, initialRecordValue[i][0], initialRecordValue[i][1]);
+      }
+
+      tableData[rowIndex] = record;
+      return tableData;
     };
 
     const changeCellValue = (tableData, rowIndex, field, value) => {
       tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
       return tableData;
+    };
+
+    const changeRecordValue = (recordData, field, value) => {
+      recordData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
+      return recordData;
     };
 
     const createEmptyObject = (columnsSchema, data) => {
@@ -448,30 +495,29 @@ const DataViewer = withRouter(
 
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          label={resources.messages['cancel']}
-          icon="cancel"
-          onClick={() => {
-            setEditedRecord(selectedRecord);
-            setEditDialogVisible(false);
-          }}
-        />
+        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
         <Button
           label={resources.messages['save']}
           icon="save"
           onClick={() => {
-            onSaveRecord(editedRecord);
+            try {
+              onSaveRecord(editedRecord);
+            } catch (error) {
+              console.error(error);
+            }
           }}
         />
       </div>
     );
 
     const editRecordForm = colsSchema.map((column, i) => {
+      const arr = [];
       //Avoid row id Field
       if (editDialogVisible) {
         if (i < colsSchema.length - 1) {
           if (!isUndefined(editedRecord.dataRow)) {
-            let field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            const field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            arr.push([column.field, field.fieldData[column.field]]);
             return (
               <React.Fragment key={column.field}>
                 <div className="p-col-4" style={{ padding: '.75em' }}>
@@ -481,7 +527,7 @@ const DataViewer = withRouter(
                   <InputText
                     id={column.field}
                     value={field.fieldData[column.field]}
-                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
+                    onChange={e => onEditAddFormInput(column.field, e.target.value, Object.create(field))}
                   />
                 </div>
               </React.Fragment>
@@ -516,8 +562,12 @@ const DataViewer = withRouter(
         };
         return arrayDataAndValidations;
       });
-
       setFetchedData(dataFiltered);
+    };
+
+    const getCellId = (tableData, field) => {
+      const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
+      return value.length > 0 ? value[0].fieldData.id : undefined;
     };
 
     const getCellValue = (tableData, field) => {
@@ -532,6 +582,27 @@ const DataViewer = withRouter(
       const exportTableMenu = document.getElementById('exportTableMenu');
       exportTableMenu.style.top = buttonTopPosition;
       exportTableMenu.style.left = `${buttonLeftPosition}px`;
+    };
+
+    const getInitialRecordValues = record => {
+      const arr = [];
+      colsSchema.map((column, i) => {
+        if (i < colsSchema.length - 1) {
+          if (!isUndefined(record.dataRow)) {
+            const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            arr.push([column.field, field.fieldData[column.field]]);
+          }
+        }
+      });
+      return arr;
+    };
+
+    const getRecordId = (tableData, record) => {
+      return tableData
+        .map(e => {
+          return e.recordId;
+        })
+        .indexOf(record.recordId);
     };
 
     const newRecordForm = colsSchema.map((column, i) => {
@@ -733,7 +804,8 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
-            //editable={true}
+            editable={true}
+            //emptyMessage={resources.messages['noDataInDataTable']}
             first={firstRow}
             footer={addRowFooter}
             header={header}
@@ -741,16 +813,17 @@ const DataViewer = withRouter(
             loading={loading}
             onPage={onChangePage}
             onPaste={() => console.log('Paste')}
-            // onRowSelect={e => onSelectRecord(e, e.data)}
+            onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
+            ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}
             rowClassName={rowClassName}
             rows={numRows}
             rowsPerPageOptions={[5, 10, 20, 100]}
-            // selectionMode="single"
+            selectionMode="single"
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
