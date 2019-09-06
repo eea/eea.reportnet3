@@ -17,6 +17,8 @@ import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -30,7 +32,6 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -115,10 +116,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
-
-  /** The dataset repository. */
   @Autowired
-  private FieldRepositoryImpl fieldRepositoryImpl;
+  private DatasetMetabaseController metabaseController;
+
 
   /**
    * Gets the element lenght.
@@ -256,7 +256,8 @@ public class ValidationServiceImpl implements ValidationService {
       List<TableValidation> validations = runTableValidations(table, session);
       table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
         tableValidation.setTableValue(table);
-        if (validation.getLevelError() == null || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+        if (validation.getLevelError() == null
+            || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
           if (TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
             validation.setLevelError(TypeErrorEnum.ERROR);
           } else {
@@ -275,7 +276,8 @@ public class ValidationServiceImpl implements ValidationService {
         }
         dsValidation.setDatasetValue(dataset);
         validation.setIdRule(new ObjectId().toString());
-        validation.setOriginName("dataSet_ " + dataset.getId());
+        DataSetMetabaseVO datasetMetabase = metabaseController.findDatasetMetabaseById(datasetId);
+        validation.setOriginName(datasetMetabase == null ? "" : datasetMetabase.getDataSetName());
         validation.setTypeEntity(TypeEntityEnum.DATASET);
         validation.setValidationDate(new Date().toString());
         dsValidation.setValidation(validation);
@@ -312,7 +314,8 @@ public class ValidationServiceImpl implements ValidationService {
         if (null != row.getRecordValidations()) {
           row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
             rowValidation.setRecordValue(row);
-            if (validation.getLevelError() == null || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+            if (validation.getLevelError() == null
+                || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
               if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
                 validation.setLevelError(TypeErrorEnum.ERROR);
               } else {

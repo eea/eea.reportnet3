@@ -17,6 +17,8 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -166,6 +168,10 @@ public class ValidationServiceTest {
 
   /** The validation. */
   private Validation validation;
+
+  /** The dataset metabase. */
+  @Mock
+  private DatasetMetabaseController datasetMetabase;
 
   /**
    * Inits the mocks.
@@ -968,6 +974,8 @@ public class ValidationServiceTest {
     tableVals.add(tableValidation);
     datasetValue.getTableValues().get(0).setTableValidations(tableVals);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(datasetMetabase.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(new DataSetMetabaseVO());
     validationServiceImpl.validateTable(1L, kieSession);
   }
 
@@ -1012,6 +1020,8 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(0).setId(2L);
     datasetValue.getTableValues().get(0).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(datasetMetabase.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(new DataSetMetabaseVO());
     validationServiceImpl.validateTable(1L, kieSession);
   }
 }

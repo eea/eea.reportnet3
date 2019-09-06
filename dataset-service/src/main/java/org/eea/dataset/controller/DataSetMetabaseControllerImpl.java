@@ -1,12 +1,12 @@
 package org.eea.dataset.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.List;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The Class DataSetMetabaseControllerImpl.
@@ -142,6 +143,19 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
+  }
+
+  /**
+   * Find dataset name.
+   *
+   * @param idDataSet the id data set
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset) {
+    return datasetMetabaseService.findDatasetMetabase(idDataset);
   }
 
 }

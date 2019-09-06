@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -64,5 +65,15 @@ public interface DatasetMetabaseController {
   @DeleteMapping(value = "/{id}/snapshot/delete/{idSnapshot}")
   void deleteSnapshot(@PathVariable("id") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
+
+
+  /**
+   * Find dataset name.
+   *
+   * @param idDataSet the id data set
+   * @return the string
+   */
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset);
 
 }

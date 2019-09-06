@@ -45,4 +45,12 @@ public interface DatasetMetabaseService {
    */
   void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
+  /**
+   * Gets the dataset name.
+   *
+   * @param idDataset the id dataset
+   * @return the dataset name
+   */
+  DataSetMetabaseVO findDatasetMetabase(Long idDataset);
+
 }
