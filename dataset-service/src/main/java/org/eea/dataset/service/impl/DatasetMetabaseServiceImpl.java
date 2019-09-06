@@ -43,8 +43,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
-  }
-
   /**
    * Gets the dataset name.
    *
@@ -56,4 +54,5 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
     return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
 
+  }
 }
