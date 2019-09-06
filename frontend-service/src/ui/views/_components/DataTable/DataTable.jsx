@@ -1,15 +1,19 @@
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { isUndefined } from 'lodash';
+
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Paginator } from 'primereact/paginator';
-import DomHandler from 'ui/DomHandler';
-import ObjectUtils from 'ui/ObjectUtils';
 import { ScrollableView } from './_components/ScrollableView';
 import { TableBody } from './_components/TableBody';
 import { TableFooter } from './_components/TableFooter';
 import { TableHeader } from './_components/TableHeader';
 import { TableLoadingBody } from './_components/TableLoadingBody';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+
+import classNames from 'classnames';
+
+import DomHandler from 'ui/DomHandler';
+import ObjectUtils from 'ui/ObjectUtils';
+import PropTypes from 'prop-types';
 
 export class DataTable extends Component {
   static defaultProps = {
@@ -223,6 +227,7 @@ export class DataTable extends Component {
     this.onPasteAccept = this.onPasteAccept.bind(this);
     this.onPasteCancel = this.onPasteCancel.bind(this);
     this.frozenSelectionMode = null;
+    this.checkPastedColumnsErrors = this.checkPastedColumnsErrors.bind(this);
     //document.addEventListener('paste', event => this.onPaste(event));
   }
 
@@ -424,20 +429,19 @@ export class DataTable extends Component {
   }
 
   onPaste(event) {
-    if (!this.props.onPaste) {
-      console.log('No viene onPaste');
-      let clipboardData = event.clipboardData || window.clipboardData;
-      let pastedData = clipboardData.getData('Text');
-      this.setState({
-        confirmVisible: true,
-        pastedData: pastedData
-      });
-    } else {
-      console.log('Viene onPaste');
+    //Preview data
+    // this.props.pastedRecords;
+    // this.props.recordsPreviewNumber;
+    // this.props.columnsPreviewNumber;
+
+    if (this.props.onPaste) {
       this.props.onPaste();
       this.setState({
-        confirmVisible: true
+        confirmVisible: true,
+        pastedData: this.props.pastedData
       });
+    } else {
+      //Default component paste
     }
   }
 
@@ -499,6 +503,39 @@ export class DataTable extends Component {
 
     if (this.props.onValueChange) {
       this.props.onValueChange();
+    }
+  }
+
+  checkPastedColumnsErrors() {
+    let correctColumns = true;
+    if (this.props.pastedRecords) {
+      if (this.props.pastedRecords.length > 0) {
+        let i = 0;
+        do {
+          if (!isUndefined(this.props.pastedRecords[i])) {
+            const pastedColumns = this.props.pastedRecords[i].dataRow.filter(d => Object.values(d.fieldData)[0]);
+            if (pastedColumns.length !== this.props.children.length - 3) {
+              correctColumns = false;
+            }
+            i++;
+          }
+        } while (i < this.props.pastedRecords.length || !correctColumns);
+      }
+    }
+
+    if (!correctColumns) {
+      return (
+        <div>
+          <span style={{ fontWeight: 'bold' }}>Warning! There are rows with a wrong number of columns</span>
+          <span>Do you still want to paste this data?</span>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <span>Do you want to paste this data?</span>
+        </div>
+      );
     }
   }
 
@@ -1536,7 +1573,10 @@ export class DataTable extends Component {
           maximizable={false}
           labelConfirm="Yes"
           labelCancel="No">
-          Do you want to paste this data?
+          Copied records: {this.props.pastedRecords ? this.props.pastedRecords.length : null}
+          <br />
+          {this.checkPastedColumnsErrors()}
+          <br />
         </ConfirmDialog>
       </React.Fragment>
     );

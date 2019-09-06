@@ -177,7 +177,7 @@ const DataViewer = withRouter(
       onFetchData(sortField, sortOrder, event.first, event.rows);
     };
 
-    const onConfirmDelete = async () => {
+    const onConfirmDeleteTable = async () => {
       setDeleteDialogVisible(false);
       const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
       if (dataDeleted) {
@@ -187,8 +187,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteRow = async () => {
       setDeleteDialogVisible(false);
-      let field = selectedRecord.dataRow.filter(row => Object.keys(row.fieldData)[0] === 'id')[0];
-      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, field.fieldData['id']);
+      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, selectedRecord.recordId);
       if (recordDeleted) {
         setIsRecordDeleted(true);
       }
@@ -199,11 +198,9 @@ const DataViewer = withRouter(
       if (!isNewRecord) {
         record = Object.create(editedRecord);
         let updatedRecord = changeRecordValue(record, property, value);
-        // field.fieldData[property] = value;
         setEditedRecord(updatedRecord);
       } else {
         record = { ...newRecord };
-        //field.fieldData[property] = value;
         let updatedRecord = changeRecordValue(record, property, value);
         setNewRecord(updatedRecord);
       }
@@ -315,11 +312,12 @@ const DataViewer = withRouter(
 
         copiedRecords.push(emptyRecord);
       });
-
+      console.log(copiedRecords);
       setPastedRecords(copiedRecords);
     };
     const onPasteAccept = async () => {
       try {
+        console.log(pastedRecords);
         await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
         growlRef.current.show({
           severity: 'success',
@@ -910,7 +908,7 @@ const DataViewer = withRouter(
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           maximizable={false}
-          onConfirm={onConfirmDelete}
+          onConfirm={onConfirmDeleteTable}
           onHide={() => onSetVisible(setDeleteDialogVisible, false)}
           visible={deleteDialogVisible}>
           {resources.messages['deleteDatasetTableConfirm']}

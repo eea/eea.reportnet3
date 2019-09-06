@@ -37,7 +37,7 @@
 		"dataFlowAcceptedPendingTab": "Pending & Accepted",
 		"dataFlowCompletedTab": "Completed",
 		"dataFlowTask": "Dataflow Task",
-		"dataPasted": "Data has been successfully pasted",
+		"dataPasted": "Data has been successfully pasted",		
 		"dataProviderManageContributorsDialogTitle": "Manage roles for data flow",
 		"dataSet": "Dataset",
         "dataSetLoadingTitle": "Data Loading",
