@@ -54,7 +54,6 @@ import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -122,9 +121,6 @@ public class DatasetServiceTest {
 
   @Mock
   private KafkaSender kafkaSender;
-
-  @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
 
   @Mock
   private RecordRepository recordRepository;
@@ -345,17 +341,6 @@ public class DatasetServiceTest {
     datasetService.saveTable(1L, new TableValue());
     Mockito.verify(tableRepository, times(1)).saveAndFlush(Mockito.any());
   }
-
-
-
-  @Test
-  public void testCreateEmptyDataset() throws Exception {
-    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
-    datasetService.createEmptyDataset("", "5d0c822ae1ccd34cfcd97e20", 1L);
-    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any());
-  }
-
 
   @Test
   public void testDeleteImportData() throws Exception {

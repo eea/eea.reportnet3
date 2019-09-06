@@ -2,7 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -227,39 +226,6 @@ public class DatasetServiceImpl implements DatasetService {
   private RecordValidationMapper recordValidationMapper;
 
 
-  /**
-   * Creates the empty dataset.
-   *
-   * @param datasetName the dataset name
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void createEmptyDataset(final String datasetName, String idDatasetSchema, Long idDataflow)
-      throws EEAException {
-
-    ReportingDataset reportingData = new ReportingDataset();
-    reportingData.setDataSetName(datasetName);
-    reportingData.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-    reportingData.setDataflowId(idDataflow);
-    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
-    partition.setUsername("root");
-    partition.setIdDataSet(reportingData);
-    List<PartitionDataSetMetabase> partitions = new ArrayList<>();
-    partitions.add(partition);
-    reportingData.setPartitions(partitions);
-    // save reporting dataset into metabase
-    reportingDatasetRepository.save(reportingData);
-
-    // create the dataset into datasets
-    recordStoreControllerZull.createEmptyDataset("dataset_" + reportingData.getId(),
-        idDatasetSchema);
-
-
-  }
 
   /**
    * Process file.

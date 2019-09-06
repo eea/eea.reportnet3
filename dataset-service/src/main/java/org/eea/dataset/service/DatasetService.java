@@ -24,18 +24,6 @@ public interface DatasetService {
 
 
   /**
-   * Creates the empty dataset.
-   *
-   * @param datasetName the dataset name
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
-   *
-   * @throws EEAException the EEA exception
-   */
-  void createEmptyDataset(String datasetName, String idDatasetSchema, Long idDataflow)
-      throws EEAException;
-
-  /**
    * Process the file: read, parse and save in the db.
    *
    * @param datasetId the dataset id

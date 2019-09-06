@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -160,31 +159,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
-  /**
-   * Creates the empty data set.
-   *
-   * @param datasetname the datasetname
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/create")
-  public void createEmptyDataSet(
-      @RequestParam(value = "datasetName", required = true) final String datasetname,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
-      @RequestParam(value = "idDataflow", required = false) Long idDataflow) {
-    if (StringUtils.isBlank(datasetname)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    try {
-      datasetService.createEmptyDataset(datasetname, idDatasetSchema, idDataflow);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-  }
 
   /**
    * Load dataset data.
