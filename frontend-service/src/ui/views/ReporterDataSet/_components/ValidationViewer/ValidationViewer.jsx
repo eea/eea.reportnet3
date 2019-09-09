@@ -16,7 +16,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataSetService } from 'core/services/DataSet';
 
-const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefined }) => {
+const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefined, hasWritePermissions }) => {
   const contextReporterDataSet = useContext(ReporterDataSetContext);
   const resources = useContext(ResourcesContext);
   const [columns, setColumns] = useState([]);

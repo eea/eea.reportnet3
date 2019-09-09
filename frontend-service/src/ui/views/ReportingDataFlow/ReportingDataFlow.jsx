@@ -16,6 +16,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'ui/views/_components/SplitButton';
@@ -28,6 +30,7 @@ import { ScrollPanel } from 'primereact/scrollpanel';
 
 export const ReportingDataFlow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataFlowData, setDataFlowData] = useState(undefined);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -35,6 +38,19 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [dataSetIdToProps, setDataSetIdToProps] = useState();
+  const [hasWritePermissions, setHasWritePermissions] = useState(false);
+
+  useEffect(() => {
+    if (!isUndefined(user.roles)) {
+      setHasWritePermissions(
+        UserService.hasPermission(
+          user,
+          [config.permissions.PROVIDER],
+          `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
+        )
+      );
+    }
+  }, [user]);
 
   const home = {
     icon: config.icons['home'],
@@ -129,6 +145,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         dataFlowTitle={dataFlowData.name}
         navTitle={resources.messages.dataFlow}
         components={['dashboard']}
+        entity={`${config.permissions.DATA_FLOW}${dataFlowData.id}`}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <div className={styles.titleBar}>
@@ -139,7 +156,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
             </h2>
           </div>
           <div className={styles.option_btns_wrapper}>
-            <DropdownButton icon="ellipsis" model={dropDownItems} />
+            {hasWritePermissions && <DropdownButton icon="ellipsis" model={dropDownItems} />}
           </div>
         </div>
 
@@ -159,28 +176,42 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               return (
                 <div className={`${styles.dataSetItem}`} key={dataSet.id}>
                   <SplitButton
+                    label={resources.messages['ds']}
+                    model={
+                      hasWritePermissions
+                        ? [
+                            {
+                              label: resources.messages.releaseDataCollection,
+                              icon: config.icons.cloudUpload,
+                              command: () => {
+                                showReleaseSnapshotDialog(dataSet.id);
+                              }
+                            },
+                            {
+                              label: resources.messages['releaseDataCollection'],
+                              icon: config.icons.archive
+                            },
+                            {
+                              label: resources.messages['importFromFile'],
+                              icon: config.icons.import
+                            },
+                            {
+                              label: resources.messages['duplicate'],
+                              icon: config.icons.clone
+                            },
+                            {
+                              label: resources.messages['properties'],
+                              icon: config.icons.info
+                            }
+                          ]
+                        : [
+                            {
+                              label: resources.messages['properties'],
+                              icon: config.icons.info
+                            }
+                          ]
+                    }
                     label={resources.messages.ds}
-                    model={[
-                      {
-                        label: resources.messages.releaseDataCollection,
-                        icon: config.icons.cloudUpload,
-                        command: () => {
-                          showReleaseSnapshotDialog(dataSet.id);
-                        }
-                      },
-                      {
-                        label: resources.messages.importFromFile,
-                        icon: config.icons.import
-                      },
-                      {
-                        label: resources.messages.duplicate,
-                        icon: config.icons.clone
-                      },
-                      {
-                        label: resources.messages.properties,
-                        icon: config.icons.info
-                      }
-                    ]}
                     onClick={() => {
                       handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${dataSet.id}`);
                     }}
