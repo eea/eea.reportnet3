@@ -1811,6 +1811,11 @@ form .error {
   color: var(--errors);
 }
 
+/*Tooltip*/
+.p-tooltip {
+  z-index: 4000 !important;
+}
+
 /* buttons */
 
 @keyframes p-progress-spinner-color {
