@@ -48,7 +48,6 @@ const DataViewer = withRouter(
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-    const [editDataAvailable, setEditDataAvailable] = useState(true);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [exportButtonsList, setExportButtonsList] = useState([]);
@@ -151,7 +150,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            editor={editDataAvailable ? row => cellDataEditor(row, selectedRecord) : null}
+            editor={hasWritePermissions ? row => cellDataEditor(row, selectedRecord) : null}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -173,7 +172,7 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      editDataAvailable ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       setColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
@@ -873,16 +872,16 @@ const DataViewer = withRouter(
             autoLayout={true}
             columnsPreviewNumber={5}
             contextMenuSelection={selectedRecord}
-            editable={editDataAvailable}
+            editable={hasWritePermissions}
             //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
             first={firstRow}
-            footer={editDataAvailable ? addRowFooter : null}
+            footer={hasWritePermissions ? addRowFooter : null}
             header={header}
             lazy={true}
             loading={loading}
             onContextMenu={
-              editDataAvailable
+              hasWritePermissions
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);
