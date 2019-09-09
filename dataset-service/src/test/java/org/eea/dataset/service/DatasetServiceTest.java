@@ -841,4 +841,10 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
   }
 
+  @Test
+  public void testSanitizeTableValuesToRestoreSnapshot() throws EEAException {
+    datasetService.sanitizeTableValuesToRestoreSnapshot(1L);
+    Mockito.verify(tableRepository, times(1)).sanitizeTableValuesToRestoreSnapshot();
+  }
+
 }

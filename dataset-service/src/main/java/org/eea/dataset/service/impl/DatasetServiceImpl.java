@@ -1121,4 +1121,16 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException {
     recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
   }
+
+  /**
+   * Sanitize table values to restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void sanitizeTableValuesToRestoreSnapshot(Long datasetId) throws EEAException {
+    tableRepository.sanitizeTableValuesToRestoreSnapshot();
+  }
 }
