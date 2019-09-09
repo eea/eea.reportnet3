@@ -423,6 +423,7 @@ const DataViewer = withRouter(
           style={{ float: 'left' }}
           label={resources.messages['add']}
           icon="add"
+          disabled={!hasWritePermissions}
           onClick={() => {
             setIsNewRecord(true);
             setAddDialogVisible(true);
