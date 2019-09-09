@@ -38,6 +38,20 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [dataSetIdToProps, setDataSetIdToProps] = useState();
+  const [hasWritePermissions, setHasWritePermissions] = useState(false);
+
+  useEffect(() => {
+    if (!isUndefined(user.roles)) {
+      setHasWritePermissions(
+        UserService.hasPermission(
+          user,
+          [config.permissions.PROVIDER],
+          `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
+        )
+      );
+    }
+    console.log('user: ', user);
+  }, [user]);
 
   const home = {
     icon: config.icons['home'],
@@ -125,16 +139,6 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     setIsActiveReleaseSnapshotDialog(true);
   };
 
-  const checkPermissions = permissions => {
-    const permission = UserService.hasPermission(
-      user,
-      permissions,
-      `${config.permissions.DATA_FLOW}${dataFlowData.id}`
-    );
-    console.log('permission: ', permission);
-    return permission;
-  };
-
   return layout(
     <div className="rep-row">
       <DataFlowColumn
@@ -153,9 +157,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
             </h2>
           </div>
           <div className={styles.option_btns_wrapper}>
-            {checkPermissions([config.permissions.PROVIDER]) && (
-              <DropdownButton icon="ellipsis" model={dropDownItems} />
-            )}
+            {hasWritePermissions && <DropdownButton icon="ellipsis" model={dropDownItems} />}
           </div>
         </div>
 
@@ -177,7 +179,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                   <SplitButton
                     label={resources.messages['ds']}
                     model={
-                      checkPermissions([config.permissions.PROVIDER])
+                      hasWritePermissions
                         ? [
                             {
                               label: resources.messages.releaseDataCollection,
