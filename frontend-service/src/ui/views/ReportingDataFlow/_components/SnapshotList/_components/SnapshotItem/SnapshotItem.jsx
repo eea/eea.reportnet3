@@ -34,7 +34,7 @@ export function SnapshotItem({ itemData, dataFlowId, dataSetId, onLoadSnapshotLi
                   ? resources.messages.releasedSnapshotTooltip
                   : resources.messages.releaseSnapshotTooltip
               }
-              tooltipOptions={{ position: 'top' }}
+              tooltipOptions={{ position: 'right' }}
               icon={itemData.isReleased ? 'check' : 'cloudUpload'}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() => {

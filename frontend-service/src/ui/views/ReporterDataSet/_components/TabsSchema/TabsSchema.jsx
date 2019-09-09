@@ -15,7 +15,8 @@ export const TabsSchema = ({
   recordPositionId,
   selectedRecordErrorId,
   tables,
-  tableSchemaColumns
+  tableSchemaColumns,
+  hasWritePermissions
 }) => {
   let tabs =
     tables && tableSchemaColumns
@@ -24,6 +25,7 @@ export const TabsSchema = ({
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
                 <DataViewer
+                  hasWritePermissions={hasWritePermissions}
                   buttonsList={buttonsList}
                   key={table.id}
                   tableId={table.id}
