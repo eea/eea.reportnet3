@@ -101,7 +101,7 @@ public class KieBaseManagerTest {
     dataSchema.setTableSchemas(tableSchemasList);
     // CALL SERVICES
     when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
-    kieBaseManager.reloadRules(1L);
+    kieBaseManager.reloadRules(1L, 1L);
   }
 
 }

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
@@ -32,6 +34,7 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -119,7 +122,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DatasetMetabaseController metabaseController;
 
-
   /**
    * Gets the element lenght.
    *
@@ -202,7 +204,7 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
+      kieSession = kieBaseManager.reloadRules(dataflowId, datasetId).newKieSession();
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -308,24 +310,36 @@ public class ValidationServiceImpl implements ValidationService {
       List<RecordValue> validatedRecords =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
       Validation validation = new Validation();
-      validatedRecords.stream().filter(Objects::nonNull).forEach(row -> {
-        List<RecordValidation> resultRecords = runRecordValidations(row, session);
-        if (null != row.getRecordValidations()) {
-          row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
-            rowValidation.setRecordValue(row);
-            if (validation.getLevelError() == null
-                || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
-              if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
-                validation.setLevelError(TypeErrorEnum.ERROR);
-              } else {
-                validation.setLevelError(TypeErrorEnum.WARNING);
+
+      int totalrecord = validatedRecords.size();
+
+      ForkJoinPool myPool = new ForkJoinPool(totalrecord / 1000);
+      try {
+        myPool.submit(() -> validatedRecords.stream().filter(Objects::nonNull).forEach(row -> {
+          List<RecordValidation> resultRecords = runRecordValidations(row, session);
+          if (null != row.getRecordValidations()) {
+            row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
+              rowValidation.setRecordValue(row);
+              if (validation.getLevelError() == null
+                  || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+                if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
+                  validation.setLevelError(TypeErrorEnum.ERROR);
+                } else {
+                  validation.setLevelError(TypeErrorEnum.WARNING);
+                }
               }
-            }
-            validation.setOriginName(rowValidation.getValidation().getOriginName());
-          });
-          recordValList.addAll(resultRecords);
-        }
-      });
+              validation.setOriginName(rowValidation.getValidation().getOriginName());
+            });
+            recordValList.addAll(resultRecords);
+          }
+        })).get();
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (ExecutionException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       // Adding errors into tables
       if (validation.getLevelError() != null) {
         if (TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
@@ -630,6 +644,46 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
+  }
+
+  /** The dataset repository. */
+  @Autowired
+  private DatasetRepositoryImpl datasetRepositoryImpl;
+
+  /**
+   * Dataset validation DO 02 query.
+   *
+   * @param do02 the do 02
+   * @return the boolean
+   */
+  @Override
+  public Boolean datasetValidationDO02Query(String DO02) {
+    return datasetRepositoryImpl.datasetValidationQuery(DO02);
+  }
+
+  @Override
+  public Boolean datasetValidationDO03Query(String DO03) {
+    return datasetRepositoryImpl.datasetValidationQuery(DO03);
+  }
+
+  @Override
+  public Boolean datasetValidationDC01AQuery(String DC01A) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC01A);
+  }
+
+  @Override
+  public Boolean datasetValidationDC01BQuery(String DC01B) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC01B);
+  }
+
+  @Override
+  public Boolean datasetValidationDC02Query(String DC02) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC02);
+  }
+
+  @Override
+  public Boolean datasetValidationDC03Query(String DC03) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC03);
   }
 
 }

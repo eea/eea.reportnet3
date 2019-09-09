@@ -1,5 +1,7 @@
 package org.eea.recordstore.service;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -58,6 +60,41 @@ public interface RecordStoreService {
    * @throws RecordStoreAccessException the docker access exception
    */
   List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException;
+
+
+  /**
+   * Creates the data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param idPartitionDataset the id partition dataset
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
+      throws SQLException, IOException, RecordStoreAccessException;
+
+  /**
+   * Restore data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+      throws SQLException, IOException, RecordStoreAccessException;
+
+  /**
+   * Delete data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
 
 
 }

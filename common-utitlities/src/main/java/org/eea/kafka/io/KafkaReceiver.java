@@ -15,11 +15,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaReceiver {
 
-  /** The handler. */
+  /**
+   * The handler.
+   */
   @Autowired(required = false)
   private EEAEventHandler handler;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(KafkaReceiver.class);
 
 
@@ -28,7 +32,7 @@ public class KafkaReceiver {
    *
    * @param message the message
    */
-  @KafkaListener(topics = "Hello-Kafka2")
+  @KafkaListener(topics = "DATA_REPORTING_TOPIC")
   public void listenMessage(final Message<EEAEventVO> message) {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {

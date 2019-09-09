@@ -16,7 +16,7 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
 
   const onAcceptDataFlow = async () => {
     try {
-      const status = await DataFlowService.accept(itemContent.id);
+      const status = await DataFlowService.accept(itemContent.requestId);
       if (status >= 200 && status <= 299) {
         dataFetch();
       } else {
@@ -28,7 +28,7 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
   };
   const onRejectDataFlow = async () => {
     try {
-      const status = await DataFlowService.reject(itemContent.id);
+      const status = await DataFlowService.reject(itemContent.requestId);
       if (status >= 200 && status <= 299) {
         dataFetch();
       } else {
