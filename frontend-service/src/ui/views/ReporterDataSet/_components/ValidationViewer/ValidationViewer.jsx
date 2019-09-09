@@ -49,6 +49,9 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     ];
     let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
     columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
+    columnsArr.push(
+      <Column key="dataSetPartitionId" field="dataSetPartitionId" header="" className={styles.VisibleHeader} />
+    );
     columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
 

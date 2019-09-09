@@ -228,6 +228,9 @@ export class DataTable extends Component {
     this.onPasteCancel = this.onPasteCancel.bind(this);
     this.frozenSelectionMode = null;
     this.checkPastedColumnsErrors = this.checkPastedColumnsErrors.bind(this);
+    this.previewPastedDataBody = this.previewPastedDataBody.bind(this);
+    this.previewPastedDataHeaders = this.previewPastedDataHeaders.bind(this);
+    this.previewPastedData = this.previewPastedData.bind(this);
     //document.addEventListener('paste', event => this.onPaste(event));
   }
 
@@ -449,30 +452,7 @@ export class DataTable extends Component {
     if (this.props.onPasteAccept) {
       this.props.onPasteAccept();
     } else {
-      let data = this.props.value;
-      console.log(this.props.children);
-      console.log(this.props.children[3].key);
-      let pastedData = this.state.pastedData;
-      let keys = Object.keys(data[0]);
-      let copiedRows = pastedData.split('\n').filter(l => l.length > 0);
-      let rows = [];
-      let cols = [];
-
-      copiedRows.forEach(row => {
-        let copiedCols = row.split('\t');
-        copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
-        for (let i = 0; i < keys.length; i++) {
-          cols[keys[i]] = copiedCols[i];
-        }
-        rows.push({ ...cols });
-        cols = [];
-      });
-
-      data.push(...rows);
-      this.setState({
-        value: data,
-        confirmVisible: false
-      });
+      //Default paste Accept
     }
 
     this.setState({
@@ -506,34 +486,111 @@ export class DataTable extends Component {
     }
   }
 
+  previewPastedData() {
+    return (
+      <div className="p-datatable-wrapper">
+        <table className="p-datatable" style={{ width: '100%' }}>
+          <thead className="p-datatable-thead">
+            <tr>{this.previewPastedDataHeaders()}</tr>
+          </thead>
+          <tbody className="p-datatable-tbody">{this.previewPastedDataBody()}</tbody>
+        </table>
+      </div>
+    );
+  }
+
+  previewPastedDataHeaders() {
+    if (this.props.pastedRecords) {
+      if (this.props.pastedRecords.length > 0) {
+        const filteredColumns = this.props.children.filter(
+          column => column.key !== 'actions' && column.key !== 'recordValidation' && column.key !== 'id'
+        );
+        let columns = filteredColumns.slice(0, this.props.recordsPreviewNumber);
+
+        columns = columns.map((column, i) => {
+          return (
+            <th key={i} className="p-resizable-column">
+              {column.props.header}
+            </th>
+          );
+        });
+        if (filteredColumns.length > this.props.columnsPreviewNumber) {
+          columns.push(<th key="previewColumn">...</th>);
+        }
+        return columns;
+      }
+    }
+  }
+
+  previewPastedDataBody() {
+    if (this.props.pastedRecords) {
+      if (this.props.pastedRecords.length > 0) {
+        const filteredColumns = this.props.children.filter(
+          column => column.key !== 'actions' && column.key !== 'recordValidation' && column.key !== 'id'
+        );
+        let records = this.props.pastedRecords.slice(0, this.props.recordsPreviewNumber);
+        if (records) {
+          records = records.map((record, i) => {
+            return (
+              <tr key={i} className="p-datatable-row">
+                {record.dataRow
+                  .slice(
+                    0,
+                    filteredColumns.length < this.props.columnsPreviewNumber
+                      ? filteredColumns.length
+                      : this.props.columnsPreviewNumber
+                  )
+                  .map((column, j) => {
+                    return <td key={j}>{Object.values(column.fieldData)[0]}</td>;
+                  })}
+              </tr>
+            );
+          });
+        }
+        if (this.props.pastedRecords.length > this.props.recordsPreviewNumber) {
+          records.push(
+            <tr key="preview">
+              <td style={{ colSpan: this.props.columnsPreviewNumber }}>...</td>
+            </tr>
+          );
+        }
+        return records;
+      }
+    }
+  }
+
   checkPastedColumnsErrors() {
     let correctColumns = true;
     if (this.props.pastedRecords) {
       if (this.props.pastedRecords.length > 0) {
         let i = 0;
+        //Data columns minus "actions", "recordValidations" and "id" columnns
+        const columns = this.props.children.filter(
+          column => column.key !== 'actions' && column.key !== 'recordValidation' && column.key !== 'id'
+        );
         do {
           if (!isUndefined(this.props.pastedRecords[i])) {
             const pastedColumns = this.props.pastedRecords[i].dataRow.filter(d => Object.values(d.fieldData)[0]);
-            if (pastedColumns.length !== this.props.children.length - 3) {
+            if (pastedColumns.length !== columns.length) {
               correctColumns = false;
             }
             i++;
           }
-        } while (i < this.props.pastedRecords.length || !correctColumns);
+        } while (i < this.props.pastedRecords.length && correctColumns);
       }
     }
 
     if (!correctColumns) {
       return (
         <div>
-          <span style={{ fontWeight: 'bold' }}>Warning! There are rows with a wrong number of columns</span>
-          <span>Do you still want to paste this data?</span>
+          <p style={{ fontWeight: 'bold', color: '#DA2131' }}>Warning! There are rows with a wrong number of columns</p>
+          <p>Do you still want to paste this data?</p>
         </div>
       );
     } else {
       return (
         <div>
-          <span>Do you want to paste this data?</span>
+          <p>Do you want to paste this data?</p>
         </div>
       );
     }
@@ -1573,10 +1630,10 @@ export class DataTable extends Component {
           maximizable={false}
           labelConfirm="Yes"
           labelCancel="No">
-          Copied records: {this.props.pastedRecords ? this.props.pastedRecords.length : null}
-          <br />
+          <p>Copied records: {this.props.pastedRecords ? this.props.pastedRecords.length : null}</p>
           {this.checkPastedColumnsErrors()}
-          <br />
+          <hr />
+          {this.previewPastedData()}
         </ConfirmDialog>
       </React.Fragment>
     );

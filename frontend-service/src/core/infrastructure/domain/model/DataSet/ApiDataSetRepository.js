@@ -243,7 +243,7 @@ const updateFieldById = async (dataSetId, fieldSchemaId, fieldId, fieldType, fie
   return fieldUpdated;
 };
 
-const updateRecordById = async (dataSetId, tableSchemaId, record) => {
+const updateRecordsById = async (dataSetId, record) => {
   const fields = record.dataRow.map(DataTableFieldDTO => {
     let newField = new DataSetTableField();
     newField.id = DataTableFieldDTO.fieldData.id;
@@ -260,7 +260,7 @@ const updateRecordById = async (dataSetId, tableSchemaId, record) => {
   dataSetTableRecord.idRecordSchema = record.recordSchemaId;
   dataSetTableRecord.id = record.recordId;
   //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-  const recordAdded = await apiDataSet.updateRecordById(dataSetId, tableSchemaId, [dataSetTableRecord]);
+  const recordAdded = await apiDataSet.updateRecordsById(dataSetId, [dataSetTableRecord]);
   return recordAdded;
 };
 
@@ -291,6 +291,6 @@ export const ApiDataSetRepository = {
   schemaById,
   tableDataById,
   updateFieldById,
-  updateRecordById,
+  updateRecordsById,
   validateDataById
 };

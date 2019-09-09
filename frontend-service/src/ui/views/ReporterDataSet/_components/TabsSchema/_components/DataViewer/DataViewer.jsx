@@ -46,6 +46,7 @@ const DataViewer = withRouter(
     const [columns, setColumns] = useState([]);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+    const [editDataAvailable, setEditDataAvailable] = useState(true);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [exportButtonsList, setExportButtonsList] = useState([]);
@@ -96,6 +97,7 @@ const DataViewer = withRouter(
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
+      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'dataSetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
 
       onFetchData(undefined, undefined, 0, numRows);
@@ -127,13 +129,13 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       let columnsArr = colsSchema.map(column => {
-        let sort = column.field === 'id' ? false : true;
-        let visibleColumn = column.field === 'id' ? styles.VisibleHeader : '';
+        let sort = column.field === 'id' || column.field === 'dataSetPartitionId' ? false : true;
+        let visibleColumn = column.field === 'id' || column.field === 'dataSetPartitionId' ? styles.VisibleHeader : '';
         return (
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            editor={row => cellDataEditor(row, selectedRecord)}
+            editor={editDataAvailable ? row => cellDataEditor(row, selectedRecord) : null}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -155,7 +157,7 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      columnsArr.unshift(editCol, validationCol);
+      editDataAvailable ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       setColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
@@ -196,7 +198,7 @@ const DataViewer = withRouter(
     const onEditAddFormInput = (property, value) => {
       let record = {};
       if (!isNewRecord) {
-        record = Object.create(editedRecord);
+        record = { ...editedRecord };
         let updatedRecord = changeRecordValue(record, property, value);
         setEditedRecord(updatedRecord);
       } else {
@@ -207,11 +209,14 @@ const DataViewer = withRouter(
     };
 
     //When pressing "Escape" cell data resets to initial value
-    const onEditorEscapeChange = (props, event) => {
+    const onEditorKeyChange = (props, event, record) => {
       if (event.key === 'Escape') {
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
+      } else if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        onEditorSubmitValue(props, event.target.value, record);
       }
     };
 
@@ -312,7 +317,6 @@ const DataViewer = withRouter(
 
         copiedRecords.push(emptyRecord);
       });
-      console.log(copiedRecords);
       setPastedRecords(copiedRecords);
     };
     const onPasteAccept = async () => {
@@ -350,6 +354,7 @@ const DataViewer = withRouter(
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
           setAddDialogVisible(false);
+          onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -362,8 +367,9 @@ const DataViewer = withRouter(
         }
       } else {
         try {
-          await DataSetService.updateRecordById(dataSetId, tableId, record);
+          await DataSetService.updateRecordsById(dataSetId, record);
           setEditDialogVisible(false);
+          onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -480,7 +486,7 @@ const DataViewer = withRouter(
           onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
           onChange={e => onEditorValueChange(cells, e.target.value)}
           onFocus={e => onEditorValueFocus(cells, e.target.value)}
-          onKeyDown={e => onEditorEscapeChange(cells, e)}
+          onKeyDown={e => onEditorKeyChange(cells, e, record)}
         />
       );
     };
@@ -553,9 +559,9 @@ const DataViewer = withRouter(
 
     const editRecordForm = colsSchema.map((column, i) => {
       const arr = [];
-      //Avoid row id Field
+      //Avoid row id Field and dataSetPartitionId
       if (editDialogVisible) {
-        if (i < colsSchema.length - 1) {
+        if (i < colsSchema.length - 2) {
           if (!isUndefined(editedRecord.dataRow)) {
             const field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
             arr.push([column.field, field.fieldData[column.field]]);
@@ -580,6 +586,7 @@ const DataViewer = withRouter(
 
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
+        const dataSetPartitionId = record.dataSetPartitionId;
         const recordValidations = record.validations;
         const recordId = record.recordId;
         const recordSchemaId = record.recordSchemaId;
@@ -595,10 +602,12 @@ const DataViewer = withRouter(
           };
         });
         arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
+        arrayDataFields.push({ fieldData: { dataSetPartitionId: record.dataSetPartitionId }, fieldValidations: null });
         const arrayDataAndValidations = {
           dataRow: arrayDataFields,
           recordValidations,
           recordId,
+          dataSetPartitionId,
           recordSchemaId
         };
         return arrayDataAndValidations;
@@ -845,11 +854,11 @@ const DataViewer = withRouter(
           <DataTable
             autoLayout={true}
             columnsPreviewNumber={5}
-            editable={true}
+            editable={editDataAvailable}
             //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
             first={firstRow}
-            footer={addRowFooter}
+            footer={editDataAvailable ? addRowFooter : null}
             header={header}
             lazy={true}
             loading={loading}

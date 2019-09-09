@@ -28,6 +28,6 @@ export const DataSetService = {
   schemaById: GetSchema({ dataSetRepository }),
   tableDataById: GetData({ dataSetRepository }),
   updateFieldById: UpdateField({ dataSetRepository }),
-  updateRecordById: UpdateRecord({ dataSetRepository }),
+  updateRecordsById: UpdateRecord({ dataSetRepository }),
   validateDataById: ValidateData({ dataSetRepository })
 };
