@@ -50,7 +50,6 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         )
       );
     }
-    console.log('user: ', user);
   }, [user]);
 
   const home = {
