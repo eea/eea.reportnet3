@@ -192,26 +192,26 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                               }
                             },
                             {
-                              label: resources.messages['releaseDataCollection'],
-                              icon: config.icons.archive
-                            },
-                            {
                               label: resources.messages['importFromFile'],
-                              icon: config.icons.import
+                              icon: config.icons.export,
+                              disabled: true
                             },
                             {
                               label: resources.messages['duplicate'],
-                              icon: config.icons.clone
+                              icon: config.icons.clone,
+                              disabled: true
                             },
                             {
                               label: resources.messages['properties'],
-                              icon: config.icons.info
+                              icon: config.icons.info,
+                              disabled: true
                             }
                           ]
                         : [
                             {
                               label: resources.messages['properties'],
-                              icon: config.icons.info
+                              icon: config.icons.info,
+                              disabled: true
                             }
                           ]
                     }
