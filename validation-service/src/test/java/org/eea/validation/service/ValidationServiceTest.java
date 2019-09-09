@@ -321,7 +321,8 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
-    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
+    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any(),
+        Mockito.any());
     try {
       validationServiceImpl.loadRulesKnowledgeBase(1L);
     } catch (EEAException e) {
@@ -588,7 +589,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBase() throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
-    when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
+    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 

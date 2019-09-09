@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
@@ -43,25 +45,32 @@ public class KieBaseManager {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The dataset metabase controller. */
+  @Autowired
+  private DatasetMetabaseController datasetMetabaseController;
+
 
   /**
    * Reload rules.
    *
    * @param dataFlowId the data flow id
+   * @param datasetId
    *
    * @return the kie base
    *
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long dataFlowId) throws FileNotFoundException {
+  public KieBase reloadRules(Long dataFlowId, Long datasetId) throws FileNotFoundException {
     DataSetSchema schema = schemasRepository.findSchemaByIdFlow(dataFlowId);
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     schema.getRuleDataSet().stream().forEach(rule -> {
-      ruleAttributes
-          .add(passDataToMap(rule.getIdDataSetSchema().toString(), rule.getRuleId().toString(),
-              TypeValidation.DATASET, SchemasDrools.ID_DATASET_SCHEMA.getValue(),
-              rule.getWhenCondition(), rule.getThenCondition().get(0),
-              rule.getThenCondition().get(1), schema.getNameDataSetSchema()));
+      ruleAttributes.add(passDataToMap(rule.getIdDataSetSchema().toString(),
+          rule.getRuleId().toString(), TypeValidation.DATASET,
+          SchemasDrools.ID_DATASET_SCHEMA.getValue(), rule.getWhenCondition(),
+          rule.getThenCondition().get(0), rule.getThenCondition().get(1),
+          null == dataSetMetabaseVO ? "" : dataSetMetabaseVO.getDataSetName()));
     });
     schema.getTableSchemas().stream().forEach(tableSchema -> {
       tableSchema.getRuleTable().stream().filter(Objects::nonNull).forEach(ruleTable -> {

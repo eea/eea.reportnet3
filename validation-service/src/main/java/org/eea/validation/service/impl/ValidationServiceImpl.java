@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
@@ -202,7 +204,7 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      kieSession = kieBaseManager.reloadRules(dataflowId).newKieSession();
+      kieSession = kieBaseManager.reloadRules(dataflowId, datasetId).newKieSession();
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -308,24 +310,36 @@ public class ValidationServiceImpl implements ValidationService {
       List<RecordValue> validatedRecords =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
       Validation validation = new Validation();
-      validatedRecords.stream().filter(Objects::nonNull).forEach(row -> {
-        List<RecordValidation> resultRecords = runRecordValidations(row, session);
-        if (null != row.getRecordValidations()) {
-          row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
-            rowValidation.setRecordValue(row);
-            if (validation.getLevelError() == null
-                || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
-              if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
-                validation.setLevelError(TypeErrorEnum.ERROR);
-              } else {
-                validation.setLevelError(TypeErrorEnum.WARNING);
+
+      int totalrecord = validatedRecords.size();
+
+      ForkJoinPool myPool = new ForkJoinPool(totalrecord / 1000);
+      try {
+        myPool.submit(() -> validatedRecords.stream().filter(Objects::nonNull).forEach(row -> {
+          List<RecordValidation> resultRecords = runRecordValidations(row, session);
+          if (null != row.getRecordValidations()) {
+            row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
+              rowValidation.setRecordValue(row);
+              if (validation.getLevelError() == null
+                  || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+                if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
+                  validation.setLevelError(TypeErrorEnum.ERROR);
+                } else {
+                  validation.setLevelError(TypeErrorEnum.WARNING);
+                }
               }
-            }
-            validation.setOriginName(rowValidation.getValidation().getOriginName());
-          });
-          recordValList.addAll(resultRecords);
-        }
-      });
+              validation.setOriginName(rowValidation.getValidation().getOriginName());
+            });
+            recordValList.addAll(resultRecords);
+          }
+        })).get();
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (ExecutionException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       // Adding errors into tables
       if (validation.getLevelError() != null) {
         if (TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
