@@ -37,6 +37,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   const [loading, setLoading] = useState(true);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
+  const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [dataSetIdToProps, setDataSetIdToProps] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
 
@@ -112,6 +113,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     {
       label: resources.messages.manageRoles,
       icon: 'users',
+      show: hasWritePermissions,
       menuItemFunction: () => {
         showContributorsDialog();
       }
@@ -120,13 +122,17 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     {
       label: resources.messages.delete,
       icon: 'trash',
+      show: hasWritePermissions,
       menuItemFunction: () => {}
     },
 
     {
       label: resources.messages.properties,
       icon: 'settings',
-      menuItemFunction: () => {}
+      show: true,
+      menuItemFunction: e => {
+        setIsActivePropertiesDialog(true);
+      }
     }
   ];
   const showContributorsDialog = () => {
@@ -155,9 +161,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               {dataFlowData.name}
             </h2>
           </div>
-          <div className={styles.option_btns_wrapper}>
-            {hasWritePermissions && <DropdownButton icon="ellipsis" model={dropDownItems} />}
-          </div>
+          <div className={styles.option_btns_wrapper}>{<DropdownButton icon="ellipsis" model={dropDownItems} />}</div>
         </div>
 
         <div className={`${styles.buttonsWrapper}`}>
@@ -244,6 +248,45 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               dataSetId={dataSetIdToProps}
             />
           </ScrollPanel>
+        </Dialog>
+        <Dialog
+          header={dataFlowData.name}
+          footer={
+            <>
+              <Button className="p-button-text-only" label="Generate new API-key" />
+              <Button className="p-button-text-only" label="Open Metadata" />
+              <Button
+                className="p-button-secondary"
+                icon="cancel"
+                label={resources.messages.close}
+                onClick={() => setIsActivePropertiesDialog(false)}
+              />
+            </>
+          }
+          visible={isActivePropertiesDialog}
+          onHide={() => setIsActivePropertiesDialog(false)}
+          style={{ width: '50vw' }}>
+          <div className="description">{dataFlowData.description}</div>
+          <div className="features">
+            <ul>
+              <li>
+                <strong>
+                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`)}{' '}
+                  functionality:
+                </strong>{' '}
+                {hasWritePermissions ? 'read / write' : 'read'}
+              </li>
+              <li>
+                <strong>
+                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`)} type:
+                </strong>
+              </li>
+              <li>
+                <strong>REST API key:</strong> <a>Copy API-key</a> (API-key access for developers)
+              </li>
+            </ul>
+          </div>
+          <div className="actions"></div>
         </Dialog>
       </div>
     </div>

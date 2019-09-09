@@ -2,5 +2,7 @@
   "DATA_FLOW":"/Dataflow-",
   "DATA_SET":"/Dataset-",
   "CUSTODIAN": "DATA_CUSTODIAN",
-  "PROVIDER": "DATA_PROVIDER"
+  "PROVIDER": "DATA_PROVIDER",
+  "DATA_CUSTODIAN":"Data custodian",
+  "DATA_PROVIDER": "Data provider"
 }

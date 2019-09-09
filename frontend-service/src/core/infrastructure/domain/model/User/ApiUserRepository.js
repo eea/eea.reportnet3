@@ -4,6 +4,7 @@ import moment from 'moment';
 import { apiUser } from 'core/infrastructure/api/domain/model/User';
 import { User } from 'core/domain/model/User/User';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+import { config } from 'conf/index';
 
 const timeOut = time => {
   setTimeout(() => {
@@ -46,10 +47,19 @@ const hasPermission = (user, permissions, entity) => {
   });
   return allow;
 };
+const userRole = (user, entity) => {
+  const roleDTO = user.roles.filter(role => role.includes(entity));
+  if (roleDTO.length) {
+    const [roleName] = roleDTO[0].split('-').reverse();
+    return config.permissions[roleName];
+  }
+  return;
+};
 
 export const ApiUserRepository = {
   login,
   logout,
   refreshToken,
-  hasPermission
+  hasPermission,
+  userRole
 };
