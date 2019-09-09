@@ -12,6 +12,7 @@ import styles from './DataViewer.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
@@ -63,6 +64,7 @@ const DataViewer = withRouter(
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
+    const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
     const [numRows, setNumRows] = useState(10);
     const [pastedRecords, setPastedRecords] = useState();
@@ -77,6 +79,7 @@ const DataViewer = withRouter(
     let growlRef = useRef();
     let exportMenuRef = useRef();
     let datatableRef = useRef();
+    let contextMenuRef = useRef();
 
     useEffect(() => {
       //document.addEventListener('paste', event => onPaste(event));
@@ -99,13 +102,25 @@ const DataViewer = withRouter(
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'dataSetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-
       onFetchData(undefined, undefined, 0, numRows);
     }, []);
 
     useEffect(() => {
       setFetchedData([]);
     }, [isDataDeleted]);
+
+    useEffect(() => {
+      setMenu([
+        {
+          label: 'Edit',
+          icon: 'pi pi-fw pi-pencil',
+          command: e => {
+            setEditDialogVisible(true);
+          }
+        },
+        { label: 'Delete', icon: 'pi pi-fw pi-trash', command: () => setConfirmDeleteVisible(true) }
+      ]);
+    }, [selectedRecord]);
 
     useEffect(() => {
       onRefresh();
@@ -321,7 +336,6 @@ const DataViewer = withRouter(
     };
     const onPasteAccept = async () => {
       try {
-        console.log(pastedRecords);
         await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
         growlRef.current.show({
           severity: 'success',
@@ -850,10 +864,12 @@ const DataViewer = withRouter(
             />
           </div>
         </Toolbar>
+        <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
             columnsPreviewNumber={5}
+            contextMenuSelection={selectedRecord}
             editable={editDataAvailable}
             //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
@@ -862,6 +878,17 @@ const DataViewer = withRouter(
             header={header}
             lazy={true}
             loading={loading}
+            onContextMenu={
+              editDataAvailable
+                ? e => {
+                    datatableRef.current.closeEditingCell();
+                    contextMenuRef.current.show(e.originalEvent);
+                  }
+                : null
+            }
+            onContextMenuSelectionChange={e => {
+              onSelectRecord(e.value);
+            }}
             onPage={onChangePage}
             onPaste={onPaste}
             onPasteAccept={onPasteAccept}
