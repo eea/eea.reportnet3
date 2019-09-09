@@ -11,13 +11,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * The Interface DatasetSnapshotController.
+ */
 public interface DatasetSnapshotController {
 
+  /**
+   * The Interface DataSetSnapshotControllerZuul.
+   */
   @FeignClient(value = "dataset", contextId = "snapshot", path = "/snapshot")
   interface DataSetSnapshotControllerZuul extends DatasetSnapshotController {
 
   }
 
+  /**
+   * Gets the snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots by id dataset
+   */
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
@@ -44,12 +56,24 @@ public interface DatasetSnapshotController {
       @PathVariable("idSnapshot") Long idSnapshot);
 
 
+  /**
+   * Restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
 
 
+  /**
+   * Release snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @PutMapping(value = "/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void releaseSnapshot(@PathVariable("idDataset") Long datasetId,

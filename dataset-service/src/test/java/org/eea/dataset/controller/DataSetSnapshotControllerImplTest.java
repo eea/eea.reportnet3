@@ -157,5 +157,26 @@ public class DataSetSnapshotControllerImplTest {
 
   }
 
+  @Test
+  public void testReleaseSnapshots() throws Exception {
+
+    dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testReleaseSnapshotsException1() throws Exception {
+
+    dataSetSnapshotControllerImpl.releaseSnapshot(null, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testReleaseSnapshotsException2() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService).releaseSnapshot(Mockito.any(),
+        Mockito.any());
+    dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
+  }
 
 }

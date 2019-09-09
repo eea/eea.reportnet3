@@ -15,8 +15,26 @@ import lombok.ToString;
  * The type Snapshot.
  */
 @Entity
+
+/**
+ * Gets the release.
+ *
+ * @return the release
+ */
 @Getter
+
+/**
+ * Sets the release.
+ *
+ * @param release the new release
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Table(name = "SNAPSHOT")
 public class Snapshot extends DataSetMetabase {
@@ -26,9 +44,11 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  /** The description. */
   @Column(name = "DESCRIPTION")
   private String description;
 
+  /** The reporting dataset. */
   @ManyToOne
   @JoinColumn(name = "REPORTING_DATASET_ID")
   private ReportingDataset reportingDataset;
@@ -37,6 +57,7 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "DATACOLLECTION_ID")
   private Long datacollection;
 
+  /** The release. */
   @Column(name = "RELEASE")
   private Boolean release;
 

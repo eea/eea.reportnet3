@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import styles from './TabsSchema.module.css';
 
@@ -20,7 +20,7 @@ export const TabsSchema = ({
 }) => {
   let tabs =
     tables && tableSchemaColumns
-      ? tables.map((table, i) => {
+      ? tables.map(table => {
           return (
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
