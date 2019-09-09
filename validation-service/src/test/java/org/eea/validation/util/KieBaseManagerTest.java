@@ -36,7 +36,7 @@ public class KieBaseManagerTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testKieBaseManager() throws FileNotFoundException {
     DataSetSchema dataSchema = new DataSetSchema();
     // LIST STRINGS

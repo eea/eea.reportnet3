@@ -38,6 +38,7 @@ import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
+import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -113,6 +114,8 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  @Autowired
+  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
    * The dataset controller.
    */
@@ -685,5 +688,19 @@ public class ValidationServiceImpl implements ValidationService {
   public Boolean datasetValidationDC03Query(String DC03) {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);
   }
+
+
+  // TABLE PART
+  @Override
+  public Boolean tableValidationDR01ABQuery(String DR01A, Boolean previous) {
+    return tableValidationQuerysDroolsRepository.tableValidationDR01ABQuery(DR01A, previous);
+  }
+
+  @Override
+  public Boolean tableValidationQueryNonReturnResult(String QUERY) {
+    return tableValidationQuerysDroolsRepository.tableValidationQueryNonReturnResult(QUERY);
+  }
+
+
 
 }

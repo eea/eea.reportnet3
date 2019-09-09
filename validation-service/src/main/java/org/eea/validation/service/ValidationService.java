@@ -236,5 +236,10 @@ public interface ValidationService {
   Boolean datasetValidationDC03Query(String DC03);
 
 
+  /// PART TABLE
+
+  Boolean tableValidationDR01ABQuery(String DR01A, Boolean previous);
+
+  Boolean tableValidationQueryNonReturnResult(String QUERY);
 
 }

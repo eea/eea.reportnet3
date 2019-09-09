@@ -207,6 +207,35 @@ function boolean isCordenateLong( String value ){
  
  
  //// PART OF TABLE
+function Boolean ruleDR01AB(String idSchema, Boolean previous, String datasetId){
+ return TableValidationDrools.ruleDR01AB(idSchema,previous,datasetId); 
+}
+
+function Boolean ruleDU01A(String idSchema, String datasetId){
+ return TableValidationDrools.ruleDU01A(idSchema,datasetId); 
+}
+
+function Boolean ruleDU01B(String idSchema, String datasetId){
+ return TableValidationDrools.ruleDU01B(idSchema,datasetId); 
+}
+
+function  Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
+      String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, String countryCodeValue,
+      String idDataset, String idDatasetToContribute) {
+  return TableValidationDrools.ruleDO01(idSchemaThematicIdIdentifier,idSchemaStatusCode,idSchemaCountryCode,idSchemaBathingWaterIdentifier,countryCodeValue,idDataset,idDatasetToContribute);     
+}
+
+
+function  Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
+      String idSchemaPeriodType, String idSchemaStartDate, String idSchemaEndDate,
+      String datasetId){
+return TableValidationDrools.ruleDU02A(idSchemaBathingWaterIdentifierTable,idSchemaPeriodType,idSchemaStartDate,idSchemaEndDate,datasetId);
+}
+
+//MONITORING PART
+function Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate, String datasetId){
+ return TableValidationDrools.ruleDU03(idSchemaBWIdent,idSchemaBWSampleDate,datasetId); 
+}
  
  
  // PART OF DATASET
