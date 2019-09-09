@@ -56,7 +56,7 @@ const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
   );
 
   const errors = dataSetErrorsDTO.errors.map(
-    dataSetErrorDTO =>
+    dataSetErrorDTO => dataSetErrorDTO && 
       new DataSetError(
         dataSetErrorDTO.typeEntity,
         dataSetErrorDTO.levelError,
@@ -254,7 +254,7 @@ const updateRecordById = async (dataSetId, tableSchemaId, record) => {
   dataSetTableRecord.idRecordSchema = record.recordSchemaId;
   dataSetTableRecord.id = record.recordId;
   //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-  const recordAdded = await apiDataSet.addRecordById(dataSetId, tableSchemaId, [dataSetTableRecord]);
+  const recordAdded = await apiDataSet.updateRecordById(dataSetId, tableSchemaId, [dataSetTableRecord]);
   return recordAdded;
 };
 

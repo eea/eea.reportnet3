@@ -23,7 +23,7 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet data: ${error}`);
+      console.error(`Error adding record to dataSet data: ${error}`);
       return false;
     }
   },
@@ -237,7 +237,7 @@ export const apiDataSet = {
   updateRecordById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
     const tokens = userStorage.get();
     try {
-      const response = await HTTPRequester.put({
+      const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${dataSetId}/table/${tableSchemaId}/record`
           : getUrl(config.addNewRecord.url, {
@@ -253,7 +253,7 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet data: ${error}`);
+      console.error(`Error updating dataSet record data: ${error}`);
       return false;
     }
   },

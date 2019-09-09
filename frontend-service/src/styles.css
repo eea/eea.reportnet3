@@ -1290,6 +1290,7 @@ body .p-button.p-button-raised {
   box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.15);
 }
 body .p-button.p-button-rounded {
+  margin: 0.1rem;
   -moz-border-radius: 15px;
   -webkit-border-radius: 15px;
   border-radius: 15px;
@@ -3288,6 +3289,15 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span {
 body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   margin-right: 0.35em;
   font-size: 16px;
+}
+.p-component-overlay.p-dialog-mask,
+.p-component-overlay.p-sidebar-mask {
+  display: none !important;
+}
+
+.p-dialog {
+  -webkit-transform: none;
+  transform: none;
 }
 body .p-sidebar {
   background-color: #ffffff;
