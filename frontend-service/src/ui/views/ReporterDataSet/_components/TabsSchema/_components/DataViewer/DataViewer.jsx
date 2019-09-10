@@ -69,6 +69,7 @@ const DataViewer = withRouter(
     const [numRows, setNumRows] = useState(10);
     const [pastedRecords, setPastedRecords] = useState();
     const [selectedRecord, setSelectedRecord] = useState({});
+    //const [selectedRecords, setSelectedRecords] = useState([]);
     const [selectedCellId, setSelectedCellId] = useState();
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
@@ -333,6 +334,10 @@ const DataViewer = withRouter(
           emptyRecord = changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
         });
 
+        emptyRecord.dataRow = emptyRecord.dataRow.filter(
+          column =>
+            Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'dataSetPartitionId'
+        );
         copiedRecords.push(emptyRecord);
       });
       setPastedRecords(copiedRecords);
@@ -369,7 +374,6 @@ const DataViewer = withRouter(
     const onSaveRecord = async record => {
       //Delete hidden column null values (recordId, validations, etc.)
       record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
-      console.log(record);
       if (isNewRecord) {
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
@@ -548,11 +552,15 @@ const DataViewer = withRouter(
         recordSchemaId: columnsSchema[0].recordId
       };
 
+      obj.dataSetPartitionId = null;
       //dataSetPartitionId is needed for checking the rows owned by delegated contributors
       if (!isUndefined(data.records) && data.records.length > 0) {
         obj.dataSetPartitionId = data.records[0].dataSetPartitionId;
       } else {
-        obj.dataSetPartitionId = null;
+        //onPaste we check the formatted datatable data
+        if (!isUndefined(data) && data.length > 0) {
+          obj.dataSetPartitionId = data[0].dataSetPartitionId;
+        }
       }
       return obj;
     };
@@ -796,8 +804,20 @@ const DataViewer = withRouter(
     };
 
     const rowClassName = rowData => {
-      let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
-      return { 'p-highlight': id === selectedRecordErrorId };
+      let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
+      return {
+        'p-highlight': id === selectedRecordErrorId
+      };
+      // let selected = selectedRecords.filter(record => record.recordId === id);
+      // if (!isUndefined(selected[0])) {
+      //   return {
+      //     'p-highlight': id === selectedRecordErrorId || rowData.recordId === selected[0].recordId
+      //   };
+      // } else {
+      //   return {
+      //     'p-highlight': id === selectedRecordErrorId
+      //   };
+      // }
     };
 
     const totalCount = <span>Total: {totalRecords} rows</span>;
@@ -901,6 +921,9 @@ const DataViewer = withRouter(
             onPaste={onPaste}
             onPasteAccept={onPasteAccept}
             onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
+            // onSelectionChange={e => {
+            //   setSelectedRecords(e.value);
+            // }}
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
@@ -912,6 +935,7 @@ const DataViewer = withRouter(
             rowClassName={rowClassName}
             rows={numRows}
             rowsPerPageOptions={[5, 10, 20, 100]}
+            //selection={selectedRecords}
             selectionMode="single"
             sortable={true}
             sortField={sortField}
