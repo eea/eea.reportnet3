@@ -2,6 +2,7 @@ package org.eea.validation.service.impl;
 
 
 import java.io.FileNotFoundException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -114,6 +116,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The table validation querys drools repository. */
   @Autowired
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
@@ -122,6 +125,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
+  /** The metabase controller. */
   @Autowired
   private DatasetMetabaseController metabaseController;
 
@@ -656,7 +660,7 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Dataset validation DO 02 query.
    *
-   * @param do02 the do 02
+   * @param DO02 the do02
    * @return the boolean
    */
   @Override
@@ -664,43 +668,115 @@ public class ValidationServiceImpl implements ValidationService {
     return datasetRepositoryImpl.datasetValidationQuery(DO02);
   }
 
+  /**
+   * Dataset validation DO 03 query.
+   *
+   * @param DO03 the do03
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDO03Query(String DO03) {
     return datasetRepositoryImpl.datasetValidationQuery(DO03);
   }
 
+  /**
+   * Dataset validation DC 01 A query.
+   *
+   * @param DC01A the dc01a
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC01AQuery(String DC01A) {
     return datasetRepositoryImpl.datasetValidationQuery(DC01A);
   }
 
+  /**
+   * Dataset validation DC 01 B query.
+   *
+   * @param DC01B the dc01b
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC01BQuery(String DC01B) {
     return datasetRepositoryImpl.datasetValidationQuery(DC01B);
   }
 
+  /**
+   * Dataset validation DC 02 query.
+   *
+   * @param DC02 the dc02
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC02Query(String DC02) {
     return datasetRepositoryImpl.datasetValidationQuery(DC02);
   }
 
+  /**
+   * Dataset validation DC 03 query.
+   *
+   * @param DC03 the dc03
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC03Query(String DC03) {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);
   }
 
 
+  /**
+   * Table validation DR 01 AB query.
+   *
+   * @param DR01A the dr01a
+   * @param previous the previous
+   * @return the boolean
+   */
   // TABLE PART
   @Override
   public Boolean tableValidationDR01ABQuery(String DR01A, Boolean previous) {
     return tableValidationQuerysDroolsRepository.tableValidationDR01ABQuery(DR01A, previous);
   }
 
+  /**
+   * Table validation query non return result.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
   @Override
   public Boolean tableValidationQueryNonReturnResult(String QUERY) {
     return tableValidationQuerysDroolsRepository.tableValidationQueryNonReturnResult(QUERY);
   }
 
+  /**
+   * Table validation query period monitoring.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
+  @Override
+  public Boolean tableValidationQueryPeriodMonitoring(String QUERY) {
 
+    List<BigInteger> listRecords =
+        tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(QUERY);
+    if (null != listRecords) {
+      for (BigInteger recordId : listRecords) {
+        Optional<RecordValue> record = recordRepository.findByIdValidation(recordId.longValue());
+        RecordValidation recordVal = new RecordValidation();
+        Validation validation = new Validation();
+        recordVal.setValidation(validation);
+        recordVal.setRecordValue(record.get());
+        recordVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
+        recordVal.getValidation().setMessage(
+            "The sample was taken during a short-term pollution event, but the sampleStatus is not 'shortTermPollutionSample'.");
+        recordVal.getValidation().setIdRule(new ObjectId().toString());
+        recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
+        recordVal.getValidation().setValidationDate(new Date().toString());
+        recordVal.getValidation().setOriginName("MonitoringResult");
+        validationRecordRepository.save(recordVal);
+      }
+    }
+    return true;
+  }
 
 }

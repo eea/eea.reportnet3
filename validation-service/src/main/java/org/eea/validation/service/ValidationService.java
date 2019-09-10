@@ -238,8 +238,28 @@ public interface ValidationService {
 
   /// PART TABLE
 
+  /**
+   * Table validation DR 01 AB query.
+   *
+   * @param DR01A the dr01a
+   * @param previous the previous
+   * @return the boolean
+   */
   Boolean tableValidationDR01ABQuery(String DR01A, Boolean previous);
 
+  /**
+   * Table validation query non return result.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
   Boolean tableValidationQueryNonReturnResult(String QUERY);
 
+  /**
+   * Table validation query period monitoring.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
+  Boolean tableValidationQueryPeriodMonitoring(String QUERY);
 }

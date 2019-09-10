@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.data.repository;
 
+import java.math.BigInteger;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -7,15 +8,26 @@ import javax.persistence.Query;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 
+/**
+ * The Class TableValidationQuerysDroolsRepository.
+ */
 @Repository
 public class TableValidationQuerysDroolsRepository {
 
 
+  /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
 
 
 
+  /**
+   * Table validation DR 01 AB query.
+   *
+   * @param QUERY the query
+   * @param previous the previous
+   * @return the boolean
+   */
   @SuppressWarnings("unchecked")
   public Boolean tableValidationDR01ABQuery(String QUERY, Boolean previous) {
 
@@ -42,6 +54,12 @@ public class TableValidationQuerysDroolsRepository {
     return true;
   }
 
+  /**
+   * Table validation query non return result.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
   @SuppressWarnings("unchecked")
   public Boolean tableValidationQueryNonReturnResult(String QUERY) {
 
@@ -54,4 +72,15 @@ public class TableValidationQuerysDroolsRepository {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public List<BigInteger> tableValidationQueryPeriodMonitoring(String QUERY) {
+
+    Query query = entityManager.createNativeQuery(QUERY);
+    List<BigInteger> value = query.getResultList();
+    if (null == value || value.isEmpty()) {
+      return null;
+    } else {
+      return value;
+    }
+  }
 }

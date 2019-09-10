@@ -1,7 +1,5 @@
 package org.eea.validation.util;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,9 +11,6 @@ public class TableValidationDrools {
 
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
-
-  @PersistenceContext
-  private EntityManager entityManager;
 
   @Autowired
   private void setDatasetRepository(ValidationService validationService) {
@@ -30,9 +25,9 @@ public class TableValidationDrools {
   // --# DR01A # The Characterisation file contains records for more than one season. #
   // the boolean is to know if the validation has previous years
 
-  public static Boolean ruleDR01AB(String idSchema, Boolean previous, String datasetId) {
+  public static Boolean ruleDR01AB(String idSchema, Boolean previous, Long datasetId) {
 
-    String DR01AB = "select v.value from " + datasetId
+    String DR01AB = "select v.value from dataset_" + datasetId
         + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
 
     return validationService.tableValidationDR01ABQuery(DR01AB, previous);
@@ -40,28 +35,28 @@ public class TableValidationDrools {
 
   // # DU01A # The Characterisation file contains more than one record for the
   // bathingWaterIdentifier.
-  public static Boolean ruleDU01A(String idSchema, String datasetId) {
+  public static Boolean ruleDU01A(String idSchema, Long datasetId) {
 
-    String ruleDU01A =
-        "select v.value FROM " + datasetId + ".field_value v " + "where  v.id_field_schema = '"
-            + idSchema + "' " + "group by v.value " + "having COUNT(*) >1";
+    String ruleDU01A = "select v.value FROM dataset_" + datasetId + ".field_value v "
+        + "where  v.id_field_schema = '" + idSchema + "' " + "group by v.value "
+        + "having COUNT(*) >1";
     return validationService.tableValidationQueryNonReturnResult(ruleDU01A);
   }
 
   // # DU01B # The Characterisation file contains a groupIdentifier associated with single btahing
   // water. #
-  public static Boolean ruleDU01B(String idSchema, String datasetId) {
+  public static Boolean ruleDU01B(String idSchema, Long datasetId) {
 
     String ruleDU01B =
-        "select v.value FROM " + datasetId + ".field_value v where v.id_field_schema = '" + idSchema
-            + "' group by v.value" + " having COUNT(*) = 1";
+        "select v.value FROM dataset_" + datasetId + ".field_value v where v.id_field_schema = '"
+            + idSchema + "' group by v.value" + " having COUNT(*) = 1";
     return validationService.tableValidationQueryNonReturnResult(ruleDU01B);
   }
 
   // --# DR01A # The Characterisation file contains records for more than one season. #
   public static Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
       String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, String countryCodeValue,
-      String idDataset, String idDatasetToContribute) {
+      Long idDataset, String idDatasetToContribute) {
 
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
@@ -76,7 +71,7 @@ public class TableValidationDrools {
             + "FROM " + idDatasetToContribute + ".field_value v where v.id_field_schema = '"
             + idSchemaCountryCode + "') as dato3 on dato2.record = dato3.record ),"
             + "characterisation as ( select character1.bathingWaterIdentifier FROM ( "
-            + "select v.value as bathingWaterIdentifier FROM " + idDataset
+            + "select v.value as bathingWaterIdentifier FROM dataset_" + idDataset
             + ".field_value v where v.id_field_schema = '" + idSchemaBathingWaterIdentifier
             + "')as character1 ) "
             + "select s.thematicIdIdentifier from  sparcial s left join characterisation c on "
@@ -96,22 +91,21 @@ public class TableValidationDrools {
   // bathingWaterIdentifier, periodType, startDate and endDate. #
 
   public static Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
-      String idSchemaPeriodType, String idSchemaStartDate, String idSchemaEndDate,
-      String datasetId) {
+      String idSchemaPeriodType, String idSchemaStartDate, String idSchemaEndDate, Long datasetId) {
 
     String ruleDU02A = "select bathingWaterIdentifierTable.bathingWaterIdentifier as BW_IDENT, "
         + "periodeTypeTable.periodType as PERIOD_TYPE, startdateTable.startDate as START_DATE, "
         + "endDateTable.enddate as END_DATE from( select v.value as bathingWaterIdentifier,"
-        + " v.id_record as record_id from " + datasetId
+        + " v.id_record as record_id from dataset_" + datasetId
         + ".field_value v where v.id_field_schema = '" + idSchemaBathingWaterIdentifierTable + "') "
         + "as bathingWaterIdentifierTable inner join( select v.value as periodType, v.id_record as record_id "
-        + "from " + datasetId + ".field_value v where v.id_field_schema = '" + idSchemaPeriodType
-        + "') as periodeTypeTable on "
+        + "from dataset_" + datasetId + ".field_value v where v.id_field_schema = '"
+        + idSchemaPeriodType + "') as periodeTypeTable on "
         + "bathingWaterIdentifierTable.record_id = periodeTypeTable.record_id inner join( select v.value as startDate, "
-        + "v.id_record as record_id from " + datasetId
+        + "v.id_record as record_id from dataset_" + datasetId
         + ".field_value v where v.id_field_schema = '" + idSchemaStartDate + "') as "
         + "startdateTable on periodeTypeTable.record_id = startdateTable.record_id inner join( select v.value as endDate, "
-        + "v.id_record as record_id from " + datasetId
+        + "v.id_record as record_id from dataset_" + datasetId
         + ".field_value v where v.id_field_schema = '" + idSchemaEndDate + "') "
         + "as endDateTable on  startdateTable.record_id = endDateTable.record_id GROUP BY BW_IDENT,PERIOD_TYPE,START_DATE,END_DATE"
         + " having count(*) > 1";
@@ -126,15 +120,15 @@ public class TableValidationDrools {
   // # DU03 # The MonitoringResult file contains more than two records for the combination of
   // bathingWaterIdentifier and sampleDate. #
   public static Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate,
-      String datasetId) {
+      Long datasetId) {
 
     String DU03 = "select tabla1.bathingWaterIdentifier as campo1, tabla2.sampleDate as campo2 "
-        + "from(select v.value as bathingWaterIdentifier,  v.id_record as record1 " + "FROM "
-        + datasetId + ".field_value v " + "where v.id_field_schema = '" + idSchemaBWIdent
-        + "') as tabla1 inner join(" + "select v.value as sampleDate, v.id_record as record2 "
-        + "FROM " + datasetId + ".field_value v " + "where v.id_field_schema = '"
-        + idSchemaBWSampleDate + "') as tabla2 " + "on tabla1.record1 = tabla2.record2 "
-        + "GROUP BY campo1,campo2 having count(*) > 1";
+        + "from(select v.value as bathingWaterIdentifier,  v.id_record as record1 "
+        + "FROM dataset_" + datasetId + ".field_value v " + "where v.id_field_schema = '"
+        + idSchemaBWIdent + "') as tabla1 inner join("
+        + "select v.value as sampleDate, v.id_record as record2 " + "FROM dataset_" + datasetId
+        + ".field_value v " + "where v.id_field_schema = '" + idSchemaBWSampleDate + "') as tabla2 "
+        + "on tabla1.record1 = tabla2.record2 " + "GROUP BY campo1,campo2 having count(*) > 1";
 
 
     return validationService.tableValidationQueryNonReturnResult(DU03);
