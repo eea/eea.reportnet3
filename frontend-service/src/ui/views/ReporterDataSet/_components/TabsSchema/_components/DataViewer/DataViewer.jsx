@@ -82,8 +82,6 @@ const DataViewer = withRouter(
     let contextMenuRef = useRef();
 
     useEffect(() => {
-      //document.addEventListener('paste', event => onPaste(event));
-
       setExportButtonsList(
         config.exportTypes.map(type => ({
           label: type.text,
@@ -112,13 +110,17 @@ const DataViewer = withRouter(
     useEffect(() => {
       setMenu([
         {
-          label: 'Edit',
-          icon: 'pi pi-fw pi-pencil',
-          command: e => {
+          label: resources.messages['edit'],
+          icon: config.icons['edit'],
+          command: () => {
             setEditDialogVisible(true);
           }
         },
-        { label: 'Delete', icon: 'pi pi-fw pi-trash', command: () => setConfirmDeleteVisible(true) }
+        {
+          label: resources.messages['delete'],
+          icon: config.icons['trash'],
+          command: () => setConfirmDeleteVisible(true)
+        }
       ]);
     }, [selectedRecord]);
 
@@ -672,7 +674,7 @@ const DataViewer = withRouter(
 
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
-        if (i < colsSchema.length - 1) {
+        if (i < colsSchema.length - 2) {
           let field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
@@ -963,25 +965,25 @@ const DataViewer = withRouter(
         </ConfirmDialog>
         <Dialog
           blockScroll={false}
-          contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
           header={resources.messages['addNewRow']}
           maximizable={true}
           modal={true}
           onHide={() => setAddDialogVisible(false)}
-          style={{ width: '50%', height: '80%', overflow: 'auto' }}
+          style={{ width: '50%', height: '80%' }}
           visible={addDialogVisible}>
           <div className="p-grid p-fluid">{newRecordForm}</div>
         </Dialog>
         <Dialog
           blockScroll={false}
-          contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
           maximizable={true}
           modal={true}
           onHide={() => setEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%', overflow: 'auto' }}
+          style={{ width: '50%', height: '80%' }}
           visible={editDialogVisible}>
           <div className="p-grid p-fluid">{editRecordForm}</div>
         </Dialog>

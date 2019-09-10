@@ -3263,6 +3263,8 @@ body .p-dialog .p-dialog-content {
   color: #404040;
   border: 1px solid #c8c8c8;
   padding: 1em;
+  height: 80%;
+  overflow: auto;
 }
 body .p-dialog .p-dialog-footer {
   border: 1px solid #c8c8c8;
