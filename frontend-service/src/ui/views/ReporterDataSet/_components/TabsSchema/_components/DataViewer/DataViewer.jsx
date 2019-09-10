@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -82,8 +82,6 @@ const DataViewer = withRouter(
     let contextMenuRef = useRef();
 
     useEffect(() => {
-      //document.addEventListener('paste', event => onPaste(event));
-
       setExportButtonsList(
         config.exportTypes.map(type => ({
           label: type.text,
@@ -112,13 +110,17 @@ const DataViewer = withRouter(
     useEffect(() => {
       setMenu([
         {
-          label: 'Edit',
-          icon: 'pi pi-fw pi-pencil',
-          command: e => {
+          label: resources.messages['edit'],
+          icon: config.icons['edit'],
+          command: () => {
             setEditDialogVisible(true);
           }
         },
-        { label: 'Delete', icon: 'pi pi-fw pi-trash', command: () => setConfirmDeleteVisible(true) }
+        {
+          label: resources.messages['delete'],
+          icon: config.icons['trash'],
+          command: () => setConfirmDeleteVisible(true)
+        }
       ]);
     }, [selectedRecord]);
 
@@ -224,6 +226,7 @@ const DataViewer = withRouter(
     };
 
     //When pressing "Escape" cell data resets to initial value
+    //on "Enter" and "Tab" the value submits
     const onEditorKeyChange = (props, event, record) => {
       if (event.key === 'Escape') {
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
@@ -364,6 +367,9 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
+      //Delete hidden column null values (recordId, validations, etc.)
+      record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
+      console.log(record);
       if (isNewRecord) {
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
@@ -672,7 +678,7 @@ const DataViewer = withRouter(
 
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
-        if (i < colsSchema.length - 1) {
+        if (i < colsSchema.length - 2) {
           let field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
@@ -963,25 +969,25 @@ const DataViewer = withRouter(
         </ConfirmDialog>
         <Dialog
           blockScroll={false}
-          contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
           header={resources.messages['addNewRow']}
           maximizable={true}
           modal={true}
           onHide={() => setAddDialogVisible(false)}
-          style={{ width: '50%', height: '80%', overflow: 'auto' }}
+          style={{ width: '50%', height: '80%' }}
           visible={addDialogVisible}>
           <div className="p-grid p-fluid">{newRecordForm}</div>
         </Dialog>
         <Dialog
           blockScroll={false}
-          contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
           maximizable={true}
           modal={true}
           onHide={() => setEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%', overflow: 'auto' }}
+          style={{ width: '50%', height: '80%' }}
           visible={editDialogVisible}>
           <div className="p-grid p-fluid">{editRecordForm}</div>
         </Dialog>

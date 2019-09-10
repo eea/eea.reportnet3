@@ -65,6 +65,7 @@
 		"documentUploadingGrowlErrorSummary": "Document upload",
 		"duplicate": "Duplicate",
 		"ds": "DS",
+		"edit": "Edit",
 		"editRow": "Edit row",
 		"emptyDescriptionValidationError":"Please, enter a description",
 		"emptyFileValidationError":"Please, select a file",
