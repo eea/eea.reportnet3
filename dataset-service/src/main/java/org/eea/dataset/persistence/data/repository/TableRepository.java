@@ -83,12 +83,6 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   @Query("delete from TableValue d where d.idTableSchema=?1")
   void deleteByIdTableSchema(String idTableSchema);
 
-  /**
-   * Sanitize table values to restore snapshot.
-   */
-  @Modifying
-  @Query(nativeQuery = true, value = "delete from table_value where id in "
-      + "(select t.id from table_value t left outer join record_value r on t.id = r.id_table where r.id_table is null)")
-  void sanitizeTableValuesToRestoreSnapshot();
+
 
 }

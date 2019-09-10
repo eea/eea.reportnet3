@@ -279,11 +279,5 @@ public interface DatasetService {
   void deleteRecordValuesToRestoreSnapshot(@DatasetId Long datasetId, Long partitionId)
       throws EEAException;
 
-  /**
-   * Sanitize table values to restore snapshot.
-   *
-   * @param datasetId the dataset id
-   * @throws EEAException the EEA exception
-   */
-  void sanitizeTableValuesToRestoreSnapshot(@DatasetId Long datasetId) throws EEAException;
+
 }

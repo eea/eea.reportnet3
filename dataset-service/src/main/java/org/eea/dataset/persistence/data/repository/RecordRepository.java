@@ -75,4 +75,15 @@ public interface RecordRepository
   @Query("delete from RecordValue r where r.datasetPartitionId= :idPartition")
   void deleteRecordValuesToRestoreSnapshot(@Param("idPartition") Long partitionDatasetId);
 
+
+  /**
+   * Delete record with id table schema.
+   *
+   * @param idTableSchema the id table schema
+   */
+  @Modifying
+  @Query("delete from RecordValue r where r.tableValue in "
+      + "(select t from TableValue t where t.idTableSchema= :idTableSchema)")
+  void deleteRecordWithIdTableSchema(@Param("idTableSchema") String idTableSchema);
+
 }
