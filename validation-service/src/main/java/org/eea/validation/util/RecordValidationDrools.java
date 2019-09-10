@@ -173,14 +173,9 @@ public class RecordValidationDrools {
    */
   public static Boolean sameYearValidation(Long datasetId, Long idRecord, String idFieldShemaDate,
       String idFieldSchemaSeason) {
-    String season = null;
-    String date = null;
-    try {
-      season = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaSeason).trim();
-      date = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaDate).trim();
-    } catch (RuntimeException e) {
-      System.err.println("ENTRA");
-    }
+    String season =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaSeason).trim();
+    String date = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaDate).trim();
     if (!"".equalsIgnoreCase(season) && !"".equalsIgnoreCase(date)) {
 
       try {
