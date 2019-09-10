@@ -1,14 +1,15 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
-import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,17 +34,19 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The snapshot repository. */
-  @Mock
-  private SnapshotRepository snapshotRepository;
 
   /** The data set metabase mapper. */
   @Mock
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
-  /** The snapshot mapper. */
+  /** The record store controller zull. */
   @Mock
-  private SnapshotMapper snapshotMapper;
+  private RecordStoreControllerZull recordStoreControllerZull;
+
+  /** The reporting dataset repository. */
+  @Mock
+  private ReportingDatasetRepository reportingDatasetRepository;
+
 
   /**
    * Inits the mocks.
@@ -70,44 +73,18 @@ public class DatasetMetabaseServiceTest {
 
 
   /**
-   * Test get snapshots.
+   * Test create empty dataset.
    *
    * @throws Exception the exception
    */
   @Test
-  public void testGetSnapshots() throws Exception {
-
-    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    datasetMetabaseService.getSnapshotsByIdDataset(Mockito.anyLong());
-    assertEquals("failed assertion", new ArrayList<>(),
-        datasetMetabaseService.getSnapshotsByIdDataset(Mockito.anyLong()));
-
+  public void testCreateEmptyDataset() throws Exception {
+    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
+    datasetMetabaseService.createEmptyDataset("", "5d0c822ae1ccd34cfcd97e20", 1L);
+    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any());
   }
 
-  /**
-   * Test add snapshots.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testAddSnapshots() throws Exception {
 
-    datasetMetabaseService.addSnapshot(1L, "test");
-    Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
-
-  }
-
-  /**
-   * Test delete snapshots.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testDeleteSnapshots() throws Exception {
-
-    datasetMetabaseService.removeSnapshot(1L, 1L);
-    Mockito.verify(snapshotRepository, times(1)).removeSnaphot(Mockito.any(), Mockito.any());
-
-  }
 
 }

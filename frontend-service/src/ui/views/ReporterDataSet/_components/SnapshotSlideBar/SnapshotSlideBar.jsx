@@ -20,7 +20,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
 
   useEffect(() => {
     const bodySelector = document.querySelector('body');
-    isVisible ? (bodySelector.style.overflowY = 'hidden') : (bodySelector.style.overflowY = 'auto');
+    isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
   }, [isVisible]);
 
   const snapshotValidationSchema = Yup.object().shape({

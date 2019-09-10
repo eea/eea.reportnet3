@@ -81,7 +81,7 @@ public interface DataflowService {
    *
    * @throws EEAException the EEA exception
    */
-  void updateUserRequestStatus(String userRequestId, TypeRequestEnum type) throws EEAException;
+  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
 
 
   /**

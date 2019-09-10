@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -30,11 +31,14 @@ import org.springframework.web.server.ResponseStatusException;
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
-
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The dataflow web link service. */
+  /**
+   * The dataflow web link service.
+   */
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
 
@@ -43,9 +47,11 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * Gets the link.
    *
    * @param idLink the id link
+   *
    * @return the link
    */
   @Override
+  @HystrixCommand
   @GetMapping(value = "{idLink}")
   public WeblinkVO getLink(@RequestParam("idLink") Long idLink) {
     try {
@@ -64,9 +70,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param description the description
    */
   @Override
+  @HystrixCommand
   @PutMapping
   public void saveLink(Long idDataflow, String url, String description) {
-
 
     try {
       new URL(url).toURI();
@@ -93,6 +99,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param idLink the id link
    */
   @Override
+  @HystrixCommand
   @DeleteMapping(value = "{idLink}")
   public void removeLink(@RequestParam(value = "idLink") Long idLink) {
     try {
@@ -112,6 +119,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    * @param description the description
    */
   @Override
+  @HystrixCommand
   @PostMapping(value = "{idLink}")
   public void updateLink(@RequestParam(value = "idLink") Long idLink,
       @RequestParam(value = "url") String url,

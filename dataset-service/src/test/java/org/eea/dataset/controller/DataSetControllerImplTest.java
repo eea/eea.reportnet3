@@ -57,7 +57,7 @@ public class DataSetControllerImplTest {
   List<RecordVO> records;
 
   /** The record ids. */
-  List<Long> recordIds;
+  Long recordId;
 
   @Mock
   UpdateRecordHelper updateRecordHelper;
@@ -72,8 +72,7 @@ public class DataSetControllerImplTest {
   public void initMocks() {
     records = new ArrayList<>();
     records.add(new RecordVO());
-    recordIds = new ArrayList<>();
-    recordIds.add(1L);
+    recordId = 1L;
     MockitoAnnotations.initMocks(this);
   }
 
@@ -249,40 +248,6 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Creates the removeDatasetData data set test exception entry 1.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createEmptyDataSetTestExceptionEntry1() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet(null, null, 1L);
-  }
-
-  /**
-   * Creates the removeDatasetData data set test exception entry 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createEmptyDataSetTestExceptionEntry2() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet("", "", 1L);
-  }
-
-  /**
-   * Creates the removeDatasetData data set test.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void createEmptyDataSetTest() throws Exception {
-    doNothing().when(datasetService).createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.createEmptyDataSet("datasetName", null, 1L);
-
-    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
 
 
   /**
@@ -594,32 +559,27 @@ public class DataSetControllerImplTest {
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsNullEntry() throws Exception {
-    dataSetControllerImpl.deleteRecords(null, new ArrayList<Long>());
+  public void testdeleteRecordNullEntry() throws Exception {
+    dataSetControllerImpl.deleteRecord(null, 1L);
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsNull() throws Exception {
-    dataSetControllerImpl.deleteRecords(-2L, null);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsEmpty() throws Exception {
-    dataSetControllerImpl.deleteRecords(1L, new ArrayList<Long>());
+  public void testdeleteRecordNull() throws Exception {
+    dataSetControllerImpl.deleteRecord(-2L, null);
   }
 
   @Test
-  public void testdeleteRecordsSuccess() throws Exception {
+  public void testdeleteRecordSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
-    dataSetControllerImpl.deleteRecords(1L, recordIds);
+    dataSetControllerImpl.deleteRecord(1L, recordId);
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void testdeleteRecordsNotFoundException() throws Exception {
+  public void testdeleteRecordNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
         Mockito.any());
-    dataSetControllerImpl.deleteRecords(1L, recordIds);
+    dataSetControllerImpl.deleteRecord(1L, recordId);
   }
 
   @Test(expected = ResponseStatusException.class)

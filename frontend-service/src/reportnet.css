@@ -141,7 +141,7 @@ body {
 .rp-btn.default {
   color: var(--white);
 }
-.rp-btn.rp-btn.default:hover {
+.rp-btn.default:hover {
   background-color: var(--c-orange-200);
   color: var(--blue-120);
   border: 2px solid var(--c-orange-200);
@@ -1809,6 +1809,11 @@ input:focus {
 
 form .error {
   color: var(--errors);
+}
+
+/*Tooltip*/
+.p-tooltip {
+  z-index: 4000 !important;
 }
 
 /* buttons */

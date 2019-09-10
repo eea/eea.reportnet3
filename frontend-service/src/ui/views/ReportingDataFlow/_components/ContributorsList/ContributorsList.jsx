@@ -124,7 +124,7 @@ export function ContributorsList({ dataFlowId }) {
       <>
         <Button
           tooltip={resources.messages.deleteContributor}
-          tooltipOptions={{ position: 'left' }}
+          tooltipOptions={{ position: 'right' }}
           icon="trash"
           disabled={false}
           className={`${styles.btn} rp-btn warning`}
@@ -196,7 +196,7 @@ export function ContributorsList({ dataFlowId }) {
                   type="submit"
                   icon="plus"
                   tooltip={resources.messages.addContributor}
-                  tooltipOptions={{ position: 'left' }}
+                  tooltipOptions={{ position: 'right' }}
                   label={resources.messages.add}
                   className={`${styles.addContributorButton} rp-btn default`}
                 />

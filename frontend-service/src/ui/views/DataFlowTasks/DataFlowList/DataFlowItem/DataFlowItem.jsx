@@ -14,9 +14,9 @@ import { DataFlowService } from 'core/services/DataFlow';
 export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
   const resources = useContext(ResourcesContext);
 
-  const onAcceptDataFlow = async () => {
+  const onAccept = async () => {
     try {
-      const status = await DataFlowService.accept(itemContent.id);
+      const status = await DataFlowService.accept(itemContent.requestId);
       if (status >= 200 && status <= 299) {
         dataFetch();
       } else {
@@ -26,9 +26,9 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
       console.error('AcceptDataFlow error: ', error);
     }
   };
-  const onRejectDataFlow = async () => {
+  const onReject = async () => {
     try {
-      const status = await DataFlowService.reject(itemContent.id);
+      const status = await DataFlowService.reject(itemContent.requestId);
       if (status >= 200 && status <= 299) {
         dataFetch();
       } else {
@@ -79,12 +79,12 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
             <Button
               layout="simple"
               className={`${styles.rep_button}`}
-              onClick={() => onAcceptDataFlow()}
+              onClick={() => onAccept()}
               label={resources.messages['accept']}
             />
             <Button
               className={`${styles.rep_button}`}
-              onClick={() => onRejectDataFlow()}
+              onClick={() => onReject()}
               label={resources.messages['reject']}
             />
           </>

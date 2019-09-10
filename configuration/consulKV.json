@@ -387,6 +387,18 @@
     "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
     "value": "ZmFsc2U="
   },
+    {
+    "key": "config/apiGateway/zuul.routes.snapshot.path",
+    "value": "L3NuYXBzaG90Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.snapshot.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.snapshot.stripPrefix",
+    "value": "ZmFsc2U="
+  },
   {
     "key": "config/apiGateway/zuul.routes.dataschema.path",
     "value": "L2RhdGFzY2hlbWEvKio="
@@ -732,6 +744,10 @@
     "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTBVUzZiNDlIdUxkZ0dEYXltVzFqOXR5VWlqdjQrN3J0WTh2eEVGeVRGbDZmdFFxK3N2Sm5RNUlWWEw0aFM2c0ltbFFnbEx1WER2UDAvU2UxVHlNSzB2T3pzWXA2aVd0WUtUSmFvaFU0dVlUMnN3OWRJU0dhdjVMN25ZT0R5dlV0bHZqa2x2bzloRUNPaVRLaEJsa0VoUDhlV1dFWG1WOURHMERYL0l0eGZZbnpVd1JZSGJxZ2tYZWZZbmhmRTBxQ3p2Um9oYnNyZ1lSaitibmFmL1VkOHkwWHdGVTJaQTArK2dYT2JHalBoQy9JTFk3S2JxNnFLa1Z2TnVDam00MmdjUTNvWXRvVUYrR1M1TUZ4QjZ5c3BPMmcxcTNSN0t3VU9hS1h5bjh6OVlsY2RVZkVOQ2R0eXhTbFBqb1FLdkg2Y3hSSmRseE9Ha3RlK0V0WEN2TENIUUlEQVFBQn0="
   },
   {
+    "key": "config/application/hystrix.shareSecurityContext",
+    "value": "dHJ1ZQ=="
+  },
+  {
     "key": "config/ums/eea.keycloak.admin.user",
     "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
   },
@@ -782,5 +798,9 @@
   {
     "key": "config/dataset/spring.servlet.multipart.max-request-size",
     "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
+  },
+  {
+    "key": "config/recordstore/pathSnapshot",
+    "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
   }
 ]

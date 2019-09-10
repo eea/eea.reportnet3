@@ -24,16 +24,17 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
 
 
   /**
-   * Removes the snaphot.
+   * Release snaphot.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    */
+
   @Transactional
   @Modifying
   @Query(nativeQuery = true,
-      value = "DELETE FROM snapshot WHERE id=:idSnapshot AND reporting_dataset_id=:idDataset ; "
-          + "DELETE FROM dataset where id=:idSnapshot")
-  void removeSnaphot(@Param("idDataset") Long idDataset, @Param("idSnapshot") Long idSnapshot);
+      value = "UPDATE snapshot SET release=false WHERE reporting_dataset_id=:idDataset ; "
+          + "UPDATE snapshot SET release=true WHERE id=:idSnapshot")
+  void releaseSnaphot(@Param("idDataset") Long idDataset, @Param("idSnapshot") Long idSnapshot);
 
 }

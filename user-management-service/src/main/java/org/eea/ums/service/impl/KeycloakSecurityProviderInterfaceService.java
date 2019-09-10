@@ -2,6 +2,7 @@ package org.eea.ums.service.impl;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -50,6 +51,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   @Override
+  public void doLogout(String refreshToken) {
+    keycloakConnectorService.logout(refreshToken);
+  }
+
+  @Override
   public Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes) {
     return !keycloakConnectorService.checkUserPermision(resource, scopes).equals("DENY");
   }
@@ -66,12 +72,23 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
 
   @Override
-  public void addUserToUserGroup(String userId, String groupId, String securityToken) {
-    throw new UnsupportedOperationException("Method Not implemented yet");
+  public void addUserToUserGroup(String userId, String groupName) {
+    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    //remove ROLE_ from groupName
+    if (null != groups && groups.length > 0) {
+      String groupId = Arrays.asList(groups).stream()
+          .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
+          .map(GroupInfo::getId)
+          .findFirst().orElse("");
+      if (StringUtils.isNotBlank(groupId)) {
+        keycloakConnectorService.addUserToGroup(userId, groupId);
+      }
+    }
+
   }
 
   @Override
-  public void removeUserFromUserGroup(String userId, String groupId, String securityToken) {
+  public void removeUserFromUserGroup(String userId, String groupId) {
     throw new UnsupportedOperationException("Method Not implemented yet");
   }
 

@@ -3,16 +3,18 @@ package org.eea.dataflow.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
+import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
@@ -207,12 +209,26 @@ public class DataFlowServiceImplTest {
       }
     };
     dataflows.add(df);
-    when(dataflowRepository.findPendingAccepted(Mockito.any())).thenReturn(dataflows);
+    when(dataflowRepository.findPending(Mockito.any())).thenReturn(dataflows);
+
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setId(1L);
     List<DataFlowVO> dataflowsVO = new ArrayList<>();
     dataflowsVO.add(dfVO);
     when(dataflowNoContentMapper.entityListToClass(Mockito.any())).thenReturn(dataflowsVO);
+
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    List<ResourceAccessVO> resources = new ArrayList<>();
+    resources.add(resource);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceEnum.class)))
+        .thenReturn(resources);
+
+    Optional<Dataflow> df2 = Optional.of(df.getDataflow());
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(df2);
+
+    when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
+
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
   }
@@ -277,7 +293,32 @@ public class DataFlowServiceImplTest {
   public void updateUserRequestStatus() throws EEAException {
     Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus("1L", TypeRequestEnum.ACCEPTED);
+    Optional<UserRequest> ur = Optional.of(new UserRequest());
+    Set<Dataflow> dfs = new HashSet<>();
+    Dataflow df = new Dataflow();
+    df.setId(1L);
+    dfs.add(df);
+    ur.get().setDataflows(dfs);
+
+    when(userRequestRepository.findById(Mockito.anyLong())).thenReturn(ur);
+    Mockito.doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+        Mockito.any());
+
+    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
+    Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Update user request status 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateUserRequestStatus2() throws EEAException {
+    Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
+        Mockito.any());
+    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.REJECTED);
     Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
         Mockito.any());
   }

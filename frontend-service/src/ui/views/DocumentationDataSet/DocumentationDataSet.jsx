@@ -25,6 +25,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const DocumentationDataSet = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
@@ -33,7 +34,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const [documents, setDocuments] = useState([]);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [webLinks, setWebLinks] = useState([]);
 
@@ -83,9 +84,16 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
-    setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
-    setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
-    setIsLoading(false);
+    try {
+      setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
+      setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(config.DATAFLOW_TASKS.url));
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const createFileName = title => {
@@ -191,24 +199,28 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['title']}
+                sortable={true}
               />
               <Column
                 field="description"
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['description']}
+                sortable={true}
               />
               <Column
                 field="category"
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['category']}
+                sortable={true}
               />
               <Column
                 field="language"
                 filter={false}
                 filterMatchMode="contains"
                 header={resources.messages['language']}
+                sortable={true}
               />
               <Column
                 body={actionTemplate}

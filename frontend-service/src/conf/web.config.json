@@ -3,7 +3,7 @@
 		"url":"/dataset/{:dataSetId}/table/{:tableSchemaId}/record"
 	},
 	"createSnapshot": {
-		"url": "/datasetmetabase/{:dataSetId}/snapshot/create?description={:description}"
+		"url": "/snapshot/dataset/{:dataSetId}/create?description={:description}"
 	},
 	"dataSchemaAPI": {
 		"url": "/dataschema/dataflow/{:dataFlowId}"
@@ -15,7 +15,13 @@
 		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}"
 	},
 	"deleteSnapshotByID": {
-		"url": "/datasetmetabase/{:dataSetId}/snapshot/delete/{:snapshotId}"
+		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/delete"
+	},
+	"restoreSnapshot": {
+		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/restore"
+	},
+	"releaseSnapshot": {
+		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/release"
 	},
 	"deleteImportData": {
 		"url": "/dataset/{:dataSetId}/deleteImportData"
@@ -48,7 +54,7 @@
 		"url": "/dataset/{:dataSetId}/loadTableData/{:tableId}"
 	},
 	"loadSnapshotsListAPI": {
-		"url": "/datasetmetabase/{:dataSetId}/listSnapshots/"
+		"url": "/snapshot/dataset/{:dataSetId}/listSnapshots"
 	},
 	"loadStatisticsAPI": {
 		"url": "/dataset/loadStatistics/{:dataSetId}"
@@ -71,17 +77,20 @@
 	"loginUser":{
 		"url": "/user/generateToken?password={:password}&username={:userName}"
 	},
-	"refreshToken":{
-		"url": "/user/refreshToken?refreshToken={:refreshToken}"
-	},
 	"logout":{
 		"url": "/user/logout?refreshToken={:refreshToken}"
+	},
+	"refreshToken":{
+		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	},
 	"REPORTING_DATAFLOW": {
 		"url": "/reporting-data-flow/{:dataFlowId}"
 		},
 	"updateTableDataField":{
 		"url": "/dataset/{:dataSetId}/updateField"
+	},
+	"updateTableDataRecord":{
+		"url":"/dataset/{:dataSetId}/updateRecord"
 	},
 	"DATAFLOW_TASKS":{
 		"url":"/data-flow-task"

@@ -1,11 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import styles from './TabsSchema.module.css';
 
 import { config } from 'conf';
 
 import { DataViewer } from './_components/DataViewer';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 import { TabView, TabPanel } from 'primereact/tabview';
 
@@ -14,19 +13,19 @@ export const TabsSchema = ({
   buttonsList = undefined,
   onTabChange,
   recordPositionId,
-  selectedRowErrorId,
+  selectedRecordErrorId,
   tables,
-  tableSchemaColumns
+  tableSchemaColumns,
+  hasWritePermissions
 }) => {
-  const resources = useContext(ResourcesContext);
-
   let tabs =
     tables && tableSchemaColumns
-      ? tables.map((table, i) => {
+      ? tables.map(table => {
           return (
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
                 <DataViewer
+                  hasWritePermissions={hasWritePermissions}
                   buttonsList={buttonsList}
                   key={table.id}
                   tableId={table.id}
@@ -35,7 +34,7 @@ export const TabsSchema = ({
                     tableSchemaColumns.map(tab => tab.filter(t => t.table === table.name)).filter(f => f.length > 0)[0]
                   }
                   recordPositionId={table.id === activeIndex ? recordPositionId : -1}
-                  selectedRowErrorId={table.id === activeIndex ? selectedRowErrorId : -1}
+                  selectedRecordErrorId={table.id === activeIndex ? selectedRecordErrorId : -1}
                 />
               </div>
             </TabPanel>

@@ -3,7 +3,6 @@ package org.eea.dataset.service;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.metabase.SnapshotVO;
 
 /**
  * The Interface DatasetMetabaseService.
@@ -18,31 +17,16 @@ public interface DatasetMetabaseService {
    */
   List<DataSetMetabaseVO> getDataSetIdByDataflowId(Long idFlow);
 
-  /**
-   * Gets the snapshots by id dataset.
-   *
-   * @param datasetId the dataset id
-   * @return the snapshots by id dataset
-   * @throws EEAException the EEA exception
-   */
-  List<SnapshotVO> getSnapshotsByIdDataset(Long datasetId) throws EEAException;
 
   /**
-   * Adds the snapshot.
+   * Creates the empty dataset.
    *
-   * @param idDataset the id dataset
-   * @param description the description
+   * @param datasetName the dataset name
+   * @param idDatasetSchema the id dataset schema
+   * @param idDataflow the id dataflow
    * @throws EEAException the EEA exception
    */
-  void addSnapshot(Long idDataset, String description) throws EEAException;
-
-  /**
-   * Removes the snapshot.
-   *
-   * @param idDataset the id dataset
-   * @param idSnapshot the id snapshot
-   * @throws EEAException the EEA exception
-   */
-  void removeSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void createEmptyDataset(String datasetName, String idDatasetSchema, Long idDataflow)
+      throws EEAException;
 
 }

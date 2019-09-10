@@ -1,14 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { routes } from 'ui/routes';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-
-import { isUndefined } from 'lodash';
 
 import { config } from 'conf';
 
@@ -17,6 +12,7 @@ import styles from './DataViewer.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
 import { InputText } from 'ui/views/_components/InputText';
@@ -29,9 +25,11 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
+import { Object } from 'es6-shim';
 
 const DataViewer = withRouter(
   ({
+    hasWritePermissions,
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
@@ -59,14 +57,19 @@ const DataViewer = withRouter(
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
+    const [initialCellValue, setInitialCellValue] = useState();
+    const [initialRecordValue, setInitialRecordValue] = useState();
     const [isDataDeleted, setIsDataDeleted] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
+    const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
     const [numRows, setNumRows] = useState(10);
+    const [pastedRecords, setPastedRecords] = useState();
     const [selectedRecord, setSelectedRecord] = useState({});
+    const [selectedCellId, setSelectedCellId] = useState();
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -75,6 +78,8 @@ const DataViewer = withRouter(
 
     let growlRef = useRef();
     let exportMenuRef = useRef();
+    let datatableRef = useRef();
+    let contextMenuRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -93,14 +98,31 @@ const DataViewer = withRouter(
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
+      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'dataSetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-
       onFetchData(undefined, undefined, 0, numRows);
     }, []);
 
     useEffect(() => {
       setFetchedData([]);
     }, [isDataDeleted]);
+
+    useEffect(() => {
+      setMenu([
+        {
+          label: resources.messages['edit'],
+          icon: config.icons['edit'],
+          command: () => {
+            setEditDialogVisible(true);
+          }
+        },
+        {
+          label: resources.messages['delete'],
+          icon: config.icons['trash'],
+          command: () => setConfirmDeleteVisible(true)
+        }
+      ]);
+    }, [selectedRecord]);
 
     useEffect(() => {
       onRefresh();
@@ -124,13 +146,13 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       let columnsArr = colsSchema.map(column => {
-        let sort = column.field === 'id' ? false : true;
-        let visibleColumn = column.field === 'id' ? styles.VisibleHeader : '';
+        let sort = column.field === 'id' || column.field === 'dataSetPartitionId' ? false : true;
+        let visibleColumn = column.field === 'id' || column.field === 'dataSetPartitionId' ? styles.VisibleHeader : '';
         return (
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            editor={row => cellDataEditor(row, selectedRecord)}
+            editor={hasWritePermissions ? row => cellDataEditor(row, selectedRecord) : null}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -152,10 +174,9 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      let newColumnsArr = [validationCol].concat(columnsArr);
-      let newColumnsArr2 = [editCol].concat(newColumnsArr);
-      setColumns(newColumnsArr2);
-    }, [colsSchema, columnOptions, selectedRecord]);
+      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      setColumns(columnsArr);
+    }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
@@ -163,13 +184,19 @@ const DataViewer = withRouter(
       }
     }, [exportTableData]);
 
+    const onCancelRowEdit = () => {
+      let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
+      setEditDialogVisible(false);
+      setFetchedData(updatedValue);
+    };
+
     const onChangePage = event => {
       setNumRows(event.rows);
       setFirstRow(event.first);
       onFetchData(sortField, sortOrder, event.first, event.rows);
     };
 
-    const onConfirmDelete = async () => {
+    const onConfirmDeleteTable = async () => {
       setDeleteDialogVisible(false);
       const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
       if (dataDeleted) {
@@ -179,33 +206,46 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteRow = async () => {
       setDeleteDialogVisible(false);
-      let field = selectedRecord.dataRow.filter(row => Object.keys(row.fieldData)[0] === 'id')[0];
-      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, field.fieldData['id']);
+      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, selectedRecord.recordId);
       if (recordDeleted) {
         setIsRecordDeleted(true);
       }
     };
 
-    const onEditAddFormInput = (property, value, field) => {
+    const onEditAddFormInput = (property, value) => {
       let record = {};
       if (!isNewRecord) {
         record = { ...editedRecord };
-        field.fieldData[property] = value;
-        setEditedRecord(record);
+        let updatedRecord = changeRecordValue(record, property, value);
+        setEditedRecord(updatedRecord);
       } else {
         record = { ...newRecord };
-        field.fieldData[property] = value;
-        setNewRecord(record);
+        let updatedRecord = changeRecordValue(record, property, value);
+        setNewRecord(updatedRecord);
+      }
+    };
+
+    //When pressing "Escape" cell data resets to initial value
+    //on "Enter" and "Tab" the value submits
+    const onEditorKeyChange = (props, event, record) => {
+      if (event.key === 'Escape') {
+        let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
+        datatableRef.current.closeEditingCell();
+        setFetchedData(updatedData);
+      } else if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        onEditorSubmitValue(props, event.target.value, record);
       }
     };
 
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        console.log(field, value);
-        const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
-        if (!fieldUpdated) {
-          console.error('Error!');
+        if (value !== initialCellValue && selectedCellId === getCellId(cell, cell.field)) {
+          const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
+          if (!fieldUpdated) {
+            console.error('Error!');
+          }
         }
       }
     };
@@ -213,6 +253,11 @@ const DataViewer = withRouter(
     const onEditorValueChange = (props, value) => {
       let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
+    };
+
+    const onEditorValueFocus = (props, value) => {
+      setSelectedCellId(getCellId(props, props.field));
+      setInitialCellValue(value);
     };
 
     const onExportTableData = async fileType => {
@@ -273,21 +318,63 @@ const DataViewer = withRouter(
       setConfirmDeleteVisible(false);
     };
 
+    const onPaste = async () => {
+      const pastedData = await navigator.clipboard.readText();
+      //event.clipboardData || window.clipboardData;
+      //let pastedData = clipboardData.getData('Text');
+      const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
+      const copiedRecords = [];
+      copiedClipboardRecords.forEach(row => {
+        let emptyRecord = createEmptyObject(colsSchema, fetchedData);
+        const copiedCols = row.split('\t');
+        //copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
+
+        emptyRecord.dataRow.forEach((record, i) => {
+          emptyRecord = changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
+        });
+
+        copiedRecords.push(emptyRecord);
+      });
+      setPastedRecords(copiedRecords);
+    };
+    const onPasteAccept = async () => {
+      try {
+        await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
+        growlRef.current.show({
+          severity: 'success',
+          summary: resources.messages['dataPasted'],
+          life: '3000'
+        });
+      } catch (error) {
+        console.error('DataViewer error: ', error);
+        const errorResponse = error.response;
+        console.error('DataViewer errorResponse: ', errorResponse);
+        if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+          history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+        }
+      } finally {
+      }
+    };
     const onRefresh = () => {
       onFetchData(sortField, sortOrder, firstRow, numRows);
     };
 
-    const onSelectRecord = (event, value) => {
+    const onSelectRecord = val => {
       setIsNewRecord(false);
-      setSelectedRecord(value);
-      setEditedRecord(value);
+      setSelectedRecord({ ...val });
+      setInitialRecordValue(getInitialRecordValues(val));
+      setEditedRecord({ ...val });
     };
 
     const onSaveRecord = async record => {
+      //Delete hidden column null values (recordId, validations, etc.)
+      record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
+      console.log(record);
       if (isNewRecord) {
         try {
-          await DataSetService.addRecordById(dataSetId, tableId, record);
+          await DataSetService.addRecordsById(dataSetId, tableId, [record]);
           setAddDialogVisible(false);
+          onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -300,8 +387,9 @@ const DataViewer = withRouter(
         }
       } else {
         try {
-          await DataSetService.updateRecordById(dataSetId, tableId, record);
+          await DataSetService.updateRecordsById(dataSetId, record);
           setEditDialogVisible(false);
+          onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -310,6 +398,7 @@ const DataViewer = withRouter(
             history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
           }
         } finally {
+          onCancelRowEdit();
           setLoading(false);
         }
       }
@@ -331,15 +420,15 @@ const DataViewer = withRouter(
 
       const detailContent = (
         <span>
-          {resources.messages['datasetLoadingMessage']}
+          {resources.messages['dataSetLoadingMessage']}
           <strong>{editLargeStringWithDots(tableName, 22)}</strong>
-          {resources.messages['datasetLoading']}
+          {resources.messages['dataSetLoading']}
         </span>
       );
 
       growlRef.current.show({
         severity: 'info',
-        summary: resources.messages['datasetLoadingTitle'],
+        summary: resources.messages['dataSetLoadingTitle'],
         detail: detailContent,
         life: '5000'
       });
@@ -375,7 +464,6 @@ const DataViewer = withRouter(
           icon="cancel"
           onClick={() => {
             setAddDialogVisible(false);
-            setNewRecord({});
           }}
         />
         <Button
@@ -394,28 +482,55 @@ const DataViewer = withRouter(
           style={{ float: 'left' }}
           label={resources.messages['add']}
           icon="add"
+          disabled={!hasWritePermissions}
           onClick={() => {
             setIsNewRecord(true);
             setAddDialogVisible(true);
           }}
         />
+        <Button
+          style={{ float: 'right' }}
+          label={resources.messages['paste']}
+          icon="clipboard"
+          onClick={() => {
+            datatableRef.current.onPaste();
+          }}
+        />
       </div>
     );
 
-    const cellDataEditor = (cell, record) => {
+    const cellDataEditor = (cells, record) => {
       return (
         <InputText
           type="text"
-          value={getCellValue(cell, cell.field)}
-          onChange={e => onEditorValueChange(cell, e.target.value)}
-          onBlur={e => onEditorSubmitValue(cell, e.target.value, record)}
+          value={getCellValue(cells, cells.field)}
+          onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+          onChange={e => onEditorValueChange(cells, e.target.value)}
+          onFocus={e => onEditorValueFocus(cells, e.target.value)}
+          onKeyDown={e => onEditorKeyChange(cells, e, record)}
         />
       );
+    };
+
+    const changeRecordInTable = (tableData, rowIndex) => {
+      let record = tableData[rowIndex];
+
+      for (let i = 0; i < initialRecordValue.length; i++) {
+        record = changeRecordValue(record, initialRecordValue[i][0], initialRecordValue[i][1]);
+      }
+
+      tableData[rowIndex] = record;
+      return tableData;
     };
 
     const changeCellValue = (tableData, rowIndex, field, value) => {
       tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
       return tableData;
+    };
+
+    const changeRecordValue = (recordData, field, value) => {
+      recordData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
+      return recordData;
     };
 
     const createEmptyObject = (columnsSchema, data) => {
@@ -448,30 +563,29 @@ const DataViewer = withRouter(
 
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          label={resources.messages['cancel']}
-          icon="cancel"
-          onClick={() => {
-            setEditedRecord(selectedRecord);
-            setEditDialogVisible(false);
-          }}
-        />
+        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
         <Button
           label={resources.messages['save']}
           icon="save"
           onClick={() => {
-            onSaveRecord(editedRecord);
+            try {
+              onSaveRecord(editedRecord);
+            } catch (error) {
+              console.error(error);
+            }
           }}
         />
       </div>
     );
 
     const editRecordForm = colsSchema.map((column, i) => {
-      //Avoid row id Field
+      const arr = [];
+      //Avoid row id Field and dataSetPartitionId
       if (editDialogVisible) {
-        if (i < colsSchema.length - 1) {
+        if (i < colsSchema.length - 2) {
           if (!isUndefined(editedRecord.dataRow)) {
-            let field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            const field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            arr.push([column.field, field.fieldData[column.field]]);
             return (
               <React.Fragment key={column.field}>
                 <div className="p-col-4" style={{ padding: '.75em' }}>
@@ -481,7 +595,7 @@ const DataViewer = withRouter(
                   <InputText
                     id={column.field}
                     value={field.fieldData[column.field]}
-                    onChange={e => onEditAddFormInput(column.field, e.target.value, field)}
+                    onChange={e => onEditAddFormInput(column.field, e.target.value)}
                   />
                 </div>
               </React.Fragment>
@@ -493,6 +607,7 @@ const DataViewer = withRouter(
 
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
+        const dataSetPartitionId = record.dataSetPartitionId;
         const recordValidations = record.validations;
         const recordId = record.recordId;
         const recordSchemaId = record.recordSchemaId;
@@ -508,16 +623,22 @@ const DataViewer = withRouter(
           };
         });
         arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
+        arrayDataFields.push({ fieldData: { dataSetPartitionId: record.dataSetPartitionId }, fieldValidations: null });
         const arrayDataAndValidations = {
           dataRow: arrayDataFields,
           recordValidations,
           recordId,
+          dataSetPartitionId,
           recordSchemaId
         };
         return arrayDataAndValidations;
       });
-
       setFetchedData(dataFiltered);
+    };
+
+    const getCellId = (tableData, field) => {
+      const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
+      return value.length > 0 ? value[0].fieldData.id : undefined;
     };
 
     const getCellValue = (tableData, field) => {
@@ -534,9 +655,30 @@ const DataViewer = withRouter(
       exportTableMenu.style.left = `${buttonLeftPosition}px`;
     };
 
+    const getInitialRecordValues = record => {
+      const arr = [];
+      colsSchema.map((column, i) => {
+        if (i < colsSchema.length - 1) {
+          if (!isUndefined(record.dataRow)) {
+            const field = record.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+            arr.push([column.field, field.fieldData[column.field]]);
+          }
+        }
+      });
+      return arr;
+    };
+
+    const getRecordId = (tableData, record) => {
+      return tableData
+        .map(e => {
+          return e.recordId;
+        })
+        .indexOf(record.recordId);
+    };
+
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
-        if (i < colsSchema.length - 1) {
+        if (i < colsSchema.length - 2) {
           let field = newRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
           return (
             <React.Fragment key={column.field}>
@@ -655,7 +797,6 @@ const DataViewer = withRouter(
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === 'id')[0].fieldData.id;
-
       return { 'p-highlight': id === selectedRecordErrorId };
     };
 
@@ -667,12 +808,13 @@ const DataViewer = withRouter(
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={'export'}
               label={resources.messages['import']}
               onClick={() => setImportDialogVisible(true)}
             />
             <Button
+              disabled={!hasWritePermissions}
               id="buttonExportTable"
               className={`p-button-rounded p-button-secondary`}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
@@ -690,7 +832,7 @@ const DataViewer = withRouter(
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={'trash'}
               label={resources.messages['deleteTable']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
@@ -730,21 +872,41 @@ const DataViewer = withRouter(
             />
           </div>
         </Toolbar>
+        <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
-            editable={true}
+            columnsPreviewNumber={5}
+            contextMenuSelection={selectedRecord}
+            editable={hasWritePermissions}
+            //emptyMessage={resources.messages['noDataInDataTable']}
+            id={tableId}
             first={firstRow}
-            footer={addRowFooter}
+            footer={hasWritePermissions ? addRowFooter : null}
             header={header}
             lazy={true}
             loading={loading}
+            onContextMenu={
+              hasWritePermissions
+                ? e => {
+                    datatableRef.current.closeEditingCell();
+                    contextMenuRef.current.show(e.originalEvent);
+                  }
+                : null
+            }
+            onContextMenuSelectionChange={e => {
+              onSelectRecord(e.value);
+            }}
             onPage={onChangePage}
-            onPaste={() => console.log('Paste')}
-            onRowSelect={e => onSelectRecord(e, e.data)}
+            onPaste={onPaste}
+            onPasteAccept={onPasteAccept}
+            onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
+            pastedRecords={pastedRecords}
+            recordsPreviewNumber={5}
+            ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}
             rowClassName={rowClassName}
@@ -790,7 +952,7 @@ const DataViewer = withRouter(
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           maximizable={false}
-          onConfirm={onConfirmDelete}
+          onConfirm={onConfirmDeleteTable}
           onHide={() => onSetVisible(setDeleteDialogVisible, false)}
           visible={deleteDialogVisible}>
           {resources.messages['deleteDatasetTableConfirm']}
@@ -807,25 +969,25 @@ const DataViewer = withRouter(
         </ConfirmDialog>
         <Dialog
           blockScroll={false}
-          contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
           header={resources.messages['addNewRow']}
           maximizable={true}
           modal={true}
           onHide={() => setAddDialogVisible(false)}
-          style={{ width: '50%', height: '80%', overflow: 'auto' }}
+          style={{ width: '50%', height: '80%' }}
           visible={addDialogVisible}>
           <div className="p-grid p-fluid">{newRecordForm}</div>
         </Dialog>
         <Dialog
           blockScroll={false}
-          contentStyle={{ maxHeight: '80%', overflow: 'auto' }}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
           maximizable={true}
           modal={true}
           onHide={() => setEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%', overflow: 'auto' }}
+          style={{ width: '50%', height: '80%' }}
           visible={editDialogVisible}>
           <div className="p-grid p-fluid">{editRecordForm}</div>
         </Dialog>

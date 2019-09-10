@@ -28,6 +28,8 @@ import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
+import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const SnapshotContext = React.createContext();
@@ -37,6 +39,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     params: { dataFlowId, dataSetId }
   } = match;
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
   const [activeIndex, setActiveIndex] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
@@ -50,7 +53,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRowErrorId, setSelectedRowErrorId] = useState(-1);
+  const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
   const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -58,6 +61,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
+  const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [webFormData, setWebFormData] = useState();
 
   let exportMenuRef = useRef();
@@ -66,6 +70,14 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     icon: config.icons['home'],
     command: () => history.push('/')
   };
+
+  useEffect(() => {
+    if (!isUndefined(user.roles)) {
+      setHasWritePermissions(
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATA_SET}${dataSetId}`)
+      );
+    }
+  }, [user]);
 
   useEffect(() => {
     onLoadDataSetSchema();
@@ -155,10 +167,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onRestoreSnapshot = async () => {
-    const snapshotRestored = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
-    if (snapshotRestored) {
-      onLoadSnapshotList();
-    }
+    await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
@@ -205,10 +214,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       setDatasetHasErrors(dataSetStatistics.datasetErrors);
     } catch (error) {
       const errorResponse = error.response;
-      if (
-        !isUndefined(errorResponse) &&
-        (errorResponse.data.message.includes('401') || errorResponse.data.message.includes('403'))
-      ) {
+      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
         history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
       }
     }
@@ -320,7 +326,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['export']}
               onClick={event => exportMenuRef.current.show(event)}
@@ -339,6 +345,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               disabled={false}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
+              disabled={!hasWritePermissions}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
@@ -352,7 +359,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -377,7 +384,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
               onClick={() => onSetVisible(setSnapshotIsVisible, true)}
@@ -388,28 +395,28 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       <ReporterDataSetContext.Provider
         value={{
           validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowErrorId(selectedRowErrorId);
+            setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
         {/* <TabsSchema
           activeIndex={activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
           recordPositionId={recordPositionId}
-          selectedRowErrorId={selectedRowErrorId}
+          selectedRecordErrorId={selectedRecordErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
+          hasWritePermissions={hasWritePermissions}
         /> */}
         <WebFormData data={webFormData} />
       </ReporterDataSetContext.Provider>
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
-        maximizable
         onHide={() => onSetVisible(setDashDialogVisible, false)}
-        style={{ width: '80%' }}
+        style={{ width: '70vw' }}
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} />
       </Dialog>
@@ -418,10 +425,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
           },
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRowErrorId) => {
+          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
             setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
-            setSelectedRowErrorId(selectedRowErrorId);
+            setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
         <Dialog
@@ -431,7 +438,11 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
           visible={validationsVisible}>
-          <ValidationViewer dataSetId={dataSetId} visible={validationsVisible} />
+          <ValidationViewer
+            dataSetId={dataSetId}
+            visible={validationsVisible}
+            hasWritePermissions={hasWritePermissions}
+          />
         </Dialog>
       </ReporterDataSetContext.Provider>
       <ConfirmDialog

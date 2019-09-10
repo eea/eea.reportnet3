@@ -54,7 +54,7 @@ public interface DatasetController {
   TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields);
 
 
@@ -66,19 +66,6 @@ public interface DatasetController {
   @RequestMapping(value = "/update", method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void updateDataset(@RequestBody DataSetVO dataset);
-
-
-  /**
-   * Creates the empty data set.
-   *
-   * @param datasetName the dataset name
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
-   */
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
-  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
-      @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
 
   /**
@@ -181,15 +168,14 @@ public interface DatasetController {
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records);
 
   /**
-   * Delete records.
+   * Delete record.
    *
    * @param datasetId the dataset id
-   * @param recordIds the record ids
+   * @param recordId the record id
    */
-  @RequestMapping(value = "/{id}/record/", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/{id}/record/{recordId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteRecords(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "recordIds", required = true) List<Long> recordIds);
+  void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") Long recordId);
 
   /**
    * Delete import table.

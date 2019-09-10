@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,7 +35,9 @@ public class TableCollection {
   /** The Id. */
   @Id
   @Column(name = "ID", columnDefinition = "serial")
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "table_collection_id_seq")
+  @SequenceGenerator(name = "table_collection_id_seq", sequenceName = "table_collection_id_seq",
+      allocationSize = 1)
   private Long id;
 
   /** The Dataflow id. */
@@ -80,7 +83,7 @@ public class TableCollection {
     }
     if (getClass() != obj.getClass()) {
       return false;
-    }  
+    }
     TableCollection other = (TableCollection) obj;
     return Objects.equals(dataSetId, other.dataSetId)
         && Objects.equals(dataFlowId, other.dataFlowId) && Objects.equals(id, other.id)

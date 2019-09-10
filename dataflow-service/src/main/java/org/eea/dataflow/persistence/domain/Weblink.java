@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +26,8 @@ public class Weblink {
 
   /** The id. */
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "weblink_id_seq")
+  @SequenceGenerator(name = "weblink_id_seq", sequenceName = "weblink_id_seq", allocationSize = 1)
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 

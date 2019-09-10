@@ -4,7 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataSet = {
-  addRecordById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
+  addRecordsById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
@@ -23,7 +23,7 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet data: ${error}`);
+      console.error(`Error adding record to dataSet data: ${error}`);
       return false;
     }
   },
@@ -111,6 +111,9 @@ export const apiDataSet = {
   },
   errorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
     const tokens = userStorage.get();
+    if (asc === -1) {
+      asc = 0;
+    }
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'
@@ -247,15 +250,14 @@ export const apiDataSet = {
       return false;
     }
   },
-  updateRecordById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
+  updateRecordsById: async (dataSetId, dataSetTableRecords) => {
     const tokens = userStorage.get();
     try {
-      const response = await HTTPRequester.put({
+      const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/table/${tableSchemaId}/record`
-          : getUrl(config.addNewRecord.url, {
-              dataSetId: dataSetId,
-              tableSchemaId: tableSchemaId
+          ? `/dataset/${dataSetId}/updateRecord`
+          : getUrl(config.updateTableDataRecord.url, {
+              dataSetId: dataSetId
             }),
         data: dataSetTableRecords,
         queryString: {},
@@ -266,7 +268,7 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet data: ${error}`);
+      console.error(`Error updating dataSet record data: ${error}`);
       return false;
     }
   },
