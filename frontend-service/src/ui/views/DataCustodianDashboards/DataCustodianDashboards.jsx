@@ -51,35 +51,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   function getDatasetsDashboardData() {
     const datasetDataObject = {
-      labels: [
-        'Austria',
-        'Belgium',
-        'Bulgaria',
-        'Croatia',
-        'Cyprus',
-        'Denmark',
-        'Estonia',
-        'Finland',
-        'France',
-        'Germany',
-        'Greece',
-        'Hungary',
-        'Ireland',
-        'Italy',
-        'Latvia',
-        'Lithuania',
-        'Luxembourg',
-        'Malta',
-        'Netherlands',
-        'Poland',
-        'Portugal',
-        'Romania',
-        'Slovakia',
-        'Slovenia',
-        'Spain',
-        'Sweeden',
-        'United Kingdom'
-      ],
+      labels: config.countries.map(countries => countries.name),
       datasets: [
         {
           label: 'Correct',
@@ -164,101 +136,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
   function getReleasedDashboardData() {
     const releasedDataObject = {
-      labels: [
-        'Austria',
-        'Belgium',
-        'Bulgaria',
-        'Croatia',
-        'Cyprus',
-        'Denmark',
-        'Estonia',
-        'Finland',
-        'France',
-        'Germany',
-        'Greece',
-        'Hungary',
-        'Ireland',
-        'Italy',
-        'Latvia',
-        'Lithuania',
-        'Luxembourg',
-        'Malta',
-        'Netherlands',
-        'Poland',
-        'Portugal',
-        'Romania',
-        'Slovakia',
-        'Slovenia',
-        'Spain',
-        'Sweeden',
-        'United Kingdom'
-      ],
+      labels: config.countries.map(countries => countries.name),
       datasets: [
         {
           label: 'Released',
           backgroundColor: '#32CD32',
-          data: [
-            50,
-            75,
-            25,
-            100,
-            0,
-            30,
-            20,
-            45,
-            35,
-            80,
-            50,
-            75,
-            25,
-            100,
-            0,
-            30,
-            20,
-            45,
-            35,
-            80,
-            50,
-            75,
-            25,
-            0,
-            100,
-            30,
-            20
-          ]
+          data: [1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0]
         },
         {
           label: 'Unreleased',
           backgroundColor: '#8FBC8F',
-          data: [
-            50,
-            25,
-            75,
-            0,
-            100,
-            70,
-            80,
-            55,
-            65,
-            20,
-            50,
-            25,
-            75,
-            0,
-            100,
-            70,
-            80,
-            55,
-            65,
-            20,
-            50,
-            25,
-            75,
-            100,
-            0,
-            70,
-            80
-          ]
+          data: [0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1]
         }
       ]
     };
@@ -290,7 +178,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             }, */
             ticks: {
               // Include a % sign in the ticks
-              callback: (value, index, values) => `${value} %`
+              callback: (value, index, values) => `${index}`
             }
           }
         ]
