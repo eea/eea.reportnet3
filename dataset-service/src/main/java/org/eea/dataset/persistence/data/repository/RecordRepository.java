@@ -1,7 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
-import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -74,7 +73,6 @@ public interface RecordRepository
    */
   @Modifying
   @Query("delete from RecordValue r where r.datasetPartitionId= :idPartition")
-  @Transactional
   void deleteRecordValuesToRestoreSnapshot(@Param("idPartition") Long partitionDatasetId);
 
 }

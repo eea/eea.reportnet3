@@ -3,12 +3,12 @@ package org.eea.dataset.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.eea.dataset.mapper.SnapshotMapper;
-import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -39,15 +40,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SnapshotMapper snapshotMapper;
 
-  /** The record repository. */
-  @Autowired
-  private RecordRepository recordRepository;
 
   /**
    * The record store controller zull.
    */
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
+
+  @Autowired
+  @Qualifier("proxyDatasetService")
+  private DatasetService datasetService;
 
   /**
    * The Constant LOG.
@@ -143,12 +145,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
-    recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
+    datasetService.deleteRecordValuesToRestoreSnapshot(idDataset, idPartition);
     LOG.info("First step of restoring snapshot completed. Previously data erased");
 
     // 2. Restore the dataset data, using the operation from recordstore
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot);
+    // 3. Sanitize the table values, delete possible unused values
+    datasetService.sanitizeTableValuesToRestoreSnapshot(idDataset);
     LOG.info("Snapshot {} restored", idSnapshot);
+
   }
 
 

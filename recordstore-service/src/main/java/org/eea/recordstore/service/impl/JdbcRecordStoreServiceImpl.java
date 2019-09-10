@@ -38,6 +38,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -270,6 +271,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
+  @Async
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException {
 
@@ -336,6 +338,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   }
 
+  /**
+   * Prints the to file.
+   *
+   * @param fileName the file name
+   * @param query the query
+   * @param copyManager the copy manager
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private void printToFile(String fileName, String query, CopyManager copyManager)
       throws SQLException, IOException {
     byte[] buffer;
@@ -362,7 +373,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
+  @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
       throws SQLException, IOException {
 
@@ -373,7 +384,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           conexion.getPassword());
 
       CopyManager cm = new CopyManager((BaseConnection) con);
-
+      LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
       // Table value
 
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
@@ -414,6 +425,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         idReportingDataset);
   }
 
+  /**
+   * Copy from file.
+   *
+   * @param query the query
+   * @param fileName the file name
+   * @param copyManager the copy manager
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
   private void copyFromFile(String query, String fileName, CopyManager copyManager)
       throws IOException, SQLException {
     Path path = Paths.get(fileName);
