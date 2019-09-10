@@ -374,7 +374,6 @@ const DataViewer = withRouter(
     const onSaveRecord = async record => {
       //Delete hidden column null values (recordId, validations, etc.)
       record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
-      console.log(record);
       if (isNewRecord) {
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
@@ -553,11 +552,15 @@ const DataViewer = withRouter(
         recordSchemaId: columnsSchema[0].recordId
       };
 
+      obj.dataSetPartitionId = null;
       //dataSetPartitionId is needed for checking the rows owned by delegated contributors
       if (!isUndefined(data.records) && data.records.length > 0) {
         obj.dataSetPartitionId = data.records[0].dataSetPartitionId;
       } else {
-        obj.dataSetPartitionId = null;
+        //onPaste we check the formatted datatable data
+        if (!isUndefined(data) && data.length > 0) {
+          obj.dataSetPartitionId = data[0].dataSetPartitionId;
+        }
       }
       return obj;
     };
