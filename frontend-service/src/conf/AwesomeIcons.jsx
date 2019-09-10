@@ -10,7 +10,9 @@ import {
   faFileArchive,
   faFileCode,
   faDatabase,
-  faFileImage
+  faFileImage,
+  faFilePowerpoint,
+  faFileVideo
 } from '@fortawesome/free-solid-svg-icons';
 
 export const AwesomeIcons = icon => {
