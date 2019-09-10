@@ -83,4 +83,16 @@ public class TableValidationQuerysDroolsRepository {
       return value;
     }
   }
+
+  @SuppressWarnings("unchecked")
+  public String queryRecordsFields(String QUERY) {
+
+    Query query = entityManager.createNativeQuery(QUERY);
+    String value = query.getResultList().get(0).toString();
+    if (null == value || value.isEmpty()) {
+      return "";
+    } else {
+      return value;
+    }
+  }
 }

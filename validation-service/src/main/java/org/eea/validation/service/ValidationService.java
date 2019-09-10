@@ -262,4 +262,6 @@ public interface ValidationService {
    * @return the boolean
    */
   Boolean tableValidationQueryPeriodMonitoring(String QUERY);
+
+  String recordFieldValidation(String QUERY);
 }

@@ -3,7 +3,6 @@ package org.eea.validation.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,18 +31,9 @@ public class RecordValidationDrools {
 
   /** The Constant MAXIMUN_VALUE_ESCHERICHIA. */
   private static final Integer MAXIMUN_VALUE_ESCHERICHIA = 300;
-  /** The field repository impl. */
-  private static FieldRepository fieldRepository;
 
-  /**
-   * Sets the dataset repository.
-   *
-   * @param fieldRepositoryImpl the new dataset repository
-   */
-  @Autowired
-  private void setDatasetRepository(FieldRepository fieldRepositoryImpl) {
-    RecordValidationDrools.fieldRepository = fieldRepositoryImpl;
-  }
+  /** The field repository impl. */
+
 
   /**
    * Return value id record and id field schema.
@@ -52,8 +42,12 @@ public class RecordValidationDrools {
    * @param idFieldSchema the id field schema
    * @return the string
    */
-  private static String returnValueIdRecordAndIdFieldSchema(Long idRecord, String idFieldSchema) {
-    return fieldRepository.findByIdAndIdFieldSchema(idRecord, idFieldSchema);
+  private static String returnValueIdRecordAndIdFieldSchema(Long datasetId, Long idRecord,
+      String idFieldSchema) {
+    String QUERY =
+        "select v.value FROM dataset_" + datasetId + ".field_value v  where v.id_field_schema = '"
+            + idFieldSchema + "' and v.id_record = " + idRecord + "";
+    return validationService.recordFieldValidation(QUERY);
   }
 
 
@@ -66,13 +60,15 @@ public class RecordValidationDrools {
    * @param idFieldSchemaEnddate the id field schema enddate
    * @return the boolean
    */
-  public static Boolean periodTypeValidation(Long idRecord, String idFieldSchemaPeriodeType,
-      String idFieldShemaStartDate, String idFieldSchemaEnddate) {
+  public static Boolean periodTypeValidation(Long datasetId, Long idRecord,
+      String idFieldSchemaPeriodeType, String idFieldShemaStartDate, String idFieldSchemaEnddate) {
 
     String periodeType =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaPeriodeType).trim();
-    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate).trim();
-    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaPeriodeType).trim();
+    String startDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaStartDate).trim();
+    String endDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEnddate).trim();
 
     if ("shortTermPollution".equalsIgnoreCase(periodeType) && !"".equalsIgnoreCase(startDate)
         && !"".equalsIgnoreCase(endDate)) {
@@ -110,11 +106,13 @@ public class RecordValidationDrools {
    * @param idFieldSchemaEnddate the id field schema enddate
    * @return the boolean
    */
-  public static Boolean startDateGoodDatesOrder(Long idRecord, String idFieldShemaStartDate,
-      String idFieldSchemaEnddate) {
+  public static Boolean startDateGoodDatesOrder(Long datasetId, Long idRecord,
+      String idFieldShemaStartDate, String idFieldSchemaEnddate) {
 
-    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate).trim();
-    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate).trim();
+    String startDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaStartDate).trim();
+    String endDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEnddate).trim();
 
     if (!"".equalsIgnoreCase(startDate) && !"".equalsIgnoreCase(endDate)) {
       Date dateInit;
@@ -145,12 +143,13 @@ public class RecordValidationDrools {
    * @param idFieldShemaStartDate the id field shema start date
    * @return the boolean
    */
-  public static Boolean unknownDateStart(Long idRecord, String idFieldSchemaPeriodeType,
-      String idFieldShemaStartDate) {
+  public static Boolean unknownDateStart(Long datasetId, Long idRecord,
+      String idFieldSchemaPeriodeType, String idFieldShemaStartDate) {
 
     String periodeType =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaPeriodeType).trim();
-    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaPeriodeType).trim();
+    String startDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaStartDate).trim();
 
     if (!"".equalsIgnoreCase(periodeType) && !"".equalsIgnoreCase(startDate)) {
       if (!periodeType.equalsIgnoreCase("qualityChanges")
@@ -172,12 +171,16 @@ public class RecordValidationDrools {
    * @param idFieldSchemaSeason the id field schema season
    * @return the boolean
    */
-  public static Boolean sameYearValidation(Long idRecord, String idFieldShemaDate,
+  public static Boolean sameYearValidation(Long datasetId, Long idRecord, String idFieldShemaDate,
       String idFieldSchemaSeason) {
-
-    String season = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaSeason).trim();
-    String date = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaDate).trim();
-
+    String season = null;
+    String date = null;
+    try {
+      season = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaSeason).trim();
+      date = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaDate).trim();
+    } catch (RuntimeException e) {
+      System.err.println("ENTRA");
+    }
     if (!"".equalsIgnoreCase(season) && !"".equalsIgnoreCase(date)) {
 
       try {
@@ -210,13 +213,15 @@ public class RecordValidationDrools {
    * @param idFieldSchemaEnddate the id field schema enddate
    * @return the boolean
    */
-  public static Boolean bathingSeasonDurationValidation(Long idRecord,
+  public static Boolean bathingSeasonDurationValidation(Long datasetId, Long idRecord,
       String idFieldShemaPeriodType, String idFieldShemaStartDate, String idFieldSchemaEnddate) {
 
     String periodeType =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaPeriodType).trim();
-    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate).trim();
-    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaPeriodType).trim();
+    String startDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaStartDate).trim();
+    String endDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEnddate).trim();
 
 
     if ("bathingSeason".equalsIgnoreCase(periodeType) && !"".equalsIgnoreCase(startDate)
@@ -248,10 +253,12 @@ public class RecordValidationDrools {
    * @param idFieldSchemaEnddate the id field schema enddate
    * @return the boolean
    */
-  public static Boolean startAndEndUnknown(Long idRecord, String idFieldShemaStartDate,
-      String idFieldSchemaEnddate) {
-    String startDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaStartDate).trim();
-    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate).trim();
+  public static Boolean startAndEndUnknown(Long datasetId, Long idRecord,
+      String idFieldShemaStartDate, String idFieldSchemaEnddate) {
+    String startDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaStartDate).trim();
+    String endDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEnddate).trim();
 
     if ("9999-12-31".equalsIgnoreCase(startDate) && "9999-12-31".equalsIgnoreCase(endDate)) {
       return false;
@@ -267,11 +274,12 @@ public class RecordValidationDrools {
    * @param idFieldSchemaEnddate the id field schema enddate
    * @return the boolean
    */
-  public static Boolean endUnknownPeriod(Long idRecord, String idFieldShemaPeriodType,
-      String idFieldSchemaEnddate) {
+  public static Boolean endUnknownPeriod(Long datasetId, Long idRecord,
+      String idFieldShemaPeriodType, String idFieldSchemaEnddate) {
     String periodeType =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaPeriodType).trim();
-    String endDate = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEnddate).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaPeriodType).trim();
+    String endDate =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEnddate).trim();
 
     if (("abnormalSituation".equalsIgnoreCase(periodeType)
         || "bathingProhibition".equalsIgnoreCase(periodeType)
@@ -294,11 +302,12 @@ public class RecordValidationDrools {
    * @return the boolean
    */
   // 1
-  public static Boolean sameYearValidatioMonitoring(Long idRecord, String idFieldShemaDate,
-      String idFieldSchemaSeason) {
+  public static Boolean sameYearValidatioMonitoring(Long datasetId, Long idRecord,
+      String idFieldShemaDate, String idFieldSchemaSeason) {
 
-    String season = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaSeason).trim();
-    String date = returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaDate).trim();
+    String season =
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaSeason).trim();
+    String date = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaDate).trim();
 
     if (!"".equalsIgnoreCase(season.trim()) && !"".equalsIgnoreCase(date)) {
 
@@ -330,16 +339,14 @@ public class RecordValidationDrools {
    * @return the boolean
    */
   // 2
-  public static Boolean maxValueintestinal(Long idRecord,
+  public static Boolean maxValueintestinal(Long datasetId, Long idRecord,
       String idFieldShemaIntestinalEnterococciValue,
       String idFieldSchemaIntestinalEnterococciStatus) {
 
-    String intestinalEnterococciValue =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaIntestinalEnterococciValue)
-            .trim();
-    String intestinalEnterococciStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaIntestinalEnterococciStatus)
-            .trim();
+    String intestinalEnterococciValue = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord,
+        idFieldShemaIntestinalEnterococciValue).trim();
+    String intestinalEnterococciStatus = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord,
+        idFieldSchemaIntestinalEnterococciStatus).trim();
     try {
       Integer.valueOf(intestinalEnterococciValue);
     } catch (Exception e) {
@@ -366,16 +373,14 @@ public class RecordValidationDrools {
    * @return the boolean
    */
   // 3
-  public static Boolean maxValueEscherichiaColi(Long idRecord,
+  public static Boolean maxValueEscherichiaColi(Long datasetId, Long idRecord,
       String idFieldShemaEscherichiaColiEnterococciValue,
       String idFieldSchemaEscherichiaColiEnterococciStatus) {
 
-    String echerichiaColiEnterococciValue =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaEscherichiaColiEnterococciValue)
-            .trim();
-    String echerichiaColiEnterococciStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEscherichiaColiEnterococciStatus)
-            .trim();
+    String echerichiaColiEnterococciValue = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord,
+        idFieldShemaEscherichiaColiEnterococciValue).trim();
+    String echerichiaColiEnterococciStatus = returnValueIdRecordAndIdFieldSchema(datasetId,
+        idRecord, idFieldSchemaEscherichiaColiEnterococciStatus).trim();
 
     try {
       Integer.valueOf(echerichiaColiEnterococciValue);
@@ -402,17 +407,17 @@ public class RecordValidationDrools {
    * @param idFieldSchemaSampleStatus the id field schema sample status
    * @return the boolean
    */
-  public static Boolean generalStatusValidation(Long idRecord,
+  public static Boolean generalStatusValidation(Long datasetId, Long idRecord,
       String idFieldShemaIntestinalEnterococciStatus, String idFieldSchemaEscherichiaColiStatus,
       String idFieldSchemaSampleStatus) {
 
-    String intestinalEnterococciStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaIntestinalEnterococciStatus)
-            .trim();
+    String intestinalEnterococciStatus = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord,
+        idFieldShemaIntestinalEnterococciStatus).trim();
     String escherichiaColiStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEscherichiaColiStatus).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEscherichiaColiStatus)
+            .trim();
     String sampleStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaSampleStatus).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaSampleStatus).trim();
 
 
 
@@ -439,16 +444,14 @@ public class RecordValidationDrools {
    * @return the boolean
    */
   // 8
-  public static Boolean intestinalEnterococciValueValidation(Long idRecord,
+  public static Boolean intestinalEnterococciValueValidation(Long datasetId, Long idRecord,
       String idFieldShemaIntestinalEnterococciValue,
       String idFieldSchemIntestinalEnterococciStatus) {
 
-    String intestinalEnterococciValue =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaIntestinalEnterococciValue)
-            .trim();
-    String intestinalEnterococciStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemIntestinalEnterococciStatus)
-            .trim();
+    String intestinalEnterococciValue = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord,
+        idFieldShemaIntestinalEnterococciValue).trim();
+    String intestinalEnterococciStatus = returnValueIdRecordAndIdFieldSchema(datasetId, idRecord,
+        idFieldSchemIntestinalEnterococciStatus).trim();
 
     if (!"".equalsIgnoreCase(intestinalEnterococciValue)
         && !"".equalsIgnoreCase(intestinalEnterococciStatus)) {
@@ -471,13 +474,15 @@ public class RecordValidationDrools {
    * @return the boolean
    */
   // 9
-  public static Boolean escherichiaColiStatusValidation(Long idRecord,
+  public static Boolean escherichiaColiStatusValidation(Long datasetId, Long idRecord,
       String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus) {
 
     String escherichiaColiValue =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldShemaEscherichiaColiValue).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldShemaEscherichiaColiValue)
+            .trim();
     String escherichiaColiStatus =
-        returnValueIdRecordAndIdFieldSchema(idRecord, idFieldSchemaEscherichiaColiStatus).trim();
+        returnValueIdRecordAndIdFieldSchema(datasetId, idRecord, idFieldSchemaEscherichiaColiStatus)
+            .trim();
 
     if (!"".equalsIgnoreCase(escherichiaColiValue) && !"".equalsIgnoreCase(escherichiaColiStatus)) {
 
