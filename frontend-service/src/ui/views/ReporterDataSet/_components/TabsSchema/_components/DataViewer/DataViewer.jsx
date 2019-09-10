@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -226,6 +226,7 @@ const DataViewer = withRouter(
     };
 
     //When pressing "Escape" cell data resets to initial value
+    //on "Enter" and "Tab" the value submits
     const onEditorKeyChange = (props, event, record) => {
       if (event.key === 'Escape') {
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
@@ -366,6 +367,9 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
+      //Delete hidden column null values (recordId, validations, etc.)
+      record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
+      console.log(record);
       if (isNewRecord) {
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
