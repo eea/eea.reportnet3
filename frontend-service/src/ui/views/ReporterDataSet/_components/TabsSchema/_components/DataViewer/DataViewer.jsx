@@ -226,6 +226,7 @@ const DataViewer = withRouter(
     };
 
     //When pressing "Escape" cell data resets to initial value
+    //on "Enter" and "Tab" the value submits
     const onEditorKeyChange = (props, event, record) => {
       if (event.key === 'Escape') {
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);

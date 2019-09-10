@@ -75,7 +75,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATA_SET}${dataSetId}`)
       );
     }
-    console.log('user: ', user);
   }, [user]);
 
   useEffect(() => {
