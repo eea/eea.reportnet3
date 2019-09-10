@@ -87,6 +87,7 @@ CREATE TABLE public."snapshot" (
 	"description" varchar(255) NULL,
 	REPORTING_DATASET_ID int8 null,
 	id bigserial NOT NULL,
+	"release" bool NULL DEFAULT false,
 	CONSTRAINT snapshot_pkey PRIMARY KEY (id),
 	CONSTRAINT snapshot_data_collection_fkey FOREIGN KEY (datacollection_id) REFERENCES data_collection(id),
 	CONSTRAINT snapshot_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)

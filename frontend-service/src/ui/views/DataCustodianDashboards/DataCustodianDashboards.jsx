@@ -14,7 +14,6 @@ import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
 import { Chart } from 'primereact/chart';
-import { async } from 'q';
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);

@@ -67,6 +67,11 @@ public interface RecordRepository
   @Query("delete from RecordValue record where record.id = ?1")
   void deleteRecordWithId(Long recordId);
 
+  /**
+   * Delete record values to restore snapshot.
+   *
+   * @param partitionDatasetId the partition dataset id
+   */
   @Modifying
   @Query("delete from RecordValue r where r.datasetPartitionId= :idPartition")
   @Transactional

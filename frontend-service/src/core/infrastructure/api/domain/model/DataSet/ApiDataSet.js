@@ -4,7 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataSet = {
-  addRecordById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
+  addRecordsById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
@@ -234,15 +234,14 @@ export const apiDataSet = {
       return false;
     }
   },
-  updateRecordById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
+  updateRecordsById: async (dataSetId, dataSetTableRecords) => {
     const tokens = userStorage.get();
     try {
-      const response = await HTTPRequester.post({
+      const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/table/${tableSchemaId}/record`
-          : getUrl(config.addNewRecord.url, {
-              dataSetId: dataSetId,
-              tableSchemaId: tableSchemaId
+          ? `/dataset/${dataSetId}/updateRecord`
+          : getUrl(config.updateTableDataRecord.url, {
+              dataSetId: dataSetId
             }),
         data: dataSetTableRecords,
         queryString: {},

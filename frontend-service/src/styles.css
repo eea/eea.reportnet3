@@ -2200,7 +2200,7 @@ body .p-datatable .p-datatable-tbody > tr.p-highlight .p-row-toggler:hover {
   color: #ffffff;
 }
 body .p-datatable .p-datatable-tbody > tr.p-highlight-contextmenu {
-  background-color: #5ab7ff;
+  background-color: #004494;
   color: #ffffff;
 }
 body .p-datatable .p-datatable-tbody > tr.p-datatable-dragpoint-bottom > td {
@@ -2220,7 +2220,7 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight .p-row-tog
   color: #ffffff;
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight-contextmenu {
-  background-color: #5ab7ff;
+  background-color: #004494;
   color: #ffffff;
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight-contextmenu .p-row-toggler {
@@ -2886,7 +2886,8 @@ body .p-treetable .p-treetable-tbody > tr.p-highlight .p-treetable-toggler {
   color: #ffffff;
 }
 body .p-treetable .p-treetable-tbody > tr.p-highlight-contextmenu {
-  background-color: #5ab7ff;
+  background-color: #004494;
+  /* 5ab7ff */
   color: #ffffff;
 }
 body .p-treetable .p-treetable-tbody > tr.p-highlight-contextmenu .p-treetable-toggler {
@@ -3262,6 +3263,8 @@ body .p-dialog .p-dialog-content {
   color: #404040;
   border: 1px solid #c8c8c8;
   padding: 1em;
+  height: 80%;
+  overflow: auto;
 }
 body .p-dialog .p-dialog-footer {
   border: 1px solid #c8c8c8;

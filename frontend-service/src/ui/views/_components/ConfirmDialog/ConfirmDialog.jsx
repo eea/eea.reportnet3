@@ -37,7 +37,7 @@ export const ConfirmDialog = React.memo(
         header={header}
         maximizable={maximizable}
         onHide={onHide}
-        style={dialogStyle ? dialogStyle : { width: '50vw' }}
+        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '70vw' }}
         visible={visible}>
         {children}
       </Dialog>
