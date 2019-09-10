@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -367,6 +367,9 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
+      //Delete hidden column null values (recordId, validations, etc.)
+      record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
+      console.log(record);
       if (isNewRecord) {
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
