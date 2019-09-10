@@ -115,10 +115,7 @@ const WebFormData = ({ data }) => {
     let firstRow = columns[0][0].rowPosition;
 
     result.push(<td name={columns[0][0].rowPosition}>{rowHeaders[index]}</td>);
-
     columns.forEach(function(column, i) {
-      i = firstRow;
-
       if (isUndefined(column[index])) {
         result.push(
           <td>
@@ -127,12 +124,16 @@ const WebFormData = ({ data }) => {
         );
       } else {
         let name = `${column[index].columnPosition}${column[index].rowPosition}`;
+        console.log('Fila: ', index);
+        console.log('Columna: ', i);
+        console.log('Valor: ', column[index].value);
+        console.log('Valor Fila: ', column[index].rowPosition);
+        console.log('Valor Columnas: ', column[index].columnPosition);
         result.push(
           <td name={name}>
             <InputText name={name} value={column[index].value} />
           </td>
         );
-        i++;
       }
     });
 
@@ -141,7 +142,10 @@ const WebFormData = ({ data }) => {
 
   return (
     <div className={`${styles.newContainer} ${styles.section}`}>
-      <table className={styles.webFormTable}>{form()}</table>
+      <table className={styles.webFormTable}>
+        <tbody>{form()}</tbody>
+      </table>
+      <button>Save</button>
     </div>
   );
 };
