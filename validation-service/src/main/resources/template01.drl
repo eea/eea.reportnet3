@@ -207,90 +207,123 @@ function boolean isCordenateLong( String value ){
  
  
  //// PART OF TABLE
+function Boolean ruleDR01AB(String idSchema, Boolean previous, Long datasetId){
+ return TableValidationDrools.ruleDR01AB(idSchema,previous,datasetId); 
+}
+
+function Boolean ruleDU01A(String idSchema, Long datasetId){
+ return TableValidationDrools.ruleDU01A(idSchema,datasetId); 
+}
+
+function Boolean ruleDU01B(String idSchema, Long datasetId){
+ return TableValidationDrools.ruleDU01B(idSchema,datasetId); 
+}
+
+function  Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
+      String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, String countryCodeValue,
+      Long idDataset, String idDatasetToContribute) {
+  return TableValidationDrools.ruleDO01(idSchemaThematicIdIdentifier,idSchemaStatusCode,idSchemaCountryCode,idSchemaBathingWaterIdentifier,countryCodeValue,idDataset,idDatasetToContribute);     
+}
+
+
+function  Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
+      String idSchemaPeriodType, String idSchemaStartDate, String idSchemaEndDate,
+      Long datasetId){
+			return TableValidationDrools.ruleDU02A(idSchemaBathingWaterIdentifierTable,idSchemaPeriodType,
+			idSchemaStartDate,idSchemaEndDate,datasetId);
+}
+//PART TABLE BUT USING RECORD TO MASK
+function  Boolean monitoringWithPeriodSampleStatus(Long datasetId){
+return RecordValidationDrools.monitoringWithPeriodSampleStatus(datasetId);
+}
+//MONITORING PART
+function Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate, Long datasetId){
+ return TableValidationDrools.ruleDU03(idSchemaBWIdent,idSchemaBWSampleDate,datasetId); 
+}
  
  
  // PART OF DATASET
 
-function Boolean datasetValidationDO02() {
-return DatasetValidations.datasetValidationDO02();
+function Boolean datasetValidationDO02(Long idDataset) {
+return DatasetValidations.datasetValidationDO02(idDataset);
 }
   
-function Boolean datasetValidationDO03() {
-return DatasetValidations.datasetValidationDO03();
+function Boolean datasetValidationDO03(Long idDataset) {
+return DatasetValidations.datasetValidationDO03(idDataset);
 }
   
-function Boolean datasetValidationDC01A() {
-return DatasetValidations.datasetValidationDC01A();
+function Boolean datasetValidationDC01A(Long idDataset) {
+return DatasetValidations.datasetValidationDC01A(idDataset);
 }
   
-function Boolean datasetValidationDC01B() {
-return DatasetValidations.datasetValidationDC01B();
+function Boolean datasetValidationDC01B(Long idDataset) {
+return DatasetValidations.datasetValidationDC01B(idDataset);
 }
   
-function Boolean datasetValidationDC02() {
-return DatasetValidations.datasetValidationDC02();
+function Boolean datasetValidationDC02(Long idDataset) {
+return DatasetValidations.datasetValidationDC02(idDataset);
 }
   
-function Boolean datasetValidationDC03() {
-return DatasetValidations.datasetValidationDC03();
+function Boolean datasetValidationDC03(Long idDataset) {
+return DatasetValidations.datasetValidationDC03(idDataset);
 }
  
  //PART RECORD
  
 //SEASIONALPERIOD TABLE
-function boolean periodTypeValidation(Long idRecord, String idFieldSchemaPeriodeType,
+function boolean periodTypeValidation(RecordValue recordValue, String idFieldSchemaPeriodeType,
       String idFieldShemaStartDate, String idFieldSchemaEnddate){
-	return RecordValidationDrools.periodTypeValidation(idRecord,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
+	return RecordValidationDrools.periodTypeValidation(recordValue,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
 }
 
 
-function boolean startDateGoodDatesOrder(Long idRecord, String idFieldShemaStartDate, String idFieldSchemaEnddate){    
-	return RecordValidationDrools.startDateGoodDatesOrder(idRecord,idFieldShemaStartDate,idFieldSchemaEnddate);
+function boolean startDateGoodDatesOrder(RecordValue recordValue, String idFieldShemaStartDate, String idFieldSchemaEnddate){    
+	return RecordValidationDrools.startDateGoodDatesOrder(recordValue,idFieldShemaStartDate,idFieldSchemaEnddate);
 }
 
 
-function boolean unknownDateStart(Long idRecord, String idFieldShemaPeriodType, String idFieldShemaStartDate){
-	return RecordValidationDrools.unknownDateStart(idRecord,idFieldShemaPeriodType,idFieldShemaStartDate);
+function boolean unknownDateStart(RecordValue recordValue, String idFieldShemaPeriodType, String idFieldShemaStartDate){
+	return RecordValidationDrools.unknownDateStart(recordValue,idFieldShemaPeriodType,idFieldShemaStartDate);
 }
 
-function boolean sameYearValidation(Long idRecord, String idFieldShemaDate, String idFieldSchemaSeason){
-	return RecordValidationDrools.sameYearValidation(idRecord,idFieldShemaDate,idFieldSchemaSeason);
+function boolean sameYearValidation(RecordValue recordValue, String idFieldShemaDate, String idFieldSchemaSeason){
+	return RecordValidationDrools.sameYearValidation(recordValue,idFieldShemaDate,idFieldSchemaSeason);
 }
 
 
-function boolean bathingSeasonDurationValidation(Long idRecord, String idFieldSchemaPeriodeType
+function boolean bathingSeasonDurationValidation(RecordValue recordValue, String idFieldSchemaPeriodeType
 ,String idFieldShemaStartDate, String idFieldSchemaEnddate){
-	return RecordValidationDrools.bathingSeasonDurationValidation(idRecord,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
+	return RecordValidationDrools.bathingSeasonDurationValidation(recordValue,idFieldSchemaPeriodeType,idFieldShemaStartDate,idFieldSchemaEnddate);
 }
 
-function boolean startAndEndUnknown(Long idRecord,String idFieldShemaStartDate, String idFieldSchemaEnddate){
-	return RecordValidationDrools.startAndEndUnknown(idRecord,idFieldShemaStartDate,idFieldSchemaEnddate);
+function boolean startAndEndUnknown(RecordValue recordValue,String idFieldShemaStartDate, String idFieldSchemaEnddate){
+	return RecordValidationDrools.startAndEndUnknown(recordValue,idFieldShemaStartDate,idFieldSchemaEnddate);
 }
 
 
-function boolean endUnknownPeriod(Long idRecord,String idFieldSchemaPeriodeType, String idFieldSchemaEnddate){
-	return RecordValidationDrools.endUnknownPeriod(idRecord,idFieldSchemaPeriodeType,idFieldSchemaEnddate);
+function boolean endUnknownPeriod(RecordValue recordValue,String idFieldSchemaPeriodeType, String idFieldSchemaEnddate){
+	return RecordValidationDrools.endUnknownPeriod(recordValue,idFieldSchemaPeriodeType,idFieldSchemaEnddate);
 }
 
 // MONITORING PART OF TABLES
 //1
-function boolean sameYearValidatioMonitoring(Long idRecord, String idFieldShemaDate, String idFieldSchemaSeason){
-	return RecordValidationDrools.sameYearValidatioMonitoring(idRecord,idFieldShemaDate,idFieldSchemaSeason);
+function boolean sameYearValidatioMonitoring(RecordValue recordValue, String idFieldShemaDate, String idFieldSchemaSeason){
+	return RecordValidationDrools.sameYearValidatioMonitoring(recordValue,idFieldShemaDate,idFieldSchemaSeason);
 }
 
 //2
 
-function boolean maxValueintestinal(Long idRecord, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemaIntestinalEnterococciStatus){
-	return RecordValidationDrools.maxValueintestinal(idRecord,idFieldShemaIntestinalEnterococciValue,idFieldSchemaIntestinalEnterococciStatus);
+function boolean maxValueintestinal(RecordValue recordValue, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemaIntestinalEnterococciStatus){
+	return RecordValidationDrools.maxValueintestinal(recordValue,idFieldShemaIntestinalEnterococciValue,idFieldSchemaIntestinalEnterococciStatus);
 }
 //3
-function boolean maxValueEscherichiaColi(Long idRecord, String idFieldSchemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
-	return RecordValidationDrools.maxValueEscherichiaColi(idRecord,idFieldSchemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
+function boolean maxValueEscherichiaColi(RecordValue recordValue,  String idFieldSchemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
+	return RecordValidationDrools.maxValueEscherichiaColi(recordValue,idFieldSchemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
 }
 //4
-function boolean generalStatusValidation(Long idRecord, String idFieldShemaIntestinalEnterococciStatus , 
+function boolean generalStatusValidation(RecordValue recordValue, String idFieldShemaIntestinalEnterococciStatus , 
 String idFieldSchemaEscherichiaColiStatus,String idFieldSchemaSampleStatus ){
-	return RecordValidationDrools.generalStatusValidation(idRecord,idFieldShemaIntestinalEnterococciStatus,
+	return RecordValidationDrools.generalStatusValidation(recordValue,idFieldShemaIntestinalEnterococciStatus,
 	idFieldSchemaEscherichiaColiStatus,idFieldSchemaSampleStatus);
 }
 
@@ -303,12 +336,12 @@ String idFieldSchemaEscherichiaColiStatus,String idFieldSchemaSampleStatus ){
 
 
 //8
-function boolean intestinalEnterococciValueValidation(Long idRecord, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemIntestinalEnterococciStatus){
-	return RecordValidationDrools.intestinalEnterococciValueValidation(idRecord,idFieldShemaIntestinalEnterococciValue,idFieldSchemIntestinalEnterococciStatus);
+function boolean intestinalEnterococciValueValidation(RecordValue recordValue, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemIntestinalEnterococciStatus){
+	return RecordValidationDrools.intestinalEnterococciValueValidation(recordValue,idFieldShemaIntestinalEnterococciValue,idFieldSchemIntestinalEnterococciStatus);
 }
 
 
 //9
-function boolean escherichiaColiStatusValidation(Long idRecord, String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
-	return RecordValidationDrools.escherichiaColiStatusValidation(idRecord,idFieldShemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
+function boolean escherichiaColiStatusValidation(RecordValue recordValue, String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
+	return RecordValidationDrools.escherichiaColiStatusValidation(recordValue,idFieldShemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
 }
