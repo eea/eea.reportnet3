@@ -6,6 +6,7 @@ import styles from './DataCustodianDashboards.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
+import { Chart } from 'primereact/chart';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -13,14 +14,13 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
-import { Chart } from 'primereact/chart';
-
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userData = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
+  const [dashboardsData, setDashboardsData] = useState([]);
   const [datasetsDashboardData, setDatasetsDashboardData] = useState({});
   const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
   const [releasedDashboardData, setReleasedDashboardData] = useState({});
@@ -46,6 +46,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         label: resources.messages.dataCustodianDashboards
       }
     ]);
+  }, []);
+
+  const loadDashboards = async () => {
+    setDashboardsData(await DataFlowService.dashboards(match.params.dataFlowId));
+  };
+
+  useEffect(() => {
+    loadDashboards();
   }, []);
 
   function getDatasetsDashboardData() {
