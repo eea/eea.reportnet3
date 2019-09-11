@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -35,6 +37,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState('');
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [webLinks, setWebLinks] = useState([]);
 
@@ -69,8 +72,14 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   }, [fileToDownload]);
 
   const onDownloadDocument = async rowData => {
-    setFileName(createFileName(rowData.title));
-    setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+    try {
+      setIsDownloading(rowData.title);
+      setFileName(createFileName(rowData.title));
+      setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+    } catch (error) {
+    } finally {
+      setIsDownloading('');
+    }
   };
 
   const onHide = () => {
@@ -101,10 +110,16 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   };
 
   const actionTemplate = (rowData, column) => {
+    switch (rowData.category) {
+    }
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
-        <Icon icon="archive" />
+        {isDownloading === rowData.title ? (
+          <Icon icon="spinnerAnimate" />
+        ) : (
+          <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+        )}
       </span>
     );
   };
