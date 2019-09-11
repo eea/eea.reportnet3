@@ -48,14 +48,6 @@ const WebFormData = ({ data }) => {
         numbers.push(rowPosition, cellValue);
       }
 
-      let letterPosition =
-        record.fields
-          .filter(field => field.fieldSchemaId === letterFieldSchemaId)[0]
-          .value.toLowerCase()
-          .charCodeAt(0) -
-        97 +
-        1;
-
       let row = {};
       row.rowPosition = parseInt(rowPosition);
       row.columnPosition = numberColumnPosition;
@@ -82,6 +74,14 @@ const WebFormData = ({ data }) => {
     return formData;
   };
 
+  const nextChar = letter => {
+    return String.fromCharCode(letter.charCodeAt(0) + 1);
+  };
+
+  const previousChar = letter => {
+    return String.fromCharCode(letter.charCodeAt(0) - 1);
+  };
+
   const createColumns = (rowsData, letters) => {
     let columns = [];
     letters.forEach(function(value, index) {
@@ -101,43 +101,60 @@ const WebFormData = ({ data }) => {
     let rowHeaders = data.rowHeaders;
 
     headersTop.map((column, i) => {
-      formResult.push(<th name={`${String.fromCharCode(97 + i)}${5}`}>{column}</th>);
+      console.log(column, i);
+      let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
+      formResult.push(<th name={position}>{column}</th>);
     });
 
-    rowHeaders.forEach(function(element, index) {
-      formResult.push(<tr>{getRowsResult(columns, index, rowHeaders)}</tr>);
-    });
+    let grid = getGrid(rowHeaders, columns);
+    formResult.push(grid);
     return formResult;
   };
 
-  const getRowsResult = (columns, index, rowHeaders) => {
-    let result = [];
-    let firstRow = columns[0][0].rowPosition;
+  const getGrid = (rowHeaders, columns) => {
+    let grid = [];
 
-    result.push(<td name={columns[0][0].rowPosition}>{rowHeaders[index]}</td>);
-    columns.forEach(function(column, i) {
-      if (isUndefined(column[index])) {
-        result.push(
-          <td>
-            <span></span>
-          </td>
-        );
-      } else {
-        let name = `${column[index].columnPosition}${column[index].rowPosition}`;
-        console.log('Fila: ', index);
-        console.log('Columna: ', i);
-        console.log('Valor: ', column[index].value);
-        console.log('Valor Fila: ', column[index].rowPosition);
-        console.log('Valor Columnas: ', column[index].columnPosition);
-        result.push(
-          <td name={name}>
-            <InputText name={name} value={column[index].value} />
-          </td>
-        );
-      }
+    let firstRowPosition = columns[0][0].rowPosition;
+
+    rowHeaders.forEach(function(element, index) {
+      let columnsTds = [];
+      let firstColumnPosition = columns[0][0].columnPosition;
+
+      let headersColumnPosition = previousChar(firstColumnPosition);
+      let headersRowPosition = firstRowPosition;
+
+      let headersPosition = `${headersColumnPosition}${headersRowPosition}`;
+
+      columnsTds.push(<td name={headersPosition}>{rowHeaders[index]}</td>);
+
+      columns.forEach(function(column, i) {
+        let position = `${firstColumnPosition}${firstRowPosition}`;
+
+        let columnsFiltered = columns[i].filter(col => col.rowPosition === firstRowPosition);
+
+        columnsTds.push(fillFormData(columnsFiltered, position));
+        firstColumnPosition = nextChar(firstColumnPosition);
+      });
+
+      let data = fillFormData(firstRowPosition, firstColumnPosition, columns);
+      grid.push(data);
+
+      firstRowPosition++;
+      grid.push(<tr>{columnsTds}</tr>);
     });
 
-    return result;
+    return grid;
+  };
+
+  const fillFormData = (columnsFiltered, position) => {
+    if (!isEmpty(columnsFiltered)) {
+      let values = columnsFiltered.map(column => column.value);
+      return (
+        <td name={position}>
+          <InputText value={values[0]} />
+        </td>
+      );
+    }
   };
 
   return (
