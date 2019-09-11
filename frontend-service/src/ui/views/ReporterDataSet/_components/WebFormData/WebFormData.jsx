@@ -5,10 +5,7 @@ import styles from './WebFormData.module.css';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isUndefined } from 'lodash';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
 import { InputText } from 'ui/views/_components/InputText';
-import { Column } from 'primereact/column';
 
 const WebFormData = ({ data }) => {
   const headerFieldSchemaId = '5d666d53460a1e0001b16717';
@@ -21,12 +18,12 @@ const WebFormData = ({ data }) => {
 
   const getFormData = () => {
     const formData = {};
-    const headersTop = [];
+    const columnHeaders = [];
     const rows = [];
     const letters = [];
     const rowHeaders = [];
-    const numbers = [];
-    headersTop.unshift('Column1');
+
+    columnHeaders.unshift('GREENHOUSE GAS SORUCE');
 
     const records = data.records.map((record, i) => {
       let cellValue = record.fields.filter(field => field.fieldSchemaId === valueFieldSchemaId)[0].value;
@@ -35,39 +32,37 @@ const WebFormData = ({ data }) => {
       }
 
       let columnHeader = record.fields.filter(field => field.fieldSchemaId === headerFieldSchemaId)[0].value;
-      let rowHeader = record.fields.filter(field => field.fieldSchemaId === descriptionFieldSchemaId)[0].value;
-      let numberColumnPosition = record.fields.filter(field => field.fieldSchemaId === letterFieldSchemaId).sort()[0]
-        .value;
-      let rowPosition = record.fields.filter(field => field.fieldSchemaId === numberFieldSchemaId)[0].value;
-
-      if (letters.includes(numberColumnPosition) !== true) {
-        letters.push(numberColumnPosition);
+      if (columnHeaders.includes(columnHeader) !== true) {
+        columnHeaders.push(columnHeader);
       }
 
-      if (numbers.includes(rowPosition) !== true) {
-        numbers.push(rowPosition, cellValue);
+      let rowHeader = record.fields.filter(field => field.fieldSchemaId === descriptionFieldSchemaId)[0].value;
+      if (rowHeaders.includes(rowHeader) !== true) {
+        rowHeaders.push(rowHeader);
+      } else {
+        console.log(rowHeader);
+      }
+
+      let columnPosition = record.fields.filter(field => field.fieldSchemaId === letterFieldSchemaId).sort()[0].value;
+
+      let rowPosition = record.fields.filter(field => field.fieldSchemaId === numberFieldSchemaId)[0].value;
+
+      if (letters.includes(columnPosition) !== true) {
+        letters.push(columnPosition);
       }
 
       let row = {};
       row.rowPosition = parseInt(rowPosition);
-      row.columnPosition = numberColumnPosition;
+      row.columnPosition = columnPosition;
       row.value = cellValue;
       row.header = rowHeader;
 
-      if (headersTop.includes(columnHeader) !== true) {
-        headersTop.push(columnHeader);
-      }
-
-      if (rowHeaders.includes(rowHeader) !== true) {
-        rowHeaders.push(rowHeader);
-      }
-
       rows.push(row);
     });
-    headersTop.splice(10, 0, '');
 
-    formData.headersTop = headersTop;
     letters.sort();
+    columnHeaders.splice(10, 0, '');
+    formData.columnHeaders = columnHeaders;
     let columns = createColumns(rows, letters);
     formData.rowHeaders = rowHeaders;
     formData.columns = columns;
@@ -97,11 +92,10 @@ const WebFormData = ({ data }) => {
     let formResult = [];
     let data = getFormData();
     let columns = data.columns;
-    let headersTop = data.headersTop;
+    let columnHeaders = data.columnHeaders;
     let rowHeaders = data.rowHeaders;
 
-    headersTop.map((column, i) => {
-      console.log(column, i);
+    columnHeaders.map((column, i) => {
       let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
       formResult.push(<th name={position}>{column}</th>);
     });
@@ -122,23 +116,19 @@ const WebFormData = ({ data }) => {
 
       let headersColumnPosition = previousChar(firstColumnPosition);
       let headersRowPosition = firstRowPosition;
-
       let headersPosition = `${headersColumnPosition}${headersRowPosition}`;
 
       columnsTds.push(<td name={headersPosition}>{rowHeaders[index]}</td>);
 
       columns.forEach(function(column, i) {
         let position = `${firstColumnPosition}${firstRowPosition}`;
-
         let columnsFiltered = columns[i].filter(col => col.rowPosition === firstRowPosition);
-
         columnsTds.push(fillFormData(columnsFiltered, position));
         firstColumnPosition = nextChar(firstColumnPosition);
       });
 
       let data = fillFormData(firstRowPosition, firstColumnPosition, columns);
       grid.push(data);
-
       firstRowPosition++;
       grid.push(<tr>{columnsTds}</tr>);
     });
