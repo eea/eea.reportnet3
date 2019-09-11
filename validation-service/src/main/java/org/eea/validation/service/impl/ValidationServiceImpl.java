@@ -4,6 +4,7 @@ package org.eea.validation.service.impl;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,9 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
+import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -26,6 +26,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -116,18 +117,19 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The table validation querys drools repository. */
-  @Autowired
-  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
    * The dataset controller.
    */
   @Autowired
   private DataSetControllerZuul datasetController;
 
-  /** The metabase controller. */
   @Autowired
   private DatasetMetabaseController metabaseController;
+
+  /** The table validation querys drools repository. */
+  @Autowired
+  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
+
 
   /**
    * Gets the element lenght.
@@ -166,7 +168,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<RecordValidation> runRecordValidations(RecordValue record, KieSession kieSession) {
+  public synchronized List<RecordValidation> runRecordValidations(RecordValue record,
+      KieSession kieSession) {
     if (record.getIdRecordSchema() != null && StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
@@ -291,10 +294,34 @@ public class ValidationServiceImpl implements ValidationService {
         validation.setValidationDate(new Date().toString());
         dsValidation.setValidation(validation);
       }
+      LOG.info(TenantResolver.getTenantName());
       tableValidationRepository.saveAll(validations);
     });
     validationDatasetRepository.save(dsValidation);
 
+  }
+
+  /**
+   * List of objects paginated by threads.
+   *
+   * @param <T> the generic type
+   * @param objects the objects
+   * @return the list
+   */
+  private <T> List<List<T>> listOfObjectsPaginated(final List<T> objects) {
+    List<List<T>> generalList = new ArrayList<>();
+    // lists size
+    int size = null != objects ? objects.size() / 8 : 0;
+    final int BATCH = size > 1 ? 10 : size;
+    // dividing the number of records in different lists
+    int nLists = (int) Math.ceil(objects.size() / (double) BATCH);
+    if (nLists > 1) {
+      for (int i = 0; i < (nLists - 1); i++) {
+        generalList.add(new ArrayList<>(objects.subList(BATCH * i, BATCH * (i + 1))));
+      }
+    }
+    generalList.add(new ArrayList<>(objects.subList(BATCH * (nLists - 1), objects.size())));
+    return generalList;
   }
 
   /**
@@ -306,23 +333,25 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateRecord(Long datasetId, KieSession session) throws EEAException {
+  public List<RecordValidation> validateRecord(Long datasetId, KieSession session)
+      throws EEAException {
+    long timer = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-
-    dataset.getTableValues().stream().forEach(table -> {
-      List<RecordValidation> recordValList = new ArrayList<>();
+    List<RecordValidation> recordValList = new ArrayList<>();
+    List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
+    tableValues.parallelStream().forEach(table -> {
+      TenantResolver.setTenantName("dataset_6");
       List<RecordValue> validatedRecords =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
       Validation validation = new Validation();
-
-      int totalrecord = validatedRecords.size();
-
-      ForkJoinPool myPool = new ForkJoinPool(totalrecord / 1000);
-      try {
-        myPool.submit(() -> validatedRecords.stream().filter(Objects::nonNull).forEach(row -> {
+      List<List<RecordValue>> listaGeneral =
+          Collections.synchronizedList(listOfObjectsPaginated(validatedRecords));
+      listaGeneral.parallelStream().filter(Objects::nonNull).forEach(rows -> {
+        rows = Collections.synchronizedList(rows);
+        rows.stream().forEach(row -> {
           List<RecordValidation> resultRecords = runRecordValidations(row, session);
           if (null != row.getRecordValidations()) {
             row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
@@ -339,14 +368,8 @@ public class ValidationServiceImpl implements ValidationService {
             });
             recordValList.addAll(resultRecords);
           }
-        })).get();
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ExecutionException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+        });
+      });
       // Adding errors into tables
       if (validation.getLevelError() != null) {
         if (TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
@@ -364,9 +387,16 @@ public class ValidationServiceImpl implements ValidationService {
         tableVal.setValidation(validation);
         tableValidationRepository.save(tableVal);
       }
+      LOG.info(TenantResolver.getTenantName());
       validationRecordRepository.saveAll((Iterable<RecordValidation>) recordValList);
     });
+    System.out.println(System.currentTimeMillis() - timer);
+    return recordValList;
   }
+
+
+  @Autowired
+  private DataSource dataSetsDataSource;
 
   /**
    * Validate data set data.
@@ -378,25 +408,30 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public void validateFields(Long datasetId, KieSession session) throws EEAException {
+    long timer = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    // Records
-    for (TableValue tableValue : dataset.getTableValues()) {
+    // Fields
+    List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
+    tableValues.parallelStream().forEach(tableValue -> {
+      LOG.info("NIVEL TABLA before" + TenantResolver.getTenantName());
+      TenantResolver.setTenantName("dataset_6");
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
           sanitizeRecords(recordRepository.findAllRecordsByTableValueId(tableId));
-
+      recordsByTable = Collections.synchronizedList(recordsByTable);
       // Execute field rules validation
-      recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
-        String orig;
+      recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
+
+        // TenantResolver.setTenantName("dataset_6");
         RecordValidation recordVal = new RecordValidation();
         recordVal.setValidation(new Validation());
         if (null != row.getRecordValidations()) {
-          row.getFields().stream().filter(Objects::nonNull).forEach(field -> {
-
+          List<FieldValue> fields = Collections.synchronizedList(row.getFields());
+          fields.parallelStream().filter(Objects::nonNull).forEach(field -> {
             List<FieldValidation> resultFields = runFieldValidations(field, session);
             if (null != field.getFieldValidations()) {
               field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
@@ -411,6 +446,7 @@ public class ValidationServiceImpl implements ValidationService {
                 }
                 recordVal.getValidation().setOriginName(fieldValue.getValidation().getOriginName());
               });
+              LOG.info("NIVEL TABLA after" + TenantResolver.getTenantName());
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           });
@@ -433,7 +469,8 @@ public class ValidationServiceImpl implements ValidationService {
 
       });
 
-    }
+    });
+    System.out.println(System.currentTimeMillis() - timer);
   }
 
   /**
@@ -660,7 +697,7 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Dataset validation DO 02 query.
    *
-   * @param DO02 the do02
+   * @param do02 the do 02
    * @return the boolean
    */
   @Override
@@ -668,56 +705,26 @@ public class ValidationServiceImpl implements ValidationService {
     return datasetRepositoryImpl.datasetValidationQuery(DO02);
   }
 
-  /**
-   * Dataset validation DO 03 query.
-   *
-   * @param DO03 the do03
-   * @return the boolean
-   */
   @Override
   public Boolean datasetValidationDO03Query(String DO03) {
     return datasetRepositoryImpl.datasetValidationQuery(DO03);
   }
 
-  /**
-   * Dataset validation DC 01 A query.
-   *
-   * @param DC01A the dc01a
-   * @return the boolean
-   */
   @Override
   public Boolean datasetValidationDC01AQuery(String DC01A) {
     return datasetRepositoryImpl.datasetValidationQuery(DC01A);
   }
 
-  /**
-   * Dataset validation DC 01 B query.
-   *
-   * @param DC01B the dc01b
-   * @return the boolean
-   */
   @Override
   public Boolean datasetValidationDC01BQuery(String DC01B) {
     return datasetRepositoryImpl.datasetValidationQuery(DC01B);
   }
 
-  /**
-   * Dataset validation DC 02 query.
-   *
-   * @param DC02 the dc02
-   * @return the boolean
-   */
   @Override
   public Boolean datasetValidationDC02Query(String DC02) {
     return datasetRepositoryImpl.datasetValidationQuery(DC02);
   }
 
-  /**
-   * Dataset validation DC 03 query.
-   *
-   * @param DC03 the dc03
-   * @return the boolean
-   */
   @Override
   public Boolean datasetValidationDC03Query(String DC03) {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);
@@ -784,9 +791,6 @@ public class ValidationServiceImpl implements ValidationService {
     return tableValidationQuerysDroolsRepository.queryRecordsFields(QUERY);
   }
 
-  @Override
-  public RecordValue testeo(String QUERY) {
-    return tableValidationQuerysDroolsRepository.testeo(QUERY);
-  }
+
 
 }

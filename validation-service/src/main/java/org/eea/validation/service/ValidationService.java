@@ -80,9 +80,11 @@ public interface ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieSession the kie session
+   * @return
    * @throws EEAException the EEA exception
    */
-  void validateRecord(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+  List<RecordValidation> validateRecord(@DatasetId Long datasetId, KieSession kieSession)
+      throws EEAException;
 
 
   /**
@@ -265,5 +267,4 @@ public interface ValidationService {
 
   String recordFieldValidation(String QUERY);
 
-  RecordValue testeo(String QUERY);
 }
