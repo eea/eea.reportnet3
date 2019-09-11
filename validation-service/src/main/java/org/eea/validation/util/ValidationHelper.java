@@ -52,13 +52,22 @@ public class ValidationHelper {
     LOG.info("Load Rules");
     KieSession session = validationService.loadRulesKnowledgeBase(datasetId);
     LOG.info("Validating Fields");
+    System.err.println(System.currentTimeMillis());
+    Long timer = System.currentTimeMillis();
     validationService.validateFields(datasetId, session);
+    System.err.println(System.currentTimeMillis() - timer);
+    timer = System.currentTimeMillis();
     LOG.info("Validating Records");
     validationService.validateRecord(datasetId, session);
+    System.err.println(System.currentTimeMillis() - timer);
+    timer = System.currentTimeMillis();
     LOG.info("Validating Tables");
     validationService.validateTable(datasetId, session);
+    System.err.println(System.currentTimeMillis() - timer);
+    timer = System.currentTimeMillis();
     LOG.info("Validating Dataset");
     validationService.validateDataSet(datasetId, session);
+    System.err.println(System.currentTimeMillis() - timer);
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }

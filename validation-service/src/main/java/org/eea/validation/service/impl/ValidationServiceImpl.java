@@ -784,4 +784,9 @@ public class ValidationServiceImpl implements ValidationService {
     return tableValidationQuerysDroolsRepository.queryRecordsFields(QUERY);
   }
 
+  @Override
+  public RecordValue testeo(String QUERY) {
+    return tableValidationQuerysDroolsRepository.testeo(QUERY);
+  }
+
 }
