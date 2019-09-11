@@ -29,14 +29,18 @@ const logout = async userId => {
   return response;
 };
 const refreshToken = async refreshToken => {
-  const currentTokens = userStorage.get();
-  const userTokensDTO = await apiUser.refreshToken(currentTokens.refreshToken);
-  const userDTO = jwt_decode(userTokensDTO.accessToken);
-  const user = new User(userDTO.sub, userDTO.name, userDTO.user_groups, userDTO.preferred_username, userDTO.exp);
-  const remain = userDTO.exp - moment().unix();
-  timeOut((remain - 10) * 1000);
-  userStorage.set(userTokensDTO);
-  return user;
+  try {
+    const currentTokens = userStorage.get();
+    const userTokensDTO = await apiUser.refreshToken(currentTokens.refreshToken);
+    const userDTO = jwt_decode(userTokensDTO.accessToken);
+    const user = new User(userDTO.sub, userDTO.name, userDTO.user_groups, userDTO.preferred_username, userDTO.exp);
+    const remain = userDTO.exp - moment().unix();
+    timeOut((remain - 10) * 1000);
+    userStorage.set(userTokensDTO);
+    return user;
+  } catch (error) {
+    userStorage.remove();
+  }
 };
 
 const hasPermission = (user, permissions, entity) => {
