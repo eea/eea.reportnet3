@@ -1,6 +1,8 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isEmpty } from 'lodash';
+
 import styles from './DataCustodianDashboards.module.scss';
 
 import { config } from 'conf';
@@ -20,7 +22,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
-  const [dashboardsData, setDashboardsData] = useState([]);
+  const [dashboardsData, setDashboardsData] = useState({});
   const [datasetsDashboardData, setDatasetsDashboardData] = useState({});
   const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
   const [releasedDashboardData, setReleasedDashboardData] = useState({});
@@ -49,7 +51,13 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   const loadDashboards = async () => {
-    setDashboardsData(await DataFlowService.dashboards(match.params.dataFlowId));
+    try {
+      setDashboardsData(await DataFlowService.dashboards(match.params.dataFlowId));
+    } catch (error) {
+      console.error(error.response);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -58,7 +66,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   function getDatasetsDashboardData() {
     const datasetDataObject = {
-      labels: config.countries.map(countries => countries.name),
+      labels: dashboardsData.dataSetCountries.map(data => data.countryName),
       datasets: [
         {
           label: 'Correct',
@@ -143,7 +151,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
   function getReleasedDashboardData() {
     const releasedDataObject = {
-      labels: config.countries.map(countries => countries.name),
+      labels: dashboardsData.dataSetCountries.map(data => data.countryName),
       datasets: [
         {
           label: 'Released',
@@ -194,19 +202,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     return releasedOptionsObject;
   }
 
-  const onPageLoad = async () => {
-    await setDatasetsDashboardData(getDatasetsDashboardData());
-    await setDatasetsDashboardOptions(getDatasetsDashboardOptions());
-    await setReleasedDashboardData(getReleasedDashboardData());
-    await setReleasedDashboardOptions(getReleasedDashboardOptions());
+  const onPageLoad = () => {
+    setDatasetsDashboardData(getDatasetsDashboardData());
+    setDatasetsDashboardOptions(getDatasetsDashboardOptions());
+    setReleasedDashboardData(getReleasedDashboardData());
+    setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
   useEffect(() => {
-    setLoading(true);
-
-    onPageLoad();
-
-    setLoading(false);
+    if (!isEmpty(dashboardsData)) {
+      onPageLoad();
+    }
   }, [dashboardsData]);
 
   const layout = children => {
@@ -225,7 +231,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <div className="rep-row">
-        <h1>Title Hardcoded</h1>
+        <h1>{resources.messages['dataFlow']}</h1>
       </div>
       <div className="rep-row">
         <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="100%" height="35%" />
