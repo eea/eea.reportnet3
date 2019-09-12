@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
@@ -25,6 +28,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class DatasetSnapshotServiceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSnapshotServiceTest {
 
@@ -48,14 +54,21 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private SnapshotMapper snapshotMapper;
 
+  /** The record store controller zull. */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The partition data set metabase repository. */
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
+
+  /** The dataset service. */
+  @Mock
+  private DatasetService datasetService;
 
   /**
    * Inits the mocks.
@@ -113,6 +126,11 @@ public class DatasetSnapshotServiceTest {
 
   }
 
+  /**
+   * Test restore snapshots exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testRestoreSnapshotsException() throws Exception {
 
@@ -120,13 +138,19 @@ public class DatasetSnapshotServiceTest {
 
   }
 
+  /**
+   * Test restore snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testRestoreSnapshots() throws Exception {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     datasetSnapshotService.restoreSnapshot(1L, 1L);
-    Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
+    Mockito.verify(datasetService, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any(),
+        Mockito.any());
   }
 
 

@@ -5,10 +5,11 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dashboard.module.css';
 
-import { Chart } from 'primereact/chart';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { DataSetService } from 'core/services/DataSet';
+
+import { Chart } from 'primereact/chart';
 
 const Dashboard = withRouter(
   React.memo(({ refresh, match: { params: { dataSetId } } }) => {
@@ -100,26 +101,26 @@ const Dashboard = withRouter(
 
     const renderDashboard = () => {
       if (isLoading) {
-        return <Spinner />;
+        return <Spinner className={styles.dashBoardSpinner} />;
       } else {
         if (
           !isUndefined(dashboardData.datasets) &&
           dashboardData.datasets.length > 0 &&
           ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
         ) {
-          return (
-            <React.Fragment>
-              <h1>{dashboardTitle}</h1>
-              <Chart type="bar" data={dashboardData} options={dashboardOptions} />
-            </React.Fragment>
-          );
+          return <Chart type="bar" data={dashboardData} options={dashboardOptions} />;
         } else {
           return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
         }
       }
     };
 
-    return <React.Fragment>{renderDashboard()}</React.Fragment>;
+    return (
+      <React.Fragment>
+        <h1>{dashboardTitle}</h1>
+        {renderDashboard()}
+      </React.Fragment>
+    );
   })
 );
 

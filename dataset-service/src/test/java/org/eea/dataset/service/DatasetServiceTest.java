@@ -54,7 +54,6 @@ import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -122,9 +121,6 @@ public class DatasetServiceTest {
 
   @Mock
   private KafkaSender kafkaSender;
-
-  @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
 
   @Mock
   private RecordRepository recordRepository;
@@ -345,17 +341,6 @@ public class DatasetServiceTest {
     datasetService.saveTable(1L, new TableValue());
     Mockito.verify(tableRepository, times(1)).saveAndFlush(Mockito.any());
   }
-
-
-
-  @Test
-  public void testCreateEmptyDataset() throws Exception {
-    doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
-    datasetService.createEmptyDataset("", "5d0c822ae1ccd34cfcd97e20", 1L);
-    Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any());
-  }
-
 
   @Test
   public void testDeleteImportData() throws Exception {
@@ -716,9 +701,9 @@ public class DatasetServiceTest {
 
   @Test
   public void testDeleteTableData() throws Exception {
-    doNothing().when(tableRepository).deleteByIdTableSchema(Mockito.any());
+    doNothing().when(recordRepository).deleteRecordWithIdTableSchema(Mockito.any());
     datasetService.deleteTableBySchema("", 1L);
-    Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
+    Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
   @Test(expected = EEAException.class)
@@ -836,5 +821,28 @@ public class DatasetServiceTest {
     thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
     datasetService.updateField(1L, null);
   }
+
+  @Test
+  public void testInsertSchema() throws EEAException {
+
+    DataSetSchema ds = new DataSetSchema();
+    ds.setTableSchemas(new ArrayList<>());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(ds);
+    datasetService.insertSchema(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void testFindTableIdByTableSchema() {
+    datasetService.findTableIdByTableSchema(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(tableRepository, times(1)).findIdByIdTableSchema(Mockito.any());
+  }
+
+  @Test
+  public void testDeleteRecordValuesToRestoreSnapshot() throws EEAException {
+    datasetService.deleteRecordValuesToRestoreSnapshot(1L, 1L);
+    Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
+  }
+
 
 }

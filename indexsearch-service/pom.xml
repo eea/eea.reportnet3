@@ -11,7 +11,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:indexsearch-service</sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:indexsearch-service:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
   <groupId>org.eea.indexsearc</groupId>
   <artifactId>indexsearch-service</artifactId>
