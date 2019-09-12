@@ -77,8 +77,21 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
       setFileName(createFileName(rowData.title));
       setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
     } catch (error) {
+      console.error(error.response);
     } finally {
       setIsDownloading('');
+    }
+  };
+
+  const onDeleteDocument = async documentData => {
+    console.log('DocumentData: ', documentData);
+    try {
+      const response = await DocumentService.deleteDocument(documentData.id);
+      if (response === 200) {
+        onLoadDocumentsAndWebLinks();
+      }
+    } catch (error) {
+      console.error(error.response);
     }
   };
 
@@ -107,6 +120,19 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const createFileName = title => {
     return `${title.split(' ').join('_')}`;
+  };
+
+  const crudTemplate = (rowData, column) => {
+    return (
+      <span className={styles.delete} onClick={() => onDeleteDocument(rowData)}>
+        {' '}
+        {isDownloading === rowData.title ? (
+          <Icon icon="spinnerAnimate" />
+        ) : (
+          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
+        )}
+      </span>
+    );
   };
 
   const actionTemplate = (rowData, column) => {
@@ -208,6 +234,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
+              <Column body={crudTemplate} />
               <Column
                 columnResizeMode="expand"
                 field="title"
