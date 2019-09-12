@@ -83,8 +83,7 @@ public interface ValidationService {
    * @return
    * @throws EEAException the EEA exception
    */
-  List<RecordValidation> validateRecord(@DatasetId Long datasetId, KieSession kieSession)
-      throws EEAException;
+  void validateRecord(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
 
 
   /**

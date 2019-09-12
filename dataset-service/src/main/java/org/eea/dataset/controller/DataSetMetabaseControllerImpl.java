@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -74,6 +75,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset) {
     return datasetMetabaseService.findDatasetMetabase(idDataset);
+  }
 
 
   /**

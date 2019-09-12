@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
-import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -185,7 +184,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public List<FieldValidation> runFieldValidations(FieldValue field, KieSession kieSession) {
+  public synchronized List<FieldValidation> runFieldValidations(FieldValue field,
+      KieSession kieSession) {
     if (field.getIdFieldSchema() != null && StringUtils.isNotBlank(field.getIdFieldSchema())) {
       kieSession.insert(field);
     }
@@ -333,70 +333,60 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public List<RecordValidation> validateRecord(Long datasetId, KieSession session)
-      throws EEAException {
+  public void validateRecord(Long datasetId, KieSession session) throws EEAException {
     long timer = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    List<RecordValidation> recordValList = new ArrayList<>();
     List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
-    tableValues.parallelStream().forEach(table -> {
-      TenantResolver.setTenantName("dataset_6");
-      List<RecordValue> validatedRecords =
-          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
-      Validation validation = new Validation();
-      List<List<RecordValue>> listaGeneral =
-          Collections.synchronizedList(listOfObjectsPaginated(validatedRecords));
-      listaGeneral.parallelStream().filter(Objects::nonNull).forEach(rows -> {
-        rows = Collections.synchronizedList(rows);
-        rows.stream().forEach(row -> {
-          List<RecordValidation> resultRecords = runRecordValidations(row, session);
-          if (null != row.getRecordValidations()) {
-            row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
-              rowValidation.setRecordValue(row);
-              if (validation.getLevelError() == null
-                  || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
-                if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
-                  validation.setLevelError(TypeErrorEnum.ERROR);
-                } else {
-                  validation.setLevelError(TypeErrorEnum.WARNING);
-                }
+    tableValues.parallelStream().filter(Objects::nonNull).forEach(tableValue -> {
+      TableValidation tableVal = new TableValidation();
+      tableVal.setValidation(new Validation());
+      Long tableId = tableValue.getId();
+      // read Dataset records Data for each table
+      List<RecordValue> recordsByTable =
+          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(tableId));
+
+      recordsByTable = Collections.synchronizedList(recordsByTable);
+      recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
+        List<RecordValidation> resultRecords = runRecordValidations(row, session);
+        if (null != row.getRecordValidations()) {
+          row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
+            rowValidation.setRecordValue(row);
+            if (tableVal.getValidation().getLevelError() == null
+                || !TypeErrorEnum.ERROR.equals(tableVal.getValidation().getLevelError())) {
+              if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
+                tableVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
+              } else {
+                tableVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
               }
-              validation.setOriginName(rowValidation.getValidation().getOriginName());
-            });
-            recordValList.addAll(resultRecords);
-          }
-        });
+            }
+            tableVal.getValidation().setOriginName(rowValidation.getValidation().getOriginName());
+          });
+        }
+        validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecords);
       });
       // Adding errors into tables
-      if (validation.getLevelError() != null) {
-        if (TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
-          validation.setMessage("ONE OR MORE RECORDS HAVE ERRORS");
+      if (tableVal.getValidation().getLevelError() != null) {
+        if (TypeErrorEnum.ERROR.equals(tableVal.getValidation().getLevelError())) {
+          tableVal.getValidation().setMessage("ONE OR MORE RECORDS HAVE ERRORS");
         } else {
-          if (TypeErrorEnum.WARNING.equals(validation.getLevelError())) {
-            validation.setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
+          if (TypeErrorEnum.WARNING.equals(tableVal.getValidation().getLevelError())) {
+            tableVal.getValidation().setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
           }
         }
-        TableValidation tableVal = new TableValidation();
-        tableVal.setTableValue(table);
-        validation.setIdRule(new ObjectId().toString());
-        validation.setTypeEntity(TypeEntityEnum.TABLE);
-        validation.setValidationDate(new Date().toString());
-        tableVal.setValidation(validation);
+        tableVal.setTableValue(tableValue);
+        tableVal.getValidation().setIdRule(new ObjectId().toString());
+        tableVal.getValidation().setTypeEntity(TypeEntityEnum.TABLE);
+        tableVal.getValidation().setValidationDate(new Date().toString());
         tableValidationRepository.save(tableVal);
       }
-      LOG.info(TenantResolver.getTenantName());
-      validationRecordRepository.saveAll((Iterable<RecordValidation>) recordValList);
+
     });
     System.out.println(System.currentTimeMillis() - timer);
-    return recordValList;
   }
 
-
-  @Autowired
-  private DataSource dataSetsDataSource;
 
   /**
    * Validate data set data.
@@ -416,8 +406,6 @@ public class ValidationServiceImpl implements ValidationService {
     // Fields
     List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
     tableValues.parallelStream().forEach(tableValue -> {
-      LOG.info("NIVEL TABLA before" + TenantResolver.getTenantName());
-      TenantResolver.setTenantName("dataset_6");
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
@@ -425,8 +413,6 @@ public class ValidationServiceImpl implements ValidationService {
       recordsByTable = Collections.synchronizedList(recordsByTable);
       // Execute field rules validation
       recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
-
-        // TenantResolver.setTenantName("dataset_6");
         RecordValidation recordVal = new RecordValidation();
         recordVal.setValidation(new Validation());
         if (null != row.getRecordValidations()) {
@@ -446,7 +432,6 @@ public class ValidationServiceImpl implements ValidationService {
                 }
                 recordVal.getValidation().setOriginName(fieldValue.getValidation().getOriginName());
               });
-              LOG.info("NIVEL TABLA after" + TenantResolver.getTenantName());
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           });
