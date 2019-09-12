@@ -65,51 +65,31 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   function getDatasetsDashboardData() {
+    const dashboardStatus = dashboardsData.dataSetCountries.map(status => {
+      return {
+        error: status.error.length,
+        warning: status.warning.length,
+        correct: status.correct.length
+      };
+    });
+
     const datasetDataObject = {
-      labels: dashboardsData.dataSetCountries.map(data => data.countryName),
+      labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
       datasets: [
         {
           label: 'Correct',
           backgroundColor: '#004494',
-          data: [
-            50,
-            25,
-            70,
-            95,
-            90,
-            100,
-            5,
-            33,
-            50,
-            25,
-            70,
-            95,
-            90,
-            100,
-            5,
-            33,
-            50,
-            25,
-            70,
-            95,
-            90,
-            100,
-            5,
-            33,
-            100,
-            85,
-            0
-          ]
+          data: dashboardStatus.map(cor => cor.correct)
         },
         {
           label: 'Warning',
           backgroundColor: '#ffd617',
-          data: [25, 25, 20, 5, 5, 0, 10, 34, 25, 25, 20, 5, 5, 0, 10, 34, 25, 25, 20, 5, 5, 0, 10, 34, 0, 15, 1]
+          data: dashboardStatus.map(war => war.warning)
         },
         {
           label: 'Error',
           backgroundColor: '#DA2131',
-          data: [25, 50, 10, 0, 5, 0, 85, 33, 25, 50, 10, 0, 5, 0, 85, 33, 25, 50, 10, 0, 5, 0, 85, 33, 0, 0, 99]
+          data: dashboardStatus.map(err => err.error)
         }
       ]
     };
@@ -141,7 +121,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             }, */
             ticks: {
               // Include a % sign in the ticks
-              callback: (value, index, values) => `${value} %`
+              callback: (value, index, values) => `${value}%`
             }
           }
         ]
