@@ -207,7 +207,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     onPageLoad();
 
     setLoading(false);
-  }, []);
+  }, [dashboardsData]);
 
   const layout = children => {
     return (

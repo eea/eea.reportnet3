@@ -1,0 +1,762 @@
+{
+    "idDataSetSchema": "5d4abe555b1c1e0001477410",
+    "nameDataSetSchema": "dataSet_1",
+    "dataSetCountries": [
+        {
+            "countryName": "Austria",
+            "countryCode": "at",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Belgium",
+            "countryCode": "be",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Bulgarian",
+            "countryCode": "bg"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Croatia",
+            "countryCode": "hr"    ,
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Cyprus",
+            "countryCode": "cy",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Czechia",
+            "countryCode": "cz"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Denmark",
+            "countryCode": "dk"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Estonia",
+            "countryCode": "ee",
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Finland",
+            "countryCode": "fi"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "France",
+            "countryCode": "fr"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Germany",
+            "countryCode": "de"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Greece",
+            "countryCode": "el"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Hungary",
+            "countryCode": "hu",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Ireland",
+            "countryCode": "ie"    ,
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Italy",
+            "countryCode": "it"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Latvia",
+            "countryCode": "lv"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Lithuania",
+            "countryCode": "lt"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Luxembourg",
+            "countryCode": "lu",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Malta",
+            "countryCode": "mt"    ,
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Netherlands",
+            "countryCode": "nl"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Poland",
+            "countryCode": "pl"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Portugal",
+            "countryCode": "pt"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Romania",
+            "countryCode": "ro",
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Slovakia",
+            "countryCode": "sk",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Slovenia",
+            "countryCode": "sl",
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Spain",
+            "countryCode": "es"    ,
+            "isDataSetReleased": false,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "Sweeden",
+            "countryCode": "se",
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        },
+        {
+            "countryName": "United Kingdom",
+            "countryCode": "uk"    ,
+            "isDataSetReleased": true,
+            "error": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477412",
+                    "nameTable": "BWQD_2006_IdentifiedBW"
+                }
+            ],
+            "warning": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477448",
+                    "nameTable": "BWQD_2006_SeasonalInfo"
+                }
+            ],
+            "correct": [
+                {
+                    "idTable": "5d4abe555b1c1e0001477460",
+                    "nameTable": "BWQD_2006_MonitoringResults"
+                },
+                {
+                    "idTable": "5d4abe555b1c1e0001477473",
+                    "nameTable": "BWQD_2006_ShortTermPolut"
+                }
+            ]
+        }
+    ]
+}
