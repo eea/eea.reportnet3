@@ -87,7 +87,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     console.log('DocumentData: ', documentData);
     try {
       const response = await DocumentService.deleteDocument(documentData.id);
-      if (response === 200) {
+      if (response >= 200 && response <= 299) {
         onLoadDocumentsAndWebLinks();
       }
     } catch (error) {
