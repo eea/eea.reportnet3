@@ -2,7 +2,8 @@ import { ApiDocumentRepository } from 'core/infrastructure/domain/model/Document
 
 export const DocumentRepository = {
   all: () => Promise.reject('[DocumentRepository#all] must be implemented'),
-  downloadDocumentById: () => Promise.reject('[DocumentRepository#downloadDocumentById] must be implemented')
+  downloadDocumentById: () => Promise.reject('[DocumentRepository#downloadDocumentById] must be implemented'),
+  deleteDocument: () => Promise.reject('[DocumentRepository#delete] must be implemented')
 };
 
 export const documentRepository = Object.assign({}, DocumentRepository, ApiDocumentRepository);
