@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, isNull, isString } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -15,6 +15,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
+import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -46,7 +47,9 @@ const DataViewer = withRouter(
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
+    //const [columnsPreviewNumber, setColumnsPreviewNumber] = useState(5);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+    const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editedRecord, setEditedRecord] = useState({});
     const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -54,6 +57,7 @@ const DataViewer = withRouter(
     const [exportTableData, setExportTableData] = useState(undefined);
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
+    const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -70,6 +74,7 @@ const DataViewer = withRouter(
     const [pastedRecords, setPastedRecords] = useState();
     const [selectedRecord, setSelectedRecord] = useState({});
     //const [selectedRecords, setSelectedRecords] = useState([]);
+    //const [recordsPreviewNumber, setRecordsPreviewNumber] = useState(5);
     const [selectedCellId, setSelectedCellId] = useState();
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
@@ -81,6 +86,7 @@ const DataViewer = withRouter(
     let exportMenuRef = useRef();
     let datatableRef = useRef();
     let contextMenuRef = useRef();
+    let divRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -105,7 +111,9 @@ const DataViewer = withRouter(
     }, []);
 
     useEffect(() => {
-      setFetchedData([]);
+      if (fetchedData.length > 0) {
+        setFetchedData([]);
+      }
     }, [isDataDeleted]);
 
     useEffect(() => {
@@ -163,7 +171,12 @@ const DataViewer = withRouter(
         );
       });
       let editCol = (
-        <Column key="actions" body={row => actionTemplate(row)} style={{ width: '100px', height: '45px' }} />
+        <Column
+          key="actions"
+          body={row => actionTemplate(row)}
+          sortable={false}
+          style={{ width: '100px', height: '45px' }}
+        />
       );
 
       let validationCol = (
@@ -172,18 +185,30 @@ const DataViewer = withRouter(
           field="validations"
           header=""
           key="recordValidation"
+          sortable={false}
           style={{ width: '15px' }}
         />
       );
       hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       setColumns(columnsArr);
-    }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
+    }, [colsSchema, columnOptions, selectedRecord, editedRecord]);
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
         DownloadFile(exportTableData, exportTableDataName);
       }
     }, [exportTableData]);
+
+    useEffect(() => {
+      if (confirmPasteVisible) {
+        if (!isUndefined(pastedRecords)) {
+          if (pastedRecords.length > 0) {
+            setPastedRecords([]);
+          }
+        }
+        divRef.current.focus();
+      }
+    }, [confirmPasteVisible]);
 
     const onCancelRowEdit = () => {
       let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
@@ -211,6 +236,12 @@ const DataViewer = withRouter(
       if (recordDeleted) {
         setIsRecordDeleted(true);
       }
+    };
+
+    const onDeletePastedRecord = recordIndex => {
+      const inmPastedRecords = [...pastedRecords];
+      inmPastedRecords.splice(recordIndex, 1);
+      setPastedRecords(inmPastedRecords);
     };
 
     const onEditAddFormInput = (property, value) => {
@@ -290,7 +321,11 @@ const DataViewer = withRouter(
         );
 
         if (!isUndefined(colsSchema)) {
-          setNewRecord(createEmptyObject(colsSchema, tableData));
+          if (!isUndefined(tableData)) {
+            if (tableData.records.length > 0) {
+              setNewRecord(createEmptyObject(colsSchema, tableData.records[0]));
+            }
+          }
         }
         if (!isUndefined(tableData.records)) {
           filterDataResponse(tableData);
@@ -319,17 +354,36 @@ const DataViewer = withRouter(
       setConfirmDeleteVisible(false);
     };
 
-    const onPaste = async () => {
+    const onPaste = event => {
+      if (event) {
+        const clipboardData = event.clipboardData;
+        const pastedData = clipboardData.getData('Text');
+        const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
+        const copiedRecords = !isUndefined(pastedRecords) ? [...pastedRecords] : [];
+        copiedClipboardRecords.forEach(row => {
+          let emptyRecord = createEmptyObject(colsSchema, fetchedDataFirstRow);
+          const copiedCols = row.split('\t');
+          emptyRecord.dataRow.forEach((record, i) => {
+            emptyRecord = changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
+          });
+
+          emptyRecord.dataRow = emptyRecord.dataRow.filter(
+            column =>
+              Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'dataSetPartitionId'
+          );
+          copiedRecords.push(emptyRecord);
+        });
+        setPastedRecords(copiedRecords);
+      }
+    };
+
+    const onPasteAsync = async () => {
       const pastedData = await navigator.clipboard.readText();
-      //event.clipboardData || window.clipboardData;
-      //let pastedData = clipboardData.getData('Text');
       const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
       const copiedRecords = [];
       copiedClipboardRecords.forEach(row => {
         let emptyRecord = createEmptyObject(colsSchema, fetchedData);
         const copiedCols = row.split('\t');
-        //copiedCols.unshift(Math.floor(Math.random() * (999999 - 500) + 500));
-
         emptyRecord.dataRow.forEach((record, i) => {
           emptyRecord = changeRecordValue(emptyRecord, record.fieldData.fieldSchemaId, copiedCols[i]);
         });
@@ -342,14 +396,25 @@ const DataViewer = withRouter(
       });
       setPastedRecords(copiedRecords);
     };
+
     const onPasteAccept = async () => {
       try {
-        await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
-        growlRef.current.show({
-          severity: 'success',
-          summary: resources.messages['dataPasted'],
-          life: '3000'
-        });
+        const recordsAdded = await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
+        setConfirmPasteVisible(false);
+        onRefresh();
+        if (recordsAdded) {
+          growlRef.current.show({
+            severity: 'success',
+            summary: resources.messages['dataPasted'],
+            life: '3000'
+          });
+        } else {
+          growlRef.current.show({
+            severity: 'error',
+            summary: resources.messages['dataPastedError'],
+            life: '3000'
+          });
+        }
       } catch (error) {
         console.error('DataViewer error: ', error);
         const errorResponse = error.response;
@@ -358,10 +423,15 @@ const DataViewer = withRouter(
           history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
         }
       } finally {
+        setConfirmPasteVisible(false);
       }
     };
     const onRefresh = () => {
       onFetchData(sortField, sortOrder, firstRow, numRows);
+    };
+
+    const onPasteCancel = () => {
+      setConfirmPasteVisible(false);
     };
 
     const onSelectRecord = val => {
@@ -496,8 +566,9 @@ const DataViewer = withRouter(
           style={{ float: 'right' }}
           label={resources.messages['paste']}
           icon="clipboard"
-          onClick={() => {
-            datatableRef.current.onPaste();
+          onClick={async () => {
+            setConfirmPasteVisible(true);
+            //onPasteAsync();
           }}
         />
       </div>
@@ -533,6 +604,10 @@ const DataViewer = withRouter(
     };
 
     const changeRecordValue = (recordData, field, value) => {
+      //Delete \r and \n values for tabular paste
+      if (!isUndefined(value) && !isNull(value) && isString(value)) {
+        value = value.replace(`\r`, '').replace(`\n`, '');
+      }
       recordData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
       return recordData;
     };
@@ -554,13 +629,8 @@ const DataViewer = withRouter(
 
       obj.dataSetPartitionId = null;
       //dataSetPartitionId is needed for checking the rows owned by delegated contributors
-      if (!isUndefined(data.records) && data.records.length > 0) {
-        obj.dataSetPartitionId = data.records[0].dataSetPartitionId;
-      } else {
-        //onPaste we check the formatted datatable data
-        if (!isUndefined(data) && data.length > 0) {
-          obj.dataSetPartitionId = data[0].dataSetPartitionId;
-        }
+      if (!isUndefined(data) && data.length > 0) {
+        obj.dataSetPartitionId = data.dataSetPartitionId;
       }
       return obj;
     };
@@ -641,6 +711,9 @@ const DataViewer = withRouter(
         };
         return arrayDataAndValidations;
       });
+      if (dataFiltered.length > 0) {
+        setFetchedDataFirstRow(dataFiltered[0]);
+      }
       setFetchedData(dataFiltered);
     };
 
@@ -896,7 +969,7 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             autoLayout={true}
-            columnsPreviewNumber={5}
+            //columnsPreviewNumber={columnsPreviewNumber}
             contextMenuSelection={selectedRecord}
             editable={hasWritePermissions}
             //emptyMessage={resources.messages['noDataInDataTable']}
@@ -918,8 +991,10 @@ const DataViewer = withRouter(
               onSelectRecord(e.value);
             }}
             onPage={onChangePage}
-            onPaste={onPaste}
-            onPasteAccept={onPasteAccept}
+            onPaste={e => {
+              onPaste(e);
+            }}
+            //onPasteAccept={onPasteAccept}
             onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
             // onSelectionChange={e => {
             //   setSelectedRecords(e.value);
@@ -927,8 +1002,8 @@ const DataViewer = withRouter(
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
-            pastedRecords={pastedRecords}
-            recordsPreviewNumber={5}
+            //pastedRecords={pastedRecords}
+            //recordsPreviewNumber={recordsPreviewNumber}
             ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}
@@ -990,6 +1065,18 @@ const DataViewer = withRouter(
           labelConfirm="Yes"
           labelCancel="No">
           {resources.messages['confirmDeleteRow']}
+        </ConfirmDialog>
+        <ConfirmDialog
+          header="Paste data"
+          labelCancel="No"
+          labelConfirm="Yes"
+          maximizable={true}
+          onConfirm={onPasteAccept}
+          onHide={onPasteCancel}
+          onPaste={onPaste}
+          divRef={divRef}
+          visible={confirmPasteVisible}>
+          <InfoTable data={pastedRecords} columns={columns} onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
         </ConfirmDialog>
         <Dialog
           blockScroll={false}
