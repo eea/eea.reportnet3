@@ -151,17 +151,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
   function getReleasedDashboardData() {
     const releasedDataObject = {
-      labels: dashboardsData.dataSetCountries.map(data => data.countryName),
+      labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
       datasets: [
         {
           label: 'Released',
           backgroundColor: '#32CD32',
-          data: [1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0]
+          data: dashboardsData.dataSetCountries.map(released => released.isDataSetReleased)
         },
         {
           label: 'Unreleased',
           backgroundColor: '#8FBC8F',
-          data: [0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1]
+          data: dashboardsData.dataSetCountries.map(released => !released.isDataSetReleased)
         }
       ]
     };
@@ -193,7 +193,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             }, */
             ticks: {
               // Include a % sign in the ticks
-              callback: (value, index, values) => `${index}`
+              callback: (value, index, values) => `${value}`
             }
           }
         ]
