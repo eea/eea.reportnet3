@@ -61,7 +61,6 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
             column.key !== 'id' &&
             column.key !== 'dataSetPartitionId'
         );
-        console.log(filteredColumns);
         let records = [...data];
         if (!isUndefined(records)) {
           records = records.map((record, i) => {

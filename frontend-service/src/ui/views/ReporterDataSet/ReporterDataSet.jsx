@@ -302,8 +302,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
-  console.log('snapshotState: ', snapshotState);
-
   const getPosition = button => {
     const buttonTopPosition = button.top;
     const buttonLeftPosition = button.left;
