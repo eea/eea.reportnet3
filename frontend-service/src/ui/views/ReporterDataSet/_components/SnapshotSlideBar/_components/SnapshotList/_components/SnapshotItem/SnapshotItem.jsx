@@ -6,7 +6,7 @@ import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 
 export function SnapshotItem({ itemData }) {
   const snapshotContext = useContext(SnapshotContext);
@@ -25,6 +25,7 @@ export function SnapshotItem({ itemData }) {
               tooltip={resources.messages.restoreSnapshotTooltip}
               tooltipOptions={{ position: 'top' }}
               icon="replay"
+              disabled={snapshotContext.snapshotState.restored === itemData.id ? true : false}
               className={`${styles.btn} rp-btn secondary`}
               onClick={() =>
                 snapshotContext.snapshotDispatch({
