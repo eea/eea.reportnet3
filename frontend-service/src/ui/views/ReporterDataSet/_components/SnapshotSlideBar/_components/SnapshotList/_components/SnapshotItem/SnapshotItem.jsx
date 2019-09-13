@@ -25,7 +25,6 @@ export function SnapshotItem({ itemData }) {
               tooltip={resources.messages.restoreSnapshotTooltip}
               tooltipOptions={{ position: 'top' }}
               icon="replay"
-              disabled={snapshotContext.snapshotState.restored === itemData.id ? true : false}
               className={`${styles.btn} rp-btn secondary`}
               onClick={() =>
                 snapshotContext.snapshotDispatch({
