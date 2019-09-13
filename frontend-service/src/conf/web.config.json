@@ -91,5 +91,8 @@
 	},
 	"DATAFLOW_TASKS":{
 		"url":"/data-flow-task"
+	},
+	"deleteDocument":{
+		"url":"/document/{:documentId}"
 	}
 }

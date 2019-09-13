@@ -22,6 +22,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -79,6 +80,7 @@ const DataViewer = withRouter(
     const [totalRecords, setTotalRecords] = useState(0);
 
     const resources = useContext(ResourcesContext);
+    const snapshotContext = useContext(SnapshotContext);
 
     let growlRef = useRef();
     let exportMenuRef = useRef();
@@ -226,6 +228,7 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
       if (dataDeleted) {
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsDataDeleted(true);
         setTotalRecords(0);
       }
@@ -235,6 +238,7 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const recordDeleted = await DataSetService.deleteRecordById(dataSetId, selectedRecord.recordId);
       if (recordDeleted) {
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsRecordDeleted(true);
       }
     };
@@ -279,6 +283,7 @@ const DataViewer = withRouter(
           if (!fieldUpdated) {
             console.error('Error!');
           }
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         }
       }
     };
@@ -375,14 +380,14 @@ const DataViewer = withRouter(
     const onPasteAccept = async () => {
       try {
         const recordsAdded = await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
-        setConfirmPasteVisible(false);
-        onRefresh();
         if (recordsAdded) {
           growlRef.current.show({
             severity: 'success',
             summary: resources.messages['dataPasted'],
             life: '3000'
           });
+          onRefresh();
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } else {
           growlRef.current.show({
             severity: 'error',
@@ -425,6 +430,7 @@ const DataViewer = withRouter(
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
           setAddDialogVisible(false);
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -440,6 +446,7 @@ const DataViewer = withRouter(
         try {
           await DataSetService.updateRecordsById(dataSetId, record);
           setEditDialogVisible(false);
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);

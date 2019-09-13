@@ -205,7 +205,7 @@ export function ContributorsList({ dataFlowId }) {
           )}
         />
       </div>
-      <DataTable value={contributorsArray} paginator={true} rows={5} rowsPerPageOptions={[4, 6, 8]}>
+      <DataTable value={contributorsArray} paginator={false} scrollable={true} scrollHeight="60vh">
         <Column key="login" field="login" header="Login" />
         <Column body={roleDropdownColumnTemplate} header="Role" />
         <Column body={deleteBtnColumnTemplate} style={{ width: '60px' }} />
