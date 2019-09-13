@@ -196,7 +196,7 @@ public class RecordValidationDrools {
         return true;
       }
       try {
-        Date dateCalculate = sdf.parse(date);
+        sdf.parse(date);
       } catch (ParseException e) {
         return true;
       }
@@ -353,7 +353,7 @@ public class RecordValidationDrools {
         return true;
       }
       try {
-        Date dateCalculate = sdf.parse(date);
+        sdf.parse(date);
       } catch (ParseException e) {
         return true;
       }

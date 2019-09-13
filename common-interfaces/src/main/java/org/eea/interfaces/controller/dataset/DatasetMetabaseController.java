@@ -51,7 +51,7 @@ public interface DatasetMetabaseController {
   /**
    * Find dataset name.
    *
-   * @param idDataSet the id data set
+   * @param idDataset the id dataset
    * @return the string
    */
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
