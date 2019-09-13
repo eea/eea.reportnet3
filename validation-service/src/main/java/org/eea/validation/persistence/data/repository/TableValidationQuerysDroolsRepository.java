@@ -72,6 +72,12 @@ public class TableValidationQuerysDroolsRepository {
     }
   }
 
+  /**
+   * Table validation query period monitoring.
+   *
+   * @param QUERY the query
+   * @return the list
+   */
   @SuppressWarnings("unchecked")
   public List<BigInteger> tableValidationQueryPeriodMonitoring(String QUERY) {
 

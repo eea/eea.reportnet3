@@ -222,7 +222,8 @@ function Boolean ruleDU01B(String idSchema, Long datasetId){
 function  Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
       String idSchemaCountryCode, String idSchemaBathingWaterIdentifier,
       Long idDataset, String idDatasetToContribute) {
-  return TableValidationDrools.ruleDO01(idSchemaThematicIdIdentifier,idSchemaStatusCode,idSchemaCountryCode,idSchemaBathingWaterIdentifier,idDataset,idDatasetToContribute);     
+  return TableValidationDrools.ruleDO01(idSchemaThematicIdIdentifier,idSchemaStatusCode,idSchemaCountryCode,
+  idSchemaBathingWaterIdentifier,idDataset,idDatasetToContribute);     
 }
 
 
