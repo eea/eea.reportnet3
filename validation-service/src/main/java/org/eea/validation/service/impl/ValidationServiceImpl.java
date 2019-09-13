@@ -1,11 +1,9 @@
 package org.eea.validation.service.impl;
 
 
-import com.google.common.collect.Lists;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -177,15 +175,15 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public List<RecordValidation> runRecordValidations(RecordValue record,
-      KieSession kieSession) {
+  public List<RecordValidation> runRecordValidations(RecordValue record, KieSession kieSession) {
     if (record.getIdRecordSchema() != null && StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
     kieSession.fireAllRules();
 
-    return recordValidationRepository
-        .findByRecordValueIdIn(Arrays.asList(new Long[]{record.getId()}));
+    return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
+        ? new ArrayList<>()
+        : record.getRecordValidations();
   }
 
   /**
@@ -365,16 +363,17 @@ public class ValidationServiceImpl implements ValidationService {
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(tableId));
-
+      recordsByTable.stream()
+          .forEach(recordValue -> recordValue.setRecordValidations(new ArrayList<>()));
       recordsByTable = Collections.synchronizedList(recordsByTable);
       recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
         List<RecordValidation> recordValidations = runRecordValidations(row, session);
-        if (null != recordValidations
-            && recordValidations.size() > 0) {//there were validation error
-          //set on validation error the reference back to the record
-          recordValidations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
+        if (null != recordValidations && recordValidations.size() > 0) {// there were validation
+                                                                        // error
+          // set on validation error the reference back to the record
+          recordValidations.parallelStream().filter(Objects::nonNull).forEach(rowValidation -> {
             rowValidation.setRecordValue(row);
-            //set an error on the table according to the highest kind of error in a row
+            // set an error on the table according to the highest kind of error in a row
             synchronized (tableValidation) {
               if (tableValidation.getValidation().getLevelError() == null
                   || !TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
@@ -442,7 +441,7 @@ public class ValidationServiceImpl implements ValidationService {
         recordVal.setValidation(new Validation());
         if (null != row.getRecordValidations()) {
           List<FieldValue> fields = Collections.synchronizedList(row.getFields());
-          fields.parallelStream().filter(Objects::nonNull).forEach(field -> {
+          fields.stream().filter(Objects::nonNull).forEach(field -> {
             List<FieldValidation> resultFields = runFieldValidations(field, session);
             if (null != field.getFieldValidations()) {
               field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {

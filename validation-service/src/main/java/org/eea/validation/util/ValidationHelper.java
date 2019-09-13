@@ -59,7 +59,7 @@ public class ValidationHelper {
     LOG.info("Validating Fields");
     System.err.println(System.currentTimeMillis());
     Long timer = System.currentTimeMillis();
-//    validationService.validateFields(datasetId, session);
+    validationService.validateFields(datasetId, session);
     System.err.println(System.currentTimeMillis() - timer);
     timer = System.currentTimeMillis();
     LOG.info("Validating Records");

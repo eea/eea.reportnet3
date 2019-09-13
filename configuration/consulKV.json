@@ -725,7 +725,7 @@
   },
   {
     "key": "config/application/eea.keycloak.secret",
-    "value": "JHtLRVlDTE9BS19TRUNSRVQ6YmNkN2RjZDItZDBkMC00ODY5LWI5NjUtMzU2ZDJjNzEyOWQ3fQ=="
+    "value": "YTNmNmNhZDEtMDJjOC00ODA0LTg0OTgtODhiZjUyMGRkYjM0"
   },
   {
     "key": "config/application/eea.keycloak.clientId",
@@ -741,7 +741,7 @@
   },
   {
     "key": "config/application/eea.keycloak.publicKey",
-    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTBVUzZiNDlIdUxkZ0dEYXltVzFqOXR5VWlqdjQrN3J0WTh2eEVGeVRGbDZmdFFxK3N2Sm5RNUlWWEw0aFM2c0ltbFFnbEx1WER2UDAvU2UxVHlNSzB2T3pzWXA2aVd0WUtUSmFvaFU0dVlUMnN3OWRJU0dhdjVMN25ZT0R5dlV0bHZqa2x2bzloRUNPaVRLaEJsa0VoUDhlV1dFWG1WOURHMERYL0l0eGZZbnpVd1JZSGJxZ2tYZWZZbmhmRTBxQ3p2Um9oYnNyZ1lSaitibmFmL1VkOHkwWHdGVTJaQTArK2dYT2JHalBoQy9JTFk3S2JxNnFLa1Z2TnVDam00MmdjUTNvWXRvVUYrR1M1TUZ4QjZ5c3BPMmcxcTNSN0t3VU9hS1h5bjh6OVlsY2RVZkVOQ2R0eXhTbFBqb1FLdkg2Y3hSSmRseE9Ha3RlK0V0WEN2TENIUUlEQVFBQn0="
+    "value": "TUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyOTh0ZDV6MEFVMWh5UCtZeFRUQTlNMHhKMXdob1JxeW96ZjQzU1liNFdnTWpZMU5ManJrckF4TlRHVC96MjZBaytFSUlIV0tsa3kyblFlU1cza0hlZkpRNDZOVTd2dDhVaEQvY1o1MW9sQ2tvY0RMYnBJbE9PY2U4cXg3MElWelhZa1I3RTFLOG1oWWVZMHFSdUw4a3NaOVAwUXp3eDFTK1hPdVB6ZnNyWXRIeGFHT01GVGRVeW5oSzBOMitSQXFSZUVOK21icUJwQUpHUDg2SEh5bjhZL3V5TDlIOWEzSk9HOUZtWXpzSmszY1hPbEYxQ1dpNitML3NnVzN1SC8rb2FMSE90dzNDVVN2TmZERnByQWpYUFN2MVhZTGhBQzk0K1R0eFpLMGpESVJ4aFNoTDhpVVJxanFHZHZTS3B3NVVKaHFYVkVCQXh1cW1lUHRvMkhzQlFJREFRQUI="
   },
   {
     "key": "config/application/hystrix.shareSecurityContext",
@@ -802,5 +802,13 @@
   {
     "key": "config/recordstore/pathSnapshot",
     "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
+  },
+  {
+  "key": "config/validation/spring.datasource.hikari.maximum-pool-size",
+   "value": "JHtNQVhJTVVNX1BPT0xfU0laRToxMH0="
+  },
+  {
+  "key": "config/dataset/spring.datasource.hikari.maximum-pool-size",
+   "value": "JHtNQVhJTVVNX1BPT0xfU0laRToxMH0="
   }
 ]
