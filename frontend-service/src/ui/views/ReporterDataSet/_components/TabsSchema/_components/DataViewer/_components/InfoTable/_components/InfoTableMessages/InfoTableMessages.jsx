@@ -1,44 +1,35 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { isUndefined } from 'lodash';
 
-export const InfoTableMessages = ({ data, columns }) => {
-  const checkPastedColumnsErrors = () => {
-    let correctColumns = true;
-    if (data) {
-      if (data.length > 0) {
-        let i = 0;
-        //Data columns minus "actions", "recordValidations", "dataSetPartitionId" and "id" columnns
-        const filteredColumns = columns.filter(
-          column =>
-            column.key !== 'actions' &&
-            column.key !== 'recordValidation' &&
-            column.key !== 'id' &&
-            column.key !== 'dataSetPartitionId'
-        );
-        do {
-          if (!isUndefined(data[i])) {
-            const nonEmptyColumns = data[i].dataRow.filter(d => !isUndefined(Object.values(d.fieldData)[0]));
-            if (nonEmptyColumns.length !== filteredColumns.length) {
-              correctColumns = false;
-            }
-            i++;
-          }
-        } while (i < data.length && correctColumns);
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-        if (!correctColumns) {
+export const InfoTableMessages = ({ data, columns }) => {
+  const resources = useContext(ResourcesContext);
+
+  const checkPastedColumnsErrors = () => {
+    //Data columns minus "actions", "recordValidations", "dataSetPartitionId" and "id" columnns
+    const filteredColumns = columns.filter(
+      column =>
+        column.key !== 'actions' &&
+        column.key !== 'recordValidation' &&
+        column.key !== 'id' &&
+        column.key !== 'dataSetPartitionId'
+    );
+
+    if (!isUndefined(data)) {
+      if (data.length > 0) {
+        if (filteredColumns.length !== data[0].copiedCols) {
           return (
             <div>
-              <p style={{ fontWeight: 'bold', color: '#DA2131' }}>
-                Warning! There are rows with a wrong number of columns pasted
-              </p>
-              <p>Do you still want to paste this data?</p>
+              <p style={{ fontWeight: 'bold', color: '#DA2131' }}>{resources.messages['pasteColumnWarningMessage']}</p>
+              <p>{resources.messages['pasteColumnWarningConfirmMessage']}</p>
             </div>
           );
         } else {
           return (
             <div>
-              <p>Do you want to paste this data?</p>
+              <p>{resources.messages['pasteColumnConfirmMessage']}</p>
             </div>
           );
         }
@@ -48,7 +39,9 @@ export const InfoTableMessages = ({ data, columns }) => {
 
   return (
     <React.Fragment>
-      <p>Pasted records: {!isUndefined(data) ? data.length : 0}</p>
+      <p>
+        {resources.messages['pastedRecordsMessage']} {!isUndefined(data) ? data.length : 0}
+      </p>
       {!isUndefined(data) ? checkPastedColumnsErrors() : null}
     </React.Fragment>
   );

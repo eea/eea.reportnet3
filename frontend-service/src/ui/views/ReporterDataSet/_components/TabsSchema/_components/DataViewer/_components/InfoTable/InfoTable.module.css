@@ -18,3 +18,7 @@
     rgba(218, 33, 49, 0.3) 15px
   ) !important;
 }
+
+.infoTableSpinner {
+  top: 0vh !important;
+}

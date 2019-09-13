@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import { isUndefined } from 'lodash';
 
 import styles from './InfoTable.module.css';
 
 import { Button } from 'ui/views/_components/Button';
+import { IconTooltip } from '../IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
 
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+
 export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
+  const resources = useContext(ResourcesContext);
   const previewPastedData = () => {
     return (
       <div className="p-datatable-wrapper">
@@ -31,7 +35,6 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
             column.key !== 'id' &&
             column.key !== 'dataSetPartitionId'
         );
-        //let slicedColumns = filteredColumns.slice(0, recordsPreviewNumber);
 
         const headers = filteredColumns.map((column, i) => {
           return (
@@ -40,11 +43,9 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
             </th>
           );
         });
-        // if (filteredColumns.length > columnsPreviewNumber) {
-        //   headers.push(<th key="previewColumn">...</th>);
-        // }
         let deleteCol = <th key="deleteRecord" className="p-resizable-column"></th>;
-        headers.unshift(deleteCol);
+        let validationCol = <th key="validationRecord" className="p-resizable-column"></th>;
+        headers.unshift(deleteCol, validationCol);
         return headers;
       }
     }
@@ -60,9 +61,9 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
             column.key !== 'id' &&
             column.key !== 'dataSetPartitionId'
         );
+        console.log(filteredColumns);
         let records = [...data];
-        //data.slice(0, recordsPreviewNumber);
-        if (records) {
+        if (!isUndefined(records)) {
           records = records.map((record, i) => {
             return (
               <tr key={i} className="p-datatable-row">
@@ -70,37 +71,36 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
                   <Button
                     type="button"
                     icon="trash"
-                    // classNamonDeletePastedRecorde={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
                     onClick={e => {
                       onDeletePastedRecord(i);
                     }}
                   />
                 </td>
-                {record.dataRow
-                  //   .slice(
-                  //     0,
-                  //     filteredColumns.length < columnsPreviewNumber ? filteredColumns.length : columnsPreviewNumber
-                  //   )
-                  .map((column, j) => {
-                    return (
-                      <td
-                        key={j}
-                        className={isUndefined(Object.values(column.fieldData)[0]) ? styles.infoTableCellError : ''}>
-                        {Object.values(column.fieldData)[0]}
-                      </td>
-                    );
-                  })}
+                <td>
+                  {record.copiedCols !== filteredColumns.length ? (
+                    <IconTooltip
+                      levelError="WARNING"
+                      message={
+                        record.copiedCols < filteredColumns.length
+                          ? resources.messages['pasteColumnErrorLessMessage']
+                          : resources.messages['pasteColumnErrorMoreMessage']
+                      }
+                    />
+                  ) : null}
+                </td>
+                {record.dataRow.map((column, j) => {
+                  return (
+                    <td
+                      key={j}
+                      className={isUndefined(Object.values(column.fieldData)[0]) ? styles.infoTableCellError : ''}>
+                      {Object.values(column.fieldData)[0]}
+                    </td>
+                  );
+                })}
               </tr>
             );
           });
         }
-        // if (data.length > recordsPreviewNumber) {
-        //   records.push(
-        //     <tr key="preview">
-        //       <td>...</td>
-        //     </tr>
-        //   );
-        // }
         return records;
       }
     }
@@ -114,8 +114,7 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
         previewPastedData()
       ) : (
         <div className={styles.infoTablePaste}>
-          {' '}
-          <span>Paste here your data (Ctrl + V or ⌘ + V)</span>
+          <span>{resources.messages['pasteRecordsMessage']}</span>
         </div>
       )}
     </React.Fragment>
