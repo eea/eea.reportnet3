@@ -112,11 +112,15 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RecordRepository recordRepository;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The table validation querys drools repository. */
+  /**
+   * The table validation querys drools repository.
+   */
   @Autowired
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
@@ -125,7 +129,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
-  /** The metabase controller. */
+  /**
+   * The metabase controller.
+   */
   @Autowired
   private DatasetMetabaseController metabaseController;
 
@@ -134,6 +140,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param dataset the dataset
    * @param kieSession the kie session
+   *
    * @return the element lenght
    */
   @Override
@@ -149,6 +156,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param table the table
    * @param kieSession the kie session
+   *
    * @return the list
    */
   @Override
@@ -163,6 +171,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param record the record
    * @param kieSession the kie session
+   *
    * @return the list
    */
   @Override
@@ -179,6 +188,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param field the field
    * @param kieSession the kie session
+   *
    * @return the list
    */
   @Override
@@ -197,7 +207,9 @@ public class ValidationServiceImpl implements ValidationService {
    * Load rules knowledge base.
    *
    * @param datasetId the dataset id
+   *
    * @return the kie session
+   *
    * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
@@ -222,12 +234,12 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
 
-
   /**
    * Validate data set.
    *
    * @param datasetId the dataset id
    * @param kieSession the kie session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -248,6 +260,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param session the session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -302,6 +315,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param session the session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -340,12 +354,9 @@ public class ValidationServiceImpl implements ValidationService {
             recordValList.addAll(resultRecords);
           }
         })).get();
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ExecutionException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      } catch (InterruptedException | ExecutionException e) {
+        LOG_ERROR.error("ERROR validating records", e);
+        return;
       }
       // Adding errors into tables
       if (validation.getLevelError() != null) {
@@ -373,6 +384,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param session the session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -462,6 +474,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Sanitize records validations.
    *
    * @param records the records
+   *
    * @return the list
    */
   private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
@@ -492,6 +505,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param idValidations the id validations
+   *
    * @return the field errors
    */
   @Override
@@ -527,6 +541,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param idValidations the id validations
+   *
    * @return the record errors
    */
   @Override
@@ -561,6 +576,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param idValidations the id validations
+   *
    * @return the table errors
    */
   @Override
@@ -596,6 +612,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param dataset the dataset
    * @param idValidations the id validations
+   *
    * @return the dataset errors
    */
   @Override
@@ -625,7 +642,9 @@ public class ValidationServiceImpl implements ValidationService {
    * Gets the dataset valueby id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset valueby id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -641,7 +660,9 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the find by id data set schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -653,7 +674,9 @@ public class ValidationServiceImpl implements ValidationService {
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
   }
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepositoryImpl datasetRepositoryImpl;
 
@@ -661,6 +684,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DO 02 query.
    *
    * @param DO02 the do02
+   *
    * @return the boolean
    */
   @Override
@@ -672,6 +696,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DO 03 query.
    *
    * @param DO03 the do03
+   *
    * @return the boolean
    */
   @Override
@@ -683,6 +708,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 01 A query.
    *
    * @param DC01A the dc01a
+   *
    * @return the boolean
    */
   @Override
@@ -694,6 +720,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 01 B query.
    *
    * @param DC01B the dc01b
+   *
    * @return the boolean
    */
   @Override
@@ -705,6 +732,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 02 query.
    *
    * @param DC02 the dc02
+   *
    * @return the boolean
    */
   @Override
@@ -716,6 +744,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 03 query.
    *
    * @param DC03 the dc03
+   *
    * @return the boolean
    */
   @Override
@@ -729,6 +758,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param DR01A the dr01a
    * @param previous the previous
+   *
    * @return the boolean
    */
   // TABLE PART
@@ -741,6 +771,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Table validation query non return result.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
   @Override
@@ -752,6 +783,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Table validation query period monitoring.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
   @Override
