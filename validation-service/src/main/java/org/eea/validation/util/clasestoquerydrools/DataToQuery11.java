@@ -1,4 +1,4 @@
-package org.eea.validation.util.clasestoquerydrools;
+package org.eea.validation.util.clasesToQueryDrools;
 
 import java.util.Arrays;
 import java.util.List;

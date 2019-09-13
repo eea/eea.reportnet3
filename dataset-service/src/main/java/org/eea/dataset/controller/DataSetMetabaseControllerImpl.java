@@ -7,6 +7,7 @@ import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,7 +64,18 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
   }
 
-
+  /**
+   * Find dataset name.
+   *
+   * @param idDataSet the id data set
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset) {
+    return datasetMetabaseService.findDatasetMetabase(idDataset);
+  }
 
   /**
    * Creates the empty data set.
@@ -87,6 +100,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
+
+
   }
 
 

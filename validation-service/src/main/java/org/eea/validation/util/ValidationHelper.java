@@ -47,7 +47,6 @@ public class ValidationHelper {
    */
   @Async
   public void executeValidation(final Long datasetId) throws EEAException {
-
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Load Rules");

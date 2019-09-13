@@ -36,7 +36,7 @@ public class KieBaseManagerTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testKieBaseManager() throws FileNotFoundException {
     DataSetSchema dataSchema = new DataSetSchema();
     // LIST STRINGS
@@ -101,7 +101,7 @@ public class KieBaseManagerTest {
     dataSchema.setTableSchemas(tableSchemasList);
     // CALL SERVICES
     when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
-    kieBaseManager.reloadRules(1L);
+    kieBaseManager.reloadRules(1L, 1L);
   }
 
 }

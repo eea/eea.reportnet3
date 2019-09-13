@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -45,5 +46,15 @@ public interface DatasetMetabaseController {
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
       @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
+
+
+  /**
+   * Find dataset name.
+   *
+   * @param idDataSet the id data set
+   * @return the string
+   */
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset);
 
 }
