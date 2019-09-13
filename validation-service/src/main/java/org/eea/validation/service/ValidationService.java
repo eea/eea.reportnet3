@@ -263,7 +263,6 @@ public interface ValidationService {
    */
   Boolean tableValidationQueryPeriodMonitoring(String QUERY);
 
-  String recordFieldValidation(String QUERY);
 
-  RecordValue testeo(String QUERY);
+
 }

@@ -29,28 +29,10 @@ public class RecordValidationDrools {
   private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
   /** The Constant MAXIMUN_VALUE_INTESTINAL. */
-  private static final Integer MAXIMUN_VALUE_INTESTINAL = 500;
+  private static final Integer MAXIMUN_VALUE_INTESTINAL = 35000;
 
   /** The Constant MAXIMUN_VALUE_ESCHERICHIA. */
-  private static final Integer MAXIMUN_VALUE_ESCHERICHIA = 300;
-
-  /** The field repository impl. */
-
-
-  /**
-   * Return value id record and id field schema.
-   *
-   * @param idRecord the id record
-   * @param idFieldSchema the id field schema
-   * @return the string
-   */
-  private static String returnValueIdRecordAndIdFieldSchema(Long datasetId, Long idRecord,
-      String idFieldSchema) {
-    String QUERY =
-        "select v.value FROM dataset_" + datasetId + ".field_value v  where v.id_field_schema = '"
-            + idFieldSchema + "' and v.id_record = " + idRecord + "";
-    return validationService.recordFieldValidation(QUERY);
-  }
+  private static final Integer MAXIMUN_VALUE_ESCHERICHIA = 35000;
 
   /**
    * Period type validation.
