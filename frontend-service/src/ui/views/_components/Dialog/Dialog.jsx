@@ -1,5 +1,7 @@
 import React from 'react';
 
+import styles from './Dialog.module.scss';
+
 import { Dialog as PrimeDialog } from 'primereact/dialog';
 
 export const Dialog = ({
@@ -24,17 +26,31 @@ export const Dialog = ({
   style,
   visible
 }) => {
+  const maskStyle = {
+    display: visible ? 'flex' : 'none',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1050
+  };
+  const dialogStyle = {
+    top: 'auto',
+    left: 'auto',
+    zIndex: 1050
+  };
   return (
-    <PrimeDialog
-      className={className}
-      dismissableMask={dismissableMask}
-      footer={footer}
-      header={header}
-      maximizable={maximizable}
-      onHide={onHide}
-      style={style ? style : { width: '50vw' }}
-      visible={visible}>
-      {children}
-    </PrimeDialog>
+    <div className={styles.dialog_mask_wrapper} style={maskStyle}>
+      <PrimeDialog
+        className={className}
+        dismissableMask={dismissableMask}
+        footer={footer}
+        header={header}
+        maximizable={maximizable}
+        onHide={onHide}
+        style={style ? { ...style, ...dialogStyle } : { ...dialogStyle, width: '50vw' }}
+        visible={visible}>
+        {children}
+      </PrimeDialog>
+    </div>
   );
 };

@@ -132,6 +132,15 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * Checks if is in same record.
+   *
+   * @param value the value
+   * @param record the record
+   * @param position the position
+   * @param valueToHave the value to have
+   * @return the boolean
+   */
   public static Boolean isInSameRecord(String value, RecordValue record, Integer position,
       String valueToHave) {
 

@@ -54,6 +54,17 @@ public class ValidationControllerImplTest {
   }
 
   @Test
+  public void testValidateDataSetDataTest() throws EEAException {
+    validationController.validateDataSetData(1L);
+  }
+
+  @Test
+  public void testValidateDataSetDataException() throws EEAException {
+    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any());
+    validationController.validateDataSetData(0L);
+  }
+
+  @Test
   public void getFailedValidationsByIdDatasetSuccessEmptyFieldsTest() throws EEAException {
     when(loadValidationsHelper.getListValidations(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(failedValidationsDatasetVO);

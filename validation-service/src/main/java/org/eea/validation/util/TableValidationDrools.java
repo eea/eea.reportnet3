@@ -1,5 +1,8 @@
 package org.eea.validation.util;
 
+import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +20,13 @@ public class TableValidationDrools {
     TableValidationDrools.validationService = validationService;
   }
 
+
+  private static UserManagementController userManagementController;
+
+  @Autowired
+  private void setUserManagerController(UserManagementController userManagementController) {
+    TableValidationDrools.userManagementController = userManagementController;
+  }
   ////////////////////////////////////////////////////////////////////
   ////////////////////////////////// charaterization //////////////////
   ////////////////////////////////////////////////////////////////////
@@ -55,9 +65,12 @@ public class TableValidationDrools {
 
   // --# DR01A # The Characterisation file contains records for more than one season. #
   public static Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
-      String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, String countryCodeValue,
-      Long idDataset, String idDatasetToContribute) {
+      String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, Long idDataset,
+      String idDatasetToContribute) {
 
+    ResourceInfoVO resourceInfoVO =
+        userManagementController.getResourceDetail(idDataset, ResourceGroupEnum.DATASET_PROVIDER);
+    String countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
             + "dato2.statusCode as statusCode, dato3.countryCode as countryCode "
@@ -76,8 +89,8 @@ public class TableValidationDrools {
             + "')as character1 ) "
             + "select s.thematicIdIdentifier from  sparcial s left join characterisation c on "
             + "s.thematicIdIdentifier = c.bathingWaterIdentifier where "
-            + "s.statusCode NOT in('experimental','retired','superseded') and s.countryCode ='"
-            + countryCodeValue + "' and c.bathingWaterIdentifier is null";
+            + "s.statusCode NOT in('experimental','retired','superseded') and s.countryCode in("
+            + countryCode + ") " + "and c.bathingWaterIdentifier is null";
 
     return validationService.tableValidationQueryNonReturnResult(ruleDO01);
   }

@@ -95,7 +95,7 @@ public class FileTreatmentHelper {
     dataset.getTableValues().get(0).setRecords(new ArrayList<>());
 
     // Check if the table with idTableSchema has been populated already
-    Long oldTableId = tableRepository.findIdByIdTableSchema(idTableSchema);
+    Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, idTableSchema);
     fillTableId(idTableSchema, dataset.getTableValues(), oldTableId);
 
     if (null == oldTableId) {

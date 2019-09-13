@@ -248,40 +248,6 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Creates the removeDatasetData data set test exception entry 1.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createEmptyDataSetTestExceptionEntry1() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet(null, null, 1L);
-  }
-
-  /**
-   * Creates the removeDatasetData data set test exception entry 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createEmptyDataSetTestExceptionEntry2() throws Exception {
-    dataSetControllerImpl.createEmptyDataSet("", "", 1L);
-  }
-
-  /**
-   * Creates the removeDatasetData data set test.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void createEmptyDataSetTest() throws Exception {
-    doNothing().when(datasetService).createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.createEmptyDataSet("datasetName", null, 1L);
-
-    Mockito.verify(datasetService, times(1)).createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
 
 
   /**

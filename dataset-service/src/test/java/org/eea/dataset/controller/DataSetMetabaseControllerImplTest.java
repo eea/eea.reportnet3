@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DataSetMetabaseControllerImplTest.
@@ -51,6 +53,42 @@ public class DataSetMetabaseControllerImplTest {
         .thenReturn(new ArrayList<>());
     dataSetMetabaseControllerImpl.findDataSetIdByDataflowId(Mockito.anyLong());
     Mockito.verify(reportingDatasetService, times(1)).getDataSetIdByDataflowId(Mockito.any());
+  }
+
+
+  /**
+   * Creates the removeDatasetData data set test exception entry 1.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetTestExceptionEntry1() throws Exception {
+    dataSetMetabaseControllerImpl.createEmptyDataSet(null, null, 1L);
+  }
+
+  /**
+   * Creates the removeDatasetData data set test exception entry 2.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetTestExceptionEntry2() throws Exception {
+    dataSetMetabaseControllerImpl.createEmptyDataSet("", "", 1L);
+  }
+
+  /**
+   * Creates the removeDatasetData data set test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void createEmptyDataSetTest() throws Exception {
+    doNothing().when(datasetMetabaseService).createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSetMetabaseControllerImpl.createEmptyDataSet("datasetName", null, 1L);
+
+    Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
 

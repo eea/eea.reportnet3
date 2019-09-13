@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import moment from 'moment';
 
@@ -17,13 +17,14 @@ export function SnapshotItem({ itemData }) {
     <li className={styles.listItem}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <h5>{moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}</h5>
+          <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
+            {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+          </h5>
           <div className={styles.listActions}>
             <Button
               tooltip={resources.messages.restoreSnapshotTooltip}
               tooltipOptions={{ position: 'top' }}
               icon="replay"
-              disabled={true}
               className={`${styles.btn} rp-btn secondary`}
               onClick={() =>
                 snapshotContext.snapshotDispatch({
@@ -33,16 +34,23 @@ export function SnapshotItem({ itemData }) {
               }
             />
             <Button
-              tooltip={resources.messages.releaseSnapshotTooltip}
+              tooltip={
+                itemData.isReleased
+                  ? resources.messages.releasedSnapshotTooltip
+                  : resources.messages.releaseSnapshotTooltip
+              }
               tooltipOptions={{ position: 'top' }}
-              icon="cloudUpload"
-              disabled={true}
-              className={`${styles.btn} rp-btn secondary`}
+              icon={itemData.isReleased ? 'check' : 'cloudUpload'}
+              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() =>
-                snapshotContext.snapshotDispatch({
-                  type: 'release_snapshot',
-                  payload: { ...itemData }
-                })
+                snapshotContext.snapshotDispatch(
+                  itemData.isReleased
+                    ? {}
+                    : {
+                        type: 'release_snapshot',
+                        payload: { ...itemData }
+                      }
+                )
               }
             />
             <Button

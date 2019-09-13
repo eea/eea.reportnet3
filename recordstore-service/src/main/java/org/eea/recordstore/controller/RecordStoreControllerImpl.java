@@ -125,6 +125,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idPartitionDataset the id partition dataset
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/create", method = RequestMethod.POST)
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
@@ -147,6 +148,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idSnapshot the id snapshot
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/restore", method = RequestMethod.POST)
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
@@ -167,6 +169,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idSnapshot the id snapshot
    */
   @Override
+  @HystrixCommand
   @RequestMapping(value = "/dataset/{datasetId}/snapshot/delete", method = RequestMethod.POST)
   public void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {

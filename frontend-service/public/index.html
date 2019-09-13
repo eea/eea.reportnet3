@@ -42,13 +42,22 @@
     <script src="%PUBLIC_URL%/env.js"></script>
   </body>
   <script>
-  window.addEventListener("dragover",function(e){
-    e.dataTransfer.effectAllowed = "none";
-    e.preventDefault();
-    e = e || event;
-  },false);
-  window.addEventListener("drop",function(e){
-    e = e || event;
-    e.preventDefault();
-  },false);</script>
+    window.addEventListener(
+      'dragover',
+      function(e) {
+        e.dataTransfer.effectAllowed = 'none';
+        e.preventDefault();
+        e = e || event;
+      },
+      false
+    );
+    window.addEventListener(
+      'drop',
+      function(e) {
+        e = e || event;
+        e.preventDefault();
+      },
+      false
+    );
+  </script>
 </html>

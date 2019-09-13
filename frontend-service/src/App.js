@@ -5,6 +5,7 @@ import styles from './App.module.css';
 import { routes } from 'ui/routes';
 
 import { DataFlowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
+import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
 import { DocumentationDataSet } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
 import { Login } from 'ui/views/Login';
 import { ReporterDataSet } from 'ui/views/ReporterDataSet/ReporterDataSet';
@@ -54,6 +55,7 @@ const App = () => {
             <Switch>
               <Route exact path="/" component={Login} />
               <PrivateRoute exact path={routes.DATAFLOW_TASKS} component={DataFlowTasks} />
+              <PrivateRoute exact path={routes.DATA_CUSTODIAN_DASHBOARDS} component={DataCustodianDashboards} />
               <PrivateRoute exact path={routes.REPORTING_DATAFLOW} component={ReportingDataFlow} />
               <PrivateRoute exact path={routes.REPORTER_DATASET} component={ReporterDataSet} />
               <PrivateRoute exact path={routes.DOCUMENTATION_DATASET} component={DocumentationDataSet} />
