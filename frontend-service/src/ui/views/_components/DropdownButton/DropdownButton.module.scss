@@ -1,18 +1,10 @@
 .dropdown {
   position: relative;
   display: inline-block;
+  cursor: pointer;
 
   .dropdown_content {
-    display: none;
     right: 0px;
-  }
-
-  &:hover {
-    cursor: pointer;
-
-    .dropdown_content {
-      display: block;
-    }
   }
 }
 
