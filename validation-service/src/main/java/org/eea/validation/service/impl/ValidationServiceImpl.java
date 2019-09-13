@@ -1,9 +1,11 @@
 package org.eea.validation.service.impl;
 
 
+import com.google.common.collect.Lists;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,7 +82,7 @@ public class ValidationServiceImpl implements ValidationService {
    * The validation record repository.
    */
   @Autowired
-  private RecordValidationRepository validationRecordRepository;
+  private RecordValidationRepository recordValidationRepository;
 
   /**
    * The validation dataset repository.
@@ -112,7 +114,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RecordRepository recordRepository;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
@@ -125,7 +129,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DatasetMetabaseController metabaseController;
 
-  /** The table validation querys drools repository. */
+  /**
+   * The table validation querys drools repository.
+   */
   @Autowired
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
 
@@ -135,6 +141,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param dataset the dataset
    * @param kieSession the kie session
+   *
    * @return the element lenght
    */
   @Override
@@ -150,6 +157,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param table the table
    * @param kieSession the kie session
+   *
    * @return the list
    */
   @Override
@@ -164,16 +172,20 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param record the record
    * @param kieSession the kie session
+   *
    * @return the list
    */
   @Override
-  public synchronized List<RecordValidation> runRecordValidations(RecordValue record,
+  @Transactional
+  public List<RecordValidation> runRecordValidations(RecordValue record,
       KieSession kieSession) {
     if (record.getIdRecordSchema() != null && StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
     kieSession.fireAllRules();
-    return record.getRecordValidations();
+
+    return recordValidationRepository
+        .findByRecordValueIdIn(Arrays.asList(new Long[]{record.getId()}));
   }
 
   /**
@@ -181,6 +193,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param field the field
    * @param kieSession the kie session
+   *
    * @return the list
    */
   @Override
@@ -200,7 +213,9 @@ public class ValidationServiceImpl implements ValidationService {
    * Load rules knowledge base.
    *
    * @param datasetId the dataset id
+   *
    * @return the kie session
+   *
    * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
@@ -225,12 +240,12 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
 
-
   /**
    * Validate data set.
    *
    * @param datasetId the dataset id
    * @param kieSession the kie session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -251,6 +266,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param session the session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -306,6 +322,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param <T> the generic type
    * @param objects the objects
+   *
    * @return the list
    */
   private <T> List<List<T>> listOfObjectsPaginated(final List<T> objects) {
@@ -329,6 +346,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param session the session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -341,8 +359,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
     List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
     tableValues.parallelStream().filter(Objects::nonNull).forEach(tableValue -> {
-      TableValidation tableVal = new TableValidation();
-      tableVal.setValidation(new Validation());
+      TableValidation tableValidation = new TableValidation();
+      tableValidation.setValidation(new Validation());
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
@@ -350,37 +368,43 @@ public class ValidationServiceImpl implements ValidationService {
 
       recordsByTable = Collections.synchronizedList(recordsByTable);
       recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
-        List<RecordValidation> resultRecords = runRecordValidations(row, session);
-        if (null != row.getRecordValidations()) {
-          row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
+        List<RecordValidation> recordValidations = runRecordValidations(row, session);
+        if (null != recordValidations
+            && recordValidations.size() > 0) {//there were validation error
+          //set on validation error the reference back to the record
+          recordValidations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
             rowValidation.setRecordValue(row);
-            if (tableVal.getValidation().getLevelError() == null
-                || !TypeErrorEnum.ERROR.equals(tableVal.getValidation().getLevelError())) {
-              if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
-                tableVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
-              } else {
-                tableVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
+            //set an error on the table according to the highest kind of error in a row
+            synchronized (tableValidation) {
+              if (tableValidation.getValidation().getLevelError() == null
+                  || !TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
+                if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
+                  tableValidation.getValidation().setLevelError(TypeErrorEnum.ERROR);
+                } else {
+                  tableValidation.getValidation().setLevelError(TypeErrorEnum.WARNING);
+                }
               }
+              tableValidation.getValidation()
+                  .setOriginName(rowValidation.getValidation().getOriginName());
             }
-            tableVal.getValidation().setOriginName(rowValidation.getValidation().getOriginName());
           });
         }
-        validationRecordRepository.saveAll((Iterable<RecordValidation>) resultRecords);
+        recordValidationRepository.saveAll((Iterable<RecordValidation>) recordValidations);
       });
       // Adding errors into tables
-      if (tableVal.getValidation().getLevelError() != null) {
-        if (TypeErrorEnum.ERROR.equals(tableVal.getValidation().getLevelError())) {
-          tableVal.getValidation().setMessage("ONE OR MORE RECORDS HAVE ERRORS");
+      if (tableValidation.getValidation().getLevelError() != null) {
+        if (TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
+          tableValidation.getValidation().setMessage("ONE OR MORE RECORDS HAVE ERRORS");
         } else {
-          if (TypeErrorEnum.WARNING.equals(tableVal.getValidation().getLevelError())) {
-            tableVal.getValidation().setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
+          if (TypeErrorEnum.WARNING.equals(tableValidation.getValidation().getLevelError())) {
+            tableValidation.getValidation().setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
           }
         }
-        tableVal.setTableValue(tableValue);
-        tableVal.getValidation().setIdRule(new ObjectId().toString());
-        tableVal.getValidation().setTypeEntity(TypeEntityEnum.TABLE);
-        tableVal.getValidation().setValidationDate(new Date().toString());
-        tableValidationRepository.save(tableVal);
+        tableValidation.setTableValue(tableValue);
+        tableValidation.getValidation().setIdRule(new ObjectId().toString());
+        tableValidation.getValidation().setTypeEntity(TypeEntityEnum.TABLE);
+        tableValidation.getValidation().setValidationDate(new Date().toString());
+        tableValidationRepository.save(tableValidation);
       }
 
     });
@@ -393,6 +417,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param session the session
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -449,7 +474,7 @@ public class ValidationServiceImpl implements ValidationService {
           recordVal.getValidation().setIdRule(new ObjectId().toString());
           recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
           recordVal.getValidation().setValidationDate(new Date().toString());
-          validationRecordRepository.save(recordVal);
+          recordValidationRepository.save(recordVal);
         }
 
       });
@@ -484,6 +509,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Sanitize records validations.
    *
    * @param records the records
+   *
    * @return the list
    */
   private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
@@ -514,6 +540,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param idValidations the id validations
+   *
    * @return the field errors
    */
   @Override
@@ -549,13 +576,14 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param idValidations the id validations
+   *
    * @return the record errors
    */
   @Override
   public Future<Map<Long, ErrorsValidationVO>> getRecordErrors(final Long datasetId,
       final List<Long> idValidations) {
     List<RecordValidation> recordValidations =
-        validationRecordRepository.findByValidationIds(idValidations);
+        recordValidationRepository.findByValidationIds(idValidations);
     Map<Long, ErrorsValidationVO> errors = new HashMap<>();
     for (RecordValidation recordValidation : recordValidations) {
 
@@ -583,6 +611,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param idValidations the id validations
+   *
    * @return the table errors
    */
   @Override
@@ -618,6 +647,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param dataset the dataset
    * @param idValidations the id validations
+   *
    * @return the dataset errors
    */
   @Override
@@ -647,7 +677,9 @@ public class ValidationServiceImpl implements ValidationService {
    * Gets the dataset valueby id.
    *
    * @param datasetId the dataset id
+   *
    * @return the dataset valueby id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -663,7 +695,9 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the find by id data set schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -675,7 +709,9 @@ public class ValidationServiceImpl implements ValidationService {
     return schemasRepository.findByIdDataSetSchema(datasetSchemaId);
   }
 
-  /** The dataset repository. */
+  /**
+   * The dataset repository.
+   */
   @Autowired
   private DatasetRepositoryImpl datasetRepositoryImpl;
 
@@ -683,6 +719,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DO 02 query.
    *
    * @param do02 the do 02
+   *
    * @return the boolean
    */
   @Override
@@ -721,6 +758,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param DR01A the dr01a
    * @param previous the previous
+   *
    * @return the boolean
    */
   // TABLE PART
@@ -733,6 +771,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Table validation query non return result.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
   @Override
@@ -744,6 +783,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Table validation query period monitoring.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
   @Override
@@ -765,7 +805,7 @@ public class ValidationServiceImpl implements ValidationService {
         recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
         recordVal.getValidation().setValidationDate(new Date().toString());
         recordVal.getValidation().setOriginName("MonitoringResult");
-        validationRecordRepository.save(recordVal);
+        recordValidationRepository.save(recordVal);
       }
     }
     return true;
@@ -775,7 +815,6 @@ public class ValidationServiceImpl implements ValidationService {
   public String recordFieldValidation(String QUERY) {
     return tableValidationQuerysDroolsRepository.queryRecordsFields(QUERY);
   }
-
 
 
 }

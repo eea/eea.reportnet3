@@ -18,11 +18,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ValidationHelper {
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation service. */
+  /**
+   * The validation service.
+   */
   @Autowired
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
@@ -43,6 +47,7 @@ public class ValidationHelper {
    * Execute file process.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Async
@@ -54,7 +59,7 @@ public class ValidationHelper {
     LOG.info("Validating Fields");
     System.err.println(System.currentTimeMillis());
     Long timer = System.currentTimeMillis();
-    validationService.validateFields(datasetId, session);
+//    validationService.validateFields(datasetId, session);
     System.err.println(System.currentTimeMillis() - timer);
     timer = System.currentTimeMillis();
     LOG.info("Validating Records");
