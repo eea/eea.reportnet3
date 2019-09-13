@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.FileNotFoundException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
+import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -134,7 +136,12 @@ public class ValidationServiceTest {
   @Mock
   private ValidationDatasetRepository datasetValidationRepository;
 
-  /** The table validation repository. */
+
+  @Mock
+  private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
+  /**
+   * /** The table validation repository.
+   */
   @Mock
   private TableValidationRepository tableValidationRepository;
   /**
@@ -1024,5 +1031,31 @@ public class ValidationServiceTest {
     when(datasetMetabase.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     validationServiceImpl.validateTable(1L, kieSession);
+  }
+
+  @Test
+  public void tableValidationQueryPeriodMonitoring() {
+    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    listRecords.add(new BigInteger("1"));
+
+    when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
+        .thenReturn(listRecords);
+    when(recordRepository.findByIdValidation(Mockito.anyLong()))
+        .thenReturn(Optional.of(new RecordValue()));
+    validationServiceImpl.tableValidationQueryPeriodMonitoring("");
+  }
+
+
+  @Test
+  public void tableValidationQueryPeriodMonitoringFail() {
+    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+
+    when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
+        .thenReturn(listRecords);
+    validationServiceImpl.tableValidationQueryPeriodMonitoring("");
+
+    when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
+        .thenReturn(null);
+    validationServiceImpl.tableValidationQueryPeriodMonitoring("");
   }
 }
