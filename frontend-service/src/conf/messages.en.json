@@ -10,6 +10,7 @@
 		"appName": "Reportnet 3.0",		
 		"cancel": "Cancel",
 		"category": "Category",
+		"chooseDataStatus": "Choose status data",
 		"close": "Close",
 		"confirmDeleteRow": "Are you sure you want to delete this row?",
 		"contributorLoginValidationMax": "Login is to long!",
@@ -26,6 +27,7 @@
 		"copyrightLegal": "Legal notice",
 		"copyrightPrivacy": "Privacy policy",
 		"copyrightResources": "Resources for partners",
+		"correct": "Correct",
 		"create": "Create",
 		"createSnapshotMessage": "You are about to CREATE a snapshot...",
 		"createSnapshotPlaceholder": "Please, enter a description",
@@ -71,6 +73,7 @@
 		"emptyFileValidationError":"Please, select a file",
 		"emptyLanguageValidationError":"Please, language must be selected",
 		"emptyTitleValidationError": "Please, enter a title",
+		"error": "Error",
 		"errorMessage": "Message",
 		"entityType": "Entity",
 		"events": "Events",
@@ -143,6 +146,7 @@
 		"validateDataSetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
 		"viewData": "View data",
 		"visibility": "Visibility",
+		"warning": "Warning",
 		"webLinks": "Web Links",
 		"yes": "Yes"		
 	}

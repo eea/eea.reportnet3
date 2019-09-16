@@ -62,7 +62,6 @@ export const apiDataFlow = {
     // });
     // return response.data;
     const hardcodedDashboardTest = dataCustodianDashboards;
-    console.log('hardcodedDashboardTest', hardcodedDashboardTest);
     return hardcodedDashboardTest;
   },
   pending: async () => {
