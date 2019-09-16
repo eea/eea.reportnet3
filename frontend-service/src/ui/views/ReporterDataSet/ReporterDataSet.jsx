@@ -28,10 +28,9 @@ import { ValidationViewer } from './_components/ValidationViewer';
 import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
-
-export const SnapshotContext = React.createContext();
 
 export const ReporterDataSet = withRouter(({ match, history }) => {
   const {
@@ -165,7 +164,11 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onRestoreSnapshot = async () => {
-    await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    const response = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    if (response) {
+      snapshotDispatch({ type: 'mark_as_restored', payload: {} });
+    }
+
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
@@ -282,12 +285,24 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           dialogMessage: resources.messages.restoreSnapshotMessage,
           action: onRestoreSnapshot
         };
+      case 'mark_as_restored':
+        return {
+          ...state,
+          restored: state.snapShotId
+        };
+      case 'clear_restored':
+        return {
+          ...state,
+          restored: undefined
+        };
       default:
         return state;
     }
   };
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
+
+  console.log('snapshotState: ', snapshotState);
 
   const getPosition = button => {
     const buttonTopPosition = button.top;
@@ -394,15 +409,21 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
-        <TabsSchema
-          activeIndex={activeIndex}
-          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={recordPositionId}
-          selectedRecordErrorId={selectedRecordErrorId}
-          tables={tableSchema}
-          tableSchemaColumns={tableSchemaColumns}
-          hasWritePermissions={hasWritePermissions}
-        />
+        <SnapshotContext.Provider
+          value={{
+            snapshotState: snapshotState,
+            snapshotDispatch: snapshotDispatch
+          }}>
+          <TabsSchema
+            activeIndex={activeIndex}
+            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+            recordPositionId={recordPositionId}
+            selectedRecordErrorId={selectedRecordErrorId}
+            tables={tableSchema}
+            tableSchemaColumns={tableSchemaColumns}
+            hasWritePermissions={hasWritePermissions}
+          />
+        </SnapshotContext.Provider>
       </ReporterDataSetContext.Provider>
       <Dialog
         dismissableMask={true}
