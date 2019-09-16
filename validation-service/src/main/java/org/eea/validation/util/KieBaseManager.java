@@ -111,7 +111,6 @@ public class KieBaseManager {
     byte[] b1 = generatedDRL.getBytes();
     Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
     kieHelper.addResource(resource1, ResourceType.DRL);
-
     // this is a shared variable in a single instanced object.
     return kieHelper.build();
   }
