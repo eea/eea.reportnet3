@@ -72,6 +72,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const tableTwoPercentages = tablePercentages[1];
   const tableThirdPercentages = tablePercentages[2];
 
+  const tableValues =
+    isArray(dashboardsData.tables) && dashboardsData.tables.map(values => values.tableStatisticValues);
+  const tableOneValues = tableValues[0];
+  const tableTwoValues = tableValues[1];
+  const tableThirdValues = tableValues[2];
+
   function getDatasetsDashboardData() {
     const datasetDataObject = {
       labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
@@ -80,67 +86,85 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           label: tableNames[0],
           backgroundColor: '#004494',
           data: tableOnePercentages[0],
+          totalData: tableOneValues[0],
           stack: tableNames[0]
         },
         {
           label: tableNames[0],
           backgroundColor: '#ffd617',
           data: tableOnePercentages[1],
+          totalData: tableOneValues[1],
           stack: tableNames[0]
         },
         {
           label: tableNames[0],
           backgroundColor: '#DA2131',
           data: tableOnePercentages[2],
+          totalData: tableOneValues[2],
           stack: tableNames[0]
         },
         {
           label: tableNames[1],
           backgroundColor: '#004494',
           data: tableTwoPercentages[0],
+          totalData: tableTwoValues[0],
           stack: tableNames[1]
         },
         {
           label: tableNames[1],
           backgroundColor: '#ffd617',
           data: tableTwoPercentages[1],
+          totalData: tableTwoValues[1],
           stack: tableNames[1]
         },
         {
           label: tableNames[1],
           backgroundColor: '#DA2131',
           data: tableTwoPercentages[2],
+          totalData: tableTwoValues[2],
           stack: tableNames[1]
         },
         {
           label: tableNames[2],
           backgroundColor: '#004494',
           data: tableThirdPercentages[0],
+          totalData: tableThirdValues[0],
           stack: tableNames[2]
         },
         {
           label: tableNames[2],
           backgroundColor: '#ffd617',
           data: tableThirdPercentages[1],
+          totalData: tableThirdValues[1],
           stack: tableNames[2]
         },
         {
           label: tableNames[2],
           backgroundColor: '#DA2131',
           data: tableThirdPercentages[2],
+          totalData: tableThirdValues[2],
           stack: tableNames[2]
         }
       ]
     };
     return datasetDataObject;
   }
+
   function getDatasetsDashboardOptions() {
     const datasetOptionsObject = {
       tooltips: {
-        mode: 'index',
-        intersect: false
+        model: 'index',
+        intersect: false,
+        callbacks: {
+          label: (tooltipItems, data) =>
+            `${data.datasets[tooltipItems.datasetIndex].label}: ${
+              data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems.index]
+            } (${tooltipItems.yLabel}%)`
+        }
       },
-      legend: false,
+      legend: {
+        display: false
+      },
       responsive: true,
       scales: {
         xAxes: [
@@ -175,12 +199,15 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       datasets: [
         {
           label: 'Released',
-          backgroundColor: '#32CD32',
+          backgroundColor: 'rgba(50, 205, 50, 0.7)',
+          borderColor: 'rgba(50, 205, 50, 1)',
           data: dashboardsData.dataSetCountries.map(released => released.isDataSetReleased)
         },
         {
           label: 'Unreleased',
           backgroundColor: '#8FBC8F',
+          backgroundColor: 'rgba(143, 188, 143, 0.7)',
+          borderColor: 'rgba(143, 188, 143, 1)',
           data: dashboardsData.dataSetCountries.map(released => !released.isDataSetReleased)
         }
       ]
