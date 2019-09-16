@@ -235,7 +235,7 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
 const webFormDataById = async (dataSetId, tableSchemaId) => {
   const webFormDataDTO = await apiDataSet.webFormDataById(dataSetId, tableSchemaId);
   const webForm = new DataSetTable();
-  console.log(webFormDataDTO);
+  console.log('Clean Data', webFormDataDTO);
   const headerFieldSchemaId = '5d666d53460a1e0001b16717';
   const valueFieldSchemaId = '5d666d53460a1e0001b16728';
   const descriptionFieldSchemaId = '5d666d53460a1e0001b1671b';
@@ -247,7 +247,7 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
   const rows = [];
   const letters = [];
   const rowHeaders = [];
-
+  const rowPositions = [];
   columnHeaders.unshift('GREENHOUSE GAS SOURCE');
 
   if (webFormDataDTO.totalRecords > 0) {
@@ -258,6 +258,7 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
 
     const records = webFormDataDTO.records.map(webFormRecordDTO => {
       record = new DataSetTableRecord();
+      let row = {};
       const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
         field = new DataSetTableField();
         field.fieldId = webFormFieldDTO.id;
@@ -267,47 +268,46 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
         field.type = webFormFieldDTO.type;
         field.value = webFormFieldDTO.value;
 
+        if (field.fieldId === 173241) {
+          console.log('Field0', field);
+        }
+
+        row.fieldId = field.fieldId;
+        if (field.fieldSchemaId === letterFieldSchemaId) {
+          row.columnPosition = field.value;
+        } else if (field.fieldSchemaId === numberFieldSchemaId) {
+          row.rowPosition = field.value;
+        } else if (field.fieldSchemaId === valueFieldSchemaId) {
+          row.value = field.value;
+        } else if (field.fieldSchemaId === headerFieldSchemaId) {
+          row.columnHeader = field.value;
+          if (!columnHeaders.includes(field.value)) {
+            columnHeaders.push(field.value);
+          }
+        } else if (field.fieldSchemaId === descriptionFieldSchemaId) {
+          row.description = field.value;
+          if (!rowHeaders.includes(field.value)) {
+            rowHeaders.push(field.value);
+          }
+        }
+
         return field;
       });
-
-      record.recordId = webFormRecordDTO.id;
-      record.recordSchemaId = webFormRecordDTO.idRecordSchema;
-      record.fields = fields;
-
-      let columnPosition = record.fields.filter(field => field.fieldSchemaId === letterFieldSchemaId).sort()[0].value;
-      let rowPosition = record.fields.filter(field => field.fieldSchemaId === numberFieldSchemaId)[0].value;
-      let cellValue = record.fields.filter(field => field.fieldSchemaId === valueFieldSchemaId)[0].value;
-
-      let row = {};
-      row.recordId = record.recordId;
-      row.rowPosition = parseInt(rowPosition);
-      row.columnPosition = columnPosition;
-      row.value = cellValue;
       rows.push(row);
 
-      if (!letters.includes(columnPosition)) {
-        letters.push(columnPosition);
-      }
+      row.recordId = field.recordId;
 
-      let columnHeader = record.fields.filter(field => field.fieldSchemaId === headerFieldSchemaId)[0].value;
-      if (!columnHeaders.includes(columnHeader)) {
-        columnHeaders.push(columnHeader);
-      }
-
-      let rowHeader = record.fields.filter(field => field.fieldSchemaId === descriptionFieldSchemaId)[0].value;
-      if (!rowHeaders.includes(rowHeader)) {
-        rowHeaders.push(rowHeader);
+      if (!letters.includes(row.columnPosition)) {
+        letters.push(row.columnPosition);
       }
 
       return record;
     });
     webForm.records = records;
     webForm.rows = rows;
-    console.log(rows);
   }
   letters.sort();
   columnHeaders.splice(10, 0, ''); // refactor hardcoded
-
   let dataColumns = createDataColumns(rows, letters);
 
   formData.columnHeaders = columnHeaders;
@@ -319,13 +319,11 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
 
 const createDataColumns = (rowsData, letters) => {
   let columns = [];
-  letters.forEach(function(value, index) {
-    let column = rowsData.filter(function(row) {
-      return row.columnPosition == value;
-    });
-    columns.push(column);
+  letters.forEach(function(value, i) {
+    let columnLetter = rowsData.filter(row => row.columnPosition === value);
+    columns.push(columnLetter);
   });
-  console.log(columns);
+  console.log('After clean data', columns);
   return columns;
 };
 

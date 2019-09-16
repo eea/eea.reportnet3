@@ -24,43 +24,153 @@ const WebFormData = ({ data }) => {
     let columnHeaders = webFormData.columnHeaders;
     let rowHeaders = webFormData.rowHeaders;
 
-    columnHeaders.map((column, i) => {
-      let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
-      formResult.push(<th name={position}>{column}</th>);
+    let columnTitles = getColumnHeaders(columnHeaders);
+    let grid = getGrid(rowHeaders, dataColumns);
+
+    grid.forEach(function(element, i) {
+      console.log(element);
     });
 
-    let grid = getGrid(rowHeaders, dataColumns);
-    formResult.push(grid);
+    formResult.push(
+      <>
+        <tr>{columnTitles}</tr>
+        {grid.map(tr => (
+          <div>{tr.name}</div>
+        ))}
+        {/* {grid} */}
+      </>
+    );
+    console.log(grid);
+
     return formResult;
   };
 
-  const getGrid = (rowHeaders, columns) => {
+  const getColumnHeaders = columnHeaders => {
+    let columnsTitles = [];
+    columnHeaders.map((column, i) => {
+      let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
+      if (i === 10) {
+        columnsTitles.push(
+          <th name={position} className={styles.kColumn}>
+            {column}
+          </th>
+        );
+      } else {
+        columnsTitles.push(<th name={position}>{column}</th>);
+      }
+    });
+    return columnsTitles;
+  };
+
+  const getMinAndMaxRows = dataColumns => {
+    let firstRow = 10000;
+    let lastRow = 0;
+    let rowHeaders = [];
+    dataColumns.forEach(function(column, i) {
+      column.forEach(function(field, i) {
+        let rowPosition = parseInt(field.rowPosition);
+        if (firstRow > rowPosition) {
+          firstRow = rowPosition;
+        }
+        if (lastRow < rowPosition) {
+          lastRow = rowPosition;
+        }
+        let description = field.description;
+        if (!rowHeaders.includes(description)) {
+          rowHeaders.push(description);
+        }
+      });
+    });
+    let rows = { firstRow: firstRow, lastRow: lastRow, rowHeaders: rowHeaders };
+    return rows;
+  };
+
+  const getMinAndMaxColumns = dataColumns => {
+    let firstColumn = dataColumns[0][0].columnPosition;
+    let lastColumn = 'A';
+    dataColumns.forEach(function(column, i) {
+      let columnPosition = dataColumns[i][0].columnPosition;
+      if (columnPosition < firstColumn) {
+        firstColumn = columnPosition;
+      }
+      if (columnPosition > lastColumn) {
+        lastColumn = columnPosition;
+      }
+    });
+    let columns = { firstColumn: firstColumn, lastColumn: lastColumn };
+    return columns;
+  };
+
+  const getGrid = (rowHeaders, dataColumns) => {
     let grid = [];
 
-    let firstRowPosition = columns[0][0].rowPosition;
+    let rows = getMinAndMaxRows(dataColumns);
+    let firstRow = parseInt(rows.firstRow);
+    let lastRow = rows.lastRow;
 
-    rowHeaders.forEach(function(element, index) {
-      let columnsTds = [];
-      let firstColumnPosition = columns[0][0].columnPosition;
+    let columns = getMinAndMaxColumns(dataColumns);
+    // let firstColumn = 0;
+    // let lastColumn = dataColumns.length - 1;
+    let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
+    let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
-      let headersColumnPosition = previousChar(firstColumnPosition);
-      let headersRowPosition = firstRowPosition;
-      let headersPosition = `${headersColumnPosition}${headersRowPosition}`;
+    let header = '';
 
-      columnsTds.push(<td name={headersPosition}>{rowHeaders[index]}</td>);
+    let columnsTds = [];
+    let rowsFilled = [];
 
-      columns.forEach(function(column, i) {
-        let position = `${firstColumnPosition}${firstRowPosition}`;
-        let columnsFiltered = columns[i].filter(col => col.rowPosition === firstRowPosition);
-        columnsTds.push(fillFormData(columnsFiltered, position));
-        firstColumnPosition = nextChar(firstColumnPosition);
-      });
+    for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
+      let header = '';
+      let tds = [];
 
-      let data = fillFormData(firstRowPosition, firstColumnPosition, columns);
-      grid.push(data);
-      firstRowPosition++;
-      grid.push(<tr>{columnsTds}</tr>);
-    });
+      let i = 0;
+
+      for (var columnIndex = firstColumn; columnIndex <= lastColumn; columnIndex++) {
+        let j = 0;
+        let tds = [];
+        let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
+        let header = [];
+
+        console.log('POS: ', columnPosition, rowIndex);
+        if (dataColumns[j].rowPosition === rowIndex) {
+          // console.log('Pos:', dataColumns[j].rowPosition);
+          if (j === 0) {
+            tds.push(<td>{dataColumns[j].description}</td>);
+            tds.push(
+              <td name={`${columnPosition}${rowIndex}`}>
+                <InputText value={dataColumns[j].value} />
+              </td>
+            );
+          } else {
+            tds.push(
+              <td name={`${columnPosition}${rowIndex}`}>
+                <InputText value={dataColumns[j].value} />
+              </td>
+            );
+          }
+          // header.push(<td>{dataColumns[j].description}</td>);
+          tds.push(
+            <td name={`${columnPosition}${rowIndex}`}>
+              <InputText value={dataColumns[j].value} />
+            </td>
+          );
+        } else {
+          tds.push(
+            <td name={`${columnPosition}${rowIndex}`}>
+              <InputText value={''} />
+            </td>
+          );
+        }
+        j++;
+      }
+
+      rowsFilled.push(<tr>{tds}</tr>);
+      console.log(rowsFilled);
+
+      i++;
+      firstRow++;
+    }
+    grid.push({ rowsFilled });
 
     return grid;
   };
@@ -142,9 +252,7 @@ const WebFormData = ({ data }) => {
   return (
     <div className={`${styles.newContainer} ${styles.section}`}>
       <div className="ui-dialog-buttonpane p-clearfix">
-        <table className={styles.webFormTable}>
-          <tbody>{form()}</tbody>
-        </table>
+        <table className={styles.webFormTable}>{form()}</table>
         <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
         <Button
           label={resources.messages['save']}
