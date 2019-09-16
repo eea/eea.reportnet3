@@ -144,6 +144,8 @@
 		"viewData": "View data",
 		"visibility": "Visibility",
 		"webLinks": "Web Links",
-		"yes": "Yes"		
+		"yes": "Yes",
+		"snapshotItemRestoreProcessDetail": "Restoring...",
+		"snapshotItemRestoreProcessSummary": "Snapshot restoring"
 	}
 }
