@@ -14,6 +14,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
@@ -167,6 +168,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     const response = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
     if (response) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
+      onGrowlAlert({
+        severity: 'info',
+        summary: resources.messages.snapshotItemRestoreProcessSummary,
+        detail: resources.messages.snapshotItemRestoreProcessDetail,
+        life: '5000'
+      });
     }
 
     onSetVisible(setSnapshotDialogVisible, false);
@@ -229,6 +236,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const createFileName = (fileName, fileType) => {
     return `${fileName}.${fileType}`;
   };
+
+  const onGrowlAlert = message => {
+    growlRef.current.show(message);
+  };
+
+  let growlRef = useRef();
 
   const snapshotInitialState = {
     apiCall: '',
@@ -302,8 +315,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
-  console.log('snapshotState: ', snapshotState);
-
   const getPosition = button => {
     const buttonTopPosition = button.top;
     const buttonLeftPosition = button.left;
@@ -316,6 +327,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const layout = children => {
     return (
       <MainLayout>
+        <Growl ref={growlRef} />
         <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
       </MainLayout>

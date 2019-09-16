@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -95,6 +95,12 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
   const handleRedirect = target => {
     history.push(target);
   };
+
+  const onGrowlAlert = message => {
+    growlRef.current.show(message);
+  };
+
+  let growlRef = useRef();
 
   const layout = children => {
     return (
