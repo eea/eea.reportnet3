@@ -115,16 +115,19 @@ const WebFormData = ({ data }) => {
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
         let filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
         if (!isEmpty(filteredColumn)) {
-          console.log('filteredColumn', filteredColumn);
           header = filteredColumn[0].description;
           tds.push(
             <td name={`${columnPosition}${rowIndex}`}>
-              <InputText value={filteredColumn[0].value} />
+              <InputText
+                value={filteredColumn[0].value}
+                onChange={e => onEditorValueChange(filteredColumn, e.target.value)}
+              />
             </td>
           );
         } else {
           tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
         }
+
         j++;
       }
 
@@ -136,23 +139,9 @@ const WebFormData = ({ data }) => {
           {tds}
         </tr>
       );
-      console.log(rowIndex);
     }
     grid.push(rowsFilled);
-    console.log(columnIndex);
     return grid;
-  };
-
-  const fillFormData = (columnsFiltered, position) => {
-    if (!isEmpty(columnsFiltered)) {
-      let value = columnsFiltered.map(column => column.value)[0];
-      let id = columnsFiltered.map(column => column.id)[0];
-      return (
-        <td name={position}>
-          <InputText key={id} value={value} onChange={e => onEditorValueChange(columnsFiltered, e.target.value)} />
-        </td>
-      );
-    }
   };
 
   const nextChar = letter => {
@@ -208,7 +197,7 @@ const WebFormData = ({ data }) => {
 
   const onEditorValueChange = (props, value) => {
     let updatedData = changeCellValue(props, value);
-    // setFetchedData(updatedData);
+    setFetchedData(updatedData);
   };
 
   const changeCellValue = (props, value) => {
