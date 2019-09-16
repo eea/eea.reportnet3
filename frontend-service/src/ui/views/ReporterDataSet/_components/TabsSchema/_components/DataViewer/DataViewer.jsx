@@ -665,7 +665,7 @@ const DataViewer = withRouter(
     const getExportButtonPosition = e => {
       const exportButton = e.currentTarget;
       const left = `${exportButton.offsetLeft}px`;
-      const topValue = exportButton.offsetHeight + exportButton.offsetTop;
+      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
       const top = `${topValue}px `;
       const menu = exportButton.nextElementSibling;
       menu.style.top = top;
