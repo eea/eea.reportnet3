@@ -69,19 +69,6 @@ public interface DatasetController {
 
 
   /**
-   * Creates the empty data set.
-   *
-   * @param datasetName the dataset name
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
-   */
-  @RequestMapping(value = "/create", method = RequestMethod.POST)
-  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
-      @RequestParam(value = "idDataflow", required = false) Long idDataflow);
-
-
-  /**
    * Load table data.
    *
    * @param datasetId the dataset id

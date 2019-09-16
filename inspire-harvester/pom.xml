@@ -13,6 +13,7 @@
 
   <properties>
     <geotools.version>21.0</geotools.version>
+    <sonar.moduleKey>org.eea:reportnet:inspire-harvester:${sonar.jenkins.branch}</sonar.moduleKey>
   </properties>
 
   <groupId>org.eea.inspire</groupId>

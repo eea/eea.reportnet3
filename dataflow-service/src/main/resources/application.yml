@@ -7,4 +7,5 @@ eea:
   security:
     authenticatedRequest: /dataflow/pendingaccepted, /dataflow/request/*, /dataflow/completed, /dataflow/status/*
     roleProtectedRequest:
-      DATA_CUSTODIAN: /dataflow/createDataFlow
+      DATA_CUSTODIAN: /dataflow/createDataFlow,/dataflow/*/contributor/*
+      DATA_REQUESTOR: /dataflow/createDataFlow

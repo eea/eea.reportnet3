@@ -22,11 +22,6 @@ import com.mongodb.MongoClient;
 public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
 
   /**
-   * The Constant DEFAULT_PORT.
-   */
-  private static final int DEFAULT_PORT = 27017;
-
-  /**
    * The dll.
    */
   @Value("${mongodb.hibernate.ddl-auto}")
@@ -85,7 +80,7 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
    */
   @Override
   public MongoClient mongoClient() {
-    return new MongoClient(host, DEFAULT_PORT);
+    return new MongoClient(host, port);
   }
 
 }

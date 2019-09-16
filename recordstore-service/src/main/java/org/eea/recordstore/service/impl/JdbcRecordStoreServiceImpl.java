@@ -38,6 +38,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,11 +49,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
-  /** The dataset controller zuul. */
+  private static final String FILE_PATTERN_NAME = "snapshot_%s-dataset_%s%s";
+  /**
+   * The dataset controller zuul.
+   */
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
-  /** The kafka sender helper. */
+  /**
+   * The kafka sender helper.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -80,15 +86,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /** The jdbc template. */
+  /**
+   * The jdbc template.
+   */
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  /** The resource file. */
+  /**
+   * The resource file.
+   */
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
-  /** The path snapshot. */
+  /**
+   * The path snapshot.
+   */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
@@ -118,12 +130,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
+   *
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
   public void createEmptyDataSet(String datasetName, String idDatasetSchema)
       throws RecordStoreAccessException {
-
 
     final List<String> commands = new ArrayList<>();
     // read file into stream, try-with-resources
@@ -170,6 +182,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @param datasetName the dataset name
+   *
    * @return the connection data for dataset
    */
   @Override
@@ -222,6 +235,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Gets the all data sets name.
    *
    * @param datasetName the dataset name
+   *
    * @return the all data sets name
    */
   private List<String> getAllDataSetsName(String datasetName) {
@@ -252,177 +266,156 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
+  @Async
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException {
 
-    ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
+    ConnectionDataVO connectionDataVO =
+        getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
-    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-        conexion.getPassword());
+    try {
+      con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+          connectionDataVO.getUser(), connectionDataVO.getPassword());
 
-    CopyManager cm = new CopyManager((BaseConnection) con);
+      CopyManager cm = new CopyManager((BaseConnection) con);
 
+      // Copy dataset_value
+      // String nameFileDatasetValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
+      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_DatasetValue.snap");
+      String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
+          + idReportingDataset + ".dataset_value) to STDOUT";
 
-    // Copy dataset_value
-    String nameFileDatasetValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
-    byte[] buf;
-    CopyOut cpOut = cm.copyOut("COPY (SELECT id, id_dataset_schema FROM dataset_"
-        + idReportingDataset + ".dataset_value) to STDOUT");
+      printToFile(nameFileDatasetValue, copyQueryDataset, cm);
+      // Copy table_value
+      // String nameFileTableValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_TableValue.snap");
 
-    try (OutputStream to = new FileOutputStream(pathSnapshot + nameFileDatasetValue)) {
-      while ((buf = cpOut.readFromCopy()) != null) {
-        to.write(buf);
+      String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
+          + idReportingDataset + ".table_value) to STDOUT";
+
+      printToFile(nameFileTableValue, copyQueryTable, cm);
+
+      // Copy record_value
+      // String nameFileRecordValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_RecordValue.snap");
+      String copyQueryRecord =
+          "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
+              + idReportingDataset + ".record_value WHERE dataset_partition_id="
+              + idPartitionDataset + ") to STDOUT";
+
+      printToFile(nameFileRecordValue, copyQueryRecord, cm);
+
+      // Copy field_value
+      // String nameFileFieldValue =
+      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_FieldValue.snap");
+      String copyQueryField =
+          "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+              + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
+              + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
+              + idPartitionDataset + ") to STDOUT";
+
+      printToFile(nameFileFieldValue, copyQueryField, cm);
+    } finally {
+      if (null != con) {
+        con.close();
       }
-    } finally { // see to it that we do not leave the connection locked
-      if (cpOut.isActive()) {
-        cpOut.cancelCopy();
-      }
+
     }
 
-    // Copy table_value
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    byte[] buf2;
-    CopyOut cpOut2 = cm.copyOut("COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
-        + idReportingDataset + ".table_value) to STDOUT");
-
-    try (OutputStream to2 = new FileOutputStream(pathSnapshot + nameFileTableValue)) {
-      while ((buf2 = cpOut2.readFromCopy()) != null) {
-        to2.write(buf2);
-      }
-    } finally { // see to it that we do not leave the connection locked
-      if (cpOut2.isActive()) {
-        cpOut2.cancelCopy();
-      }
-    }
-
-    // Copy record_value
-    String nameFileRecordValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-    byte[] buf3;
-    CopyOut cpOut3 =
-        cm.copyOut("COPY (SELECT id, id_record_schema, id_table, dataset_partition_id FROM dataset_"
-            + idReportingDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
-            + ") to STDOUT");
-
-
-    try (OutputStream to3 = new FileOutputStream(pathSnapshot + nameFileRecordValue)) {
-      while ((buf3 = cpOut3.readFromCopy()) != null) {
-        to3.write(buf3);
-      }
-    } finally { // see to it that we do not leave the connection locked
-      if (cpOut3.isActive()) {
-        cpOut3.cancelCopy();
-      }
-    }
-
-    // Copy field_value
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
-    byte[] buf4;
-    CopyOut cpOut4 = cm.copyOut(
-        "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-            + idReportingDataset + ".field_value fv inner join dataset_" + idReportingDataset
-            + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
-            + idPartitionDataset + ") to STDOUT");
-
-
-    try (OutputStream to4 = new FileOutputStream(pathSnapshot + nameFileFieldValue)) {
-      while ((buf4 = cpOut4.readFromCopy()) != null) {
-        to4.write(buf4);
-      }
-    } finally { // see to it that we do not leave the connection locked
-      if (cpOut4.isActive()) {
-        cpOut4.cancelCopy();
-      }
-    }
-
-    con.close();
 
   }
 
+  /**
+   * Prints the to file.
+   *
+   * @param fileName the file name
+   * @param query the query
+   * @param copyManager the copy manager
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void printToFile(String fileName, String query, CopyManager copyManager)
+      throws SQLException, IOException {
+    byte[] buffer;
+    CopyOut copyOut = copyManager.copyOut(query);
+
+    try (OutputStream to = new FileOutputStream(fileName)) {
+      while ((buffer = copyOut.readFromCopy()) != null) {
+        to.write(buffer);
+      }
+    } finally {
+      if (copyOut.isActive()) {
+        copyOut.cancelCopy();
+      }
+    }
+  }
 
   /**
    * Restore data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
+  @Async
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
       throws SQLException, IOException {
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
-    con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
-        conexion.getPassword());
-
-    CopyManager cm = new CopyManager((BaseConnection) con);
-
-
-    // Table value
-    String nameFileTableValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
-    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
-    InputStream is2 = Files.newInputStream(path2);
     try {
+      con = DriverManager.getConnection(conexion.getConnectionString(), conexion.getUser(),
+          conexion.getPassword());
 
-      cm.copyIn("COPY dataset_" + idReportingDataset
-          + ".table_value(id, id_table_schema, dataset_id) FROM STDIN", is2);
+      CopyManager cm = new CopyManager((BaseConnection) con);
+      LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
+      // Table value
 
+      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_TableValue.snap");
 
-    } catch (PSQLException e) {
-      LOG.error("Error restoring the table value. Restoring snapshot continues");
+      String copyQueryTable = "COPY dataset_" + idReportingDataset
+          + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+
+      copyFromFile(copyQueryTable, nameFileTableValue, cm);
+
+      // Record value
+
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_RecordValue.snap");
+
+      String copyQueryRecord = "COPY dataset_" + idReportingDataset
+          + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN";
+      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+      // Field value
+      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          idReportingDataset, "_table_FieldValue.snap");
+
+      String copyQueryField = "COPY dataset_" + idReportingDataset
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
     } finally {
-      is2.close();
+      if (null != con) {
+        con.close();
+      }
     }
-
-
-    // Record value
-    String nameFileRecordValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
-    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
-    InputStream is3 = Files.newInputStream(path3);
-    try {
-
-      cm.copyIn(
-          "COPY dataset_" + idReportingDataset
-              + ".record_value(id, id_record_schema, id_table, dataset_partition_id) FROM STDIN",
-          is3);
-
-    } catch (PSQLException e) {
-      LOG.error("Error restoring the record value. Restoring snapshot continues");
-    } finally {
-      is3.close();
-    }
-
-
-
-    // Field value
-    String nameFileFieldValue =
-        "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
-    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    InputStream is4 = Files.newInputStream(path4);
-    try {
-
-      cm.copyIn("COPY dataset_" + idReportingDataset
-          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN", is4);
-
-    } catch (PSQLException e) {
-      LOG.error("Error restoring the field value. Restoring snapshot continues");
-    } finally {
-      is4.close();
-    }
-
-    con.close();
 
     // Send kafka event to launch Validation
     final EEAEventVO event = new EEAEventVO();
@@ -432,12 +425,36 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         idReportingDataset);
   }
 
+  /**
+   * Copy from file.
+   *
+   * @param query the query
+   * @param fileName the file name
+   * @param copyManager the copy manager
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyFromFile(String query, String fileName, CopyManager copyManager)
+      throws IOException, SQLException {
+    Path path = Paths.get(fileName);
+    InputStream inputStream = Files.newInputStream(path);
+    try {
+
+      copyManager.copyIn(query, inputStream);
+
+    } catch (PSQLException e) {
+      LOG.error("Error restoring the file {}. Restoring snapshot continues", fileName);
+    } finally {
+      inputStream.close();
+    }
+  }
 
   /**
    * Delete data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
@@ -462,7 +479,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
     Files.deleteIfExists(path4);
   }
-
 
 
 }
