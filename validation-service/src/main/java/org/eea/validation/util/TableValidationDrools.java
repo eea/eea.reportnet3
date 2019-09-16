@@ -108,7 +108,11 @@ public class TableValidationDrools {
 
     ResourceInfoVO resourceInfoVO =
         userManagementController.getResourceDetail(idDataset, ResourceGroupEnum.DATASET_PROVIDER);
-    String countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+    String countryCode = "''";
+    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0
+        && resourceInfoVO.getAttributes().containsKey("countryCode")) {
+      countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+    }
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
             + "dato2.statusCode as statusCode, dato3.countryCode as countryCode "
