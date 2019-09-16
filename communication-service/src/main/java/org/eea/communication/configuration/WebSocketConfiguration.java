@@ -7,6 +7,7 @@ import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -15,6 +16,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -23,6 +25,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
+
+  @Autowired
+  @Qualifier("clientOutboundChannel")
+  private MessageChannel clientOutboundChannel;
 
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
@@ -62,6 +68,13 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
             logger.error("Security token is not valid: {}", ex.getMessage());
           }
         }
+
+        StompHeaderAccessor errorAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+        errorAccessor.setSessionId(accessor.getSessionId());
+        errorAccessor.setMessage("Token validation failed");
+
+        clientOutboundChannel
+            .send(MessageBuilder.createMessage(new byte[0], errorAccessor.getMessageHeaders()));
 
         return null;
       }
