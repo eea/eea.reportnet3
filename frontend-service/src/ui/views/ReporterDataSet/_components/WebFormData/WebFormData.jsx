@@ -27,24 +27,12 @@ const WebFormData = ({ data }) => {
     let columnTitles = getColumnHeaders(columnHeaders);
     let grid = getGrid(rowHeaders, dataColumns);
 
-    grid.forEach(function(element, i) {
-      console.log(element);
-    });
-
-    console.log(columnTitles);
-    console.log(grid);
-
     formResult.push(
       <>
         <tr>{columnTitles}</tr>
-        {grid.map(tr => (
-          <div>{tr.name}</div>
-        ))}
-        {/* {grid} */}
+        {grid}
       </>
     );
-    console.log(grid);
-
     return formResult;
   };
 
@@ -116,60 +104,42 @@ const WebFormData = ({ data }) => {
     let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
     let rowsFilled = [];
+    let header = '';
 
     for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
-      let header = '';
+      let i = 0;
+      let j = 0;
       let tds = [];
 
-      let i = 0;
-
       for (var columnIndex = firstColumn; columnIndex <= lastColumn; columnIndex++) {
-        let j = 0;
-        let tds = [];
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
-        let header = [];
-
-        // console.log('POS: ', columnPosition, rowIndex);
-        if (dataColumns[j].rowPosition === rowIndex) {
-          // console.log('Pos:', dataColumns[j].rowPosition);
-          if (j === 0) {
-            tds.push(<td>{dataColumns[j].description}</td>);
-            tds.push(
-              <td name={`${columnPosition}${rowIndex}`}>
-                <InputText value={dataColumns[j].value} />
-              </td>
-            );
-          } else {
-            tds.push(
-              <td name={`${columnPosition}${rowIndex}`}>
-                <InputText value={dataColumns[j].value} />
-              </td>
-            );
-          }
-          // header.push(<td>{dataColumns[j].description}</td>);
+        let filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
+        if (!isEmpty(filteredColumn)) {
+          console.log('filteredColumn', filteredColumn);
+          header = filteredColumn[0].description;
           tds.push(
             <td name={`${columnPosition}${rowIndex}`}>
-              <InputText value={dataColumns[j].value} />
+              <InputText value={filteredColumn[0].value} />
             </td>
           );
         } else {
-          tds.push(
-            <td name={`${columnPosition}${rowIndex}`}>
-              <InputText value={''} />
-            </td>
-          );
+          tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
         }
         j++;
       }
-      console.log('tds', tds);
-      rowsFilled.push(<tr name={rowIndex}>{tds}</tr>);
-      console.log('rows', rowsFilled);
 
       i++;
-      firstRow++;
-    }
-    grid.push({ rowsFilled });
 
+      rowsFilled.push(
+        <tr name={rowIndex}>
+          <td>{header}</td>
+          {tds}
+        </tr>
+      );
+      console.log(rowIndex);
+    }
+    grid.push(rowsFilled);
+    console.log(columnIndex);
     return grid;
   };
 
