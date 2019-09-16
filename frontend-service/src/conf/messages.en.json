@@ -147,6 +147,8 @@
 		"visibility": "Visibility",
 		"warning": "Warning",
 		"webLinks": "Web Links",
-		"yes": "Yes"		
+		"yes": "Yes",
+		"snapshotItemRestoreProcessDetail": "Restoring...",
+		"snapshotItemRestoreProcessSummary": "Snapshot restoring"
 	}
 }
