@@ -21,6 +21,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -76,6 +77,7 @@ const DataViewer = withRouter(
     const [totalRecords, setTotalRecords] = useState(0);
 
     const resources = useContext(ResourcesContext);
+    const snapshotContext = useContext(SnapshotContext);
 
     let growlRef = useRef();
     let exportMenuRef = useRef();
@@ -201,6 +203,7 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
       if (dataDeleted) {
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsDataDeleted(true);
       }
     };
@@ -209,6 +212,7 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const recordDeleted = await DataSetService.deleteRecordById(dataSetId, selectedRecord.recordId);
       if (recordDeleted) {
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsRecordDeleted(true);
       }
     };
@@ -247,6 +251,7 @@ const DataViewer = withRouter(
           if (!fieldUpdated) {
             console.error('Error!');
           }
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         }
       }
     };
@@ -350,6 +355,7 @@ const DataViewer = withRouter(
           summary: resources.messages['dataPasted'],
           life: '3000'
         });
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       } catch (error) {
         console.error('DataViewer error: ', error);
         const errorResponse = error.response;
@@ -378,6 +384,7 @@ const DataViewer = withRouter(
         try {
           await DataSetService.addRecordsById(dataSetId, tableId, [record]);
           setAddDialogVisible(false);
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -393,6 +400,7 @@ const DataViewer = withRouter(
         try {
           await DataSetService.updateRecordsById(dataSetId, record);
           setEditDialogVisible(false);
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -654,13 +662,14 @@ const DataViewer = withRouter(
       return value.length > 0 ? value[0].fieldData[field] : '';
     };
 
-    const getExportButtonPosition = button => {
-      const buttonLeftPosition = document.getElementById('buttonExportTable').offsetLeft;
-      const buttonTopPosition = button.style.top;
-
-      const exportTableMenu = document.getElementById('exportTableMenu');
-      exportTableMenu.style.top = buttonTopPosition;
-      exportTableMenu.style.left = `${buttonLeftPosition}px`;
+    const getExportButtonPosition = e => {
+      const exportButton = e.currentTarget;
+      const left = `${exportButton.offsetLeft}px`;
+      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
+      const top = `${topValue}px `;
+      const menu = exportButton.nextElementSibling;
+      menu.style.top = top;
+      menu.style.left = left;
     };
 
     const getInitialRecordValues = record => {
@@ -839,16 +848,16 @@ const DataViewer = withRouter(
               className={`p-button-rounded p-button-secondary`}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['exportTable']}
-              onClick={event => exportMenuRef.current.show(event)}
+              onClick={event => {
+                exportMenuRef.current.show(event);
+              }}
             />
             <Menu
               model={exportButtonsList}
               popup={true}
               ref={exportMenuRef}
               id="exportTableMenu"
-              onShow={e => {
-                getExportButtonPosition(e.target);
-              }}
+              onShow={e => getExportButtonPosition(e)}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
