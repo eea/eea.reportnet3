@@ -34,10 +34,6 @@ public class KieBaseManager {
    */
   private static final String REGULATION_TEMPLATE_FILE = "/template01.drl";
 
-  /**
-   * The kie base.
-   */
-  private KieBase kieBase;
 
   /**
    * The data flow rules repository.
@@ -116,9 +112,10 @@ public class KieBaseManager {
     Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
     kieHelper.addResource(resource1, ResourceType.DRL);
     // this is a shared variable in a single instanced object.
+    KieBase kieBase;
     KieBase newBase = kieHelper.build();
-    this.kieBase = newBase;
-    return this.kieBase;
+    kieBase = newBase;
+    return kieBase;
   }
 
   /**
