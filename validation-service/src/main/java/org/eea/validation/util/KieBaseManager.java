@@ -112,10 +112,7 @@ public class KieBaseManager {
     Resource resource1 = kieServices.getResources().newByteArrayResource(b1);
     kieHelper.addResource(resource1, ResourceType.DRL);
     // this is a shared variable in a single instanced object.
-    KieBase kieBase;
-    KieBase newBase = kieHelper.build();
-    kieBase = newBase;
-    return kieBase;
+    return kieHelper.build();
   }
 
   /**
