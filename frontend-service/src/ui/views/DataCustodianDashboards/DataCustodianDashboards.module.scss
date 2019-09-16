@@ -1,25 +1,3 @@
 .chart_released {
   padding-bottom: 100px;
 }
-.toolbarText {
-  vertical-align: middle !important;
-  margin: 0.5rem 0;
-  border: 1px solid #ffffff;
-}
-.statusText {
-  text-transform: uppercase;
-  border-bottom: 2px solid;
-  padding-bottom: 1px;
-}
-.statusText[data-status='correct'] {
-  border-bottom-color: rgba(50, 205, 50, 1);
-  color: rgba(50, 205, 50, 1);
-}
-.statusText[data-status='warning'] {
-  border-bottom-color: rgba(255, 206, 86, 1);
-  color: rgba(255, 206, 86, 1);
-}
-.statusText[data-status='error'] {
-  border-bottom-color: rgba(255, 99, 132, 1);
-  color: rgba(255, 99, 132, 1);
-}
