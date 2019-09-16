@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import moment from 'moment';
 
@@ -26,12 +26,12 @@ export function SnapshotItem({ itemData }) {
               tooltipOptions={{ position: 'top' }}
               icon="replay"
               className={`${styles.btn} rp-btn secondary`}
-              onClick={() =>
+              onClick={() => {
                 snapshotContext.snapshotDispatch({
                   type: 'restore_snapshot',
                   payload: { ...itemData }
-                })
-              }
+                });
+              }}
             />
             <Button
               tooltip={
