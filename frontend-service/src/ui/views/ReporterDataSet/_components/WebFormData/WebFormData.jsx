@@ -31,6 +31,9 @@ const WebFormData = ({ data }) => {
       console.log(element);
     });
 
+    console.log(columnTitles);
+    console.log(grid);
+
     formResult.push(
       <>
         <tr>{columnTitles}</tr>
@@ -109,14 +112,9 @@ const WebFormData = ({ data }) => {
     let lastRow = rows.lastRow;
 
     let columns = getMinAndMaxColumns(dataColumns);
-    // let firstColumn = 0;
-    // let lastColumn = dataColumns.length - 1;
     let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
     let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
-    let header = '';
-
-    let columnsTds = [];
     let rowsFilled = [];
 
     for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
@@ -131,7 +129,7 @@ const WebFormData = ({ data }) => {
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
         let header = [];
 
-        console.log('POS: ', columnPosition, rowIndex);
+        // console.log('POS: ', columnPosition, rowIndex);
         if (dataColumns[j].rowPosition === rowIndex) {
           // console.log('Pos:', dataColumns[j].rowPosition);
           if (j === 0) {
@@ -163,9 +161,9 @@ const WebFormData = ({ data }) => {
         }
         j++;
       }
-
-      rowsFilled.push(<tr>{tds}</tr>);
-      console.log(rowsFilled);
+      console.log('tds', tds);
+      rowsFilled.push(<tr name={rowIndex}>{tds}</tr>);
+      console.log('rows', rowsFilled);
 
       i++;
       firstRow++;
