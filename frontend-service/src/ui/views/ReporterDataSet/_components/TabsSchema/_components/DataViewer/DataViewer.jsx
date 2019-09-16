@@ -206,9 +206,9 @@ const DataViewer = withRouter(
             setPastedRecords([]);
           }
         }
-        if (confirmPasteVisible) {
-          divRef.current.focus();
-        }
+        // if (confirmPasteVisible) {
+        //   divRef.current.focus();
+        // }
       }
     }, [confirmPasteVisible]);
 
@@ -270,7 +270,6 @@ const DataViewer = withRouter(
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
       } else if (event.key === 'Enter' || event.key === 'Tab') {
-        event.preventDefault();
         onEditorSubmitValue(props, event.target.value, record);
       }
     };
@@ -278,8 +277,13 @@ const DataViewer = withRouter(
     const onEditorSubmitValue = async (cell, value, record) => {
       if (!isEmpty(record)) {
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-        if (value !== initialCellValue && selectedCellId === getCellId(cell, cell.field)) {
-          const fieldUpdated = await DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
+        if (
+          value !== initialCellValue &&
+          selectedCellId === getCellId(cell, cell.field) &&
+          record.recordId === selectedRecord.recordId
+        ) {
+          //without await. We don't have to wait for the response.
+          const fieldUpdated = DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
           if (!fieldUpdated) {
             console.error('Error!');
           }
@@ -289,7 +293,7 @@ const DataViewer = withRouter(
     };
 
     const onEditorValueChange = (props, value) => {
-      let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
+      const updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
       setFetchedData(updatedData);
     };
 
@@ -417,8 +421,8 @@ const DataViewer = withRouter(
     const onSelectRecord = val => {
       setIsNewRecord(false);
       setSelectedRecord({ ...val });
-      setInitialRecordValue(getInitialRecordValues(val));
       setEditedRecord({ ...val });
+      setInitialRecordValue(getInitialRecordValues(val));
     };
 
     const onSaveRecord = async record => {
@@ -445,9 +449,9 @@ const DataViewer = withRouter(
       } else {
         try {
           await DataSetService.updateRecordsById(dataSetId, record);
+          onRefresh();
           setEditDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-          onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -564,7 +568,10 @@ const DataViewer = withRouter(
           value={getCellValue(cells, cells.field)}
           onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
           onChange={e => onEditorValueChange(cells, e.target.value)}
-          onFocus={e => onEditorValueFocus(cells, e.target.value)}
+          onFocus={e => {
+            e.preventDefault();
+            onEditorValueFocus(cells, e.target.value);
+          }}
           onKeyDown={e => onEditorKeyChange(cells, e, record)}
         />
       );
@@ -640,13 +647,11 @@ const DataViewer = withRouter(
     );
 
     const editRecordForm = colsSchema.map((column, i) => {
-      const arr = [];
       //Avoid row id Field and dataSetPartitionId
       if (editDialogVisible) {
         if (i < colsSchema.length - 2) {
           if (!isUndefined(editedRecord.dataRow)) {
             const field = editedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-            arr.push([column.field, field.fieldData[column.field]]);
             return (
               <React.Fragment key={column.field}>
                 <div className="p-col-4" style={{ padding: '.75em' }}>

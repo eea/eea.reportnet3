@@ -17,9 +17,17 @@ export const InfoTableMessages = ({ data, columns }) => {
         column.key !== 'dataSetPartitionId'
     );
 
+    const numCopiedCols = data.map(rows => rows.copiedCols);
+    console.log(numCopiedCols, filteredColumns.length);
+    const equalNumberColumns = numCopiedCols.filter(colNum => {
+      console.log(colNum !== filteredColumns.length);
+      return colNum !== filteredColumns.length;
+    });
+
+    console.log(equalNumberColumns);
     if (!isUndefined(data)) {
       if (data.length > 0) {
-        if (filteredColumns.length !== data[0].copiedCols) {
+        if (equalNumberColumns.length > 0) {
           return (
             <div>
               <p style={{ fontWeight: 'bold', color: '#DA2131' }}>{resources.messages['pasteColumnWarningMessage']}</p>
