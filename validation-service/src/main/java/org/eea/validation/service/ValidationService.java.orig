@@ -265,4 +265,8 @@ public interface ValidationService {
   Boolean tableValidationQueryPeriodMonitoring(String QUERY);
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/feature/REP-119-us-data-pilots-bw-db-model
 }

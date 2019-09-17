@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 @Component("recordValidationDrools")
 public class RecordValidationDrools {
 
-  /** The validation service. */
+  /**
+   * The validation service.
+   */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
@@ -26,39 +28,25 @@ public class RecordValidationDrools {
   }
 
   /** The Constant sdf. */
-  private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-  /** The Constant MAXIMUN_VALUE_INTESTINAL. */
-  private static final Integer MAXIMUN_VALUE_INTESTINAL = 500;
-
-  /** The Constant MAXIMUN_VALUE_ESCHERICHIA. */
-  private static final Integer MAXIMUN_VALUE_ESCHERICHIA = 300;
-
-  /** The field repository impl. */
-
 
   /**
-   * Return value id record and id field schema.
-   *
-   * @param idRecord the id record
-   * @param idFieldSchema the id field schema
-   * @return the string
+   * The Constant MAXIMUN_VALUE_INTESTINAL.
    */
-  private static String returnValueIdRecordAndIdFieldSchema(Long datasetId, Long idRecord,
-      String idFieldSchema) {
-    String QUERY =
-        "select v.value FROM dataset_" + datasetId + ".field_value v  where v.id_field_schema = '"
-            + idFieldSchema + "' and v.id_record = " + idRecord + "";
-    return validationService.recordFieldValidation(QUERY);
-  }
+  private static final Integer MAXIMUN_VALUE_INTESTINAL = 35000;
+
+  /**
+   * The Constant MAXIMUN_VALUE_ESCHERICHIA.
+   */
+  private static final Integer MAXIMUN_VALUE_ESCHERICHIA = 35000;
 
   /**
    * Period type validation.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldSchemaPeriodeType the id field schema periode type
    * @param idFieldShemaStartDate the id field shema start date
    * @param idFieldSchemaEnddate the id field schema enddate
+   *
    * @return the boolean
    */
   public static Boolean periodTypeValidation(RecordValue recordValue,
@@ -66,7 +54,9 @@ public class RecordValidationDrools {
     String endDate = "";
     String startDate = "";
     String periodeType = "";
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     for (FieldValue fieldData : recordValue.getFields()) {
+
       if (fieldData.getIdFieldSchema().equalsIgnoreCase(idFieldSchemaPeriodeType)) {
         periodeType = fieldData.getValue();
       }
@@ -93,9 +83,9 @@ public class RecordValidationDrools {
         return true;
       }
 
-      Long dias = ((dateend.getTime() - dateInit.getTime()) / 86400000);
+      Long days = ((dateend.getTime() - dateInit.getTime()) / 86400000);
 
-      if (dias >= 3) {
+      if (days >= 3) {
         return false;
       }
 
@@ -105,19 +95,18 @@ public class RecordValidationDrools {
   }
 
 
-
   /**
    * Start date good dates order.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaStartDate the id field shema start date
    * @param idFieldSchemaEnddate the id field schema enddate
+   *
    * @return the boolean
    */
   public static Boolean startDateGoodDatesOrder(RecordValue recordValue,
       String idFieldShemaStartDate, String idFieldSchemaEnddate) {
-
-
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String endDate = "";
     String startDate = "";
     for (FieldValue fieldData : recordValue.getFields()) {
@@ -128,7 +117,6 @@ public class RecordValidationDrools {
         endDate = fieldData.getValue();
       }
     }
-
 
     if (!"".equalsIgnoreCase(startDate) && !"".equalsIgnoreCase(endDate)) {
       Date dateInit;
@@ -154,9 +142,10 @@ public class RecordValidationDrools {
   /**
    * Unknown date start.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldSchemaPeriodeType the id field schema periode type
    * @param idFieldShemaStartDate the id field shema start date
+   *
    * @return the boolean
    */
   public static Boolean unknownDateStart(RecordValue recordValue, String idFieldSchemaPeriodeType,
@@ -188,14 +177,15 @@ public class RecordValidationDrools {
   /**
    * Same year validation.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaDate the id field shema date
    * @param idFieldSchemaSeason the id field schema season
+   *
    * @return the boolean
    */
   public static Boolean sameYearValidation(RecordValue recordValue, String idFieldShemaDate,
       String idFieldSchemaSeason) {
-
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String date = "";
     String season = "";
     for (FieldValue fieldData : recordValue.getFields()) {
@@ -214,7 +204,7 @@ public class RecordValidationDrools {
         return true;
       }
       try {
-        Date dateCalculate = sdf.parse(date);
+        sdf.parse(date);
       } catch (ParseException e) {
         return true;
       }
@@ -232,15 +222,16 @@ public class RecordValidationDrools {
   /**
    * Bathing season duration validation.
    *
-   * @param idRecord the id record
-   * @param idFieldShemaPeriodType the id field shema period type
+   * @param recordValue the record value
+   * @param idFieldSchemaPeriodeType the id field schema periode type
    * @param idFieldShemaStartDate the id field shema start date
    * @param idFieldSchemaEnddate the id field schema enddate
+   *
    * @return the boolean
    */
   public static Boolean bathingSeasonDurationValidation(RecordValue recordValue,
       String idFieldSchemaPeriodeType, String idFieldShemaStartDate, String idFieldSchemaEnddate) {
-
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String endDate = "";
     String startDate = "";
     String periodeType = "";
@@ -255,7 +246,6 @@ public class RecordValidationDrools {
         endDate = fieldData.getValue();
       }
     }
-
 
     if ("bathingSeason".equalsIgnoreCase(periodeType) && !"".equalsIgnoreCase(startDate)
         && !"".equalsIgnoreCase(endDate)) {
@@ -281,9 +271,10 @@ public class RecordValidationDrools {
   /**
    * Start and end unknown.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaStartDate the id field shema start date
    * @param idFieldSchemaEnddate the id field schema enddate
+   *
    * @return the boolean
    */
   public static Boolean startAndEndUnknown(RecordValue recordValue, String idFieldShemaStartDate,
@@ -307,9 +298,10 @@ public class RecordValidationDrools {
   /**
    * End unknown period.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaPeriodType the id field shema period type
    * @param idFieldSchemaEnddate the id field schema enddate
+   *
    * @return the boolean
    */
   public static Boolean endUnknownPeriod(RecordValue recordValue, String idFieldShemaPeriodType,
@@ -334,23 +326,21 @@ public class RecordValidationDrools {
     return true;
   }
 
-
-
   /////////////////////// MONITORING PART//////////////////////////////////////////////
 
   /**
    * Same year validatio monitoring.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaDate the id field shema date
    * @param idFieldSchemaSeason the id field schema season
+   *
    * @return the boolean
    */
-  // 1
+// 1
   public static Boolean sameYearValidatioMonitoring(RecordValue recordValue,
       String idFieldShemaDate, String idFieldSchemaSeason) {
-
-
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String season = "";
     String date = "";
     for (FieldValue fieldData : recordValue.getFields()) {
@@ -362,7 +352,6 @@ public class RecordValidationDrools {
       }
     }
 
-
     if (!"".equalsIgnoreCase(season.trim()) && !"".equalsIgnoreCase(date)) {
 
       try {
@@ -371,7 +360,7 @@ public class RecordValidationDrools {
         return true;
       }
       try {
-        Date dateCalculate = sdf.parse(date);
+        sdf.parse(date);
       } catch (ParseException e) {
         return true;
       }
@@ -386,17 +375,18 @@ public class RecordValidationDrools {
   /**
    * Max valueintestinal.
    *
-   * @param idRecord the id record
-   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci value
+   * @param recordValue the record value
+   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci
+   *     value
    * @param idFieldSchemaIntestinalEnterococciStatus the id field schema intestinal enterococci
-   *        status
+   *     status
+   *
    * @return the boolean
    */
-  // 2
+// 2
   public static Boolean maxValueintestinal(RecordValue recordValue,
       String idFieldShemaIntestinalEnterococciValue,
       String idFieldSchemaIntestinalEnterococciStatus) {
-
 
     String intestinalEnterococciValue = "";
     String intestinalEnterococciStatus = "";
@@ -426,14 +416,15 @@ public class RecordValidationDrools {
   /**
    * Max value escherichia coli.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaEscherichiaColiEnterococciValue the id field shema escherichia coli
-   *        enterococci value
+   *     enterococci value
    * @param idFieldSchemaEscherichiaColiEnterococciStatus the id field schema escherichia coli
-   *        enterococci status
+   *     enterococci status
+   *
    * @return the boolean
    */
-  // 3
+// 3
   public static Boolean maxValueEscherichiaColi(RecordValue recordValue,
       String idFieldShemaEscherichiaColiEnterococciValue,
       String idFieldSchemaEscherichiaColiEnterococciStatus) {
@@ -469,10 +460,12 @@ public class RecordValidationDrools {
   /**
    * General status validation.
    *
-   * @param idRecord the id record
-   * @param idFieldShemaIntestinalEnterococciStatus the id field shema intestinal enterococci status
+   * @param recordValue the record value
+   * @param idFieldShemaIntestinalEnterococciStatus the id field shema intestinal enterococci
+   *     status
    * @param idFieldSchemaEscherichiaColiStatus the id field schema escherichia coli status
    * @param idFieldSchemaSampleStatus the id field schema sample status
+   *
    * @return the boolean
    */
   public static Boolean generalStatusValidation(RecordValue recordValue,
@@ -494,7 +487,6 @@ public class RecordValidationDrools {
       }
     }
 
-
     if ("missingValue".equalsIgnoreCase(intestinalEnterococciStatus)
         && "missingValue".equalsIgnoreCase(escherichiaColiStatus)
         && !"missingSample".equalsIgnoreCase(sampleStatus) && !"".equalsIgnoreCase(sampleStatus)) {
@@ -502,7 +494,8 @@ public class RecordValidationDrools {
     }
     return true;
   }
-  // 5
+
+  // 5 RULES DONT COMPOSE
 
   // 6
 
@@ -512,16 +505,18 @@ public class RecordValidationDrools {
   /**
    * Intestinal enterococci value validation.
    *
-   * @param idRecord the id record
-   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci value
-   * @param idFieldSchemIntestinalEnterococciStatus the id field schem intestinal enterococci status
+   * @param recordValue the record value
+   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci
+   *     value
+   * @param idFieldSchemIntestinalEnterococciStatus the id field schem intestinal enterococci
+   *     status
+   *
    * @return the boolean
    */
-  // 8
+// 8
   public static Boolean intestinalEnterococciValueValidation(RecordValue recordValue,
       String idFieldShemaIntestinalEnterococciValue,
       String idFieldSchemIntestinalEnterococciStatus) {
-
 
     String intestinalEnterococciValue = "";
     String intestinalEnterococciStatus = "";
@@ -548,12 +543,13 @@ public class RecordValidationDrools {
   /**
    * Escherichia coli status validation.
    *
-   * @param idRecord the id record
+   * @param recordValue the record value
    * @param idFieldShemaEscherichiaColiValue the id field shema escherichia coli value
    * @param idFieldSchemaEscherichiaColiStatus the id field schema escherichia coli status
+   *
    * @return the boolean
    */
-  // 9
+// 9
   public static Boolean escherichiaColiStatusValidation(RecordValue recordValue,
       String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus) {
 
@@ -579,11 +575,11 @@ public class RecordValidationDrools {
   }
 
 
-
   /**
    * Monitoring with period sample status.
    *
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean monitoringWithPeriodSampleStatus(Long datasetId) {

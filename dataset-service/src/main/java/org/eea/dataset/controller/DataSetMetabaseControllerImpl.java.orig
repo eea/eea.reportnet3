@@ -76,6 +76,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset) {
     return datasetMetabaseService.findDatasetMetabase(idDataset);
   }
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/feature/REP-119-us-data-pilots-bw-db-model
 
   /**
    * Creates the empty data set.
@@ -101,5 +105,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       LOG_ERROR.error(e.getMessage());
     }
 
+
+<<<<<<< HEAD
+=======
   }
+
+
+>>>>>>> origin/feature/REP-119-us-data-pilots-bw-db-model
 }

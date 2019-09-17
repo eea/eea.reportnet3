@@ -336,6 +336,7 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
+<<<<<<< HEAD
     List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
     tableValues.parallelStream().filter(Objects::nonNull).forEach(tableValue -> {
       TableValidation tableValidation = new TableValidation();
@@ -372,6 +373,34 @@ public class ValidationServiceImpl implements ValidationService {
         TenantResolver.setTenantName("dataset_" + datasetId);
         recordValidationRepository.saveAll((Iterable<RecordValidation>) recordValidations);
       });
+=======
+
+    dataset.getTableValues().stream().forEach(table -> {
+      List<RecordValidation> recordValList = new ArrayList<>();
+      List<RecordValue> validatedRecords =
+          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(table.getId()));
+      Validation validation = new Validation();
+
+      validatedRecords.stream().filter(Objects::nonNull).forEach(row -> {
+        List<RecordValidation> resultRecords = runRecordValidations(row, session);
+        if (null != row.getRecordValidations()) {
+          row.getRecordValidations().stream().filter(Objects::nonNull).forEach(rowValidation -> {
+            rowValidation.setRecordValue(row);
+            if (validation.getLevelError() == null
+                || !TypeErrorEnum.ERROR.equals(validation.getLevelError())) {
+              if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
+                validation.setLevelError(TypeErrorEnum.ERROR);
+              } else {
+                validation.setLevelError(TypeErrorEnum.WARNING);
+              }
+            }
+            validation.setOriginName(rowValidation.getValidation().getOriginName());
+          });
+          recordValList.addAll(resultRecords);
+        }
+      });
+
+>>>>>>> origin/feature/REP-119-us-data-pilots-bw-db-model
       // Adding errors into tables
       if (tableValidation.getValidation().getLevelError() != null) {
         if (TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
@@ -795,5 +824,14 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return true;
   }
+<<<<<<< HEAD
 
+  @Override
+  public String recordFieldValidation(String QUERY) {
+    return tableValidationQuerysDroolsRepository.queryRecordsFields(QUERY);
+  }
+
+
+=======
+>>>>>>> origin/feature/REP-119-us-data-pilots-bw-db-model
 }

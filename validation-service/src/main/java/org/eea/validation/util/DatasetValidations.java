@@ -1,21 +1,20 @@
 package org.eea.validation.util;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class DatasetValidations.
+ */
 @Component("datasetValidations")
 public class DatasetValidations {
 
 
+  /** The validation service. */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
-
-  @PersistenceContext
-  private EntityManager entityManager;
 
   @Autowired
   private void setDatasetRepository(ValidationService validationService) {
@@ -24,6 +23,13 @@ public class DatasetValidations {
 
   // # DO02 # The SeasonalPeriod file does not contain the bathing season for a
   // bathingWaterIdentifier and season reported in the Characterisation file. #
+
+  /**
+   * Dataset validation DO 02.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDO02(Long idDataset) {
     String DO02 = "WITH Characterisation AS " + "    (SELECT "
         + "    (select field_value.value from dataset_" + idDataset
@@ -54,9 +60,17 @@ public class DatasetValidations {
     return validationService.datasetValidationDO02Query(DO02);
   }
 
+  // # DO03 # The MonitoringResult file does not contain samples for a bathingWaterIdentifier and
+  // season reported in the SeasonalPeriod file. #
+
+  /**
+   * Dataset validation DO 03.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDO03(Long idDataset) {
-    // # DO03 # The MonitoringResult file does not contain samples for a bathingWaterIdentifier and
-    // season reported in the SeasonalPeriod file. #
+
     String DO03 = "WITH MonitoringResult AS (" + "    SELECT "
         + "    (select field_value.value from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90cbf') as season, "
@@ -90,8 +104,15 @@ public class DatasetValidations {
     return validationService.datasetValidationDO03Query(DO03);
   }
 
+  // # DC01A # The Characterisation file contain a record for an unknown bathing water. #
+
+  /**
+   * Dataset validation DC 01 A.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDC01A(Long idDataset) {
-    // # DC01A # The Characterisation file contain a record for an unknown bathing water. #
     String DC01A = "WITH Characterisation AS ( " + "    SELECT "
         + "    (select field_value.value from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c39') as season, "
@@ -115,8 +136,14 @@ public class DatasetValidations {
     return validationService.datasetValidationDC01AQuery(DC01A);
   }
 
+  // # DC01B # The Characterisation file contain a record for a deprecated bathing water. #
+  /**
+   * Dataset validation DC 01 B.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDC01B(Long idDataset) {
-    // # DC01B # The Characterisation file contain a record for a deprecated bathing water. #
     String DC01B = "WITH Characterisation AS ( " + "    SELECT "
         + "    (select field_value.value from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c39') as season, "
@@ -143,6 +170,12 @@ public class DatasetValidations {
 
   // # DC02 # The SeasonalPeriod file contains a record for a bathingWaterIdentifier and season not
   // reported in the Characterisation file. #
+  /**
+   * Dataset validation DC 02.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDC02(Long idDataset) {
 
     String DC02 = "WITH Characterisation AS ( " + "SELECT "
@@ -175,6 +208,12 @@ public class DatasetValidations {
 
   // # DC03 # The MonitoringResult file contains samples for a bathingWaterIdentifier and season not
   // reported in the SeasonalPeriod file. #
+  /**
+   * Dataset validation DC 03.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDC03(Long idDataset) {
     String DC03 = "WITH MonitoringResult AS (    SELECT "
         + "    (select field_value.value from dataset_" + idDataset

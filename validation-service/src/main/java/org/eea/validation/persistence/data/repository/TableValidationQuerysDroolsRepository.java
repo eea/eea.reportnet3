@@ -5,7 +5,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import org.eea.validation.persistence.data.domain.RecordValue;
 import org.joda.time.LocalDate;
 import org.springframework.stereotype.Repository;
 
@@ -73,6 +72,12 @@ public class TableValidationQuerysDroolsRepository {
     }
   }
 
+  /**
+   * Table validation query period monitoring.
+   *
+   * @param QUERY the query
+   * @return the list
+   */
   @SuppressWarnings("unchecked")
   public List<BigInteger> tableValidationQueryPeriodMonitoring(String QUERY) {
 
@@ -82,30 +87,6 @@ public class TableValidationQuerysDroolsRepository {
       return null;
     } else {
       return value;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public String queryRecordsFields(String QUERY) {
-
-    Query query = entityManager.createNativeQuery(QUERY);
-    String value = query.getResultList().get(0).toString();
-    if (null == value || value.isEmpty()) {
-      return "";
-    } else {
-      return value;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public RecordValue testeo(String QUERY) {
-
-    Query query = entityManager.createNativeQuery(QUERY);
-    List value = query.getResultList();
-    if (null == value) {
-      return null;
-    } else {
-      return new RecordValue();
     }
   }
 }

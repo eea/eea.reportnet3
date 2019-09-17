@@ -61,10 +61,19 @@ public class ValidationHelper {
     LOG.info("Validating Records");
     validationService.validateRecord(datasetId, session);
     LOG.info("Validating Tables");
+<<<<<<< HEAD
+    // validationService.validateTable(datasetId, session);
+    System.err.println(System.currentTimeMillis() - timer);
+    timer = System.currentTimeMillis();
+    LOG.info("Validating Dataset");
+    // validationService.validateDataSet(datasetId, session);
+    System.err.println(System.currentTimeMillis() - timer);
+    session.dispose();
+=======
     validationService.validateTable(datasetId, session);
     LOG.info("Validating Dataset");
     validationService.validateDataSet(datasetId, session);
-    session.dispose();
+>>>>>>> origin/feature/REP-119-us-data-pilots-bw-db-model
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }

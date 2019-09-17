@@ -1,14 +1,21 @@
 package org.eea.validation.util;
 
+import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class TableValidationDrools.
+ */
 @Component("tableValidationDrools")
 public class TableValidationDrools {
 
 
+  /** The validation service. */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
@@ -17,6 +24,14 @@ public class TableValidationDrools {
     TableValidationDrools.validationService = validationService;
   }
 
+
+  /** The user management controller. */
+  private static UserManagementController userManagementController;
+
+  @Autowired
+  private void setUserManagerController(UserManagementController userManagementController) {
+    TableValidationDrools.userManagementController = userManagementController;
+  }
   ////////////////////////////////////////////////////////////////////
   ////////////////////////////////// charaterization //////////////////
   ////////////////////////////////////////////////////////////////////
@@ -25,6 +40,14 @@ public class TableValidationDrools {
   // --# DR01A # The Characterisation file contains records for more than one season. #
   // the boolean is to know if the validation has previous years
 
+  /**
+   * Rule DR 01 AB.
+   *
+   * @param idSchema the id schema
+   * @param previous the previous
+   * @param datasetId the dataset id
+   * @return the boolean
+   */
   public static Boolean ruleDR01AB(String idSchema, Boolean previous, Long datasetId) {
 
     String DR01AB = "select v.value from dataset_" + datasetId
@@ -35,6 +58,13 @@ public class TableValidationDrools {
 
   // # DU01A # The Characterisation file contains more than one record for the
   // bathingWaterIdentifier.
+  /**
+   * Rule DU 01 A.
+   *
+   * @param idSchema the id schema
+   * @param datasetId the dataset id
+   * @return the boolean
+   */
   public static Boolean ruleDU01A(String idSchema, Long datasetId) {
 
     String ruleDU01A = "select v.value FROM dataset_" + datasetId + ".field_value v "
@@ -45,6 +75,13 @@ public class TableValidationDrools {
 
   // # DU01B # The Characterisation file contains a groupIdentifier associated with single btahing
   // water. #
+  /**
+   * Rule DU 01 B.
+   *
+   * @param idSchema the id schema
+   * @param datasetId the dataset id
+   * @return the boolean
+   */
   public static Boolean ruleDU01B(String idSchema, Long datasetId) {
 
     String ruleDU01B =
@@ -54,10 +91,28 @@ public class TableValidationDrools {
   }
 
   // --# DR01A # The Characterisation file contains records for more than one season. #
+  /**
+   * Rule DO 01.
+   *
+   * @param idSchemaThematicIdIdentifier the id schema thematic id identifier
+   * @param idSchemaStatusCode the id schema status code
+   * @param idSchemaCountryCode the id schema country code
+   * @param idSchemaBathingWaterIdentifier the id schema bathing water identifier
+   * @param idDataset the id dataset
+   * @param idDatasetToContribute the id dataset to contribute
+   * @return the boolean
+   */
   public static Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
-      String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, String countryCodeValue,
-      Long idDataset, String idDatasetToContribute) {
+      String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, Long idDataset,
+      String idDatasetToContribute) {
 
+    ResourceInfoVO resourceInfoVO =
+        userManagementController.getResourceDetail(idDataset, ResourceGroupEnum.DATASET_PROVIDER);
+    String countryCode = "''";
+    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0
+        && resourceInfoVO.getAttributes().containsKey("countryCode")) {
+      countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+    }
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
             + "dato2.statusCode as statusCode, dato3.countryCode as countryCode "
@@ -76,8 +131,8 @@ public class TableValidationDrools {
             + "')as character1 ) "
             + "select s.thematicIdIdentifier from  sparcial s left join characterisation c on "
             + "s.thematicIdIdentifier = c.bathingWaterIdentifier where "
-            + "s.statusCode NOT in('experimental','retired','superseded') and s.countryCode ='"
-            + countryCodeValue + "' and c.bathingWaterIdentifier is null";
+            + "s.statusCode NOT in('experimental','retired','superseded') and s.countryCode in("
+            + countryCode + ") " + "and c.bathingWaterIdentifier is null";
 
     return validationService.tableValidationQueryNonReturnResult(ruleDO01);
   }
@@ -90,6 +145,16 @@ public class TableValidationDrools {
   // # DU02A # The SeasonalPeriod file contains more than one record for the combination of
   // bathingWaterIdentifier, periodType, startDate and endDate. #
 
+  /**
+   * Rule DU 02 A.
+   *
+   * @param idSchemaBathingWaterIdentifierTable the id schema bathing water identifier table
+   * @param idSchemaPeriodType the id schema period type
+   * @param idSchemaStartDate the id schema start date
+   * @param idSchemaEndDate the id schema end date
+   * @param datasetId the dataset id
+   * @return the boolean
+   */
   public static Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
       String idSchemaPeriodType, String idSchemaStartDate, String idSchemaEndDate, Long datasetId) {
 
@@ -119,6 +184,14 @@ public class TableValidationDrools {
 
   // # DU03 # The MonitoringResult file contains more than two records for the combination of
   // bathingWaterIdentifier and sampleDate. #
+  /**
+   * Rule DU 03.
+   *
+   * @param idSchemaBWIdent the id schema BW ident
+   * @param idSchemaBWSampleDate the id schema BW sample date
+   * @param datasetId the dataset id
+   * @return the boolean
+   */
   public static Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate,
       Long datasetId) {
 
