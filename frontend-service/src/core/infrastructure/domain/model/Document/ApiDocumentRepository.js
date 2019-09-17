@@ -1,5 +1,6 @@
 import { apiDocument } from 'core/infrastructure/api/domain/model/Document';
 import { Document } from 'core/domain/model/Document/Document';
+import { async } from 'q';
 
 const all = async dataFlowId => {
   const documentsDTO = await apiDocument.all(dataFlowId);
@@ -27,8 +28,14 @@ const uploadDocument = async (dataFlowId, description, language, file) => {
   return responseData;
 };
 
+const deleteDocument = async documentId => {
+  const responseData = await apiDocument.deleteDocument(documentId);
+  return responseData;
+};
+
 export const ApiDocumentRepository = {
   all,
   downloadDocumentById,
-  uploadDocument
+  uploadDocument,
+  deleteDocument
 };

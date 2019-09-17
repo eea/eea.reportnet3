@@ -5,7 +5,6 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiContributor = {
   all: async dataFlowId => {
-    console.log('Getting All Contributors from dataFlow ', dataFlowId);
     /* 
         const response = await HTTPRequester.get({
           url: '/jsons/contributors.json',
