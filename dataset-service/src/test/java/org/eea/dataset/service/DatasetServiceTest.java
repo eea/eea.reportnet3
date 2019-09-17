@@ -826,7 +826,11 @@ public class DatasetServiceTest {
   public void testInsertSchema() throws EEAException {
 
     DataSetSchema ds = new DataSetSchema();
-    ds.setTableSchemas(new ArrayList<>());
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    tableSchemas.add(table);
+    ds.setTableSchemas(tableSchemas);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(ds);
     datasetService.insertSchema(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
