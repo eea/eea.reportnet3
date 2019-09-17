@@ -18,13 +18,10 @@ export const InfoTableMessages = ({ data, columns }) => {
     );
 
     const numCopiedCols = data.map(rows => rows.copiedCols);
-    console.log(numCopiedCols, filteredColumns.length);
     const equalNumberColumns = numCopiedCols.filter(colNum => {
-      console.log(colNum !== filteredColumns.length);
       return colNum !== filteredColumns.length;
     });
 
-    console.log(equalNumberColumns);
     if (!isUndefined(data)) {
       if (data.length > 0) {
         if (equalNumberColumns.length > 0) {
