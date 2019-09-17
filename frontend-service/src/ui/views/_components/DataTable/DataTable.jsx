@@ -1485,7 +1485,7 @@ export class DataTable extends Component {
     if (this.isStateful() && this.props.resizableColumns) {
       this.restoreColumnWidths();
     }
-    this.container.addEventListener('paste', event => this.onPaste(event));
+    //this.container.addEventListener('paste', event => this.onPaste(event));
   }
 
   componentDidUpdate() {
