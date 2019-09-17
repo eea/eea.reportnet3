@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import moment from 'moment';
 
@@ -6,7 +6,7 @@ import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotContext } from 'ui/views/ReporterDataSet/ReporterDataSet';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 
 export function SnapshotItem({ itemData }) {
   const snapshotContext = useContext(SnapshotContext);
@@ -26,12 +26,12 @@ export function SnapshotItem({ itemData }) {
               tooltipOptions={{ position: 'top' }}
               icon="replay"
               className={`${styles.btn} rp-btn secondary`}
-              onClick={() =>
+              onClick={() => {
                 snapshotContext.snapshotDispatch({
                   type: 'restore_snapshot',
                   payload: { ...itemData }
-                })
-              }
+                });
+              }}
             />
             <Button
               tooltip={
