@@ -8,21 +8,37 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import { Button } from 'ui/views/_components/Button';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 
-const WebFormData = ({ data }) => {
+import { DataSetService } from 'core/services/DataSet';
+
+const WebFormData = ({ dataSetId, tableSchemaId }) => {
   const [fetchedData, setFetchedData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const resources = useContext(ResourcesContext);
 
+  useEffect(() => {
+    onLoadWebForm();
+  }, []);
+
+  const onLoadWebForm = async () => {
+    setLoading(true);
+    const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+    setFetchedData(webFormData);
+    setLoading(false);
+  };
+
   const form = () => {
-    if (isEmpty(data)) {
-      return;
+    let formResult = [];
+    let webFormData = fetchedData;
+
+    if (isEmpty(webFormData)) {
+      return formResult;
     }
 
-    let formResult = [];
-    let webFormData = data;
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
-    // let rowHeaders = webFormData.rowHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
     let grid = getGrid(dataColumns);
@@ -33,6 +49,7 @@ const WebFormData = ({ data }) => {
         {grid}
       </>
     );
+
     return formResult;
   };
 
@@ -202,19 +219,23 @@ const WebFormData = ({ data }) => {
     // let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
     // console.log('onEditorValueChange props and value', props, value);
     let updatedData = changeCellValue(value, props[0].fieldId, props[0].columnPosition, props[0].rowPosition);
-    setFetchedData(data.dataColumns);
+    setFetchedData(fetchedData.dataColumns);
   };
 
   const changeCellValue = (value, fieldId, columnPosition, rowPosition) => {
     console.log('Col:', columnPosition, 'RowPosition', rowPosition);
     let columnArrayPosition = columnPosition.charCodeAt(0) - 64 - 2; // if columnPosiiton === "D" => columnArrayPosition = 2
-    let oldValue = data.dataColumns[columnArrayPosition].filter(field => field.fieldId === fieldId)[0];
+    let oldValue = fetchedData.dataColumns[columnArrayPosition].filter(field => field.fieldId === fieldId)[0];
     console.log('Old', oldValue);
     let newValue = value;
     oldValue.value = newValue;
     console.log('New', oldValue);
     return oldValue;
   };
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <div className={`${styles.newContainer} ${styles.section}`}>

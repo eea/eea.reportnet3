@@ -62,7 +62,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-  const [webFormData, setWebFormData] = useState();
+  const [tableSchemaId, setTableSchemaId] = useState();
 
   let exportMenuRef = useRef();
 
@@ -189,11 +189,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     try {
       const dataSetSchema = await DataSetService.schemaById(dataFlowId);
       const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
-      if (dataSetId == 5 || dataSetId == 142) {
-        let tableSchemaId = dataSetSchema.tables[0].tableSchemaId;
-        const formData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
-        setWebFormData(formData);
-      }
+      setTableSchemaId(dataSetSchema.tables[0].tableSchemaId);
       setDatasetTitle(dataSetStatistics.dataSetSchemaName);
       setTableSchema(
         dataSetSchema.tables.map(tableSchema => {
@@ -341,6 +337,30 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     );
   };
 
+  const isWebForm = () => {
+    if (dataSetId == 5 || dataSetId == 142) {
+      return <WebFormData dataSetId={dataSetId} tableSchemaId={tableSchemaId} />;
+    } else {
+      return (
+        <SnapshotContext.Provider
+          value={{
+            snapshotState: snapshotState,
+            snapshotDispatch: snapshotDispatch
+          }}>
+          <TabsSchema
+            activeIndex={activeIndex}
+            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+            recordPositionId={recordPositionId}
+            selectedRecordErrorId={selectedRecordErrorId}
+            tables={tableSchema}
+            tableSchemaColumns={tableSchemaColumns}
+            hasWritePermissions={hasWritePermissions}
+          />
+        </SnapshotContext.Provider>
+      );
+    }
+  };
+
   if (loading) {
     return layout(<Spinner />);
   }
@@ -428,22 +448,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
-        {/* <SnapshotContext.Provider
-          value={{
-            snapshotState: snapshotState,
-            snapshotDispatch: snapshotDispatch
-          }}>
-          <TabsSchema
-            activeIndex={activeIndex}
-            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-            recordPositionId={recordPositionId}
-            selectedRecordErrorId={selectedRecordErrorId}
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            hasWritePermissions={hasWritePermissions}
-          />
-        </SnapshotContext.Provider> */}
-        <WebFormData data={webFormData} />
+        {isWebForm()}
       </ReporterDataSetContext.Provider>
       <Dialog
         dismissableMask={true}

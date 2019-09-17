@@ -84,7 +84,6 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   };
 
   const onDeleteDocument = async documentData => {
-    console.log('DocumentData: ', documentData);
     try {
       const response = await DocumentService.deleteDocument(documentData.id);
       if (response >= 200 && response <= 299) {
