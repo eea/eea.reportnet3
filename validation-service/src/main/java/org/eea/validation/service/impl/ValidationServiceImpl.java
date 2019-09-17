@@ -124,6 +124,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataSetControllerZuul datasetController;
 
+  /** The metabase controller. */
   @Autowired
   private DatasetMetabaseController metabaseController;
 
@@ -315,29 +316,6 @@ public class ValidationServiceImpl implements ValidationService {
 
   }
 
-  /**
-   * List of objects paginated by threads.
-   *
-   * @param <T> the generic type
-   * @param objects the objects
-   *
-   * @return the list
-   */
-  private <T> List<List<T>> listOfObjectsPaginated(final List<T> objects) {
-    List<List<T>> generalList = new ArrayList<>();
-    // lists size
-    int size = null != objects ? objects.size() / 8 : 0;
-    final int BATCH = size > 1 ? 10 : size;
-    // dividing the number of records in different lists
-    int nLists = (int) Math.ceil(objects.size() / (double) BATCH);
-    if (nLists > 1) {
-      for (int i = 0; i < (nLists - 1); i++) {
-        generalList.add(new ArrayList<>(objects.subList(BATCH * i, BATCH * (i + 1))));
-      }
-    }
-    generalList.add(new ArrayList<>(objects.subList(BATCH * (nLists - 1), objects.size())));
-    return generalList;
-  }
 
   /**
    * Validate record.
@@ -351,6 +329,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateRecord(Long datasetId, KieSession session) throws EEAException {
     long timer = System.currentTimeMillis();
+    LOG.info(
+        "Validating records dataset" + datasetId + "nombre: " + TenantResolver.getTenantName());
+
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -388,6 +369,7 @@ public class ValidationServiceImpl implements ValidationService {
             }
           });
         }
+        TenantResolver.setTenantName("dataset_" + datasetId);
         recordValidationRepository.saveAll((Iterable<RecordValidation>) recordValidations);
       });
       // Adding errors into tables
@@ -423,13 +405,16 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateFields(Long datasetId, KieSession session) throws EEAException {
     long timer = System.currentTimeMillis();
+    LOG.info(
+        "Validating Fields dataset " + datasetId + " nombre: " + TenantResolver.getTenantName());
+
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     // Fields
     List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
-    tableValues.parallelStream().forEach(tableValue -> {
+    tableValues.stream().forEach(tableValue -> {
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
@@ -456,6 +441,7 @@ public class ValidationServiceImpl implements ValidationService {
                 }
                 recordVal.getValidation().setOriginName(fieldValue.getValidation().getOriginName());
               });
+              TenantResolver.setTenantName("dataset_" + datasetId);
               validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
             }
           });

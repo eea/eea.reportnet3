@@ -32,7 +32,7 @@ public class CodeListUtils {
    * @param codeList the code list
    * @return the boolean
    */
-  public static Boolean codeListValidate(String value, String codeList) {
+  public static Boolean codeListValidate(final String value, final String codeList) {
     switch (codeList) {
       case "BWDStatus":
         return listBWDStatus.stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value));

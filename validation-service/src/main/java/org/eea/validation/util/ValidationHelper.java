@@ -73,6 +73,7 @@ public class ValidationHelper {
     LOG.info("Validating Dataset");
     // validationService.validateDataSet(datasetId, session);
     System.err.println(System.currentTimeMillis() - timer);
+    session.dispose();
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }

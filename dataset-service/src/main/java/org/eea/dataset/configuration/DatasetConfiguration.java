@@ -104,7 +104,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
   /** The max pool size. */
   @Value("${spring.datasource.hikari.maximum-pool-size}")
-  private static int maxPoolSize = 0;
+  private int maxPoolSize;
 
 
   /**
@@ -154,7 +154,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the data source
    */
   @Primary
-  private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
+  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
     HikariDataSource hikariDataSource = new HikariDataSource();
     hikariDataSource.setJdbcUrl(connectionDataVO.getConnectionString());
     hikariDataSource.setSchema(connectionDataVO.getSchema());
