@@ -269,6 +269,9 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
         field.value = webFormFieldDTO.value;
 
         row.fieldId = field.fieldId;
+        row.type = field.type;
+        row.fieldSchemaId = field.fieldSchemaId;
+
         if (field.fieldSchemaId === letterFieldSchemaId) {
           row.columnPosition = field.value;
         } else if (field.fieldSchemaId === numberFieldSchemaId) {
