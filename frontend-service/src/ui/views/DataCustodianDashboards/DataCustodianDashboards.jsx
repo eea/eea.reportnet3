@@ -33,6 +33,34 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     command: () => history.push('/')
   };
 
+  const newLegendClickHandler = function(e, legendItem) {
+    let datasetIndex = legendItem.datasetIndex;
+
+    let currentChart = this.chart;
+
+    let arrLenght = currentChart.data.datasets.length;
+
+    let arrLegendSameTypePositions = [];
+
+    for (let i = datasetIndex; i >= 0; ) {
+      arrLegendSameTypePositions.push(i);
+      i -= 3;
+    }
+    for (let i = datasetIndex; i < arrLenght; ) {
+      if (!arrLegendSameTypePositions.includes(i)) {
+        arrLegendSameTypePositions.push(i);
+      }
+      i += 3;
+    }
+
+    arrLegendSameTypePositions
+      .map(index => currentChart.getDatasetMeta(index))
+      .forEach(meta => {
+        meta.hidden = meta.hidden === null ? !currentChart.data.datasets[datasetIndex].hidden : null;
+      });
+    currentChart.update();
+  };
+
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
@@ -83,63 +111,72 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
       datasets: [
         {
-          label: tableNames[0],
+          label: `CORRECT`,
+          tableName: tableNames[0],
           backgroundColor: '#004494',
           data: tableOnePercentages[0],
           totalData: tableOneValues[0],
           stack: tableNames[0]
         },
         {
-          label: tableNames[0],
+          label: `WARNINGS`,
+          tableName: tableNames[0],
           backgroundColor: '#ffd617',
           data: tableOnePercentages[1],
           totalData: tableOneValues[1],
           stack: tableNames[0]
         },
         {
-          label: tableNames[0],
+          label: `ERRORS`,
+          tableName: tableNames[0],
           backgroundColor: '#DA2131',
           data: tableOnePercentages[2],
           totalData: tableOneValues[2],
           stack: tableNames[0]
         },
         {
-          label: tableNames[1],
+          label: `CORRECT`,
+          tableName: tableNames[1],
           backgroundColor: '#004494',
           data: tableTwoPercentages[0],
           totalData: tableTwoValues[0],
           stack: tableNames[1]
         },
         {
-          label: tableNames[1],
+          label: `WARNINGS`,
+          tableName: tableNames[1],
           backgroundColor: '#ffd617',
           data: tableTwoPercentages[1],
           totalData: tableTwoValues[1],
           stack: tableNames[1]
         },
         {
-          label: tableNames[1],
+          label: `ERRORS`,
+          tableName: tableNames[1],
           backgroundColor: '#DA2131',
           data: tableTwoPercentages[2],
           totalData: tableTwoValues[2],
           stack: tableNames[1]
         },
         {
-          label: tableNames[2],
+          label: `CORRECT`,
+          tableName: tableNames[2],
           backgroundColor: '#004494',
           data: tableThirdPercentages[0],
           totalData: tableThirdValues[0],
           stack: tableNames[2]
         },
         {
-          label: tableNames[2],
+          label: `WARNINGS`,
+          tableName: tableNames[2],
           backgroundColor: '#ffd617',
           data: tableThirdPercentages[1],
           totalData: tableThirdValues[1],
           stack: tableNames[2]
         },
         {
-          label: tableNames[2],
+          label: `ERRORS`,
+          tableName: tableNames[2],
           backgroundColor: '#DA2131',
           data: tableThirdPercentages[2],
           totalData: tableThirdValues[2],
@@ -157,32 +194,30 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         intersect: false,
         callbacks: {
           label: (tooltipItems, data) =>
-            `${data.datasets[tooltipItems.datasetIndex].label}: ${
+            `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
               data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems.index]
             } (${tooltipItems.yLabel}%)`
         }
       },
       legend: {
-        display: false
+        onClick: newLegendClickHandler,
+
+        display: true,
+        labels: {
+          filter: legendItem =>
+            legendItem.datasetIndex == 0 || legendItem.datasetIndex == 1 || legendItem.datasetIndex == 2
+        }
       },
       responsive: true,
       scales: {
         xAxes: [
           {
-            stacked: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Datasets'
-            }
+            stacked: true
           }
         ],
         yAxes: [
           {
             stacked: true,
-            /*  scaleLabel: {
-              display: true,
-              labelString: 'Percentage'
-            }, */
             ticks: {
               // Include a % sign in the ticks
               callback: (value, index, values) => `${value}%`
@@ -199,15 +234,13 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       datasets: [
         {
           label: 'Released',
-          backgroundColor: 'rgba(50, 205, 50, 0.7)',
-          borderColor: 'rgba(50, 205, 50, 1)',
+          backgroundColor: 'rgb(50, 205, 50)',
+
           data: dashboardsData.dataSetCountries.map(released => released.isDataSetReleased)
         },
         {
           label: 'Unreleased',
-          backgroundColor: '#8FBC8F',
-          backgroundColor: 'rgba(143, 188, 143, 0.7)',
-          borderColor: 'rgba(143, 188, 143, 1)',
+          backgroundColor: 'rgb(255, 99, 132)',
           data: dashboardsData.dataSetCountries.map(released => !released.isDataSetReleased)
         }
       ]
@@ -224,20 +257,13 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       scales: {
         xAxes: [
           {
-            stacked: true,
-            scaleLabel: {
-              display: true,
-              labelString: 'Datasets'
-            }
+            stacked: true
           }
         ],
         yAxes: [
           {
             stacked: true,
-            /*  scaleLabel: {
-              display: true,
-              labelString: 'Percentage'
-            }, */
+
             ticks: {
               // Include a % sign in the ticks
               callback: (value, index, values) => `${value}`
@@ -284,7 +310,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="100%" height="35%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="35%" />
+        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="10%" />
       </div>
     </>
   );
