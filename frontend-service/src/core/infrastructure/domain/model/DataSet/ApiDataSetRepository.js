@@ -1,4 +1,4 @@
-import { isNull, isUndefined } from 'lodash/isNull';
+import { isNull, isUndefined } from 'lodash';
 
 import { apiDataSet } from 'core/infrastructure/api/domain/model/DataSet';
 import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
@@ -267,10 +267,6 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
         field.name = webFormFieldDTO.name;
         field.type = webFormFieldDTO.type;
         field.value = webFormFieldDTO.value;
-
-        if (field.fieldId === 173241) {
-          console.log('Field0', field);
-        }
 
         row.fieldId = field.fieldId;
         if (field.fieldSchemaId === letterFieldSchemaId) {
