@@ -133,12 +133,15 @@ const WebFormData = ({ data }) => {
 
       i++;
 
-      rowsFilled.push(
-        <tr name={rowIndex}>
-          <td>{header}</td>
-          {tds}
-        </tr>
-      );
+      if (!isEmpty(header))
+        rowsFilled.push(
+          <tr name={rowIndex}>
+            <td>{header}</td>
+            {tds}
+          </tr>
+        );
+
+      header = '';
     }
     grid.push(rowsFilled);
     return grid;
