@@ -662,13 +662,14 @@ const DataViewer = withRouter(
       return value.length > 0 ? value[0].fieldData[field] : '';
     };
 
-    const getExportButtonPosition = button => {
-      const buttonLeftPosition = document.getElementById('buttonExportTable').offsetLeft;
-      const buttonTopPosition = button.style.top;
-
-      const exportTableMenu = document.getElementById('exportTableMenu');
-      exportTableMenu.style.top = buttonTopPosition;
-      exportTableMenu.style.left = `${buttonLeftPosition}px`;
+    const getExportButtonPosition = e => {
+      const exportButton = e.currentTarget;
+      const left = `${exportButton.offsetLeft}px`;
+      const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
+      const top = `${topValue}px `;
+      const menu = exportButton.nextElementSibling;
+      menu.style.top = top;
+      menu.style.left = left;
     };
 
     const getInitialRecordValues = record => {
@@ -847,16 +848,16 @@ const DataViewer = withRouter(
               className={`p-button-rounded p-button-secondary`}
               icon={loadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['exportTable']}
-              onClick={event => exportMenuRef.current.show(event)}
+              onClick={event => {
+                exportMenuRef.current.show(event);
+              }}
             />
             <Menu
               model={exportButtonsList}
               popup={true}
               ref={exportMenuRef}
               id="exportTableMenu"
-              onShow={e => {
-                getExportButtonPosition(e.target);
-              }}
+              onShow={e => getExportButtonPosition(e)}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
