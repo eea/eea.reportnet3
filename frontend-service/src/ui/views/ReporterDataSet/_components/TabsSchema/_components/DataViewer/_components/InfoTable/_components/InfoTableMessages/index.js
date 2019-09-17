@@ -1,0 +1,1 @@
+export { InfoTableMessages } from './InfoTableMessages';

@@ -3263,7 +3263,7 @@ body .p-dialog .p-dialog-content {
   color: #404040;
   border: 1px solid #c8c8c8;
   padding: 1em;
-  height: 80%;
+  max-height: 60vh;
   overflow: auto;
 }
 body .p-dialog .p-dialog-footer {
@@ -3293,8 +3293,7 @@ body .p-dialog.p-confirm-dialog .p-dialog-content > span.p-icon {
   margin-right: 0.35em;
   font-size: 16px;
 }
-.p-component-overlay.p-dialog-mask,
-.p-component-overlay.p-sidebar-mask {
+.p-component-overlay.p-dialog-mask{
   display: none !important;
 }
 
