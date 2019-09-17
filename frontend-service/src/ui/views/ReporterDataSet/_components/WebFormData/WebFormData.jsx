@@ -22,10 +22,10 @@ const WebFormData = ({ data }) => {
     let webFormData = data;
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
-    let rowHeaders = webFormData.rowHeaders;
+    // let rowHeaders = webFormData.rowHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
-    let grid = getGrid(rowHeaders, dataColumns);
+    let grid = getGrid(dataColumns);
 
     formResult.push(
       <>
@@ -92,7 +92,7 @@ const WebFormData = ({ data }) => {
     return columns;
   };
 
-  const getGrid = (rowHeaders, dataColumns) => {
+  const getGrid = dataColumns => {
     let grid = [];
 
     let rows = getMinAndMaxRows(dataColumns);
@@ -196,14 +196,21 @@ const WebFormData = ({ data }) => {
   };
 
   const onEditorValueChange = (props, value) => {
-    let updatedData = changeCellValue(props, value);
-    setFetchedData(updatedData);
+    // let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
+    // console.log('onEditorValueChange props and value', props, value);
+    let updatedData = changeCellValue(value, props[0].fieldId, props[0].columnPosition, props[0].rowPosition);
+    setFetchedData(data.dataColumns);
   };
 
-  const changeCellValue = (props, value) => {
-    console.log(props, value);
-    // tableData[rowIndex].dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0].fieldData[field] = value;
-    // return tableData;
+  const changeCellValue = (value, fieldId, columnPosition, rowPosition) => {
+    console.log('Col:', columnPosition, 'RowPosition', rowPosition);
+    let columnArrayPosition = columnPosition.charCodeAt(0) - 64 - 2; // if columnPosiiton === "D" => columnArrayPosition = 2
+    let oldValue = data.dataColumns[columnArrayPosition].filter(field => field.fieldId === fieldId)[0];
+    console.log('Old', oldValue);
+    let newValue = value;
+    oldValue.value = newValue;
+    console.log('New', oldValue);
+    return oldValue;
   };
 
   return (
