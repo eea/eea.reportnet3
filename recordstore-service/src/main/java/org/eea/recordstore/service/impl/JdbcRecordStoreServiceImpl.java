@@ -445,7 +445,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyManager.copyIn(query, inputStream);
 
     } catch (PSQLException e) {
-      LOG.error("Error restoring the file {}. Restoring snapshot continues", fileName, e);
+      LOG.error("Error restoring the file {} executing query {}. Restoring snapshot continues",
+          fileName, query, e);
     } finally {
       inputStream.close();
     }
