@@ -36,10 +36,9 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     if (isEmpty(webFormData)) {
       return formResult;
     }
-
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
-    console.log(fetchedData, columnHeaders);
+
     let columnTitles = getColumnHeaders(columnHeaders);
     let grid = getGrid(dataColumns);
 
@@ -142,7 +141,9 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
             </td>
           );
         } else {
-          tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
+          tds.push(
+            <td name={`${columnPosition}${rowIndex}`}>{/* <InputText className={styles.disabledInput} /> */}</td>
+          );
         }
         j++;
       }
@@ -229,18 +230,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     <div className={`${styles.newContainer} ${styles.section}`}>
       <div className="ui-dialog-buttonpane p-clearfix">
         <table className={styles.webFormTable}>{form()}</table>
-        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
-        <Button
-          label={resources.messages['save']}
-          icon="save"
-          onClick={() => {
-            try {
-              onSaveRecord('');
-            } catch (error) {
-              console.error(error);
-            }
-          }}
-        />
       </div>
     </div>
   );
