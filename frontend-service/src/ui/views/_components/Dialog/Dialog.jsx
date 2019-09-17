@@ -14,6 +14,7 @@ export const Dialog = ({
   closeOnEscape,
   contentStyle,
   dismissableMask,
+  focusOnShow,
   footer,
   header,
   id,
@@ -43,6 +44,7 @@ export const Dialog = ({
       <PrimeDialog
         className={className}
         dismissableMask={dismissableMask}
+        focusOnShow={focusOnShow}
         footer={footer}
         header={header}
         maximizable={maximizable}

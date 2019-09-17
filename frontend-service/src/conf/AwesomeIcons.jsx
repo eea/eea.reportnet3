@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   faFilePdf,
   faFileExcel,
@@ -12,7 +10,8 @@ import {
   faDatabase,
   faFileImage,
   faFilePowerpoint,
-  faFileVideo
+  faFileVideo,
+  faTrashAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -103,6 +102,8 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'wmv':
       return faFileVideo;
+    case 'delete':
+      return faTrashAlt;
     default:
       return faFileAlt;
   }
