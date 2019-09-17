@@ -344,6 +344,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param fileName the file name
    * @param query the query
    * @param copyManager the copy manager
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -431,6 +432,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param query the query
    * @param fileName the file name
    * @param copyManager the copy manager
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
@@ -443,7 +445,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyManager.copyIn(query, inputStream);
 
     } catch (PSQLException e) {
-      LOG.error("Error restoring the file {}. Restoring snapshot continues", fileName);
+      LOG.error("Error restoring the file {}. Restoring snapshot continues", fileName, e);
     } finally {
       inputStream.close();
     }
