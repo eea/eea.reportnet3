@@ -1,0 +1,10 @@
+.listItem {
+  border-radius: 20px;
+  padding: 2rem;
+}
+.dataSet {
+  background-color: var(--c-corporate-blue);
+}
+.documents {
+  background-color: #ffba01;
+}

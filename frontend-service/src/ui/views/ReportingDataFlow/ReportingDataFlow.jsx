@@ -14,6 +14,7 @@ import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
+// import { ListItem } from './_components/ListItem';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -173,6 +174,8 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.dataSetItem}`}>
+              {/* <ListItem layout="document" />
+              <ListItem layout="dataSet" /> */}
               <Button
                 className="p-button-warning"
                 label={resources.messages.do}
