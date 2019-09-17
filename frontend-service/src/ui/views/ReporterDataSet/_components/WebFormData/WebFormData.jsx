@@ -10,8 +10,16 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 const WebFormData = ({ data }) => {
-  const [fetchedData, setFetchedData] = useState([]);
+  const [mmrData, setMmrData] = useState(data.dataColumns);
   const resources = useContext(ResourcesContext);
+
+  // useEffect(() => {
+  //   setMmrData(data.dataColumns);
+  // }, []);
+
+  useEffect(() => {
+    console.log(mmrData);
+  }, [mmrData]);
 
   const form = () => {
     if (isEmpty(data)) {
@@ -19,13 +27,10 @@ const WebFormData = ({ data }) => {
     }
 
     let formResult = [];
-    let webFormData = data;
-    let dataColumns = webFormData.dataColumns;
-    let columnHeaders = webFormData.columnHeaders;
-    // let rowHeaders = webFormData.rowHeaders;
+    let columnHeaders = data.columnHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
-    let grid = getGrid(dataColumns);
+    let grid = getGrid(mmrData);
 
     formResult.push(
       <>
@@ -93,6 +98,7 @@ const WebFormData = ({ data }) => {
   };
 
   const getGrid = dataColumns => {
+    console.log(dataColumns);
     let grid = [];
 
     let rows = getMinAndMaxRows(dataColumns);
@@ -193,27 +199,30 @@ const WebFormData = ({ data }) => {
   };
 
   const onCancelRowEdit = () => {
-    // let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
+    // let updatedValue = changeRecordInTable(mmrData, getRecordId(mmrData, selectedRecord));
     // setEditDialogVisible(false);
-    // setFetchedData(updatedValue);
+    // setMmrData(updatedValue);
   };
 
   const onEditorValueChange = (props, value) => {
     // let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
     // console.log('onEditorValueChange props and value', props, value);
-    let updatedData = changeCellValue(value, props[0].fieldId, props[0].columnPosition, props[0].rowPosition);
-    setFetchedData(data.dataColumns);
+    console.log(props);
+    const updatedData = changeCellValue(mmrData, value, props[0].fieldId);
+    setMmrData(updatedData);
   };
 
-  const changeCellValue = (value, fieldId, columnPosition, rowPosition) => {
-    console.log('Col:', columnPosition, 'RowPosition', rowPosition);
-    let columnArrayPosition = columnPosition.charCodeAt(0) - 64 - 2; // if columnPosiiton === "D" => columnArrayPosition = 2
-    let oldValue = data.dataColumns[columnArrayPosition].filter(field => field.fieldId === fieldId)[0];
-    console.log('Old', oldValue);
-    let newValue = value;
-    oldValue.value = newValue;
-    console.log('New', oldValue);
-    return oldValue;
+  const changeCellValue = (tableData, value, fieldId) => {
+    const aux = tableData.map(column =>
+      column.map((col, index, originalArray) => {
+        if (col.fieldId === fieldId) {
+          originalArray[index].value = value;
+        }
+        return originalArray;
+      })
+    );
+    console.log(aux);
+    return tableData;
   };
 
   return (

@@ -1,4 +1,4 @@
-import { isNull, isUndefined } from 'lodash/isNull';
+import { isNull } from 'lodash';
 
 import { apiDataSet } from 'core/infrastructure/api/domain/model/DataSet';
 import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
