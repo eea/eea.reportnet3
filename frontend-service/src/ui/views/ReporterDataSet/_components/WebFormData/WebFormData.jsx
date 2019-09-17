@@ -39,7 +39,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
 
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
-
+    console.log(fetchedData, columnHeaders);
     let columnTitles = getColumnHeaders(columnHeaders);
     let grid = getGrid(dataColumns);
 
@@ -110,6 +110,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const getGrid = dataColumns => {
+    console.log(dataColumns);
     let grid = [];
 
     let rows = getMinAndMaxRows(dataColumns);
@@ -124,7 +125,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let header = '';
 
     for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
-      let i = 0;
       let j = 0;
       let tds = [];
 
@@ -144,11 +144,8 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
         } else {
           tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
         }
-
         j++;
       }
-
-      i++;
 
       if (!isEmpty(header))
         rowsFilled.push(
@@ -162,14 +159,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     }
     grid.push(rowsFilled);
     return grid;
-  };
-
-  const nextChar = letter => {
-    return String.fromCharCode(letter.charCodeAt(0) + 1);
-  };
-
-  const previousChar = letter => {
-    return String.fromCharCode(letter.charCodeAt(0) - 1);
   };
 
   const onSaveRecord = async record => {
@@ -216,21 +205,20 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const onEditorValueChange = (props, value) => {
-    // let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
-    // console.log('onEditorValueChange props and value', props, value);
-    let updatedData = changeCellValue(value, props[0].fieldId, props[0].columnPosition, props[0].rowPosition);
-    setFetchedData(fetchedData.dataColumns);
+    const updatedData = changeCellValue(fetchedData.dataColumns, value, props[0].fieldId);
+    setFetchedData({ ...fetchedData, dataColumns: updatedData });
   };
 
-  const changeCellValue = (value, fieldId, columnPosition, rowPosition) => {
-    console.log('Col:', columnPosition, 'RowPosition', rowPosition);
-    let columnArrayPosition = columnPosition.charCodeAt(0) - 64 - 2; // if columnPosiiton === "D" => columnArrayPosition = 2
-    let oldValue = fetchedData.dataColumns[columnArrayPosition].filter(field => field.fieldId === fieldId)[0];
-    console.log('Old', oldValue);
-    let newValue = value;
-    oldValue.value = newValue;
-    console.log('New', oldValue);
-    return oldValue;
+  const changeCellValue = (tableData, value, fieldId) => {
+    tableData.map(column =>
+      column.map((field, index, originalArray) => {
+        if (field.fieldId === fieldId) {
+          originalArray[index].value = value;
+        }
+        return originalArray;
+      })
+    );
+    return tableData;
   };
 
   if (loading) {
