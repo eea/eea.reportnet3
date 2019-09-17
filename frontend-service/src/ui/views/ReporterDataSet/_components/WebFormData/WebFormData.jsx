@@ -8,29 +8,40 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 import { Button } from 'ui/views/_components/Button';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Spinner } from 'ui/views/_components/Spinner';
 
-const WebFormData = ({ data }) => {
-  const [mmrData, setMmrData] = useState(data.dataColumns);
+import { DataSetService } from 'core/services/DataSet';
+
+const WebFormData = ({ dataSetId, tableSchemaId }) => {
+  const [fetchedData, setFetchedData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const resources = useContext(ResourcesContext);
 
-  // useEffect(() => {
-  //   setMmrData(data.dataColumns);
-  // }, []);
-
   useEffect(() => {
-    console.log(mmrData);
-  }, [mmrData]);
+    onLoadWebForm();
+  }, []);
+
+  const onLoadWebForm = async () => {
+    setLoading(true);
+    const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+    setFetchedData(webFormData);
+    setLoading(false);
+  };
 
   const form = () => {
-    if (isEmpty(data)) {
-      return;
+    let formResult = [];
+    let webFormData = fetchedData;
+
+    if (isEmpty(webFormData)) {
+      return formResult;
     }
 
-    let formResult = [];
-    let columnHeaders = data.columnHeaders;
-
+    let dataColumns = webFormData.dataColumns;
+    let columnHeaders = webFormData.columnHeaders;
+    console.log(fetchedData, columnHeaders);
     let columnTitles = getColumnHeaders(columnHeaders);
-    let grid = getGrid(mmrData);
+    let grid = getGrid(dataColumns);
 
     formResult.push(
       <>
@@ -38,6 +49,7 @@ const WebFormData = ({ data }) => {
         {grid}
       </>
     );
+
     return formResult;
   };
 
@@ -113,7 +125,6 @@ const WebFormData = ({ data }) => {
     let header = '';
 
     for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
-      let i = 0;
       let j = 0;
       let tds = [];
 
@@ -133,11 +144,8 @@ const WebFormData = ({ data }) => {
         } else {
           tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
         }
-
         j++;
       }
-
-      i++;
 
       if (!isEmpty(header))
         rowsFilled.push(
@@ -151,14 +159,6 @@ const WebFormData = ({ data }) => {
     }
     grid.push(rowsFilled);
     return grid;
-  };
-
-  const nextChar = letter => {
-    return String.fromCharCode(letter.charCodeAt(0) + 1);
-  };
-
-  const previousChar = letter => {
-    return String.fromCharCode(letter.charCodeAt(0) - 1);
   };
 
   const onSaveRecord = async record => {
@@ -199,31 +199,31 @@ const WebFormData = ({ data }) => {
   };
 
   const onCancelRowEdit = () => {
-    // let updatedValue = changeRecordInTable(mmrData, getRecordId(mmrData, selectedRecord));
+    // let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
     // setEditDialogVisible(false);
-    // setMmrData(updatedValue);
+    // setFetchedData(updatedValue);
   };
 
   const onEditorValueChange = (props, value) => {
-    // let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, value);
-    // console.log('onEditorValueChange props and value', props, value);
-    console.log(props);
-    const updatedData = changeCellValue(mmrData, value, props[0].fieldId);
-    setMmrData(updatedData);
+    const updatedData = changeCellValue(fetchedData.dataColumns, value, props[0].fieldId);
+    setFetchedData({ ...fetchedData, dataColumns: updatedData });
   };
 
   const changeCellValue = (tableData, value, fieldId) => {
-    const aux = tableData.map(column =>
-      column.map((col, index, originalArray) => {
-        if (col.fieldId === fieldId) {
+    tableData.map(column =>
+      column.map((field, index, originalArray) => {
+        if (field.fieldId === fieldId) {
           originalArray[index].value = value;
         }
         return originalArray;
       })
     );
-    console.log(aux);
     return tableData;
   };
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <div className={`${styles.newContainer} ${styles.section}`}>
