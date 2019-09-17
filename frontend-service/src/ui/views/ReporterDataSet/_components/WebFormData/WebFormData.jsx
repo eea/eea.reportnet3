@@ -10,10 +10,12 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
 
 const WebFormData = ({ dataSetId, tableSchemaId }) => {
   const [fetchedData, setFetchedData] = useState([]);
+  const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(false);
 
   const resources = useContext(ResourcesContext);
@@ -22,11 +24,61 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     onLoadWebForm();
   }, []);
 
+  const onEditorKeyChange = (props, event, record) => {
+    if (event.key === 'Escape') {
+      onEditorValueChange(props, event.target.value);
+      // setFetchedData(updatedData);
+    } else if (event.key === 'Enter' || event.key === 'Tab') {
+      onEditorSubmitValue(props, event.target.value, record);
+    }
+  };
+
+  const onEditorSubmitValue = async (cell, value) => {
+    console.log(cell);
+    if (!isEmpty(cell)) {
+      //let field = fetchedData.dataColumns.reduce(column => column.filter(col => col.fieldId === cell[0].fieldId))[0];
+      //record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
+      if (value !== initialCellValue) {
+        const fieldUpdated = DataSetService.updateFieldById(
+          dataSetId,
+          cell.fieldSchemaId,
+          cell.fieldId,
+          cell.type,
+          value
+        );
+        if (!fieldUpdated) {
+          console.error('Error!');
+        }
+      }
+    }
+  };
+
+  const onEditorValueChange = (props, value) => {
+    const updatedData = changeCellValue(fetchedData.dataColumns, value, props[0].fieldId);
+    setFetchedData({ ...fetchedData, dataColumns: updatedData });
+  };
+
+  const onEditorValueFocus = value => {
+    setInitialCellValue(value);
+  };
+
   const onLoadWebForm = async () => {
     setLoading(true);
     const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
     setFetchedData(webFormData);
     setLoading(false);
+  };
+
+  const changeCellValue = (tableData, value, fieldId) => {
+    tableData.map(column =>
+      column.map((field, index, originalArray) => {
+        if (field.fieldId === fieldId) {
+          originalArray[index].value = value;
+        }
+        return originalArray;
+      })
+    );
+    return tableData;
   };
 
   const form = () => {
@@ -137,7 +189,10 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
             <td name={`${columnPosition}${rowIndex}`}>
               <InputText
                 value={filteredColumn[0].value}
+                onBlur={e => onEditorSubmitValue(filteredColumn, e.target.value)}
                 onChange={e => onEditorValueChange(filteredColumn, e.target.value)}
+                onFocus={e => onEditorValueFocus(e.target.value)}
+                onKeyDown={e => onEditorKeyChange(filteredColumn, e)}
               />
             </td>
           );
@@ -161,66 +216,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     return grid;
   };
 
-  const onSaveRecord = async record => {
-    //Delete hidden column null values (recordId, validations, etc.)
-    // record.dataRow = record.dataRow.filter(column => !isNull(Object.values(column.fieldData)[0]));
-    // if (isNewRecord) {
-    //   try {
-    //     await DataSetService.addRecordsById(dataSetId, tableId, [record]);
-    //     setAddDialogVisible(false);
-    //     onRefresh();
-    //   } catch (error) {
-    //     console.error('DataViewer error: ', error);
-    //     const errorResponse = error.response;
-    //     console.error('DataViewer errorResponse: ', errorResponse);
-    //     if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-    //       history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
-    //     }
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // } else {
-    //   try {
-    //     await DataSetService.updateRecordsById(dataSetId, record);
-    //     setEditDialogVisible(false);
-    //     onRefresh();
-    //   } catch (error) {
-    //     console.error('DataViewer error: ', error);
-    //     const errorResponse = error.response;
-    //     console.error('DataViewer errorResponse: ', errorResponse);
-    //     if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-    //       history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
-    //     }
-    //   } finally {
-    //     onCancelRowEdit();
-    //     setLoading(false);
-    //   }
-    // }
-  };
-
-  const onCancelRowEdit = () => {
-    // let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
-    // setEditDialogVisible(false);
-    // setFetchedData(updatedValue);
-  };
-
-  const onEditorValueChange = (props, value) => {
-    const updatedData = changeCellValue(fetchedData.dataColumns, value, props[0].fieldId);
-    setFetchedData({ ...fetchedData, dataColumns: updatedData });
-  };
-
-  const changeCellValue = (tableData, value, fieldId) => {
-    tableData.map(column =>
-      column.map((field, index, originalArray) => {
-        if (field.fieldId === fieldId) {
-          originalArray[index].value = value;
-        }
-        return originalArray;
-      })
-    );
-    return tableData;
-  };
-
   if (loading) {
     return <Spinner />;
   }
@@ -235,7 +230,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
           icon="save"
           onClick={() => {
             try {
-              onSaveRecord('');
+              onSaveRecords('');
             } catch (error) {
               console.error(error);
             }
