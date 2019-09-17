@@ -150,8 +150,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // 2. Restore the dataset data, using the operation from recordstore
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot);
-    // 3. Sanitize the table values, delete possible unused values
-    datasetService.sanitizeTableValuesToRestoreSnapshot(idDataset);
+
     LOG.info("Snapshot {} restored", idSnapshot);
 
   }

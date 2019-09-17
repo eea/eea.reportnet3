@@ -1,6 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -63,5 +64,14 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    */
   @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv WHERE tv.id = :id")
   List<RecordValue> findAllRecordsAndFieldsByTableValueId(@Param("id") Long tableId);
+
+  /**
+   * Find all records and fields by table value id.
+   *
+   * @param recordId the record id
+   * @return the list
+   */
+  @Query("SELECT rv from RecordValue rv WHERE rv.id = :id")
+  Optional<RecordValue> findByIdValidation(@Param("id") Long recordId);
 
 }

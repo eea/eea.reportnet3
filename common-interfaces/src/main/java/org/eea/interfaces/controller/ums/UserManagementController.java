@@ -2,12 +2,14 @@ package org.eea.interfaces.controller.ums;
 
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * The interface User management controller.
  */
 public interface UserManagementController {
+
 
   /**
    * The interface User management controller zull.
@@ -119,4 +122,15 @@ public interface UserManagementController {
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
+  /**
+   * Gets resource detail.
+   *
+   * @param idResource the id resource
+   * @param resourceGroupEnum the resource group enum
+   *
+   * @return the resource detail
+   */
+  @GetMapping("/resource/details")
+  ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 }

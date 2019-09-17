@@ -62,6 +62,15 @@ public interface KeycloakConnectorService {
   GroupInfo[] getGroups();
 
   /**
+   * Gets group detail.
+   *
+   * @param groupId the group id
+   *
+   * @return the group detail
+   */
+  GroupInfo getGroupDetail(String groupId);
+
+  /**
    * Add user to group.
    *
    * @param userId the user id

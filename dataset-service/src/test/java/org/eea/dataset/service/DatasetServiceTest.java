@@ -701,9 +701,9 @@ public class DatasetServiceTest {
 
   @Test
   public void testDeleteTableData() throws Exception {
-    doNothing().when(tableRepository).deleteByIdTableSchema(Mockito.any());
+    doNothing().when(recordRepository).deleteRecordWithIdTableSchema(Mockito.any());
     datasetService.deleteTableBySchema("", 1L);
-    Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
+    Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
   @Test(expected = EEAException.class)
@@ -825,7 +825,10 @@ public class DatasetServiceTest {
   @Test
   public void testInsertSchema() throws EEAException {
 
-    datasetService.insertSchema(1L, "");
+    DataSetSchema ds = new DataSetSchema();
+    ds.setTableSchemas(new ArrayList<>());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(ds);
+    datasetService.insertSchema(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }
 
@@ -841,10 +844,5 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
   }
 
-  @Test
-  public void testSanitizeTableValuesToRestoreSnapshot() throws EEAException {
-    datasetService.sanitizeTableValuesToRestoreSnapshot(1L);
-    Mockito.verify(tableRepository, times(1)).sanitizeTableValuesToRestoreSnapshot();
-  }
 
 }

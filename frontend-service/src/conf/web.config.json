@@ -74,17 +74,20 @@
 	"loginUser":{
 		"url": "/user/generateToken?password={:password}&username={:userName}"
 	},
-	"refreshToken":{
-		"url": "/user/refreshToken?refreshToken={:refreshToken}"
-	},
 	"logout":{
 		"url": "/user/logout?refreshToken={:refreshToken}"
+	},
+	"refreshToken":{
+		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	},
 	"REPORTING_DATAFLOW": {
 		"url": "/reporting-data-flow/{:dataFlowId}"
 		},
 	"updateTableDataField":{
 		"url": "/dataset/{:dataSetId}/updateField"
+	},
+	"updateTableDataRecord":{
+		"url":"/dataset/{:dataSetId}/updateRecord"
 	},
 	"DATAFLOW_TASKS":{
 		"url":"/data-flow-task"
