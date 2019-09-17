@@ -747,7 +747,21 @@ public class DatasetServiceTest {
     myRecords.add(new RecordValue());
     Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
     Mockito.when(recordMapper.classListToEntity(Mockito.any())).thenReturn(myRecords);
-    datasetService.createRecords(1L, new ArrayList<RecordVO>(), "");
+    List<RecordVO> records = new ArrayList<>();
+
+    List<RecordValue> recordsList = new ArrayList<>();
+    RecordValue record = new RecordValue();
+
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue field = new FieldValue();
+
+    fields.add(field);
+    field.setValue(null);
+    fields.add(field);
+    record.setFields(fields);
+    recordsList.add(record);
+    when(recordMapper.classListToEntity(records)).thenReturn(recordsList);
+    datasetService.createRecords(1L, records, "");
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 

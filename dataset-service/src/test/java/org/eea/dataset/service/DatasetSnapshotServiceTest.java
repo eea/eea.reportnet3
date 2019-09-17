@@ -153,6 +153,12 @@ public class DatasetSnapshotServiceTest {
         Mockito.any());
   }
 
+  @Test
+  public void releaseSnapshot() throws Exception {
 
+    doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
+    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
+  }
 
 }

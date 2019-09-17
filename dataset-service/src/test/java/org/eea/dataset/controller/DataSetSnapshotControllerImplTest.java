@@ -14,10 +14,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The Class DataSetSnapshotControllerImplTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DataSetSnapshotControllerImplTest {
 
 
+  /** The data set snapshot controller impl. */
   @InjectMocks
   private DataSetSnapshotControllerImpl dataSetSnapshotControllerImpl;
 
@@ -135,6 +139,11 @@ public class DataSetSnapshotControllerImplTest {
     dataSetSnapshotControllerImpl.deleteSnapshot(1L, 1L);
   }
 
+  /**
+   * Test restore snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testRestoreSnapshots() throws Exception {
 
@@ -142,12 +151,22 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.verify(datasetSnapshotService, times(1)).restoreSnapshot(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test restsore snapshots exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testRestsoreSnapshotsException() throws Exception {
 
     dataSetSnapshotControllerImpl.restoreSnapshot(null, 1L);
   }
 
+  /**
+   * Test restore snapshots exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSnapshotsException2() throws Exception {
 
@@ -157,6 +176,11 @@ public class DataSetSnapshotControllerImplTest {
 
   }
 
+  /**
+   * Test release snapshots.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testReleaseSnapshots() throws Exception {
 
@@ -164,6 +188,11 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test release snapshots exception 1.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testReleaseSnapshotsException1() throws Exception {
 
@@ -171,6 +200,11 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test release snapshots exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testReleaseSnapshotsException2() throws Exception {
 
@@ -178,5 +212,4 @@ public class DataSetSnapshotControllerImplTest {
         Mockito.any());
     dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
   }
-
 }
