@@ -1,0 +1,24 @@
+.infoTablePaste {
+  border-style: dashed;
+  border-color: var(--gray);
+  opacity: 0.5;
+  height: 34vh;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.infoTableCellError {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0) 10px,
+    rgba(218, 33, 49, 0.3) 10px,
+    rgba(218, 33, 49, 0.3) 15px
+  ) !important;
+}
+
+.infoTableSpinner {
+  top: 0vh !important;
+}

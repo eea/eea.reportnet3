@@ -2,6 +2,7 @@ import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+import { async } from 'q';
 
 export const apiDocument = {
   all: async dataFlowId => {
@@ -50,6 +51,19 @@ export const apiDocument = {
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`,
         'Content-Type': undefined
+      }
+    });
+    return response.status;
+  },
+  deleteDocument: async documentId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(config.deleteDocument.url, {
+        documentId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
       }
     });
     return response.status;
