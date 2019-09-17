@@ -986,7 +986,20 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
     TableValue table = new TableValue();
     table.setId(tableId);
-    recordValue.parallelStream().forEach(record -> record.setTableValue(table));
+    recordValue.parallelStream().forEach(record -> {
+      if (record.getDatasetPartitionId() == null) {
+        try {
+          record.setDatasetPartitionId(this.obtainPartition(datasetId, "root").getId());
+        } catch (EEAException e) {
+          LOG_ERROR.error(e.getMessage());
+        }
+      }
+      record.setTableValue(table);
+      record.getFields().stream().filter(field -> field.getValue() == null).forEach(field -> {
+        field.setValue("");
+      });
+
+    });
     recordRepository.saveAll(recordValue);
   }
 

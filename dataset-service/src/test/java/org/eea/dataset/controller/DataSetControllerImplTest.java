@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
@@ -495,17 +496,34 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.getPositionFromAnyObjectId(1L, null, null);
   }
 
+  @Mock
+  private DeleteHelper deleteHelper;
 
   /**
    * Test delete import table.
+   * 
+   * @throws EEAException
    */
-  public void testDeleteImportTable() {
-    doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
+  @Test
+  public void testDeleteImportTable() throws EEAException {
+    doNothing().when(deleteHelper).executeDeleteProcess(Mockito.any(), Mockito.any());
     dataSetControllerImpl.deleteImportTable(1L, "");
-    Mockito.verify(datasetService, times(1)).deleteTableBySchema(Mockito.any(), Mockito.any());
 
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableIdSchemaNull() throws EEAException {
+    dataSetControllerImpl.deleteImportTable(1L, null);
+
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteImportTableThrow() throws EEAException {
+    doThrow(new EEAException()).when(deleteHelper).executeDeleteProcess(Mockito.any(),
+        Mockito.any());
+    dataSetControllerImpl.deleteImportTable(1L, "");
+
+  }
 
   /**
    * Test delete import table throw non provided.
