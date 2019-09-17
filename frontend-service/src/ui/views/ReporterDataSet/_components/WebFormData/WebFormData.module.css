@@ -30,3 +30,6 @@
 .kColumn {
   width: 1%;
 }
+.disabledInput {
+  background: #dddddd;
+}
