@@ -1,4 +1,4 @@
-import isNull from 'lodash/isNull';
+import { isNull, isUndefined } from 'lodash';
 
 import { apiDataSet } from 'core/infrastructure/api/domain/model/DataSet';
 import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
@@ -232,6 +232,99 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
   return table;
 };
 
+const webFormDataById = async (dataSetId, tableSchemaId) => {
+  const webFormDataDTO = await apiDataSet.webFormDataById(dataSetId, tableSchemaId);
+  const webForm = new DataSetTable();
+  console.log('Clean Data', webFormDataDTO);
+  const headerFieldSchemaId = '5d666d53460a1e0001b16717';
+  const valueFieldSchemaId = '5d666d53460a1e0001b16728';
+  const descriptionFieldSchemaId = '5d666d53460a1e0001b1671b';
+  const letterFieldSchemaId = '5d666d53460a1e0001b16721';
+  const numberFieldSchemaId = '5d666d53460a1e0001b16723';
+
+  const formData = {};
+  const columnHeaders = [];
+  const rows = [];
+  const letters = [];
+  const rowHeaders = [];
+  const rowPositions = [];
+  columnHeaders.unshift('GREENHOUSE GAS SOURCE');
+
+  if (webFormDataDTO.totalRecords > 0) {
+    webForm.tableSchemaId = webFormDataDTO.idTableSchema;
+    webForm.totalRecords = webFormDataDTO.totalRecords;
+
+    let field, record;
+
+    const records = webFormDataDTO.records.map(webFormRecordDTO => {
+      record = new DataSetTableRecord();
+      let row = {};
+      const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
+        field = new DataSetTableField();
+        field.fieldId = webFormFieldDTO.id;
+        field.fieldSchemaId = webFormFieldDTO.idFieldSchema;
+        field.recordId = webFormRecordDTO.idRecordSchema;
+        field.name = webFormFieldDTO.name;
+        field.type = webFormFieldDTO.type;
+        field.value = webFormFieldDTO.value;
+
+        row.type = field.type;
+        row.fieldSchemaId = field.fieldSchemaId;
+
+        if (field.fieldSchemaId === letterFieldSchemaId) {
+          row.columnPosition = field.value;
+        } else if (field.fieldSchemaId === numberFieldSchemaId) {
+          row.rowPosition = field.value;
+        } else if (field.fieldSchemaId === valueFieldSchemaId) {
+          row.fieldId = webFormFieldDTO.id;
+          row.value = field.value;
+        } else if (field.fieldSchemaId === headerFieldSchemaId) {
+          row.columnHeader = field.value;
+          if (!columnHeaders.includes(field.value)) {
+            columnHeaders.push(field.value);
+          }
+        } else if (field.fieldSchemaId === descriptionFieldSchemaId) {
+          row.description = field.value;
+          if (!rowHeaders.includes(field.value)) {
+            rowHeaders.push(field.value);
+          }
+        }
+
+        return field;
+      });
+      rows.push(row);
+
+      row.recordId = field.recordId;
+
+      if (!letters.includes(row.columnPosition)) {
+        letters.push(row.columnPosition);
+      }
+
+      return record;
+    });
+    webForm.records = records;
+    webForm.rows = rows;
+  }
+  letters.sort();
+  let dataColumns = createDataColumns(rows, letters);
+
+  formData.columnHeaders = columnHeaders;
+  formData.dataColumns = dataColumns;
+  formData.rowHeaders = rowHeaders;
+
+  return formData;
+};
+
+const createDataColumns = (rowsData, letters) => {
+  let columns = [];
+  letters.forEach(function(value, i) {
+    let columnLetter = rowsData.filter(row => row.columnPosition === value);
+    columns.push(columnLetter);
+  });
+  console.log('After clean data', columns);
+  return columns;
+};
+
 const updateFieldById = async (dataSetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
   const dataSetTableField = new DataSetTableField();
   dataSetTableField.id = fieldId;
@@ -292,5 +385,6 @@ export const ApiDataSetRepository = {
   tableDataById,
   updateFieldById,
   updateRecordsById,
-  validateDataById
+  validateDataById,
+  webFormDataById
 };
