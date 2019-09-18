@@ -17,7 +17,7 @@ import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
-import { DataTable } from 'ui/views/_components/DataTable';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
@@ -269,8 +269,10 @@ const DataViewer = withRouter(
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
-      } else if (event.key === 'Enter' || event.key === 'Tab') {
+      } else if (event.key === 'Enter') {
         onEditorSubmitValue(props, event.target.value, record);
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
       }
     };
 
@@ -897,7 +899,8 @@ const DataViewer = withRouter(
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
       return {
-        'p-highlight': id === selectedRecordErrorId
+        'p-highlight': id === selectedRecordErrorId,
+        'p-highlight-contextmenu': ''
       };
       // let selected = selectedRecords.filter(record => record.recordId === id);
       // if (!isUndefined(selected[0])) {
@@ -1073,7 +1076,6 @@ const DataViewer = withRouter(
           header={resources.messages['deleteDatasetTableHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={onConfirmDeleteTable}
           onHide={() => onSetVisible(setDeleteDialogVisible, false)}
           visible={deleteDialogVisible}>
@@ -1084,7 +1086,6 @@ const DataViewer = withRouter(
           onHide={onHideConfirmDeleteDialog}
           visible={confirmDeleteVisible}
           header={resources.messages['deleteRow']}
-          maximizable={false}
           labelConfirm={resources.messages['yes']}
           labelCancel={resources.messages['no']}>
           {resources.messages['confirmDeleteRow']}
@@ -1094,7 +1095,6 @@ const DataViewer = withRouter(
           hasPasteOption={true}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={true}
           onConfirm={onPasteAccept}
           onHide={onPasteCancel}
           onPaste={onPaste}
