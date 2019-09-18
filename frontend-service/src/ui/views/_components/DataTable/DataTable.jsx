@@ -27,6 +27,7 @@ export class DataTable extends Component {
     tableClassName: null,
     paginator: false,
     paginatorPosition: 'bottom',
+    pasteHeader: '',
     alwaysShowPaginator: true,
     paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown',
     paginatorLeft: null,
@@ -112,6 +113,7 @@ export class DataTable extends Component {
     tableClassName: PropTypes.string,
     paginator: PropTypes.bool,
     paginatorPosition: PropTypes.string,
+    pasteHeader: PropTypes.string,
     alwaysShowPaginator: PropTypes.bool,
     paginatorTemplate: PropTypes.string,
     paginatorLeft: PropTypes.any,
@@ -1626,7 +1628,7 @@ export class DataTable extends Component {
           onConfirm={this.onPasteAccept}
           onHide={this.onPasteCancel}
           visible={this.state.confirmVisible}
-          header="Paste data"
+          header={this.props.pasteHeader}
           maximizable={false}
           labelConfirm="Yes"
           labelCancel="No">

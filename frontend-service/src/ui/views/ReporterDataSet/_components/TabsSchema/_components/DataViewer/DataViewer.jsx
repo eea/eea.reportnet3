@@ -1024,6 +1024,7 @@ const DataViewer = withRouter(
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
+            //pasteHeader={resources.messages['pasteRecords']}
             //pastedRecords={pastedRecords}
             //recordsPreviewNumber={recordsPreviewNumber}
             ref={datatableRef}
@@ -1084,15 +1085,15 @@ const DataViewer = withRouter(
           visible={confirmDeleteVisible}
           header={resources.messages['deleteRow']}
           maximizable={false}
-          labelConfirm="Yes"
-          labelCancel="No">
+          labelConfirm={resources.messages['yes']}
+          labelCancel={resources.messages['no']}>
           {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
         <ConfirmDialog
-          header="Paste data"
+          header={resources.messages['pasteRecords']}
           hasPasteOption={true}
-          labelCancel="No"
-          labelConfirm="Yes"
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           maximizable={true}
           onConfirm={onPasteAccept}
           onHide={onPasteCancel}
@@ -1107,7 +1108,6 @@ const DataViewer = withRouter(
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
           header={resources.messages['addNewRow']}
-          maximizable={true}
           modal={true}
           onHide={() => setAddDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
@@ -1119,7 +1119,6 @@ const DataViewer = withRouter(
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
-          maximizable={true}
           modal={true}
           onHide={() => setEditDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
