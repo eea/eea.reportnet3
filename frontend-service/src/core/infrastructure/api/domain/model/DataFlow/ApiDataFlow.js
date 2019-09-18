@@ -2,6 +2,7 @@ import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+import dataCustodianDashboards from './dashboardData.json';
 
 export const apiDataFlow = {
   accept: async dataFlowId => {
@@ -48,6 +49,20 @@ export const apiDataFlow = {
       }
     });
     return response.data;
+  },
+  dashboards: async dataFlowId => {
+    console.log('Getting all the dashboards', dataFlowId);
+    // const tokens = userStorage.get();
+    // const response = await HTTPRequester.get({
+    //   url: '/jsons/dataCustodianDashboards.json',
+    //   queryString: {},
+    //   headers: {
+    //     Authorization: `Bearer ${tokens.accessToken}`
+    //   }
+    // });
+    // return response.data;
+    const hardcodedDashboardTest = dataCustodianDashboards;
+    return hardcodedDashboardTest;
   },
   pending: async () => {
     const tokens = userStorage.get();
