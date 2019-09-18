@@ -1,11 +1,13 @@
 package org.eea.ums.service.impl;
 
 import java.util.List;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.ums.mapper.GroupInfoMapper;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
@@ -16,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.OngoingStubbing;
 
 public class KeycloakSecurityProviderInterfaceServiceTest {
 
@@ -24,6 +25,9 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   private KeycloakSecurityProviderInterfaceService keycloakSecurityProviderInterfaceService;
   @Mock
   private KeycloakConnectorService keycloakConnectorService;
+
+  @Mock
+  private GroupInfoMapper groupInfoMapper;
 
   @Before
   public void setUp() throws Exception {
@@ -120,5 +124,28 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
         .addUserToUserGroup("user1", "DATAFLOW-1-DATA_CUSTODIAN");
     Mockito.verify(keycloakConnectorService, Mockito.times(1))
         .addUserToGroup("user1", "idGroupInfo");
+  }
+
+  @Test
+  public void getGroupDetail() {
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setId("idGroupInfo");
+    groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
+    groupInfos[0] = groupInfo;
+    Mockito
+        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    Mockito
+        .when(keycloakConnectorService.getGroupDetail("idGroupInfo")).thenReturn(groupInfo);
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setId("idGroupInfo");
+    resourceInfoVO.setName("Dataflow-1-DATA_CUSTODIAN");
+    Mockito.when(groupInfoMapper.entityToClass(Mockito.any(GroupInfo.class)))
+        .thenReturn(resourceInfoVO);
+    ResourceInfoVO result = this.keycloakSecurityProviderInterfaceService
+        .getGroupDetail("Dataflow-1-DATA_CUSTODIAN");
+    Assert.assertNotNull(result);
+    Assert.assertEquals(((ResourceInfoVO) result).getName(), resourceInfoVO.getName());
   }
 }
