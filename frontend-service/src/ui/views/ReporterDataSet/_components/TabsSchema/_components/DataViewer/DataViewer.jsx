@@ -17,7 +17,7 @@ import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
-import { DataTable } from 'ui/views/_components/DataTable';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
@@ -269,8 +269,10 @@ const DataViewer = withRouter(
         let updatedData = changeCellValue([...props.value], props.rowIndex, props.field, initialCellValue);
         datatableRef.current.closeEditingCell();
         setFetchedData(updatedData);
-      } else if (event.key === 'Enter' || event.key === 'Tab') {
+      } else if (event.key === 'Enter') {
         onEditorSubmitValue(props, event.target.value, record);
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
       }
     };
 
@@ -897,7 +899,8 @@ const DataViewer = withRouter(
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
       return {
-        'p-highlight': id === selectedRecordErrorId
+        'p-highlight': id === selectedRecordErrorId,
+        'p-highlight-contextmenu': ''
       };
       // let selected = selectedRecords.filter(record => record.recordId === id);
       // if (!isUndefined(selected[0])) {
@@ -1024,6 +1027,7 @@ const DataViewer = withRouter(
             onSort={onSort}
             paginator={true}
             paginatorRight={totalCount}
+            //pasteHeader={resources.messages['pasteRecords']}
             //pastedRecords={pastedRecords}
             //recordsPreviewNumber={recordsPreviewNumber}
             ref={datatableRef}
@@ -1072,7 +1076,6 @@ const DataViewer = withRouter(
           header={resources.messages['deleteDatasetTableHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          maximizable={false}
           onConfirm={onConfirmDeleteTable}
           onHide={() => onSetVisible(setDeleteDialogVisible, false)}
           visible={deleteDialogVisible}>
@@ -1083,17 +1086,15 @@ const DataViewer = withRouter(
           onHide={onHideConfirmDeleteDialog}
           visible={confirmDeleteVisible}
           header={resources.messages['deleteRow']}
-          maximizable={false}
-          labelConfirm="Yes"
-          labelCancel="No">
+          labelConfirm={resources.messages['yes']}
+          labelCancel={resources.messages['no']}>
           {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
         <ConfirmDialog
-          header="Paste data"
+          header={resources.messages['pasteRecords']}
           hasPasteOption={true}
-          labelCancel="No"
-          labelConfirm="Yes"
-          maximizable={true}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={onPasteAccept}
           onHide={onPasteCancel}
           onPaste={onPaste}
@@ -1107,7 +1108,6 @@ const DataViewer = withRouter(
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
           header={resources.messages['addNewRow']}
-          maximizable={true}
           modal={true}
           onHide={() => setAddDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
@@ -1119,7 +1119,6 @@ const DataViewer = withRouter(
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
-          maximizable={true}
           modal={true}
           onHide={() => setEditDialogVisible(false)}
           style={{ width: '50%', height: '80%' }}
