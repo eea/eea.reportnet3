@@ -24,13 +24,25 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     onLoadWebForm();
   }, []);
 
+  // const onEditorEnterKeyPress = event => {
+  //   if (event.key === 'Enter') {
+  //     const form = event.target;
+  //     console.log(form);
+  //     const index = Array.prototype.indexOf.call(form, event.target);
+  //     form.elements[index + 1].focus();
+  //     event.preventDefault();
+  //   }
+  // };
+
   const onEditorKeyChange = (props, event) => {
     if (event.key === 'Escape') {
       const updatedData = changeCellValue(fetchedData.dataColumns, initialCellValue, props.fieldId);
       setFetchedData({ ...fetchedData, dataColumns: updatedData });
-    } else if (event.key === 'Enter' || event.key === 'Tab') {
-      onEditorSubmitValue(props, event.target.value);
     }
+    // else if (event.key === 'Enter') {
+    //   onEditorEnterKeyPress(event);
+    //   // onEditorSubmitValue(props, event.target.value);
+    // }
   };
 
   const onEditorSubmitValue = async (cell, value) => {
