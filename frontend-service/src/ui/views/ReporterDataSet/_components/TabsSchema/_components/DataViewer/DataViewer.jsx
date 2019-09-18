@@ -63,7 +63,6 @@ const DataViewer = withRouter(
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [initialRecordValue, setInitialRecordValue] = useState();
-    const [isDataDeleted, setIsDataDeleted] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -109,12 +108,6 @@ const DataViewer = withRouter(
       setColsSchema(inmTableSchemaColumns);
       onFetchData(undefined, undefined, 0, numRows);
     }, []);
-
-    useEffect(() => {
-      if (fetchedData.length > 0) {
-        setFetchedData([]);
-      }
-    }, [isDataDeleted]);
 
     useEffect(() => {
       setMenu([
@@ -228,9 +221,9 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
       if (dataDeleted) {
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
-        setIsDataDeleted(true);
+        setFetchedData([]);
         setTotalRecords(0);
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       }
     };
 
@@ -331,7 +324,6 @@ const DataViewer = withRouter(
           nRows,
           fields
         );
-
         if (!isUndefined(colsSchema)) {
           if (!isUndefined(tableData)) {
             if (!isUndefined(tableData.records)) {
@@ -345,7 +337,10 @@ const DataViewer = withRouter(
         }
         if (!isUndefined(tableData.records)) {
           filterDataResponse(tableData);
+        } else {
+          setFetchedData([]);
         }
+
         if (tableData.totalRecords !== totalRecords) {
           setTotalRecords(tableData.totalRecords);
         }
@@ -707,6 +702,8 @@ const DataViewer = withRouter(
       });
       if (dataFiltered.length > 0) {
         setFetchedDataFirstRow(dataFiltered[0]);
+      } else {
+        setFetchedData([]);
       }
       setFetchedData(dataFiltered);
     };
