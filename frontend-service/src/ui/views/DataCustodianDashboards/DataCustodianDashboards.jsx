@@ -33,7 +33,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     command: () => history.push('/')
   };
 
-  const newLegendClickHandler = function(e, legendItem) {
+  const onNewLegend = function(e, legendItem) {
     let datasetIndex = legendItem.datasetIndex;
 
     let currentChart = this.chart;
@@ -200,7 +200,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         }
       },
       legend: {
-        onClick: newLegendClickHandler,
+        onClick: onNewLegend,
 
         display: true,
         labels: {
