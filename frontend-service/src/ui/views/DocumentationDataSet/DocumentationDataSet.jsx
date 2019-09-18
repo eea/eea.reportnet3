@@ -13,6 +13,7 @@ import { config } from 'conf';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
@@ -33,6 +34,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documents, setDocuments] = useState([]);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
@@ -84,6 +86,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   };
 
   const onDeleteDocument = async documentData => {
+    setDeleteDialogVisible(false);
     try {
       const response = await DocumentService.deleteDocument(documentData.id);
       if (response >= 200 && response <= 299) {
@@ -97,6 +100,10 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const onHide = () => {
     setIsUploadDialogVisible(false);
     onLoadDocumentsAndWebLinks();
+  };
+
+  const onHideDeleteDialog = () => {
+    setDeleteDialogVisible(false);
   };
 
   const onCancelDialog = () => {
@@ -123,14 +130,21 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const crudTemplate = (rowData, column) => {
     return (
-      <span className={styles.delete} onClick={() => onDeleteDocument(rowData)}>
-        {' '}
-        {isDownloading === rowData.title ? (
-          <Icon icon="spinnerAnimate" />
-        ) : (
+      <>
+        <span className={styles.delete} onClick={() => setDeleteDialogVisible(true)}>
           <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-        )}
-      </span>
+        </span>
+        <ConfirmDialog
+          header={resources.messages['delete']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={() => onDeleteDocument(rowData)}
+          onHide={onHideDeleteDialog}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDocument']}
+        </ConfirmDialog>
+      </>
     );
   };
 
