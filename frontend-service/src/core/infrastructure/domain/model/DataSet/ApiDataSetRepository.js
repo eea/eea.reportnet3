@@ -268,7 +268,6 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
         field.type = webFormFieldDTO.type;
         field.value = webFormFieldDTO.value;
 
-        row.fieldId = field.fieldId;
         row.type = field.type;
         row.fieldSchemaId = field.fieldSchemaId;
 
@@ -277,6 +276,7 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
         } else if (field.fieldSchemaId === numberFieldSchemaId) {
           row.rowPosition = field.value;
         } else if (field.fieldSchemaId === valueFieldSchemaId) {
+          row.fieldId = webFormFieldDTO.id;
           row.value = field.value;
         } else if (field.fieldSchemaId === headerFieldSchemaId) {
           row.columnHeader = field.value;
