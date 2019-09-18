@@ -10,13 +10,13 @@ public enum ResourceGroupEnum {
    */
   DATAFLOW_PROVIDER("Dataflow-%s-DATA_PROVIDER"),
   /**
-   * Dataflow requestor resource group enum.
+   * Dataflow requester resource group enum.
    */
-  DATAFLOW_REQUESTOR("Dataflow-%s-DATA_REQUESTOR"),
+  DATAFLOW_REQUESTER("Dataflow-%s-DATA_REQUESTER"),
   /**
    * Dataflow steward resource group enum.
    */
-  DATAFLOW_STEWARD("Dataflow-%s-DATA_REQUESTOR"),
+  DATAFLOW_STEWARD("Dataflow-%s-DATA_STEWARD"),
   /**
    * Dataflow custodian resource group enum.
    */
@@ -26,13 +26,13 @@ public enum ResourceGroupEnum {
    */
   DATASET_PROVIDER("Dataset-%s-DATA_PROVIDER"),
   /**
-   * Dataset requestor resource group enum.
+   * Dataset requester resource group enum.
    */
-  DATASET_REQUESTOR("Dataset-%s-DATA_REQUESTOR"),
+  DATASET_REQUESTER("Dataset-%s-DATA_REQUESTER"),
   /**
    * Dataset steward resource group enum.
    */
-  DATASET_STEWARD("Dataset-%s-DATA_REQUESTOR"),
+  DATASET_STEWARD("Dataset-%s-DATA_STEWARD"),
   /**
    * Dataset custodian resource group enum.
    */

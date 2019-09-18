@@ -234,7 +234,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
-   *
+   * @return the data set VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -287,6 +287,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Save table.
    *
+   * @param datasetId the dataset id
    * @param tableValue the dataset
    */
   @Override
@@ -402,7 +403,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
-    tableRepository.deleteByIdTableSchema(idTableSchema);
+    recordRepository.deleteRecordWithIdTableSchema(idTableSchema);
     LOG.info("Executed delete table with id {}, from dataset {}", idTableSchema, datasetId);
   }
 
@@ -985,7 +986,20 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValue = recordMapper.classListToEntity(records);
     TableValue table = new TableValue();
     table.setId(tableId);
-    recordValue.parallelStream().forEach(record -> record.setTableValue(table));
+    recordValue.parallelStream().forEach(record -> {
+      if (record.getDatasetPartitionId() == null) {
+        try {
+          record.setDatasetPartitionId(this.obtainPartition(datasetId, "root").getId());
+        } catch (EEAException e) {
+          LOG_ERROR.error(e.getMessage());
+        }
+      }
+      record.setTableValue(table);
+      record.getFields().stream().filter(field -> field.getValue() == null).forEach(field -> {
+        field.setValue("");
+      });
+
+    });
     recordRepository.saveAll(recordValue);
   }
 
@@ -1070,9 +1084,21 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void insertSchema(final Long datasetId, String idDatasetSchema) throws EEAException {
 
+    // 1.Insert the dataset schema into DatasetValue
     DatasetValue ds = new DatasetValue();
     ds.setIdDatasetSchema(idDatasetSchema);
     ds.setId(datasetId);
+
+    // 2.Search the table schemas of the dataset and then insert it into TableValue
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+    List<TableValue> tableValues = new ArrayList<>();
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      TableValue tv = new TableValue();
+      tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+      tv.setDatasetId(ds);
+      tableValues.add(tv);
+    }
+    ds.setTableValues(tableValues);
     datasetRepository.save(ds);
 
   }
@@ -1095,8 +1121,31 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.saveValue(field.getId(), field.getValue());
   }
 
+  /**
+   * Find table id by table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
   @Override
   public Long findTableIdByTableSchema(Long datasetId, String idTableSchema) {
     return tableRepository.findIdByIdTableSchema(idTableSchema);
   }
+
+  /**
+   * Delete record values to restore snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idPartition the id partition
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteRecordValuesToRestoreSnapshot(Long datasetId, Long idPartition)
+      throws EEAException {
+    recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
+  }
+
+
 }

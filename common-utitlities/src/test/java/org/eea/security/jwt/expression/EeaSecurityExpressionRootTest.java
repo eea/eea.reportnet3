@@ -51,7 +51,7 @@ public class EeaSecurityExpressionRootTest {
   @Test
   public void secondLevelAuthorizeUnauthorized() {
     Assert.assertFalse(eeaSecurityExpressionRoot
-        .secondLevelAuthorize(DATAFLOW_ID, ObjectAccessRoleEnum.DATAFLOW_REQUESTOR));
+        .secondLevelAuthorize(DATAFLOW_ID, ObjectAccessRoleEnum.DATAFLOW_REQUESTER));
   }
 
   @Test

@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.ums.mapper.GroupInfoMapper;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
@@ -27,6 +29,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
 
+  @Autowired
+  private GroupInfoMapper groupInfoMapper;
 
   @Override
   public TokenVO doLogin(String username, String password, Object... extraParams) {
@@ -56,6 +60,23 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   @Override
+  public ResourceInfoVO getGroupDetail(String groupName) {
+    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    String groupId = "";
+    ResourceInfoVO result = new ResourceInfoVO();
+    if (null != groups && groups.length > 0) {
+      groupId = Arrays.asList(groups).stream()
+          .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
+          .map(GroupInfo::getId)
+          .findFirst().orElse("");
+    }
+    if (StringUtils.isNotBlank(groupId)) {
+      result = this.groupInfoMapper.entityToClass(keycloakConnectorService.getGroupDetail(groupId));
+    }
+    return result;
+  }
+
+  @Override
   public Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes) {
     return !keycloakConnectorService.checkUserPermision(resource, scopes).equals("DENY");
   }
@@ -74,7 +95,6 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
     GroupInfo[] groups = keycloakConnectorService.getGroups();
-    //remove ROLE_ from groupName
     if (null != groups && groups.length > 0) {
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
