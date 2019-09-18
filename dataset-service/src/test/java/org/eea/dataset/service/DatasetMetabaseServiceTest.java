@@ -96,13 +96,4 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.findDatasetMetabase(Mockito.anyLong());
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
   }
-
-  @Test
-  public void findDatasetMetabase() throws Exception {
-
-    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
-    datasetMetabaseService.findDatasetMetabase(Mockito.anyLong());
-    Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
-  }
 }
