@@ -41,6 +41,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState('');
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [rowDataState, setRowDataState] = useState();
   const [webLinks, setWebLinks] = useState([]);
 
   const home = {
@@ -131,19 +132,14 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const crudTemplate = (rowData, column) => {
     return (
       <>
-        <span className={styles.delete} onClick={() => setDeleteDialogVisible(true)}>
+        <span
+          className={styles.delete}
+          onClick={() => {
+            setDeleteDialogVisible(true);
+            setRowDataState(rowData);
+          }}>
           <FontAwesomeIcon icon={AwesomeIcons('delete')} />
         </span>
-        <ConfirmDialog
-          header={resources.messages['delete']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={() => onDeleteDocument(rowData)}
-          onHide={onHideDeleteDialog}
-          visible={deleteDialogVisible}>
-          {resources.messages['deleteDocument']}
-        </ConfirmDialog>
       </>
     );
   };
@@ -194,122 +190,144 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   if (documents) {
     return layout(
-      <TabView>
-        <TabPanel header={resources.messages['documents']}>
-          <Toolbar>
-            <div className="p-toolbar-group-left">
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={false}
-                icon={'export'}
-                label={resources.messages['upload']}
-                onClick={() => setIsUploadDialogVisible(true)}
-              />
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={true}
-                icon={'eye'}
-                label={resources.messages['visibility']}
-                onClick={null}
-              />
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={true}
-                icon={'filter'}
-                label={resources.messages['filter']}
-                onClick={null}
-              />
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={true}
-                icon={'import'}
-                label={resources.messages['export']}
-                onClick={null}
-              />
-            </div>
-            <div className="p-toolbar-group-right">
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={false}
-                icon={'refresh'}
-                label={resources.messages['refresh']}
-                onClick={() => onLoadDocumentsAndWebLinks()}
-              />
-            </div>
-          </Toolbar>
-          <Dialog
-            header={resources.messages['upload']}
-            visible={isUploadDialogVisible}
-            className={styles.Dialog}
-            dismissableMask={false}
-            onHide={onCancelDialog}>
-            <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
-          </Dialog>
-          {
-            <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-              <Column className={styles.crudColumn} body={crudTemplate} />
-              <Column
-                columnResizeMode="expand"
-                field="title"
-                filter={false}
-                filterMatchMode="contains"
-                header={resources.messages['title']}
-                sortable={true}
-              />
-              <Column
-                field="description"
-                filter={false}
-                filterMatchMode="contains"
-                header={resources.messages['description']}
-                sortable={true}
-              />
-              <Column
-                field="category"
-                filter={false}
-                filterMatchMode="contains"
-                header={resources.messages['category']}
-                sortable={true}
-              />
-              <Column
-                field="language"
-                filter={false}
-                filterMatchMode="contains"
-                header={resources.messages['language']}
-                sortable={true}
-              />
-              <Column
-                body={actionTemplate}
-                field="url"
-                filter={false}
-                filterMatchMode="contains"
-                header={resources.messages['file']}
-                style={{ textAlign: 'center', width: '8em' }}
-              />
-            </DataTable>
-          }
-        </TabPanel>
+      <>
+        <TabView>
+          <TabPanel header={resources.messages['documents']}>
+            <Toolbar>
+              <div className="p-toolbar-group-left">
+                <Button
+                  className={`p-button-rounded p-button-secondary`}
+                  disabled={false}
+                  icon={'export'}
+                  label={resources.messages['upload']}
+                  onClick={() => setIsUploadDialogVisible(true)}
+                />
+                <Button
+                  className={`p-button-rounded p-button-secondary`}
+                  disabled={true}
+                  icon={'eye'}
+                  label={resources.messages['visibility']}
+                  onClick={null}
+                />
+                <Button
+                  className={`p-button-rounded p-button-secondary`}
+                  disabled={true}
+                  icon={'filter'}
+                  label={resources.messages['filter']}
+                  onClick={null}
+                />
+                <Button
+                  className={`p-button-rounded p-button-secondary`}
+                  disabled={true}
+                  icon={'import'}
+                  label={resources.messages['export']}
+                  onClick={null}
+                />
+              </div>
+              <div className="p-toolbar-group-right">
+                <Button
+                  className={`p-button-rounded p-button-secondary`}
+                  disabled={false}
+                  icon={'refresh'}
+                  label={resources.messages['refresh']}
+                  onClick={() => onLoadDocumentsAndWebLinks()}
+                />
+              </div>
+            </Toolbar>
+            <Dialog
+              header={resources.messages['upload']}
+              visible={isUploadDialogVisible}
+              className={styles.Dialog}
+              dismissableMask={false}
+              onHide={onCancelDialog}>
+              <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
+            </Dialog>
+            {
+              <DataTable
+                value={documents}
+                autoLayout={true}
+                paginator={true}
+                rowsPerPageOptions={[5, 10, 100]}
+                rows={10}>
+                <Column className={styles.crudColumn} body={crudTemplate} />
+                <Column
+                  columnResizeMode="expand"
+                  field="title"
+                  filter={false}
+                  filterMatchMode="contains"
+                  header={resources.messages['title']}
+                  sortable={true}
+                />
+                <Column
+                  field="description"
+                  filter={false}
+                  filterMatchMode="contains"
+                  header={resources.messages['description']}
+                  sortable={true}
+                />
+                <Column
+                  field="category"
+                  filter={false}
+                  filterMatchMode="contains"
+                  header={resources.messages['category']}
+                  sortable={true}
+                />
+                <Column
+                  field="language"
+                  filter={false}
+                  filterMatchMode="contains"
+                  header={resources.messages['language']}
+                  sortable={true}
+                />
+                <Column
+                  body={actionTemplate}
+                  field="url"
+                  filter={false}
+                  filterMatchMode="contains"
+                  header={resources.messages['file']}
+                  style={{ textAlign: 'center', width: '8em' }}
+                />
+              </DataTable>
+            }
+          </TabPanel>
 
-        <TabPanel header={resources.messages['webLinks']}>
-          {
-            <DataTable value={webLinks} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-              <Column
-                columnResizeMode="expand"
-                field="description"
-                header={resources.messages['description']}
-                filter={false}
-                filterMatchMode="contains"
-              />
-              <Column
-                body={actionWeblink}
-                field="url"
-                header={resources.messages['url']}
-                filter={false}
-                filterMatchMode="contains"
-              />
-            </DataTable>
-          }
-        </TabPanel>
-      </TabView>
+          <TabPanel header={resources.messages['webLinks']}>
+            {
+              <DataTable
+                value={webLinks}
+                autoLayout={true}
+                paginator={true}
+                rowsPerPageOptions={[5, 10, 100]}
+                rows={10}>
+                <Column
+                  columnResizeMode="expand"
+                  field="description"
+                  header={resources.messages['description']}
+                  filter={false}
+                  filterMatchMode="contains"
+                />
+                <Column
+                  body={actionWeblink}
+                  field="url"
+                  header={resources.messages['url']}
+                  filter={false}
+                  filterMatchMode="contains"
+                />
+              </DataTable>
+            }
+          </TabPanel>
+        </TabView>
+        <ConfirmDialog
+          header={resources.messages['delete']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          maximizable={false}
+          onConfirm={() => onDeleteDocument(rowDataState)}
+          onHide={onHideDeleteDialog}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDocument']}
+        </ConfirmDialog>
+      </>
     );
   } else {
     return <></>;
