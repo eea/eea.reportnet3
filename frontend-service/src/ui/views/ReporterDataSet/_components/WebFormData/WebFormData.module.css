@@ -31,5 +31,8 @@
   width: 1%;
 }
 .disabledInput {
-  background: #dddddd;
+  background: #dddddd !important;
+}
+.webFormWrapper {
+  padding-bottom: 4rem;
 }
