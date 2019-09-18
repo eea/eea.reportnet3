@@ -913,7 +913,7 @@ const DataViewer = withRouter(
 
     const totalCount = (
       <span>
-        {resources.messages['totalRecords']} {totalRecords} {resources.messages['rows']}
+        {resources.messages['totalRecords']} {totalRecords ? totalRecords : 0} {resources.messages['rows']}
       </span>
     );
 
