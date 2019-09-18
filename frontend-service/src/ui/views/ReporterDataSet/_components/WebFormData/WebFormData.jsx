@@ -129,25 +129,34 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
 
       for (var columnIndex = firstColumn; columnIndex <= lastColumn; columnIndex++) {
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
-        let filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
-        if (!isEmpty(filteredColumn)) {
-          header = filteredColumn[0].description;
-          tds.push(
-            <td name={`${columnPosition}${rowIndex}`}>
-              <InputText
-                value={filteredColumn[0].value}
-                onChange={e => onEditorValueChange(filteredColumn, e.target.value)}
-              />
-            </td>
-          );
+        let filteredColumn = [];
+        if (columnPosition === 'K') {
+          tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
         } else {
-          tds.push(
-            <td name={`${columnPosition}${rowIndex}`}>{/* <InputText className={styles.disabledInput} /> */}</td>
-          );
+          if (!isUndefined(dataColumns[j])) {
+            filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
+            if (!isEmpty(filteredColumn)) {
+              header = filteredColumn[0].description;
+              tds.push(
+                <td name={`${columnPosition}${rowIndex}`}>
+                  <InputText
+                    value={filteredColumn[0].value}
+                    onChange={e => onEditorValueChange(filteredColumn, e.target.value)}
+                  />
+                </td>
+              );
+            } else {
+              tds.push(
+                <td name={`${columnPosition}${rowIndex}`}>{/* <InputText className={styles.disabledInput} /> */}</td>
+              );
+            }
+          } else {
+          }
         }
-        j++;
+        if (columnPosition !== 'K') {
+          j++;
+        }
       }
-
       if (!isEmpty(header))
         rowsFilled.push(
           <tr name={rowIndex}>
