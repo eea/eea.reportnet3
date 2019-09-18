@@ -3263,9 +3263,10 @@ body .p-dialog .p-dialog-content {
   color: #404040;
   border: 1px solid #c8c8c8;
   padding: 1em;
-  max-height: 60vh;
+  max-height: 90vh;
   overflow: auto;
 }
+
 body .p-dialog .p-dialog-footer {
   border: 1px solid #c8c8c8;
   border-top: 0 none;
