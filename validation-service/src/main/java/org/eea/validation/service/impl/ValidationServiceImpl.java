@@ -177,7 +177,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public List<RecordValidation> runRecordValidations(RecordValue record, KieSession kieSession) {
-    if (record.getIdRecordSchema() != null && StringUtils.isNotBlank(record.getIdRecordSchema())) {
+    if (StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
     kieSession.fireAllRules();
@@ -198,7 +198,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public synchronized List<FieldValidation> runFieldValidations(FieldValue field,
       KieSession kieSession) {
-    if (field.getIdFieldSchema() != null && StringUtils.isNotBlank(field.getIdFieldSchema())) {
+    if (StringUtils.isNotBlank(field.getIdFieldSchema())) {
       kieSession.insert(field);
     }
     kieSession.fireAllRules();
@@ -329,8 +329,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateRecord(Long datasetId, KieSession session) throws EEAException {
     long timer = System.currentTimeMillis();
-    LOG.info(
-        "Validating records dataset" + datasetId + "nombre: " + TenantResolver.getTenantName());
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
@@ -405,8 +403,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateFields(Long datasetId, KieSession session) throws EEAException {
     long timer = System.currentTimeMillis();
-    LOG.info(
-        "Validating Fields dataset " + datasetId + " nombre: " + TenantResolver.getTenantName());
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
