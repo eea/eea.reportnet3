@@ -101,7 +101,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     formResult.push(
       <>
         <tbody>
-          <tr>{columnTitles}</tr>
+          <tr className={styles.columnHeaders}>{columnTitles}</tr>
         </tbody>
         {grid}
       </>
@@ -114,7 +114,11 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let columnsTitles = [];
     columnHeaders.map((column, i) => {
       let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
-      columnsTitles.push(<th name={position}>{column}</th>);
+      columnsTitles.push(
+        <th className={styles.columnTitle} name={position}>
+          {column}
+        </th>
+      );
     });
     return columnsTitles;
   };
@@ -143,7 +147,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const getMinAndMaxColumns = dataColumns => {
-    let firstColumn = dataColumns[0][0].columnPosition;
+    let firstColumn = 'Z';
     let lastColumn = 'A';
     dataColumns.forEach(function(column, i) {
       let columnPosition = dataColumns[i][0].columnPosition;
@@ -166,6 +170,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let lastRow = rows.lastRow;
 
     let columns = getMinAndMaxColumns(dataColumns);
+    console.log(columns);
     let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
     let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
@@ -208,7 +213,9 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
         rowsFilled.push(
           <tbody>
             <tr name={rowIndex}>
-              <td key={rowIndex}>{header}</td>
+              <td key={rowIndex} className={styles.rowTitle}>
+                {header}
+              </td>
               {tds}
             </tr>
           </tbody>
