@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.validation.service;
 
@@ -283,6 +283,20 @@ public class ValidationServiceTest {
   @Test
   public void testRunRecordValidations() {
     RecordValue record = new RecordValue();
+    record.setRecordValidations(new ArrayList<>());
+    assertEquals("failed", record.getRecordValidations(),
+        validationServiceImpl.runRecordValidations(record, kieSession));
+  }
+
+  /**
+   * Test run record validations2.
+   */
+  @Test
+  public void testRunRecordValidations2() {
+    RecordValue record = new RecordValue();
+    ArrayList<RecordValidation> recordValidations = new ArrayList<>();
+    recordValidations.add(new RecordValidation());
+    record.setRecordValidations(recordValidations);
     assertEquals("failed", record.getRecordValidations(),
         validationServiceImpl.runRecordValidations(record, kieSession));
   }
@@ -294,6 +308,7 @@ public class ValidationServiceTest {
   public void testRunRecordValidationsNotNull() {
     RecordValue record = new RecordValue();
     record.setIdRecordSchema("123");
+    record.setRecordValidations(new ArrayList<>());
     assertEquals("failed", record.getRecordValidations(),
         validationServiceImpl.runRecordValidations(record, kieSession));
   }
@@ -305,6 +320,19 @@ public class ValidationServiceTest {
   public void testRunFieldValidations() {
     FieldValue field = new FieldValue();
     assertEquals("failed", new ArrayList<FieldValidation>(),
+        validationServiceImpl.runFieldValidations(field, kieSession));
+  }
+
+  /**
+   * Test run record validations2.
+   */
+  @Test
+  public void testRunFieldValidations2() {
+    FieldValue field = new FieldValue();
+    ArrayList<FieldValidation> fieldValidations = new ArrayList<>();
+    fieldValidations.add(new FieldValidation());
+    field.setFieldValidations(fieldValidations);
+    assertEquals("failed", field.getFieldValidations(),
         validationServiceImpl.runFieldValidations(field, kieSession));
   }
 
@@ -337,18 +365,6 @@ public class ValidationServiceTest {
           FileNotFoundException.class);
       throw e;
     }
-
-  }
-
-
-  /**
-   * Testvalidate record.
-   *
-   * @throws FileNotFoundException the file not found exception
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testValidateField() throws FileNotFoundException, EEAException {
 
   }
 
@@ -1035,7 +1051,7 @@ public class ValidationServiceTest {
 
   @Test
   public void tableValidationQueryPeriodMonitoring() {
-    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    List<BigInteger> listRecords = new ArrayList<>();
     listRecords.add(new BigInteger("1"));
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
@@ -1048,7 +1064,7 @@ public class ValidationServiceTest {
 
   @Test
   public void tableValidationQueryPeriodMonitoringFail() {
-    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    List<BigInteger> listRecords = new ArrayList<>();
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
         .thenReturn(listRecords);
