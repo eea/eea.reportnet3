@@ -147,7 +147,9 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
               );
             } else {
               tds.push(
-                <td name={`${columnPosition}${rowIndex}`}>{/* <InputText className={styles.disabledInput} /> */}</td>
+                <td name={`${columnPosition}${rowIndex}`}>
+                  <InputText className={styles.disabledInput} disabled={true} />
+                </td>
               );
             }
           } else {
@@ -236,8 +238,8 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   }
 
   return (
-    <div className={`${styles.newContainer} ${styles.section}`}>
-      <div className="ui-dialog-buttonpane p-clearfix">
+    <div className={styles.webFormWrapper}>
+      <div>
         <table className={styles.webFormTable}>{form()}</table>
       </div>
     </div>
