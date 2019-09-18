@@ -86,19 +86,19 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const form = () => {
-    let formResult = [];
     let webFormData = fetchedData;
 
     if (isEmpty(webFormData)) {
-      return formResult;
+      return <div></div>;
     }
+
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
     let grid = getGrid(dataColumns);
 
-    formResult.push(
+    return (
       <table className={styles.webFormTable}>
         <thead>
           <tr className={styles.columnHeaders}>{columnTitles}</tr>
@@ -106,16 +106,14 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
         <tbody>{grid}</tbody>
       </table>
     );
-
-    return formResult;
   };
 
   const getColumnHeaders = columnHeaders => {
     let columnsTitles = [];
     columnHeaders.map((column, i) => {
-      let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
+      let position = `${String.fromCharCode(97 + i).toUpperCase()}`;
       columnsTitles.push(
-        <th key={i} className={styles.columnTitle} name={position}>
+        <th key={`${position}${i}`} className={styles.columnTitle} name={`${position}${i}`}>
           {column}
         </th>
       );
@@ -173,6 +171,8 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
     let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
+    let headerLetterColumn = String.fromCharCode(97 + firstColumn - 2).toUpperCase();
+
     let rowsFilled = [];
     let header = '';
 
@@ -211,7 +211,10 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
       if (!isEmpty(header))
         rowsFilled.push(
           <tr key={rowIndex} name={rowIndex}>
-            <td key={`${rowIndex}-${j}`} className={styles.rowTitle}>
+            <td
+              key={`${headerLetterColumn}${rowIndex}`}
+              name={`${headerLetterColumn}${rowIndex}`}
+              className={styles.rowTitle}>
               {header}
             </td>
             {tds}
