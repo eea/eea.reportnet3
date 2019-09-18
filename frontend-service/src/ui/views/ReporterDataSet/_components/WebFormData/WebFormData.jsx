@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-
-import styles from './WebFormData.module.css';
+import { withRouter } from 'react-router-dom';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
+
+import { config } from 'conf';
+
+import styles from './WebFormData.module.css';
 
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -10,7 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
 
-const WebFormData = ({ dataSetId, tableSchemaId }) => {
+const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataFlowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(false);
@@ -67,10 +70,20 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const onLoadWebForm = async () => {
-    setLoading(true);
-    const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
-    setFetchedData(webFormData);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+      setFetchedData(webFormData);
+    } catch (error) {
+      console.error('WebForm error: ', error);
+      const errorResponse = error.response;
+      console.error('WebForm errorResponse: ', errorResponse);
+      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const changeCellValue = (tableData, value, fieldId) => {
@@ -86,19 +99,19 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const form = () => {
-    let formResult = [];
     let webFormData = fetchedData;
 
     if (isEmpty(webFormData)) {
-      return formResult;
+      return <div></div>;
     }
+
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
     let grid = getGrid(dataColumns);
 
-    formResult.push(
+    return (
       <table className={styles.webFormTable}>
         <thead>
           <tr className={styles.columnHeaders}>{columnTitles}</tr>
@@ -106,16 +119,14 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
         <tbody>{grid}</tbody>
       </table>
     );
-
-    return formResult;
   };
 
   const getColumnHeaders = columnHeaders => {
     let columnsTitles = [];
     columnHeaders.map((column, i) => {
-      let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
+      let position = `${String.fromCharCode(97 + i).toUpperCase()}`;
       columnsTitles.push(
-        <th key={i} className={styles.columnTitle} name={position}>
+        <th key={`${position}${i}`} className={styles.columnTitle} name={`${position}${i}`}>
           {column}
         </th>
       );
@@ -173,6 +184,8 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
     let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
+    let headerLetterColumn = String.fromCharCode(97 + firstColumn - 2).toUpperCase();
+
     let rowsFilled = [];
     let header = '';
 
@@ -211,7 +224,10 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
       if (!isEmpty(header))
         rowsFilled.push(
           <tr key={rowIndex} name={rowIndex}>
-            <td key={`${rowIndex}-${j}`} className={styles.rowTitle}>
+            <td
+              key={`${headerLetterColumn}${rowIndex}`}
+              name={`${headerLetterColumn}${rowIndex}`}
+              className={styles.rowTitle}>
               {header}
             </td>
             {tds}
@@ -233,6 +249,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
       <div>{form()}</div>
     </div>
   );
-};
+});
 
 export { WebFormData };

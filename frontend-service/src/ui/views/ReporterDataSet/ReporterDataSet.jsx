@@ -415,7 +415,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!datasetHasErrors}
+              disabled={!datasetHasErrors || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
               icon={'warning'}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
