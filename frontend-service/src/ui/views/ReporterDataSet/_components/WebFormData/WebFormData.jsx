@@ -24,20 +24,17 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     onLoadWebForm();
   }, []);
 
-  const onEditorKeyChange = (props, event, record) => {
+  const onEditorKeyChange = (props, event) => {
     if (event.key === 'Escape') {
-      onEditorValueChange(props, event.target.value);
-      // setFetchedData(updatedData);
+      const updatedData = changeCellValue(fetchedData.dataColumns, initialCellValue, props.fieldId);
+      setFetchedData({ ...fetchedData, dataColumns: updatedData });
     } else if (event.key === 'Enter' || event.key === 'Tab') {
-      onEditorSubmitValue(props, event.target.value, record);
+      onEditorSubmitValue(props, event.target.value);
     }
   };
 
   const onEditorSubmitValue = async (cell, value) => {
-    console.log(cell, value, initialCellValue);
     if (!isEmpty(cell)) {
-      //let field = fetchedData.dataColumns.reduce(column => column.filter(col => col.fieldId === cell[0].fieldId))[0];
-      //record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
       if (value !== initialCellValue) {
         const fieldUpdated = DataSetService.updateFieldById(
           dataSetId,
@@ -54,7 +51,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const onEditorValueChange = (props, value) => {
-    const updatedData = changeCellValue(fetchedData.dataColumns, value, props[0].fieldId);
+    const updatedData = changeCellValue(fetchedData.dataColumns, value, props.fieldId);
     setFetchedData({ ...fetchedData, dataColumns: updatedData });
   };
 
@@ -180,30 +177,37 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
 
       for (var columnIndex = firstColumn; columnIndex <= lastColumn; columnIndex++) {
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
-        if (!isUndefined(dataColumns[j])) {
-          let filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
-          if (!isEmpty(filteredColumn)) {
-            header = filteredColumn[0].description;
-            tds.push(
-              <td name={`${columnPosition}${rowIndex}`}>
-                <InputText
-                  value={filteredColumn[0].value}
-                  onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
-                  onChange={e => onEditorValueChange(filteredColumn, e.target.value)}
-                  onFocus={e => onEditorValueFocus(e.target.value)}
-                  onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
-                />
-              </td>
-            );
+        let filteredColumn = [];
+        if (columnPosition === 'K') {
+          tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
+        } else {
+          if (!isUndefined(dataColumns[j])) {
+            filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
+            if (!isEmpty(filteredColumn)) {
+              header = filteredColumn[0].description;
+              tds.push(
+                <td name={`${columnPosition}${rowIndex}`}>
+                  <InputText
+                    value={filteredColumn[0].value}
+                    onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
+                    onChange={e => onEditorValueChange(filteredColumn[0], e.target.value)}
+                    onFocus={e => onEditorValueFocus(e.target.value)}
+                    onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
+                  />
+                </td>
+              );
+            } else {
+              tds.push(
+                <td name={`${columnPosition}${rowIndex}`}>{/* <InputText className={styles.disabledInput} /> */}</td>
+              );
+            }
           } else {
-            tds.push(
-              <td name={`${columnPosition}${rowIndex}`}>{/* <InputText className={styles.disabledInput} /> */}</td>
-            );
           }
         }
-        j++;
+        if (columnPosition !== 'K') {
+          j++;
+        }
       }
-
       if (!isEmpty(header))
         rowsFilled.push(
           <tr name={rowIndex}>
