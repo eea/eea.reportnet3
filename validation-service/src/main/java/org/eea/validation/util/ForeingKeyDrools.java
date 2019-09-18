@@ -1,28 +1,27 @@
 package org.eea.validation.util;
 
 import org.eea.validation.persistence.data.domain.RecordValue;
-import org.eea.validation.persistence.data.repository.FieldRepositoryImpl;
 import org.eea.validation.service.ValidationService;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery11;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery11par1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery12;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery12part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery1par1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery2;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery21;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery21part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery22;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery22part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery2part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery3;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery31;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery31part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery32;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery32part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery3part1;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery4;
-import org.eea.validation.util.clasestoquerydrools.DataToQuery41;
+import org.eea.validation.util.querysdrools.DataToQuery1;
+import org.eea.validation.util.querysdrools.DataToQuery11;
+import org.eea.validation.util.querysdrools.DataToQuery11par1;
+import org.eea.validation.util.querysdrools.DataToQuery12;
+import org.eea.validation.util.querysdrools.DataToQuery12part1;
+import org.eea.validation.util.querysdrools.DataToQuery1par1;
+import org.eea.validation.util.querysdrools.DataToQuery2;
+import org.eea.validation.util.querysdrools.DataToQuery21;
+import org.eea.validation.util.querysdrools.DataToQuery21part1;
+import org.eea.validation.util.querysdrools.DataToQuery22;
+import org.eea.validation.util.querysdrools.DataToQuery22part1;
+import org.eea.validation.util.querysdrools.DataToQuery2part1;
+import org.eea.validation.util.querysdrools.DataToQuery3;
+import org.eea.validation.util.querysdrools.DataToQuery31;
+import org.eea.validation.util.querysdrools.DataToQuery31part1;
+import org.eea.validation.util.querysdrools.DataToQuery32;
+import org.eea.validation.util.querysdrools.DataToQuery32part1;
+import org.eea.validation.util.querysdrools.DataToQuery3part1;
+import org.eea.validation.util.querysdrools.DataToQuery4;
+import org.eea.validation.util.querysdrools.DataToQuery41;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -32,22 +31,6 @@ import org.springframework.stereotype.Component;
  */
 @Component("foreingKeyDrools")
 public class ForeingKeyDrools {
-
-
-  /** The field repository impl. */
-  private static FieldRepositoryImpl fieldRepositoryImpl;
-
-  /**
-   * Sets the dataset repository.
-   *
-   * @param fieldRepositoryImpl the new dataset repository
-   */
-  @Autowired
-  private void setDatasetRepository(FieldRepositoryImpl fieldRepositoryImpl) {
-    ForeingKeyDrools.fieldRepositoryImpl = fieldRepositoryImpl;
-  }
-
-
 
   /** The validation service. */
   @Qualifier("proxyValidationService")

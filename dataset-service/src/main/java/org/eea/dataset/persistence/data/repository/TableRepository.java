@@ -83,4 +83,6 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   @Query("delete from TableValue d where d.idTableSchema=?1")
   void deleteByIdTableSchema(String idTableSchema);
 
+
+
 }

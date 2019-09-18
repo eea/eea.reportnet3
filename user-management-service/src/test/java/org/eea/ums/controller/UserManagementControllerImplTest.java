@@ -2,6 +2,7 @@ package org.eea.ums.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
@@ -58,8 +59,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -136,4 +137,14 @@ public class UserManagementControllerImplTest {
   }
 
 
+  @Test
+  public void getGroupDetail() {
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    Mockito.when(securityProviderInterfaceService
+        .getGroupDetail(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(1l)))
+        .thenReturn(resourceInfoVO);
+    ResourceInfoVO result = userManagementController
+        .getResourceDetail(1L, ResourceGroupEnum.DATAFLOW_PROVIDER);
+    Assert.assertNotNull(result);
+  }
 }
