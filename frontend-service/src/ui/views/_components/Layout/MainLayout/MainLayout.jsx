@@ -33,7 +33,8 @@ const MainLayout = ({ children }) => {
       <Navigation />
       <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
-        BETA VERSION: This is test Data. Any change would not affect the real data. So feel free trying your stuff.
+        BETA VERSION FOR TESTING ONLY: The data and illustrated errors are for testing purposes only and do not reflect
+        the actual data delivered by any countries featured.
       </div>
       <div className={styles.mainContent}>{children}</div>
       <Footer />

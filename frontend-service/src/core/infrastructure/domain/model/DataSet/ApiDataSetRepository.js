@@ -235,7 +235,7 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
 const webFormDataById = async (dataSetId, tableSchemaId) => {
   const webFormDataDTO = await apiDataSet.webFormDataById(dataSetId, tableSchemaId);
   const webForm = new DataSetTable();
-  console.log('Clean Data', webFormDataDTO);
+
   const headerFieldSchemaId = '5d666d53460a1e0001b16717';
   const valueFieldSchemaId = '5d666d53460a1e0001b16728';
   const descriptionFieldSchemaId = '5d666d53460a1e0001b1671b';
@@ -321,7 +321,6 @@ const createDataColumns = (rowsData, letters) => {
     let columnLetter = rowsData.filter(row => row.columnPosition === value);
     columns.push(columnLetter);
   });
-  console.log('After clean data', columns);
   return columns;
 };
 

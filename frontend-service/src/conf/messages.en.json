@@ -36,6 +36,7 @@
 		"dataFlow": "Data Flow",
 		"dataFlowAcceptedPendingTab": "Pending & Accepted",
 		"dataFlowCompletedTab": "Completed",
+		"dataFlowList": "Dataflow List",
 		"dataFlowTask": "Dataflow Task",
 		"dataPasted": "Data has been successfully pasted",
 		"dataPastedError": "There has been an error pasting your data",			

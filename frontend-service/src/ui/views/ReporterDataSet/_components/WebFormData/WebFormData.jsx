@@ -99,12 +99,12 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let grid = getGrid(dataColumns);
 
     formResult.push(
-      <>
-        <tbody>
+      <table className={styles.webFormTable}>
+        <thead>
           <tr className={styles.columnHeaders}>{columnTitles}</tr>
-        </tbody>
-        {grid}
-      </>
+        </thead>
+        <tbody>{grid}</tbody>
+      </table>
     );
 
     return formResult;
@@ -115,7 +115,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     columnHeaders.map((column, i) => {
       let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
       columnsTitles.push(
-        <th className={styles.columnTitle} name={position}>
+        <th key={i} className={styles.columnTitle} name={position}>
           {column}
         </th>
       );
@@ -170,7 +170,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let lastRow = rows.lastRow;
 
     let columns = getMinAndMaxColumns(dataColumns);
-    console.log(columns);
     let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
     let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
 
@@ -189,7 +188,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
           if (!isEmpty(filteredColumn)) {
             header = filteredColumn[0].description;
             tds.push(
-              <td key={filteredColumn[0].fieldId} name={`${columnPosition}${rowIndex}`}>
+              <td key={`${columnIndex}${rowIndex}`} name={`${columnPosition}${rowIndex}`}>
                 <InputText
                   value={filteredColumn[0].value}
                   onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
@@ -211,14 +210,12 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
       }
       if (!isEmpty(header))
         rowsFilled.push(
-          <tbody>
-            <tr name={rowIndex}>
-              <td key={rowIndex} className={styles.rowTitle}>
-                {header}
-              </td>
-              {tds}
-            </tr>
-          </tbody>
+          <tr key={rowIndex} name={rowIndex}>
+            <td key={`${rowIndex}-${j}`} className={styles.rowTitle}>
+              {header}
+            </td>
+            {tds}
+          </tr>
         );
 
       header = '';
@@ -233,9 +230,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
 
   return (
     <div className={styles.webFormWrapper}>
-      <div>
-        <table className={styles.webFormTable}>{form()}</table>
-      </div>
+      <div>{form()}</div>
     </div>
   );
 };
