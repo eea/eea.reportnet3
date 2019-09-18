@@ -306,7 +306,6 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
     webForm.rows = rows;
   }
   letters.sort();
-  columnHeaders.splice(10, 0, ''); // refactor hardcoded
   let dataColumns = createDataColumns(rows, letters);
 
   formData.columnHeaders = columnHeaders;
