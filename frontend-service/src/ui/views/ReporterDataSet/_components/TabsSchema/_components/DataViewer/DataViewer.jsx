@@ -1101,6 +1101,7 @@ const DataViewer = withRouter(
           <InfoTable data={pastedRecords} columns={columns} onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
         </ConfirmDialog>
         <Dialog
+          className="edit-table"
           blockScroll={false}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
@@ -1112,6 +1113,7 @@ const DataViewer = withRouter(
           <div className="p-grid p-fluid">{newRecordForm}</div>
         </Dialog>
         <Dialog
+          className="edit-table"
           blockScroll={false}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}

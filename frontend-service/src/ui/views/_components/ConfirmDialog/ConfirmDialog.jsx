@@ -83,7 +83,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
         header={header}
         maximizable={maximizable}
         onHide={onHide}
-        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh', minHeight: '30vh' }}
+        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh' }}
         visible={visible}>
         {children}
       </Dialog>
