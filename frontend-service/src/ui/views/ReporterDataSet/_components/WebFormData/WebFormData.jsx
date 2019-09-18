@@ -2,12 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './WebFormData.module.css';
 
-import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
-import { Button } from 'ui/views/_components/Button';
 import { InputText } from 'ui/views/_components/InputText';
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -17,8 +14,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(false);
-
-  const resources = useContext(ResourcesContext);
 
   useEffect(() => {
     onLoadWebForm();
@@ -105,7 +100,9 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
 
     formResult.push(
       <>
-        <tr>{columnTitles}</tr>
+        <tbody>
+          <tr>{columnTitles}</tr>
+        </tbody>
         {grid}
       </>
     );
@@ -117,15 +114,7 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
     let columnsTitles = [];
     columnHeaders.map((column, i) => {
       let position = `${String.fromCharCode(97 + i).toUpperCase()}${5}`; // 5 -> still hardcoded
-      if (i === 10) {
-        columnsTitles.push(
-          <th name={position} className={styles.kColumn}>
-            {column}
-          </th>
-        );
-      } else {
-        columnsTitles.push(<th name={position}>{column}</th>);
-      }
+      columnsTitles.push(<th name={position}>{column}</th>);
     });
     return columnsTitles;
   };
@@ -190,44 +179,39 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
       for (var columnIndex = firstColumn; columnIndex <= lastColumn; columnIndex++) {
         let columnPosition = String.fromCharCode(96 + columnIndex).toUpperCase();
         let filteredColumn = [];
-        if (columnPosition === 'K') {
-          tds.push(<td name={`${columnPosition}${rowIndex}`}></td>);
-        } else {
-          if (!isUndefined(dataColumns[j])) {
-            filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
-            if (!isEmpty(filteredColumn)) {
-              header = filteredColumn[0].description;
-              tds.push(
-                <td name={`${columnPosition}${rowIndex}`}>
-                  <InputText
-                    value={filteredColumn[0].value}
-                    onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
-                    onChange={e => onEditorValueChange(filteredColumn[0], e.target.value)}
-                    onFocus={e => onEditorValueFocus(e.target.value)}
-                    onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
-                  />
-                </td>
-              );
-            } else {
-              tds.push(
-                <td name={`${columnPosition}${rowIndex}`}>
-                  <InputText className={styles.disabledInput} disabled={true} />
-                </td>
-              );
-            }
+        if (!isUndefined(dataColumns[j])) {
+          filteredColumn = dataColumns[j].filter(column => column.rowPosition == rowIndex);
+          if (!isEmpty(filteredColumn)) {
+            header = filteredColumn[0].description;
+            tds.push(
+              <td key={filteredColumn[0].fieldId} name={`${columnPosition}${rowIndex}`}>
+                <InputText
+                  value={filteredColumn[0].value}
+                  onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
+                  onChange={e => onEditorValueChange(filteredColumn[0], e.target.value)}
+                  onFocus={e => onEditorValueFocus(e.target.value)}
+                  onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
+                />
+              </td>
+            );
           } else {
+            tds.push(
+              <td key={`${columnIndex}${rowIndex}`} name={`${columnPosition}${rowIndex}`}>
+                <InputText className={styles.disabledInput} disabled={true} />
+              </td>
+            );
           }
-        }
-        if (columnPosition !== 'K') {
           j++;
         }
       }
       if (!isEmpty(header))
         rowsFilled.push(
-          <tr name={rowIndex}>
-            <td>{header}</td>
-            {tds}
-          </tr>
+          <tbody>
+            <tr name={rowIndex}>
+              <td key={rowIndex}>{header}</td>
+              {tds}
+            </tr>
+          </tbody>
         );
 
       header = '';
