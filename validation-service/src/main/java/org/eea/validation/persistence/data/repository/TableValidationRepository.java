@@ -40,4 +40,7 @@ public interface TableValidationRepository extends CrudRepository<TableValidatio
    */
   @Query("SELECT tv FROM TableValidation tv  WHERE tv.validation.id in(:ids) ")
   List<TableValidation> findByValidationIds(@Param("ids") List<Long> ids);
+
+
+
 }

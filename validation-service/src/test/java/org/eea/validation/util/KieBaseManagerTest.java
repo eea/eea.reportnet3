@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
@@ -31,12 +33,15 @@ public class KieBaseManagerTest {
   @Mock
   private SchemasRepository schemasRepository;
 
+  @Mock
+  private DatasetMetabaseController datasetMetabaseController;
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test
+  @Test()
   public void testKieBaseManager() throws FileNotFoundException {
     DataSetSchema dataSchema = new DataSetSchema();
     // LIST STRINGS
@@ -90,7 +95,9 @@ public class KieBaseManagerTest {
     List<FieldSchema> fieldSchemaList = new ArrayList<FieldSchema>();
     FieldSchema fieldSchema = new FieldSchema();
     fieldSchema.setRuleField(ruleFieldList);
+    fieldSchema.setIdFieldSchema(new ObjectId());
     fieldSchemaList.add(fieldSchema);
+
     record.setFieldSchema(fieldSchemaList);
     record.setRuleRecord(ruleRecordList);
     tableSchema.setRecordSchema(record);
@@ -100,8 +107,10 @@ public class KieBaseManagerTest {
     dataSchema.setRuleDataSet(ruleDataSetList);
     dataSchema.setTableSchemas(tableSchemasList);
     // CALL SERVICES
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
     when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
-    kieBaseManager.reloadRules(1L);
+    kieBaseManager.reloadRules(1L, 1L);
   }
 
 }

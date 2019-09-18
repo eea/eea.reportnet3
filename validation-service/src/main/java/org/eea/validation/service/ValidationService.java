@@ -45,36 +45,7 @@ public interface ValidationService {
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
 
-  /**
-   * Run table validations.
-   *
-   * @param list the list
-   * @param kieSession the kie session
-   *
-   * @return the list
-   */
-  List<TableValidation> runTableValidations(List<TableValue> list, KieSession kieSession);
 
-  /**
-   * Run record validations.
-   *
-   * @param recordsPaged the records paged
-   * @param kieSession the kie session
-   *
-   * @return the list
-   */
-  List<RecordValidation> runRecordValidations(List<RecordValue> recordsPaged,
-      KieSession kieSession);
-
-  /**
-   * Run field validations.
-   *
-   * @param fields the fields
-   * @param kieSession the kie session
-   *
-   * @return the list
-   */
-  List<FieldValidation> runFieldValidations(List<FieldValue> fields, KieSession kieSession);
 
   /**
    * Delete all validation.
@@ -184,6 +155,114 @@ public interface ValidationService {
    */
   Future<Map<Long, ErrorsValidationVO>> getFieldErrors(@DatasetId Long datasetId,
       List<Long> idValidations);
+
+
+  /**
+   * Run field validations.
+   *
+   * @param field the field
+   * @param kieSession the kie session
+   * @return the list
+   */
+  List<FieldValidation> runFieldValidations(FieldValue field, KieSession kieSession);
+
+
+  /**
+   * Run record validations.
+   *
+   * @param record the record
+   * @param kieSession the kie session
+   * @return the list
+   */
+  List<RecordValidation> runRecordValidations(RecordValue record, KieSession kieSession);
+
+
+  /**
+   * Run table validations.
+   *
+   * @param table the table
+   * @param kieSession the kie session
+   * @return the list
+   */
+  List<TableValidation> runTableValidations(TableValue table, KieSession kieSession);
+
+
+  /**
+   * Dataset validation DO 02 query.
+   *
+   * @param DO02 the do02
+   * @return the boolean
+   */
+  Boolean datasetValidationDO02Query(String DO02);
+
+  /**
+   * Dataset validation DO 03 query.
+   *
+   * @param DO03 the do03
+   * @return the boolean
+   */
+  Boolean datasetValidationDO03Query(String DO03);
+
+  /**
+   * Dataset validation DC 01 A query.
+   *
+   * @param DC01A the dc01a
+   * @return the boolean
+   */
+  Boolean datasetValidationDC01AQuery(String DC01A);
+
+  /**
+   * Dataset validation DC 01 B query.
+   *
+   * @param DC01B the dc01b
+   * @return the boolean
+   */
+  Boolean datasetValidationDC01BQuery(String DC01B);
+
+  /**
+   * Dataset validation DC 02 query.
+   *
+   * @param DC02 the dc02
+   * @return the boolean
+   */
+  Boolean datasetValidationDC02Query(String DC02);
+
+  /**
+   * Dataset validation DC 03 query.
+   *
+   * @param DC03 the dc03
+   * @return the boolean
+   */
+  Boolean datasetValidationDC03Query(String DC03);
+
+
+  /// PART TABLE
+
+  /**
+   * Table validation DR 01 AB query.
+   *
+   * @param DR01A the dr01a
+   * @param previous the previous
+   * @return the boolean
+   */
+  Boolean tableValidationDR01ABQuery(String DR01A, Boolean previous);
+
+  /**
+   * Table validation query non return result.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
+  Boolean tableValidationQueryNonReturnResult(String QUERY);
+
+  /**
+   * Table validation query period monitoring.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
+  Boolean tableValidationQueryPeriodMonitoring(String QUERY);
+
 
 
 }

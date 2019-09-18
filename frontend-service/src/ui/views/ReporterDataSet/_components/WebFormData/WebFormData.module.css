@@ -1,35 +1,17 @@
-.divWebForm {
-  display: flex;
-  margin: 5px !important;
+.webFormWrapper {
+  padding-bottom: 4rem;
 }
-.formColumn {
-  margin: 5px;
-  /* width: auto; */
-  text-align: center;
+.columnTitle {
+  border-radius: 5px;
 }
-.inputColumn {
-  width: auto !important;
+.columnHeaders {
+  background: aliceblue;
 }
-.divRowsWebForms {
-  display: flex;
-}
-.divColumnHeader {
-  display: flex;
-  width: 100%;
-}
-.columnHeader {
-  width: 100%;
-  text-align: center;
-}
-.headersLeft {
-  width: 20%;
-}
-.tdInputFields {
-  width: 10%;
+.rowTitle {
+  border-radius: 3px;
+  background: aliceblue;
+  padding: 10px;
 }
 .disabledInput {
   background: #dddddd !important;
-}
-.webFormWrapper {
-  padding-bottom: 4rem;
 }
