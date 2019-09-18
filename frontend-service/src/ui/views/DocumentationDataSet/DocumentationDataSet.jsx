@@ -233,7 +233,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
           </Dialog>
           {
             <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-              <Column body={crudTemplate} />
+              <Column className={styles.crudColumn} body={crudTemplate} />
               <Column
                 columnResizeMode="expand"
                 field="title"
