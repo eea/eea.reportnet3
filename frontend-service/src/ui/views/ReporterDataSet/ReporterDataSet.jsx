@@ -86,7 +86,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowTask'],
+        label: resources.messages['dataFlowList'],
         command: () => history.push('/data-flow-task')
       },
       {
