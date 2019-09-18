@@ -153,6 +153,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.any());
   }
 
+
   @Test
   public void releaseSnapshot() throws Exception {
 
@@ -160,5 +161,4 @@ public class DatasetSnapshotServiceTest {
     datasetSnapshotService.releaseSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
-
 }

@@ -746,7 +746,9 @@ public class DatasetServiceTest {
     List<RecordValue> myRecords = new ArrayList<>();
     myRecords.add(new RecordValue());
     Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
-    Mockito.when(recordMapper.classListToEntity(Mockito.any())).thenReturn(myRecords);
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     List<RecordVO> records = new ArrayList<>();
 
     List<RecordValue> recordsList = new ArrayList<>();
