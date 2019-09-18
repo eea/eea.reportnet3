@@ -17,6 +17,7 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
 
 /**
@@ -29,10 +30,10 @@ public interface ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie session
    * @throws EEAException the EEA exception
    */
-  void validateFields(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+  void validateFields(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
 
 
   /**
@@ -62,7 +63,7 @@ public interface ValidationService {
    * @param kieSession the kie session
    * @throws EEAException the EEA exception
    */
-  void validateDataSet(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+  void validateDataSet(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
 
 
   /**
@@ -72,7 +73,7 @@ public interface ValidationService {
    * @param kieSession the kie session
    * @throws EEAException the EEA exception
    */
-  void validateTable(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+  void validateTable(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
 
 
   /**
@@ -83,7 +84,7 @@ public interface ValidationService {
    * @return
    * @throws EEAException the EEA exception
    */
-  void validateRecord(@DatasetId Long datasetId, KieSession kieSession) throws EEAException;
+  void validateRecord(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
 
 
   /**
@@ -93,7 +94,7 @@ public interface ValidationService {
    * @return the kie session
    * @throws EEAException the EEA exception
    */
-  KieSession loadRulesKnowledgeBase(@DatasetId Long datasetId) throws EEAException;
+  KieBase loadRulesKnowledgeBase(@DatasetId Long datasetId) throws EEAException;
 
   /**
    * Gets the record errors.

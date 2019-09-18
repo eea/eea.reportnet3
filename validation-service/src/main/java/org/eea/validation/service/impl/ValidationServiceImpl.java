@@ -47,6 +47,8 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
+import org.hibernate.Hibernate;
+import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,8 +198,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @return the list
    */
   @Override
-  public synchronized List<FieldValidation> runFieldValidations(FieldValue field,
-      KieSession kieSession) {
+  public List<FieldValidation> runFieldValidations(FieldValue field, KieSession kieSession) {
     if (StringUtils.isNotBlank(field.getIdFieldSchema())) {
       kieSession.insert(field);
     }
@@ -220,22 +221,22 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IllegalArgumentException the illegal argument exception
    */
   @Override
-  public KieSession loadRulesKnowledgeBase(Long datasetId) throws EEAException {
-    KieSession kieSession;
+  public KieBase loadRulesKnowledgeBase(Long datasetId) throws EEAException {
+    KieBase kieBase;
     // Get Dataflow id
     Long dataflowId = datasetController.getDataFlowIdById(datasetId);
     if (dataflowId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      kieSession = kieBaseManager.reloadRules(dataflowId, datasetId).newKieSession();
+      kieBase = kieBaseManager.reloadRules(dataflowId, datasetId);
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.VALIDATION_SESSION_ERROR, e);
     }
-    return kieSession;
+    return kieBase;
   }
 
 
@@ -249,13 +250,13 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateDataSet(Long datasetId, KieSession kieSession) throws EEAException {
+  public void validateDataSet(Long datasetId, KieBase kieBase) throws EEAException {
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    List<DatasetValidation> validations = runDatasetValidations(dataset, kieSession);
+    List<DatasetValidation> validations = runDatasetValidations(dataset, kieBase.newKieSession());
     validations.stream().forEach(validation -> validation.setDatasetValue(dataset));
     validationDatasetRepository.saveAll(validations);
   }
@@ -270,7 +271,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, KieSession session) throws EEAException {
+  public void validateTable(Long datasetId, KieBase kieBase) throws EEAException {
     // Validating tables
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
@@ -280,7 +281,7 @@ public class ValidationServiceImpl implements ValidationService {
     dataset.getTableValues().stream().forEach(table -> {
 
       Validation validation = new Validation();
-      List<TableValidation> validations = runTableValidations(table, session);
+      List<TableValidation> validations = runTableValidations(table, kieBase.newKieSession());
       table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
         tableValidation.setTableValue(table);
         if (validation.getLevelError() == null
@@ -327,7 +328,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateRecord(Long datasetId, KieSession session) throws EEAException {
+  public void validateRecord(Long datasetId, KieBase kieBase) throws EEAException {
     long timer = System.currentTimeMillis();
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
@@ -343,10 +344,13 @@ public class ValidationServiceImpl implements ValidationService {
       List<RecordValue> recordsByTable =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(tableId));
       recordsByTable.stream()
+          .filter(recordValue -> !Hibernate.isInitialized(recordValue.getRecordValidations()))
           .forEach(recordValue -> recordValue.setRecordValidations(new ArrayList<>()));
       recordsByTable = Collections.synchronizedList(recordsByTable);
       recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
+        KieSession session = kieBase.newKieSession();
         List<RecordValidation> recordValidations = runRecordValidations(row, session);
+        session.dispose();
         if (null != recordValidations && recordValidations.size() > 0) {// there were validation
                                                                         // error
           // set on validation error the reference back to the record
@@ -401,7 +405,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateFields(Long datasetId, KieSession session) throws EEAException {
+  public void validateFields(Long datasetId, KieBase kieBase) throws EEAException {
     long timer = System.currentTimeMillis();
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
@@ -423,7 +427,9 @@ public class ValidationServiceImpl implements ValidationService {
         if (null != row.getRecordValidations()) {
           List<FieldValue> fields = Collections.synchronizedList(row.getFields());
           fields.stream().filter(Objects::nonNull).forEach(field -> {
+            KieSession session = kieBase.newKieSession();
             List<FieldValidation> resultFields = runFieldValidations(field, session);
+            session.dispose();
             if (null != field.getFieldValidations()) {
               field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
                 fieldValue.setFieldValue(field);

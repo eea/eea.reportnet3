@@ -4,7 +4,7 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.service.ValidationService;
-import org.kie.api.runtime.KieSession;
+import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,16 +55,15 @@ public class ValidationHelper {
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Load Rules");
-    KieSession session = validationService.loadRulesKnowledgeBase(datasetId);
+    KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
     LOG.info("Validating Fields");
-    validationService.validateFields(datasetId, session);
+    validationService.validateFields(datasetId, kieBase);
     LOG.info("Validating Records");
-    validationService.validateRecord(datasetId, session);
+    validationService.validateRecord(datasetId, kieBase);
     LOG.info("Validating Tables");
-    validationService.validateTable(datasetId, session);
+    validationService.validateTable(datasetId, kieBase);
     LOG.info("Validating Dataset");
-    validationService.validateDataSet(datasetId, session);
-    session.dispose();
+    validationService.validateDataSet(datasetId, kieBase);
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }

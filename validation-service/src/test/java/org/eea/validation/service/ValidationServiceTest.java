@@ -80,6 +80,10 @@ public class ValidationServiceTest {
   @Mock
   private KieSession kieSession;
 
+  /** The kie session. */
+  @Mock
+  private KieBase kieBase;
+
   /**
    * The kie base manager.
    */
@@ -376,7 +380,7 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testValidateRecordException() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    validationServiceImpl.validateRecord(1L, kieSession);
+    validationServiceImpl.validateRecord(1L, kieBase);
   }
 
   /**
@@ -385,7 +389,7 @@ public class ValidationServiceTest {
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testValidateRecord() throws FileNotFoundException, EEAException {
 
     datasetValue.getTableValues().get(0).setId(1L);
@@ -425,11 +429,13 @@ public class ValidationServiceTest {
     records.add(recordValue);
 
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    validationServiceImpl.validateRecord(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    when(kieSession.fireAllRules()).thenReturn(1);
+    validationServiceImpl.validateRecord(1L, kieBase);
 
   }
 
-  // @Test
+  @Test
   public void testValidateRecordError() throws FileNotFoundException, EEAException {
 
     datasetValue.getTableValues().get(0).setId(1L);
@@ -467,9 +473,9 @@ public class ValidationServiceTest {
     recordValue.setFields(fields);
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
-
+    when(kieBase.newKieSession()).thenReturn(kieSession);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    validationServiceImpl.validateRecord(1L, kieSession);
+    validationServiceImpl.validateRecord(1L, kieBase);
 
   }
 
@@ -479,7 +485,7 @@ public class ValidationServiceTest {
    * @throws FileNotFoundException the file not found exception
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testValidateRecordWarningPart() throws FileNotFoundException, EEAException {
     datasetValue.getTableValues().remove(1);
     datasetValue.getTableValues().get(0).setIdTableSchema("123123");
@@ -509,7 +515,8 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    validationServiceImpl.validateRecord(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    validationServiceImpl.validateRecord(1L, kieBase);
 
   }
 
@@ -521,7 +528,7 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testValidateDataSetDataSessionExcep() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    validationServiceImpl.validateFields(1L, kieSession);
+    validationServiceImpl.validateFields(1L, kieBase);
   }
 
   /**
@@ -535,18 +542,19 @@ public class ValidationServiceTest {
     RecordValue recordValue = new RecordValue();
     recordValue.setId(1L);
     List<FieldValue> fields = new ArrayList<>();
-    FieldValue fieldValue = new FieldValue();
     List<FieldValidation> fieldValidations = new ArrayList<>();
     FieldValidation fieldValidation = new FieldValidation();
-    fieldValue.setId(1L);
-    fieldValue.setLevelError(TypeErrorEnum.WARNING);
     validation.setId(1L);
     validation.setTypeEntity(TypeEntityEnum.DATASET);
     fieldValidation.setValidation(validation);
     fieldValidation.setFieldValue(fieldValue);
     fieldValidation.setId(1L);
     fieldValidations.add(fieldValidation);
+    FieldValue fieldValue = new FieldValue();
     fieldValue.setFieldValidations(fieldValidations);
+    fieldValue.setId(1L);
+    fieldValue.setLevelError(TypeErrorEnum.WARNING);
+    fields.add(fieldValue);
     fields.add(fieldValue);
     List<RecordValidation> recordValidations = new ArrayList<>();
     RecordValidation recordValidation = new RecordValidation();
@@ -562,11 +570,14 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(1).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    validationServiceImpl.validateFields(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    when(kieSession.fireAllRules()).thenReturn(1);
+    when(kieSession.insert(Mockito.any())).thenReturn(null);
+    validationServiceImpl.validateFields(1L, kieBase);
 
   }
 
-  @Test
+  // @Test
   public void testValidateFieldsSuccessData() throws EEAException {
     List<RecordValue> records = new ArrayList<>();
     RecordValue recordValue = new RecordValue();
@@ -597,9 +608,11 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(0).setIdTableSchema("123123");
     datasetValue.getTableValues().get(1).setId(2L);
     datasetValue.getTableValues().get(1).setIdTableSchema("123123");
+    when(kieBase.newKieSession()).thenReturn(kieSession);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    validationServiceImpl.validateFields(1L, kieSession);
+    when(kieSession.fireAllRules()).thenReturn(1);
+    validationServiceImpl.validateFields(1L, kieBase);
   }
 
   /**
@@ -626,7 +639,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBaseThrowErrorException()
       throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
-    KieBase kiebase = kieHelper.build();
+    kieBase = kieHelper.build();
     when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(123L);
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
@@ -915,7 +928,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void validateDataSetError() throws EEAException {
-    validationServiceImpl.validateDataSet(1L, kieSession);
+    validationServiceImpl.validateDataSet(1L, kieBase);
   }
 
   /**
@@ -928,7 +941,8 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(0).getTableValidations().get(0).getValidation()
         .setLevelError(TypeErrorEnum.ERROR);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    validationServiceImpl.validateDataSet(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    validationServiceImpl.validateDataSet(1L, kieBase);
   }
 
   /**
@@ -939,7 +953,8 @@ public class ValidationServiceTest {
   @Test
   public void validateDataWarning() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    validationServiceImpl.validateDataSet(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    validationServiceImpl.validateDataSet(1L, kieBase);
   }
 
   /**
@@ -949,7 +964,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void validateTableThrow() throws EEAException {
-    validationServiceImpl.validateTable(1L, kieSession);
+    validationServiceImpl.validateTable(1L, kieBase);
   }
 
   /**
@@ -1000,7 +1015,8 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(datasetMetabase.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
-    validationServiceImpl.validateTable(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    validationServiceImpl.validateTable(1L, kieBase);
   }
 
   /**
@@ -1046,7 +1062,8 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(datasetMetabase.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
-    validationServiceImpl.validateTable(1L, kieSession);
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    validationServiceImpl.validateTable(1L, kieBase);
   }
 
   @Test
