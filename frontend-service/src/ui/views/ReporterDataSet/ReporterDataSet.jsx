@@ -392,7 +392,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               disabled={false}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
@@ -406,7 +406,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -424,7 +424,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={Number(dataSetId) === 5 || Number(dataSetId) === 142}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
