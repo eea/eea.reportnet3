@@ -746,8 +746,24 @@ public class DatasetServiceTest {
     List<RecordValue> myRecords = new ArrayList<>();
     myRecords.add(new RecordValue());
     Mockito.when(tableRepository.findIdByIdTableSchema(Mockito.any())).thenReturn(1L);
-    Mockito.when(recordMapper.classListToEntity(Mockito.any())).thenReturn(myRecords);
-    datasetService.createRecords(1L, new ArrayList<RecordVO>(), "");
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    List<RecordVO> records = new ArrayList<>();
+
+    List<RecordValue> recordsList = new ArrayList<>();
+    RecordValue record = new RecordValue();
+
+    List<FieldValue> fields = new ArrayList<>();
+    FieldValue field = new FieldValue();
+
+    fields.add(field);
+    field.setValue(null);
+    fields.add(field);
+    record.setFields(fields);
+    recordsList.add(record);
+    when(recordMapper.classListToEntity(records)).thenReturn(recordsList);
+    datasetService.createRecords(1L, records, "");
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
@@ -826,7 +842,11 @@ public class DatasetServiceTest {
   public void testInsertSchema() throws EEAException {
 
     DataSetSchema ds = new DataSetSchema();
-    ds.setTableSchemas(new ArrayList<>());
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    tableSchemas.add(table);
+    ds.setTableSchemas(tableSchemas);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(ds);
     datasetService.insertSchema(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
