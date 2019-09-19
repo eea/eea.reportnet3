@@ -244,8 +244,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate data set.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
-   *
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   @Override
@@ -265,8 +264,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
-   * @param session the session
-   *
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   @Override
@@ -322,8 +320,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate record.
    *
    * @param datasetId the dataset id
-   * @param session the session
-   *
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   @Override
@@ -399,8 +396,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate data set data.
    *
    * @param datasetId the dataset id
-   * @param session the session
-   *
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   @Override
@@ -705,8 +701,7 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * Dataset validation DO 02 query.
    *
-   * @param do02 the do 02
-   *
+   * @param DO02 the do02
    * @return the boolean
    */
   @Override
@@ -714,26 +709,56 @@ public class ValidationServiceImpl implements ValidationService {
     return datasetRepositoryImpl.datasetValidationQuery(DO02);
   }
 
+  /**
+   * Dataset validation DO 03 query.
+   *
+   * @param DO03 the do03
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDO03Query(String DO03) {
     return datasetRepositoryImpl.datasetValidationQuery(DO03);
   }
 
+  /**
+   * Dataset validation DC 01 A query.
+   *
+   * @param DC01A the dc01a
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC01AQuery(String DC01A) {
     return datasetRepositoryImpl.datasetValidationQuery(DC01A);
   }
 
+  /**
+   * Dataset validation DC 01 B query.
+   *
+   * @param DC01B the dc01b
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC01BQuery(String DC01B) {
     return datasetRepositoryImpl.datasetValidationQuery(DC01B);
   }
 
+  /**
+   * Dataset validation DC 02 query.
+   *
+   * @param DC02 the dc02
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC02Query(String DC02) {
     return datasetRepositoryImpl.datasetValidationQuery(DC02);
   }
 
+  /**
+   * Dataset validation DC 03 query.
+   *
+   * @param DC03 the dc03
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC03Query(String DC03) {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);

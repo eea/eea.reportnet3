@@ -34,6 +34,7 @@ import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
+import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -141,6 +142,7 @@ public class ValidationServiceTest {
   private ValidationDatasetRepository datasetValidationRepository;
 
 
+  /** The table validation querys drools repository. */
   @Mock
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
@@ -183,6 +185,10 @@ public class ValidationServiceTest {
   /** The dataset metabase. */
   @Mock
   private DatasetMetabaseController datasetMetabase;
+
+  /** The dataset repository impl. */
+  @Mock
+  private DatasetRepositoryImpl datasetRepositoryImpl;
 
   /**
    * Inits the mocks.
@@ -435,6 +441,12 @@ public class ValidationServiceTest {
 
   }
 
+  /**
+   * Test validate record error.
+   *
+   * @throws FileNotFoundException the file not found exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testValidateRecordError() throws FileNotFoundException, EEAException {
 
@@ -572,11 +584,15 @@ public class ValidationServiceTest {
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
-    when(kieSession.insert(Mockito.any())).thenReturn(null);
     validationServiceImpl.validateFields(1L, kieBase);
 
   }
 
+  /**
+   * Test validate fields success data.
+   *
+   * @throws EEAException the EEA exception
+   */
   // @Test
   public void testValidateFieldsSuccessData() throws EEAException {
     List<RecordValue> records = new ArrayList<>();
@@ -629,20 +645,6 @@ public class ValidationServiceTest {
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
-  /**
-   * Test load rules knowledge base throw error exception.
-   *
-   * @throws FileNotFoundException the file not found exception
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void testLoadRulesKnowledgeBaseThrowErrorException()
-      throws FileNotFoundException, EEAException {
-    KieHelper kieHelper = new KieHelper();
-    kieBase = kieHelper.build();
-    when(datasetController.getDataFlowIdById(Mockito.any())).thenReturn(123L);
-    validationServiceImpl.loadRulesKnowledgeBase(1L);
-  }
 
   /**
    * Test load rules knowledge base throw error null.
@@ -1066,6 +1068,9 @@ public class ValidationServiceTest {
     validationServiceImpl.validateTable(1L, kieBase);
   }
 
+  /**
+   * Table validation query period monitoring.
+   */
   @Test
   public void tableValidationQueryPeriodMonitoring() {
     List<BigInteger> listRecords = new ArrayList<>();
@@ -1079,6 +1084,9 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Table validation query period monitoring fail.
+   */
   @Test
   public void tableValidationQueryPeriodMonitoringFail() {
     List<BigInteger> listRecords = new ArrayList<>();
@@ -1090,5 +1098,79 @@ public class ValidationServiceTest {
     when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
         .thenReturn(null);
     validationServiceImpl.tableValidationQueryPeriodMonitoring("");
+  }
+
+  /**
+   * Dataset validation DO 02 query test.
+   */
+  @Test
+  public void datasetValidationDO02QueryTest() {
+    validationServiceImpl.datasetValidationDO02Query(Mockito.any());
+    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
+  }
+
+  /**
+   * Dataset validation DO 03 query test.
+   */
+  @Test
+  public void datasetValidationDO03QueryTest() {
+    validationServiceImpl.datasetValidationDO03Query(Mockito.any());
+    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
+  }
+
+  /**
+   * Dataset validation DC 01 A query test.
+   */
+  @Test
+  public void datasetValidationDC01AQueryTest() {
+    validationServiceImpl.datasetValidationDC01AQuery(Mockito.any());
+    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
+  }
+
+  /**
+   * Dataset validation DC 01 B query test.
+   */
+  @Test
+  public void datasetValidationDC01BQueryTest() {
+    validationServiceImpl.datasetValidationDC01BQuery(Mockito.any());
+    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
+  }
+
+  /**
+   * Dataset validation DC 02 query test.
+   */
+  @Test
+  public void datasetValidationDC02QueryTest() {
+    validationServiceImpl.datasetValidationDC02Query(Mockito.any());
+    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
+  }
+
+  /**
+   * Dataset validation DC 03 B query test.
+   */
+  @Test
+  public void datasetValidationDC03BQueryTest() {
+    validationServiceImpl.datasetValidationDC03Query(Mockito.any());
+    Mockito.verify(datasetRepositoryImpl, times(1)).datasetValidationQuery(Mockito.any());
+  }
+
+  /**
+   * Table validation DR 01 AB query test.
+   */
+  @Test
+  public void tableValidationDR01ABQueryTest() {
+    validationServiceImpl.tableValidationDR01ABQuery(Mockito.any(), Mockito.any());
+    Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
+        .tableValidationDR01ABQuery(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Table validation query non return result test.
+   */
+  @Test
+  public void tableValidationQueryNonReturnResultTest() {
+    validationServiceImpl.tableValidationQueryNonReturnResult(Mockito.any());
+    Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
+        .tableValidationQueryNonReturnResult(Mockito.any());
   }
 }
