@@ -6,6 +6,7 @@
 		"cancel": "pi pi-times",
 		"camera": "pi pi-camera",
 		"check": "pi pi-check",
+		"checkCircle": "pi pi-check-circle",
 		"clipboard": "pi pi-paperclip",
 		"clock": "pi pi-clock",
 		"clone": "pi pi-clone",
@@ -14,6 +15,7 @@
 		"dashboard": "pi pi-chart-bar",
 		"edit": "pi pi-pencil",
 		"ellipsis":"pi pi-ellipsis-v",
+		"errorCircle": "pi pi-times-circle",
 		"export": "pi pi-download",
 		"eye": "pi pi-eye",
 		"filter": "pi pi-filter",
@@ -37,6 +39,7 @@
 		"user": "pi pi-user",
 		"users": "pi pi-users",
 		"validate": "pi pi-check-circle",
-		"warning": "pi pi-exclamation-triangle"
+		"warning": "pi pi-exclamation-triangle",
+		"warningCircle": "pi pi-exclamation-circle"
 	}
 }
