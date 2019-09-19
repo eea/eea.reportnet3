@@ -4,7 +4,7 @@ import { isUndefined } from 'lodash';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const InfoTableMessages = ({ data, columns }) => {
+export const InfoTableMessages = ({ data, columns, records }) => {
   const resources = useContext(ResourcesContext);
 
   const checkPastedColumnsErrors = () => {
@@ -28,6 +28,11 @@ export const InfoTableMessages = ({ data, columns }) => {
           return (
             <div>
               <p style={{ fontWeight: 'bold', color: '#DA2131' }}>{resources.messages['pasteColumnWarningMessage']}</p>
+              {records > 500 ? (
+                <p style={{ fontWeight: 'bold', color: '#DA2131' }}>
+                  {resources.messages['pasteRecordsWarningMessage']}
+                </p>
+              ) : null}
               <p>{resources.messages['pasteColumnWarningConfirmMessage']}</p>
             </div>
           );

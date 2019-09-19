@@ -4,9 +4,19 @@
   opacity: 0.5;
   height: 34vh;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-content: center;
   align-items: center;
+}
+
+.infoTableItem {
+  flex-grow: 1;
+  text-align: center;
+}
+.lineBreak {
+  flex-basis: 100%;
+  height: 0;
 }
 
 .infoTableCellError {

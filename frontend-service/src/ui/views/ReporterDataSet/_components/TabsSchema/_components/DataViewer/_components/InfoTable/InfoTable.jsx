@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import { isUndefined } from 'lodash';
 
@@ -10,8 +10,14 @@ import { InfoTableMessages } from './_components/InfoTableMessages';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
+export const InfoTable = ({ data, columns, records, onDeletePastedRecord, isPasting }) => {
+  const [isLoading, setIsLoading] = useState();
   const resources = useContext(ResourcesContext);
+
+  useEffect(() => {
+    setIsLoading(isPasting);
+  }, []);
+
   const previewPastedData = () => {
     return (
       <div className="p-datatable-wrapper">
@@ -19,7 +25,7 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
           <thead className="p-datatable-thead">
             <tr>{previewPastedDataHeaders()}</tr>
           </thead>
-          <tbody className="p-datatable-tbody">{previewPastedDataBody()}</tbody>
+          <tbody className="p-datatable-tbody">{!isLoading ? previewPastedDataBody() : <div>Loading...</div>}</tbody>
         </table>
       </div>
     );
@@ -100,6 +106,8 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
             );
           });
         }
+        console.log('End pasting');
+        //setIsLoading(false);
         return records;
       }
     }
@@ -107,13 +115,20 @@ export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
 
   return (
     <React.Fragment>
-      <InfoTableMessages data={data} columns={columns} />
+      <InfoTableMessages data={data} columns={columns} records={records} />
       <hr />
       {!isUndefined(data) && data.length > 0 ? (
         previewPastedData()
       ) : (
         <div className={styles.infoTablePaste}>
-          <span>{resources.messages['pasteRecordsMessage']}</span>
+          {/* {isPasting ? console.log('Pasting') : console.log('No pasting')} */}
+          <div className={styles.infoTableItem}>
+            <p>{resources.messages['pasteRecordsMessage']}</p>
+          </div>
+          <div className={styles.lineBreak}></div>
+          <div className={styles.infoTableItem}>
+            <p>{resources.messages['pasteRecordsMaxMessage']}</p>
+          </div>
         </div>
       )}
     </React.Fragment>
