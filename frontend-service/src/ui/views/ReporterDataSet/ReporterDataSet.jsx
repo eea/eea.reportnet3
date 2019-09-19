@@ -454,7 +454,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
         onHide={() => onSetVisible(setDashDialogVisible, false)}
-        style={{ width: '70vw', minHeight: '90vh' }}
+        style={{ width: '70vw' }}
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} />
       </Dialog>
