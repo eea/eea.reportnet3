@@ -64,7 +64,7 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['dataFlowTask'] }]);
+    setBreadCrumbItems([{ label: resources.messages['dataFlowList'] }]);
   }, [history, match.params.dataFlowId, resources.messages]);
 
   const layout = children => {

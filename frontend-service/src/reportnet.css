@@ -1815,7 +1815,10 @@ form .error {
 .p-tooltip {
   z-index: 4000 !important;
 }
-
+/*dialog*/
+body .p-dialog.edit-table .p-dialog-content {
+  max-height: 65vh;
+}
 /* buttons */
 
 @keyframes p-progress-spinner-color {

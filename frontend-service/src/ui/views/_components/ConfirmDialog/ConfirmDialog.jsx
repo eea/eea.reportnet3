@@ -47,9 +47,13 @@ export const ConfirmDialog = forwardRef((props, _) => {
     }
   };
 
+  const isHTTPS = () => {
+    return window.location.protocol === 'https:';
+  };
+
   const footer = (
     <div>
-      {hasPasteOption ? (
+      {hasPasteOption && isHTTPS() ? (
         <Button
           disabled={!isChrome()}
           icon="clipboard"
@@ -70,6 +74,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
       />
     </div>
   );
+
   return (
     <div onPaste={onPaste} ref={divRef}>
       <Dialog
@@ -78,7 +83,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
         header={header}
         maximizable={maximizable}
         onHide={onHide}
-        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh', minHeight: '30vh' }}
+        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh' }}
         visible={visible}>
         {children}
       </Dialog>

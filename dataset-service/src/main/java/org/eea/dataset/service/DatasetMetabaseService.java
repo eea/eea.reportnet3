@@ -29,4 +29,12 @@ public interface DatasetMetabaseService {
   void createEmptyDataset(String datasetName, String idDatasetSchema, Long idDataflow)
       throws EEAException;
 
+  /**
+   * Gets the dataset name.
+   *
+   * @param idDataset the id dataset
+   * @return the dataset name
+   */
+  DataSetMetabaseVO findDatasetMetabase(Long idDataset);
+
 }

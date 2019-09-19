@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -14,6 +15,7 @@ import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +29,9 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping(value = "/user")
 public class UserManagementControllerImpl implements UserManagementController {
 
-  /** The security provider interface service. */
+  /**
+   * The security provider interface service.
+   */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
@@ -36,6 +40,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    *
    * @param username the username
    * @param password the password
+   *
    * @return the token VO
    */
   @Override
@@ -50,6 +55,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Refresh token.
    *
    * @param refreshToken the refresh token
+   *
    * @return the token VO
    */
   @Override
@@ -64,6 +70,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    *
    * @param resource the resource
    * @param scopes the scopes
+   *
    * @return the boolean
    */
   @Override
@@ -96,6 +103,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Gets the resources by user.
    *
    * @param resourceType the resource type
+   *
    * @return the resources by user
    */
   @Override
@@ -112,6 +120,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Gets the resources by user.
    *
    * @param securityRole the security role
+   *
    * @return the resources by user
    */
   @Override
@@ -128,6 +137,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    *
    * @param resourceType the resource type
    * @param securityRole the security role
+   *
    * @return the resources by user
    */
   @Override
@@ -172,6 +182,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * Test secured service.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the string
    */
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
@@ -179,5 +190,14 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping("/resource/details")
+  public ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
+      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
+    return securityProviderInterfaceService
+        .getGroupDetail(resourceGroupEnum.getGroupName(idResource));
   }
 }
