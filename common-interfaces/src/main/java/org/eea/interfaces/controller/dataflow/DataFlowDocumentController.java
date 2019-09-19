@@ -23,7 +23,7 @@ public interface DataFlowDocumentController {
   }
 
   /**
-   * Gets the document by id.
+   * Gets the document info by id.
    *
    * @param documentId the document id
    * @return the document by id
