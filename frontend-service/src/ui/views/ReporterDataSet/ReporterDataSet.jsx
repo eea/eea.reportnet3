@@ -25,6 +25,7 @@ import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
+import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DataSetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
@@ -61,6 +62,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
+  const [tableSchemaId, setTableSchemaId] = useState();
 
   let exportMenuRef = useRef();
 
@@ -84,7 +86,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowTask'],
+        label: resources.messages['dataFlowList'],
         command: () => history.push('/data-flow-task')
       },
       {
@@ -187,6 +189,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     try {
       const dataSetSchema = await DataSetService.schemaById(dataFlowId);
       const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
+      setTableSchemaId(dataSetSchema.tables[0].tableSchemaId);
       setDatasetTitle(dataSetStatistics.dataSetSchemaName);
       setTableSchema(
         dataSetSchema.tables.map(tableSchema => {
@@ -334,6 +337,30 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     );
   };
 
+  const isWebForm = () => {
+    if (dataSetId == 5 || dataSetId == 142) {
+      return <WebFormData dataSetId={dataSetId} tableSchemaId={tableSchemaId} />;
+    } else {
+      return (
+        <SnapshotContext.Provider
+          value={{
+            snapshotState: snapshotState,
+            snapshotDispatch: snapshotDispatch
+          }}>
+          <TabsSchema
+            activeIndex={activeIndex}
+            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+            recordPositionId={recordPositionId}
+            selectedRecordErrorId={selectedRecordErrorId}
+            tables={tableSchema}
+            tableSchemaColumns={tableSchemaColumns}
+            hasWritePermissions={hasWritePermissions}
+          />
+        </SnapshotContext.Provider>
+      );
+    }
+  };
+
   if (loading) {
     return layout(<Spinner />);
   }
@@ -365,7 +392,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               disabled={false}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
@@ -379,7 +406,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -388,7 +415,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!datasetHasErrors}
+              disabled={!datasetHasErrors || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
               icon={'warning'}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
@@ -397,7 +424,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              disabled={Number(dataSetId) === 5 || Number(dataSetId) === 142}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
@@ -421,21 +448,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
-        <SnapshotContext.Provider
-          value={{
-            snapshotState: snapshotState,
-            snapshotDispatch: snapshotDispatch
-          }}>
-          <TabsSchema
-            activeIndex={activeIndex}
-            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-            recordPositionId={recordPositionId}
-            selectedRecordErrorId={selectedRecordErrorId}
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            hasWritePermissions={hasWritePermissions}
-          />
-        </SnapshotContext.Provider>
+        {isWebForm()}
       </ReporterDataSetContext.Provider>
       <Dialog
         dismissableMask={true}

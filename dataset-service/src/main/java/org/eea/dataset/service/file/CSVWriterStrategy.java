@@ -81,7 +81,7 @@ public class CSVWriterStrategy implements WriterStrategy {
 
     // Init the writer
     StringWriter writer = new StringWriter();
-    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.NO_QUOTE_CHARACTER,
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
     setLines(idTableSchema, dataSetSchema, csvWriter, datasetId);
@@ -138,7 +138,7 @@ public class CSVWriterStrategy implements WriterStrategy {
       headers.add(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
     }
-    csvWriter.writeNext(headers.stream().toArray(String[]::new));
+    csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
 
     return nHeaders;
   }
@@ -167,7 +167,7 @@ public class CSVWriterStrategy implements WriterStrategy {
         }
       }
 
-      csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite));
+      csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
     }
   }
 

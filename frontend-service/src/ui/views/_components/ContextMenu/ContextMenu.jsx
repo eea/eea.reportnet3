@@ -311,7 +311,7 @@ export class ContextMenu extends Component {
       }
 
       this.container.style.left = left - 50 + 'px';
-      this.container.style.top = top - 173 + 'px';
+      this.container.style.top = top - 183 + 'px';
     }
   }
 

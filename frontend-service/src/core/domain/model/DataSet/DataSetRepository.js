@@ -10,7 +10,8 @@ export const DataSetRepository = {
   exportDataById: () => Promise.reject('[DataSetRepository#exportDataById] must be implemented'),
   exportTableDataById: () => Promise.reject('[DataSetRepository#exportTableDataById] must be implemented'),
   tableDataById: () => Promise.reject('[DataSetRepository#tableDataById] must be implemented'),
-  validateDataById: () => Promise.reject('[DataSetRepository#validateDataById] must be implemented')
+  validateDataById: () => Promise.reject('[DataSetRepository#validateDataById] must be implemented'),
+  webFormDataById: () => Promise.reject('[DataSetRepository#webFormDataById] must be implemented')
 };
 
 export const dataSetRepository = Object.assign({}, DataSetRepository, ApiDataSetRepository);
