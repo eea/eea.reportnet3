@@ -33,7 +33,7 @@ const MainLayout = ({ children }) => {
       <Navigation />
       <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
-        BETA VERSION FOR TESTING ONLY:
+        BETA VERSION FOR TESTING ONLY
         <br />
         The data and illustrated errors are for testing purposes only and do not reflect the actual data delivered by
         any countries featured.
