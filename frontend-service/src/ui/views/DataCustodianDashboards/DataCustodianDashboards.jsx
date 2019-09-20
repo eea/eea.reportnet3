@@ -284,11 +284,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr) => {
-    const datasetsData = originalData.datasets.filter(dataset => !datasetsIdsArr.includes(dataset.tableId));
+    const tablesData = originalData.datasets.filter(table => !datasetsIdsArr.includes(table.tableId));
 
-    const labels = originalData.labels; // filter by labels in countriesLabelsArr
+    const labels = originalData.labels.filter(label => !countriesLabelsArr.includes(label));
 
-    return { labels: labels, datasets: datasetsData };
+    return { labels: labels, datasets: tablesData };
   };
   useEffect(() => {
     if (!isEmpty(dashboardsData)) {
@@ -305,6 +305,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const filterReducer = (state, { type, payload }) => {
+    let countriesLabelsArr = [];
     let tablesIdsArray = [];
     let filteredTableData;
     switch (type) {
@@ -314,9 +315,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           originalData: payload,
           data: payload
         };
-      case 'TABLE_CHECKBOX_ON':
-        console.log('ON', payload.tableId);
 
+      case 'TABLE_CHECKBOX_ON':
         tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
         filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.countryFilter);
 
@@ -325,9 +325,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           tableFilter: tablesIdsArray,
           data: filteredTableData
         };
-      case 'TABLE_CHECKBOX_OFF':
-        console.log('OFF', payload.tableId);
 
+      case 'TABLE_CHECKBOX_OFF':
         tablesIdsArray = [...state.tableFilter, payload.tableId];
 
         filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.countryFilter);
@@ -337,15 +336,26 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           tableFilter: tablesIdsArray,
           data: filteredTableData
         };
+
       case 'COUNTRY_CHECKBOX_ON':
-        console.log('payload ON', payload.label);
+        countriesLabelsArr = state.countryFilter.filter(label => label !== payload.label);
+
+        filteredTableData = onFilteringData(state.originalData, state.tableFilter, countriesLabelsArr);
+
         return {
-          state
+          ...state,
+          countryFilter: countriesLabelsArr,
+          data: filteredTableData
         };
+
       case 'COUNTRY_CHECKBOX_OFF':
-        console.log('payload OFF', payload.label);
+        countriesLabelsArr = [...state.countryFilter, payload.label];
+
+        filteredTableData = onFilteringData(state.originalData, state.tableFilter, countriesLabelsArr);
         return {
-          state
+          ...state,
+          countryFilter: countriesLabelsArr,
+          data: filteredTableData
         };
       case 'FILTER_BY_STATUS':
         //todo
