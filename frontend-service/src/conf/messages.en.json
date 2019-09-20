@@ -86,6 +86,7 @@
 		"fileTitle":"File title",
 		"filter": "Filter",
 		"groupBy": "Group by",
+		"grid": "Grid",
 		"import": "Import",
 		"importFromFile": "Import from file",
 		"language": "Language",
@@ -136,7 +137,9 @@
 		"snapshots": "Snapshots",
 		"snapshotDescriptionValidationMax": "Too long description!",
 		"snapshotDescriptionValidationMin": "Too short description!",
-		"snapshotDescriptionValidationRequired": "Description is required",		
+		"snapshotDescriptionValidationRequired": "Description is required",
+		"snapshotItemRestoreProcessDetail": "Restoring...",
+		"snapshotItemRestoreProcessSummary": "Snapshot restoring",
 		"sort": "Sort",
 		"subscribeButton": "Subscribe to a data flow",
 		"subscribeButtonTitle": "Active open data flows",
@@ -161,8 +164,7 @@
 		"visibility": "Visibility",
 		"warning": "Warning",
 		"webLinks": "Web Links",
-		"yes": "Yes",
-		"snapshotItemRestoreProcessDetail": "Restoring...",
-		"snapshotItemRestoreProcessSummary": "Snapshot restoring"
+		"webForm": "Webform",
+		"yes": "Yes"
 	}
 }
