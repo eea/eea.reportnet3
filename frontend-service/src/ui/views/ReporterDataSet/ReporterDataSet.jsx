@@ -15,6 +15,7 @@ import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Growl } from 'primereact/growl';
+import { InputSwitch } from 'primereact/inputswitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
@@ -50,6 +51,8 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [exportDataSetData, setExportDataSetData] = useState(undefined);
   const [exportDataSetDataName, setExportDataSetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [isWebFormDataSet, setIsWebFormDataSet] = useState(false);
+  const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
@@ -78,6 +81,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       );
     }
   }, [user]);
+
+  useEffect(() => {
+    setIsWebFormDataSet(checkWebFormDataSet());
+  }, []);
 
   useEffect(() => {
     onLoadDataSetSchema();
@@ -337,8 +344,42 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     );
   };
 
-  const isWebForm = () => {
+  const showWebFormInputSwitch = () => {
+    if (isWebFormDataSet) {
+      return (
+        <>
+          <div className={styles.InputSwitchContainer}>
+            <div className={styles.InputSwitchDiv}>
+              <span className={styles.InputSwitchText}>Grid</span>
+              <InputSwitch
+                className={styles.WebFormInputSwitch}
+                onLabel={'WebForm'}
+                offLabel={'Grid'}
+                checked={isInputSwitchChecked}
+                onChange={e => {
+                  setIsInputSwitchChecked(e.value);
+                }}
+              />
+              <span className={styles.InputSwitchText}>WebForm</span>
+            </div>
+          </div>
+        </>
+      );
+    }
+    return;
+  };
+
+  const checkWebFormDataSet = () => {
     if (dataSetId == 5 || dataSetId == 142) {
+      setIsInputSwitchChecked(true);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const isWebForm = () => {
+    if (isInputSwitchChecked) {
       return <WebFormData dataSetId={dataSetId} tableSchemaId={tableSchemaId} />;
     } else {
       return (
@@ -448,6 +489,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             setSelectedRecordErrorId(selectedRecordErrorId);
           }
         }}>
+        {showWebFormInputSwitch()}
         {isWebForm()}
       </ReporterDataSetContext.Provider>
       <Dialog
