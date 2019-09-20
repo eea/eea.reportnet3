@@ -35,7 +35,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     command: () => history.push('/')
   };
 
-  const newLegendClickHandler = function(e, legendItem) {
+  const onNewLegend = function(e, legendItem) {
     let datasetIndex = legendItem.datasetIndex;
 
     let currentChart = this.chart;
@@ -200,7 +200,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         }
       },
       legend: {
-        onClick: newLegendClickHandler,
+        onClick: onNewLegend,
 
         display: true,
         labels: {
@@ -265,11 +265,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         yAxes: [
           {
             stacked: true,
-
-            ticks: {
-              // Include a % sign in the ticks
-              callback: (value, index, values) => `${value}`
-            }
+            display: false
           }
         ]
       }
@@ -395,7 +391,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <Chart type="bar" data={filterState.data} options={datasetsDashboardOptions} width="100%" height="35%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="10%" />
+        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="25%" />
       </div>
     </>
   );

@@ -53,6 +53,7 @@
 		"deleteDatasetHeader": "Delete dataset data",
 		"deleteDatasetTableConfirm": "Are you sure you want to delete the table data? You won't be able to recover it. Please, consider creating a snapshot before.",
 		"deleteDatasetTableHeader": "Delete table data",
+		"deleteDocument": "Are you sure you want to delete this document?",
 		"deleteRow": "Delete row",
 		"deleteSnapshotMessage": "You are about to DELETE a snapshot...",
 		"deleteSnapshotTooltip": "Delete snapshot",

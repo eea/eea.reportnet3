@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-
-import styles from './WebFormData.module.css';
+import { withRouter } from 'react-router-dom';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
+
+import { config } from 'conf';
+
+import styles from './WebFormData.module.css';
 
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -10,7 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
 
-const WebFormData = ({ dataSetId, tableSchemaId }) => {
+const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataFlowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(false);
@@ -67,10 +70,20 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
   };
 
   const onLoadWebForm = async () => {
-    setLoading(true);
-    const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
-    setFetchedData(webFormData);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+      setFetchedData(webFormData);
+    } catch (error) {
+      console.error('WebForm error: ', error);
+      const errorResponse = error.response;
+      console.error('WebForm errorResponse: ', errorResponse);
+      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const changeCellValue = (tableData, value, fieldId) => {
@@ -236,6 +249,6 @@ const WebFormData = ({ dataSetId, tableSchemaId }) => {
       <div>{form()}</div>
     </div>
   );
-};
+});
 
 export { WebFormData };
