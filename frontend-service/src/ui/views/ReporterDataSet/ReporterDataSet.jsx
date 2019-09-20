@@ -359,9 +359,9 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       return (
         <div className={styles.InputSwitchContainer}>
           <div className={styles.InputSwitchDiv}>
-            <span className={styles.InputSwitchText}>Grid</span>
+            <span className={styles.InputSwitchText}>{resources.messages['grid']}</span>
             {WebFormInputSwitch}
-            <span className={styles.InputSwitchText}>WebForm</span>
+            <span className={styles.InputSwitchText}>{resources.messages['webForm']}</span>
           </div>
         </div>
       );
