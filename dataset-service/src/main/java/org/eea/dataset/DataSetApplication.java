@@ -1,13 +1,12 @@
 package org.eea.dataset;
 
 import org.eea.multitenancy.MultiTenantApplication;
-import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * The Class DataSetApplication.
@@ -17,6 +16,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EeaEnableSecurity
+@EnableAspectJAutoProxy
 public class DataSetApplication {
 
 
