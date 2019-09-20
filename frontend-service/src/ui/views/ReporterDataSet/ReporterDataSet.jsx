@@ -347,8 +347,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   let WebFormInputSwitch = (
     <InputSwitch
       className={styles.WebFormInputSwitch}
-      onLabel={'WebForm'}
-      offLabel={'Grid'}
       checked={isInputSwitchChecked}
       onChange={e => {
         setIsInputSwitchChecked(e.value);
