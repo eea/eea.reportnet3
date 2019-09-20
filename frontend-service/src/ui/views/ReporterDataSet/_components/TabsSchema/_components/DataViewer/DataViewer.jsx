@@ -32,6 +32,7 @@ import { Object } from 'es6-shim';
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
+    isWebFormMMR,
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
@@ -155,7 +156,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            editor={hasWritePermissions ? row => cellDataEditor(row, selectedRecord) : null}
+            editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, selectedRecord) : null}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -183,7 +184,11 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+
+      if (!isWebFormMMR) {
+        hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      }
+
       setColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
@@ -939,7 +944,7 @@ const DataViewer = withRouter(
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || isWebFormMMR}
               icon={'export'}
               label={resources.messages['import']}
               onClick={() => setImportDialogVisible(true)}
@@ -963,7 +968,7 @@ const DataViewer = withRouter(
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || isUndefined(totalRecords)}
+              disabled={!hasWritePermissions || isWebFormMMR || isUndefined(totalRecords)}
               icon={'trash'}
               label={resources.messages['deleteTable']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
@@ -1013,7 +1018,7 @@ const DataViewer = withRouter(
             //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
             first={firstRow}
-            footer={hasWritePermissions ? addRowFooter : null}
+            footer={hasWritePermissions && !isWebFormMMR ? addRowFooter : null}
             header={header}
             lazy={true}
             loading={loading}
