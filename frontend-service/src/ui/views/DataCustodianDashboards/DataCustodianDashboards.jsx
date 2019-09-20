@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isEmpty, isArray } from 'lodash';
@@ -12,6 +12,7 @@ import { Chart } from 'primereact/chart';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { FilterList } from './_components/FilterList';
 
 import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
@@ -27,6 +28,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
   const [releasedDashboardData, setReleasedDashboardData] = useState({});
   const [releasedDashboardOptions, setReleasedDashboardOptions] = useState({});
+  /*   const [tablesIds, setTablesIds] = useState([]); */
 
   const home = {
     icon: config.icons['home'],
@@ -78,30 +80,18 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ]);
   }, []);
 
-  const loadDashboards = async () => {
-    try {
-      setDashboardsData(await DataFlowService.dashboards(match.params.dataFlowId));
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDashboards();
-  }, []);
-
   const tableNames = isArray(dashboardsData.tables) && dashboardsData.tables.map(table => table.tableName);
 
   const tablePercentages =
     isArray(dashboardsData.tables) && dashboardsData.tables.map(table => table.tableStatisticPercentages);
+
   const tableOnePercentages = tablePercentages[0];
   const tableTwoPercentages = tablePercentages[1];
   const tableThirdPercentages = tablePercentages[2];
 
   const tableValues =
     isArray(dashboardsData.tables) && dashboardsData.tables.map(values => values.tableStatisticValues);
+
   const tableOneValues = tableValues[0];
   const tableTwoValues = tableValues[1];
   const tableThirdValues = tableValues[2];
@@ -113,6 +103,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `CORRECT`,
           tableName: tableNames[0],
+          tableId: 'a1111',
           backgroundColor: '#004494',
           data: tableOnePercentages[0],
           totalData: tableOneValues[0],
@@ -121,6 +112,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `WARNINGS`,
           tableName: tableNames[0],
+          tableId: 'a1111',
           backgroundColor: '#ffd617',
           data: tableOnePercentages[1],
           totalData: tableOneValues[1],
@@ -129,6 +121,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `ERRORS`,
           tableName: tableNames[0],
+          tableId: 'a1111',
           backgroundColor: '#DA2131',
           data: tableOnePercentages[2],
           totalData: tableOneValues[2],
@@ -137,6 +130,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `CORRECT`,
           tableName: tableNames[1],
+          tableId: 'b2222',
           backgroundColor: '#004494',
           data: tableTwoPercentages[0],
           totalData: tableTwoValues[0],
@@ -145,6 +139,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `WARNINGS`,
           tableName: tableNames[1],
+          tableId: 'b2222',
           backgroundColor: '#ffd617',
           data: tableTwoPercentages[1],
           totalData: tableTwoValues[1],
@@ -153,6 +148,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `ERRORS`,
           tableName: tableNames[1],
+          tableId: 'b2222',
           backgroundColor: '#DA2131',
           data: tableTwoPercentages[2],
           totalData: tableTwoValues[2],
@@ -161,6 +157,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `CORRECT`,
           tableName: tableNames[2],
+          tableId: 'c3333',
           backgroundColor: '#004494',
           data: tableThirdPercentages[0],
           totalData: tableThirdValues[0],
@@ -169,6 +166,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `WARNINGS`,
           tableName: tableNames[2],
+          tableId: 'c3333',
           backgroundColor: '#ffd617',
           data: tableThirdPercentages[1],
           totalData: tableThirdValues[1],
@@ -177,6 +175,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         {
           label: `ERRORS`,
           tableName: tableNames[2],
+          tableId: 'c3333',
           backgroundColor: '#DA2131',
           data: tableThirdPercentages[2],
           totalData: tableThirdValues[2],
@@ -184,6 +183,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         }
       ]
     };
+    filterDispatch({ type: 'INIT_DATA', payload: datasetDataObject });
     return datasetDataObject;
   }
 
@@ -228,6 +228,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     };
     return datasetOptionsObject;
   }
+
   function getReleasedDashboardData() {
     const releasedDataObject = {
       labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
@@ -247,6 +248,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     };
     return releasedDataObject;
   }
+
   function getReleasedDashboardOptions() {
     const releasedOptionsObject = {
       tooltips: {
@@ -276,17 +278,99 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   const onPageLoad = () => {
-    setDatasetsDashboardData(getDatasetsDashboardData());
+    getDatasetsDashboardData();
+
     setDatasetsDashboardOptions(getDatasetsDashboardOptions());
     setReleasedDashboardData(getReleasedDashboardData());
     setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
+  const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr) => {
+    const datasetsData = originalData.datasets.filter(dataset => !datasetsIdsArr.includes(dataset.tableId));
+
+    const labels = originalData.labels; // filter by labels in countriesLabelsArr
+
+    return { labels: labels, datasets: datasetsData };
+  };
   useEffect(() => {
     if (!isEmpty(dashboardsData)) {
       onPageLoad();
     }
   }, [dashboardsData]);
+
+  //STATE
+  const initialFiltersState = {
+    countryFilter: [],
+    tableFilter: [],
+    originalData: {},
+    data: {}
+  };
+
+  const filterReducer = (state, { type, payload }) => {
+    let tablesIdsArray = [];
+    let filteredTableData;
+    switch (type) {
+      case 'INIT_DATA':
+        return {
+          ...state,
+          originalData: payload,
+          data: payload
+        };
+      case 'TABLE_CHECKBOX_ON':
+        console.log('ON', payload.tableId);
+
+        tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
+        filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.countryFilter);
+
+        return {
+          ...state,
+          tableFilter: tablesIdsArray,
+          data: filteredTableData
+        };
+      case 'TABLE_CHECKBOX_OFF':
+        console.log('OFF', payload.tableId);
+
+        tablesIdsArray = [...state.tableFilter, payload.tableId];
+
+        filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.countryFilter);
+
+        return {
+          ...state,
+          tableFilter: tablesIdsArray,
+          data: filteredTableData
+        };
+      case 'FILTER_BY_COUNTRYES':
+        //todo
+        return {
+          state
+        };
+      case 'FILTER_BY_STATUS':
+        //todo
+        return {
+          state
+        };
+
+      default:
+        return state;
+    }
+  };
+
+  const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
+
+  const loadDashboards = async () => {
+    try {
+      const dashboardData = await DataFlowService.dashboards(match.params.dataFlowId);
+      setDashboardsData(dashboardData);
+    } catch (error) {
+      console.error(error.response);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboards();
+  }, []);
 
   const layout = children => {
     return (
@@ -307,7 +391,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <h1>{resources.messages['dataFlow']}</h1>
       </div>
       <div className="rep-row">
-        <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="100%" height="35%" />
+        <FilterList filteredDataState={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
+        <Chart type="bar" data={filterState.data} options={datasetsDashboardOptions} width="100%" height="35%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
         <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="10%" />
