@@ -344,7 +344,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     );
   };
 
-  let WebformInputSwitch = (
+  let WebFormInputSwitch = (
     <InputSwitch
       className={styles.WebFormInputSwitch}
       onLabel={'WebForm'}
@@ -359,18 +359,15 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const showWebFormInputSwitch = () => {
     if (isWebFormDataSet) {
       return (
-        <>
-          <div className={styles.InputSwitchContainer}>
-            <div className={styles.InputSwitchDiv}>
-              <span className={styles.InputSwitchText}>Grid</span>
-              {WebformInputSwitch}
-              <span className={styles.InputSwitchText}>WebForm</span>
-            </div>
+        <div className={styles.InputSwitchContainer}>
+          <div className={styles.InputSwitchDiv}>
+            <span className={styles.InputSwitchText}>Grid</span>
+            {WebFormInputSwitch}
+            <span className={styles.InputSwitchText}>WebForm</span>
           </div>
-        </>
+        </div>
       );
     }
-    return;
   };
 
   const checkWebFormDataSet = () => {
