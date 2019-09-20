@@ -48,7 +48,7 @@ const DataViewer = withRouter(
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
-    const [copiedRecords, setCopiedRecords] = useState();
+    const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -65,7 +65,6 @@ const DataViewer = withRouter(
     const [initialCellValue, setInitialCellValue] = useState();
     const [initialRecordValue, setInitialRecordValue] = useState();
     const [isNewRecord, setIsNewRecord] = useState(false);
-    const [isPasting, setisPasting] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
@@ -240,8 +239,7 @@ const DataViewer = withRouter(
 
     const onDeletePastedRecord = recordIndex => {
       const inmPastedRecords = [...pastedRecords];
-      inmPastedRecords.splice(recordIndex, 1);
-      setisPasting(true);
+      inmPastedRecords.splice(getRecordIdByIndex(inmPastedRecords, recordIndex), 1);
       setPastedRecords(inmPastedRecords);
     };
 
@@ -725,7 +723,7 @@ const DataViewer = withRouter(
     const getClipboardData = pastedData => {
       const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
       //Maximum number of records to paste should be 500
-      setCopiedRecords(copiedClipboardRecords.length);
+      setNumCopiedRecords(copiedClipboardRecords.length);
       const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
       copiedClipboardRecords.forEach(row => {
         let emptyRecord = createEmptyObject(colsSchema, fetchedDataFirstRow);
@@ -741,7 +739,10 @@ const DataViewer = withRouter(
         emptyRecord.copiedCols = copiedCols.length;
         copiedBulkRecords.push(emptyRecord);
       });
-      return copiedBulkRecords.slice(0, 500);
+      //Slice to 500 records and renumber de records for delete button
+      return copiedBulkRecords.slice(0, 500).map((record, i) => {
+        return { ...record, recordId: i };
+      });
     };
 
     const getExportButtonPosition = e => {
@@ -780,6 +781,14 @@ const DataViewer = withRouter(
         .indexOf(record.recordId);
     };
 
+    const getRecordIdByIndex = (tableData, recordIdx) => {
+      return tableData
+        .map(e => {
+          return e.recordId;
+        })
+        .indexOf(recordIdx);
+    };
+
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -804,7 +813,7 @@ const DataViewer = withRouter(
     };
 
     //Template for Record validation
-    const validationsTemplate = (recordData, column) => {
+    const validationsTemplate = recordData => {
       if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
         const validations = recordData.recordValidations;
 
@@ -1108,10 +1117,18 @@ const DataViewer = withRouter(
           visible={confirmPasteVisible}>
           <InfoTable
             data={pastedRecords}
-            columns={columns}
-            records={copiedRecords}
-            onDeletePastedRecord={onDeletePastedRecord}
-            isPasting={isPasting}></InfoTable>
+            filteredColumns={colsSchema.filter(
+              column =>
+                column.field !== 'actions' &&
+                column.field !== 'recordValidation' &&
+                column.field !== 'id' &&
+                column.field !== 'dataSetPartitionId'
+            )}
+            numRecords={numCopiedRecords}
+            onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
+          <br />
+          <br />
+          <hr />
         </ConfirmDialog>
         <Dialog
           className="edit-table"

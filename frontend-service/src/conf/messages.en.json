@@ -151,6 +151,7 @@
 		"titleValidations": "Validations",
 		"tooLargeFileValidationError":"File size is too large",		
 		"totalRecords": "Total:",
+		"totalPastedRecords": "Pasted records:",
 		"typeDataFlowName": "Type a DataFlow name",
 		"unknownUsername": "User",
 		"upload": "Upload",
