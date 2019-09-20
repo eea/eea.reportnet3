@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 
 import { uniqBy } from 'lodash';
 
+import styles from './FilterList.module.scss';
+
+import { Accordion, AccordionTab } from 'primereact/accordion';
 import { CountriesListItem } from '../_components/CountriesListItem';
 import { TableListItem } from '../_components/TableListItem';
 
@@ -21,23 +24,22 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
 
   return (
     <>
-      <div>
-        <h3>Filter by Tables/Datasets</h3>
-        <ul>
-          {tableNamesIdsArray.map(item => (
-            <TableListItem key={item.tableId} item={item} filterDispatch={filterDispatch}></TableListItem>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        <h3>Filter by Countrie</h3>
-        <ul>
-          {labels.map(item => (
-            <CountriesListItem key={item} item={item} filterDispatch={filterDispatch}></CountriesListItem>
-          ))}
-        </ul>
-      </div>
+      <Accordion>
+        <AccordionTab header="Filter by Tables/Datasets">
+          <ul>
+            {tableNamesIdsArray.map(item => (
+              <TableListItem key={item.tableId} item={item} filterDispatch={filterDispatch} />
+            ))}
+          </ul>
+        </AccordionTab>
+        <AccordionTab header="Filter by Countries">
+          <ul>
+            {labels.map(item => (
+              <CountriesListItem key={item} item={item} filterDispatch={filterDispatch} />
+            ))}
+          </ul>
+        </AccordionTab>
+      </Accordion>
     </>
   );
 }
