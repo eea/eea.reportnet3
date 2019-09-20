@@ -27,8 +27,8 @@ const Login = ({ history }) => {
     password: ''
   };
   const validationSchema = Yup.object().shape({
-    userName: Yup.string().required('An user name is required'),
-    password: Yup.string().required('a password is required')
+    userName: Yup.string().required('A user name is required'),
+    password: Yup.string().required('A password is required')
   });
   return (
     <div className="rp-container">
