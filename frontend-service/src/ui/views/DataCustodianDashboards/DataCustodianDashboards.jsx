@@ -12,7 +12,7 @@ import { Chart } from 'primereact/chart';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { FilterList } from './_components/FilterList';
+import { FilterList } from './_components/FilterList/FilterList';
 
 import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
@@ -277,7 +277,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     getDatasetsDashboardData();
 
     setDatasetsDashboardOptions(getDatasetsDashboardOptions());
+
     setReleasedDashboardData(getReleasedDashboardData());
+
     setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
@@ -335,8 +337,13 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           tableFilter: tablesIdsArray,
           data: filteredTableData
         };
-      case 'FILTER_BY_COUNTRYES':
-        //todo
+      case 'COUNTRY_CHECKBOX_ON':
+        console.log('payload ON', payload.label);
+        return {
+          state
+        };
+      case 'COUNTRY_CHECKBOX_OFF':
+        console.log('payload OFF', payload.label);
         return {
           state
         };
@@ -387,7 +394,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         <h1>{resources.messages['dataFlow']}</h1>
       </div>
       <div className="rep-row">
-        <FilterList filteredDataState={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
+        <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
         <Chart type="bar" data={filterState.data} options={datasetsDashboardOptions} width="100%" height="35%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
