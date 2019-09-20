@@ -344,6 +344,18 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     );
   };
 
+  let WebformInputSwitch = (
+    <InputSwitch
+      className={styles.WebFormInputSwitch}
+      onLabel={'WebForm'}
+      offLabel={'Grid'}
+      checked={isInputSwitchChecked}
+      onChange={e => {
+        setIsInputSwitchChecked(e.value);
+      }}
+    />
+  );
+
   const showWebFormInputSwitch = () => {
     if (isWebFormDataSet) {
       return (
@@ -351,15 +363,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           <div className={styles.InputSwitchContainer}>
             <div className={styles.InputSwitchDiv}>
               <span className={styles.InputSwitchText}>Grid</span>
-              <InputSwitch
-                className={styles.WebFormInputSwitch}
-                onLabel={'WebForm'}
-                offLabel={'Grid'}
-                checked={isInputSwitchChecked}
-                onChange={e => {
-                  setIsInputSwitchChecked(e.value);
-                }}
-              />
+              {WebformInputSwitch}
               <span className={styles.InputSwitchText}>WebForm</span>
             </div>
           </div>
@@ -370,7 +374,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const checkWebFormDataSet = () => {
-    if (dataSetId == 5 || dataSetId == 142) {
+    if (Number(dataSetId) === 5 || Number(dataSetId) === 142) {
       setIsInputSwitchChecked(true);
       return true;
     } else {
@@ -395,6 +399,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             selectedRecordErrorId={selectedRecordErrorId}
             tables={tableSchema}
             tableSchemaColumns={tableSchemaColumns}
+            isWebFormMMR={isWebFormDataSet}
             hasWritePermissions={hasWritePermissions}
           />
         </SnapshotContext.Provider>
