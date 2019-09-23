@@ -234,14 +234,6 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                 </>
               );
             })}
-            {console.log(
-              'DATA_CUSTODIAN PERMISSION: ',
-              UserService.hasPermission(
-                user,
-                [config.permissions.DATA_CUSTODIAN],
-                `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
-              )
-            )}
             {UserService.hasPermission(
               user,
               [config.permissions.CUSTODIAN],
