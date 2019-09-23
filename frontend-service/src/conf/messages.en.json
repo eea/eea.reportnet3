@@ -85,6 +85,8 @@
 		"fileDescription": "File description",
 		"fileTitle":"File title",
 		"filter": "Filter",
+		"filterByCountries": "Filter by countries",
+		"filterByTables": "Filter by tables",
 		"groupBy": "Group by",
 		"grid": "Grid",
 		"import": "Import",
