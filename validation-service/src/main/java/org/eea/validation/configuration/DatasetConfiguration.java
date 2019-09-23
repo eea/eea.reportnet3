@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.MultiTenantDataSource;
+import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,7 +89,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 
-  /** The max pool size. */
+  /**
+   * The max pool size.
+   */
   @Value("${spring.datasource.hikari.maximum-pool-size}")
   private int maxPoolSize;
 
@@ -146,6 +149,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     hikariDataSource.setUsername(connectionDataVO.getUser());
     hikariDataSource.setPassword(connectionDataVO.getPassword());
     hikariDataSource.setDriverClassName("org.postgresql.Driver");
+
     hikariDataSource.setMaximumPoolSize(maxPoolSize);
     return hikariDataSource;
   }
