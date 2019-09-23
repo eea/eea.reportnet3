@@ -163,6 +163,7 @@
 		"webLinks": "Web Links",
 		"yes": "Yes",
 		"snapshotItemRestoreProcessDetail": "Restoring...",
-		"snapshotItemRestoreProcessSummary": "Snapshot restoring"
+		"snapshotItemRestoreProcessSummary": "Snapshot restoring",
+		"dashboards":"Dashboards"
 	}
 }

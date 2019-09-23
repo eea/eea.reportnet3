@@ -56,21 +56,6 @@ const DataFlowColumn = withRouter(
               setVisibleHandler(setSubscribeDialogVisible, true);
             }}
           />
-          {components.includes('dashboard') &&
-          UserService.hasPermission(user, [config.permissions.CUSTODIAN], entity) ? (
-            <>
-              <hr />
-              <Button
-                className={styles.subscribeBtn}
-                icon="dashboard"
-                label={'View Dashboard'}
-                onClick={e => {
-                  e.preventDefault();
-                  history.push(`/reporting-data-flow/${match.params.dataFlowId}/data-custodian-dashboards/`);
-                }}
-              />
-            </>
-          ) : null}
           <ConfirmDialog
             header={resources.messages['subscribeButtonTitle']}
             maximizable={false}
