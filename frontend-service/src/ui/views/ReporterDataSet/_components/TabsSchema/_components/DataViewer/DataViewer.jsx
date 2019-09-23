@@ -375,6 +375,7 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
+        console.log(pastedData);
         setPastedRecords(getClipboardData(pastedData));
       }
     };
@@ -726,7 +727,11 @@ const DataViewer = withRouter(
     };
 
     const getClipboardData = pastedData => {
-      const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
+      //Delete double quotes from strings
+      const copiedClipboardRecords = pastedData
+        .split('\r\n')
+        .filter(l => l.length > 0)
+        .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
       //Maximum number of records to paste should be 500
       setNumCopiedRecords(copiedClipboardRecords.length);
       const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
