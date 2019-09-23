@@ -26,14 +26,14 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
     <>
       <Accordion>
         <AccordionTab header="Filter by Tables/Datasets">
-          <ul>
+          <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
               <TableListItem key={item.tableId} item={item} filterDispatch={filterDispatch} />
             ))}
           </ul>
         </AccordionTab>
         <AccordionTab header="Filter by Countries">
-          <ul>
+          <ul className={styles.list}>
             {labels.map(item => (
               <CountriesListItem key={item} item={item} filterDispatch={filterDispatch} />
             ))}

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 
+import styles from './TableListItem.module.css';
+
 function TableListItem({ filterDispatch, item }) {
   return (
-    <li>
+    <li className={styles.listItem}>
       <input
         id={item.tableId}
+        className={styles.checkbox}
         type="checkbox"
         defaultChecked={true}
         onChange={e => {
@@ -21,7 +24,9 @@ function TableListItem({ filterDispatch, item }) {
           }
         }}
       />
-      <label htmlFor={item.tableId}>{item.tableName}</label>
+      <label htmlFor={item.tableId} className={styles.labelItem}>
+        {item.tableName}
+      </label>
     </li>
   );
 }

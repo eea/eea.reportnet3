@@ -1,0 +1,14 @@
+:global .p-accordion .p-accordion-content {
+  padding: 1rem;
+  margin: auto;
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0;
+}
