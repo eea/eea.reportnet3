@@ -47,7 +47,6 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
-import org.hibernate.Hibernate;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
@@ -333,28 +332,26 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
-    tableValues.parallelStream().filter(Objects::nonNull).forEach(tableValue -> {
-      TableValidation tableValidation = new TableValidation();
-      tableValidation.setValidation(new Validation());
+    tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
           sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(tableId));
-      recordsByTable.stream()
-          .filter(recordValue -> !Hibernate.isInitialized(recordValue.getRecordValidations()))
-          .forEach(recordValue -> recordValue.setRecordValidations(new ArrayList<>()));
-      recordsByTable = Collections.synchronizedList(recordsByTable);
-      recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
-        KieSession session = kieBase.newKieSession();
-        List<RecordValidation> recordValidations = runRecordValidations(row, session);
-        session.dispose();
-        if (null != recordValidations && recordValidations.size() > 0) {// there were validation
-                                                                        // error
-          // set on validation error the reference back to the record
-          recordValidations.parallelStream().filter(Objects::nonNull).forEach(rowValidation -> {
-            rowValidation.setRecordValue(row);
-            // set an error on the table according to the highest kind of error in a row
-            synchronized (tableValidation) {
+
+      TableValidation tableValidation = new TableValidation();
+      tableValidation.setValidation(new Validation());
+      synchronized (tableValidation) {
+        recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+          KieSession session = kieBase.newKieSession();
+          runRecordValidations(row, session);
+          session.dispose();
+          List<RecordValidation> recordValidations = row.getRecordValidations();
+          if (null != recordValidations) {// there were validation
+                                          // error
+            // set on validation error the reference back to the record
+            recordValidations.parallelStream().filter(Objects::nonNull).forEach(rowValidation -> {
+              rowValidation.setRecordValue(row);
+              // set an error on the table according to the highest kind of error in a row
               if (tableValidation.getValidation().getLevelError() == null
                   || !TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
                 if (TypeErrorEnum.ERROR.equals(rowValidation.getValidation().getLevelError())) {
@@ -365,28 +362,28 @@ public class ValidationServiceImpl implements ValidationService {
               }
               tableValidation.getValidation()
                   .setOriginName(rowValidation.getValidation().getOriginName());
-            }
-          });
-        }
-        TenantResolver.setTenantName("dataset_" + datasetId);
-        recordValidationRepository.saveAll((Iterable<RecordValidation>) recordValidations);
-      });
-      // Adding errors into tables
-      if (tableValidation.getValidation().getLevelError() != null) {
-        if (TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
-          tableValidation.getValidation().setMessage("ONE OR MORE RECORDS HAVE ERRORS");
-        } else {
-          if (TypeErrorEnum.WARNING.equals(tableValidation.getValidation().getLevelError())) {
-            tableValidation.getValidation().setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
+            });
           }
+          TenantResolver.setTenantName("dataset_" + datasetId);
+          recordValidationRepository.saveAll((Iterable<RecordValidation>) recordValidations);
+        });
+        // Adding errors into tables
+        if (tableValidation.getValidation().getLevelError() != null) {
+          if (TypeErrorEnum.ERROR.equals(tableValidation.getValidation().getLevelError())) {
+            tableValidation.getValidation().setMessage("ONE OR MORE RECORDS HAVE ERRORS");
+          } else {
+            if (TypeErrorEnum.WARNING.equals(tableValidation.getValidation().getLevelError())) {
+              tableValidation.getValidation().setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
+            }
+          }
+          tableValidation.setTableValue(tableValue);
+          tableValidation.getValidation().setIdRule(new ObjectId().toString());
+          tableValidation.getValidation().setTypeEntity(TypeEntityEnum.TABLE);
+          tableValidation.getValidation().setValidationDate(new Date().toString());
+          tableValidationRepository.save(tableValidation);
         }
-        tableValidation.setTableValue(tableValue);
-        tableValidation.getValidation().setIdRule(new ObjectId().toString());
-        tableValidation.getValidation().setTypeEntity(TypeEntityEnum.TABLE);
-        tableValidation.getValidation().setValidationDate(new Date().toString());
-        tableValidationRepository.save(tableValidation);
-      }
 
+      }
     });
     System.out.println(System.currentTimeMillis() - timer);
   }
@@ -418,48 +415,54 @@ public class ValidationServiceImpl implements ValidationService {
       recordsByTable = Collections.synchronizedList(recordsByTable);
       // Execute field rules validation
       recordsByTable.parallelStream().filter(Objects::nonNull).forEach(row -> {
+
         RecordValidation recordVal = new RecordValidation();
         recordVal.setValidation(new Validation());
-        if (null != row.getRecordValidations()) {
-          List<FieldValue> fields = Collections.synchronizedList(row.getFields());
-          fields.stream().filter(Objects::nonNull).forEach(field -> {
-            KieSession session = kieBase.newKieSession();
-            List<FieldValidation> resultFields = runFieldValidations(field, session);
-            session.dispose();
-            if (null != field.getFieldValidations()) {
-              field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldValue -> {
-                fieldValue.setFieldValue(field);
-                if (recordVal.getValidation().getLevelError() == null
-                    || !TypeErrorEnum.ERROR.equals(recordVal.getValidation().getLevelError())) {
-                  if (TypeErrorEnum.ERROR.equals(fieldValue.getValidation().getLevelError())) {
-                    recordVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
-                  } else {
-                    recordVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
-                  }
-                }
-                recordVal.getValidation().setOriginName(fieldValue.getValidation().getOriginName());
-              });
-              TenantResolver.setTenantName("dataset_" + datasetId);
-              validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
-            }
-          });
-        }
-        // Adding errors into records
-        if (recordVal.getValidation().getLevelError() != null) {
-          if (TypeErrorEnum.ERROR.equals(recordVal.getValidation().getLevelError())) {
-            recordVal.getValidation().setMessage("ONE OR MORE FIELDS HAVE ERRORS");
-          } else {
-            if (TypeErrorEnum.WARNING.equals(recordVal.getValidation().getLevelError())) {
-              recordVal.getValidation().setMessage("ONE OR MORE FIELDS HAVE WARNINGS");
-            }
+        synchronized (recordVal) {
+          if (null != row.getRecordValidations()) {
+            List<FieldValue> fields = Collections.synchronizedList(row.getFields());
+            fields.stream().filter(Objects::nonNull).forEach(field -> {
+              KieSession session = kieBase.newKieSession();
+              List<FieldValidation> resultFields = runFieldValidations(field, session);
+              session.dispose();
+              if (null != field.getFieldValidations()) {
+                field.getFieldValidations().stream().filter(Objects::nonNull)
+                    .forEach(fieldValue -> {
+                      fieldValue.setFieldValue(field);
+                      if (recordVal.getValidation().getLevelError() == null || !TypeErrorEnum.ERROR
+                          .equals(recordVal.getValidation().getLevelError())) {
+                        if (TypeErrorEnum.ERROR
+                            .equals(fieldValue.getValidation().getLevelError())) {
+                          recordVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
+                        } else {
+                          recordVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
+                        }
+                      }
+                      recordVal.getValidation()
+                          .setOriginName(fieldValue.getValidation().getOriginName());
+                    });
+                TenantResolver.setTenantName("dataset_" + datasetId);
+                validationFieldRepository.saveAll((Iterable<FieldValidation>) resultFields);
+              }
+            });
           }
-          recordVal.setRecordValue(row);
-          recordVal.getValidation().setIdRule(new ObjectId().toString());
-          recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
-          recordVal.getValidation().setValidationDate(new Date().toString());
-          recordValidationRepository.save(recordVal);
-        }
+          // Adding errors into records
+          if (recordVal.getValidation().getLevelError() != null) {
+            if (TypeErrorEnum.ERROR.equals(recordVal.getValidation().getLevelError())) {
+              recordVal.getValidation().setMessage("ONE OR MORE FIELDS HAVE ERRORS");
+            } else {
+              if (TypeErrorEnum.WARNING.equals(recordVal.getValidation().getLevelError())) {
+                recordVal.getValidation().setMessage("ONE OR MORE FIELDS HAVE WARNINGS");
+              }
+            }
+            recordVal.setRecordValue(row);
+            recordVal.getValidation().setIdRule(new ObjectId().toString());
+            recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
+            recordVal.getValidation().setValidationDate(new Date().toString());
+            recordValidationRepository.save(recordVal);
+          }
 
+        }
       });
 
     });
