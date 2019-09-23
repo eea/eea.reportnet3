@@ -283,12 +283,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
-  const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr) => {
+  const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr, statusPositionsArray) => {
     let tablesData = originalData.datasets.filter(table => !datasetsIdsArr.includes(table.tableId));
 
     const labels = originalData.labels.filter(label => !countriesLabelsArr.includes(label));
 
     const labelPositionsInArray = countriesLabelsArr.map(label => originalData.labels.indexOf(label));
+
+    console.log('statusPositionsArray', statusPositionsArray);
 
     tablesData = tablesData.map(d => ({
       ...d,
@@ -308,6 +310,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const initialFiltersState = {
     countryFilter: [],
     tableFilter: [],
+    statusFilter: [],
     originalData: {},
     data: {}
   };
@@ -315,6 +318,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const filterReducer = (state, { type, payload }) => {
     let countriesLabelsArr = [];
     let tablesIdsArray = [];
+    let statusPositionsArray = [];
     let filteredTableData;
     switch (type) {
       case 'INIT_DATA':
@@ -326,7 +330,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
       case 'TABLE_CHECKBOX_ON':
         tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
-        filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.countryFilter);
+        filteredTableData = onFilteringData(
+          state.originalData,
+
+          tablesIdsArray,
+
+          state.countryFilter,
+          state.statusFilter
+        );
 
         return {
           ...state,
@@ -337,7 +348,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       case 'TABLE_CHECKBOX_OFF':
         tablesIdsArray = [...state.tableFilter, payload.tableId];
 
-        filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.countryFilter);
+        filteredTableData = onFilteringData(
+          state.originalData,
+
+          tablesIdsArray,
+
+          state.countryFilter,
+          state.statusFilter
+        );
 
         return {
           ...state,
@@ -348,7 +366,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       case 'COUNTRY_CHECKBOX_ON':
         countriesLabelsArr = state.countryFilter.filter(label => label !== payload.label);
 
-        filteredTableData = onFilteringData(state.originalData, state.tableFilter, countriesLabelsArr);
+        filteredTableData = onFilteringData(
+          state.originalData,
+          state.tableFilter,
+
+          countriesLabelsArr,
+
+          state.statusFilter
+        );
 
         return {
           ...state,
@@ -359,16 +384,54 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       case 'COUNTRY_CHECKBOX_OFF':
         countriesLabelsArr = [...state.countryFilter, payload.label];
 
-        filteredTableData = onFilteringData(state.originalData, state.tableFilter, countriesLabelsArr);
+        filteredTableData = onFilteringData(
+          state.originalData,
+          state.tableFilter,
+
+          countriesLabelsArr,
+
+          state.statusFilter
+        );
         return {
           ...state,
           countryFilter: countriesLabelsArr,
           data: filteredTableData
         };
-      case 'FILTER_BY_STATUS':
-        //todo
+      case 'STATUS_FILTER_ON':
+        countriesLabelsArr = state.statusFilter.filter(statusPosition => statusPosition !== payload);
+
+        console.log('on statusPositionsArray', statusPositionsArray);
+
+        filteredTableData = onFilteringData(
+          state.originalData,
+          state.tableFilter,
+          state.countryFilter,
+
+          countriesLabelsArr
+        );
+
         return {
-          state
+          ...state,
+          statusFilter: statusPositionsArray,
+          data: filteredTableData
+        };
+      case 'STATUS_FILTER_OFF':
+        statusPositionsArray = [...state.statusFilter, payload];
+
+        console.log('off statusPositionsArray', statusPositionsArray);
+
+        filteredTableData = onFilteringData(
+          state.originalData,
+          state.tableFilter,
+          state.countryFilter,
+
+          countriesLabelsArr
+        );
+
+        return {
+          ...state,
+          statusFilter: statusPositionsArray,
+          data: filteredTableData
         };
 
       default:
