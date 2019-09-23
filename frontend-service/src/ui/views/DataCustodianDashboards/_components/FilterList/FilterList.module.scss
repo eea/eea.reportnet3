@@ -1,14 +1,12 @@
 :global .p-accordion .p-accordion-content {
   padding: 1rem;
   margin: auto;
-  display: flex !important;
-  flex-direction: row !important;
 }
 
 .list {
   list-style: none;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  grid-gap: 10px;
   padding: 0;
 }
