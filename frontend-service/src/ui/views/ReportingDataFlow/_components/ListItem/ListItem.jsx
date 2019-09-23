@@ -53,7 +53,7 @@ export const ListItem = ({ layout, label, handleRedirect, model }) => {
         <FontAwesomeIcon icon={AwesomeIcons('dropDown')} />
       </span>
       <Menu dropdownState={dropdownState} dropdowndispatch={dropdowndispatch} model={model} />
-      {true && <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />}
+      {false && <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />}
     </div>
   ) : (
     <></>
