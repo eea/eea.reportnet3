@@ -1,10 +1,13 @@
 import React from 'react';
 
+import styles from './CountriesListItem.module.css';
+
 function CountriesListItem({ filterDispatch, item }) {
   return (
-    <li>
+    <li className={styles.listItem}>
       <input
-        id={item.tableId}
+        id={item}
+        className={styles.checkbox}
         type="checkbox"
         defaultChecked={true}
         onChange={e => {
@@ -21,7 +24,9 @@ function CountriesListItem({ filterDispatch, item }) {
           }
         }}
       />
-      <label htmlFor={item}>{item}</label>
+      <label htmlFor={item} className={styles.labelItem}>
+        {item}
+      </label>
     </li>
   );
 }
