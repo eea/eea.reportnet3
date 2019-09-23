@@ -88,7 +88,9 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 
-  /** The max pool size. */
+  /**
+   * The max pool size.
+   */
   @Value("${spring.datasource.hikari.maximum-pool-size}")
   private int maxPoolSize;
 
@@ -146,6 +148,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     hikariDataSource.setUsername(connectionDataVO.getUser());
     hikariDataSource.setPassword(connectionDataVO.getPassword());
     hikariDataSource.setDriverClassName("org.postgresql.Driver");
+
     hikariDataSource.setMaximumPoolSize(maxPoolSize);
     return hikariDataSource;
   }
@@ -179,7 +182,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   Properties additionalProperties() {
     final Properties properties = new Properties();
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
-    properties.setProperty("hibernate.dialect", dialect);
+    // properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
     properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
     properties.setProperty("hibernate.show_sql", showSql);
