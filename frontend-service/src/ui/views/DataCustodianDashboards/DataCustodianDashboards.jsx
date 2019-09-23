@@ -290,13 +290,13 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
     const labelPositionsInArray = countriesLabelsArr.map(label => originalData.labels.indexOf(label));
 
-    console.log('statusPositionsArray', statusPositionsArray);
-
-    tablesData = tablesData.map(d => ({
-      ...d,
-      data: d.data.filter((dd, i) => !labelPositionsInArray.includes(i)),
-      totalData: d.totalData.filter((td, i) => !labelPositionsInArray.includes(i))
+    tablesData = tablesData.map(table => ({
+      ...table,
+      data: table.data.filter((d, i) => !labelPositionsInArray.includes(i)),
+      totalData: table.totalData.filter((td, i) => !labelPositionsInArray.includes(i))
     }));
+
+    console.log('tablesData', tablesData);
 
     return { labels: labels, datasets: tablesData };
   };
@@ -398,7 +398,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           data: filteredTableData
         };
       case 'STATUS_FILTER_ON':
-        countriesLabelsArr = state.statusFilter.filter(statusPosition => statusPosition !== payload);
+        statusPositionsArray = state.statusFilter.filter(status => status !== payload.msg);
 
         console.log('on statusPositionsArray', statusPositionsArray);
 
@@ -416,7 +416,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           data: filteredTableData
         };
       case 'STATUS_FILTER_OFF':
-        statusPositionsArray = [...state.statusFilter, payload];
+        statusPositionsArray = [...state.statusFilter, payload.msg];
 
         console.log('off statusPositionsArray', statusPositionsArray);
 

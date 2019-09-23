@@ -15,12 +15,12 @@ function StatusList({ filterDispatch }) {
             if (e.target.checked) {
               filterDispatch({
                 type: 'STATUS_FILTER_ON',
-                payload: 0
+                payload: { msg: 'CORRECT' }
               });
             } else {
               filterDispatch({
                 type: 'STATUS_FILTER_OFF',
-                payload: 0
+                payload: { msg: 'CORRECT' }
               });
             }
           }}
@@ -37,12 +37,12 @@ function StatusList({ filterDispatch }) {
             if (e.target.checked) {
               filterDispatch({
                 type: 'STATUS_FILTER_ON',
-                payload: 1
+                payload: { msg: 'WARNINGS' }
               });
             } else {
               filterDispatch({
                 type: 'STATUS_FILTER_OFF',
-                payload: 1
+                payload: { msg: 'WARNINGS' }
               });
             }
           }}
@@ -59,12 +59,12 @@ function StatusList({ filterDispatch }) {
             if (e.target.checked) {
               filterDispatch({
                 type: 'STATUS_FILTER_ON',
-                payload: 2
+                payload: { msg: 'ERRORS' }
               });
             } else {
               filterDispatch({
                 type: 'STATUS_FILTER_OFF',
-                payload: 2
+                payload: { msg: 'ERRORS' }
               });
             }
           }}
