@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.MultiTenantDataSource;
+import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -182,7 +183,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   Properties additionalProperties() {
     final Properties properties = new Properties();
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
-    // properties.setProperty("hibernate.dialect", dialect);
+    properties.setProperty("hibernate.dialect", dialect);
     properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", createClobPropertie);
     properties.setProperty("hibernate.jdbc.batch_size", batch_Size);
     properties.setProperty("hibernate.show_sql", showSql);
