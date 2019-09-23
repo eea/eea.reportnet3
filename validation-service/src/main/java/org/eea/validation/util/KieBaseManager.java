@@ -50,10 +50,8 @@ public class KieBaseManager {
    * Reload rules.
    *
    * @param dataFlowId the data flow id
-   * @param datasetId
-   *
+   * @param datasetId the dataset id
    * @return the kie base
-   *
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long dataFlowId, Long datasetId) throws FileNotFoundException {

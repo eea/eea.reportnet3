@@ -5,13 +5,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
@@ -343,7 +341,9 @@ public class DataFlowControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createDataFlowDateTodayThrow() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setDeadlineDate(new Date());
+    Date date = new Date();
+    date.setTime(date.getTime() - 1000L);
+    dataflowVO.setDeadlineDate(date);
     dataFlowControllerImpl.createDataFlow(dataflowVO);
   }
 

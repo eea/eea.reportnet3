@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.MultiTenantDataSource;
-import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -27,6 +25,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.zaxxer.hikari.HikariDataSource;
 
 
 /**
@@ -40,7 +39,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     basePackages = "org.eea.validation.persistence.data.repository")
 @EnableWebMvc
 public class DatasetConfiguration implements WebMvcConfigurer {
-
 
   /**
    * The dll.
@@ -90,6 +88,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 
+  /** The max pool size. */
+  @Value("${spring.datasource.hikari.maximum-pool-size}")
+  private int maxPoolSize;
+
   /**
    * The record store controller zull.
    */
@@ -137,14 +139,15 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the data source
    */
   @Primary
-  private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
-    final DriverManagerDataSource ds = new DriverManagerDataSource();
-    ds.setUrl(connectionDataVO.getConnectionString());
-    ds.setUsername(connectionDataVO.getUser());
-    ds.setPassword(connectionDataVO.getPassword());
-    ds.setDriverClassName("org.postgresql.Driver");
-    ds.setSchema(connectionDataVO.getSchema());
-    return ds;
+  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
+    HikariDataSource hikariDataSource = new HikariDataSource();
+    hikariDataSource.setJdbcUrl(connectionDataVO.getConnectionString());
+    hikariDataSource.setSchema(connectionDataVO.getSchema());
+    hikariDataSource.setUsername(connectionDataVO.getUser());
+    hikariDataSource.setPassword(connectionDataVO.getPassword());
+    hikariDataSource.setDriverClassName("org.postgresql.Driver");
+    hikariDataSource.setMaximumPoolSize(maxPoolSize);
+    return hikariDataSource;
   }
 
 

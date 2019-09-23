@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class DataToQuery1 {
+public class DataToQueryabc {
 
   final List<String> listData = Arrays.asList("AL101", "AL102", "AL103", "AL104", "AL105", "AL106",
       "AL107", "AL201", "AL202", "AL203", "AL204", "AL205", "AL206", "AL207", "AL208", "AL501",
