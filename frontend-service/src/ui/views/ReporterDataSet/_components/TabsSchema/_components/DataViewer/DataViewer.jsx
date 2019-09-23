@@ -716,8 +716,8 @@ const DataViewer = withRouter(
     };
 
     const getCellId = (tableData, field) => {
-      const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
-      return value.length > 0 ? value[0].fieldData.id : undefined;
+      const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+      return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
     };
 
     const getCellValue = (tableData, field) => {
