@@ -296,7 +296,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       totalData: table.totalData.filter((td, i) => !labelPositionsInArray.includes(i))
     }));
 
-    console.log('tablesData', tablesData);
+    console.log('statusPositionsArray', statusPositionsArray);
 
     return { labels: labels, datasets: tablesData };
   };
@@ -332,9 +332,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
         filteredTableData = onFilteringData(
           state.originalData,
-
           tablesIdsArray,
-
           state.countryFilter,
           state.statusFilter
         );
@@ -350,9 +348,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
         filteredTableData = onFilteringData(
           state.originalData,
-
           tablesIdsArray,
-
           state.countryFilter,
           state.statusFilter
         );
@@ -369,9 +365,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
-
           countriesLabelsArr,
-
           state.statusFilter
         );
 
@@ -387,9 +381,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
-
           countriesLabelsArr,
-
           state.statusFilter
         );
         return {
@@ -400,13 +392,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       case 'STATUS_FILTER_ON':
         statusPositionsArray = state.statusFilter.filter(status => status !== payload.msg);
 
-        console.log('on statusPositionsArray', statusPositionsArray);
-
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
           state.countryFilter,
-
           countriesLabelsArr
         );
 
@@ -418,13 +407,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       case 'STATUS_FILTER_OFF':
         statusPositionsArray = [...state.statusFilter, payload.msg];
 
-        console.log('off statusPositionsArray', statusPositionsArray);
-
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
           state.countryFilter,
-
           countriesLabelsArr
         );
 
