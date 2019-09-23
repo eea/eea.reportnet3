@@ -7,6 +7,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 export const ConfirmDialog = forwardRef((props, _) => {
   const {
     children,
+    className,
     dialogStyle,
     divRef,
     hasPasteOption = false,
@@ -78,6 +79,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
   return (
     <div onPaste={onPaste} ref={divRef}>
       <Dialog
+        className={className}
         focusOnShow={false}
         footer={footer}
         header={header}
