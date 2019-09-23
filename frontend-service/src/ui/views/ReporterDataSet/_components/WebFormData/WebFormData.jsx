@@ -16,7 +16,7 @@ import { DataSetService } from 'core/services/DataSet';
 const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataFlowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     onLoadWebForm();
@@ -71,7 +71,6 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
 
   const onLoadWebForm = async () => {
     try {
-      setLoading(true);
       const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
       setFetchedData(webFormData);
     } catch (error) {
