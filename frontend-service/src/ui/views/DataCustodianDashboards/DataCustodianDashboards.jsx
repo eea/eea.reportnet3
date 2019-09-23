@@ -284,9 +284,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr) => {
-    const tablesData = originalData.datasets.filter(table => !datasetsIdsArr.includes(table.tableId));
+    let tablesData = originalData.datasets.filter(table => !datasetsIdsArr.includes(table.tableId));
 
     const labels = originalData.labels.filter(label => !countriesLabelsArr.includes(label));
+
+    const labelPositionsInArray = countriesLabelsArr.map(label => originalData.labels.indexOf(label));
+
+    tablesData = tablesData.map(d => ({
+      ...d,
+      data: d.data.filter((dd, i) => !labelPositionsInArray.includes(i)),
+      totalData: d.totalData.filter((td, i) => !labelPositionsInArray.includes(i))
+    }));
 
     return { labels: labels, datasets: tablesData };
   };
