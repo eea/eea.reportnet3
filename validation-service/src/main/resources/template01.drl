@@ -82,9 +82,7 @@ function boolean isNegativeValue(String value, String typeData){
 	if("Integer".equalsIgnoreCase(typeData)){
 		try {
 	        Integer dato = Integer.valueOf(value);
-	        if(dato < 0){
-	        	return false;        
-	        }
+	        	return dato > -1;        
 	    } catch( Exception e ){
 	        return true;
 	    }
@@ -131,12 +129,7 @@ function boolean isText( String value){
  }
  
 function boolean isBlank(String value){
-
-	if(StringUtils.isBlank(value)){
-		return false;
-	}else{
-		return true;
-	}
+	return !StringUtils.isBlank(value);
 } 
 
 //FUNCTIONS DATES AND JAVA METHODS DATES
@@ -155,21 +148,14 @@ function boolean isDateYYYYMMDD( String value ){
     try {
         Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
        	Matcher dataMatcher = dataValue.matcher(value);
-        if(dataMatcher.find()){
-        	return true;
-        }else{
-        	return false;
-        }
+        return dataMatcher.find();
     } catch( Exception e ){
         return false;
     }
 }
  
 function boolean isDate9999(String date){
-	if('9999-12-31'.equalsIgnoreCase(date)){
-		return true;
-	}	
-	return false;
+	return '9999-12-31'.equalsIgnoreCase(date);
 }
  
  
@@ -182,10 +168,7 @@ function boolean isCordenateLat( String value ){
    	value = value.replace(",",".");
    }
    if(isValid(value,'double')){
-    	if(Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90){
-		   return true;   	
-    	}
-    	return false;
+    	return Double.valueOf(value) >= -90 && Double.valueOf(value) <= 90;
    }
    return false;
 }  
@@ -197,10 +180,7 @@ function boolean isCordenateLong( String value ){
    	value = value.replace(",",".");
    }
    if(isValid(value,'double')){
-    	if(Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180){
-		   return true;   	
-    	}
-    	return false;
+    	return Double.valueOf(value) >= -180 && Double.valueOf(value) <= 180;
    }
    return false;
  }

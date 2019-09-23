@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -28,6 +27,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.zaxxer.hikari.HikariDataSource;
 
 
 /**
@@ -102,6 +102,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
 
+  /** The max pool size. */
+  @Value("${spring.datasource.hikari.maximum-pool-size}")
+  private int maxPoolSize;
+
 
   /**
    * The record store controller zull.
@@ -150,14 +154,15 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the data source
    */
   @Primary
-  private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
-    final DriverManagerDataSource ds = new DriverManagerDataSource();
-    ds.setUrl(connectionDataVO.getConnectionString());
-    ds.setUsername(connectionDataVO.getUser());
-    ds.setPassword(connectionDataVO.getPassword());
-    ds.setDriverClassName("org.postgresql.Driver");
-    ds.setSchema(connectionDataVO.getSchema());
-    return ds;
+  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
+    HikariDataSource hikariDataSource = new HikariDataSource();
+    hikariDataSource.setJdbcUrl(connectionDataVO.getConnectionString());
+    hikariDataSource.setSchema(connectionDataVO.getSchema());
+    hikariDataSource.setUsername(connectionDataVO.getUser());
+    hikariDataSource.setPassword(connectionDataVO.getPassword());
+    hikariDataSource.setDriverClassName("org.postgresql.Driver");
+    hikariDataSource.setMaximumPoolSize(maxPoolSize);
+    return hikariDataSource;
   }
 
 

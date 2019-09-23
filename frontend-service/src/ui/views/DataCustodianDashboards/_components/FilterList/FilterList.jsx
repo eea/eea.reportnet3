@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 
 import { uniqBy } from 'lodash';
 
@@ -7,6 +7,7 @@ import styles from './FilterList.module.scss';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { CountriesListItem } from '../_components/CountriesListItem';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { StatusList } from '../_components/StatusList';
 import { TableListItem } from '../_components/TableListItem';
 
 function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
@@ -16,6 +17,8 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
   };
 
   const tableNamesIdsArray = [];
+
+  console.log('datasets', datasets);
 
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
@@ -42,6 +45,8 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
           </ul>
         </AccordionTab>
       </Accordion>
+
+      <StatusList filterDispatch={filterDispatch}></StatusList>
     </>
   );
 }

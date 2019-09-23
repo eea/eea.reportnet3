@@ -1,8 +1,8 @@
 package org.eea.validation.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.ValidationService;
-import org.eea.validation.util.querysdrools.DataToQuery1;
 import org.eea.validation.util.querysdrools.DataToQuery11;
 import org.eea.validation.util.querysdrools.DataToQuery11par1;
 import org.eea.validation.util.querysdrools.DataToQuery12;
@@ -22,6 +22,10 @@ import org.eea.validation.util.querysdrools.DataToQuery32part1;
 import org.eea.validation.util.querysdrools.DataToQuery3part1;
 import org.eea.validation.util.querysdrools.DataToQuery4;
 import org.eea.validation.util.querysdrools.DataToQuery41;
+import org.eea.validation.util.querysdrools.DataToQueryabc;
+import org.eea.validation.util.querysdrools.DataToQueryd;
+import org.eea.validation.util.querysdrools.DataToQueryh;
+import org.eea.validation.util.querysdrools.DataToQuerylm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -35,6 +39,30 @@ public class ForeingKeyDrools {
   /** The validation service. */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
+
+  private static DataToQueryabc abc = new DataToQueryabc();
+  private static DataToQuery11 d = new DataToQuery11();
+  private static DataToQuery1par1 d2 = new DataToQuery1par1();
+  private static DataToQueryd d3 = new DataToQueryd();
+  private static DataToQuery12 e = new DataToQuery12();
+  private static DataToQuery12part1 e2 = new DataToQuery12part1();
+  private static DataToQuery11par1 e3 = new DataToQuery11par1();
+  private static DataToQuery2 e4 = new DataToQuery2();
+  private static DataToQuery21 f = new DataToQuery21();
+  private static DataToQuery2part1 f2 = new DataToQuery2part1();
+  private static DataToQuery21part1 f3 = new DataToQuery21part1();
+  private static DataToQuery22 f4 = new DataToQuery22();
+  private static DataToQueryh h = new DataToQueryh();
+  private static DataToQuery22part1 h2 = new DataToQuery22part1();
+  private static DataToQuery3 i = new DataToQuery3();
+  private static DataToQuery31 i2 = new DataToQuery31();
+  private static DataToQuery3part1 i3 = new DataToQuery3part1();
+  private static DataToQuery31part1 i4 = new DataToQuery31part1();
+  private static DataToQuery32 i5 = new DataToQuery32();
+  private static DataToQuerylm lm = new DataToQuerylm();
+  private static DataToQuery32part1 npr = new DataToQuery32part1();
+  private static DataToQuery4 s = new DataToQuery4();
+  private static DataToQuery41 u = new DataToQuery41();
 
 
   /**
@@ -55,82 +83,134 @@ public class ForeingKeyDrools {
    * @return the boolean
    */
   public static Boolean isQueryDataWDFProtect(String value) {
-    DataToQuery1 part1 = new DataToQuery1();
-    DataToQuery11 part11 = new DataToQuery11();
-    DataToQuery12 part12 = new DataToQuery12();
-    DataToQuery2 part2 = new DataToQuery2();
-    DataToQuery21 part21 = new DataToQuery21();
-    DataToQuery22 part22 = new DataToQuery22();
-    DataToQuery3 part3 = new DataToQuery3();
-    DataToQuery31 part31 = new DataToQuery31();
-    DataToQuery32 part32 = new DataToQuery32();
-    DataToQuery4 part4 = new DataToQuery4();
 
-    DataToQuery1par1 dataToQuery1part = new DataToQuery1par1();
-    DataToQuery11par1 dataToQuery11par1 = new DataToQuery11par1();
-    DataToQuery12part1 dataToQuery12part1 = new DataToQuery12part1();
-    DataToQuery2part1 dataToQuery2part1 = new DataToQuery2part1();
-    DataToQuery21part1 dtaToQuery21part1 = new DataToQuery21part1();
-    DataToQuery22part1 dataToQuery22part1 = new DataToQuery22part1();
-    DataToQuery3part1 dataToQuery3part1 = new DataToQuery3part1();
-    DataToQuery31part1 dataToQuery31part1 = new DataToQuery31part1();
-    DataToQuery32part1 dataToQuery32part1 = new DataToQuery32part1();
-    DataToQuery41 dataToQuery41 = new DataToQuery41();
-
-
-
-    if (dataToQuery1part.getListData().stream()
-        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dataToQuery11par1.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dataToQuery12part1.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
+    if (StringUtils.isNotBlank(value)) {
+      switch (value.toLowerCase().trim().substring(0, 1)) {
+        case ("a"):
+        case ("b"):
+        case ("c"):
+          return a(value);
+        case ("d"):
+          return d(value);
+        case ("e"):
+          return e(value);
+        case ("f"):
+          return f(value);
+        case ("h"):
+          return h(value);
+        case ("i"):
+          return i(value);
+        case ("l"):
+        case ("m"):
+          return l(value);
+        case ("n"):
+        case ("p"):
+        case ("r"):
+          return n(value);
+        case ("s"):
+          return s(value);
+        case ("u"):
+          return u(value);
+        default:
+          return false;
+      }
     }
-
-    if (dataToQuery2part1.getListData().stream()
-        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dtaToQuery21part1.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dataToQuery22part1.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-
-    if (dataToQuery3part1.getListData().stream()
-        .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dataToQuery31part1.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dataToQuery32part1.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || dataToQuery41.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-
-    if (part1.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part3.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part4.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-    if (part11.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part21.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part31.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-    if (part12.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part22.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
-        || part32.getListData().stream()
-            .anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
-      return true;
-    }
-
     return false;
   }
 
+
+  private static Boolean u(String value) {
+    if (u.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean s(String value) {
+    if (s.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean n(String value) {
+    if (npr.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean l(String value) {
+    if (lm.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean i(String value) {
+    if (i.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || i2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || i3.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || i4.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || i5.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean h(String value) {
+    if (h.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || h2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean f(String value) {
+    if (f.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || f2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || f3.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || f4.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean e(String value) {
+    if (e.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || e2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || e3.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || e4.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean d(String value) {
+    if (d.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || d2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
+        || d3.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private static Boolean a(String value) {
+    if (abc.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
+      return true;
+    }
+    return false;
+
+  }
 
   /**
    * Checks if is in same record.

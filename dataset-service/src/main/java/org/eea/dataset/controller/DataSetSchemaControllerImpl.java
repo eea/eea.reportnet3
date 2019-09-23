@@ -77,18 +77,4 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     return dataschemaService.getDataSchemaByIdFlow(idFlow);
 
   }
-
-  /**
-   * Error handler schema.
-   *
-   * @param id the id
-   *
-   * @return the data set schema VO
-   */
-  public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
-
-    return new DataSetSchemaVO();
-  }
-
-
 }

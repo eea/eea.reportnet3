@@ -1,0 +1,18 @@
+.correct {
+  background-color: #004494;
+  color: white;
+}
+.warning {
+  background-color: #ffd617;
+}
+.error {
+  background-color: #e00013;
+  color: white;
+}
+.list {
+  display: inline-flex;
+
+  li {
+    min-width: 10em;
+  }
+}

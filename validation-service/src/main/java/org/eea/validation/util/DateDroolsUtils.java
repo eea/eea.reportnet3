@@ -29,7 +29,8 @@ public class DateDroolsUtils {
    * @param interval the interval
    * @return the boolean
    */
-  public static Boolean isIntervalYear(String value, Integer init, Integer end, Boolean interval) {
+  public static Boolean isIntervalYear(final String value, final Integer init, final Integer end,
+      final Boolean interval) {
     Integer valueInt = null;
     try {
       valueInt = Integer.valueOf(value);
@@ -53,10 +54,10 @@ public class DateDroolsUtils {
    * Actual date compare.
    *
    * @param dateToCompare the date to compare
-   * @param moreLess the more less
+   * @param condition the condition
    * @return the boolean
    */
-  public static Boolean actualDateCompare(String dateToCompare, String moreLess) {
+  public static Boolean actualDateCompare(final String dateToCompare, final String condition) {
     final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date dateDrools = null;
     try {
@@ -64,18 +65,18 @@ public class DateDroolsUtils {
     } catch (ParseException e) {
       return true;
     }
-    if ((moreLess.trim().equalsIgnoreCase("MORE") && actualDate.before(dateDrools))) {
+    if ((condition.equalsIgnoreCase("MORE") && actualDate.before(dateDrools))) {
       return false;
     }
-    if (moreLess.trim().equalsIgnoreCase("MORE/EQUALS")
+    if (condition.equalsIgnoreCase("MORE/EQUALS")
         && (actualDate.before(dateDrools) || actualDate.equals(dateDrools))) {
       return false;
     }
-    if (moreLess.trim().equalsIgnoreCase("LESS") && actualDate.after(dateDrools)) {
+    if (condition.equalsIgnoreCase("LESS") && actualDate.after(dateDrools)) {
       return false;
     }
-    if (moreLess.trim().equalsIgnoreCase("LESS/EQUALS") && actualDate.after(dateDrools)
-        || actualDate.equals(dateDrools)) {
+    if (condition.equalsIgnoreCase("LESS/EQUALS")
+        && (actualDate.after(dateDrools) || actualDate.equals(dateDrools))) {
       return false;
     }
     return true;

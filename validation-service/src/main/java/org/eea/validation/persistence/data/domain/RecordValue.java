@@ -92,7 +92,8 @@ public class RecordValue {
   /**
    * The record validations.
    */
-  @OneToMany(mappedBy = "recordValue", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "recordValue",
+      cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REMOVE}, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
   /**

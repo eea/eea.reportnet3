@@ -5,7 +5,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Optional;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+
 
 /**
  * The Class DatasetMetabaseServiceTest.
@@ -85,6 +88,12 @@ public class DatasetMetabaseServiceTest {
         Mockito.any());
   }
 
+  @Test
+  public void findDatasetMetabase() throws Exception {
 
-
+    when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    datasetMetabaseService.findDatasetMetabase(Mockito.anyLong());
+    Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
+  }
 }
