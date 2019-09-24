@@ -88,7 +88,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages.reportingDataFlow
+        label: resources.messages.dataFlow
       }
     ]);
   }, [history, match.params.dataFlowId, resources.messages]);
@@ -177,9 +177,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               <ListItem
                 layout="documents"
                 label="DO"
-                handleRedirect={() =>
-                  handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`)
-                }
+                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataFlowId}/documentation-data-set/`)}
               />
               <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
@@ -191,9 +189,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                       layout="dataSet"
                       label="DS"
                       handleRedirect={() => {
-                        handleRedirect(
-                          `/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${dataSet.id}`
-                        );
+                        handleRedirect(`/dataflow/${match.params.dataFlowId}/dataset/${dataSet.id}`);
                       }}
                       model={
                         hasWritePermissions
@@ -243,7 +239,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                 <ListItem
                   layout="dashboard"
                   handleRedirect={() =>
-                    handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/data-custodian-dashboards/`)
+                    handleRedirect(`/dataflow/${match.params.dataFlowId}/data-custodian-dashboards/`)
                   }
                 />
                 <p className={styles.caption}>{resources.messages.dashboards}</p>

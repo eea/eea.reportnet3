@@ -61,8 +61,8 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages['reportingDataFlow'],
-        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+        label: resources.messages['dataFlow'],
+        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
       },
       { label: resources.messages['documents'] }
     ]);

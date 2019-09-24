@@ -83,8 +83,8 @@
 	"refreshToken":{
 		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	},
-	"REPORTING_DATAFLOW": {
-		"url": "/reporting-data-flow/{:dataFlowId}"
+	"DATAFLOW": {
+		"url": "/dataflow/{:dataFlowId}"
 		},
 	"updateTableDataField":{
 		"url": "/dataset/{:dataSetId}/updateField"

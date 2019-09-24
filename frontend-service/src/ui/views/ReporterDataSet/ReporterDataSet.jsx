@@ -97,8 +97,8 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages['reportingDataFlow'],
-        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+        label: resources.messages['dataFlow'],
+        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
       },
       { label: resources.messages['viewData'] }
     ]);
@@ -228,7 +228,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     } catch (error) {
       const errorResponse = error.response;
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+        history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
       }
     }
 
