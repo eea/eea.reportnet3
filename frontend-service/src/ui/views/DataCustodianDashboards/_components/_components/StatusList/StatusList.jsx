@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import styles from './StatusList.module.scss';
 
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+
 function StatusList({ filterDispatch }) {
+  const resources = useContext(ResourcesContext);
+
   return (
     <ul className={styles.list}>
       <li className={styles.listItem}>
@@ -27,14 +31,14 @@ function StatusList({ filterDispatch }) {
           }}
         />
         <label htmlFor="correct" className={styles.labelItem}>
-          Correct
+          {resources.messages.correct}
         </label>
       </li>
       <li className={styles.listItem}>
         <input
           id="warning"
           className={styles.checkbox}
-          data-status="correct"
+          data-status="warning"
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -52,14 +56,14 @@ function StatusList({ filterDispatch }) {
           }}
         />
         <label htmlFor="warning" className={styles.labelItem}>
-          Warnings
+          {resources.messages.warning}
         </label>
       </li>
       <li className={styles.listItem}>
         <input
           id="error"
           className={styles.checkbox}
-          data-status="correct"
+          data-status="error"
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -77,7 +81,7 @@ function StatusList({ filterDispatch }) {
           }}
         />
         <label htmlFor="error" className={styles.labelItem}>
-          Errors
+          {resources.messages.error}
         </label>
       </li>
     </ul>
