@@ -249,19 +249,15 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr, msgStatusTypesArr) => {
-    let tablesData = originalData.datasets.filter(table => !datasetsIdsArr.includes(table.tableId));
+    let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
 
-    const labels = originalData.labels.filter(label => !countriesLabelsArr.includes(label));
+    const labels = originalData.labels.filter(label => showArrayItem(countriesLabelsArr, label));
 
-    const labelPositionsInArray = countriesLabelsArr.map(label => originalData.labels.indexOf(label));
+    const labelsPositionsInFilteredLabelsArray = countriesLabelsArr.map(label => getLabelIndex(originalData, label));
 
-    tablesData = tablesData.map(table => ({
-      ...table,
-      data: table.data.filter((d, i) => !labelPositionsInArray.includes(i)),
-      totalData: table.totalData.filter((td, i) => !labelPositionsInArray.includes(i))
-    }));
+    tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
 
-    tablesData = tablesData.filter(table => !msgStatusTypesArr.includes(table.label));
+    tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
 
     return { labels: labels, datasets: tablesData };
   };
@@ -427,7 +423,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       </div>
       <div className="rep-row">
         <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetsDashboardOptions} width="100%" height="35%" />
+        <Chart type="bar" data={filterState.data} options={datasetsDashboardOptions} width="100%" height="30%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
         <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="25%" />
@@ -435,3 +431,19 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     </>
   );
 });
+
+function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
+  return tablesData.map(table => ({
+    ...table,
+    data: table.data.filter((d, i) => !labelsPositionsInFilteredLabelsArray.includes(i)),
+    totalData: table.totalData.filter((td, i) => !labelsPositionsInFilteredLabelsArray.includes(i))
+  }));
+}
+
+function getLabelIndex(originalData, label) {
+  return originalData.labels.indexOf(label);
+}
+
+function showArrayItem(array, item) {
+  return !array.includes(item);
+}
