@@ -13,17 +13,22 @@ import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -179,6 +184,9 @@ public class ValidationServiceTest {
   /** The dataset metabase. */
   @Mock
   private DatasetMetabaseController datasetMetabase;
+
+  @Mock
+  private UserManagementController userManagementController;
 
   /**
    * Inits the mocks.
@@ -635,8 +643,17 @@ public class ValidationServiceTest {
    */
   @Test
   public void testDeleteAllValidation() {
+    ResourceInfoVO resource = new ResourceInfoVO();
+    Map<String, List<String>> map = new HashMap<>();
+    List<String> list = new ArrayList<>();
+    list.add("'IT'");
+    map.put("countryCode", list);
+    resource.setAttributes(map);
     doNothing().when(datasetRepository).deleteValidationTable();
+    when(userManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
+        .thenReturn(resource);
     validationServiceImpl.deleteAllValidation(1L);
+
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();
   }
 

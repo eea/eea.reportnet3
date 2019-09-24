@@ -20,10 +20,14 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -126,6 +130,10 @@ public class ValidationServiceImpl implements ValidationService {
   /** The metabase controller. */
   @Autowired
   private DatasetMetabaseController metabaseController;
+
+  /** The user management controller. */
+  @Autowired
+  private UserManagementController userManagementController;
 
   /**
    * Gets the element lenght.
@@ -473,6 +481,24 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void deleteAllValidation(Long datasetId) {
     datasetRepository.deleteValidationTable();
+    initVariablesToValidate(datasetId);
+  }
+
+
+  /**
+   * Inits the variables to validate.
+   *
+   * @param datasetId the dataset id
+   */
+  private void initVariablesToValidate(Long datasetId) {
+    ResourceInfoVO resourceInfoVO =
+        userManagementController.getResourceDetail(datasetId, ResourceGroupEnum.DATASET_PROVIDER);
+    String countryCode = "''";
+    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0
+        && resourceInfoVO.getAttributes().containsKey("countryCode")) {
+      countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+    }
+    ThreadPropertiesManager.setVariable("countryCode", countryCode);
   }
 
   /**

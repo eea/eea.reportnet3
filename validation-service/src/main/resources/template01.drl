@@ -51,13 +51,6 @@ function boolean isCodeList( String value ,String codeList){
 	return CodeListUtils.codeListValidate(value,codeList);
 }
 
-//RECORDS PART 
-function boolean isInSameRecord( String value ,RecordValue record, Integer position, String valueToHave){
-	if(!isBlank(value)){
-		value = "";
-	}
-	return ForeingKeyDrools.isInSameRecord(value,record,position,valueToHave);
-}
 
 //URL PART
 function boolean isURL( String value ){
@@ -204,6 +197,7 @@ function boolean isCordenateLong( String value ){
    }
    return false;
  }
+
  
  
  //// PART OF TABLE
@@ -307,42 +301,29 @@ function boolean endUnknownPeriod(RecordValue recordValue,String idFieldSchemaPe
 }
 
 // MONITORING PART OF TABLES
-//1
 function boolean sameYearValidatioMonitoring(RecordValue recordValue, String idFieldShemaDate, String idFieldSchemaSeason){
 	return RecordValidationDrools.sameYearValidatioMonitoring(recordValue,idFieldShemaDate,idFieldSchemaSeason);
 }
 
-//2
-
 function boolean maxValueintestinal(RecordValue recordValue, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemaIntestinalEnterococciStatus){
 	return RecordValidationDrools.maxValueintestinal(recordValue,idFieldShemaIntestinalEnterococciValue,idFieldSchemaIntestinalEnterococciStatus);
 }
-//3
 function boolean maxValueEscherichiaColi(RecordValue recordValue,  String idFieldSchemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
 	return RecordValidationDrools.maxValueEscherichiaColi(recordValue,idFieldSchemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
 }
-//4
 function boolean generalStatusValidation(RecordValue recordValue, String idFieldShemaIntestinalEnterococciStatus , 
 String idFieldSchemaEscherichiaColiStatus,String idFieldSchemaSampleStatus ){
 	return RecordValidationDrools.generalStatusValidation(recordValue,idFieldShemaIntestinalEnterococciStatus,
 	idFieldSchemaEscherichiaColiStatus,idFieldSchemaSampleStatus);
 }
 
-//5
-
-
-//6
-
-//7
-
-
-//8
 function boolean intestinalEnterococciValueValidation(RecordValue recordValue, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemIntestinalEnterococciStatus){
 	return RecordValidationDrools.intestinalEnterococciValueValidation(recordValue,idFieldShemaIntestinalEnterococciValue,idFieldSchemIntestinalEnterococciStatus);
 }
-
-
-//9
 function boolean escherichiaColiStatusValidation(RecordValue recordValue, String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
 	return RecordValidationDrools.escherichiaColiStatusValidation(recordValue,idFieldShemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
+}
+
+function Boolean ruleIdentWise(String value){
+ 	return true;
 }

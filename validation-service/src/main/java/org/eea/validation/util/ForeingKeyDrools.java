@@ -1,6 +1,5 @@
 package org.eea.validation.util;
 
-import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.querysdrools.DataToQuery1;
 import org.eea.validation.util.querysdrools.DataToQuery11;
@@ -132,21 +131,19 @@ public class ForeingKeyDrools {
   }
 
 
-  /**
-   * Checks if is in same record.
-   *
-   * @param value the value
-   * @param record the record
-   * @param position the position
-   * @param valueToHave the value to have
-   * @return the boolean
-   */
-  public static Boolean isInSameRecord(String value, RecordValue record, Integer position,
-      String valueToHave) {
 
-    if (record.getFields().get(position).getValue().equalsIgnoreCase(valueToHave)) {
-      return true;
-    }
-    return false;
+  public static Boolean ruleSVA(String value) {
+    return true;
+    // if ("".equalsIgnoreCase(value.trim())) {
+    // return true;
+    // }
+    // Matcher expression = null;
+    // try {
+    // expression = dataValue.matcher(value);
+    // } catch (Exception e) {
+    // return false;
+    // }
+    // return expression.matches() == true ? true : false;
   }
+
 }

@@ -1,7 +1,6 @@
 package org.eea.multitenancy;
 
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.beans.factory.annotation.Autowired;
