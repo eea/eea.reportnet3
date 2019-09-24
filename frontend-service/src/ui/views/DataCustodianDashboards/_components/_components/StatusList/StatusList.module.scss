@@ -2,15 +2,20 @@
   background-color: #004494;
   color: white;
 }
+
 .warning {
   background-color: #ffd617;
 }
+
 .error {
   background-color: #e00013;
   color: white;
 }
+
 .list {
   display: inline-flex;
+  margin: 0 auto;
+  margin-top: 1em;
 
   li {
     min-width: 10em;

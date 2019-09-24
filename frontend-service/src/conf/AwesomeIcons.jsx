@@ -11,7 +11,9 @@ import {
   faFileImage,
   faFilePowerpoint,
   faFileVideo,
-  faTrashAlt
+  faTrashAlt,
+  faCaretDown,
+  faChartBar
 } from '@fortawesome/free-solid-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -104,6 +106,12 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'delete':
       return faTrashAlt;
+    case 'dropDown':
+      return faCaretDown;
+    case 'barChart':
+      return faChartBar;
+    case 'dataSet':
+      return faDatabase;
     default:
       return faFileAlt;
   }

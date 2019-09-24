@@ -1,0 +1,109 @@
+.listItem {
+  border-radius: 20px;
+  font-size: 2rem;
+}
+.listItem > a {
+  padding: 2.3rem 2.7rem;
+}
+.dataSet {
+  background-color: var(--c-corporate-blue);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.dataSet a {
+  color: var(--white);
+  border-radius: 20px;
+}
+.dataSet a:hover {
+  color: var(--white);
+  background-color: var(--c-blue-400);
+}
+.documents {
+  background-color: #ffba01;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.documents a {
+  color: var(--white);
+  border-radius: 20px;
+}
+.documents a:hover {
+  background-color: var(--c-orange-300);
+  color: var(--white);
+}
+
+.dropDwonIcon {
+  position: absolute;
+  bottom: -7px;
+  right: 5px;
+  cursor: pointer;
+}
+.dropDownMenu {
+  position: absolute;
+  bottom: 0px;
+  right: -52px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  border: 1px solid var(--c-black-200);
+  background-color: var(--white);
+  width: 170px;
+  border-radius: 2%;
+  z-index: 1000;
+  padding: 0 0.8rem;
+  color: var(--c-black-400);
+  border: 1px solid #c8c8c8;
+  box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
+  font-size: 0.9rem;
+  opacity: 0;
+}
+.dropDownMenu ul {
+  list-style: none;
+  padding: 0px;
+}
+
+.dropDownMenu ul li a {
+  color: var(--c-black-400);
+}
+.dropDownMenu ul li a:hover {
+  color: var(--c-black-400);
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.dropDownMenu ul li a i {
+  margin-right: 0.5rem;
+}
+
+.menuItemDisabled {
+  color: var(--c-black-300) !important;
+}
+.menuItemDisabled:hover {
+  color: var(--c-black-300);
+}
+.released {
+  display: block;
+  position: absolute;
+  top: 0px;
+}
+.dashboard {
+  background-color: var(--c-purple-400);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--white);
+}
+.dashboard a {
+  color: var(--white);
+  border-radius: 20px;
+}
+.dashboard a:hover {
+  background-color: var(--c-purple-300);
+  color: var(--white);
+}

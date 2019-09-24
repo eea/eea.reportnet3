@@ -14,6 +14,7 @@ import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
+import { ListItem } from './_components/ListItem';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -156,7 +157,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         buttonTitle={resources.messages.subscribeThisButton}
         dataFlowTitle={dataFlowData.name}
         navTitle={resources.messages.dataFlow}
-        components={['dashboard']}
+        components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataFlowData.id}`}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
@@ -173,63 +174,81 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.dataSetItem}`}>
-              <Button
-                className="p-button-warning"
-                label={resources.messages.do}
-                onClick={e => {
-                  handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`);
-                }}
+              <ListItem
+                layout="documents"
+                label="DO"
+                handleRedirect={() =>
+                  handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`)
+                }
               />
               <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
             {dataFlowData.datasets.map(dataSet => {
               return (
-                <div className={`${styles.dataSetItem}`} key={dataSet.id}>
-                  <SplitButton
-                    label={resources.messages['ds']}
-                    model={
-                      hasWritePermissions
-                        ? [
-                            {
-                              label: resources.messages.releaseDataCollection,
-                              icon: config.icons.cloudUpload,
-                              command: () => {
-                                showReleaseSnapshotDialog(dataSet.id);
+                <>
+                  <div className={`${styles.dataSetItem}`} key={dataSet.id}>
+                    <ListItem
+                      layout="dataSet"
+                      label="DS"
+                      handleRedirect={() => {
+                        handleRedirect(
+                          `/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${dataSet.id}`
+                        );
+                      }}
+                      model={
+                        hasWritePermissions
+                          ? [
+                              {
+                                label: resources.messages.releaseDataCollection,
+                                icon: 'cloudUpload',
+                                command: () => showReleaseSnapshotDialog(dataSet.id),
+                                disabled: false
+                              },
+                              {
+                                label: resources.messages['importFromFile'],
+                                icon: 'export',
+                                disabled: true
+                              },
+                              {
+                                label: resources.messages['duplicate'],
+                                icon: 'clone',
+                                disabled: true
+                              },
+                              {
+                                label: resources.messages['properties'],
+                                icon: 'info',
+                                disabled: true
                               }
-                            },
-                            {
-                              label: resources.messages['importFromFile'],
-                              icon: config.icons.export,
-                              disabled: true
-                            },
-                            {
-                              label: resources.messages['duplicate'],
-                              icon: config.icons.clone,
-                              disabled: true
-                            },
-                            {
-                              label: resources.messages['properties'],
-                              icon: config.icons.info,
-                              disabled: true
-                            }
-                          ]
-                        : [
-                            {
-                              label: resources.messages['properties'],
-                              icon: config.icons.info,
-                              disabled: true
-                            }
-                          ]
-                    }
-                    label={resources.messages.ds}
-                    onClick={() => {
-                      handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${dataSet.id}`);
-                    }}
-                  />
-                  <p className={styles.caption}>{dataSet.dataSetName}</p>
-                </div>
+                            ]
+                          : [
+                              {
+                                label: resources.messages['properties'],
+                                icon: 'info',
+                                disabled: true
+                              }
+                            ]
+                      }
+                    />
+                    <p className={styles.caption}>{dataSet.dataSetName}</p>
+                  </div>
+                </>
               );
             })}
+            {UserService.hasPermission(
+              user,
+              [config.permissions.CUSTODIAN],
+              `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
+            ) && (
+              <div className={`${styles.dataSetItem}`}>
+                <ListItem
+                  layout="dashboard"
+                  handleRedirect={() =>
+                    handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/data-custodian-dashboards/`)
+                  }
+                />
+                <p className={styles.caption}>{resources.messages.dashboards}</p>
+              </div>
+            )}
           </div>
         </div>
 
