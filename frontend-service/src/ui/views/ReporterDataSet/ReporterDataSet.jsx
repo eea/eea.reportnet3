@@ -71,7 +71,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
         label: resources.messages['reportingDataFlow'],

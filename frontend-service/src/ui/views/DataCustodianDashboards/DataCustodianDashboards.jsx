@@ -16,6 +16,8 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
+import { getUrl } from 'core/infrastructure/api/getUrl';
+
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userData = useContext(UserContext);
@@ -30,7 +32,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
   const onNewLegend = function(e, legendItem) {
@@ -66,7 +68,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
         label: resources.messages.reportingDataFlow,

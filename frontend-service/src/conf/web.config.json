@@ -92,8 +92,8 @@
 	"updateTableDataRecord":{
 		"url":"/dataset/{:dataSetId}/updateRecord"
 	},
-	"DATAFLOW_TASKS":{
-		"url":"/data-flow-task"
+	"DATAFLOWS":{
+		"url":"/dataflows"
 	},
 	"deleteDocument":{
 		"url":"/document/{:documentId}"
