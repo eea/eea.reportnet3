@@ -324,6 +324,6 @@ function boolean escherichiaColiStatusValidation(RecordValue recordValue, String
 	return RecordValidationDrools.escherichiaColiStatusValidation(recordValue,idFieldShemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
 }
 
-function Boolean ruleIdentWise(String value){
- 	return true;
+function boolean ruleSVA(String value){
+ 	return ForeingKeyDrools.ruleSVA(value);
 }

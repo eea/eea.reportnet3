@@ -1,5 +1,8 @@
 package org.eea.validation.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.querysdrools.DataToQuery1;
 import org.eea.validation.util.querysdrools.DataToQuery11;
@@ -35,6 +38,8 @@ public class ForeingKeyDrools {
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
+
+  private final static Pattern dataValue = Pattern.compile("^[^_-][A-Z0-9-_]{1,37}[^_-]$");
 
   /**
    * Sets the dataset repository.
@@ -133,17 +138,22 @@ public class ForeingKeyDrools {
 
 
   public static Boolean ruleSVA(String value) {
-    return true;
-    // if ("".equalsIgnoreCase(value.trim())) {
-    // return true;
-    // }
-    // Matcher expression = null;
-    // try {
-    // expression = dataValue.matcher(value);
-    // } catch (Exception e) {
-    // return false;
-    // }
-    // return expression.matches() == true ? true : false;
+    if ("".equalsIgnoreCase(value.trim())) {
+      return true;
+    }
+    String countryCode = TenantResolver.getVariable("countryCode").toString().replace("'", "");
+    if (!countryCode.equals(value.substring(0, 2))) {
+      return false;
+    } else {
+      value = value.substring(2);
+    }
+    Matcher expression = null;
+    try {
+      expression = dataValue.matcher(value);
+    } catch (Exception e) {
+      return false;
+    }
+    return expression.matches() == Boolean.TRUE ? Boolean.TRUE : false;
   }
 
 }
