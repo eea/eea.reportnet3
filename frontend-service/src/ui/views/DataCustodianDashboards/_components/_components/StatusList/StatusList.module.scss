@@ -8,6 +8,9 @@
   justify-content: space-between;
   align-self: stretch;
   align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 0rem;
+
   li {
     min-width: 10em;
     display: flex;
@@ -27,6 +30,7 @@
   margin-left: 0rem;
   text-transform: capitalize;
   cursor: pointer;
+  font-size: 0.9rem;
 }
 
 .checkbox:not(:checked) + .labelItem {
