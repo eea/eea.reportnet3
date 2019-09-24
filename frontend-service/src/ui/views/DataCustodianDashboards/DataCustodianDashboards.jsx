@@ -28,39 +28,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
   const [releasedDashboardData, setReleasedDashboardData] = useState({});
   const [releasedDashboardOptions, setReleasedDashboardOptions] = useState({});
-  /*   const [tablesIds, setTablesIds] = useState([]); */
 
   const home = {
     icon: config.icons['home'],
     command: () => history.push('/')
-  };
-
-  const onNewLegend = function(e, legendItem) {
-    let datasetIndex = legendItem.datasetIndex;
-
-    let currentChart = this.chart;
-
-    let arrLenght = currentChart.data.datasets.length;
-
-    let arrLegendSameTypePositions = [];
-
-    for (let i = datasetIndex; i >= 0; ) {
-      arrLegendSameTypePositions.push(i);
-      i -= 3;
-    }
-    for (let i = datasetIndex; i < arrLenght; ) {
-      if (!arrLegendSameTypePositions.includes(i)) {
-        arrLegendSameTypePositions.push(i);
-      }
-      i += 3;
-    }
-
-    arrLegendSameTypePositions
-      .map(index => currentChart.getDatasetMeta(index))
-      .forEach(meta => {
-        meta.hidden = meta.hidden === null ? !currentChart.data.datasets[datasetIndex].hidden : null;
-      });
-    currentChart.update();
   };
 
   //Bread Crumbs settings
@@ -200,13 +171,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         }
       },
       legend: {
-        onClick: onNewLegend,
-
-        display: true,
-        labels: {
-          filter: legendItem =>
-            legendItem.datasetIndex == 0 || legendItem.datasetIndex == 1 || legendItem.datasetIndex == 2
-        }
+        display: false
       },
       responsive: true,
       scales: {
@@ -283,7 +248,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
-  const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr, statusPositionsArray) => {
+  const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr, msgStatusTypesArr) => {
     let tablesData = originalData.datasets.filter(table => !datasetsIdsArr.includes(table.tableId));
 
     const labels = originalData.labels.filter(label => !countriesLabelsArr.includes(label));
@@ -296,17 +261,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       totalData: table.totalData.filter((td, i) => !labelPositionsInArray.includes(i))
     }));
 
-    console.log('statusPositionsArray', statusPositionsArray);
+    tablesData = tablesData.filter(table => !msgStatusTypesArr.includes(table.label));
 
     return { labels: labels, datasets: tablesData };
   };
+
   useEffect(() => {
     if (!isEmpty(dashboardsData)) {
       onPageLoad();
     }
   }, [dashboardsData]);
 
-  //STATE
   const initialFiltersState = {
     countryFilter: [],
     tableFilter: [],
@@ -318,7 +283,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const filterReducer = (state, { type, payload }) => {
     let countriesLabelsArr = [];
     let tablesIdsArray = [];
-    let statusPositionsArray = [];
+    let msgStatusTypesArray = [];
     let filteredTableData;
     switch (type) {
       case 'INIT_DATA':
@@ -390,33 +355,33 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           data: filteredTableData
         };
       case 'STATUS_FILTER_ON':
-        statusPositionsArray = state.statusFilter.filter(status => status !== payload.msg);
+        msgStatusTypesArray = state.statusFilter.filter(status => status !== payload.msg);
 
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
           state.countryFilter,
-          countriesLabelsArr
+          msgStatusTypesArray
         );
 
         return {
           ...state,
-          statusFilter: statusPositionsArray,
+          statusFilter: msgStatusTypesArray,
           data: filteredTableData
         };
       case 'STATUS_FILTER_OFF':
-        statusPositionsArray = [...state.statusFilter, payload.msg];
+        msgStatusTypesArray = [...state.statusFilter, payload.msg];
 
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
           state.countryFilter,
-          countriesLabelsArr
+          msgStatusTypesArray
         );
 
         return {
           ...state,
-          statusFilter: statusPositionsArray,
+          statusFilter: msgStatusTypesArray,
           data: filteredTableData
         };
 
