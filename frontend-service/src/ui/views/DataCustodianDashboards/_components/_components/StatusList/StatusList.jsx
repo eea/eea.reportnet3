@@ -5,10 +5,11 @@ import styles from './StatusList.module.scss';
 function StatusList({ filterDispatch }) {
   return (
     <ul className={styles.list}>
-      <li className={styles.correct}>
+      <li className={styles.listItem}>
         <input
           id="correct"
           className={styles.checkbox}
+          data-status="correct"
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -25,12 +26,15 @@ function StatusList({ filterDispatch }) {
             }
           }}
         />
-        <label htmlFor="warning">Correct</label>
+        <label htmlFor="correct" className={styles.labelItem}>
+          Correct
+        </label>
       </li>
-      <li className={styles.warning}>
+      <li className={styles.listItem}>
         <input
           id="warning"
           className={styles.checkbox}
+          data-status="correct"
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -47,12 +51,15 @@ function StatusList({ filterDispatch }) {
             }
           }}
         />
-        <label htmlFor="warning">Warnings</label>
+        <label htmlFor="warning" className={styles.labelItem}>
+          Warnings
+        </label>
       </li>
-      <li className={styles.error}>
+      <li className={styles.listItem}>
         <input
           id="error"
           className={styles.checkbox}
+          data-status="correct"
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -69,7 +76,9 @@ function StatusList({ filterDispatch }) {
             }
           }}
         />
-        <label htmlFor="error">Errors</label>
+        <label htmlFor="error" className={styles.labelItem}>
+          Errors
+        </label>
       </li>
     </ul>
   );
