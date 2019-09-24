@@ -8,9 +8,12 @@
 	"dataSchemaAPI": {
 		"url": "/dataschema/dataflow/{:dataFlowId}"
 	},
-	"dataviewerAPI": {
+	"dataViewerAPI": {
 		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}"
-	},	
+	},
+	"webFormDataViewerAPI": {
+		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}"
+	},
 	"deleteSnapshotByID": {
 		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/delete"
 	},
