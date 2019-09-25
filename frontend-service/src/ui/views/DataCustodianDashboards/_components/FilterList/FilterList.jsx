@@ -5,7 +5,7 @@ import { uniqBy } from 'lodash';
 import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { CountriesListItem } from '../_components/CountriesListItem';
+import { ReportersListItem } from '../_components/ReportersListItem';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { StatusList } from '../_components/StatusList';
 import { TableListItem } from '../_components/TableListItem';
@@ -30,10 +30,10 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
   return (
     <>
       <Accordion>
-        <AccordionTab header={resources.messages['filterByCountries']}>
+        <AccordionTab header={resources.messages['filterByReporters']}>
           <ul className={styles.list}>
             {labels.map(item => (
-              <CountriesListItem key={item} item={item} filterDispatch={filterDispatch} />
+              <ReportersListItem key={item} item={item} filterDispatch={filterDispatch} />
             ))}
           </ul>
         </AccordionTab>

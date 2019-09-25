@@ -23,7 +23,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
-  const [dashboardsData, setDashboardsData] = useState({});
+  const [dashboardsData, setDashboardsData] = useState();
   const [datasetsDashboardData, setDatasetsDashboardData] = useState({});
   const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
   const [releasedDashboardData, setReleasedDashboardData] = useState({});
@@ -51,17 +51,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ]);
   }, []);
 
-  const tableNames = isArray(dashboardsData.tables) && dashboardsData.tables.map(table => table.tableName);
+  console.log('dashboardData', dashboardsData);
+  const tableNames = isArray(dashboardsData) && dashboardsData[0].tables.map(table => table.tableName);
 
   const tablePercentages =
-    isArray(dashboardsData.tables) && dashboardsData.tables.map(table => table.tableStatisticPercentages);
+    isArray(dashboardsData) && dashboardsData[0].tables.map(table => table.tableStatisticPercentages);
 
   const tableOnePercentages = tablePercentages[0];
   const tableTwoPercentages = tablePercentages[1];
   const tableThirdPercentages = tablePercentages[2];
 
-  const tableValues =
-    isArray(dashboardsData.tables) && dashboardsData.tables.map(values => values.tableStatisticValues);
+  const tableValues = isArray(dashboardsData) && dashboardsData[0].tables.map(values => values.tableStatisticValues);
 
   const tableOneValues = tableValues[0];
   const tableTwoValues = tableValues[1];
@@ -69,7 +69,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   function getDatasetsDashboardData() {
     const datasetDataObject = {
-      labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
+      labels: dashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
       datasets: [
         {
           label: `CORRECT`,
@@ -196,18 +196,18 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   function getReleasedDashboardData() {
     const releasedDataObject = {
-      labels: dashboardsData.dataSetCountries.map(countryData => countryData.countryName),
+      labels: dashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
       datasets: [
         {
           label: 'Released',
           backgroundColor: 'rgb(50, 205, 50)',
 
-          data: dashboardsData.dataSetCountries.map(released => released.isDataSetReleased)
+          data: dashboardsData[0].dataSetReporters.map(released => released.isReleased)
         },
         {
           label: 'Unreleased',
           backgroundColor: 'rgb(255, 99, 132)',
-          data: dashboardsData.dataSetCountries.map(released => !released.isDataSetReleased)
+          data: dashboardsData[0].dataSetReporters.map(released => !released.isReleased)
         }
       ]
     };
@@ -248,12 +248,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
-  const onFilteringData = (originalData, datasetsIdsArr, countriesLabelsArr, msgStatusTypesArr) => {
+  const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
     let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
 
-    const labels = originalData.labels.filter(label => showArrayItem(countriesLabelsArr, label));
+    const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
 
-    const labelsPositionsInFilteredLabelsArray = countriesLabelsArr.map(label => getLabelIndex(originalData, label));
+    const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
 
     tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
 
@@ -269,7 +269,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, [dashboardsData]);
 
   const initialFiltersState = {
-    countryFilter: [],
+    reporterFilter: [],
     tableFilter: [],
     statusFilter: [],
     originalData: {},
@@ -277,7 +277,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const filterReducer = (state, { type, payload }) => {
-    let countriesLabelsArr = [];
+    let reportersLabelsArr = [];
     let tablesIdsArray = [];
     let msgStatusTypesArray = [];
     let filteredTableData;
@@ -294,7 +294,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         filteredTableData = onFilteringData(
           state.originalData,
           tablesIdsArray,
-          state.countryFilter,
+          state.reporterFilter,
           state.statusFilter
         );
 
@@ -310,7 +310,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         filteredTableData = onFilteringData(
           state.originalData,
           tablesIdsArray,
-          state.countryFilter,
+          state.reporterFilter,
           state.statusFilter
         );
 
@@ -320,34 +320,34 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           data: filteredTableData
         };
 
-      case 'COUNTRY_CHECKBOX_ON':
-        countriesLabelsArr = state.countryFilter.filter(label => label !== payload.label);
+      case 'REPORTER_CHECKBOX_ON':
+        reportersLabelsArr = state.reporterFilter.filter(label => label !== payload.label);
 
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
-          countriesLabelsArr,
+          reportersLabelsArr,
           state.statusFilter
         );
 
         return {
           ...state,
-          countryFilter: countriesLabelsArr,
+          reporterFilter: reportersLabelsArr,
           data: filteredTableData
         };
 
-      case 'COUNTRY_CHECKBOX_OFF':
-        countriesLabelsArr = [...state.countryFilter, payload.label];
+      case 'REPORTER_CHECKBOX_OFF':
+        reportersLabelsArr = [...state.reporterFilter, payload.label];
 
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
-          countriesLabelsArr,
+          reportersLabelsArr,
           state.statusFilter
         );
         return {
           ...state,
-          countryFilter: countriesLabelsArr,
+          reporterFilter: reportersLabelsArr,
           data: filteredTableData
         };
       case 'STATUS_FILTER_ON':
@@ -356,7 +356,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
-          state.countryFilter,
+          state.reporterFilter,
           msgStatusTypesArray
         );
 
@@ -371,7 +371,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         filteredTableData = onFilteringData(
           state.originalData,
           state.tableFilter,
-          state.countryFilter,
+          state.reporterFilter,
           msgStatusTypesArray
         );
 

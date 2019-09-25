@@ -1,8 +1,8 @@
 import React from 'react';
 
-import styles from './CountriesListItem.module.css';
+import styles from './ReportersListItem.module.scss';
 
-function CountriesListItem({ filterDispatch, item }) {
+function ReportersListItem({ filterDispatch, item }) {
   return (
     <li className={styles.listItem}>
       <input
@@ -13,12 +13,12 @@ function CountriesListItem({ filterDispatch, item }) {
         onChange={e => {
           if (e.target.checked) {
             filterDispatch({
-              type: 'COUNTRY_CHECKBOX_ON',
+              type: 'REPORTER_CHECKBOX_ON',
               payload: { label: item }
             });
           } else {
             filterDispatch({
-              type: 'COUNTRY_CHECKBOX_OFF',
+              type: 'REPORTER_CHECKBOX_OFF',
               payload: { label: item }
             });
           }
@@ -31,4 +31,4 @@ function CountriesListItem({ filterDispatch, item }) {
   );
 }
 
-export { CountriesListItem };
+export { ReportersListItem };

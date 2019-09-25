@@ -1,146 +1,147 @@
-{
+[
+  {
     "dataSetId": "5d4abe555b1c1e0001477410",
     "dataSetName": "dataSet_1",
-    "dataSetCountries": [
+    "dataSetReporters": [
       {
-        "countryName": "Austria",
-        "countryCode": "at",
-        "isDataSetReleased": true
+        "reporterName": "Austria",
+        "reporterId": "at",
+        "isReleased": true
       },
       {
-        "countryName": "Belgium",
-        "countryCode": "be",
-        "isDataSetReleased": true
+        "reporterName": "Belgium",
+        "reporterId": "be",
+        "isReleased": true
       },
       {
-        "countryName": "Bulgarian",
-        "countryCode": "bg",
-        "isDataSetReleased": true
+        "reporterName": "Bulgarian",
+        "reporterId": "bg",
+        "isReleased": true
       },
       {
-        "countryName": "Croatia",
-        "countryCode": "hr",
-        "isDataSetReleased": false
+        "reporterName": "Croatia",
+        "reporterId": "hr",
+        "isReleased": false
       },
       {
-        "countryName": "Cyprus",
-        "countryCode": "cy",
-        "isDataSetReleased": true
+        "reporterName": "Cyprus",
+        "reporterId": "cy",
+        "isReleased": true
       },
       {
-        "countryName": "Czechia",
-        "countryCode": "cz",
-        "isDataSetReleased": true
+        "reporterName": "Czechia",
+        "reporterId": "cz",
+        "isReleased": true
       },
       {
-        "countryName": "Denmark",
-        "countryCode": "dk",
-        "isDataSetReleased": true
+        "reporterName": "Denmark",
+        "reporterId": "dk",
+        "isReleased": true
       },
       {
-        "countryName": "Estonia",
-        "countryCode": "ee",
-        "isDataSetReleased": false
+        "reporterName": "Estonia",
+        "reporterId": "ee",
+        "isReleased": false
       },
       {
-        "countryName": "Finland",
-        "countryCode": "fi",
-        "isDataSetReleased": true
+        "reporterName": "Finland",
+        "reporterId": "fi",
+        "isReleased": true
       },
       {
-        "countryName": "France",
-        "countryCode": "fr",
-        "isDataSetReleased": true
+        "reporterName": "France",
+        "reporterId": "fr",
+        "isReleased": true
       },
       {
-        "countryName": "Germany",
-        "countryCode": "de",
-        "isDataSetReleased": true
+        "reporterName": "Germany",
+        "reporterId": "de",
+        "isReleased": true
       },
       {
-        "countryName": "Greece",
-        "countryCode": "el",
-        "isDataSetReleased": true
+        "reporterName": "Greece",
+        "reporterId": "el",
+        "isReleased": true
       },
       {
-        "countryName": "Hungary",
-        "countryCode": "hu",
-        "isDataSetReleased": true
+        "reporterName": "Hungary",
+        "reporterId": "hu",
+        "isReleased": true
       },
       {
-        "countryName": "Ireland",
-        "countryCode": "ie",
-        "isDataSetReleased": false
+        "reporterName": "Ireland",
+        "reporterId": "ie",
+        "isReleased": false
       },
       {
-        "countryName": "Italy",
-        "countryCode": "it",
-        "isDataSetReleased": true
+        "reporterName": "Italy",
+        "reporterId": "it",
+        "isReleased": true
       },
       {
-        "countryName": "Latvia",
-        "countryCode": "lv",
-        "isDataSetReleased": true
+        "reporterName": "Latvia",
+        "reporterId": "lv",
+        "isReleased": true
       },
       {
-        "countryName": "Lithuania",
-        "countryCode": "lt",
-        "isDataSetReleased": true
+        "reporterName": "Lithuania",
+        "reporterId": "lt",
+        "isReleased": true
       },
       {
-        "countryName": "Luxembourg",
-        "countryCode": "lu",
-        "isDataSetReleased": true
+        "reporterName": "Luxembourg",
+        "reporterId": "lu",
+        "isReleased": true
       },
       {
-        "countryName": "Malta",
-        "countryCode": "mt",
-        "isDataSetReleased": false
+        "reporterName": "Malta",
+        "reporterId": "mt",
+        "isReleased": false
       },
       {
-        "countryName": "Netherlands",
-        "countryCode": "nl",
-        "isDataSetReleased": true
+        "reporterName": "Netherlands",
+        "reporterId": "nl",
+        "isReleased": true
       },
       {
-        "countryName": "Poland",
-        "countryCode": "pl",
-        "isDataSetReleased": true
+        "reporterName": "Poland",
+        "reporterId": "pl",
+        "isReleased": true
       },
       {
-        "countryName": "Portugal",
-        "countryCode": "pt",
-        "isDataSetReleased": true
+        "reporterName": "Portugal",
+        "reporterId": "pt",
+        "isReleased": true
       },
       {
-        "countryName": "Romania",
-        "countryCode": "ro",
-        "isDataSetReleased": false
+        "reporterName": "Romania",
+        "reporterId": "ro",
+        "isReleased": false
       },
       {
-        "countryName": "Slovakia",
-        "countryCode": "sk",
-        "isDataSetReleased": true
+        "reporterName": "Slovakia",
+        "reporterId": "sk",
+        "isReleased": true
       },
       {
-        "countryName": "Slovenia",
-        "countryCode": "sl",
-        "isDataSetReleased": false
+        "reporterName": "Slovenia",
+        "reporterId": "sl",
+        "isReleased": false
       },
       {
-        "countryName": "Spain",
-        "countryCode": "es",
-        "isDataSetReleased": false
+        "reporterName": "Spain",
+        "reporterId": "es",
+        "isReleased": false
       },
       {
-        "countryName": "Sweeden",
-        "countryCode": "se",
-        "isDataSetReleased": true
+        "reporterName": "Sweeden",
+        "reporterId": "se",
+        "isReleased": true
       },
       {
-        "countryName": "United Kingdom",
-        "countryCode": "uk",
-        "isDataSetReleased": true
+        "reporterName": "United Kingdom",
+        "reporterId": "uk",
+        "isReleased": true
       }
     ],
     "tables": [
@@ -187,5 +188,196 @@
         ]
       }
     ]
-  }
+},
+{
+  "dataSetId": "5d4abe555b1c1e0001477777",
+  "dataSetName": "dataSet_2",
+  "dataSetReporters": [
+    {
+      "reporterName": "Austria",
+      "reporterId": "at",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Belgium",
+      "reporterId": "be",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Bulgarian",
+      "reporterId": "bg",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Croatia",
+      "reporterId": "hr",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Cyprus",
+      "reporterId": "cy",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Czechia",
+      "reporterId": "cz",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Denmark",
+      "reporterId": "dk",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Estonia",
+      "reporterId": "ee",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Finland",
+      "reporterId": "fi",
+      "isReleased": true
+    },
+    {
+      "reporterName": "France",
+      "reporterId": "fr",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Germany",
+      "reporterId": "de",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Greece",
+      "reporterId": "el",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Hungary",
+      "reporterId": "hu",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Ireland",
+      "reporterId": "ie",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Italy",
+      "reporterId": "it",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Latvia",
+      "reporterId": "lv",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Lithuania",
+      "reporterId": "lt",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Luxembourg",
+      "reporterId": "lu",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Malta",
+      "reporterId": "mt",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Netherlands",
+      "reporterId": "nl",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Poland",
+      "reporterId": "pl",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Portugal",
+      "reporterId": "pt",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Romania",
+      "reporterId": "ro",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Slovakia",
+      "reporterId": "sk",
+      "isReleased": true
+    },
+    {
+      "reporterName": "Slovenia",
+      "reporterId": "sl",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Spain",
+      "reporterId": "es",
+      "isReleased": false
+    },
+    {
+      "reporterName": "Sweeden",
+      "reporterId": "se",
+      "isReleased": true
+    },
+    {
+      "reporterName": "United Kingdom",
+      "reporterId": "uk",
+      "isReleased": true
+    }
+  ],
+  "tables": [
+    {
+      "tableId": "5d4abe555b1c1e0001477477",
+      "tableName": "BWQD_2016_IdentifiedBW",
+      "tableStatisticPercentages": [
+          [20, 50, 100, 75, 25, 20, 77, 77, 70, 72, 12, 50, 53, 21, 0, 9, 30, 7, 70, 40, 34, 27, 50, 50, 20, 15, 80, 52],
+          [20, 25, 0, 25, 10, 40, 13, 10, 5, 18, 38, 25, 22, 54, 50, 44, 45, 68, 20, 25, 46, 48, 40, 25, 50, 15, 10, 25],
+          [60, 25, 0, 0, 65, 40, 10, 13, 25, 10, 50, 25, 25, 25, 50, 47, 25, 25, 10, 35, 20, 25, 10, 25, 30, 70, 10, 23]
+      ],
+      "tableStatisticValues": [
+          [200, 500, 1000, 750, 250, 200, 770, 770, 700, 720, 120, 500, 530, 210, 0, 90, 30, 70, 700, 400, 340, 170, 500, 500, 200, 150, 800, 520],
+          [200, 250, 0, 250, 100, 400, 130, 100, 50, 180, 380, 250, 220, 540, 500, 440, 450, 680, 200, 250, 460, 480, 400, 250, 500, 150, 100, 250],
+          [600, 250, 0, 0, 650, 400, 100, 130, 250, 100, 500, 250, 250, 250, 500, 470, 250, 250, 100, 350, 200, 250, 100, 250, 300, 700, 100, 230]
+      ]
+    },
+    {
+      "tableId": "5d4abe555b1c1e0001477478",
+      "tableName": "BWQD_2016_SeasonalInfo",
+      "tableStatisticPercentages": [
+          [70, 40, 34, 17, 50, 50, 20, 15, 80, 52, 20, 25, 45, 20, 10, 40, 13, 10, 10, 18, 40, 25, 25, 50, 30, 30, 20, 23],
+          [10, 35, 20, 35, 10, 25, 30, 70, 10, 23, 60, 25, 45, 10, 65, 40, 10, 13, 20, 10, 40, 50, 50, 25, 30, 40, 60, 54],
+          [20, 25, 46, 48, 40, 25, 50, 15, 10, 25, 20, 50, 10, 70, 25, 20, 77, 77, 70, 72, 20, 25, 25, 25, 40, 30, 20, 23]
+      ],
+      "tableStatisticValues": [
+          [700, 400, 340, 170, 500, 500, 200, 150, 800, 520, 200, 250, 450, 200, 100, 400, 130, 100, 100, 180, 400, 250, 250, 500, 300, 300, 200, 230],
+          [100, 350, 200, 250, 100, 250, 300, 700, 100, 230, 600, 250, 450, 100, 650, 400, 100, 130, 200, 100, 400, 500, 500, 250, 300, 400, 600, 540],
+          [200, 250, 460, 480, 400, 250, 500, 150, 100, 250, 200, 500, 100, 700, 250, 200, 770, 770, 700, 720, 200, 250, 250, 250, 400, 300, 200, 230]
+      ]
+    },
+    {
+      "tableId": "5d4abe555b1c1e0001477479",
+      "tableName": "BWQD_2016_MonitoringResults",
+      "tableStatisticPercentages": [
+          [60, 25, 25, 50, 65, 40, 10, 13, 25, 10, 50, 32, 88, 1, 9, 47, 15, 25, 10, 35, 20, 15, 10, 77, 77, 70, 19, 57],
+          [10, 35, 10, 25, 15, 10, 65, 31, 50, 77, 23, 48, 7, 1, 82, 25, 70, 50, 60, 25, 10, 10, 65, 13, 11, 20, 60, 33],
+          [30, 40, 65, 25, 20, 50, 25, 56, 25, 13, 27, 20, 5, 98, 9, 28, 15, 25, 30, 40, 70, 75, 25, 10, 12, 10, 21, 10]
+      ],
+      "tableStatisticValues": [
+          [600, 250, 250, 500, 650, 400, 100, 130, 250, 100, 500, 320, 880, 10, 90, 470, 150, 250, 100, 350, 200, 150, 100, 770, 770, 700, 190, 570],
+          [100, 350, 100, 250, 150, 100, 650, 310, 500, 770, 230, 480, 70, 10, 820, 250, 700, 500, 600, 250, 100, 100, 650, 130, 110, 200, 600, 330],
+          [300, 400, 650, 250, 200, 500, 250, 560, 250, 130, 270, 200, 50, 980, 90, 280, 150, 250, 300, 400, 700, 750, 250, 100, 120, 100, 210, 100]
+      ]
+    }
+  ]
+}
+]
   

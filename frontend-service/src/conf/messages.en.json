@@ -84,7 +84,7 @@
 		"fileDescription": "File description",
 		"fileTitle":"File title",
 		"filter": "Filter",
-		"filterByCountries": "Filter by countries",
+		"filterByReporters": "Filter by reporters",
 		"filterByTables": "Filter by tables",
 		"groupBy": "Group by",
 		"grid": "Grid",
