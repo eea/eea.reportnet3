@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
 
@@ -17,7 +17,8 @@ import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
-
+  const form = useRef(null);
+  console.log(isVisible, setIsVisible, snapshotListData);
   useEffect(() => {
     const bodySelector = document.querySelector('body');
     isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
@@ -29,6 +30,10 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
       .max(100, resources.messages['snapshotDescriptionValidationMax'])
       .required(resources.messages['snapshotDescriptionValidationRequired'])
   });
+
+  if (isVisible) {
+    form.current.resetForm();
+  }
 
   return (
     <Sidebar
@@ -43,6 +48,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
           <Formik
+            ref={form}
             initialValues={{ createSnapshotDescription: '' }}
             validationSchema={snapshotValidationSchema}
             onSubmit={values => {
