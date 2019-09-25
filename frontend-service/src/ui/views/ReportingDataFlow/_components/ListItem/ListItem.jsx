@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -8,35 +8,23 @@ import { Menu } from './_components/Menu';
 import { Icon } from 'ui/views/_components/Icon';
 
 export const ListItem = ({ layout, label, handleRedirect, model }) => {
-  const reducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'TOGGLE_MENU':
-        return {
-          ...state,
-          hidden: !state.hidden,
-          menu: payload ? payload.target.nextSibling : null
-        };
-      case 'POSITIONING_MENU':
-        return {
-          ...state
-        };
+  const toggleVisibility = target => {
+    const incommingMenu = target.nextSibling;
+    const display = incommingMenu.style.display === 'none' ? true : false;
 
-      default:
-        return state;
+    const allMenus = document.querySelectorAll('.p-menu-overlay-visible');
+    allMenus.forEach(other => (other.style.display = 'none'));
+    if (display) {
+      incommingMenu.style.display = 'block';
+      setTimeout(() => {
+        incommingMenu.style.bottom = `-${incommingMenu.offsetHeight}px`;
+        incommingMenu.style.opacity = 1;
+      }, 50);
+    } else {
+      incommingMenu.style.display = 'none';
     }
   };
-  const dropdownInitialState = {
-    hidden: true,
-    menu: null
-  };
 
-  const [dropdownState, dropdowndispatch] = useReducer(reducer, dropdownInitialState);
-  useEffect(() => {
-    if (!dropdownState.hidden) {
-      dropdownState.menu.style.bottom = `-${dropdownState.menu.offsetHeight}px`;
-      dropdownState.menu.style.opacity = 1;
-    }
-  }, [dropdownState]);
   const dataSet = model ? (
     <div className={`${style.listItem} ${style.dataSet}`}>
       <a
@@ -47,12 +35,10 @@ export const ListItem = ({ layout, label, handleRedirect, model }) => {
         }}>
         <FontAwesomeIcon icon={AwesomeIcons('dataSet')} />
       </a>
-      <span
-        className={style.dropDwonIcon}
-        onClick={e => dropdowndispatch({ type: 'TOGGLE_MENU', payload: { target: e.currentTarget } })}>
+      <span className={style.dropDwonIcon} onClick={e => toggleVisibility(e.currentTarget)}>
         <FontAwesomeIcon icon={AwesomeIcons('dropDown')} />
       </span>
-      <Menu dropdownState={dropdownState} dropdowndispatch={dropdowndispatch} model={model} />
+      <Menu model={model} />
       {true && <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />}
     </div>
   ) : (

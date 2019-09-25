@@ -35,6 +35,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload, onGrowlAlert }) => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
+        enableReinitialize={true}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
           onGrowlAlert({

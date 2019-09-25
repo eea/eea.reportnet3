@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import style from '../ListItem.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
-const Menu = ({ dropdownState, model, dropdowndispatch }) => {
+const Menu = ({ model }) => {
   if (model) {
     return (
-      <div className={style.dropDownMenu} hidden={dropdownState.hidden}>
+      <div className={`${style.dropDownMenu} p-menu-overlay-visible`} style={{ display: 'none' }}>
         <ul>
           {model ? (
             model.map(item => (
@@ -15,7 +15,6 @@ const Menu = ({ dropdownState, model, dropdowndispatch }) => {
                   onClick={e => {
                     e.preventDefault();
                     item.command();
-                    dropdowndispatch({ type: 'TOGGLE_MENU', menu: null });
                   }}
                   disabled={item.disabled}>
                   <Icon icon={item.icon} />
