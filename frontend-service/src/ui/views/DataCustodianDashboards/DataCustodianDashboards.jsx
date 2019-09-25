@@ -17,6 +17,8 @@ import { FilterList } from './_components/FilterList/FilterList';
 import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
+import { getUrl } from 'core/infrastructure/api/getUrl';
+
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userData = useContext(UserContext);
@@ -31,7 +33,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
   //Bread Crumbs settings
@@ -39,11 +41,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages.reportingDataFlow,
-        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+        label: resources.messages.dataFlow,
+        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
       },
       {
         label: resources.messages.dataCustodianDashboards
