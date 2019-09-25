@@ -17,12 +17,15 @@ import org.springframework.stereotype.Service;
 @Service("reportingDatasetService")
 public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
+  /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The reporting dataset mapper. */
   @Autowired
   private ReportingDatasetMapper reportingDatasetMapper;
 
+  /** The snapshot repository. */
   @Autowired
   private SnapshotRepository snapshotRepository;
 
@@ -40,11 +43,17 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
     List<ReportingDatasetVO> datasetsVO = reportingDatasetMapper.entityListToClass(datasets);
 
+    // Check if dataset is released
     isReleased(datasetsVO);
 
     return datasetsVO;
   }
 
+  /**
+   * Checks if is released.
+   *
+   * @param datasetsVO the datasets VO
+   */
   private void isReleased(List<ReportingDatasetVO> datasetsVO) {
     if (datasetsVO != null && !datasetsVO.isEmpty()) {
       List<Long> collection =
