@@ -495,7 +495,7 @@ const DataViewer = withRouter(
 
       growlRef.current.show({
         severity: 'info',
-        summary: resources.messages['dataSetLoadingTitle'],
+        summary: resources.messages['datasetLoadingTitle'],
         detail: detailContent,
         life: '5000'
       });

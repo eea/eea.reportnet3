@@ -100,7 +100,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         label: resources.messages['dataFlow'],
         command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
       },
-      { label: resources.messages['viewData'] }
+      { label: resources.messages['dataset'] }
     ]);
     onLoadSnapshotList();
   }, []);
@@ -536,14 +536,14 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         {resources.messages['deleteDatasetConfirm']}
       </ConfirmDialog>
       <ConfirmDialog
-        header={resources.messages['validateDataSet']}
+        header={resources.messages['validateDataset']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         maximizable={false}
         onConfirm={onConfirmValidate}
         onHide={() => onSetVisible(setValidateDialogVisible, false)}
         visible={validateDialogVisible}>
-        {resources.messages['validateDataSetConfirm']}
+        {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
 
       <SnapshotContext.Provider
