@@ -356,7 +356,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+          history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
         }
       } finally {
         setLoading(false);
@@ -408,7 +408,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+          history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -446,7 +446,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+            history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
           }
         } finally {
           setLoading(false);
@@ -462,7 +462,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+            history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
           }
         } finally {
           onCancelRowEdit();
@@ -495,7 +495,7 @@ const DataViewer = withRouter(
 
       growlRef.current.show({
         severity: 'info',
-        summary: resources.messages['dataSetLoadingTitle'],
+        summary: resources.messages['datasetLoadingTitle'],
         detail: detailContent,
         life: '5000'
       });

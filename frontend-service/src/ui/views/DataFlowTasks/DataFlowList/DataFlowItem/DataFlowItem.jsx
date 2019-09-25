@@ -48,7 +48,7 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
             : `${styles.container}`
         }>
         {listType === 'accepted' ? (
-          <Link className={styles.containerLink} to={`/reporting-data-flow/${itemContent.id}`}>
+          <Link className={styles.containerLink} to={`/dataflow/${itemContent.id}`}>
             {children}
           </Link>
         ) : (

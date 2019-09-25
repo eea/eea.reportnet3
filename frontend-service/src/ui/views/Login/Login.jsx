@@ -6,12 +6,16 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Login.module.css';
 
+import { config } from 'conf';
+
 import logo from 'assets/images/logo.png';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
+
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
@@ -38,7 +42,7 @@ const Login = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
             {!isEmpty(loginError) && <div class={styles.error}>{loginError}</div>}
-            {/* <Link to={routes.DATAFLOW_TASKS}>cast</Link> */}
+            {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
           <Formik
             initialValues={initialValues}
@@ -48,7 +52,7 @@ const Login = ({ history }) => {
               try {
                 const userObject = await UserService.login(values.userName, values.password);
                 user.onLogin(userObject);
-                history.push('/data-flow-task/');
+                history.push(getUrl(config.DATAFLOWS.url));
               } catch (error) {
                 console.error(error);
                 user.onLogout();
