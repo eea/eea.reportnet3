@@ -78,7 +78,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
       const errorResponse = error.response;
       console.error('WebForm errorResponse: ', errorResponse);
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+        history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
       }
     } finally {
       setLoading(false);

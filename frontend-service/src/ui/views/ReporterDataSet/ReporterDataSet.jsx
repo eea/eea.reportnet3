@@ -71,7 +71,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
   useEffect(() => {
@@ -94,13 +94,13 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages['reportingDataFlow'],
-        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+        label: resources.messages['dataFlow'],
+        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
       },
-      { label: resources.messages['viewData'] }
+      { label: resources.messages['dataset'] }
     ]);
     onLoadSnapshotList();
   }, []);
@@ -228,7 +228,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     } catch (error) {
       const errorResponse = error.response;
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
+        history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
       }
     }
 
@@ -536,14 +536,14 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         {resources.messages['deleteDatasetConfirm']}
       </ConfirmDialog>
       <ConfirmDialog
-        header={resources.messages['validateDataSet']}
+        header={resources.messages['validateDataset']}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         maximizable={false}
         onConfirm={onConfirmValidate}
         onHide={() => onSetVisible(setValidateDialogVisible, false)}
         visible={validateDialogVisible}>
-        {resources.messages['validateDataSetConfirm']}
+        {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
 
       <SnapshotContext.Provider
