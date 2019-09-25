@@ -56,7 +56,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
   const onLoadReportingDataFlow = async () => {
@@ -65,7 +65,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
       setDataFlowData(dataFlow);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(config.DATAFLOW_TASKS.url));
+        history.push(getUrl(config.DATAFLOWS.url));
       }
     } finally {
       setLoading(false);
@@ -85,10 +85,10 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages.reportingDataFlow
+        label: resources.messages.dataFlow
       }
     ]);
   }, [history, match.params.dataFlowId, resources.messages]);
@@ -177,9 +177,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               <ListItem
                 layout="documents"
                 label="DO"
-                handleRedirect={() =>
-                  handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/documentation-data-set/`)
-                }
+                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataFlowId}/documentation-data-set/`)}
               />
               <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
@@ -191,9 +189,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                       layout="dataSet"
                       label="DS"
                       handleRedirect={() => {
-                        handleRedirect(
-                          `/reporting-data-flow/${match.params.dataFlowId}/reporter-data-set/${dataSet.id}`
-                        );
+                        handleRedirect(`/dataflow/${match.params.dataFlowId}/dataset/${dataSet.id}`);
                       }}
                       model={
                         hasWritePermissions
@@ -243,7 +239,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                 <ListItem
                   layout="dashboard"
                   handleRedirect={() =>
-                    handleRedirect(`/reporting-data-flow/${match.params.dataFlowId}/data-custodian-dashboards/`)
+                    handleRedirect(`/dataflow/${match.params.dataFlowId}/data-custodian-dashboards/`)
                   }
                 />
                 <p className={styles.caption}>{resources.messages.dashboards}</p>

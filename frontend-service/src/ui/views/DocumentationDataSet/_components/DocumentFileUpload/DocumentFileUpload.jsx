@@ -40,7 +40,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload, onGrowlAlert }) => {
           setSubmitting(true);
           onGrowlAlert({
             severity: 'info',
-            // summary: resources.messages['dataSetLoadingTitle'],
+            // summary: resources.messages['datasetLoadingTitle'],
             summary: resources.messages.documentUploadingGrowlUploadingSummary,
             detail: resources.messages.documentUploadingGrowlUploadingDetail,
             life: '5000'
@@ -57,7 +57,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload, onGrowlAlert }) => {
           if (response === 200) {
             onGrowlAlert({
               severity: 'success',
-              // summary: resources.messages['dataSetLoadingTitle'],
+              // summary: resources.messages['datasetLoadingTitle'],
               summary: resources.messages.documentUploadingGrowlSuccessSummary,
               detail: resources.messages.documentUploadingGrowlSuccessDetail,
               life: '5000'
@@ -67,7 +67,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload, onGrowlAlert }) => {
           } else {
             onGrowlAlert({
               severity: 'error',
-              // summary: resources.messages['dataSetLoadingTitle'],
+              // summary: resources.messages['datasetLoadingTitle'],
               summary: resources.messages.documentUploadingGrowlErrorSummary,
               detail: resources.messages.documentUploadingGrowlErrorDetail,
               life: '5000'

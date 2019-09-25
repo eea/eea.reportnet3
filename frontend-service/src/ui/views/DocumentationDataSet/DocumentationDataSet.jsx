@@ -46,7 +46,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
   useEffect(() => {
@@ -58,11 +58,11 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages['reportingDataFlow'],
-        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+        label: resources.messages['dataFlow'],
+        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
       },
       { label: resources.messages['documents'] }
     ]);
@@ -118,7 +118,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
       setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(config.DATAFLOW_TASKS.url));
+        history.push(getUrl(config.DATAFLOWS.url));
       }
     } finally {
       setIsLoading(false);
