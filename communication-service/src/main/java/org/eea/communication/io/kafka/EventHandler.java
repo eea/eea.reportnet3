@@ -39,9 +39,16 @@ public class EventHandler implements EEAEventHandler {
    */
   @Override
   public void processMessage(final EEAEventVO eeaEventVO) {
-    if (eeaEventVO.getEventType().equals(EventType.WEBSOCKET_NOTIFICATION)
-        && !notificationService.processAndSendEvent(eeaEventVO)) {
-      logger.error("Error sending notification: {}", eeaEventVO);
+
+    if (eeaEventVO != null && eeaEventVO.getEventType().equals(EventType.WEBSOCKET_NOTIFICATION)
+        && eeaEventVO.getData() != null) {
+
+      String userId = (String) eeaEventVO.getData().get("userId");
+      String message = (String) eeaEventVO.getData().get("message");
+
+      if (!notificationService.send(userId, message)) {
+        logger.error("Error sending notification: {}", eeaEventVO);
+      }
     }
   }
 }

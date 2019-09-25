@@ -1,7 +1,5 @@
 package org.eea.communication.service;
 
-import org.eea.kafka.domain.EEAEventVO;
-
 public interface NotificationService {
 
   /**
@@ -11,5 +9,5 @@ public interface NotificationService {
    * @param eeaEventVO An event to send to a user.
    * @return true, if successful
    */
-  public boolean processAndSendEvent(EEAEventVO eeaEventVO);
+  public boolean send(String userId, String message);
 }

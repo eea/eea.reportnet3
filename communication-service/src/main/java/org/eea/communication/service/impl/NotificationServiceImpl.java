@@ -1,7 +1,6 @@
 package org.eea.communication.service.impl;
 
 import org.eea.communication.service.NotificationService;
-import org.eea.kafka.domain.EEAEventVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,33 +27,13 @@ public class NotificationServiceImpl implements NotificationService {
    * @param message the message to send to the user.
    * @return true, if successful
    */
-  private boolean send(String userId, String message) {
+  @Override
+  public boolean send(String userId, String message) {
     if (userId != null && !userId.isEmpty() && message != null) {
       logger.info("Notification sent to user: userId={}, message={}", userId, message);
       template.convertAndSendToUser(userId, "/queue/notifications", new Notification(message));
       return true;
     }
-    return false;
-  }
-
-  /**
-   * Process the event to get the message and a user to send it. EEAEventVO should has set keys
-   * "userId" and "message" on data property.
-   *
-   * @param eeaEventVO An event to send to a user.
-   * @return true, if successful
-   */
-  @Override
-  public boolean processAndSendEvent(EEAEventVO eeaEventVO) {
-
-    if (eeaEventVO != null && eeaEventVO.getData() != null) {
-
-      String userId = (String) eeaEventVO.getData().get("userId");
-      String message = (String) eeaEventVO.getData().get("message");
-
-      return send(userId, message);
-    }
-
     return false;
   }
 
