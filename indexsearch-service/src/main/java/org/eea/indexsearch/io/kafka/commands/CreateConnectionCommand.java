@@ -6,8 +6,9 @@ import java.util.UUID;
 import org.eea.indexsearch.io.kafka.domain.ElasticSearchData;
 import org.eea.indexsearch.io.kafka.domain.EntityEvent;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.kafka.commands.AbstracEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.interfaces.EEAEventHandlerCommand;
+import org.eea.kafka.domain.EventType;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -15,6 +16,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -22,22 +24,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
  * 
  */
-public class CreateConnectionCommand implements EEAEventHandlerCommand {
+@Component
+public class CreateConnectionCommand extends AbstracEEAEventHandlerCommand {
 
 
+  /** The Constant INDEX. */
   private static final String INDEX = "lead";
+
+  /** The Constant TYPE. */
   private static final String TYPE = "lead";
 
+  /** The client. */
+  @Autowired
   private RestHighLevelClient client;
 
+  /** The object mapper. */
+  @Autowired
   private ObjectMapper objectMapper;
 
-  @Autowired
-  public CreateConnectionCommand(RestHighLevelClient client, ObjectMapper objectMapper) {
-    this.client = client;
-    this.objectMapper = objectMapper;
+
+  /**
+   * Gets the event type.
+   *
+   * @return the event type
+   */
+  @Override
+  public EventType getEventType() {
+    return EventType.CONNECTION_CREATED_EVENT;
   }
 
+
+  /**
+   * Execute.
+   *
+   * @param eeaEventVO the eea event VO
+   */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
 

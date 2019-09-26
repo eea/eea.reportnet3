@@ -1,4 +1,4 @@
-package org.eea.kafka.interfaces;
+package org.eea.kafka.commands;
 
 import java.io.IOException;
 import org.eea.exception.EEAException;

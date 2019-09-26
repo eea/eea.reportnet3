@@ -1,7 +1,7 @@
 package org.eea.indexsearch.io.kafka.commands;
 
+import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.interfaces.EEAEventHandlerCommand;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;

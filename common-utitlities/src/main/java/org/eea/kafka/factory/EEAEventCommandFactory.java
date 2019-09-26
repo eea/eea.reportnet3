@@ -1,5 +1,6 @@
-package org.eea.kafka.interfaces;
+package org.eea.kafka.factory;
 
+import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 
 /**

@@ -4,15 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import org.eea.kafka.commands.AbstracEEAEventHandlerCommand;
+import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.interfaces.AbstracEEAEventHandlerCommand;
-import org.eea.kafka.interfaces.EEAEventCommandFactory;
-import org.eea.kafka.interfaces.EEAEventHandlerCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component("EEAEventCommandFactoryImpl")
 public class EEAEventCommandFactoryImpl implements EEAEventCommandFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(EEAEventCommandFactoryImpl.class);
@@ -25,9 +26,11 @@ public class EEAEventCommandFactoryImpl implements EEAEventCommandFactory {
   @PostConstruct
   private void init() {
     eventHandleCommands = new HashMap<>();
-    commands.stream().forEach(command -> {
-      eventHandleCommands.put(command.getEventType(), command);
-    });
+    if (null != commands) {
+      commands.stream().forEach(command -> {
+        eventHandleCommands.put(command.getEventType(), command);
+      });
+    }
   }
 
   /**
