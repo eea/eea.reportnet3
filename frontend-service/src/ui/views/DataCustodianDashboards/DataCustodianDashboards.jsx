@@ -53,6 +53,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ]);
   }, []);
 
+  console.log('dashboardData', dashboardsData);
   const tableNames = isArray(dashboardsData) && dashboardsData[0].tables.map(table => table.tableName);
 
   const tablePercentages =
@@ -195,11 +196,25 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     return datasetOptionsObject;
   }
 
-  const getReleasedDashboardData = async () => {
-    const releasedDataObject = await DataFlowService.dataset_status(match.params.dataFlowId);
-    console.log('releasedDataObject', releasedDataObject);
+  function getReleasedDashboardData() {
+    const releasedDataObject = {
+      labels: dashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
+      datasets: [
+        {
+          label: 'Released',
+          backgroundColor: 'rgb(50, 205, 50)',
+
+          data: dashboardsData[0].dataSetReporters.map(released => released.isReleased)
+        },
+        {
+          label: 'Unreleased',
+          backgroundColor: 'rgb(255, 99, 132)',
+          data: dashboardsData[0].dataSetReporters.map(released => !released.isReleased)
+        }
+      ]
+    };
     return releasedDataObject;
-  };
+  }
 
   function getReleasedDashboardOptions() {
     const releasedOptionsObject = {
@@ -226,7 +241,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   const onPageLoad = () => {
-    setDatasetsDashboardData(getDatasetsDashboardData());
+    getDatasetsDashboardData();
 
     setDatasetsDashboardOptions(getDatasetsDashboardOptions());
 

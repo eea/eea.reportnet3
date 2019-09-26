@@ -3,7 +3,6 @@ import { GetPending } from './GetPending';
 import { GetAccepted } from './GetAccepted';
 import { GetCompleted } from './GetCompleted';
 import { GetDashboards } from './GetDashboards';
-import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
 import { Accept } from './Accept';
 import { Reject } from './Reject';
@@ -15,7 +14,6 @@ export const DataFlowService = {
   pending: GetPending({ dataFlowRepository }),
   completed: GetCompleted({ dataFlowRepository }),
   dashboards: GetDashboards({ dataFlowRepository }),
-  dataset_status: GetReleasedDashboards({ dataFlowRepository }),
   reporting: GetReporting({ dataFlowRepository }),
   accept: Accept({ dataFlowRepository }),
   reject: Reject({ dataFlowRepository })

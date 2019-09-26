@@ -97,9 +97,5 @@
 	},
 	"deleteDocument":{
 		"url":"/document/{:documentId}"
-	},
-	"datasetReleasedStatus":{
-		"url":"/datasetmetabase/dataflow/{:dataFlowId}"
-
 	}
 }

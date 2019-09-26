@@ -46,28 +46,6 @@ const dashboards = async dataFlowId => {
   const dashboardsData = await apiDataFlow.dashboards(dataFlowId);
   return dashboardsData;
 };
-const dataset_status = async dataFlowId => {
-  const dashboardsData = await apiDataFlow.datasetReleasedStatus(dataFlowId);
-
-  const releasedDataObject = {
-    labels: dashboardsData.map(dataset => dataset.dataSetName),
-    datasets: [
-      {
-        label: 'Released',
-        backgroundColor: 'rgb(50, 205, 50)',
-
-        data: dashboardsData.map(dataset => dataset.isReleased)
-      },
-      {
-        label: 'Unreleased',
-        backgroundColor: 'rgb(255, 99, 132)',
-        data: dashboardsData.map(dataset => !dataset.isReleased)
-      }
-    ]
-  };
-  console.log('in ApiDataFlowRepository', releasedDataObject);
-  return releasedDataObject;
-};
 
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataFlow.pending();
@@ -95,7 +73,6 @@ export const ApiDataFlowRepository = {
   accepted,
   completed,
   dashboards,
-  dataset_status,
   pending,
   reject,
   reporting

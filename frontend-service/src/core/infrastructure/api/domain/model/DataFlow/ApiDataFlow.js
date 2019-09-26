@@ -51,42 +51,18 @@ export const apiDataFlow = {
     return response.data;
   },
   dashboards: async dataFlowId => {
+    console.log('Getting all the dashboards', dataFlowId);
+    // const tokens = userStorage.get();
+    // const response = await HTTPRequester.get({
+    //   url: '/jsons/dataCustodianDashboards.json',
+    //   queryString: {},
+    //   headers: {
+    //     Authorization: `Bearer ${tokens.accessToken}`
+    //   }
+    // });
+    // return response.data;
     const hardcodedDashboardTest = dataCustodianDashboards;
     return hardcodedDashboardTest;
-  },
-  datasetReleasedStatus: async dataFlowId => {
-    /* const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: getUrl(config.datasetReleasedStatus.url, { dataFlowId: dataFlowId }),
-      queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    }); */
-
-    const responseData = [
-      {
-        id: 1,
-        dataSetName: 'Belgium',
-        creationDate: 1565088304601,
-        isReleased: false
-      },
-      {
-        id: 2,
-        dataSetName: 'Italy',
-        creationDate: 1565088304000,
-        isReleased: false
-      },
-      {
-        id: 6,
-        dataSetName: 'Spain',
-        creationDate: 1567520549026,
-        isReleased: true
-      }
-    ];
-    //HARDCODED RESPONSE responseData SHOULD BE CHANGED TO response.data AND UNCOMENT API CALL
-    console.log('in ApiDataFlow', responseData);
-    return responseData;
   },
   pending: async () => {
     const tokens = userStorage.get();
