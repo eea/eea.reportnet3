@@ -1,4 +1,4 @@
-package org.eea.multitenancy;
+package org.eea.dataset.configuration.util;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
