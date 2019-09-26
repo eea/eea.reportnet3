@@ -127,13 +127,6 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     },
 
     {
-      label: resources.messages.delete,
-      icon: 'trash',
-      show: hasWritePermissions,
-      menuItemFunction: () => {}
-    },
-
-    {
       label: resources.messages.properties,
       icon: 'settings',
       show: true,
@@ -168,7 +161,9 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               {dataFlowData.name}
             </h2>
           </div>
-          <div className={styles.option_btns_wrapper}>{<DropdownButton icon="ellipsis" model={dropDownItems} />}</div>
+          <div>
+            <DropdownButton icon="ellipsis" model={dropDownItems} />
+          </div>
         </div>
 
         <div className={`${styles.buttonsWrapper}`}>

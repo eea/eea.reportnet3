@@ -38,6 +38,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const [documents, setDocuments] = useState([]);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState('');
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
@@ -98,9 +99,8 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     }
   };
 
-  const onHide = () => {
+  const onUploadDocument = () => {
     setIsUploadDialogVisible(false);
-    onLoadDocumentsAndWebLinks();
   };
 
   const onHideDeleteDialog = () => {
@@ -109,6 +109,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const onCancelDialog = () => {
     setIsUploadDialogVisible(false);
+    setIsFormReset(false);
   };
 
   const onLoadDocumentsAndWebLinks = async () => {
@@ -240,7 +241,12 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
               className={styles.Dialog}
               dismissableMask={false}
               onHide={onCancelDialog}>
-              <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
+              <DocumentFileUpload
+                dataFlowId={match.params.dataFlowId}
+                onUpload={onUploadDocument}
+                onGrowlAlert={onGrowlAlert}
+                isFormReset={isFormReset}
+              />
             </Dialog>
             {
               <DataTable
