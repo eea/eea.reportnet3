@@ -22,6 +22,9 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+/**
+ * The type Web socket configuration.
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
@@ -59,7 +62,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
           return message;
         }
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+        StompCommand command = accessor.getCommand();
+        if (null != command && StompCommand.CONNECT.equals(command)) {
           try {
             accessor.setUser(new StompPrincipal(((AccessToken) jwtTokenProvider
                 .retrieveToken(accessor.getFirstNativeHeader("token"))).getPreferredUsername()));
@@ -70,11 +74,12 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
         }
 
         StompHeaderAccessor errorAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
-        errorAccessor.setSessionId(accessor.getSessionId());
-        errorAccessor.setMessage("Token validation failed");
-
-        clientOutboundChannel
-            .send(MessageBuilder.createMessage(new byte[0], errorAccessor.getMessageHeaders()));
+        if (null != errorAccessor) {
+          errorAccessor.setSessionId(accessor.getSessionId());
+          errorAccessor.setMessage("Token validation failed");
+          clientOutboundChannel
+              .send(MessageBuilder.createMessage(new byte[0], errorAccessor.getMessageHeaders()));
+        }
 
         return null;
       }
@@ -83,10 +88,21 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 }
 
 
+/**
+ * The type Stomp principal.
+ */
 class StompPrincipal implements Principal {
 
+  /**
+   * The Name.
+   */
   String name;
 
+  /**
+   * Instantiates a new Stomp principal.
+   *
+   * @param name the name
+   */
   StompPrincipal(String name) {
     this.name = name;
   }
