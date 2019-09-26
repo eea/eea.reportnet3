@@ -1,6 +1,7 @@
 package org.eea.communication.service.impl;
 
 import org.eea.communication.service.NotificationService;
+import org.eea.communication.service.model.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,15 @@ import org.springframework.stereotype.Service;
 @Service("notificationService")
 public class NotificationServiceImpl implements NotificationService {
 
-  /** The messaging template. */
+  /**
+   * The messaging template.
+   */
   @Autowired
   private SimpMessagingTemplate template;
 
-  /** The logger. */
+  /**
+   * The logger.
+   */
   private final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
   /**
@@ -25,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
    *
    * @param userId the user that should receive the message.
    * @param message the message to send to the user.
+   *
    * @return true, if successful
    */
   @Override
@@ -37,30 +43,5 @@ public class NotificationServiceImpl implements NotificationService {
     return false;
   }
 
-  /**
-   * The Class Notification.
-   */
-  class Notification {
 
-    /** The content. */
-    private String content;
-
-    /**
-     * Instantiates a new notification.
-     *
-     * @param message the message
-     */
-    public Notification(String message) {
-      this.content = message;
-    }
-
-    /**
-     * Gets the content.
-     *
-     * @return the content
-     */
-    public String getContent() {
-      return content;
-    }
-  }
 }
