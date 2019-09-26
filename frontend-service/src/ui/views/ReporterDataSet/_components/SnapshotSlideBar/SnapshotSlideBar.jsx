@@ -18,7 +18,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const form = useRef(null);
-  console.log(isVisible, setIsVisible, snapshotListData);
+
   useEffect(() => {
     const bodySelector = document.querySelector('body');
     isVisible ? (bodySelector.style.overflow = 'hidden') : (bodySelector.style.overflow = 'hidden auto');
