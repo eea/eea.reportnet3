@@ -128,6 +128,30 @@
     "value": "Y29tbWl0"
   },
   {
+    "key": "config/dataset/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
+  },
+  {
+    "key": "config/dataset/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
+  },
+  {
+    "key": "config/dataset/spring.datasource.hikari.maximum-pool-size",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfUE9PTF9TSVpFOjEwfQ=="
+  },
+  {
+    "key": "config/dataset/spring.datasource.hikari.minimumIdle",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NSU5JTVVNX0lERExFOjV9"
+  },
+  {
+    "key": "config/dataset/spring.datasource.hikari.idleTimeout",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9JRERMRV9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/dataset/spring.datasource.hikari.maxLifetime",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
+  },
+  {
     "key": "config/dataflow/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -403,7 +427,7 @@
     "key": "config/apiGateway/zuul.routes.datasetmetabase.stripPrefix",
     "value": "ZmFsc2U="
   },
-    {
+  {
     "key": "config/apiGateway/zuul.routes.snapshot.path",
     "value": "L3NuYXBzaG90Lyoq"
   },
@@ -613,7 +637,19 @@
   },
   {
     "key": "config/validation/spring.datasource.hikari.maximum-pool-size",
-    "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfUE9PTF9TSVpFOjEwfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.minimumIdle",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NSU5JTVVNX0lERExFOjV9"
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.idleTimeout",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9JRERMRV9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.maxLifetime",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
   },
   {
     "key": "config/validation/spring.datasource.username",
@@ -690,6 +726,26 @@
   {
     "key": "config/validation/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.maximum-pool-size",
+    "value": "JHtNQVhJTVVNX1BPT0xfU0laRToxOH0="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.maximum-pool-size",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfUE9PTF9TSVpFOjEwfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.minimumIdle",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NSU5JTVVNX0lERExFOjV9"
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.idleTimeout",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9JRERMRV9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/spring.datasource.hikari.maxLifetime",
+    "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
   },
   {
     "key": "config/ums/management.endpoints.web.exposure.include",
@@ -776,6 +832,50 @@
     "value": "JHtLRVlDTE9BS19BRE1JTl9UT0tFTl9USU1FT1VUOjMwMDAwMH0="
   },
   {
+    "key": "config/communication/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/communication/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/communication/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/communication/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/communication/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/communication/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/communication/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/communication/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/ums/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6MTAwMDB9"
+  },
+  {
+    "key": "config/ums/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/ums/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
     "key": "config/document/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
@@ -806,14 +906,6 @@
   {
     "key": "config/document/oakUser",
     "value": "JHtNT05HT19EQl9VU0VSTkFNRTphZG1pbn0="
-  },
-  {
-    "key": "config/dataset/spring.servlet.multipart.max-file-size",
-    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
-  },
-  {
-    "key": "config/dataset/spring.servlet.multipart.max-request-size",
-    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
   },
   {
     "key": "config/recordstore/pathSnapshot",

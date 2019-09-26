@@ -11,12 +11,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
-import org.eea.validation.persistence.data.SortFieldsHelper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -30,29 +28,6 @@ import lombok.ToString;
 @ToString
 @Table(name = "RECORD_VALUE")
 public class RecordValue {
-
-  /**
-   * Inits the sort fields.
-   */
-  @PostLoad
-  public void initSortFields() {
-    String sortingField = SortFieldsHelper.getSortingField();
-    if (sortingField != null && !sortingField.isEmpty()) {
-      // it could happen that the value could not have been set a idFieldSchema
-      // in this case sortCriteria will be set to Null
-      this.sortCriteria = null;
-      if (fields.size() > 0) {
-        for (FieldValue fv : fields) {
-          if (sortingField.equals(fv.getIdFieldSchema())) {
-            this.sortCriteria = fv.getValue();
-            break;
-          }
-        }
-      }
-    }
-
-
-  }
 
   /**
    * The id.
@@ -92,7 +67,8 @@ public class RecordValue {
   /**
    * The record validations.
    */
-  @OneToMany(mappedBy = "recordValue", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "recordValue",
+      cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<RecordValidation> recordValidations;
 
   /**
