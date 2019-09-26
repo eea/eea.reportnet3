@@ -26,10 +26,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
   const [dashboardsData, setDashboardsData] = useState();
-  const [datasetsDashboardData, setDatasetsDashboardData] = useState({});
-  const [datasetsDashboardOptions, setDatasetsDashboardOptions] = useState({});
-  const [releasedDashboardData, setReleasedDashboardData] = useState({});
-  const [releasedDashboardOptions, setReleasedDashboardOptions] = useState({});
+  const [datasetsDashboardData, setDatasetsDashboardData] = useState([]);
+  const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   const home = {
     icon: config.icons['home'],
@@ -53,7 +51,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ]);
   }, []);
 
-  console.log('dashboardData', dashboardsData);
   const tableNames = isArray(dashboardsData) && dashboardsData[0].tables.map(table => table.tableName);
 
   const tablePercentages =
@@ -160,94 +157,62 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     return datasetDataObject;
   }
 
-  function getDatasetsDashboardOptions() {
-    const datasetOptionsObject = {
-      tooltips: {
-        model: 'index',
-        intersect: false,
-        callbacks: {
-          label: (tooltipItems, data) =>
-            `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
-              data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems.index]
-            } (${tooltipItems.yLabel}%)`
-        }
-      },
-      legend: {
-        display: false
-      },
-      responsive: true,
-      scales: {
-        xAxes: [
-          {
-            stacked: true
-          }
-        ],
-        yAxes: [
-          {
-            stacked: true,
-            ticks: {
-              // Include a % sign in the ticks
-              callback: (value, index, values) => `${value}%`
-            }
-          }
-        ]
+  const datasetOptionsObject = {
+    tooltips: {
+      model: 'index',
+      intersect: false,
+      callbacks: {
+        label: (tooltipItems, data) =>
+          `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
+            data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems.index]
+          } (${tooltipItems.yLabel}%)`
       }
-    };
-    return datasetOptionsObject;
-  }
-
-  function getReleasedDashboardData() {
-    const releasedDataObject = {
-      labels: dashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
-      datasets: [
+    },
+    legend: {
+      display: false
+    },
+    responsive: true,
+    scales: {
+      xAxes: [
         {
-          label: 'Released',
-          backgroundColor: 'rgb(50, 205, 50)',
-
-          data: dashboardsData[0].dataSetReporters.map(released => released.isReleased)
-        },
+          stacked: true
+        }
+      ],
+      yAxes: [
         {
-          label: 'Unreleased',
-          backgroundColor: 'rgb(255, 99, 132)',
-          data: dashboardsData[0].dataSetReporters.map(released => !released.isReleased)
+          stacked: true,
+          ticks: {
+            // Include a % sign in the ticks
+            callback: (value, index, values) => `${value}%`
+          }
         }
       ]
-    };
-    return releasedDataObject;
-  }
+    }
+  };
 
-  function getReleasedDashboardOptions() {
-    const releasedOptionsObject = {
-      tooltips: {
-        mode: 'index',
-        intersect: false
-      },
-      responsive: true,
-      scales: {
-        xAxes: [
-          {
-            stacked: true
-          }
-        ],
-        yAxes: [
-          {
-            stacked: true,
-            display: false
-          }
-        ]
-      }
-    };
-    return releasedOptionsObject;
-  }
+  const releasedOptionsObject = {
+    tooltips: {
+      mode: 'index',
+      intersect: false
+    },
+    responsive: true,
+    scales: {
+      xAxes: [
+        {
+          stacked: true
+        }
+      ],
+      yAxes: [
+        {
+          stacked: true,
+          display: false
+        }
+      ]
+    }
+  };
 
   const onPageLoad = () => {
     getDatasetsDashboardData();
-
-    setDatasetsDashboardOptions(getDatasetsDashboardOptions());
-
-    setReleasedDashboardData(getReleasedDashboardData());
-
-    setReleasedDashboardOptions(getReleasedDashboardOptions());
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
@@ -390,9 +355,14 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
 
+  console.log('filterState', filterState);
+
   const loadDashboards = async () => {
     try {
       const dashboardData = await DataFlowService.dashboards(match.params.dataFlowId);
+
+      setReleasedDashboardData(await DataFlowService.datasetReleasedStatus(match.params.dataFlowId));
+
       setDashboardsData(dashboardData);
     } catch (error) {
       console.error(error.response);
@@ -425,10 +395,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       </div>
       <div className="rep-row">
         <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetsDashboardOptions} width="100%" height="30%" />
+        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
       </div>
       <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={releasedDashboardData} options={releasedDashboardOptions} width="100%" height="25%" />
+        <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
       </div>
     </>
   );

@@ -6,6 +6,7 @@ export const DataFlowRepository = {
   accepted: () => Promise.reject('[DataFlowRepository#accepted] must be implemented'),
   completed: () => Promise.reject('[DataFlowRepository#completed] must be implemented'),
   dashboards: () => Promise.reject('[DataFlowRepository#dashboards] must be implemented'),
+  datasetReleasedStatus: () => Promise.reject('[DataFlowRepository#datasetReleasedStatus] must be implemented'),
   pending: () => Promise.reject('[DataFlowRepository#pending] must be implemented'),
   reject: () => Promise.reject('[DataFlowRepository#reject] must be implemented'),
   reporting: () => Promise.reject('[DataFlowRepository#reporting] must be implemented')
