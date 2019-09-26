@@ -55,7 +55,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
         StompHeaderAccessor accessor =
             MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor.getUser() != null) {
+        if (null != accessor && accessor.getUser() != null) {
           return message;
         }
 
@@ -84,6 +84,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
 
 class StompPrincipal implements Principal {
+
   String name;
 
   StompPrincipal(String name) {
