@@ -1,2 +1,2 @@
-export const Release = ({ snapshotRepository }) => async (dataFlowId, dataSetId, snapshotId) =>
-  snapshotRepository.releaseById(dataFlowId, dataSetId, snapshotId);
+export const Release = ({ snapshotRepository }) => async (dataflowId, dataSetId, snapshotId) =>
+  snapshotRepository.releaseById(dataflowId, dataSetId, snapshotId);

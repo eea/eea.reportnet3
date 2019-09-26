@@ -13,7 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DataSetService } from 'core/services/DataSet';
 
-const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataFlowId } }, history }) => {
+const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
       const errorResponse = error.response;
       console.error('WebForm errorResponse: ', errorResponse);
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+        history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
       }
     } finally {
       setLoading(false);

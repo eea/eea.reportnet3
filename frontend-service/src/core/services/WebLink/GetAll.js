@@ -1,1 +1,1 @@
-export const GetAll = ({ webLinkRepository }) => async dataFlowId => webLinkRepository.all(dataFlowId);
+export const GetAll = ({ webLinkRepository }) => async dataflowId => webLinkRepository.all(dataflowId);

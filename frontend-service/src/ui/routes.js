@@ -1,8 +1,8 @@
 export const routes = {
   LOGIN: '/',
-  DATA_CUSTODIAN_DASHBOARDS: '/dataflow/:dataFlowId/data-custodian-dashboards',
+  DATA_CUSTODIAN_DASHBOARDS: '/dataflow/:dataflowId/data-custodian-dashboards',
   DATAFLOWS: '/dataflows',
-  DATAFLOW: '/dataflow/:dataFlowId',
-  DATASET: '/dataflow/:dataFlowId/dataset/:dataSetId',
-  DOCUMENTATION_DATASET: '/dataflow/:dataFlowId/documentation-data-set/'
+  DATAFLOW: '/dataflow/:dataflowId',
+  DATASET: '/dataflow/:dataflowId/dataset/:dataSetId',
+  DOCUMENTATION_DATASET: '/dataflow/:dataflowId/documentation-data-set/'
 };

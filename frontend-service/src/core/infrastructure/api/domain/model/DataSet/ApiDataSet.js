@@ -163,13 +163,13 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  schemaById: async dataFlowId => {
+  schemaById: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
         : getUrl(config.dataSchemaAPI.url, {
-            dataFlowId: dataFlowId
+            dataflowId: dataflowId
           }),
       queryString: {},
       headers: {

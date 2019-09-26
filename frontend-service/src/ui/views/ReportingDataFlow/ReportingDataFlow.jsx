@@ -10,7 +10,7 @@ import { config } from 'conf';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ContributorsList } from './_components/ContributorsList';
-import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
+import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
@@ -23,17 +23,17 @@ import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { SplitButton } from 'ui/views/_components/SplitButton';
 
-import { DataFlowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/DataFlow';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 import { ScrollPanel } from 'primereact/scrollpanel';
 
-export const ReportingDataFlow = withRouter(({ history, match }) => {
+export const ReportingDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataFlowData, setDataFlowData] = useState(undefined);
+  const [dataflowData, setDataflowData] = useState(undefined);
   const [snapshotListData, setSnapshotListData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -48,7 +48,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         UserService.hasPermission(
           user,
           [config.permissions.PROVIDER],
-          `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
+          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
         )
       );
     }
@@ -59,10 +59,10 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     command: () => history.push(getUrl(config.DATAFLOWS.url))
   };
 
-  const onLoadReportingDataFlow = async () => {
+  const onLoadReportingDataflow = async () => {
     try {
-      const dataFlow = await DataFlowService.reporting(match.params.dataFlowId);
-      setDataFlowData(dataFlow);
+      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      setDataflowData(dataflow);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(config.DATAFLOWS.url));
@@ -77,21 +77,21 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     setLoading(true);
-    onLoadReportingDataFlow();
-  }, [match.params.dataFlowId]);
+    onLoadReportingDataflow();
+  }, [match.params.dataflowId]);
 
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowList'],
+        label: resources.messages['dataflowList'],
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages.dataFlow
+        label: resources.messages.dataflow
       }
     ]);
-  }, [history, match.params.dataFlowId, resources.messages]);
+  }, [history, match.params.dataflowId, resources.messages]);
 
   const handleRedirect = target => {
     history.push(target);
@@ -112,7 +112,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
     );
   };
 
-  if (loading || isUndefined(dataFlowData)) {
+  if (loading || isUndefined(dataflowData)) {
     return layout(<Spinner />);
   }
 
@@ -146,19 +146,19 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn
+      <DataflowColumn
         buttonTitle={resources.messages.subscribeThisButton}
-        dataFlowTitle={dataFlowData.name}
-        navTitle={resources.messages.dataFlow}
+        dataflowTitle={dataflowData.name}
+        navTitle={resources.messages.dataflow}
         components={[]}
-        entity={`${config.permissions.DATA_FLOW}${dataFlowData.id}`}
+        entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
       />
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
               <Icon icon="shoppingCart" />
-              {dataFlowData.name}
+              {dataflowData.name}
             </h2>
           </div>
           <div>
@@ -172,11 +172,11 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               <ListItem
                 layout="documents"
                 label="DO"
-                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataFlowId}/documentation-data-set/`)}
+                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documentation-data-set/`)}
               />
               <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
-            {dataFlowData.datasets.map(dataSet => {
+            {dataflowData.datasets.map(dataSet => {
               return (
                 <>
                   <div className={`${styles.dataSetItem}`} key={dataSet.id}>
@@ -184,7 +184,7 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                       layout="dataSet"
                       label="DS"
                       handleRedirect={() => {
-                        handleRedirect(`/dataflow/${match.params.dataFlowId}/dataset/${dataSet.id}`);
+                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataSet.id}`);
                       }}
                       model={
                         hasWritePermissions
@@ -228,13 +228,13 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
             {UserService.hasPermission(
               user,
               [config.permissions.CUSTODIAN],
-              `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
+              `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
             ) && (
               <div className={`${styles.dataSetItem}`}>
                 <ListItem
                   layout="dashboard"
                   handleRedirect={() =>
-                    handleRedirect(`/dataflow/${match.params.dataFlowId}/data-custodian-dashboards/`)
+                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
                   }
                 />
                 <p className={styles.caption}>{resources.messages.dashboards}</p>
@@ -244,15 +244,15 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages.dataProviderManageContributorsDialogTitle} "${dataFlowData.name}"`}
+          header={`${resources.messages.dataProviderManageContributorsDialogTitle} "${dataflowData.name}"`}
           visible={isActiveContributorsDialog}
           onHide={() => setIsActiveContributorsDialog(false)}
           style={{ width: '50vw' }}
           maximizable>
-          <ContributorsList dataFlowId={dataFlowData.id} />
+          <ContributorsList dataflowId={dataflowData.id} />
         </Dialog>
         <Dialog
-          header={dataFlowData.name}
+          header={dataflowData.name}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
@@ -260,13 +260,13 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
             <SnapshotList
               snapshotListData={snapshotListData}
               onLoadSnapshotList={onLoadSnapshotList}
-              dataFlowId={match.params.dataFlowId}
+              dataflowId={match.params.dataflowId}
               dataSetId={dataSetIdToProps}
             />
           </ScrollPanel>
         </Dialog>
         <Dialog
-          header={dataFlowData.name}
+          header={dataflowData.name}
           footer={
             <>
               <Button className="p-button-text-only" label="Generate new API-key" />
@@ -282,19 +282,19 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
           visible={isActivePropertiesDialog}
           onHide={() => setIsActivePropertiesDialog(false)}
           style={{ width: '50vw' }}>
-          <div className="description">{dataFlowData.description}</div>
+          <div className="description">{dataflowData.description}</div>
           <div className="features">
             <ul>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`)}{' '}
+                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)}{' '}
                   functionality:
                 </strong>{' '}
                 {hasWritePermissions ? 'read / write' : 'read'}
               </li>
               <li>
                 <strong>
-                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`)} type:
+                  {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)} type:
                 </strong>
               </li>
               <li>

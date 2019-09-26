@@ -44,19 +44,19 @@ export const apiSnapshot = {
       return false;
     }
   },
-  restoreById: async (dataFlowId, dataSetId, snapshotId) => {
+  restoreById: async (dataflowId, dataSetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: getUrl(config.restoreSnapshot.url, {
-          dataFlowId,
+          dataflowId,
           dataSetId,
           snapshotId
         }),
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
         },
-        data:{
+        data: {
           snapshotId
         }
       });
@@ -66,19 +66,19 @@ export const apiSnapshot = {
       return false;
     }
   },
-  releaseById: async (dataFlowId, dataSetId, snapshotId) => {
+  releaseById: async (dataflowId, dataSetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: getUrl(config.releaseSnapshot.url, {
-          dataFlowId,
+          dataflowId,
           dataSetId,
           snapshotId
         }),
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
         },
-        data:{
+        data: {
           snapshotId
         }
       });

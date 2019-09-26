@@ -17,12 +17,12 @@ const deleteById = async (dataSetId, snapshotId) => {
   return dataDeleted;
 };
 
-const restoreById = async (dataFlowId, dataSetId, snapshotId) => {
-  return await apiSnapshot.restoreById(dataFlowId, dataSetId, snapshotId);
+const restoreById = async (dataflowId, dataSetId, snapshotId) => {
+  return await apiSnapshot.restoreById(dataflowId, dataSetId, snapshotId);
 };
 
-const releaseById = async (dataFlowId, dataSetId, snapshotId) => {
-  return await apiSnapshot.releaseById(dataFlowId, dataSetId, snapshotId);
+const releaseById = async (dataflowId, dataSetId, snapshotId) => {
+  return await apiSnapshot.releaseById(dataflowId, dataSetId, snapshotId);
 };
 
 export const ApiSnapshotRepository = {

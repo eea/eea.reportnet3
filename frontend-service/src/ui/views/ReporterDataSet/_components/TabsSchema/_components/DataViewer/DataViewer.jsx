@@ -40,7 +40,7 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns,
     match: {
-      params: { dataSetId, dataFlowId }
+      params: { dataSetId, dataflowId }
     },
     history
   }) => {
@@ -356,7 +356,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
         }
       } finally {
         setLoading(false);
@@ -408,7 +408,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -446,7 +446,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
           }
         } finally {
           setLoading(false);
@@ -462,7 +462,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
           }
         } finally {
           onCancelRowEdit();

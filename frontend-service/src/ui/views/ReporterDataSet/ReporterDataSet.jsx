@@ -37,7 +37,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const ReporterDataSet = withRouter(({ match, history }) => {
   const {
-    params: { dataFlowId, dataSetId }
+    params: { dataflowId, dataSetId }
   } = match;
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -93,12 +93,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowList'],
+        label: resources.messages['dataflowList'],
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages['dataFlow'],
-        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
+        label: resources.messages['dataflow'],
+        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
       },
       { label: resources.messages['dataset'] }
     ]);
@@ -166,7 +166,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onReleaseSnapshot = async () => {
-    const snapshotReleased = await SnapshotService.releaseById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    const snapshotReleased = await SnapshotService.releaseById(dataflowId, dataSetId, snapshotState.snapShotId);
     if (snapshotReleased) {
       onLoadSnapshotList();
     }
@@ -174,7 +174,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onRestoreSnapshot = async () => {
-    const response = await SnapshotService.restoreById(dataFlowId, dataSetId, snapshotState.snapShotId);
+    const response = await SnapshotService.restoreById(dataflowId, dataSetId, snapshotState.snapShotId);
     if (response) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
       onGrowlAlert({
@@ -194,7 +194,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onLoadDataSetSchema = async () => {
     try {
-      const dataSetSchema = await DataSetService.schemaById(dataFlowId);
+      const dataSetSchema = await DataSetService.schemaById(dataflowId);
       const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
       setTableSchemaId(dataSetSchema.tables[0].tableSchemaId);
       setDatasetTitle(dataSetStatistics.dataSetSchemaName);
@@ -228,7 +228,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     } catch (error) {
       const errorResponse = error.response;
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+        history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
       }
     }
 
@@ -258,7 +258,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     createdAt: '',
     description: '',
     dialogMessage: '',
-    dataFlowId,
+    dataflowId,
     dataSetId,
     snapShotId: '',
     action: () => {}

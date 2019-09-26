@@ -1,2 +1,2 @@
-export const Restore = ({ snapshotRepository }) => async (dataFlowId, dataSetId, snapshotId) =>
-  snapshotRepository.restoreById(dataFlowId, dataSetId, snapshotId);
+export const Restore = ({ snapshotRepository }) => async (dataflowId, dataSetId, snapshotId) =>
+  snapshotRepository.restoreById(dataflowId, dataSetId, snapshotId);

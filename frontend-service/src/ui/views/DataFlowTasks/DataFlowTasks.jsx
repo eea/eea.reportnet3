@@ -6,30 +6,30 @@ import styles from './DataFlowTasks.module.scss';
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
-import { DataFlowList } from './DataFlowList';
+import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
+import { DataflowList } from './DataFlowList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from 'primereact/tabmenu';
 
-import { DataFlowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
-export const DataFlowTasks = withRouter(({ match, history }) => {
+export const DataflowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userData = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [tabMenuItems] = useState([
     {
-      label: resources.messages['dataFlowAcceptedPendingTab'],
+      label: resources.messages['dataflowAcceptedPendingTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
     },
     {
-      label: resources.messages['dataFlowCompletedTab'],
+      label: resources.messages['dataflowCompletedTab'],
       className: styles.flow_tab,
       disabled: true,
       tabKey: 'completed'
@@ -48,10 +48,10 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
   const dataFetch = async () => {
     setLoading(true);
     try {
-      const allDataFlows = await DataFlowService.all();
-      setpendingContent(allDataFlows.pending);
-      setacceptedContent(allDataFlows.accepted);
-      setcompletedContent(allDataFlows.completed);
+      const allDataflows = await DataflowService.all();
+      setpendingContent(allDataflows.pending);
+      setacceptedContent(allDataflows.accepted);
+      setcompletedContent(allDataflows.completed);
     } catch (error) {
       console.error('dataFetch error: ', error);
     }
@@ -65,8 +65,8 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
 
   //Bread Crumbs settings
   useEffect(() => {
-    setBreadCrumbItems([{ label: resources.messages['dataFlowList'] }]);
-  }, [history, match.params.dataFlowId, resources.messages]);
+    setBreadCrumbItems([{ label: resources.messages['dataflowList'] }]);
+  }, [history, match.params.dataflowId, resources.messages]);
 
   const layout = children => {
     return (
@@ -83,8 +83,8 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
 
   return layout(
     <div className="rep-row">
-      <DataFlowColumn
-        navTitle={resources.messages['dataFlow']}
+      <DataflowColumn
+        navTitle={resources.messages['dataflow']}
         components={['search']}
         buttonTitle={resources.messages['subscribeButton']}
       />
@@ -92,16 +92,16 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
         {tabMenuActiveItem.tabKey === 'pending' ? (
           <>
-            <DataFlowList
-              listTitle={resources.messages.pendingDataFlowTitle}
-              listDescription={resources.messages.pendingDataFlowText}
+            <DataflowList
+              listTitle={resources.messages.pendingDataflowTitle}
+              listDescription={resources.messages.pendingDataflowText}
               listContent={pendingContent}
               dataFetch={dataFetch}
               listType="pending"
             />
-            <DataFlowList
-              listTitle={resources.messages.acceptedDataFlowTitle}
-              listDescription={resources.messages.acceptedDataFlowText}
+            <DataflowList
+              listTitle={resources.messages.acceptedDataflowTitle}
+              listDescription={resources.messages.acceptedDataflowText}
               listContent={acceptedContent}
               dataFetch={dataFetch}
               listType="accepted"
@@ -109,9 +109,9 @@ export const DataFlowTasks = withRouter(({ match, history }) => {
           </>
         ) : (
           <>
-            <DataFlowList
-              listTitle={resources.messages.completedDataFlowTitle}
-              listDescription={resources.messages.completedDataFlowText}
+            <DataflowList
+              listTitle={resources.messages.completedDataflowTitle}
+              listDescription={resources.messages.completedDataflowText}
               listContent={completedContent}
               dataFetch={dataFetch}
               listType="completed"

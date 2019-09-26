@@ -139,8 +139,8 @@ const exportTableDataById = async (dataSetId, tableSchemaId, fileType) => {
   return dataSetTableData;
 };
 
-const schemaById = async dataFlowId => {
-  const dataSetSchemaDTO = await apiDataSet.schemaById(dataFlowId);
+const schemaById = async dataflowId => {
+  const dataSetSchemaDTO = await apiDataSet.schemaById(dataflowId);
 
   const dataSet = new DataSet();
   dataSet.dataSetSchemaId = dataSetSchemaDTO.idDatasetSchema;
