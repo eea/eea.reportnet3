@@ -47,23 +47,25 @@ public class ValidationHelper {
    * Execute file process.
    *
    * @param datasetId the dataset id
-   *
+   * @param alphaId the alpha id
    * @throws EEAException the EEA exception
    */
   @Async
-  public void executeValidation(final Long datasetId) throws EEAException {
+  public void executeValidation(final Long datasetId, String alphaId) throws EEAException {
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Load Rules");
     KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
-    LOG.info("Validating Fields");
-    validationService.validateFields(datasetId, kieBase);
     LOG.info("Validating Records");
     validationService.validateRecord(datasetId, kieBase);
     LOG.info("Validating Tables");
     validationService.validateTable(datasetId, kieBase);
     LOG.info("Validating Dataset");
     validationService.validateDataSet(datasetId, kieBase);
+    LOG.info("Validating Fields");
+    validationService.validateFields(datasetId, kieBase);
+    LOG.info("scaling errors");
+    validationService.errorScale(datasetId, kieBase);
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
   }

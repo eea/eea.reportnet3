@@ -60,7 +60,7 @@ public interface ValidationService {
    * Validate data set.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   void validateDataSet(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
@@ -70,7 +70,7 @@ public interface ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   void validateTable(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
@@ -80,8 +80,7 @@ public interface ValidationService {
    * Validate record.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
-   * @return
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   void validateRecord(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
@@ -264,6 +263,17 @@ public interface ValidationService {
    * @return the boolean
    */
   Boolean tableValidationQueryPeriodMonitoring(String QUERY);
+
+
+  /**
+   * Error scale.
+   *
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  void errorScale(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
 
 
 }

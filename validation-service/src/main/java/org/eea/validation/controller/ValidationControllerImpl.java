@@ -5,6 +5,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.validation.kafka.EventHandler;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -53,6 +54,9 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
 
+  @Autowired
+  private EventHandler eventHandler;
+
   /**
    * Validate data set data.
    *
@@ -67,7 +71,7 @@ public class ValidationControllerImpl implements ValidationController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      validationHelper.executeValidation(datasetId);
+      validationHelper.executeValidation(datasetId, eventHandler.getId());
     } catch (EEAException e) {
       LOG_ERROR.info(e.getMessage());
     }

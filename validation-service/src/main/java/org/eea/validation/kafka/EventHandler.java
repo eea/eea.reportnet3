@@ -1,5 +1,6 @@
 package org.eea.validation.kafka;
 
+import java.util.UUID;
 import javax.sql.DataSource;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -42,6 +43,18 @@ public class EventHandler implements EEAEventHandler {
   @Autowired
   private DataSource dataSource;
 
+  /** The uuid. */
+  private UUID uuid = UUID.randomUUID();
+
+  /**
+   * Gets the id.
+   *
+   * @return the id
+   */
+  public String getId() {
+    return uuid.toString();
+  }
+
   /**
    * Gets the type.
    *
@@ -62,12 +75,10 @@ public class EventHandler implements EEAEventHandler {
   public void processMessage(final EEAEventVO eeaEventVO) {
     LOG.info("ValidationService has received this message from Kafka {}", eeaEventVO);
 
-    if (EventType.LOAD_DATA_COMPLETED_EVENT.equals(eeaEventVO.getEventType())
-        || EventType.DELETED_TABLE.equals(eeaEventVO.getEventType())
-        || EventType.SNAPSHOT_RESTORED_EVENT.equals(eeaEventVO.getEventType())) {
+    if (EventType.COMMAND_EXECUTE_VALIDATION.equals(eeaEventVO.getEventType())) {
       Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
       try {
-        validationHelper.executeValidation(datasetId);
+        validationHelper.executeValidation(datasetId, getId());
       } catch (EEAException e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             datasetId, e);

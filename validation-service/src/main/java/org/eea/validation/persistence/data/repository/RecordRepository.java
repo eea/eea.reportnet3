@@ -55,6 +55,17 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH rv.fields WHERE tv.id = :id")
   List<RecordValue> findAllRecordsByTableValueId(@Param("id") Long tableId);
 
+  /**
+   * Find all records by table value.
+   *
+   * @param tableId the table id
+   * @param pageable the pageable
+   * @return the list
+   */
+  @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH rv.fields WHERE tv.id = :id")
+  List<RecordValue> findAllRecordsByTableValueIdPaginated(@Param("id") Long tableId,
+      Pageable pageable);
+
 
   /**
    * Find all records and fields by table value id.

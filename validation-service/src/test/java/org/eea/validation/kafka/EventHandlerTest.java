@@ -59,9 +59,9 @@ public class EventHandlerTest {
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<>();
     event.setData(data);
-    doNothing().when(validationHelper).executeValidation(Mockito.any());
+    doNothing().when(validationHelper).executeValidation(Mockito.any(), Mockito.any());
     eventHandler.processMessage(event);
-    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -75,9 +75,10 @@ public class EventHandlerTest {
     event.setEventType(EventType.LOAD_DATA_COMPLETED_EVENT);
     Map<String, Object> data = new HashMap<>();
     event.setData(data);
-    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any());
+    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any(),
+        Mockito.any());
     eventHandler.processMessage(event);
-    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -92,7 +93,7 @@ public class EventHandlerTest {
     Map<String, Object> data = new HashMap<>();
     event.setData(data);
     eventHandler.processMessage(event);
-    Mockito.verify(validationHelper, times(0)).executeValidation(Mockito.any());
+    Mockito.verify(validationHelper, times(0)).executeValidation(Mockito.any(), Mockito.any());
   }
 
   /**

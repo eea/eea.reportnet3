@@ -38,7 +38,7 @@ public class KafkaReceiverTest {
    * The kafka receiver.
    */
   @InjectMocks
-  private KafkaReceiver kafkaReceiver;
+  private DefaultKafkaReceiver kafkaReceiver;
 
   /**
    * Inits the mocks.

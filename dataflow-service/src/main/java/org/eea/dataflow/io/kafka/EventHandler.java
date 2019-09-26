@@ -45,7 +45,7 @@ public class EventHandler implements EEAEventHandler {
    */
   @Override
   public void processMessage(final EEAEventVO eeaEventVO) {
-    LOG.info("ValidationService has received this message from Kafka {}", eeaEventVO);
+    LOG.info("DataFlow has received this message from Kafka {}", eeaEventVO);
 
     if (EventType.LOAD_DOCUMENT_COMPLETED_EVENT.equals(eeaEventVO.getEventType())) {
       Long dataflowId = (Long) eeaEventVO.getData().get("dataflow_id");
