@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.eea.indexsearch.io.kafka.domain.ElasticSearchData;
 import org.eea.indexsearch.io.kafka.domain.EntityEvent;
-import org.eea.indexsearch.io.kafka.interfaces.EventCommand;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.interfaces.EEAEventHandlerCommand;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
  * 
  */
-public class CreateConnectionCommand implements EventCommand {
+public class CreateConnectionCommand implements EEAEventHandlerCommand {
 
 
   private static final String INDEX = "lead";
@@ -39,7 +39,7 @@ public class CreateConnectionCommand implements EventCommand {
   }
 
   @Override
-  public void execute(EEAEventVO eeaEventVO) throws IOException {
+  public void execute(EEAEventVO eeaEventVO) {
 
     ElasticSearchData data = new ElasticSearchData();
     EntityEvent entityEvent = new EntityEvent();
@@ -65,9 +65,15 @@ public class CreateConnectionCommand implements EventCommand {
     IndexRequest indexRequest =
         new IndexRequest(INDEX, TYPE, data.getId()).source(ElasticSearchDataMapper);
 
-    IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);;
+    IndexResponse indexResponse;
+    try {
+      indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
+      new ResponseEntity(indexResponse.getResult().name(), HttpStatus.CREATED);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } ;
 
-    new ResponseEntity(indexResponse.getResult().name(), HttpStatus.CREATED);
+
   }
 
 

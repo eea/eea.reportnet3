@@ -1,7 +1,6 @@
 package org.eea.indexsearch.io.kafka;
 
-import java.io.IOException;
-import org.eea.indexsearch.io.kafka.interfaces.CommandEventFactory;
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.handler.EEAEventHandler;
 import org.slf4j.Logger;
@@ -27,7 +26,7 @@ public class EventHandler implements EEAEventHandler {
 
 
   @Autowired
-  private CommandEventFactory commandEventFactory;
+  private CommandFactory commandEventFactory;
 
   /**
    * Gets the type.
@@ -45,7 +44,7 @@ public class EventHandler implements EEAEventHandler {
 
     try {
       commandEventFactory.getEventCommand(message).execute(message);
-    } catch (IOException e) {
+    } catch (EEAException e) {
       e.printStackTrace();
     }
   }

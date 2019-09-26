@@ -1,13 +1,12 @@
 package org.eea.indexsearch.io.kafka.commands;
 
-import java.io.IOException;
-import org.eea.indexsearch.io.kafka.interfaces.EventCommand;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.interfaces.EEAEventHandlerCommand;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DeletedTableCommand implements EventCommand {
+public class DeletedTableCommand implements EEAEventHandlerCommand {
 
   private static final String INDEX = "lead";
   private static final String TYPE = "lead";
@@ -23,7 +22,7 @@ public class DeletedTableCommand implements EventCommand {
   }
 
   @Override
-  public void execute(EEAEventVO eeaEventVO) throws IOException {
+  public void execute(EEAEventVO eeaEventVO) {
     // TODO
   }
 }

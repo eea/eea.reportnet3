@@ -44,6 +44,7 @@ public enum EventType {
    */
   RECORD_DELETED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "created_record_completed_key"),
 
+  /** The deleted table. */
   DELETED_TABLE("DATA_REPORTING_TOPIC", "deleted_table"),
 
   /**
