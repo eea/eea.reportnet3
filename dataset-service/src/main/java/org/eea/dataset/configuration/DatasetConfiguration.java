@@ -3,9 +3,9 @@ package org.eea.dataset.configuration;
 import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
+import org.eea.dataset.configuration.util.EeaDataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.multitenancy.EeaDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.zaxxer.hikari.HikariDataSource;
 
 
 /**

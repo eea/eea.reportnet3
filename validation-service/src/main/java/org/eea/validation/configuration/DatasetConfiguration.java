@@ -5,7 +5,7 @@ import java.util.Properties;
 import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.multitenancy.EeaDataSource;
+import org.eea.validation.configuration.util.EeaDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
