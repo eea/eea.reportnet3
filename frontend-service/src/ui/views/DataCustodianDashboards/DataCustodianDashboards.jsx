@@ -74,110 +74,46 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     getDatasetsDashboardData();
   };
 
-  const tableNames =
-    isArray(datasetsDashboardsData.tables) && datasetsDashboardsData.tables.map(table => table.tableName);
-
-  const tablePercentages =
+  const datasets =
     isArray(datasetsDashboardsData.tables) &&
-    datasetsDashboardsData.tables.map(table => table.tableStatisticPercentages);
+    datasetsDashboardsData.tables
+      .map(table => [
+        {
+          label: `CORRECT`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: '#004494',
+          data: table.tableStatisticPercentages[0],
+          totalData: table.tableStatisticValues[0],
+          stack: table.tableName
+        },
+        {
+          label: `WARNINGS`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: '#ffd617',
+          data: table.tableStatisticPercentages[1],
+          totalData: table.tableStatisticValues[1],
+          stack: table.tableName
+        },
+        {
+          label: `ERRORS`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: '#DA2131',
+          data: table.tableStatisticPercentages[2],
+          totalData: table.tableStatisticPercentages[2],
+          stack: table.tableName
+        }
+      ])
+      .flat();
 
-  const tableOnePercentages = tablePercentages[0];
-  const tableTwoPercentages = tablePercentages[1];
-  const tableThirdPercentages = tablePercentages[2];
-
-  const tableValues =
-    isArray(datasetsDashboardsData.tables) && datasetsDashboardsData.tables.map(values => values.tableStatisticValues);
-
-  const tableOneValues = tableValues[0];
-  const tableTwoValues = tableValues[1];
-  const tableThirdValues = tableValues[2];
+  console.log('datasts', datasets);
 
   function getDatasetsDashboardData() {
     const datasetDataObject = {
       labels: datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName),
-      datasets: [
-        {
-          label: `CORRECT`,
-          tableName: tableNames[0],
-          tableId: 'a1111',
-          backgroundColor: '#004494',
-          data: tableOnePercentages[0],
-          totalData: tableOneValues[0],
-          stack: tableNames[0]
-        },
-        {
-          label: `WARNINGS`,
-          tableName: tableNames[0],
-          tableId: 'a1111',
-          backgroundColor: '#ffd617',
-          data: tableOnePercentages[1],
-          totalData: tableOneValues[1],
-          stack: tableNames[0]
-        },
-        {
-          label: `ERRORS`,
-          tableName: tableNames[0],
-          tableId: 'a1111',
-          backgroundColor: '#DA2131',
-          data: tableOnePercentages[2],
-          totalData: tableOneValues[2],
-          stack: tableNames[0]
-        },
-        {
-          label: `CORRECT`,
-          tableName: tableNames[1],
-          tableId: 'b2222',
-          backgroundColor: '#004494',
-          data: tableTwoPercentages[0],
-          totalData: tableTwoValues[0],
-          stack: tableNames[1]
-        },
-        {
-          label: `WARNINGS`,
-          tableName: tableNames[1],
-          tableId: 'b2222',
-          backgroundColor: '#ffd617',
-          data: tableTwoPercentages[1],
-          totalData: tableTwoValues[1],
-          stack: tableNames[1]
-        },
-        {
-          label: `ERRORS`,
-          tableName: tableNames[1],
-          tableId: 'b2222',
-          backgroundColor: '#DA2131',
-          data: tableTwoPercentages[2],
-          totalData: tableTwoValues[2],
-          stack: tableNames[1]
-        },
-        {
-          label: `CORRECT`,
-          tableName: tableNames[2],
-          tableId: 'c3333',
-          backgroundColor: '#004494',
-          data: tableThirdPercentages[0],
-          totalData: tableThirdValues[0],
-          stack: tableNames[2]
-        },
-        {
-          label: `WARNINGS`,
-          tableName: tableNames[2],
-          tableId: 'c3333',
-          backgroundColor: '#ffd617',
-          data: tableThirdPercentages[1],
-          totalData: tableThirdValues[1],
-          stack: tableNames[2]
-        },
-        {
-          label: `ERRORS`,
-          tableName: tableNames[2],
-          tableId: 'c3333',
-          backgroundColor: '#DA2131',
-          data: tableThirdPercentages[2],
-          totalData: tableThirdValues[2],
-          stack: tableNames[2]
-        }
-      ]
+      datasets: datasets
     };
     filterDispatch({ type: 'INIT_DATA', payload: datasetDataObject });
     return datasetDataObject;
