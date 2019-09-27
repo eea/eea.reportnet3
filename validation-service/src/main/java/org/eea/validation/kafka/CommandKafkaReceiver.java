@@ -1,5 +1,6 @@
 package org.eea.validation.kafka;
 
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.io.DefaultKafkaReceiver;
 import org.eea.kafka.io.KafkaReceiver;
@@ -24,10 +25,11 @@ public class CommandKafkaReceiver extends KafkaReceiver {
    * Listen message.
    *
    * @param message the message
+   * @throws EEAException
    */
   @Override
   @KafkaListener(topics = "COMMAND_TOPIC")
-  public void listenMessage(Message<EEAEventVO> message) {
+  public void listenMessage(Message<EEAEventVO> message) throws EEAException {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
       handler.processMessage(message.getPayload());

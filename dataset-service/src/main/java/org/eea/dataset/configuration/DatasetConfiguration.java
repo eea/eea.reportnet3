@@ -1,13 +1,11 @@
 package org.eea.dataset.configuration;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
+import org.eea.dataset.configuration.util.EeaDataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.multitenancy.MultiTenantDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -27,7 +24,6 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.zaxxer.hikari.HikariDataSource;
 
 
 /**
@@ -93,19 +89,33 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String orderInserts;
 
 
-  /** The max file size. */
+  /**
+   * The max file size.
+   */
   @Value("${spring.servlet.multipart.max-file-size}")
   private Long maxFileSize;
 
 
-  /** The max request size. */
+  /**
+   * The max request size.
+   */
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
 
-  /** The max pool size. */
+  /**
+   * The max pool size.
+   */
   @Value("${spring.datasource.hikari.maximum-pool-size}")
-  private int maxPoolSize;
+  private Integer maxPoolSize;
 
+  @Value("${spring.datasource.hikari.minimumIdle}")
+  private Integer minimumIdle;
+
+  @Value("${spring.datasource.hikari.idleTimeout}")
+  private Integer iddleTimeout;
+
+  @Value("${spring.datasource.hikari.maxLifetime}")
+  private Integer maxLifetime;
 
   /**
    * The record store controller zull.
@@ -119,14 +129,14 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the data source
    */
-
   @Bean
-  @Primary
-  public DataSource dataSource() {
-    final AbstractRoutingDataSource ds = new MultiTenantDataSource();
-
-    ds.setTargetDataSources(targetDataSources());
-    return ds;
+  public DataSource datasetDataSource() {
+    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
+    DataSource dataSource = null;
+    if (null != connections && connections.size() > 0) {
+      dataSource = dataSetsDataSource(connections.get(0));
+    }
+    return dataSource;
   }
 
   /**
@@ -134,17 +144,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the map
    */
-  @Bean
-  @Qualifier("targetDataSources")
-  public Map<Object, Object> targetDataSources() {
-    final Map<Object, Object> targetDataSources = new ConcurrentHashMap<>();
 
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
-    for (final ConnectionDataVO connectionDataVO : connections) {
-      targetDataSources.put(connectionDataVO.getSchema(), dataSetsDataSource(connectionDataVO));
-    }
-    return targetDataSources;
-  }
 
   /**
    * Data sets data source.
@@ -153,16 +153,19 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the data source
    */
-  @Primary
   private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
-    HikariDataSource hikariDataSource = new HikariDataSource();
-    hikariDataSource.setJdbcUrl(connectionDataVO.getConnectionString());
-    hikariDataSource.setSchema(connectionDataVO.getSchema());
-    hikariDataSource.setUsername(connectionDataVO.getUser());
-    hikariDataSource.setPassword(connectionDataVO.getPassword());
-    hikariDataSource.setDriverClassName("org.postgresql.Driver");
-    hikariDataSource.setMaximumPoolSize(maxPoolSize);
-    return hikariDataSource;
+
+    EeaDataSource ds = new EeaDataSource();
+    ds.setJdbcUrl(connectionDataVO.getConnectionString());
+    ds.setUsername(connectionDataVO.getUser());
+    ds.setPassword(connectionDataVO.getPassword());
+    ds.setDriverClassName("org.postgresql.Driver");
+    ds.setMaximumPoolSize(maxPoolSize);
+    ds.setIdleTimeout(iddleTimeout);
+    ds.setMinimumIdle(minimumIdle);
+    ds.setMaxLifetime(maxLifetime);
+
+    return ds;
   }
 
 
@@ -177,7 +180,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
     final LocalContainerEntityManagerFactoryBean dataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
-    dataSetsEM.setDataSource(dataSource());
+    dataSetsEM.setDataSource(datasetDataSource());
     dataSetsEM.setPackagesToScan("org.eea.dataset.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     dataSetsEM.setJpaVendorAdapter(vendorAdapter);
@@ -191,7 +194,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the properties
    */
-  Properties additionalProperties() {
+  private Properties additionalProperties() {
     final Properties properties = new Properties();
     properties.setProperty("hibernate.hbm2ddl.auto", dll);
     properties.setProperty("hibernate.dialect", dialect);

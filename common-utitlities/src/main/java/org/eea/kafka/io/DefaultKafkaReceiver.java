@@ -1,5 +1,6 @@
 package org.eea.kafka.io;
 
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +25,11 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    * Listen message.
    *
    * @param message the message
+   * @throws EEAException
    */
   @Override
   @KafkaListener(topics = "DATA_REPORTING_TOPIC")
-  public void listenMessage(final Message<EEAEventVO> message) {
+  public void listenMessage(final Message<EEAEventVO> message) throws EEAException {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
       handler.processMessage(message.getPayload());

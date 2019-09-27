@@ -1,8 +1,8 @@
 package org.eea.kafka.io;
 
 import static org.mockito.Mockito.times;
-
 import java.io.IOException;
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.handler.EEAEventHandler;
 import org.junit.Before;
@@ -52,9 +52,11 @@ public class KafkaReceiverTest {
 
   /**
    * Test listen message.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void testListenMessage() {
+  public void testListenMessage() throws EEAException {
     kafkaReceiver.listenMessage(message);
     Mockito.verify(handler, times(1)).processMessage(Mockito.any());
   }

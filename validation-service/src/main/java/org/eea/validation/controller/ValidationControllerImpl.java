@@ -5,10 +5,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.validation.kafka.EventHandler;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
-import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,16 +44,9 @@ public class ValidationControllerImpl implements ValidationController {
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
-  /** The validation helper. */
-  @Autowired
-  private ValidationHelper validationHelper;
-
-
+  /** The load validations helper. */
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
-
-  @Autowired
-  private EventHandler eventHandler;
 
   /**
    * Validate data set data.
@@ -70,11 +61,7 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    try {
-      validationHelper.executeValidation(datasetId, eventHandler.getId());
-    } catch (EEAException e) {
-      LOG_ERROR.info(e.getMessage());
-    }
+    validationService.forceValidations(datasetId);
   }
 
   /**

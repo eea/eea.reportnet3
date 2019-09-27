@@ -72,7 +72,52 @@ public enum EventType {
   /**
    * The command execute validation.
    */
-  COMMAND_EXECUTE_VALIDATION("COMMAND_TOPIC", "execute_validations_key", false);
+  COMMAND_EXECUTE_VALIDATION("COMMAND_TOPIC", "execute_validations_key", false),
+
+  /**
+   * The command validate dataset.
+   */
+  COMMAND_VALIDATE_DATASET("COMMAND_TOPIC", "execute_dataset_validations_key", false),
+
+  /**
+   * The command validate table.
+   */
+  COMMAND_VALIDATE_TABLE("COMMAND_TOPIC", "execute_table_validations_key", false),
+
+  /**
+   * The command validate record.
+   */
+  COMMAND_VALIDATE_RECORD("COMMAND_TOPIC", "execute_record_validations_key", false),
+
+  /**
+   * The command validate field.
+   */
+  COMMAND_VALIDATE_FIELD("COMMAND_TOPIC", "execute_field_validations_key", false),
+
+  /**
+   * The command validated dataset completed.
+   */
+  COMMAND_VALIDATED_DATASET_COMPLETED("COMMAND_TOPIC", "dataset_validated_key", false),
+
+  /**
+   * The command validated table completed.
+   */
+  COMMAND_VALIDATED_TABLE_COMPLETED("COMMAND_TOPIC", "table_validated_key", false),
+
+  /**
+   * The command validated record completed.
+   */
+  COMMAND_VALIDATED_RECORD_COMPLETED("COMMAND_TOPIC", "record_validated_key", false),
+
+  /**
+   * The command validated field completed.
+   */
+  COMMAND_VALIDATED_FIELD_COMPLETED("COMMAND_TOPIC", "field_validated_key", false),
+
+  /**
+   * The WebSocket notification event.
+   */
+  WEBSOCKET_NOTIFICATION("DATA_REPORTING_TOPIC", "websocket_notification", true);
 
 
   /**
@@ -94,6 +139,7 @@ public enum EventType {
    *
    * @param topic the topic
    * @param key the key
+   * @param sorted the sorted
    */
   EventType(String topic, String key, Boolean sorted) {
     this.topic = topic;

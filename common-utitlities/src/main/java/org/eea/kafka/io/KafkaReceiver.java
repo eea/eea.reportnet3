@@ -1,5 +1,6 @@
 package org.eea.kafka.io;
 
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.handler.EEAEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,6 @@ public abstract class KafkaReceiver {
    * @param message the message
    */
 
-  public abstract void listenMessage(final Message<EEAEventVO> message);
+  public abstract void listenMessage(final Message<EEAEventVO> message) throws EEAException;
 
 }

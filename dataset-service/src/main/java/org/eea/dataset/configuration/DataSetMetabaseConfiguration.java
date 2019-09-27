@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.eea.dataset.configuration;
 
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -70,6 +71,7 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    * @return the data source
    */
   @Bean
+  @Primary
   public DataSource metaBaseDataSource() {
     DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
     metaDataSource.setDriverClassName(driver);

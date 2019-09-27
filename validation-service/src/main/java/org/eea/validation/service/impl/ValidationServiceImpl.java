@@ -4,7 +4,6 @@ package org.eea.validation.service.impl;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +23,8 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -131,6 +132,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the element lenght.
@@ -299,8 +303,8 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
-    tableValues.parallelStream().filter(Objects::nonNull).forEach(tableValue -> {
+    List<TableValue> tableValues = dataset.getTableValues();
+    tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
       List<RecordValue> recordsByTable =
@@ -351,8 +355,8 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     // Fields
-    List<TableValue> tableValues = Collections.synchronizedList(dataset.getTableValues());
-    tableValues.parallelStream().forEach(tableValue -> {
+    List<TableValue> tableValues = dataset.getTableValues();
+    tableValues.stream().forEach(tableValue -> {
       List<FieldValidation> fieldValidations = new ArrayList<>();
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
@@ -749,6 +753,13 @@ public class ValidationServiceImpl implements ValidationService {
     return true;
   }
 
+  /**
+   * Error scale.
+   *
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public void errorScale(Long datasetId, KieBase kieBase) throws EEAException {
@@ -834,5 +845,15 @@ public class ValidationServiceImpl implements ValidationService {
     });
     validationDatasetRepository.saveAll(datasetValidations);
     System.out.println(System.currentTimeMillis() - timer);
+  }
+
+  /**
+   * Force validations.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void forceValidations(Long datasetId) {
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
   }
 }

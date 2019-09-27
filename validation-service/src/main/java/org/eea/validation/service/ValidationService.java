@@ -276,4 +276,12 @@ public interface ValidationService {
   void errorScale(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
 
 
+  /**
+   * Force validations.
+   *
+   * @param datasetId the dataset id
+   */
+  void forceValidations(@DatasetId Long datasetId);
+
+
 }
