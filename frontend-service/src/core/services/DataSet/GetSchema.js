@@ -1,1 +1,1 @@
-export const GetSchema = ({ dataSetRepository }) => async dataflowId => dataSetRepository.schemaById(dataflowId);
+export const GetSchema = ({ datasetRepository }) => async dataflowId => datasetRepository.schemaById(dataflowId);

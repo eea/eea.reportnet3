@@ -14,7 +14,7 @@ import { ReporterDataSetContext } from 'ui/views/ReporterDataSet/_components/_co
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
 
 const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefined, hasWritePermissions }) => {
   const contextReporterDataSet = useContext(ReporterDataSetContext);
@@ -50,7 +50,7 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
     columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
     columnsArr.push(
-      <Column key="dataSetPartitionId" field="dataSetPartitionId" header="" className={styles.VisibleHeader} />
+      <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.VisibleHeader} />
     );
     columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
@@ -71,14 +71,14 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   };
 
   const onLoadErrors = async (fRow, nRows, sField, sOrder) => {
-    const dataSetErrors = await DataSetService.errorsById(dataSetId, Math.floor(fRow / nRows), nRows, sField, sOrder);
+    const dataSetErrors = await DatasetService.errorsById(dataSetId, Math.floor(fRow / nRows), nRows, sField, sOrder);
     setTotalRecords(dataSetErrors.totalErrors);
     setFetchedData(dataSetErrors.errors);
     setLoading(false);
   };
 
   const onLoadErrorPosition = async (objectId, dataSetId, entityType) => {
-    const errorPosition = await DataSetService.errorPositionByObjectId(objectId, dataSetId, entityType);
+    const errorPosition = await DatasetService.errorPositionByObjectId(objectId, dataSetId, entityType);
     return errorPosition;
   };
 

@@ -37,15 +37,15 @@ export const ListItem = ({ layout, label, handleRedirect, model }) => {
       dropdownState.menu.style.opacity = 1;
     }
   }, [dropdownState]);
-  const dataSet = model ? (
-    <div className={`${style.listItem} ${style.dataSet}`}>
+  const dataset = model ? (
+    <div className={`${style.listItem} ${style.dataset}`}>
       <a
         href=""
         onClick={e => {
           e.preventDefault();
           handleRedirect();
         }}>
-        <FontAwesomeIcon icon={AwesomeIcons('dataSet')} />
+        <FontAwesomeIcon icon={AwesomeIcons('dataset')} />
       </a>
       <span
         className={style.dropDwonIcon}
@@ -83,7 +83,7 @@ export const ListItem = ({ layout, label, handleRedirect, model }) => {
     </div>
   );
   const buttons = {
-    dataSet,
+    dataset,
     documents,
     dashboard
   };

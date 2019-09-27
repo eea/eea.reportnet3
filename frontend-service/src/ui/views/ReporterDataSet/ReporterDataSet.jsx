@@ -28,7 +28,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
 import { SnapshotService } from 'core/services/Snapshot';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
@@ -77,7 +77,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(user.roles)) {
       setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATA_SET}${dataSetId}`)
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${dataSetId}`)
       );
     }
   }, [user]);
@@ -126,7 +126,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     setDeleteDialogVisible(false);
-    const dataDeleted = await DataSetService.deleteDataById(dataSetId);
+    const dataDeleted = await DatasetService.deleteDataById(dataSetId);
     if (dataDeleted) {
       setIsDataDeleted(true);
     }
@@ -134,7 +134,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onConfirmValidate = async () => {
     setValidateDialogVisible(false);
-    await DataSetService.validateDataById(dataSetId);
+    await DatasetService.validateDataById(dataSetId);
   };
 
   const onCreateSnapshot = async () => {
@@ -157,7 +157,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setLoadingFile(true);
     try {
       setExportDataSetDataName(createFileName(datasetTitle, fileType));
-      setExportDataSetData(await DataSetService.exportDataById(dataSetId, fileType));
+      setExportDataSetData(await DatasetService.exportDataById(dataSetId, fileType));
     } catch (error) {
       console.error(error);
     } finally {
@@ -194,8 +194,8 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onLoadDataSetSchema = async () => {
     try {
-      const dataSetSchema = await DataSetService.schemaById(dataflowId);
-      const dataSetStatistics = await DataSetService.errorStatisticsById(dataSetId);
+      const dataSetSchema = await DatasetService.schemaById(dataflowId);
+      const dataSetStatistics = await DatasetService.errorStatisticsById(dataSetId);
       setTableSchemaId(dataSetSchema.tables[0].tableSchemaId);
       setDatasetTitle(dataSetStatistics.dataSetSchemaName);
       setTableSchema(

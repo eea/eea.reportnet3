@@ -1,4 +1,4 @@
-export class DataSetTableField {
+export class DatasetTableField {
   constructor(fieldId, recordId, name, type, value, validations, fieldSchemaId) {
     this.fieldId = fieldId;
     this.fieldSchemaId = fieldSchemaId;

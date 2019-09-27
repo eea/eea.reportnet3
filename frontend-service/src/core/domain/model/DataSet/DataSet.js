@@ -1,18 +1,18 @@
-export class DataSet {
+export class Dataset {
   constructor(
     errors,
-    dataSetId,
-    dataSetSchemaId,
-    dataSetSchemaName,
+    datasetId,
+    datasetSchemaId,
+    datasetSchemaName,
     totalErrors,
     tables,
     hasErrors,
     tableStatisticPercentages,
     tableStatisticValues
   ) {
-    this.dataSetId = dataSetId;
-    this.dataSetSchemaId = dataSetSchemaId;
-    this.dataSetSchemaName = dataSetSchemaName;
+    this.datasetId = datasetId;
+    this.datasetSchemaId = datasetSchemaId;
+    this.datasetSchemaName = datasetSchemaName;
     this.errors = errors;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;

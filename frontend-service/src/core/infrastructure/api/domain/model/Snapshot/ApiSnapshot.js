@@ -4,12 +4,12 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiSnapshot = {
-  createById: async (dataSetId, description) => {
+  createById: async (datasetId, description) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: getUrl(config.createSnapshot.url, {
-          dataSetId,
+          datasetId,
           description: description
         }),
         data: {
@@ -25,12 +25,12 @@ export const apiSnapshot = {
       return false;
     }
   },
-  deleteById: async (dataSetId, snapshotId) => {
+  deleteById: async (datasetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: getUrl(config.deleteSnapshotByID.url, {
-          dataSetId,
+          datasetId,
           snapshotId: snapshotId
         }),
         headers: {
@@ -44,13 +44,13 @@ export const apiSnapshot = {
       return false;
     }
   },
-  restoreById: async (dataflowId, dataSetId, snapshotId) => {
+  restoreById: async (dataflowId, datasetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: getUrl(config.restoreSnapshot.url, {
           dataflowId,
-          dataSetId,
+          datasetId,
           snapshotId
         }),
         headers: {
@@ -66,13 +66,13 @@ export const apiSnapshot = {
       return false;
     }
   },
-  releaseById: async (dataflowId, dataSetId, snapshotId) => {
+  releaseById: async (dataflowId, datasetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: getUrl(config.releaseSnapshot.url, {
           dataflowId,
-          dataSetId,
+          datasetId,
           snapshotId
         }),
         headers: {
@@ -88,13 +88,13 @@ export const apiSnapshot = {
       return false;
     }
   },
-  all: async dataSetId => {
+  all: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/snapshots.json'
         : getUrl(config.loadSnapshotsListAPI.url, {
-            dataSetId: dataSetId
+            datasetId: datasetId
           }),
       queryString: {},
       headers: {

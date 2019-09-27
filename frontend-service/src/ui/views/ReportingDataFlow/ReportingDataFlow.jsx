@@ -168,7 +168,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            <div className={`${styles.dataSetItem}`}>
+            <div className={`${styles.datasetItem}`}>
               <ListItem
                 layout="documents"
                 label="DO"
@@ -176,15 +176,15 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               />
               <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
-            {dataflowData.datasets.map(dataSet => {
+            {dataflowData.datasets.map(dataset => {
               return (
                 <>
-                  <div className={`${styles.dataSetItem}`} key={dataSet.id}>
+                  <div className={`${styles.datasetItem}`} key={dataset.id}>
                     <ListItem
-                      layout="dataSet"
+                      layout="dataset"
                       label="DS"
                       handleRedirect={() => {
-                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataSet.id}`);
+                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
                       }}
                       model={
                         hasWritePermissions
@@ -192,7 +192,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                               {
                                 label: resources.messages.releaseDataCollection,
                                 icon: 'cloudUpload',
-                                command: () => showReleaseSnapshotDialog(dataSet.id),
+                                command: () => showReleaseSnapshotDialog(dataset.id),
                                 disabled: false
                               },
                               {
@@ -220,7 +220,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                             ]
                       }
                     />
-                    <p className={styles.caption}>{dataSet.dataSetName}</p>
+                    <p className={styles.caption}>{dataset.datasetName}</p>
                   </div>
                 </>
               );
@@ -230,7 +230,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               [config.permissions.CUSTODIAN],
               `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
             ) && (
-              <div className={`${styles.dataSetItem}`}>
+              <div className={`${styles.datasetItem}`}>
                 <ListItem
                   layout="dashboard"
                   handleRedirect={() =>

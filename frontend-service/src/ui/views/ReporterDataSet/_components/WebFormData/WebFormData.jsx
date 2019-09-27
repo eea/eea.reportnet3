@@ -11,7 +11,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
 
 const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
@@ -46,7 +46,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
   const onEditorSubmitValue = async (cell, value) => {
     if (!isEmpty(cell)) {
       if (value !== initialCellValue) {
-        const fieldUpdated = DataSetService.updateFieldById(
+        const fieldUpdated = DatasetService.updateFieldById(
           dataSetId,
           cell.fieldSchemaId,
           cell.fieldId,
@@ -71,7 +71,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
 
   const onLoadWebForm = async () => {
     try {
-      const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+      const webFormData = await DatasetService.webFormDataById(dataSetId, tableSchemaId);
       setFetchedData(webFormData);
     } catch (error) {
       console.error('WebForm error: ', error);
