@@ -97,27 +97,39 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return tableData;
   };
 
-  const form = () => {
+  const form = (titles, rows) => {
+    return (
+      <table className={styles.webFormTable}>
+        <thead>
+          <tr className={styles.columnHeaders}>{titles}</tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    );
+  };
+
+  const webForm = () => {
+    let webFormCreated = getWebFormData();
+    if (isUndefined(webFormCreated)) {
+      return <div></div>;
+    }
+    return <div>{form(webFormCreated.columnTitles, webFormCreated.webFormRows)}</div>;
+  };
+
+  const getWebFormData = () => {
     let webFormData = fetchedData;
 
     if (isEmpty(webFormData)) {
-      return <div></div>;
+      return;
     }
 
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
-    let grid = getGrid(dataColumns);
+    let webFormRows = getWebFormRows(dataColumns);
 
-    return (
-      <table className={styles.webFormTable}>
-        <thead>
-          <tr className={styles.columnHeaders}>{columnTitles}</tr>
-        </thead>
-        <tbody>{grid}</tbody>
-      </table>
-    );
+    return columnTitles, webFormRows;
   };
 
   const getColumnHeaders = columnHeaders => {
@@ -172,20 +184,16 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return columns;
   };
 
-  const getGrid = dataColumns => {
-    let grid = [];
-
-    let rows = getMinAndMaxRows(dataColumns);
-    let firstRow = parseInt(rows.firstRow);
-    let lastRow = rows.lastRow;
-
-    let columns = getMinAndMaxColumns(dataColumns);
-    let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
-    let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
-
+  const onFillWebFormRows = (minAndMaxRows, minAndMaxColumns) => {
     let headerLetterColumn = String.fromCharCode(97 + firstColumn - 2).toUpperCase();
 
-    let rowsFilled = [];
+    let firstRow = parseInt(minAndMaxRows.firstRow);
+    let lastRow = minAndMaxRows.lastRow;
+
+    let firstColumn = minAndMaxColumns.firstColumn.charCodeAt(0) - 64;
+    let lastColumn = minAndMaxColumns.lastColumn.charCodeAt(0) - 64;
+
+    let filledRows = [];
     let header = '';
 
     for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
@@ -221,7 +229,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
         }
       }
       if (!isEmpty(header))
-        rowsFilled.push(
+        filledRows.push(
           <tr key={rowIndex} name={rowIndex}>
             <td
               key={`${headerLetterColumn}${rowIndex}`}
@@ -232,11 +240,18 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
             {tds}
           </tr>
         );
-
       header = '';
     }
-    grid.push(rowsFilled);
-    return grid;
+    return filledRows;
+  };
+
+  const getWebFormRows = dataColumns => {
+    let webFormRows = [];
+    let minAndMaxRows = getMinAndMaxRows(dataColumns);
+    let minAndMaxColumns = getMinAndMaxColumns(dataColumns);
+    filledRows = onFillWebFormRows(minAndMaxRows, minAndMaxColumns);
+    webFormRows.push(filledRows);
+    return webFormRows;
   };
 
   if (loading) {
@@ -245,7 +260,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
 
   return (
     <div className={styles.webFormWrapper}>
-      <div>{form()}</div>
+      <div>{webForm()}</div>
     </div>
   );
 });
