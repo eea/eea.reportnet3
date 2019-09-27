@@ -25,8 +25,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
-  const [dashboardsData, setDashboardsData] = useState();
-  const [datasetsDashboardData, setDatasetsDashboardData] = useState([]);
+  const [datasetsDashboardsData, setDatasetsDashboardData] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   const home = {
@@ -51,16 +50,41 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     ]);
   }, []);
 
-  const tableNames = isArray(dashboardsData) && dashboardsData[0].tables.map(table => table.tableName);
+  useEffect(() => {
+    loadDashboards();
+
+    if (!isEmpty(datasetsDashboardsData)) {
+      onPageLoad();
+    }
+  }, [datasetsDashboardsData]);
+
+  const loadDashboards = async () => {
+    try {
+      setReleasedDashboardData(await DataFlowService.datasetReleasedStatus(match.params.dataFlowId));
+
+      setDatasetsDashboardData(await DataFlowService.dashboards(match.params.dataFlowId));
+    } catch (error) {
+      console.error(error.response);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onPageLoad = () => {
+    getDatasetsDashboardData();
+  };
+
+  const tableNames = isArray(datasetsDashboardsData) && datasetsDashboardsData[0].tables.map(table => table.tableName);
 
   const tablePercentages =
-    isArray(dashboardsData) && dashboardsData[0].tables.map(table => table.tableStatisticPercentages);
+    isArray(datasetsDashboardsData) && datasetsDashboardsData[0].tables.map(table => table.tableStatisticPercentages);
 
   const tableOnePercentages = tablePercentages[0];
   const tableTwoPercentages = tablePercentages[1];
   const tableThirdPercentages = tablePercentages[2];
 
-  const tableValues = isArray(dashboardsData) && dashboardsData[0].tables.map(values => values.tableStatisticValues);
+  const tableValues =
+    isArray(datasetsDashboardsData) && datasetsDashboardsData[0].tables.map(values => values.tableStatisticValues);
 
   const tableOneValues = tableValues[0];
   const tableTwoValues = tableValues[1];
@@ -68,7 +92,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   function getDatasetsDashboardData() {
     const datasetDataObject = {
-      labels: dashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
+      labels: datasetsDashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
       datasets: [
         {
           label: `CORRECT`,
@@ -211,10 +235,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     }
   };
 
-  const onPageLoad = () => {
-    getDatasetsDashboardData();
-  };
-
   const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
     let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
 
@@ -228,12 +248,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
     return { labels: labels, datasets: tablesData };
   };
-
-  useEffect(() => {
-    if (!isEmpty(dashboardsData)) {
-      onPageLoad();
-    }
-  }, [dashboardsData]);
 
   const initialFiltersState = {
     reporterFilter: [],
@@ -354,24 +368,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
-
-  const loadDashboards = async () => {
-    try {
-      const dashboardData = await DataFlowService.dashboards(match.params.dataFlowId);
-
-      setReleasedDashboardData(await DataFlowService.datasetReleasedStatus(match.params.dataFlowId));
-
-      setDashboardsData(dashboardData);
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDashboards();
-  }, []);
 
   const layout = children => {
     return (
