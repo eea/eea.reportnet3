@@ -72,30 +72,7 @@ export const apiDataFlow = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    // return response.data;
-
-    const responseData = [
-      {
-        id: 1,
-        dataSetName: 'Belgium',
-        creationDate: 1565088304601,
-        isReleased: false
-      },
-      {
-        id: 2,
-        dataSetName: 'Italy',
-        creationDate: 1565088304000,
-        isReleased: false
-      },
-      {
-        id: 6,
-        dataSetName: 'Spain',
-        creationDate: 1567520549026,
-        isReleased: true
-      }
-    ];
-    //HARDCODED RESPONSE responseData SHOULD BE CHANGED TO response.data
-    return responseData;
+    return response.data;
   },
   pending: async () => {
     const tokens = userStorage.get();
