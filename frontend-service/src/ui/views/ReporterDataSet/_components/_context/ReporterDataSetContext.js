@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ReporterDataSetContext = React.createContext({
+export const ReporterDatasetContext = React.createContext({
   onValidationsVisible: null,
   onSelectValidation: null
 });

@@ -4,7 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiDataset = {
-  addRecordsById: async (datasetId, tableSchemaId, dataSetTableRecords) => {
+  addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
@@ -14,7 +14,7 @@ export const apiDataset = {
               datasetId: datasetId,
               tableSchemaId: tableSchemaId
             }),
-        data: dataSetTableRecords,
+        data: datasetTableRecords,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -228,7 +228,7 @@ export const apiDataset = {
     });
     return response.data;
   },
-  updateFieldById: async (datasetId, dataSetTableField) => {
+  updateFieldById: async (datasetId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
@@ -237,7 +237,7 @@ export const apiDataset = {
           : getUrl(config.updateTableDataField.url, {
               datasetId: datasetId
             }),
-        data: dataSetTableField,
+        data: datasetTableRecords,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -250,7 +250,7 @@ export const apiDataset = {
       return false;
     }
   },
-  updateRecordsById: async (datasetId, dataSetTableRecords) => {
+  updateRecordsById: async (datasetId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
@@ -259,7 +259,7 @@ export const apiDataset = {
           : getUrl(config.updateTableDataRecord.url, {
               datasetId: datasetId
             }),
-        data: dataSetTableRecords,
+        data: datasetTableRecords,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`

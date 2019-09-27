@@ -1,1 +1,1 @@
-export const GetAll = ({ snapshotRepository }) => async dataSetId => snapshotRepository.all(dataSetId);
+export const GetAll = ({ snapshotRepository }) => async datasetId => snapshotRepository.all(datasetId);

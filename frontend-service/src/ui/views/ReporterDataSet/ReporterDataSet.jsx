@@ -18,7 +18,7 @@ import { Growl } from 'primereact/growl';
 import { InputSwitch } from 'primereact/inputswitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
-import { ReporterDataSetContext } from './_components/_context/ReporterDataSetContext';
+import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -37,7 +37,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const ReporterDataSet = withRouter(({ match, history }) => {
   const {
-    params: { dataflowId, dataSetId }
+    params: { dataflowId, datasetId }
   } = match;
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -77,7 +77,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(user.roles)) {
       setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${dataSetId}`)
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
       );
     }
   }, [user]);
@@ -87,7 +87,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    onLoadDataSetSchema();
+    onLoadDatasetSchema();
   }, [isDataDeleted]);
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     setDeleteDialogVisible(false);
-    const dataDeleted = await DatasetService.deleteDataById(dataSetId);
+    const dataDeleted = await DatasetService.deleteDataById(datasetId);
     if (dataDeleted) {
       setIsDataDeleted(true);
     }
@@ -134,11 +134,11 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const onConfirmValidate = async () => {
     setValidateDialogVisible(false);
-    await DatasetService.validateDataById(dataSetId);
+    await DatasetService.validateDataById(datasetId);
   };
 
   const onCreateSnapshot = async () => {
-    const snapshotCreated = await SnapshotService.createById(dataSetId, snapshotState.description);
+    const snapshotCreated = await SnapshotService.createById(datasetId, snapshotState.description);
     if (snapshotCreated) {
       onLoadSnapshotList();
     }
@@ -146,7 +146,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onDeleteSnapshot = async () => {
-    const snapshotDeleted = await SnapshotService.deleteById(dataSetId, snapshotState.snapShotId);
+    const snapshotDeleted = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
     if (snapshotDeleted) {
       onLoadSnapshotList();
     }
@@ -157,7 +157,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setLoadingFile(true);
     try {
       setExportDataSetDataName(createFileName(datasetTitle, fileType));
-      setExportDataSetData(await DatasetService.exportDataById(dataSetId, fileType));
+      setExportDataSetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
       console.error(error);
     } finally {
@@ -166,7 +166,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onReleaseSnapshot = async () => {
-    const snapshotReleased = await SnapshotService.releaseById(dataflowId, dataSetId, snapshotState.snapShotId);
+    const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
     if (snapshotReleased) {
       onLoadSnapshotList();
     }
@@ -174,7 +174,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onRestoreSnapshot = async () => {
-    const response = await SnapshotService.restoreById(dataflowId, dataSetId, snapshotState.snapShotId);
+    const response = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
     if (response) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
       onGrowlAlert({
@@ -189,29 +189,30 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const onLoadSnapshotList = async () => {
-    setSnapshotListData(await SnapshotService.all(dataSetId));
+    setSnapshotListData(await SnapshotService.all(datasetId));
   };
 
-  const onLoadDataSetSchema = async () => {
+  const onLoadDatasetSchema = async () => {
     try {
-      const dataSetSchema = await DatasetService.schemaById(dataflowId);
-      const dataSetStatistics = await DatasetService.errorStatisticsById(dataSetId);
-      setTableSchemaId(dataSetSchema.tables[0].tableSchemaId);
-      setDatasetTitle(dataSetStatistics.dataSetSchemaName);
+      const datasetSchema = await DatasetService.schemaById(dataflowId);
+      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
+      setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
+      console.log(datasetStatistics);
+      setDatasetTitle(datasetStatistics.datasetSchemaName);
       setTableSchema(
-        dataSetSchema.tables.map(tableSchema => {
+        datasetSchema.tables.map(tableSchema => {
           return {
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
             hasErrors: {
-              ...dataSetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+              ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
             }.hasErrors
           };
         })
       );
 
       setTableSchemaColumns(
-        dataSetSchema.tables.map(table => {
+        datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
               table: table['tableSchemaName'],
@@ -224,7 +225,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         })
       );
 
-      setDatasetHasErrors(dataSetStatistics.datasetErrors);
+      setDatasetHasErrors(datasetStatistics.datasetErrors);
     } catch (error) {
       const errorResponse = error.response;
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
@@ -259,7 +260,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     description: '',
     dialogMessage: '',
     dataflowId,
-    dataSetId,
+    datasetId,
     snapShotId: '',
     action: () => {}
   };
@@ -369,7 +370,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   const checkWebFormDataSet = () => {
-    if (Number(dataSetId) === 5 || Number(dataSetId) === 142) {
+    if (Number(datasetId) === 5 || Number(datasetId) === 142) {
       setIsInputSwitchChecked(true);
       return true;
     } else {
@@ -379,7 +380,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const isWebForm = () => {
     if (isInputSwitchChecked) {
-      return <WebFormData dataSetId={dataSetId} tableSchemaId={tableSchemaId} />;
+      return <WebFormData datasetId={datasetId} tableSchemaId={tableSchemaId} />;
     } else {
       return (
         <SnapshotContext.Provider
@@ -433,7 +434,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               disabled={false}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
+              disabled={!hasWritePermissions || (Number(datasetId) === 5 || Number(datasetId) === 142)}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
@@ -447,7 +448,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
+              disabled={!hasWritePermissions || (Number(datasetId) === 5 || Number(datasetId) === 142)}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -456,7 +457,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!datasetHasErrors || (Number(dataSetId) === 5 || Number(dataSetId) === 142)}
+              disabled={!datasetHasErrors || (Number(datasetId) === 5 || Number(datasetId) === 142)}
               icon={'warning'}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
@@ -465,7 +466,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={Number(dataSetId) === 5 || Number(dataSetId) === 142}
+              disabled={Number(datasetId) === 5 || Number(datasetId) === 142}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
@@ -480,7 +481,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <ReporterDataSetContext.Provider
+      <ReporterDatasetContext.Provider
         value={{
           validationsVisibleHandler: null,
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
@@ -491,7 +492,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         }}>
         {showWebFormInputSwitch()}
         {isWebForm()}
-      </ReporterDataSetContext.Provider>
+      </ReporterDatasetContext.Provider>
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -500,7 +501,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} />
       </Dialog>
-      <ReporterDataSetContext.Provider
+      <ReporterDatasetContext.Provider
         value={{
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
@@ -519,12 +520,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
           style={{ width: '80%' }}
           visible={validationsVisible}>
           <ValidationViewer
-            dataSetId={dataSetId}
+            datasetId={datasetId}
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
           />
         </Dialog>
-      </ReporterDataSetContext.Provider>
+      </ReporterDatasetContext.Provider>
       <ConfirmDialog
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}

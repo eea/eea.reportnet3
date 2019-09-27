@@ -13,7 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
 
-const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {
+const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     if (!isEmpty(cell)) {
       if (value !== initialCellValue) {
         const fieldUpdated = DatasetService.updateFieldById(
-          dataSetId,
+          datasetId,
           cell.fieldSchemaId,
           cell.fieldId,
           cell.type,
@@ -71,7 +71,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
 
   const onLoadWebForm = async () => {
     try {
-      const webFormData = await DatasetService.webFormDataById(dataSetId, tableSchemaId);
+      const webFormData = await DatasetService.webFormDataById(datasetId, tableSchemaId);
       setFetchedData(webFormData);
     } catch (error) {
       onErrorLoadingWebForm(error);
@@ -114,26 +114,29 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     let columnTitles = getColumnHeaders(columnHeaders);
     let webFormRows = getWebFormRows(dataColumns);
 
-    return columnTitles, webFormRows;
+    let data = { titles: columnTitles, rows: webFormRows };
+
+    return data;
   };
 
-  const form = (titles, rows) => {
+  const form = data => {
     return (
       <table className={styles.webFormTable}>
         <thead>
-          <tr className={styles.columnHeaders}>{titles}</tr>
+          <tr className={styles.columnHeaders}>{data.titles}</tr>
         </thead>
-        <tbody>{rows}</tbody>
+        <tbody>{data.rows}</tbody>
       </table>
     );
   };
 
   const webForm = () => {
     let webFormCreated = getWebFormData();
-    if (isUndefined(webFormCreated)) {
+    console.log(webFormCreated);
+    if (isEmpty(webFormCreated)) {
       return <div></div>;
     }
-    return <div>{form(webFormCreated.columnTitles, webFormCreated.webFormRows)}</div>;
+    return <div>{form(webFormCreated)}</div>;
   };
 
   const getColumnHeaders = columnHeaders => {
@@ -188,14 +191,15 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return columns;
   };
 
-  const onFillWebFormRows = (minAndMaxRows, minAndMaxColumns) => {
+  const onFillWebFormRows = (minsAndMaxRowsAndColumns, dataColumns) => {
+    // console.log(minsAndMaxRowsAndColumns);
+    let firstRow = parseInt(minsAndMaxRowsAndColumns.rows.firstRow);
+    let lastRow = minsAndMaxRowsAndColumns.rows.lastRow;
+
+    let firstColumn = minsAndMaxRowsAndColumns.columns.firstColumn.charCodeAt(0) - 64;
+    let lastColumn = minsAndMaxRowsAndColumns.columns.lastColumn.charCodeAt(0) - 64;
+
     let headerLetterColumn = String.fromCharCode(97 + firstColumn - 2).toUpperCase();
-
-    let firstRow = parseInt(minAndMaxRows.firstRow);
-    let lastRow = minAndMaxRows.lastRow;
-
-    let firstColumn = minAndMaxColumns.firstColumn.charCodeAt(0) - 64;
-    let lastColumn = minAndMaxColumns.lastColumn.charCodeAt(0) - 64;
 
     let filledRows = [];
     let header = '';
@@ -249,11 +253,26 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return filledRows;
   };
 
+  // const inputRow = (indexes, column) => {
+  //   return (
+  //     <td key={`${columnIndex}${rowIndex}`} name={`${columnPosition}${rowIndex}`}>
+  //       <InputText
+  //         value={filteredColumn[0].value}
+  //         onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
+  //         onChange={e => onEditorValueChange(filteredColumn[0], e.target.value)}
+  //         onFocus={e => onEditorValueFocus(e.target.value)}
+  //         onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
+  //       />
+  //     </td>
+  //   );
+  // };
+
   const getWebFormRows = dataColumns => {
     let webFormRows = [];
     let minAndMaxRows = getMinAndMaxRows(dataColumns);
     let minAndMaxColumns = getMinAndMaxColumns(dataColumns);
-    filledRows = onFillWebFormRows(minAndMaxRows, minAndMaxColumns);
+    let minsAndMaxRowsAndColumns = { rows: minAndMaxRows, columns: minAndMaxColumns };
+    let filledRows = onFillWebFormRows(minsAndMaxRowsAndColumns, dataColumns);
     webFormRows.push(filledRows);
     return webFormRows;
   };

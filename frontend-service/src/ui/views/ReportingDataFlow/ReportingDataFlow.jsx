@@ -39,7 +39,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
-  const [dataSetIdToProps, setDataSetIdToProps] = useState();
+  const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
 
   useEffect(() => {
@@ -71,8 +71,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       setLoading(false);
     }
   };
-  const onLoadSnapshotList = async dataSetId => {
-    setSnapshotListData(await SnapshotService.all(dataSetId));
+  const onLoadSnapshotList = async datasetId => {
+    setSnapshotListData(await SnapshotService.all(datasetId));
   };
 
   useEffect(() => {
@@ -138,9 +138,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const showContributorsDialog = () => {
     setIsActiveContributorsDialog(true);
   };
-  const showReleaseSnapshotDialog = async dataSetId => {
-    setDataSetIdToProps(dataSetId);
-    onLoadSnapshotList(dataSetId);
+  const showReleaseSnapshotDialog = async datasetId => {
+    setDatasetIdToProps(datasetId);
+    onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
 
@@ -220,7 +220,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                             ]
                       }
                     />
-                    <p className={styles.caption}>{dataset.datasetName}</p>
+                    <p className={styles.caption}>{dataset.dataSetName}</p>
                   </div>
                 </>
               );
@@ -261,7 +261,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               snapshotListData={snapshotListData}
               onLoadSnapshotList={onLoadSnapshotList}
               dataflowId={match.params.dataflowId}
-              dataSetId={dataSetIdToProps}
+              datasetId={datasetIdToProps}
             />
           </ScrollPanel>
         </Dialog>

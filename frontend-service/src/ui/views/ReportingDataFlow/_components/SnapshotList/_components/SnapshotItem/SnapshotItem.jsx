@@ -9,14 +9,14 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { SnapshotService } from 'core/services/Snapshot';
 
-export function SnapshotItem({ itemData, dataflowId, dataSetId, onLoadSnapshotList }) {
+export function SnapshotItem({ itemData, dataflowId, datasetId, onLoadSnapshotList }) {
   const resources = useContext(ResourcesContext);
 
   const onReleaseSnapshot = async snapShotId => {
-    const snapshotReleased = await SnapshotService.releaseById(dataflowId, dataSetId, snapShotId);
+    const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapShotId);
 
     if (snapshotReleased) {
-      onLoadSnapshotList(dataSetId);
+      onLoadSnapshotList(datasetId);
     }
   };
 

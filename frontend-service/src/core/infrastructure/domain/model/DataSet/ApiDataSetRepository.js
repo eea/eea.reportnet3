@@ -20,14 +20,14 @@ const addRecordsById = async (datasetId, tableSchemaId, records) => {
 
       return newField;
     });
-    let dataSetTableRecord = new DatasetTableRecord();
+    let datasetTableRecord = new DatasetTableRecord();
 
-    dataSetTableRecord.datasetPartitionId = record.dataSetPartitionId;
-    dataSetTableRecord.fields = fields;
-    dataSetTableRecord.idRecordSchema = record.recordSchemaId;
-    dataSetTableRecord.id = null;
+    datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+    datasetTableRecord.fields = fields;
+    datasetTableRecord.idRecordSchema = record.recordSchemaId;
+    datasetTableRecord.id = null;
 
-    datasetTableRecords.push(dataSetTableRecord);
+    datasetTableRecords.push(datasetTableRecord);
   });
 
   const recordsAdded = await apiDataset.addRecordsById(datasetId, tableSchemaId, datasetTableRecords);
@@ -51,7 +51,6 @@ const deleteTableDataById = async (datasetId, tableId) => {
 
 const errorsById = async (datasetId, pageNum, pageSize, sortField, asc) => {
   const datasetErrorsDTO = await apiDataset.errorsById(datasetId, pageNum, pageSize, sortField, asc);
-
   const dataset = new Dataset(
     null,
     datasetErrorsDTO.idDataset,
@@ -98,7 +97,7 @@ const errorStatisticsById = async datasetId => {
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
 
   const dataset = new Dataset();
-  dataset.datasetSchemaName = datasetTablesDTO.nameDatasetSchema;
+  dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
 
   const tableStatisticValues = [];

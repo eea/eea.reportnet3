@@ -40,11 +40,11 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns,
     match: {
-      params: { dataSetId, dataflowId }
+      params: { datasetId, dataflowId }
     },
     history
   }) => {
-    //const contextReporterDataSet = useContext(ReporterDataSetContext);
+    //const contextReporterDataset = useContext(ReporterDatasetContext);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -225,7 +225,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteTable = async () => {
       setDeleteDialogVisible(false);
-      const dataDeleted = await DatasetService.deleteTableDataById(dataSetId, tableId);
+      const dataDeleted = await DatasetService.deleteTableDataById(datasetId, tableId);
       if (dataDeleted) {
         setFetchedData([]);
         setTotalRecords(0);
@@ -235,7 +235,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteRow = async () => {
       setDeleteDialogVisible(false);
-      const recordDeleted = await DatasetService.deleteRecordById(dataSetId, selectedRecord.recordId);
+      const recordDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
       if (recordDeleted) {
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsRecordDeleted(true);
@@ -284,7 +284,7 @@ const DataViewer = withRouter(
           record.recordId === selectedRecord.recordId
         ) {
           //without await. We don't have to wait for the response.
-          const fieldUpdated = DatasetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
+          const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
           if (!fieldUpdated) {
             console.error('Error!');
           }
@@ -307,7 +307,7 @@ const DataViewer = withRouter(
       setLoadingFile(true);
       try {
         setExportTableDataName(createTableName(tableName, fileType));
-        setExportTableData(await DatasetService.exportTableDataById(dataSetId, tableId, fileType));
+        setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
       } catch (error) {
         console.error(error);
       } finally {
@@ -324,7 +324,7 @@ const DataViewer = withRouter(
         }
 
         const tableData = await DatasetService.tableDataById(
-          dataSetId,
+          datasetId,
           tableId,
           Math.floor(fRow / nRows),
           nRows,
@@ -387,7 +387,7 @@ const DataViewer = withRouter(
 
     const onPasteAccept = async () => {
       try {
-        const recordsAdded = await DatasetService.addRecordsById(dataSetId, tableId, pastedRecords);
+        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, pastedRecords);
         if (recordsAdded) {
           growlRef.current.show({
             severity: 'success',
@@ -431,13 +431,13 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
-      //Delete hidden column null values (dataSetPartitionId and id)
+      //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
         field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
       );
       if (isNewRecord) {
         try {
-          await DatasetService.addRecordsById(dataSetId, tableId, [record]);
+          await DatasetService.addRecordsById(datasetId, tableId, [record]);
           setAddDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
@@ -453,7 +453,7 @@ const DataViewer = withRouter(
         }
       } else {
         try {
-          await DatasetService.updateRecordsById(dataSetId, record);
+          await DatasetService.updateRecordsById(datasetId, record);
           onRefresh();
           setEditDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
@@ -487,9 +487,9 @@ const DataViewer = withRouter(
 
       const detailContent = (
         <span>
-          {resources.messages['dataSetLoadingMessage']}
+          {resources.messages['datasetLoadingMessage']}
           <strong>{editLargeStringWithDots(tableName, 22)}</strong>
-          {resources.messages['dataSetLoading']}
+          {resources.messages['datasetLoading']}
         </span>
       );
 
@@ -1089,7 +1089,7 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onUpload}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(config.loadDataTableAPI.url, {
-              dataSetId: dataSetId,
+              datasetId: datasetId,
               tableId: tableId
             })}`}
           />

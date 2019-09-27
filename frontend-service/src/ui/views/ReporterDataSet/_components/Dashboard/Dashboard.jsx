@@ -35,7 +35,7 @@ const Dashboard = withRouter(
       const tableStatisticValues = dataset.tableStatisticValues;
       const tableNames = dataset.tables.map(table => table.tableSchemaName);
 
-      setDashboardTitle(dataset.dataSetSchemaName);
+      setDashboardTitle(dataset.datasetSchemaName);
       setDashboardData({
         labels: tableNames,
         datasets: [
