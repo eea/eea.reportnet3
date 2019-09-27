@@ -231,7 +231,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
                   disabled={false}
                   icon={'refresh'}
                   label={resources.messages['refresh']}
-                  onClick={() => onLoadDocumentsAndWebLinks()}
+                  onClick={() => (onLoadDocumentsAndWebLinks(), setIsFormReset(true))}
                 />
               </div>
             </Toolbar>
