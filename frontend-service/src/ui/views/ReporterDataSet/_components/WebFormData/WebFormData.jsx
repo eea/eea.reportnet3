@@ -74,14 +74,18 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
       const webFormData = await DatasetService.webFormDataById(dataSetId, tableSchemaId);
       setFetchedData(webFormData);
     } catch (error) {
-      console.error('WebForm error: ', error);
-      const errorResponse = error.response;
-      console.error('WebForm errorResponse: ', errorResponse);
-      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
-      }
+      onErrorLoadingWebForm(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onErrorLoadingWebForm = error => {
+    console.error('WebForm error: ', error);
+    const errorResponse = error.response;
+    console.error('WebForm errorResponse: ', errorResponse);
+    if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+      history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
     }
   };
 
