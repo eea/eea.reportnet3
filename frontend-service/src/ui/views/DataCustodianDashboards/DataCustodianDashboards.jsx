@@ -1,18 +1,16 @@
 import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isArray } from 'lodash';
-
 import styles from './DataCustodianDashboards.module.scss';
 
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Chart } from 'primereact/chart';
+import { FilterList } from './_components/FilterList/FilterList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { FilterList } from './_components/FilterList/FilterList';
 
 import { DataFlowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
@@ -22,10 +20,8 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userData = useContext(UserContext);
-  const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-
-  const [datasetsDashboardsData, setDatasetsDashboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   const home = {
@@ -52,72 +48,21 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   useEffect(() => {
     loadDashboards();
-
-    if (!isEmpty(datasetsDashboardsData)) {
-      onPageLoad();
-    }
-  }, [datasetsDashboardsData]);
+  }, []);
 
   const loadDashboards = async () => {
     try {
       setReleasedDashboardData(await DataFlowService.datasetReleasedStatus(match.params.dataFlowId));
 
-      setDatasetsDashboardData(await DataFlowService.datasetStatisticsStatus(match.params.dataFlowId));
+      const datasetsDashboardsData = await DataFlowService.datasetStatisticsStatus(match.params.dataFlowId);
+
+      filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
     } catch (error) {
       console.error(error.response);
     } finally {
       setLoading(false);
     }
   };
-
-  const onPageLoad = () => {
-    getDatasetsDashboardData();
-  };
-
-  const datasets =
-    isArray(datasetsDashboardsData.tables) &&
-    datasetsDashboardsData.tables
-      .map(table => [
-        {
-          label: `CORRECT`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: '#004494',
-          data: table.tableStatisticPercentages[0],
-          totalData: table.tableStatisticValues[0],
-          stack: table.tableName
-        },
-        {
-          label: `WARNINGS`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: '#ffd617',
-          data: table.tableStatisticPercentages[1],
-          totalData: table.tableStatisticValues[1],
-          stack: table.tableName
-        },
-        {
-          label: `ERRORS`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: '#DA2131',
-          data: table.tableStatisticPercentages[2],
-          totalData: table.tableStatisticPercentages[2],
-          stack: table.tableName
-        }
-      ])
-      .flat();
-
-  console.log('datasts', datasets);
-
-  function getDatasetsDashboardData() {
-    const datasetDataObject = {
-      labels: datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName),
-      datasets: datasets
-    };
-    filterDispatch({ type: 'INIT_DATA', payload: datasetDataObject });
-    return datasetDataObject;
-  }
 
   const datasetOptionsObject = {
     tooltips: {

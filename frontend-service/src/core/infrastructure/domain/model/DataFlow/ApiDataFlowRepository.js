@@ -43,8 +43,48 @@ const completed = async () => {
 };
 
 const datasetStatisticsStatus = async dataFlowId => {
-  const dashboardsData = await apiDataFlow.datasetStatisticsStatus(dataFlowId);
-  return dashboardsData;
+  const datasetsDashboardsData = await apiDataFlow.datasetStatisticsStatus(dataFlowId);
+
+  const datasets = datasetsDashboardsData.tables
+    .map(table => [
+      {
+        label: `CORRECT`,
+        tableName: table.tableName,
+        tableId: table.tableId,
+        backgroundColor: '#004494',
+        data: table.tableStatisticPercentages[0],
+        totalData: table.tableStatisticValues[0],
+        stack: table.tableName
+      },
+      {
+        label: `WARNINGS`,
+        tableName: table.tableName,
+        tableId: table.tableId,
+        backgroundColor: '#ffd617',
+        data: table.tableStatisticPercentages[1],
+        totalData: table.tableStatisticValues[1],
+        stack: table.tableName
+      },
+      {
+        label: `ERRORS`,
+        tableName: table.tableName,
+        tableId: table.tableId,
+        backgroundColor: '#DA2131',
+        data: table.tableStatisticPercentages[2],
+        totalData: table.tableStatisticPercentages[2],
+        stack: table.tableName
+      }
+    ])
+    .flat();
+
+  const labels = datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName);
+
+  const datasetDataObject = {
+    labels: labels,
+    datasets: datasets
+  };
+
+  return datasetDataObject;
 };
 
 const datasetReleasedStatus = async dataFlowId => {

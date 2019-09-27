@@ -18,8 +18,6 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
 
   const tableNamesIdsArray = [];
 
-  console.log('datasets', datasets);
-
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
   uniqDatasets.map(dataset => {
