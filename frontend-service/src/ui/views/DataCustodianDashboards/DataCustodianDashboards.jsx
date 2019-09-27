@@ -62,7 +62,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     try {
       setReleasedDashboardData(await DataFlowService.datasetReleasedStatus(match.params.dataFlowId));
 
-      setDatasetsDashboardData(await DataFlowService.dashboards(match.params.dataFlowId));
+      setDatasetsDashboardData(await DataFlowService.datasetStatisticsStatus(match.params.dataFlowId));
     } catch (error) {
       console.error(error.response);
     } finally {

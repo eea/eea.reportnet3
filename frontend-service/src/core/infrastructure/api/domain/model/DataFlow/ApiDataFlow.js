@@ -50,7 +50,7 @@ export const apiDataFlow = {
     });
     return response.data;
   },
-  dashboards: async dataFlowId => {
+  datasetStatisticsStatus: async dataFlowId => {
     // const tokens = userStorage.get();
     // const response = await HTTPRequester.get({
     //   url: '/jsons/dataCustodianDashboards.json',
