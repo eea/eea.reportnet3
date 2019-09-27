@@ -25,7 +25,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [loading, setLoading] = useState(true);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
 
-  const [datasetsDashboardsData, setDatasetsDashboardData] = useState();
+  const [datasetsDashboardsData, setDatasetsDashboardData] = useState([]);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   const home = {
@@ -74,17 +74,19 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     getDatasetsDashboardData();
   };
 
-  const tableNames = isArray(datasetsDashboardsData) && datasetsDashboardsData[0].tables.map(table => table.tableName);
+  const tableNames =
+    isArray(datasetsDashboardsData.tables) && datasetsDashboardsData.tables.map(table => table.tableName);
 
   const tablePercentages =
-    isArray(datasetsDashboardsData) && datasetsDashboardsData[0].tables.map(table => table.tableStatisticPercentages);
+    isArray(datasetsDashboardsData.tables) &&
+    datasetsDashboardsData.tables.map(table => table.tableStatisticPercentages);
 
   const tableOnePercentages = tablePercentages[0];
   const tableTwoPercentages = tablePercentages[1];
   const tableThirdPercentages = tablePercentages[2];
 
   const tableValues =
-    isArray(datasetsDashboardsData) && datasetsDashboardsData[0].tables.map(values => values.tableStatisticValues);
+    isArray(datasetsDashboardsData.tables) && datasetsDashboardsData.tables.map(values => values.tableStatisticValues);
 
   const tableOneValues = tableValues[0];
   const tableTwoValues = tableValues[1];
@@ -92,7 +94,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   function getDatasetsDashboardData() {
     const datasetDataObject = {
-      labels: datasetsDashboardsData[0].dataSetReporters.map(reporterData => reporterData.reporterName),
+      labels: datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName),
       datasets: [
         {
           label: `CORRECT`,
