@@ -73,5 +73,10 @@ export const ListItem = ({ layout, label, handleRedirect, model }) => {
     documents,
     dashboard
   };
-  return buttons[layout];
+  return (
+    <div className={`${style.dataSetItem}`}>
+      {buttons[layout]}
+      <p className={style.caption}>{resources.messages.dashboards}</p>
+    </div>
+  );
 };
