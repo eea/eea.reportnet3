@@ -1,14 +1,14 @@
 package org.eea.validation.configuration.util;
 
-import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.eea.multitenancy.TenantResolver;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * The type Eea data source.
  */
-public class EeaDataSource extends HikariDataSource {
+public class EeaDataSource extends DriverManagerDataSource {
 
   @Override
   public String getSchema() {
