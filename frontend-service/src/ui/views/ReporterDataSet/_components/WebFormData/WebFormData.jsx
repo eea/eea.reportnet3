@@ -97,6 +97,22 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return tableData;
   };
 
+  const getWebFormData = () => {
+    let webFormData = fetchedData;
+
+    if (isEmpty(webFormData)) {
+      return;
+    }
+
+    let dataColumns = webFormData.dataColumns;
+    let columnHeaders = webFormData.columnHeaders;
+
+    let columnTitles = getColumnHeaders(columnHeaders);
+    let webFormRows = getWebFormRows(dataColumns);
+
+    return columnTitles, webFormRows;
+  };
+
   const form = (titles, rows) => {
     return (
       <table className={styles.webFormTable}>
@@ -114,22 +130,6 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
       return <div></div>;
     }
     return <div>{form(webFormCreated.columnTitles, webFormCreated.webFormRows)}</div>;
-  };
-
-  const getWebFormData = () => {
-    let webFormData = fetchedData;
-
-    if (isEmpty(webFormData)) {
-      return;
-    }
-
-    let dataColumns = webFormData.dataColumns;
-    let columnHeaders = webFormData.columnHeaders;
-
-    let columnTitles = getColumnHeaders(columnHeaders);
-    let webFormRows = getWebFormRows(dataColumns);
-
-    return columnTitles, webFormRows;
   };
 
   const getColumnHeaders = columnHeaders => {
