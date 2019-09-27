@@ -355,8 +355,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
 
-  console.log('filterState', filterState);
-
   const loadDashboards = async () => {
     try {
       const dashboardData = await DataFlowService.dashboards(match.params.dataFlowId);
