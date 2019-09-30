@@ -85,7 +85,7 @@ export const DataflowTasks = withRouter(({ match, history }) => {
     <div className="rep-row">
       <DataflowColumn
         navTitle={resources.messages['dataflow']}
-        components={['search']}
+        components={['search', 'createDataflow']}
         createDataflowButtonTitle={resources.messages['createDataflowButton']}
         subscribeButtonTitle={resources.messages['subscribeButton']}
       />

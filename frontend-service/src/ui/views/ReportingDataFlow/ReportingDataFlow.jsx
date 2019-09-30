@@ -154,7 +154,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <DataflowColumn
-        buttonTitle={resources.messages.subscribeThisButton}
+        subscribeButtonTitle={resources.messages.subscribeThisButton}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages.dataflow}
         components={[]}

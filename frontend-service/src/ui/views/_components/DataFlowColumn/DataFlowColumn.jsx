@@ -1,13 +1,18 @@
-import React, { useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isUndefined } from 'lodash';
+
 import styles from './DataFlowColumn.module.css';
+
+import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 
 const DataflowColumn = withRouter(
   ({
@@ -21,8 +26,17 @@ const DataflowColumn = withRouter(
     match
   }) => {
     const resources = useContext(ResourcesContext);
+    const [isCustodian, setIsCustodian] = useState(false);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
     const user = useContext(UserContext);
+
+    useEffect(() => {
+      if (!isUndefined(user.mainRole)) {
+        setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
+      }
+    }, [user]);
+
+    console.log('user', user);
 
     const setVisibleHandler = (fnUseState, visible) => {
       fnUseState(visible);
@@ -53,7 +67,13 @@ const DataflowColumn = withRouter(
             </h4>
           )}
 
-          <Button className={styles.columnButton} icon="plus" label={createDataflowButtonTitle} />
+          {isCustodian && components.includes('createDataflow') && (
+            <Button
+              className={`${styles.columnButton} p-button-warning`}
+              icon="plus"
+              label={createDataflowButtonTitle}
+            />
+          )}
 
           <Button
             className={styles.columnButton}
