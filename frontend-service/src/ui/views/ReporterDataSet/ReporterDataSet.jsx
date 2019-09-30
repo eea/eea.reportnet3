@@ -197,7 +197,6 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       const datasetSchema = await DatasetService.schemaById(dataflowId);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
-      console.log(datasetStatistics);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
