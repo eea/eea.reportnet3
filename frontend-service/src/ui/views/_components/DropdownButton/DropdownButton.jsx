@@ -9,6 +9,10 @@ import { Icon } from 'ui/views/_components/Icon';
 const DropdownButton = ({ children, icon, model, hasWritePermissions }) => {
   const [isVisible, setisVisible] = useState(false);
   const toggleMenu = () => {
+    const otherElements = document.querySelectorAll('.p-menu-overlay-visible');
+    otherElements.forEach(element => {
+      element.style.display = 'none';
+    });
     setisVisible(!isVisible);
   };
   return (

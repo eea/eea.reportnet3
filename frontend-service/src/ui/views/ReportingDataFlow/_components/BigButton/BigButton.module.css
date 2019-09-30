@@ -1,8 +1,8 @@
-.listItem {
+.bigButton {
   border-radius: 20px;
   font-size: 2rem;
 }
-.listItem > a {
+.bigButton > a {
   padding: 2.3rem 2.7rem;
 }
 .dataset {
@@ -106,4 +106,13 @@
 .dashboard a:hover {
   background-color: var(--c-purple-300);
   color: var(--white);
+}
+.caption {
+  text-align: center;
+  text-transform: capitalize;
+  margin: 0.5rem;
+}
+.datasetItem :global .p-button.p-button-icon-only .p-button-text {
+  padding: 0px !important;
+  height: 0px !important;
 }
