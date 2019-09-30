@@ -87,5 +87,5 @@ export const BigButton = ({ layout, handleRedirect, model, caption }) => {
     documents,
     dashboard
   };
-  return <div className={`${style.dataSetItem}`}>{buttons[layout]}</div>;
+  return <div className={`${style.datasetItem}`}>{buttons[layout]}</div>;
 };

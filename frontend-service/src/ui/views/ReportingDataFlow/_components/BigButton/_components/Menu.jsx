@@ -8,8 +8,8 @@ const Menu = ({ model }) => {
       <div className={`${style.dropDownMenu} p-menu-overlay-visible`} style={{ display: 'none' }}>
         <ul>
           {model ? (
-            model.map(item => (
-              <li>
+            model.map((item, i) => (
+              <li key={i}>
                 <a
                   className={item.disabled ? style.menuItemDisabled : null}
                   onClick={e => {

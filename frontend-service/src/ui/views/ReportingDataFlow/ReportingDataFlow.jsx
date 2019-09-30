@@ -173,56 +173,54 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 layout="documents"
                 label="DO"
                 caption={resources.messages.documents}
-                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataFlowId}/documentation-data-set/`)}
+                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documentation-data-set/`)}
               />
             </div>
             {dataflowData.datasets.map(dataset => {
               return (
-                <>
-                  <div className={`${styles.datasetItem}`} key={dataset.id}>
-                    <BigButton
-                      layout="dataset"
-                      label="DS"
-                      caption={dataset.dataSetName}
-                      handleRedirect={() => {
-                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
-                      }}
-                      model={
-                        hasWritePermissions
-                          ? [
-                              {
-                                label: resources.messages.releaseDataCollection,
-                                icon: 'cloudUpload',
-                                command: () => showReleaseSnapshotDialog(dataset.id),
-                                disabled: false
-                              },
-                              {
-                                label: resources.messages['importFromFile'],
-                                icon: 'export',
-                                disabled: true
-                              },
-                              {
-                                label: resources.messages['duplicate'],
-                                icon: 'clone',
-                                disabled: true
-                              },
-                              {
-                                label: resources.messages['properties'],
-                                icon: 'info',
-                                disabled: true
-                              }
-                            ]
-                          : [
-                              {
-                                label: resources.messages['properties'],
-                                icon: 'info',
-                                disabled: true
-                              }
-                            ]
-                      }
-                    />
-                  </div>
-                </>
+                <div className={`${styles.datasetItem}`} key={dataset.id}>
+                  <BigButton
+                    layout="dataset"
+                    label="DS"
+                    caption={dataset.dataSetName}
+                    handleRedirect={() => {
+                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
+                    }}
+                    model={
+                      hasWritePermissions
+                        ? [
+                            {
+                              label: resources.messages.releaseDataCollection,
+                              icon: 'cloudUpload',
+                              command: () => showReleaseSnapshotDialog(dataset.id),
+                              disabled: false
+                            },
+                            {
+                              label: resources.messages['importFromFile'],
+                              icon: 'export',
+                              disabled: true
+                            },
+                            {
+                              label: resources.messages['duplicate'],
+                              icon: 'clone',
+                              disabled: true
+                            },
+                            {
+                              label: resources.messages['properties'],
+                              icon: 'info',
+                              disabled: true
+                            }
+                          ]
+                        : [
+                            {
+                              label: resources.messages['properties'],
+                              icon: 'info',
+                              disabled: true
+                            }
+                          ]
+                    }
+                  />
+                </div>
               );
             })}
             {UserService.hasPermission(
