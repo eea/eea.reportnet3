@@ -1,2 +1,2 @@
-export const Upload = ({ documentRepository }) => async (dataFlowId, description, language, file) =>
-  documentRepository.uploadDocument(dataFlowId, description, language, file);
+export const Upload = ({ documentRepository }) => async (dataflowId, description, language, file) =>
+  documentRepository.uploadDocument(dataflowId, description, language, file);

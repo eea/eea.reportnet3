@@ -1,2 +1,2 @@
-export const AddRecords = ({ dataSetRepository }) => async (dataSetId, tableSchemaId, records) =>
-  dataSetRepository.addRecordsById(dataSetId, tableSchemaId, records);
+export const AddRecords = ({ datasetRepository }) => async (datasetId, tableSchemaId, records) =>
+  datasetRepository.addRecordsById(datasetId, tableSchemaId, records);

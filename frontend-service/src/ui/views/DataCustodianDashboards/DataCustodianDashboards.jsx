@@ -13,7 +13,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { DataFlowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -67,12 +67,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowList'],
+        label: resources.messages['dataflowList'],
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages.dataFlow,
-        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
+        label: resources.messages.dataflow,
+        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
       },
       {
         label: resources.messages.dataCustodianDashboards
@@ -82,7 +82,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const loadDashboards = async () => {
     try {
-      setDashboardsData(await DataFlowService.dashboards(match.params.dataFlowId));
+      setDashboardsData(await DataflowService.dashboards(match.params.dataflowId));
     } catch (error) {
       console.error(error.response);
     } finally {
@@ -302,7 +302,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <div className="rep-row">
-        <h1>{resources.messages['dataFlow']}</h1>
+        <h1>{resources.messages['dataflow']}</h1>
       </div>
       <div className="rep-row">
         <Chart type="bar" data={datasetsDashboardData} options={datasetsDashboardOptions} width="100%" height="35%" />

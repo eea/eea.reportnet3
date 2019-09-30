@@ -1,2 +1,2 @@
-export const GetErrorPosition = ({ dataSetRepository }) => async (objectId, dataSetId, entityType) =>
-  dataSetRepository.errorPositionByObjectId(objectId, dataSetId, entityType);
+export const GetErrorPosition = ({ datasetRepository }) => async (objectId, datasetId, entityType) =>
+  datasetRepository.errorPositionByObjectId(objectId, datasetId, entityType);

@@ -1,4 +1,4 @@
-export class DataSetTable {
+export class DatasetTable {
   constructor(
     hasErrors,
     tableSchemaId,

@@ -1,1 +1,1 @@
-export const GetAll = ({ contributorRepository }) => async dataFlowId => contributorRepository.all(dataFlowId);
+export const GetAll = ({ contributorRepository }) => async dataflowId => contributorRepository.all(dataflowId);

@@ -1,7 +1,7 @@
-export const UpdateField = ({ dataSetRepository }) => async (
-  dataSetId,
+export const UpdateField = ({ datasetRepository }) => async (
+  datasetId,
   fieldSchemaId,
   fieldId,
   fieldType,
   fieldValue
-) => dataSetRepository.updateFieldById(dataSetId, fieldSchemaId, fieldId, fieldType, fieldValue);
+) => datasetRepository.updateFieldById(datasetId, fieldSchemaId, fieldId, fieldType, fieldValue);

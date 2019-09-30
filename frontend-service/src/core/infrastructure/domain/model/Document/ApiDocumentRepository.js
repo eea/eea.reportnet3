@@ -2,8 +2,8 @@ import { apiDocument } from 'core/infrastructure/api/domain/model/Document';
 import { Document } from 'core/domain/model/Document/Document';
 import { async } from 'q';
 
-const all = async dataFlowId => {
-  const documentsDTO = await apiDocument.all(dataFlowId);
+const all = async dataflowId => {
+  const documentsDTO = await apiDocument.all(dataflowId);
 
   return documentsDTO.map(
     documentDTO =>
@@ -23,8 +23,8 @@ const downloadDocumentById = async documentId => {
   return fileData;
 };
 
-const uploadDocument = async (dataFlowId, description, language, file) => {
-  const responseData = await apiDocument.upload(dataFlowId, description, language, file);
+const uploadDocument = async (dataflowId, description, language, file) => {
+  const responseData = await apiDocument.upload(dataflowId, description, language, file);
   return responseData;
 };
 

@@ -13,7 +13,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { DocumentService } from 'core/services/Document';
 
-const DocumentFileUpload = ({ dataFlowId, onUpload, onGrowlAlert, isFormReset }) => {
+const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { description: '', lang: '', uploadFile: {} };
@@ -48,7 +48,7 @@ const DocumentFileUpload = ({ dataFlowId, onUpload, onGrowlAlert, isFormReset })
         });
 
         const response = await DocumentService.uploadDocument(
-          dataFlowId,
+          dataflowId,
           values.description,
           values.lang,
           values.uploadFile
