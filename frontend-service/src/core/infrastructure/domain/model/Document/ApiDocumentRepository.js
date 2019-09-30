@@ -1,6 +1,5 @@
 import { apiDocument } from 'core/infrastructure/api/domain/model/Document';
 import { Document } from 'core/domain/model/Document/Document';
-import { async } from 'q';
 
 const all = async dataflowId => {
   const documentsDTO = await apiDocument.all(dataflowId);

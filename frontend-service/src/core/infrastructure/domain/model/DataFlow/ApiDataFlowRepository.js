@@ -1,20 +1,88 @@
+import { isNull, isUndefined } from 'lodash';
+
 import { apiDataflow } from 'core/infrastructure/api/domain/model/DataFlow';
 import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
+import { Dataset } from 'core/domain/model/DataSet/DataSet';
+import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 const parseDataflowDTO = dataflowDTO => {
-  return new Dataflow(
-    dataflowDTO.id,
-    dataflowDTO.datasets,
-    dataflowDTO.description,
-    dataflowDTO.name,
-    dataflowDTO.deadlineDate,
-    dataflowDTO.creationDate,
-    dataflowDTO.userRequestStatus,
-    dataflowDTO.status,
-    dataflowDTO.documents,
-    dataflowDTO.weblinks,
-    dataflowDTO.requestId
+  const dataflow = new Dataflow();
+  dataflow.id = dataflowDTO.id;
+  dataflow.datasets = parseDatasetListDTO(dataflowDTO.datasets);
+  dataflow.deadlineDate = dataflowDTO.deadlineDate;
+  dataflow.description = dataflowDTO.description;
+  dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
+  dataflow.name = dataflowDTO.name;
+  dataflow.creationDate = dataflowDTO.creationDate;
+  dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
+  dataflow.status = dataflowDTO.status;
+  dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
+  dataflow.requestId = dataflowDTO.requestId;
+  return dataflow;
+};
+
+const parseDatasetListDTO = datasetsDTO => {
+  if (isUndefined(datasetsDTO)) {
+    return;
+  }
+  if (!isNull(datasetsDTO)) {
+    const datasets = [];
+    datasetsDTO.map(datasetDTO => {
+      datasets.push(parseDatasetDTO(datasetDTO));
+    });
+    return datasets;
+  } else {
+    return null;
+  }
+};
+
+const parseDatasetDTO = datasetDTO => {
+  return new Dataset(null, datasetDTO.id, null, datasetDTO.dataSetName, null, null, null, null, null);
+};
+
+const parseDocumentListDTO = documentsDTO => {
+  if (isUndefined(documentsDTO)) {
+    return;
+  }
+  if (!isNull(documentsDTO)) {
+    const documents = [];
+    documentsDTO.map(documentDTO => {
+      documents.push(parseDocumentDTO(documentDTO));
+    });
+    return documents;
+  } else {
+    return null;
+  }
+};
+
+const parseDocumentDTO = documentDTO => {
+  return new Document(
+    documentDTO.category,
+    documentDTO.dataflowId,
+    documentDTO.description,
+    documentDTO.id,
+    documentDTO.language,
+    documentDTO.name
   );
+};
+
+const parseWebLinkListDTO = webLinksDTO => {
+  if (isUndefined(webLinksDTO)) {
+    return;
+  }
+  if (!isNull(webLinksDTO)) {
+    const webLinks = [];
+    webLinksDTO.map(webLinkDTO => {
+      webLinks.push(parseWebLinkDTO(webLinkDTO));
+    });
+    return webLinks;
+  } else {
+    return null;
+  }
+};
+
+const parseWebLinkDTO = webLinkDTO => {
+  return new WebLink(webLinkDTO.description, webLinkDTO.url);
 };
 
 const parseDataflowDTOs = dataflowDTOs => {

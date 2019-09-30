@@ -184,7 +184,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       layout="dataset"
                       label="DS"
                       handleRedirect={() => {
-                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
+                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.datasetId}`);
                       }}
                       model={
                         hasWritePermissions
@@ -220,7 +220,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                             ]
                       }
                     />
-                    <p className={styles.caption}>{dataset.dataSetName}</p>
+                    <p className={styles.caption}>{dataset.datasetSchemaName}</p>
                   </div>
                 </>
               );
@@ -228,7 +228,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             {UserService.hasPermission(
               user,
               [config.permissions.CUSTODIAN],
-              `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+              `${config.permissions.DATA_FLOW}${match.params.datasetId}`
             ) && (
               <div className={`${styles.datasetItem}`}>
                 <ListItem
