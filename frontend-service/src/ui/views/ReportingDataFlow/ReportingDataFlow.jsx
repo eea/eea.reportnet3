@@ -221,10 +221,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                   <BigButton
                     layout="dataset"
                     label="DS"
-                    caption={dataset.dataSetName}
+                    caption={dataset.datasetSchemaName}
                     isReleased={dataset.isReleased}
                     handleRedirect={() => {
-                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
+                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.datasetId}`);
                     }}
                     model={
                       hasWritePermissions
