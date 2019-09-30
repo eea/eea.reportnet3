@@ -45,7 +45,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/communication/reportnet-websocket");
+    registry.addEndpoint("/communication/reportnet-websocket").setAllowedOrigins("*");
   }
 
   @Override
