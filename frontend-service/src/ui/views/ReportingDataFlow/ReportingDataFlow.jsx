@@ -184,7 +184,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     label="DS"
                     caption={dataset.datasetSchemaName}
                     handleRedirect={() => {
-                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
+                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.datasetId}`);
                     }}
                     model={
                       hasWritePermissions
