@@ -270,4 +270,16 @@ public class DatasetValidations {
 
     return validationService.datasetValidationDC03Query(DC02B);
   }
+
+  public static Boolean ruleEM01(Long idDataset) {
+    return true;
+  }
+
+  public static Boolean ruleEM03(Long idDataset) {
+    return true;
+  }
+
+  public static Boolean ruleEM04(Long idDataset) {
+    return true;
+  }
 }

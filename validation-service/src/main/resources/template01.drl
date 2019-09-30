@@ -271,6 +271,16 @@ return DatasetValidations.datasetValidationDC03(idDataset);
 function Boolean datasetValidationDC02B(Long idDataset) {
 return DatasetValidations.datasetValidationDC02B(idDataset);
 }
+
+function Boolean ruleEM01(Long idDataset) {
+return DatasetValidations.ruleEM01(idDataset);
+}
+function Boolean ruleEM02(Long idDataset) {
+return DatasetValidations.ruleEM02(idDataset);
+}
+function Boolean ruleEM03(Long idDataset) {
+return DatasetValidations.ruleEM03(idDataset);
+}
  //PART RECORD
  
 //SEASIONALPERIOD TABLE
