@@ -9,7 +9,7 @@ import { Icon } from 'ui/views/_components/Icon';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const BigButton = ({ layout, handleRedirect, model, caption }) => {
+export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
   const resources = useContext(ResourcesContext);
   const toggleVisibility = target => {
     const incommingMenu = target.nextSibling;
@@ -45,7 +45,9 @@ export const BigButton = ({ layout, handleRedirect, model, caption }) => {
           <FontAwesomeIcon icon={AwesomeIcons('dropDown')} />
         </span>
         <Menu model={model} />
-        {true && <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />}
+        {isReleased && (
+          <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
+        )}
       </div>
       <p className={style.caption}>{caption}</p>
     </>
