@@ -57,7 +57,7 @@ const Login = ({ history }) => {
                 console.error(error);
                 user.onLogout();
                 const errorResponse = error.response;
-                if (!isUndefined(errorResponse) && errorResponse.data.message.includes('401')) {
+                if (!isUndefined(errorResponse) && errorResponse.status === 500) {
                   setLoginError('Incorrect username or password');
                   console.error(errorResponse.data.message);
                 }
