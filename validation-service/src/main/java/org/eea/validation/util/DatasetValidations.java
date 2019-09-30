@@ -272,14 +272,78 @@ public class DatasetValidations {
   }
 
   public static Boolean ruleEM01(Long idDataset) {
-    return true;
+    String EM01 = "with Characterisation as( " + "SELECT      " + "(select v.value  as season from "
+        + idDataset
+        + ".field_value v where v.id_record=rv.id and v.id_field_schema='5d5cfa24d201fb6084d90c39') as season, "
+        + "(select v.value as bathingWaterIdentifier from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c42') as bathingWaterIdentifier, "
+        + "(select v.value as sampleDate from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c4b') as groupIdentifier, "
+        + "(select v.value as intestinalEnterococciValue from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c54') as qualityClass, "
+        + "(select v.value as escherichiaColiValue from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c5d') as geographicalConstraint, "
+        + "(select v.value as sampleStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c66') as link,  "
+        + "(select v.value as intestinalEnterococciStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c6f') as Remarks "
+        + "FROM " + idDataset + ".record_value rv) " + "select * from ( "
+        + "select c.season,c.bathingWaterIdentifier,c.groupIdentifier,c.qualityClass,c.geographicalConstraint,c.link,c.Remarks "
+        + "from Characterisation c "
+        + "group by c.season,c.bathingWaterIdentifier,c.groupIdentifier,c.qualityClass,c.geographicalConstraint,c.link,c.Remarks "
+        + "having count(*) >1   " + ") as tabledata where tabledata is not null ";
+    return validationService.datasetValidationDC03Query(EM01);
   }
 
   public static Boolean ruleEM02(Long idDataset) {
-    return true;
+    String EM02 = "with SeasonalPeriod as( " + "SELECT      " + "(select v.value  as season from "
+        + idDataset
+        + ".field_value v where v.id_record=rv.id and v.id_field_schema='5d5cfa24d201fb6084d90c7c') as season, "
+        + "(select v.value as bathingWaterIdentifier from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c85') as bathingWaterIdentifier, "
+        + "(select v.value as sampleDate from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c8e') as periodType, "
+        + "(select v.value as intestinalEnterococciValue from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90c97') as startDate, "
+        + "(select v.value as escherichiaColiValue from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90ca0') as endDate, "
+        + "(select v.value as sampleStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90ca9') as managementMeasures,  "
+        + "(select v.value as intestinalEnterococciStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cb2') as Remarks "
+        + "FROM " + idDataset + ".record_value rv) " + "select * from ( "
+        + "select s.season,s.bathingWaterIdentifier,s.periodType,s.startDate,s.endDate,s.managementMeasures,s.Remarks "
+        + "from SeasonalPeriod s "
+        + "group by s.season,s.bathingWaterIdentifier,s.periodType,s.startDate,s.endDate,s.managementMeasures,s.Remarks "
+        + "having count(*) >1   " + ") as tabledata where tabledata is not null ";
+    return validationService.datasetValidationDC03Query(EM02);
   }
 
   public static Boolean ruleEM03(Long idDataset) {
-    return true;
+    String EM03 = "with MonitoringResult as( " + "SELECT      " + "(select v.value  as season from "
+        + idDataset
+        + ".field_value v where v.id_record=rv.id and v.id_field_schema='5d5cfa24d201fb6084d90cbf') as season, "
+        + "(select v.value as bathingWaterIdentifier from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cc8') as bathingWaterIdentifier, "
+        + "(select v.value as sampleDate from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cd1') as sampleDate, "
+        + "(select v.value as intestinalEnterococciValue from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cda') as intestinalEnterococciValue, "
+        + "(select v.value as escherichiaColiValue from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90ce3') as escherichiaColiValue, "
+        + "(select v.value as sampleStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cec') as sampleStatus,  "
+        + "(select v.value as intestinalEnterococciStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cf5') as intestinalEnterococciStatus, "
+        + "(select v.value as escherichiaColiStatus from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90cfe') as escherichiaColiStatus, "
+        + "(select v.value as remarks from " + idDataset
+        + ".field_value v where v.id_record = rv.id and v.id_field_schema = '5d5cfa24d201fb6084d90d07') as remarks "
+        + "FROM " + idDataset + ".record_value rv) " + "select * from ( "
+        + "select m.season,m.bathingWaterIdentifier,m.sampleDate,m.intestinalEnterococciValue,m.escherichiaColiValue,m.sampleStatus,m.intestinalEnterococciStatus, m.escherichiaColiStatus,m.remarks "
+        + "from MonitoringResult m "
+        + "group by m.season,m.bathingWaterIdentifier,m.sampleDate,m.intestinalEnterococciValue,m.escherichiaColiValue,m.sampleStatus,m.intestinalEnterococciStatus, m.escherichiaColiStatus,m.remarks "
+        + "having count(*) >1   " + ") as tabledata where tabledata is not null";
+    return validationService.datasetValidationDC03Query(EM03);
   }
 }
