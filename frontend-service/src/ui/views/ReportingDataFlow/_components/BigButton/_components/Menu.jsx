@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import style from '../ListItem.module.css';
+import style from '../BigButton.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
 const Menu = ({ model }) => {

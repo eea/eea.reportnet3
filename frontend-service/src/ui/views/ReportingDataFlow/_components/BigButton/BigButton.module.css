@@ -107,3 +107,8 @@
   background-color: var(--c-purple-300);
   color: var(--white);
 }
+.caption {
+  text-align: center;
+  text-transform: capitalize;
+  margin: 0.5rem;
+}

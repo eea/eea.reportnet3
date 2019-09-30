@@ -14,7 +14,7 @@ import { DataFlowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
-import { ListItem } from './_components/ListItem';
+import { BigButton } from './_components/BigButton';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -174,20 +174,21 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.dataSetItem}`}>
-              <ListItem
+              <BigButton
                 layout="documents"
                 label="DO"
+                caption={resources.messages.documents}
                 handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataFlowId}/documentation-data-set/`)}
               />
-              <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
             {dataFlowData.datasets.map(dataSet => {
               return (
                 <>
                   <div className={`${styles.dataSetItem}`} key={dataSet.id}>
-                    <ListItem
+                    <BigButton
                       layout="dataSet"
                       label="DS"
+                      caption={dataSet.dataSetName}
                       handleRedirect={() => {
                         handleRedirect(`/dataflow/${match.params.dataFlowId}/dataset/${dataSet.id}`);
                       }}
@@ -225,7 +226,6 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
                             ]
                       }
                     />
-                    <p className={styles.caption}>{dataSet.dataSetName}</p>
                   </div>
                 </>
               );
@@ -236,13 +236,13 @@ export const ReportingDataFlow = withRouter(({ history, match }) => {
               `${config.permissions.DATA_FLOW}${match.params.dataFlowId}`
             ) && (
               <div className={`${styles.dataSetItem}`}>
-                <ListItem
+                <BigButton
                   layout="dashboard"
+                  caption={resources.messages.dashboards}
                   handleRedirect={() =>
                     handleRedirect(`/dataflow/${match.params.dataFlowId}/data-custodian-dashboards/`)
                   }
                 />
-                <p className={styles.caption}>{resources.messages.dashboards}</p>
               </div>
             )}
           </div>
