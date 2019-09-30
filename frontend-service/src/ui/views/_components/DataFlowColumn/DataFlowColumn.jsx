@@ -10,7 +10,16 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 
 const DataflowColumn = withRouter(
-  ({ navTitle, dataflowTitle, components = [], entity, buttonTitle, history, match }) => {
+  ({
+    navTitle,
+    dataflowTitle,
+    components = [],
+    entity,
+    createDataflowButtonTitle,
+    subscribeButtonTitle,
+    history,
+    match
+  }) => {
     const resources = useContext(ResourcesContext);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
     const user = useContext(UserContext);
@@ -44,10 +53,12 @@ const DataflowColumn = withRouter(
             </h4>
           )}
 
+          <Button className={styles.columnButton} icon="plus" label={createDataflowButtonTitle} />
+
           <Button
-            className={styles.subscribeBtn}
+            className={styles.columnButton}
             icon="plus"
-            label={buttonTitle}
+            label={subscribeButtonTitle}
             onClick={() => {
               setVisibleHandler(setSubscribeDialogVisible, true);
             }}

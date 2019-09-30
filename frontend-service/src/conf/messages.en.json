@@ -28,6 +28,7 @@
 		"copyrightResources": "Resources for partners",
 		"correct": "Correct",
 		"create": "Create",
+		"createDataflowButton": "Create Dataflow",
 		"createSnapshotMessage": "Create snapshot",
 		"createSnapshotPlaceholder": "Description",
 		"createSnapshotTitle": "Snapshots",
