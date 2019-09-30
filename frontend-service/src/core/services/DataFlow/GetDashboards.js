@@ -1,1 +1,1 @@
-export const GetDashboards = ({ dataFlowRepository }) => async dataFlowId => dataFlowRepository.dashboards(dataFlowId);
+export const GetDashboards = ({ dataflowRepository }) => async dataflowId => dataflowRepository.dashboards(dataflowId);

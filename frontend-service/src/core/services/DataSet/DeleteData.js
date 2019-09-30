@@ -1,1 +1,1 @@
-export const DeleteData = ({ dataSetRepository }) => async dataSetId => dataSetRepository.deleteDataById(dataSetId);
+export const DeleteData = ({ datasetRepository }) => async datasetId => datasetRepository.deleteDataById(datasetId);

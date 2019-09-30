@@ -3,18 +3,18 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-export const apiDataSet = {
-  addRecordsById: async (dataSetId, tableSchemaId, dataSetTableRecords) => {
+export const apiDataset = {
+  addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/table/${tableSchemaId}/record`
+          ? `/dataset/${datasetId}/table/${tableSchemaId}/record`
           : getUrl(config.addNewRecord.url, {
-              dataSetId: dataSetId,
+              datasetId: datasetId,
               tableSchemaId: tableSchemaId
             }),
-        data: dataSetTableRecords,
+        data: datasetTableRecords,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -23,18 +23,18 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error adding record to dataSet data: ${error}`);
+      console.error(`Error adding record to dataset data: ${error}`);
       return false;
     }
   },
-  deleteDataById: async dataSetId => {
+  deleteDataById: async datasetId => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/deleteImportData`
+          ? `/dataset/${datasetId}/deleteImportData`
           : getUrl(config.deleteImportData.url, {
-              dataSetId: dataSetId
+              datasetId: datasetId
             }),
         queryString: {},
         headers: {
@@ -44,18 +44,18 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet data: ${error}`);
+      console.error(`Error deleting dataset data: ${error}`);
       return false;
     }
   },
-  deleteRecordById: async (dataSetId, recordId) => {
+  deleteRecordById: async (datasetId, recordId) => {
     try {
       const tokens = userStorage.get();
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/record/${recordId}`
+          ? `/dataset/${datasetId}/record/${recordId}`
           : getUrl(config.deleteRecord.url, {
-              dataSetId,
+              datasetId,
               recordId
             }),
         queryString: {},
@@ -66,18 +66,18 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet table record: ${error}`);
+      console.error(`Error deleting dataset table record: ${error}`);
       return false;
     }
   },
-  deleteTableDataById: async (dataSetId, tableId) => {
+  deleteTableDataById: async (datasetId, tableId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/deleteImportTable/${tableId}`
+          ? `/dataset/${datasetId}/deleteImportTable/${tableId}`
           : getUrl(config.deleteImportTable.url, {
-              dataSetId: dataSetId,
+              datasetId: datasetId,
               tableId: tableId
             }),
         queryString: {},
@@ -88,18 +88,18 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error deleting dataSet table data: ${error}`);
+      console.error(`Error deleting dataset table data: ${error}`);
       return false;
     }
   },
-  errorPositionByObjectId: async (objectId, dataSetId, entityType) => {
+  errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_getTableFromAnyObjectId.json'
         : getUrl(config.validationViewerAPI.url, {
             objectId: objectId,
-            dataSetId: dataSetId,
+            datasetId: datasetId,
             entityType: entityType
           }),
       queryString: {},
@@ -109,7 +109,7 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  errorsById: async (dataSetId, pageNum, pageSize, sortField, asc) => {
+  errorsById: async (datasetId, pageNum, pageSize, sortField, asc) => {
     const tokens = userStorage.get();
     if (asc === -1) {
       asc = 0;
@@ -118,7 +118,7 @@ export const apiDataSet = {
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'
         : getUrl(config.listValidationsAPI.url, {
-            dataSetId: dataSetId,
+            datasetId: datasetId,
             pageNum: pageNum,
             pageSize: pageSize,
             sortField: sortField,
@@ -132,11 +132,11 @@ export const apiDataSet = {
 
     return response.data;
   },
-  exportDataById: async (dataSetId, fileType) => {
+  exportDataById: async (datasetId, fileType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetData.url, {
-        dataSetId: dataSetId,
+        datasetId: datasetId,
         fileType: fileType
       }),
       queryString: {},
@@ -147,11 +147,11 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  exportTableDataById: async (dataSetId, tableSchemaId, fileType) => {
+  exportTableDataById: async (datasetId, tableSchemaId, fileType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.download({
       url: getUrl(config.exportDataSetTableData.url, {
-        dataSetId: dataSetId,
+        datasetId: datasetId,
         tableSchemaId: tableSchemaId,
         fileType: fileType
       }),
@@ -163,13 +163,13 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  schemaById: async dataFlowId => {
+  schemaById: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
         : getUrl(config.dataSchemaAPI.url, {
-            dataFlowId: dataFlowId
+            dataflowId: dataflowId
           }),
       queryString: {},
       headers: {
@@ -178,13 +178,13 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  statisticsById: async dataSetId => {
+  statisticsById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/error-statistics.json'
         : getUrl(config.loadStatisticsAPI.url, {
-            dataSetId: dataSetId
+            datasetId: datasetId
           }),
       queryString: {},
       headers: {
@@ -193,13 +193,13 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  tableDataById: async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
+  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_dataset_values2.json'
         : getUrl(config.dataViewerAPI.url, {
-            dataSetId: dataSetId,
+            datasetId: datasetId,
             tableSchemaId: tableSchemaId,
             pageNum: pageNum,
             pageSize: pageSize,
@@ -212,13 +212,13 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  webFormDataById: async (dataSetId, tableSchemaId) => {
+  webFormDataById: async (datasetId, tableSchemaId) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_dataset_values2.json'
         : getUrl(config.webFormDataViewerAPI.url, {
-            dataSetId: dataSetId,
+            datasetId: datasetId,
             tableSchemaId: tableSchemaId
           }),
       queryString: {},
@@ -228,16 +228,16 @@ export const apiDataSet = {
     });
     return response.data;
   },
-  updateFieldById: async (dataSetId, dataSetTableField) => {
+  updateFieldById: async (datasetId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/updateField`
+          ? `/dataset/${datasetId}/updateField`
           : getUrl(config.updateTableDataField.url, {
-              dataSetId: dataSetId
+              datasetId: datasetId
             }),
-        data: dataSetTableField,
+        data: datasetTableRecords,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -246,20 +246,20 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error updating dataSet field: ${error}`);
+      console.error(`Error updating dataset field: ${error}`);
       return false;
     }
   },
-  updateRecordsById: async (dataSetId, dataSetTableRecords) => {
+  updateRecordsById: async (datasetId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
-          ? `/dataset/${dataSetId}/updateRecord`
+          ? `/dataset/${datasetId}/updateRecord`
           : getUrl(config.updateTableDataRecord.url, {
-              dataSetId: dataSetId
+              datasetId: datasetId
             }),
-        data: dataSetTableRecords,
+        data: datasetTableRecords,
         queryString: {},
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`
@@ -268,18 +268,18 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error updating dataSet record data: ${error}`);
+      console.error(`Error updating dataset record data: ${error}`);
       return false;
     }
   },
-  validateById: async dataSetId => {
+  validateById: async datasetId => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
           ? `/jsons/list-of-errors.json`
           : getUrl(config.validateDataSetAPI.url, {
-              dataSetId: dataSetId
+              datasetId: datasetId
             }),
         queryString: {},
         headers: {
@@ -289,7 +289,7 @@ export const apiDataSet = {
 
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
-      console.error(`Error calling dataSet data validation: ${error}`);
+      console.error(`Error calling dataset data validation: ${error}`);
       return false;
     }
   }

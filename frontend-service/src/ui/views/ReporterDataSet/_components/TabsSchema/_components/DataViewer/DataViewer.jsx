@@ -26,7 +26,7 @@ import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
 import { Object } from 'es6-shim';
 
 const DataViewer = withRouter(
@@ -40,11 +40,11 @@ const DataViewer = withRouter(
     tableName,
     tableSchemaColumns,
     match: {
-      params: { dataSetId, dataFlowId }
+      params: { datasetId, dataflowId }
     },
     history
   }) => {
-    //const contextReporterDataSet = useContext(ReporterDataSetContext);
+    //const contextReporterDataset = useContext(ReporterDatasetContext);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -106,7 +106,7 @@ const DataViewer = withRouter(
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
-      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'dataSetPartitionId', header: '' });
+      inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
       onFetchData(undefined, undefined, 0, numRows);
     }, []);
@@ -150,8 +150,8 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       let columnsArr = colsSchema.map(column => {
-        let sort = column.field === 'id' || column.field === 'dataSetPartitionId' ? false : true;
-        let visibleColumn = column.field === 'id' || column.field === 'dataSetPartitionId' ? styles.VisibleHeader : '';
+        let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
+        let visibleColumn = column.field === 'id' || column.field === 'datasetPartitionId' ? styles.VisibleHeader : '';
         return (
           <Column
             body={dataTemplate}
@@ -225,7 +225,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteTable = async () => {
       setDeleteDialogVisible(false);
-      const dataDeleted = await DataSetService.deleteTableDataById(dataSetId, tableId);
+      const dataDeleted = await DatasetService.deleteTableDataById(datasetId, tableId);
       if (dataDeleted) {
         setFetchedData([]);
         setTotalRecords(0);
@@ -235,7 +235,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteRow = async () => {
       setDeleteDialogVisible(false);
-      const recordDeleted = await DataSetService.deleteRecordById(dataSetId, selectedRecord.recordId);
+      const recordDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
       if (recordDeleted) {
         snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsRecordDeleted(true);
@@ -284,7 +284,7 @@ const DataViewer = withRouter(
           record.recordId === selectedRecord.recordId
         ) {
           //without await. We don't have to wait for the response.
-          const fieldUpdated = DataSetService.updateFieldById(dataSetId, cell.field, field.id, field.type, value);
+          const fieldUpdated = DatasetService.updateFieldById(datasetId, cell.field, field.id, field.type, value);
           if (!fieldUpdated) {
             console.error('Error!');
           }
@@ -307,7 +307,7 @@ const DataViewer = withRouter(
       setLoadingFile(true);
       try {
         setExportTableDataName(createTableName(tableName, fileType));
-        setExportTableData(await DataSetService.exportTableDataById(dataSetId, tableId, fileType));
+        setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
       } catch (error) {
         console.error(error);
       } finally {
@@ -323,8 +323,8 @@ const DataViewer = withRouter(
           fields = `${sField}:${sOrder}`;
         }
 
-        const tableData = await DataSetService.tableDataById(
-          dataSetId,
+        const tableData = await DatasetService.tableDataById(
+          datasetId,
           tableId,
           Math.floor(fRow / nRows),
           nRows,
@@ -356,7 +356,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
         }
       } finally {
         setLoading(false);
@@ -387,7 +387,7 @@ const DataViewer = withRouter(
 
     const onPasteAccept = async () => {
       try {
-        const recordsAdded = await DataSetService.addRecordsById(dataSetId, tableId, pastedRecords);
+        const recordsAdded = await DatasetService.addRecordsById(datasetId, tableId, pastedRecords);
         if (recordsAdded) {
           growlRef.current.show({
             severity: 'success',
@@ -408,7 +408,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -431,13 +431,13 @@ const DataViewer = withRouter(
     };
 
     const onSaveRecord = async record => {
-      //Delete hidden column null values (dataSetPartitionId and id)
+      //Delete hidden column null values (datasetPartitionId and id)
       record.dataRow = record.dataRow.filter(
-        field => Object.keys(field.fieldData)[0] !== 'dataSetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
+        field => Object.keys(field.fieldData)[0] !== 'datasetPartitionId' && Object.keys(field.fieldData)[0] !== 'id'
       );
       if (isNewRecord) {
         try {
-          await DataSetService.addRecordsById(dataSetId, tableId, [record]);
+          await DatasetService.addRecordsById(datasetId, tableId, [record]);
           setAddDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
@@ -446,14 +446,14 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
           }
         } finally {
           setLoading(false);
         }
       } else {
         try {
-          await DataSetService.updateRecordsById(dataSetId, record);
+          await DatasetService.updateRecordsById(datasetId, record);
           onRefresh();
           setEditDialogVisible(false);
           snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
@@ -462,7 +462,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataFlowId }));
+            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
           }
         } finally {
           onCancelRowEdit();
@@ -487,9 +487,9 @@ const DataViewer = withRouter(
 
       const detailContent = (
         <span>
-          {resources.messages['dataSetLoadingMessage']}
+          {resources.messages['datasetLoadingMessage']}
           <strong>{editLargeStringWithDots(tableName, 22)}</strong>
-          {resources.messages['dataSetLoading']}
+          {resources.messages['datasetLoading']}
         </span>
       );
 
@@ -622,10 +622,10 @@ const DataViewer = withRouter(
         recordSchemaId: columnsSchema[0].recordId
       };
 
-      obj.dataSetPartitionId = null;
+      obj.datasetPartitionId = null;
       //dataSetPartitionId is needed for checking the rows owned by delegated contributors
       if (!isUndefined(data) && data.length > 0) {
-        obj.dataSetPartitionId = data.dataSetPartitionId;
+        obj.datasetPartitionId = data.datasetPartitionId;
       }
       return obj;
     };
@@ -682,7 +682,7 @@ const DataViewer = withRouter(
 
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
-        const dataSetPartitionId = record.dataSetPartitionId;
+        const datasetPartitionId = record.datasetPartitionId;
         const recordValidations = record.validations;
         const recordId = record.recordId;
         const recordSchemaId = record.recordSchemaId;
@@ -698,12 +698,12 @@ const DataViewer = withRouter(
           };
         });
         arrayDataFields.push({ fieldData: { id: record.recordId }, fieldValidations: null });
-        arrayDataFields.push({ fieldData: { dataSetPartitionId: record.dataSetPartitionId }, fieldValidations: null });
+        arrayDataFields.push({ fieldData: { datasetPartitionId: record.datasetPartitionId }, fieldValidations: null });
         const arrayDataAndValidations = {
           dataRow: arrayDataFields,
           recordValidations,
           recordId,
-          dataSetPartitionId,
+          datasetPartitionId,
           recordSchemaId
         };
         return arrayDataAndValidations;
@@ -744,7 +744,7 @@ const DataViewer = withRouter(
 
         emptyRecord.dataRow = emptyRecord.dataRow.filter(
           column =>
-            Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'dataSetPartitionId'
+            Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'datasetPartitionId'
         );
         emptyRecord.copiedCols = copiedCols.length;
         copiedBulkRecords.push(emptyRecord);
@@ -772,7 +772,7 @@ const DataViewer = withRouter(
           column.key !== 'actions' &&
           column.key !== 'recordValidation' &&
           column.key !== 'id' &&
-          column.key !== 'dataSetPartitionId'
+          column.key !== 'datasetPartitionId'
       );
       filteredColumns.map(column => {
         if (!isUndefined(record.dataRow)) {
@@ -1089,7 +1089,7 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onUpload}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(config.loadDataTableAPI.url, {
-              dataSetId: dataSetId,
+              datasetId: datasetId,
               tableId: tableId
             })}`}
           />
@@ -1132,7 +1132,7 @@ const DataViewer = withRouter(
                 column.field !== 'actions' &&
                 column.field !== 'recordValidation' &&
                 column.field !== 'id' &&
-                column.field !== 'dataSetPartitionId'
+                column.field !== 'datasetPartitionId'
             )}
             numRecords={numCopiedRecords}
             onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
