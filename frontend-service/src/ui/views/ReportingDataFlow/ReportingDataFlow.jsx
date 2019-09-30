@@ -168,7 +168,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            <div className={`${styles.dataSetItem}`}>
+            <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
                 label="DO"
@@ -179,11 +179,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             {dataflowData.datasets.map(dataset => {
               return (
                 <>
-                  <div className={`${styles.dataSetItem}`} key={dataSet.id}>
+                  <div className={`${styles.datasetItem}`} key={dataset.id}>
                     <BigButton
-                      layout="dataSet"
+                      layout="dataset"
                       label="DS"
-                      caption={dataSet.dataSetName}
+                      caption={dataset.dataSetName}
                       handleRedirect={() => {
                         handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
                       }}
@@ -230,7 +230,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               [config.permissions.CUSTODIAN],
               `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
             ) && (
-              <div className={`${styles.dataSetItem}`}>
+              <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="dashboard"
                   caption={resources.messages.dashboards}

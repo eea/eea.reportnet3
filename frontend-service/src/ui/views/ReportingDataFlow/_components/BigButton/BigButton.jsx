@@ -30,16 +30,16 @@ export const BigButton = ({ layout, handleRedirect, model, caption }) => {
     }
   };
 
-  const dataSet = model ? (
+  const dataset = model ? (
     <>
-      <div className={`${style.listItem} ${style.dataSet}`}>
+      <div className={`${style.bigButton} ${style.dataset}`}>
         <a
           href=""
           onClick={e => {
             e.preventDefault();
             handleRedirect();
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons('dataSet')} />
+          <FontAwesomeIcon icon={AwesomeIcons('dataset')} />
         </a>
         <span className={style.dropDwonIcon} onClick={e => toggleVisibility(e.currentTarget)}>
           <FontAwesomeIcon icon={AwesomeIcons('dropDown')} />
@@ -54,7 +54,7 @@ export const BigButton = ({ layout, handleRedirect, model, caption }) => {
   );
   const documents = (
     <>
-      <div className={`${style.listItem} ${style.documents}`}>
+      <div className={`${style.bigButton} ${style.documents}`}>
         <a
           href=""
           onClick={e => {
@@ -69,7 +69,7 @@ export const BigButton = ({ layout, handleRedirect, model, caption }) => {
   );
   const dashboard = (
     <>
-      <div className={`${style.listItem} ${style.dashboard}`}>
+      <div className={`${style.bigButton} ${style.dashboard}`}>
         <a
           href=""
           onClick={e => {
@@ -83,7 +83,7 @@ export const BigButton = ({ layout, handleRedirect, model, caption }) => {
     </>
   );
   const buttons = {
-    dataSet,
+    dataset,
     documents,
     dashboard
   };
