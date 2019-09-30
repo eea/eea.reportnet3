@@ -80,7 +80,7 @@ public class TableValidationQuerysDroolsRepository {
    * @return the list
    */
   @SuppressWarnings("unchecked")
-  public List<BigInteger> tableValidationQueryPeriodMonitoring(String queryValidate) {
+  public List<BigInteger> tableValidationQueryReturnListIds(String queryValidate) {
 
     Query query = entityManager.createNativeQuery(queryValidate);
     List<BigInteger> value = query.getResultList();

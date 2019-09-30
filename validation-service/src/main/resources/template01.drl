@@ -335,3 +335,31 @@ function boolean escherichiaColiStatusValidation(RecordValue recordValue, String
 function boolean ruleSVA(String value){
  	return ForeingKeyDrools.ruleSVA(value);
 }
+
+///NEW RECORDS LUNES
+
+
+function boolean RD03ARule(Long idDataset,String idSchemaGroupIdentifier, String idSchemaBathingWaterIdentifier){
+ 	return RecordTableValidation.RD03ARule(idDataset,idSchemaGroupIdentifier,idSchemaBathingWaterIdentifier);
+}
+function boolean RD20BRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20CRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20DRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20ERule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20FRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20GRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20HRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}

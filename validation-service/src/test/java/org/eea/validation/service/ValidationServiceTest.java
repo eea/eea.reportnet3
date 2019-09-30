@@ -1055,11 +1055,11 @@ public class ValidationServiceTest {
     List<BigInteger> listRecords = new ArrayList<BigInteger>();
     listRecords.add(new BigInteger("1"));
 
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
+    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(listRecords);
     when(recordRepository.findByIdValidation(Mockito.anyLong()))
         .thenReturn(Optional.of(new RecordValue()));
-    validationServiceImpl.tableValidationQueryPeriodMonitoring("");
+    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
   }
 
 
@@ -1067,12 +1067,12 @@ public class ValidationServiceTest {
   public void tableValidationQueryPeriodMonitoringFail() {
     List<BigInteger> listRecords = new ArrayList<BigInteger>();
 
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
+    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(listRecords);
-    validationServiceImpl.tableValidationQueryPeriodMonitoring("");
+    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
 
-    when(tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(""))
+    when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(null);
-    validationServiceImpl.tableValidationQueryPeriodMonitoring("");
+    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
   }
 }

@@ -774,17 +774,17 @@ public class ValidationServiceImpl implements ValidationService {
     return tableValidationQuerysDroolsRepository.tableValidationQueryNonReturnResult(QUERY);
   }
 
-  /**
-   * Table validation query period monitoring.
-   *
-   * @param QUERY the query
-   * @return the boolean
-   */
   @Override
-  public Boolean tableValidationQueryPeriodMonitoring(String QUERY) {
+  public Boolean tableValidationQueryReturnResult(String QUERY) {
+    return tableValidationQuerysDroolsRepository.tableValidationQueryReturnResult(QUERY);
+  }
 
+
+  @Override
+  public Boolean tableRecordRIds(String queryValidate, String MessageError,
+      TypeErrorEnum typeError) {
     List<BigInteger> listRecords =
-        tableValidationQuerysDroolsRepository.tableValidationQueryPeriodMonitoring(QUERY);
+        tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(queryValidate);
     if (null != listRecords) {
       for (BigInteger recordId : listRecords) {
         Optional<RecordValue> record = recordRepository.findByIdValidation(recordId.longValue());
@@ -792,23 +792,18 @@ public class ValidationServiceImpl implements ValidationService {
         Validation validation = new Validation();
         recordVal.setValidation(validation);
         recordVal.setRecordValue(record.get());
-        recordVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
-        recordVal.getValidation().setMessage(
-            "The sample was taken during a short-term pollution event, but the sampleStatus is not 'shortTermPollutionSample'.");
+        recordVal.getValidation().setLevelError(typeError);
+        recordVal.getValidation().setMessage(MessageError);
         recordVal.getValidation().setIdRule(new ObjectId().toString());
         recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
         recordVal.getValidation().setValidationDate(new Date().toString());
-        recordVal.getValidation().setOriginName("MonitoringResult");
+        recordVal.getValidation().setOriginName("Characterisation");
         validationRecordRepository.save(recordVal);
       }
     }
     return true;
   }
 
-  @Override
-  public Boolean tableValidationQueryReturnResult(String QUERY) {
-    return tableValidationQuerysDroolsRepository.tableValidationQueryReturnResult(QUERY);
-  }
 
 
 }

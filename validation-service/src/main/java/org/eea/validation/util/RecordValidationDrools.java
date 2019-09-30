@@ -3,6 +3,7 @@ package org.eea.validation.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.ValidationService;
@@ -620,6 +621,8 @@ public class RecordValidationDrools {
             + "on m.BW_IDENT = s.BW_IDENT and m.SEASON = s.SEASON and s.PERIODE_TYPE = 'shortTermPollution' and m.SAMPLE_DATE "
             + "between s.START_DATE and s.END_DATE and coalesce(m.SAMPLE_STATUS,'') != 'shortTermPollutionSample'";
 
-    return validationService.tableValidationQueryPeriodMonitoring(QUERY);
+    String messageError =
+        "The sample was taken during a short-term pollution event, but the sampleStatus is not 'shortTermPollutionSample'.";
+    return validationService.tableRecordRIds(QUERY, messageError, TypeErrorEnum.ERROR);
   }
 }

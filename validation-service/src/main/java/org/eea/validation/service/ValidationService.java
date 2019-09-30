@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -256,14 +257,9 @@ public interface ValidationService {
    */
   Boolean tableValidationQueryNonReturnResult(String queryValidate);
 
-  /**
-   * Table validation query period monitoring.
-   *
-   * @param QUERY the query
-   * @return the boolean
-   */
-  Boolean tableValidationQueryPeriodMonitoring(String queryValidate);
-
 
   Boolean tableValidationQueryReturnResult(String queryValidate);
+
+
+  Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError);
 }
