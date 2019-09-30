@@ -235,6 +235,11 @@ return RecordValidationDrools.monitoringWithPeriodSampleStatus(datasetId);
 function Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate, Long datasetId){
  return TableValidationDrools.ruleDU03(idSchemaBWIdent,idSchemaBWSampleDate,datasetId); 
 }
+
+//PART TABLES EMPTY
+ function Boolean ruleEmptyTable(Long datasetId, Long idTable){
+return TableValidationDrools.ruleEmptyTable(datasetId,idTable);
+}
  
  
  // PART OF DATASET
@@ -263,6 +268,9 @@ function Boolean datasetValidationDC03(Long idDataset) {
 return DatasetValidations.datasetValidationDC03(idDataset);
 }
  
+function Boolean datasetValidationDC02B(Long idDataset) {
+return DatasetValidations.datasetValidationDC02B(idDataset);
+}
  //PART RECORD
  
 //SEASIONALPERIOD TABLE

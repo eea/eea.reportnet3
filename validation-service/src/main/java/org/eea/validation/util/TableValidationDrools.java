@@ -189,4 +189,14 @@ public class TableValidationDrools {
 
     return validationService.tableValidationQueryNonReturnResult(DU03);
   }
+
+
+  public static Boolean ruleEmptyTable(Long datasetId, Long idTable) {
+
+    String QUERY = "select count(*) from dataset_" + datasetId
+        + ".record_value r where r.id_Table =" + idTable;
+
+    return validationService.tableValidationQueryReturnResult(QUERY);
+  }
+
 }

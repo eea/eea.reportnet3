@@ -236,6 +236,7 @@ public interface ValidationService {
   Boolean datasetValidationDC03Query(String DC03);
 
 
+  Boolean datasetValidationDC02BQuery(String DC03);
   /// PART TABLE
 
   /**
@@ -253,7 +254,7 @@ public interface ValidationService {
    * @param QUERY the query
    * @return the boolean
    */
-  Boolean tableValidationQueryNonReturnResult(String QUERY);
+  Boolean tableValidationQueryNonReturnResult(String queryValidate);
 
   /**
    * Table validation query period monitoring.
@@ -261,8 +262,8 @@ public interface ValidationService {
    * @param QUERY the query
    * @return the boolean
    */
-  Boolean tableValidationQueryPeriodMonitoring(String QUERY);
+  Boolean tableValidationQueryPeriodMonitoring(String queryValidate);
 
 
-
+  Boolean tableValidationQueryReturnResult(String queryValidate);
 }

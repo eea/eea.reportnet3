@@ -49,6 +49,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
+import org.joda.time.LocalDate;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -494,10 +495,17 @@ public class ValidationServiceImpl implements ValidationService {
     ResourceInfoVO resourceInfoVO =
         userManagementController.getResourceDetail(datasetId, ResourceGroupEnum.DATASET_PROVIDER);
     String countryCode = "''";
-    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0
-        && resourceInfoVO.getAttributes().containsKey("countryCode")) {
-      countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+    String dataCallYear = "" + new LocalDate().getYear();
+    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {
+      if (resourceInfoVO.getAttributes().containsKey("countryCode")) {
+        countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+      }
+
+      if (resourceInfoVO.getAttributes().containsKey("dataCallYear")) {
+        dataCallYear = resourceInfoVO.getAttributes().get("dataCallYear").get(0);
+      }
     }
+    ThreadPropertiesManager.setVariable("dataCallYear", dataCallYear);
     ThreadPropertiesManager.setVariable("countryCode", countryCode);
   }
 
@@ -737,6 +745,10 @@ public class ValidationServiceImpl implements ValidationService {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);
   }
 
+  @Override
+  public Boolean datasetValidationDC02BQuery(String DC03) {
+    return datasetRepositoryImpl.datasetValidationQuery(DC03);
+  }
 
   /**
    * Table validation DR 01 AB query.
@@ -792,4 +804,11 @@ public class ValidationServiceImpl implements ValidationService {
     }
     return true;
   }
+
+  @Override
+  public Boolean tableValidationQueryReturnResult(String QUERY) {
+    return tableValidationQuerysDroolsRepository.tableValidationQueryReturnResult(QUERY);
+  }
+
+
 }

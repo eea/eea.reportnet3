@@ -5,7 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import org.joda.time.LocalDate;
+import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -29,9 +29,9 @@ public class TableValidationQuerysDroolsRepository {
    * @return the boolean
    */
   @SuppressWarnings("unchecked")
-  public Boolean tableValidationDR01ABQuery(String QUERY, Boolean previous) {
+  public Boolean tableValidationDR01ABQuery(String queryValidate, Boolean previous) {
 
-    Query query = entityManager.createNativeQuery(QUERY);
+    Query query = entityManager.createNativeQuery(queryValidate);
     List<String> value = query.getResultList();
     if (null == value || value.isEmpty()) {
       return true;
@@ -40,7 +40,8 @@ public class TableValidationQuerysDroolsRepository {
       return false;
     }
     if (value.size() == 1 && Boolean.TRUE.equals(previous)) {
-      Integer localDateYear = new LocalDate().getYear();
+      Integer localDateYear =
+          Integer.valueOf(ThreadPropertiesManager.getVariable("dataCallYear").toString());
       Integer yearSession;
       try {
         yearSession = Integer.valueOf(value.get(0));
@@ -61,9 +62,9 @@ public class TableValidationQuerysDroolsRepository {
    * @return the boolean
    */
   @SuppressWarnings("unchecked")
-  public Boolean tableValidationQueryNonReturnResult(String QUERY) {
+  public Boolean tableValidationQueryNonReturnResult(String queryValidate) {
 
-    Query query = entityManager.createNativeQuery(QUERY);
+    Query query = entityManager.createNativeQuery(queryValidate);
     List<String> value = query.getResultList();
     if (null == value || value.isEmpty()) {
       return true;
@@ -79,14 +80,33 @@ public class TableValidationQuerysDroolsRepository {
    * @return the list
    */
   @SuppressWarnings("unchecked")
-  public List<BigInteger> tableValidationQueryPeriodMonitoring(String QUERY) {
+  public List<BigInteger> tableValidationQueryPeriodMonitoring(String queryValidate) {
 
-    Query query = entityManager.createNativeQuery(QUERY);
+    Query query = entityManager.createNativeQuery(queryValidate);
     List<BigInteger> value = query.getResultList();
     if (null == value || value.isEmpty()) {
       return null;
     } else {
       return value;
+    }
+  }
+
+
+  /**
+   * Table validation query non return result.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
+  @SuppressWarnings("unchecked")
+  public Boolean tableValidationQueryReturnResult(String queryRecieve) {
+
+    Query query = entityManager.createNativeQuery(queryRecieve);
+    List<BigInteger> value = query.getResultList();
+    if (null == value || value.isEmpty() || value.get(0).longValue() == 0L) {
+      return false;
+    } else {
+      return true;
     }
   }
 }

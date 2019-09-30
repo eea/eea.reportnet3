@@ -337,7 +337,7 @@ public class RecordValidationDrools {
    *
    * @return the boolean
    */
-// 1
+  // 1
   public static Boolean sameYearValidatioMonitoring(RecordValue recordValue,
       String idFieldShemaDate, String idFieldSchemaSeason) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -364,6 +364,7 @@ public class RecordValidationDrools {
       } catch (ParseException e) {
         return true;
       }
+
       if (!date.trim().substring(0, 4).equalsIgnoreCase(season)) {
         return false;
       }
@@ -376,14 +377,13 @@ public class RecordValidationDrools {
    * Max valueintestinal.
    *
    * @param recordValue the record value
-   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci
-   *     value
+   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci value
    * @param idFieldSchemaIntestinalEnterococciStatus the id field schema intestinal enterococci
-   *     status
+   *        status
    *
    * @return the boolean
    */
-// 2
+  // 2
   public static Boolean maxValueintestinal(RecordValue recordValue,
       String idFieldShemaIntestinalEnterococciValue,
       String idFieldSchemaIntestinalEnterococciStatus) {
@@ -418,13 +418,13 @@ public class RecordValidationDrools {
    *
    * @param recordValue the record value
    * @param idFieldShemaEscherichiaColiEnterococciValue the id field shema escherichia coli
-   *     enterococci value
+   *        enterococci value
    * @param idFieldSchemaEscherichiaColiEnterococciStatus the id field schema escherichia coli
-   *     enterococci status
+   *        enterococci status
    *
    * @return the boolean
    */
-// 3
+  // 3
   public static Boolean maxValueEscherichiaColi(RecordValue recordValue,
       String idFieldShemaEscherichiaColiEnterococciValue,
       String idFieldSchemaEscherichiaColiEnterococciStatus) {
@@ -461,8 +461,7 @@ public class RecordValidationDrools {
    * General status validation.
    *
    * @param recordValue the record value
-   * @param idFieldShemaIntestinalEnterococciStatus the id field shema intestinal enterococci
-   *     status
+   * @param idFieldShemaIntestinalEnterococciStatus the id field shema intestinal enterococci status
    * @param idFieldSchemaEscherichiaColiStatus the id field schema escherichia coli status
    * @param idFieldSchemaSampleStatus the id field schema sample status
    *
@@ -506,14 +505,12 @@ public class RecordValidationDrools {
    * Intestinal enterococci value validation.
    *
    * @param recordValue the record value
-   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci
-   *     value
-   * @param idFieldSchemIntestinalEnterococciStatus the id field schem intestinal enterococci
-   *     status
+   * @param idFieldShemaIntestinalEnterococciValue the id field shema intestinal enterococci value
+   * @param idFieldSchemIntestinalEnterococciStatus the id field schem intestinal enterococci status
    *
    * @return the boolean
    */
-// 8
+  // 8
   public static Boolean intestinalEnterococciValueValidation(RecordValue recordValue,
       String idFieldShemaIntestinalEnterococciValue,
       String idFieldSchemIntestinalEnterococciStatus) {
@@ -549,7 +546,7 @@ public class RecordValidationDrools {
    *
    * @return the boolean
    */
-// 9
+  // 9
   public static Boolean escherichiaColiStatusValidation(RecordValue recordValue,
       String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus) {
 

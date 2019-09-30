@@ -38,7 +38,7 @@ public class DatasetValidations {
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c42') as bathingWaterIdentifier "
         + "    FROM dataset_" + idDataset + ".record_value rv), " + " RecordsBathingSeason as( "
         + "    select fv.id_record as id_record " + "    FROM dataset_" + idDataset
-        + ".Field_Value fv " + "    WHERE    fv.value='bathingSeason' "
+        + ".Field_Value fv " + "    WHERE    fv.value in('bathingSeason','delisted') "
         + "    and fv.id_field_schema='5d5cfa24d201fb6084d90c8e'), " + "SeasonalPeriod AS ( "
         + "    SELECT " + "    (select field_value.VALUE from dataset_" + idDataset
         + ".field_value field_value where  field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90c7c') as season, "
@@ -248,5 +248,26 @@ public class DatasetValidations {
     return validationService.datasetValidationDC03Query(DC03);
   }
 
+  public static Boolean datasetValidationDC02B(Long idDataset) {
+    String DC02B = " WITH SeasonalPeriod as("
+        + "select bathingWaterIdentifierTable.bathingWaterIdentifier as BW_IDENT,"
+        + "seasonTable.season as SEASON," + "periodeTypeTable.periodeType as PERIODE_TYPE FROM ("
+        + "select v.value as bathingWaterIdentifier, v.id_record as record_id from dataset_"
+        + idDataset + ".field_value v "
+        + "where v.id_field_schema = '5d5cfa24d201fb6084d90c85') as bathingWaterIdentifierTable "
+        + "inner join(" + "select v.value as season, v.id_record as record_id" + " from dataset_"
+        + idDataset + ".field_value v "
+        + "where v.id_field_schema = '5d5cfa24d201fb6084d90c7c') as seasonTable "
+        + "on bathingWaterIdentifierTable.record_id = seasonTable.record_id inner join("
+        + "select v.value as periodeType, v.id_record as record_id from dataset_" + idDataset
+        + ".field_value v "
+        + "where v.id_field_schema = '5d5cfa24d201fb6084d90c8e') as periodeTypeTable "
+        + "on seasonTable.record_id = periodeTypeTable.record_id) "
+        + "SELECT a.BW_IDENT, a.SEASON FROM seasonalPeriod a "
+        + "WHERE a.PERIODE_TYPE != 'delisted' "
+        + "and exists(select b.PERIODE_TYPE from seasonalPeriod b "
+        + "where b.PERIODE_TYPE = 'delisted' AND a.BW_IDENT = b.BW_IDENT and a.SEASON = b.SEASON)";
 
+    return validationService.datasetValidationDC03Query(DC02B);
+  }
 }
