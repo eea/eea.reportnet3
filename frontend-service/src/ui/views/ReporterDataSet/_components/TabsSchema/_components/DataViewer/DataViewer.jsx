@@ -129,8 +129,10 @@ const DataViewer = withRouter(
     }, [selectedRecord]);
 
     useEffect(() => {
-      onRefresh();
-      setConfirmDeleteVisible(false);
+      if (isRecordDeleted) {
+        onRefresh();
+        setConfirmDeleteVisible(false);
+      }
     }, [isRecordDeleted]);
 
     useEffect(() => {
