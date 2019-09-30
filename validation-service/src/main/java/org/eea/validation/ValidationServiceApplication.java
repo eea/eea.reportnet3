@@ -1,6 +1,5 @@
 package org.eea.validation;
 
-import org.eea.multitenancy.MultiTenantApplication;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,7 +24,8 @@ public class ValidationServiceApplication {
    * @param args the arguments
    */
   public static void main(final String[] args) {
-    MultiTenantApplication.executeApplication(ValidationServiceApplication.class, args);
+    SpringApplication.run(ValidationServiceApplication.class, args);
+
   }
 
 }

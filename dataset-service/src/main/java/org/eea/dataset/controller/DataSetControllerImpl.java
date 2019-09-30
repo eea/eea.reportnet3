@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
-import org.eea.annotation.MyAnnotation;
+import org.eea.annotation.ExecuteOnlyOnce;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -466,7 +466,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @throws Exception the exception
    */
   @Override
-  @MyAnnotation
+  @ExecuteOnlyOnce
   @HystrixCommand
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})

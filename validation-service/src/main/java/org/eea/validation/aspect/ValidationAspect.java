@@ -20,7 +20,7 @@ public class ValidationAspect {
 
   private static Map<Integer, CompletableFuture<Object>> map = new ConcurrentHashMap<>();
 
-  @Around("@annotation(org.eea.annotation.MyAnnotation)")
+  @Around("@annotation(org.eea.annotation.ExecuteOnlyOnce)")
   public Object checkDaasetBlocked(ProceedingJoinPoint jointPoint) throws Throwable {
 
     CompletableFuture<Object> alreadyExists;
@@ -43,7 +43,6 @@ public class ValidationAspect {
       map.remove(hash);
       LOG.info("eliminado {}:{}", jointPoint.getSignature().toShortString(), jointPoint.getArgs());
     }
-
 
     return response.get();
   }

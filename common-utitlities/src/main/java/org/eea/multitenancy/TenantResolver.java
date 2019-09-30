@@ -1,7 +1,5 @@
 package org.eea.multitenancy;
 
-import org.eea.exception.EEARuntimeException;
-
 /**
  * The type Tenant resolver.
  */
@@ -13,10 +11,6 @@ public final class TenantResolver {
    */
   private static InheritableThreadLocal<String> tenant = new InheritableThreadLocal<>();
 
-  /**
-   * The Constant DEFAULT_TENANT. Bust be default
-   */
-  public static String initTenant = "dataset_1";
 
   /**
    * Instantiates a new tenant resolver.
@@ -40,13 +34,8 @@ public final class TenantResolver {
    * @return the tenant name
    */
   public static String getTenantName() {
-    if ("".equals(initTenant)) {// application is started already
-      if (null == tenant.get() || tenant.get().isEmpty()) {
-        throw new EEARuntimeException("Error, connection id is null or empty");
-      }
-    }
 
-    return null == tenant.get() || tenant.get().isEmpty() ? initTenant : tenant.get();
+    return null == tenant.get() || tenant.get().isEmpty() ? "" : tenant.get();
 
   }
 

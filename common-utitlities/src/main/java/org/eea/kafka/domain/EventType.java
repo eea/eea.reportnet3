@@ -61,8 +61,15 @@ public enum EventType {
    */
   FIELD_UPDATED_COMPLETED_EVENT("DATA_REPORTING_TOPIC", "updated_field_completed_key"),
 
-  /** The snapshot restored event. */
-  SNAPSHOT_RESTORED_EVENT("DATA_REPORTING_TOPIC", "snapshot_restored_completed_key");
+  /**
+   * The snapshot restored event.
+   */
+  SNAPSHOT_RESTORED_EVENT("DATA_REPORTING_TOPIC", "snapshot_restored_completed_key"),
+
+  /**
+   * The WebSocket notification event.
+   */
+  WEBSOCKET_NOTIFICATION("DATA_REPORTING_TOPIC", "websocket_notification");
 
 
   /**

@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.multitenancy.MultiTenantDataSource;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,17 +28,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class EventHandlerTest {
 
 
-  /** The event handler. */
+  /**
+   * The event handler.
+   */
   @InjectMocks
   private EventHandler eventHandler;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The data source. */
-  @Mock
-  private MultiTenantDataSource dataSource;
 
   /**
    * Inits the mocks.

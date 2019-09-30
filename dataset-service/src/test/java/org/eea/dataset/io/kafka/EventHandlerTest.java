@@ -1,12 +1,12 @@
 package org.eea.dataset.io.kafka;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.multitenancy.MultiTenantDataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +20,6 @@ public class EventHandlerTest {
 
   @InjectMocks
   private EventHandler eventHandler;
-
-  @Mock
-  private MultiTenantDataSource dataSource;
 
   @Before
   public void initMocks() {

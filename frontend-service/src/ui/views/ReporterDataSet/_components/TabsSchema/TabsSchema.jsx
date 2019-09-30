@@ -16,7 +16,8 @@ export const TabsSchema = ({
   selectedRecordErrorId,
   tables,
   tableSchemaColumns,
-  hasWritePermissions
+  hasWritePermissions,
+  isWebFormMMR
 }) => {
   let tabs =
     tables && tableSchemaColumns
@@ -26,6 +27,7 @@ export const TabsSchema = ({
               <div className={styles.TabsSchema}>
                 <DataViewer
                   hasWritePermissions={hasWritePermissions}
+                  isWebFormMMR={isWebFormMMR}
                   buttonsList={buttonsList}
                   key={table.id}
                   tableId={table.id}
