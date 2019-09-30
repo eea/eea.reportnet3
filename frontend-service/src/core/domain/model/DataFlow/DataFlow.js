@@ -1,4 +1,4 @@
-export class DataFlow {
+export class Dataflow {
   constructor(
     id,
     datasets,
@@ -22,6 +22,6 @@ export class DataFlow {
     this.status = status;
     this.userRequestStatus = userRequestStatus;
     this.weblinks = weblinks;
-    this.requestId  = requestId;
+    this.requestId = requestId;
   }
 }

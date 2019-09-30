@@ -110,7 +110,7 @@ export const AwesomeIcons = icon => {
       return faCaretDown;
     case 'barChart':
       return faChartBar;
-    case 'dataSet':
+    case 'dataset':
       return faDatabase;
     default:
       return faFileAlt;

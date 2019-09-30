@@ -1,2 +1,2 @@
-export const GetStatistics = ({ dataSetRepository }) => async dataSetId =>
-  dataSetRepository.errorStatisticsById(dataSetId);
+export const GetStatistics = ({ datasetRepository }) => async datasetId =>
+  datasetRepository.errorStatisticsById(datasetId);

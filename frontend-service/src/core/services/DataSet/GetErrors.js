@@ -1,2 +1,2 @@
-export const GetErrors = ({ dataSetRepository }) => async (dataSetId, pageNum, pageSize, sortField, asc) =>
-  dataSetRepository.errorsById(dataSetId, pageNum, pageSize, sortField, asc);
+export const GetErrors = ({ datasetRepository }) => async (datasetId, pageNum, pageSize, sortField, asc) =>
+  datasetRepository.errorsById(datasetId, pageNum, pageSize, sortField, asc);
