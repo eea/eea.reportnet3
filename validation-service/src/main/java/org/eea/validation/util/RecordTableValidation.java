@@ -163,11 +163,10 @@ public class RecordTableValidation {
         + "    fv.id_record as idrecord FROM dataset_" + idDataset
         + ".Field_Value fv,RecordsBathingSeason rv WHERE fv.id_record=rv.id_record), "
         + "vSamplesWithin7Days AS " + " (SELECT a.*, b.endDate " + "  FROM MonitoringResult a "
-        + "  JOIN SeasonalPeriod b    --- within 7 days "
+        + "  JOIN SeasonalPeriod b   "
         + "   ON a.bathingWaterIdentifier = b.bathingWaterIdentifier "
         + "   AND a.season = b.season " + "   AND b.periodType = 'shortTermPollution' "
-        + "   AND (b.endDate - a.sampleDate) BETWEEN 1 AND 7  "
-        + "  LEFT JOIN SeasonalPeriod c    --- but not inside another STP "
+        + "   AND (b.endDate - a.sampleDate) BETWEEN 1 AND 7  " + "  LEFT JOIN SeasonalPeriod c    "
         + "   ON a.bathingWaterIdentifier = c.bathingWaterIdentifier "
         + "   AND a.season = c.season " + "   AND b.periodType = 'shortTermPollution' "
         + "   AND a.sampleDate BETWEEN c.startDate AND c.endDate "
@@ -305,9 +304,8 @@ public class RecordTableValidation {
         + "   AND b.periodType = 'shortTermPollution' "
         + "   AND a.sampleDate BETWEEN b.startDate AND b.endDate "
         + "  WHERE b.bathingWaterIdentifier IS NULL "
-        + "   AND a.sampleStatus = 'shortTermPollutionSample' "
-        + "   --Group by is not in the original validation but we put because there are a lotof duplicate records "
-        + "   group by a.idrecord " + "   having count(*)>1;";
+        + "   AND a.sampleStatus = 'shortTermPollutionSample' " + "   group by a.idrecord "
+        + "   having count(*)>1;";
 
     String MessageError =
         "The sample was not taken within a short-term pollution event and the sampleStatus is 'shortTermPollutionSample'";
@@ -437,8 +435,7 @@ public class RecordTableValidation {
         + " .field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90d07') as Remarks, "
         + "    fv.id_record as idrecord FROM dataset_" + idDataset
         + " .Field_Value fv,RecordsBathingSeason rv WHERE fv.id_record=rv.id_record) "
-        + " SELECT a.idrecord " + "  FROM MonitoringResult a "
-        + "  LEFT JOIN SeasonalPeriod b    --- within 7 days "
+        + " SELECT a.idrecord " + "  FROM MonitoringResult a " + "  LEFT JOIN SeasonalPeriod b   "
         + "    ON a.bathingWaterIdentifier = b.bathingWaterIdentifier "
         + "    AND a.season = b.season " + "    AND b.periodType = 'shortTermPollution' "
         + "    AND ((b.endDate - a.sampleDate) BETWEEN 1 AND 7) "
@@ -492,8 +489,7 @@ public class RecordTableValidation {
         + " .field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90d07') as Remarks, "
         + "    fv.id_record as idrecord  FROM dataset_" + idDataset
         + " .Field_Value fv,RecordsBathingSeason rv WHERE fv.id_record=rv.id_record) "
-        + "  SELECT a.idrecord " + "  FROM MonitoringResult a "
-        + "  LEFT JOIN SeasonalPeriod b    --- based on the end day "
+        + "  SELECT a.idrecord " + "  FROM MonitoringResult a " + "  LEFT JOIN SeasonalPeriod b "
         + "    ON a.bathingWaterIdentifier = b.bathingWaterIdentifier "
         + "    AND a.season = b.season " + "    AND b.periodType = 'shortTermPollution' "
         + "    AND b.endDate =  a.sampleDate " + "  WHERE b.bathingWaterIdentifier IS NULL";

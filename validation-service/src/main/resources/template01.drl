@@ -356,20 +356,20 @@ function boolean RD20BRule(Long idDataset){
  	return RecordTableValidation.RD20BRule(idDataset);
 }
 function boolean RD20CRule(Long idDataset){
- 	return RecordTableValidation.RD20BRule(idDataset);
+ 	return RecordTableValidation.RD20CRule(idDataset);
 }
 function boolean RD20DRule(Long idDataset){
- 	return RecordTableValidation.RD20BRule(idDataset);
+ 	return RecordTableValidation.RD20DRule(idDataset);
 }
 function boolean RD20ERule(Long idDataset){
  	return RecordTableValidation.RD20BRule(idDataset);
 }
 function boolean RD20FRule(Long idDataset){
- 	return RecordTableValidation.RD20BRule(idDataset);
+ 	return RecordTableValidation.RD20FRule(idDataset);
 }
 function boolean RD20GRule(Long idDataset){
- 	return RecordTableValidation.RD20BRule(idDataset);
+ 	return RecordTableValidation.RD20GRule(idDataset);
 }
 function boolean RD20HRule(Long idDataset){
- 	return RecordTableValidation.RD20BRule(idDataset);
+ 	return RecordTableValidation.RD20HRule(idDataset);
 }
