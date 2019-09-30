@@ -13,7 +13,8 @@ import {
   faFileVideo,
   faTrashAlt,
   faCaretDown,
-  faChartBar
+  faChartBar,
+  faPlus
 } from '@fortawesome/free-solid-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -112,6 +113,8 @@ export const AwesomeIcons = icon => {
       return faChartBar;
     case 'dataset':
       return faDatabase;
+    case 'plus':
+      return faPlus;
     default:
       return faFileAlt;
   }

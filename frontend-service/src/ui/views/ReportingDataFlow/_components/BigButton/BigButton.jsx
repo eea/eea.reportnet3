@@ -84,10 +84,27 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
       <p className={style.caption}>{caption}</p>
     </>
   );
+  const addNewDataset = (
+    <>
+      <div className={`${style.bigButton} ${style.addNewDataset}`}>
+        <a
+          href=""
+          onClick={e => {
+            e.preventDefault();
+            toggleVisibility(e.currentTarget);
+          }}>
+          <FontAwesomeIcon icon={AwesomeIcons('plus')} />
+        </a>
+        <Menu model={model} />
+      </div>
+      <p className={style.caption}>{caption}</p>
+    </>
+  );
   const buttons = {
     dataset,
     documents,
-    dashboard
+    dashboard,
+    addNewDataset
   };
   return <div className={`${style.datasetItem}`}>{buttons[layout]}</div>;
 };

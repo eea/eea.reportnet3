@@ -7,6 +7,7 @@ import styles from './ReportingDataFlow.module.scss';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ContributorsList } from './_components/ContributorsList';
@@ -175,6 +176,37 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
+            {isCustodian && (
+              <div className={`${styles.datasetItem}`}>
+                <BigButton
+                  layout="addNewDataset"
+                  caption={resources.messages.add}
+                  handleRedirect={() =>
+                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
+                  }
+                  model={[
+                    {
+                      label: 'New dataset from template' /* resources.messages.releaseDataCollection */,
+                      icon: 'clone',
+                      command: () => showReleaseSnapshotDialog(),
+                      disabled: false
+                    },
+                    {
+                      label: 'New empty dataset',
+                      icon: 'clone',
+                      command: () => showReleaseSnapshotDialog(),
+                      disabled: false
+                    },
+                    {
+                      label: 'New linked page',
+                      icon: 'clone',
+                      command: () => showReleaseSnapshotDialog(),
+                      disabled: false
+                    }
+                  ]}
+                />
+              </div>
+            )}
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
