@@ -37,7 +37,18 @@ const parseDatasetListDTO = datasetsDTO => {
 };
 
 const parseDatasetDTO = datasetDTO => {
-  return new Dataset(null, datasetDTO.id, null, datasetDTO.dataSetName, null, null, null, null, null);
+  return new Dataset(
+    null,
+    datasetDTO.id,
+    null,
+    datasetDTO.dataSetName,
+    null,
+    null,
+    null,
+    null,
+    null,
+    datasetDTO.isReleased
+  );
 };
 
 const parseDocumentListDTO = documentsDTO => {

@@ -183,6 +183,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     layout="dataset"
                     label="DS"
                     caption={dataset.datasetSchemaName}
+                    isReleased={dataset.isReleased}
                     handleRedirect={() => {
                       handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.datasetId}`);
                     }}
