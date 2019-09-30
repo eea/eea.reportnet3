@@ -30,13 +30,15 @@ const login = async (userName, password) => {
   timeOut((remain - 10) * 1000);
   return user;
 };
-const logout = async userId => {
+
+const logout = async () => {
   const currentTokens = userStorage.get();
   userStorage.remove();
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
-const refreshToken = async refreshToken => {
+
+const refreshToken = async () => {
   try {
     const currentTokens = userStorage.get();
     const userTokensDTO = await apiUser.refreshToken(currentTokens.refreshToken);
@@ -61,15 +63,16 @@ const refreshToken = async refreshToken => {
 const hasPermission = (user, permissions, entity) => {
   let allow = false;
   if (isUndefined(entity)) {
-    if (user.mainRole === permissions[0]) allow = true;
+    if (permissions.includes(user.mainRole)) allow = true;
   } else {
-    permissions.forEach(permision => {
-      const role = `${entity}-${permision}`;
+    permissions.forEach(permission => {
+      const role = `${entity}-${permission}`;
       if (user.contextRoles.includes(role)) allow = true;
     });
   }
   return allow;
 };
+
 const userRole = (user, entity) => {
   const roleDTO = user.contextRoles.filter(role => role.includes(entity));
   if (roleDTO.length) {
