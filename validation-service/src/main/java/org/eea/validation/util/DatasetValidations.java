@@ -275,11 +275,11 @@ public class DatasetValidations {
     return true;
   }
 
-  public static Boolean ruleEM03(Long idDataset) {
+  public static Boolean ruleEM02(Long idDataset) {
     return true;
   }
 
-  public static Boolean ruleEM04(Long idDataset) {
+  public static Boolean ruleEM03(Long idDataset) {
     return true;
   }
 }
