@@ -8,12 +8,14 @@ export class Dataset {
     tables,
     hasErrors,
     tableStatisticPercentages,
-    tableStatisticValues
+    tableStatisticValues,
+    isReleased
   ) {
     this.datasetId = datasetId;
     this.datasetSchemaId = datasetSchemaId;
     this.datasetSchemaName = datasetSchemaName;
     this.errors = errors;
+    this.isReleased = isReleased;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;
