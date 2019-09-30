@@ -1,4 +1,4 @@
-export class DataSetError {
+export class DatasetError {
   constructor(
     entityType,
     levelError,

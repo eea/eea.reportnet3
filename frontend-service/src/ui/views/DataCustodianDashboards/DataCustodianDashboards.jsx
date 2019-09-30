@@ -12,7 +12,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { DataFlowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -33,12 +33,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowList'],
+        label: resources.messages['dataflowList'],
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages.dataFlow,
-        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
+        label: resources.messages.dataflow,
+        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
       },
       {
         label: resources.messages.dataCustodianDashboards
@@ -52,9 +52,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const loadDashboards = async () => {
     try {
-      setReleasedDashboardData(await DataFlowService.datasetReleasedStatus(match.params.dataFlowId));
+      setReleasedDashboardData(await DataflowService.datasetReleasedStatus(match.params.dataflowId));
 
-      const datasetsDashboardsData = await DataFlowService.datasetStatisticsStatus(match.params.dataFlowId);
+      const datasetsDashboardsData = await DataflowService.datasetStatisticsStatus(match.params.dataflowId);
 
       filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
     } catch (error) {
@@ -268,7 +268,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <div className="rep-row">
-        <h1>{resources.messages['dataFlow']}</h1>
+        <h1>{resources.messages['dataflow']}</h1>
       </div>
       <div className="rep-row">
         <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>

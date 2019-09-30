@@ -1,78 +1,78 @@
 {
 	"addNewRecord": {
-		"url":"/dataset/{:dataSetId}/table/{:tableSchemaId}/record"
+		"url":"/dataset/{:datasetId}/table/{:tableSchemaId}/record"
 	},
 	"createSnapshot": {
-		"url": "/snapshot/dataset/{:dataSetId}/create?description={:description}"
+		"url": "/snapshot/dataset/{:datasetId}/create?description={:description}"
 	},
 	"dataSchemaAPI": {
-		"url": "/dataschema/dataflow/{:dataFlowId}"
+		"url": "/dataschema/dataflow/{:dataflowId}"
 	},
 	"dataViewerAPI": {
-		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}"
+		"url": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}"
 	},
 	"webFormDataViewerAPI": {
-		"url": "/dataset/TableValueDataset/{:dataSetId}?idTableSchema={:tableSchemaId}"
+		"url": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"
 	},
 	"deleteSnapshotByID": {
-		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/delete"
+		"url": "/snapshot/{:snapshotId}/dataset/{:datasetId}/delete"
 	},
 	"restoreSnapshot": {
-		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/restore"
+		"url": "/snapshot/{:snapshotId}/dataset/{:datasetId}/restore"
 	},
 	"releaseSnapshot": {
-		"url": "/snapshot/{:snapshotId}/dataset/{:dataSetId}/release"
+		"url": "/snapshot/{:snapshotId}/dataset/{:datasetId}/release"
 	},
 	"deleteImportData": {
-		"url": "/dataset/{:dataSetId}/deleteImportData"
+		"url": "/dataset/{:datasetId}/deleteImportData"
 	},		
 	"deleteImportTable": {
-		"url":"/dataset/{:dataSetId}/deleteImportTable/{:tableId}"
+		"url":"/dataset/{:datasetId}/deleteImportTable/{:tableId}"
 	},
 	"deleteRecord":{
-		"url":"/dataset/{:dataSetId}/record/{:recordId}"
+		"url":"/dataset/{:datasetId}/record/{:recordId}"
 	},
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
 	},
 	"exportDataSetData": {
-		"url": "/dataset/exportFile?datasetId={:dataSetId}&mimeType={:fileType}"
+		"url": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}"
 	},
 	"exportDataSetTableData": {
-		"url": "/dataset/exportFile?datasetId={:dataSetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
+		"url": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
 	},
 	"listValidationsAPI": {
-		"url": "/validation/listValidations/{:dataSetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
+		"url": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}"
 	},	
-	"loadDataFlowTaskPendingAcceptedAPI": {
+	"loadDataflowTaskPendingAcceptedAPI": {
 		"url": "/dataflow/pendingaccepted"
 	},
-	"loadDataSetsByDataflowID": {
-		"url": "/dataflow/{:dataFlowId}"
+	"loadDataSetsByDataflowId": {
+		"url": "/dataflow/{:dataflowId}"
 	},		
 	"loadDataTableAPI": {
-		"url": "/dataset/{:dataSetId}/loadTableData/{:tableId}"
+		"url": "/dataset/{:datasetId}/loadTableData/{:tableId}"
 	},
 	"loadSnapshotsListAPI": {
-		"url": "/snapshot/dataset/{:dataSetId}/listSnapshots"
+		"url": "/snapshot/dataset/{:datasetId}/listSnapshots"
 	},
 	"loadStatisticsAPI": {
-		"url": "/dataset/loadStatistics/{:dataSetId}"
+		"url": "/dataset/loadStatistics/{:datasetId}"
 	},
 	"uploadDocumentAPI": {
-		"url": "/document/upload/{:dataFlowId}?description={:description}&language={:language}"
+		"url": "/document/upload/{:dataflowId}?description={:description}&language={:language}"
 	},
 	"validationViewerAPI": {
-		"url": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:dataSetId}&type={:entityType}"
+		"url": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}"
 	},
 	"validateDataSetAPI":{
-		"url": "/validation/dataset/{:dataSetId}"
+		"url": "/validation/dataset/{:datasetId}"
 	},
-	"acceptDataFlow":{
-		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	"acceptDataflow":{
+		"url": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
 	},
-	"rejectDataFlow":{
-		"url": "/dataflow/updateStatusRequest/{:dataFlowId}?type={:type}"
+	"rejectDataflow":{
+		"url": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
 	},
 	"loginUser":{
 		"url": "/user/generateToken?password={:password}&username={:userName}"
@@ -84,13 +84,13 @@
 		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	},
 	"DATAFLOW": {
-		"url": "/dataflow/{:dataFlowId}"
+		"url": "/dataflow/{:dataflowId}"
 		},
 	"updateTableDataField":{
-		"url": "/dataset/{:dataSetId}/updateField"
+		"url": "/dataset/{:datasetId}/updateField"
 	},
 	"updateTableDataRecord":{
-		"url":"/dataset/{:dataSetId}/updateRecord"
+		"url":"/dataset/{:datasetId}/updateRecord"
 	},
 	"DATAFLOWS":{
 		"url":"/dataflows"
@@ -99,6 +99,6 @@
 		"url":"/document/{:documentId}"
 	},
 	"datasetReleasedStatus":{
-		"url":"/datasetmetabase/dataflow/{:dataFlowId}"
+		"url":"/datasetmetabase/dataflow/{:dataflowId}"
 	}
 }

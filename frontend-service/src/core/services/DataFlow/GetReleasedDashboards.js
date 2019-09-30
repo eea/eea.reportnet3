@@ -1,2 +1,2 @@
-export const GetReleasedDashboards = ({ dataFlowRepository }) => async dataFlowId =>
-  dataFlowRepository.datasetReleasedStatus(dataFlowId);
+export const GetReleasedDashboards = ({ dataflowRepository }) => async dataflowId =>
+  dataflowRepository.datasetReleasedStatus(dataflowId);

@@ -1,49 +1,49 @@
-import { apiDataFlow } from 'core/infrastructure/api/domain/model/DataFlow';
-import { DataFlow } from 'core/domain/model/DataFlow/DataFlow';
+import { apiDataflow } from 'core/infrastructure/api/domain/model/DataFlow';
+import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
 
-const parseDataFlowDTO = dataFlowDTO => {
-  return new DataFlow(
-    dataFlowDTO.id,
-    dataFlowDTO.datasets,
-    dataFlowDTO.description,
-    dataFlowDTO.name,
-    dataFlowDTO.deadlineDate,
-    dataFlowDTO.creationDate,
-    dataFlowDTO.userRequestStatus,
-    dataFlowDTO.status,
-    dataFlowDTO.documents,
-    dataFlowDTO.weblinks,
-    dataFlowDTO.requestId
+const parseDataflowDTO = dataflowDTO => {
+  return new Dataflow(
+    dataflowDTO.id,
+    dataflowDTO.datasets,
+    dataflowDTO.description,
+    dataflowDTO.name,
+    dataflowDTO.deadlineDate,
+    dataflowDTO.creationDate,
+    dataflowDTO.userRequestStatus,
+    dataflowDTO.status,
+    dataflowDTO.documents,
+    dataflowDTO.weblinks,
+    dataflowDTO.requestId
   );
 };
 
-const parseDataFlowDTOs = dataFlowDTOs => {
-  return dataFlowDTOs.map(dataFlowDTO => {
-    return parseDataFlowDTO(dataFlowDTO);
+const parseDataflowDTOs = dataflowDTOs => {
+  return dataflowDTOs.map(dataflowDTO => {
+    return parseDataflowDTO(dataflowDTO);
   });
 };
 
 const all = async () => {
-  const pendingDataflowsDTO = await apiDataFlow.all();
+  const pendingDataflowsDTO = await apiDataflow.all();
   return {
-    pending: parseDataFlowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING')),
-    accepted: parseDataFlowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED')),
-    completed: parseDataFlowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'COMPLETED'))
+    pending: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING')),
+    accepted: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED')),
+    completed: parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'COMPLETED'))
   };
 };
 
 const accepted = async () => {
-  const acceptedDataflowsDTO = await apiDataFlow.accepted();
-  return parseDataFlowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
+  const acceptedDataflowsDTO = await apiDataflow.accepted();
+  return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
 };
 
 const completed = async () => {
-  const completedDataflowsDTO = await apiDataFlow.completed();
-  return parseDataFlowDTOs(completedDataflowsDTO);
+  const completedDataflowsDTO = await apiDataflow.completed();
+  return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetStatisticsStatus = async dataFlowId => {
-  const datasetsDashboardsData = await apiDataFlow.datasetStatisticsStatus(dataFlowId);
+const datasetStatisticsStatus = async dataflowId => {
+  const datasetsDashboardsData = await apiDataflow.datasetStatisticsStatus(dataflowId);
 
   const datasets = datasetsDashboardsData.tables
     .map(table => [
@@ -87,8 +87,8 @@ const datasetStatisticsStatus = async dataFlowId => {
   return datasetDataObject;
 };
 
-const datasetReleasedStatus = async dataFlowId => {
-  const releasedDashboardsData = await apiDataFlow.datasetReleasedStatus(dataFlowId);
+const datasetReleasedStatus = async dataflowId => {
+  const releasedDashboardsData = await apiDataflow.datasetReleasedStatus(dataflowId);
 
   const releasedDataObject = {
     labels: releasedDashboardsData.map(dataset => dataset.dataSetName),
@@ -110,26 +110,26 @@ const datasetReleasedStatus = async dataFlowId => {
 };
 
 const pending = async () => {
-  const pendingDataflowsDTO = await apiDataFlow.pending();
-  return parseDataFlowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
+  const pendingDataflowsDTO = await apiDataflow.pending();
+  return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
 };
 
-const reporting = async dataFlowId => {
-  const reportingDataFlowDTO = await apiDataFlow.reporting(dataFlowId);
-  return parseDataFlowDTO(reportingDataFlowDTO);
+const reporting = async dataflowId => {
+  const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
+  return parseDataflowDTO(reportingDataflowDTO);
 };
 
-const accept = async dataFlowId => {
-  const status = await apiDataFlow.accept(dataFlowId);
+const accept = async dataflowId => {
+  const status = await apiDataflow.accept(dataflowId);
   return status;
 };
 
-const reject = async dataFlowId => {
-  const status = await apiDataFlow.reject(dataFlowId);
+const reject = async dataflowId => {
+  const status = await apiDataflow.reject(dataflowId);
   return status;
 };
 
-export const ApiDataFlowRepository = {
+export const ApiDataflowRepository = {
   all,
   accept,
   accepted,

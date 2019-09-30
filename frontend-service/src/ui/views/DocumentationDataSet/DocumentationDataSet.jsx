@@ -58,16 +58,16 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowList'],
+        label: resources.messages['dataflowList'],
         command: () => history.push(getUrl(config.DATAFLOWS.url))
       },
       {
-        label: resources.messages['dataFlow'],
-        command: () => history.push(`/dataflow/${match.params.dataFlowId}`)
+        label: resources.messages['dataflow'],
+        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
       },
       { label: resources.messages['documents'] }
     ]);
-  }, [history, match.params.dataFlowId, resources.messages]);
+  }, [history, match.params.dataflowId, resources.messages]);
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
@@ -115,8 +115,8 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
     try {
-      setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
-      setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
+      setWebLinks(await WebLinkService.all(`${match.params.dataflowId}`));
+      setDocuments(await DocumentService.all(`${match.params.dataflowId}`));
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(config.DATAFLOWS.url));
@@ -231,7 +231,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
                   disabled={false}
                   icon={'refresh'}
                   label={resources.messages['refresh']}
-                  onClick={() => onLoadDocumentsAndWebLinks()}
+                  onClick={() => (onLoadDocumentsAndWebLinks(), setIsFormReset(true))}
                 />
               </div>
             </Toolbar>
@@ -242,7 +242,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
               dismissableMask={false}
               onHide={onCancelDialog}>
               <DocumentFileUpload
-                dataFlowId={match.params.dataFlowId}
+                dataflowId={match.params.dataflowId}
                 onUpload={onUploadDocument}
                 onGrowlAlert={onGrowlAlert}
                 isFormReset={isFormReset}

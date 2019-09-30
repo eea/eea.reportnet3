@@ -20,7 +20,7 @@
   font-size: 2rem;
   padding: 2rem !important;
 }
-.dataSetItem :global .p-button.p-button-icon-only .p-button-text {
+.datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
   height: 0px !important;
 }
@@ -50,7 +50,7 @@
 .splitButtonWrapper:nth-last-of-type(2) {
   margin-left: 0px;
 }
-.splitButtonWrapper .dataSetItem {
+.splitButtonWrapper .datasetItem {
   margin-right: 1rem;
 }
 .caption {

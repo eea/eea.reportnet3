@@ -1,2 +1,2 @@
-export const Delete = ({ contributorRepository }) => async (dataFlowId, contributorId) =>
-  contributorRepository.deleteById(dataFlowId, contributorId);
+export const Delete = ({ contributorRepository }) => async (dataflowId, contributorId) =>
+  contributorRepository.deleteById(dataflowId, contributorId);

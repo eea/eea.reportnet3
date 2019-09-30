@@ -1,2 +1,2 @@
-export const Create = ({ snapshotRepository }) => async (dataSetId, description) =>
-  snapshotRepository.createById(dataSetId, description);
+export const Create = ({ snapshotRepository }) => async (datasetId, description) =>
+  snapshotRepository.createById(datasetId, description);

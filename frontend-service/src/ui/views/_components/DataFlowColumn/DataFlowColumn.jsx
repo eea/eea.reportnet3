@@ -3,17 +3,14 @@ import { withRouter } from 'react-router-dom';
 
 import styles from './DataFlowColumn.module.css';
 
-import { config } from 'conf';
-
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { UserService } from 'core/services/User';
 
-const DataFlowColumn = withRouter(
-  ({ navTitle, dataFlowTitle, components = [], entity, buttonTitle, history, match }) => {
+const DataflowColumn = withRouter(
+  ({ navTitle, dataflowTitle, components = [], entity, buttonTitle, history, match }) => {
     const resources = useContext(ResourcesContext);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
     const user = useContext(UserContext);
@@ -34,16 +31,16 @@ const DataFlowColumn = withRouter(
             <input
               className={styles.searchInput}
               id=""
-              placeholder={resources.messages['searchDataFlow']}
+              placeholder={resources.messages['searchDataflow']}
               type="text"
             />
           </div>
         )}
         <div className="navSection">
-          {dataFlowTitle && (
+          {dataflowTitle && (
             <h4 className={styles.title}>
               <Icon icon="shoppingCart" />
-              {dataFlowTitle}
+              {dataflowTitle}
             </h4>
           )}
 
@@ -63,7 +60,7 @@ const DataFlowColumn = withRouter(
             onConfirm={onConfirmSubscribeHandler}
             onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
             visible={subscribeDialogVisible}>
-            {resources.messages['subscribeDataFlow']}
+            {resources.messages['subscribeDataflow']}
           </ConfirmDialog>
         </div>
       </div>
@@ -71,4 +68,4 @@ const DataFlowColumn = withRouter(
   }
 );
 
-export { DataFlowColumn };
+export { DataflowColumn };

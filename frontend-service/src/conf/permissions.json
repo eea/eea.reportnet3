@@ -1,6 +1,6 @@
 {
   "DATA_FLOW":"/Dataflow-",
-  "DATA_SET":"/Dataset-",
+  "DATASET":"/Dataset-",
   "CUSTODIAN": "DATA_CUSTODIAN",
   "PROVIDER": "DATA_PROVIDER",
   "DATA_CUSTODIAN":"Data custodian",

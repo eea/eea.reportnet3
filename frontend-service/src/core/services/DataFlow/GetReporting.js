@@ -1,1 +1,1 @@
-export const GetReporting = ({ dataFlowRepository }) => async dataFlowId => dataFlowRepository.reporting(dataFlowId);
+export const GetReporting = ({ dataflowRepository }) => async dataflowId => dataflowRepository.reporting(dataflowId);

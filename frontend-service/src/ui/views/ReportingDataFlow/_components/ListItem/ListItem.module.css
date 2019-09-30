@@ -5,7 +5,7 @@
 .listItem > a {
   padding: 2.3rem 2.7rem;
 }
-.dataSet {
+.dataset {
   background-color: var(--c-corporate-blue);
   color: var(--white);
   display: flex;
@@ -15,11 +15,11 @@
   position: relative;
 }
 
-.dataSet a {
+.dataset a {
   color: var(--white);
   border-radius: 20px;
 }
-.dataSet a:hover {
+.dataset a:hover {
   color: var(--white);
   background-color: var(--c-blue-400);
 }
