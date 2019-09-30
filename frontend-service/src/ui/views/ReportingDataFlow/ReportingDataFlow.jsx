@@ -14,7 +14,7 @@ import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
-import { ListItem } from './_components/ListItem';
+import { BigButton } from './_components/BigButton';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -169,60 +169,58 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
             <div className={`${styles.datasetItem}`}>
-              <ListItem
+              <BigButton
                 layout="documents"
                 label="DO"
+                caption={resources.messages.documents}
                 handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documentation-data-set/`)}
               />
-              <p className={styles.caption}>{resources.messages.documents}</p>
             </div>
             {dataflowData.datasets.map(dataset => {
               return (
-                <>
-                  <div className={`${styles.datasetItem}`} key={dataset.id}>
-                    <ListItem
-                      layout="dataset"
-                      label="DS"
-                      handleRedirect={() => {
-                        handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.datasetId}`);
-                      }}
-                      model={
-                        hasWritePermissions
-                          ? [
-                              {
-                                label: resources.messages.releaseDataCollection,
-                                icon: 'cloudUpload',
-                                command: () => showReleaseSnapshotDialog(dataset.id),
-                                disabled: false
-                              },
-                              {
-                                label: resources.messages['importFromFile'],
-                                icon: 'export',
-                                disabled: true
-                              },
-                              {
-                                label: resources.messages['duplicate'],
-                                icon: 'clone',
-                                disabled: true
-                              },
-                              {
-                                label: resources.messages['properties'],
-                                icon: 'info',
-                                disabled: true
-                              }
-                            ]
-                          : [
-                              {
-                                label: resources.messages['properties'],
-                                icon: 'info',
-                                disabled: true
-                              }
-                            ]
-                      }
-                    />
-                    <p className={styles.caption}>{dataset.datasetSchemaName}</p>
-                  </div>
-                </>
+                <div className={`${styles.datasetItem}`} key={dataset.id}>
+                  <BigButton
+                    layout="dataset"
+                    label="DS"
+                    caption={dataset.datasetSchemaName}
+                    handleRedirect={() => {
+                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
+                    }}
+                    model={
+                      hasWritePermissions
+                        ? [
+                            {
+                              label: resources.messages.releaseDataCollection,
+                              icon: 'cloudUpload',
+                              command: () => showReleaseSnapshotDialog(dataset.id),
+                              disabled: false
+                            },
+                            {
+                              label: resources.messages['importFromFile'],
+                              icon: 'export',
+                              disabled: true
+                            },
+                            {
+                              label: resources.messages['duplicate'],
+                              icon: 'clone',
+                              disabled: true
+                            },
+                            {
+                              label: resources.messages['properties'],
+                              icon: 'info',
+                              disabled: true
+                            }
+                          ]
+                        : [
+                            {
+                              label: resources.messages['properties'],
+                              icon: 'info',
+                              disabled: true
+                            }
+                          ]
+                    }
+                  />
+                </div>
               );
             })}
             {UserService.hasPermission(
@@ -231,13 +229,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               `${config.permissions.DATA_FLOW}${match.params.datasetId}`
             ) && (
               <div className={`${styles.datasetItem}`}>
-                <ListItem
+                <BigButton
                   layout="dashboard"
+                  caption={resources.messages.dashboards}
                   handleRedirect={() =>
                     handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
                   }
                 />
-                <p className={styles.caption}>{resources.messages.dashboards}</p>
               </div>
             )}
           </div>
