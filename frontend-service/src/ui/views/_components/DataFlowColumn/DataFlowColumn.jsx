@@ -36,8 +36,6 @@ const DataflowColumn = withRouter(
       }
     }, [user]);
 
-    console.log('user', user);
-
     const setVisibleHandler = (fnUseState, visible) => {
       fnUseState(visible);
     };

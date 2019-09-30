@@ -75,7 +75,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   };
 
   useEffect(() => {
-    if (!isUndefined(user.roles)) {
+    if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
         UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
       );
