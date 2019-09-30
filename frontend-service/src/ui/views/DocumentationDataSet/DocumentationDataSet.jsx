@@ -77,7 +77,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const onDownloadDocument = async rowData => {
     try {
-      setIsDownloading(rowData.title);
+      setIsDownloading(rowData.id);
       setFileName(createFileName(rowData.title));
       setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
     } catch (error) {
@@ -151,7 +151,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
-        {isDownloading === rowData.title ? (
+        {isDownloading === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
           <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
