@@ -41,13 +41,20 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
-
+  const [isCustodian, setIsCustodian] = useState(false);
   useEffect(() => {
     if (!isUndefined(user.roles)) {
       setHasWritePermissions(
         UserService.hasPermission(
           user,
           [config.permissions.PROVIDER],
+          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+        )
+      );
+      setIsCustodian(
+        UserService.hasPermission(
+          user,
+          [config.permissions.CUSTODIAN],
           `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
         )
       );
@@ -183,6 +190,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     layout="dataset"
                     label="DS"
                     caption={dataset.dataSetName}
+                    isReleased={dataset.isReleased}
                     handleRedirect={() => {
                       handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.id}`);
                     }}
@@ -223,11 +231,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 </div>
               );
             })}
-            {UserService.hasPermission(
-              user,
-              [config.permissions.CUSTODIAN],
-              `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
-            ) && (
+            {isCustodian && (
               <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="dashboard"
