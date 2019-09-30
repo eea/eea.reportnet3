@@ -7,15 +7,15 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
-  dataflow.id = dataflowDTO.id;
+  dataflow.creationDate = dataflowDTO.creationDate;
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.datasets);
   dataflow.deadlineDate = dataflowDTO.deadlineDate;
   dataflow.description = dataflowDTO.description;
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
+  dataflow.id = dataflowDTO.id;
   dataflow.name = dataflowDTO.name;
-  dataflow.creationDate = dataflowDTO.creationDate;
-  dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
   dataflow.status = dataflowDTO.status;
+  dataflow.userRequestStatus = dataflowDTO.userRequestStatus;
   dataflow.weblinks = parseWebLinkListDTO(dataflowDTO.weblinks);
   dataflow.requestId = dataflowDTO.requestId;
   return dataflow;
