@@ -62,6 +62,7 @@
 		"deleteSnapshotTooltip": "Delete snapshot",
 		"deleteTable": "Delete table data",
 		"description": "Description",
+		"descriptionTooShort": "Description must be at least 5 characters",
 		"do": "DO",
 		"documents": "Documents",
 		"documentUploadingGrowlUploadingDetail": "Uploading document...",

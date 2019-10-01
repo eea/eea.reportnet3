@@ -13,9 +13,11 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
-  const validationSchema = Yup.object().shape({
+  const createDataflowValidationSchema = Yup.object().shape({
     dataflowName: Yup.string().required(resources.messages['emptyNameValidationError']),
-    dataflowDescription: Yup.string().required(resources.messages['emptyDescriptionValidationError'])
+    dataflowDescription: Yup.string()
+      .required(resources.messages['emptyDescriptionValidationError'])
+      .min(5, resources.messages['descriptionTooShort'])
   });
 
   if (!isFormReset) {
@@ -23,7 +25,7 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
   }
 
   return (
-    <Formik ref={form} initialValues={initialValues} validationSchema={validationSchema} onSubmit>
+    <Formik ref={form} initialValues={initialValues} validationSchema={createDataflowValidationSchema} onSubmit>
       {({ isSubmitting, errors, touched }) => (
         <Form>
           <fieldset>
