@@ -227,6 +227,10 @@ function  Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
 			return TableValidationDrools.ruleDU02A(idSchemaBathingWaterIdentifierTable,idSchemaPeriodType,
 			idSchemaStartDate,idSchemaEndDate,datasetId);
 }
+
+function  Boolean ruleDU02B(Long datasetId,Long datasetLegazy){
+			return TableValidationDrools.ruleDU02B(datasetId,datasetLegazy);
+}
 //PART TABLE BUT USING RECORD TO MASK
 function  Boolean monitoringWithPeriodSampleStatus(Long datasetId){
 return RecordValidationDrools.monitoringWithPeriodSampleStatus(datasetId);
@@ -372,4 +376,15 @@ function boolean RD20GRule(Long idDataset){
 }
 function boolean RD20HRule(Long idDataset){
  	return RecordTableValidation.RD20HRule(idDataset);
+}
+//PART LEGAZY
+function boolean RD12DRule(Long idDataset){
+ 	return RecordTableValidation.RD12DRule(idDataset);
+}
+
+function boolean RD11ERule(Long idDataset){
+ 	return RecordTableValidation.RD11ERule(idDataset);
+}
+function boolean RD11FRule(Long idDataset){
+ 	return RecordTableValidation.RD11FRule(idDataset);
 }

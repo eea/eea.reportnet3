@@ -500,4 +500,32 @@ public class RecordTableValidation {
     return validationService.tableRecordRIds(RD20HRule, MessageError, TypeErrorEnum.ERROR);
 
   }
+
+  public static Boolean RD12DRule(Long idDataset) {
+    String RD12D = "";
+    String MessageError =
+        "The endDate is not before the startDate of the next seasonal period of the same type.";
+    // return validationService.tableRecordRIds(RD12D, MessageError, TypeErrorEnum.ERROR);
+    return true;
+  }
+
+  public static Boolean RD11ERule(Long idDataset) {
+    String RD11E = " ";
+    String MessageError =
+        "The startDate is not after the endDate of the previous seasonal period of the same type.";
+    // return validationService.tableRecordRIds(RD11E, MessageError, TypeErrorEnum.ERROR);
+    return true;
+  }
+
+  public static Boolean RD11FRule(Long idDataset) {
+
+    String RD11F = "";
+    String MessageError =
+        "The startDate of the bathing season is not after the endDate of the previous bathing season.";
+    // return validationService.tableRecordRIds(RD11F, MessageError, TypeErrorEnum.ERROR);
+    return true;
+  }
+
+
+
 }
