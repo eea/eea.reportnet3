@@ -1,7 +1,5 @@
 package org.eea.multitenancy;
 
-import org.eea.exception.EEARuntimeException;
-
 /**
  * The type Tenant resolver.
  */

@@ -22,6 +22,9 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+/**
+ * The type Web socket configuration.
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
@@ -42,7 +45,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/communication/reportnet-websocket");
+    registry.addEndpoint("/communication/reportnet-websocket").setAllowedOrigins("*");
   }
 
   @Override
@@ -55,27 +58,30 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
         StompHeaderAccessor accessor =
             MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (null != accessor && accessor.getUser() != null) {
-          return message;
-        }
-
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-          try {
-            accessor.setUser(new StompPrincipal(((AccessToken) jwtTokenProvider
-                .retrieveToken(accessor.getFirstNativeHeader("token"))).getPreferredUsername()));
+        if (null != accessor) {
+          if (accessor.getUser() != null) {
             return message;
-          } catch (VerificationException ex) {
-            logger.error("Security token is not valid: {}", ex.getMessage());
+          }
+
+          StompCommand command = accessor.getCommand();
+          if (null != command && StompCommand.CONNECT.equals(command)) {
+            try {
+              accessor.setUser(new StompPrincipal(((AccessToken) jwtTokenProvider
+                  .retrieveToken(accessor.getFirstNativeHeader("token"))).getPreferredUsername()));
+              return message;
+            } catch (VerificationException ex) {
+              logger.error("Security token is not valid: {}", ex.getMessage());
+            }
+          }
+
+          StompHeaderAccessor errorAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+          if (null != errorAccessor) {
+            errorAccessor.setSessionId(accessor.getSessionId());
+            errorAccessor.setMessage("Token validation failed");
+            clientOutboundChannel
+                .send(MessageBuilder.createMessage(new byte[0], errorAccessor.getMessageHeaders()));
           }
         }
-
-        StompHeaderAccessor errorAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
-        errorAccessor.setSessionId(accessor.getSessionId());
-        errorAccessor.setMessage("Token validation failed");
-
-        clientOutboundChannel
-            .send(MessageBuilder.createMessage(new byte[0], errorAccessor.getMessageHeaders()));
-
         return null;
       }
     });
@@ -83,10 +89,21 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 }
 
 
+/**
+ * The type Stomp principal.
+ */
 class StompPrincipal implements Principal {
 
+  /**
+   * The Name.
+   */
   String name;
 
+  /**
+   * Instantiates a new Stomp principal.
+   *
+   * @param name the name
+   */
   StompPrincipal(String name) {
     this.name = name;
   }

@@ -140,14 +140,10 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
 
     EeaDataSource ds = new EeaDataSource();
-    ds.setJdbcUrl(connectionDataVO.getConnectionString());
+    ds.setUrl(connectionDataVO.getConnectionString());
     ds.setUsername(connectionDataVO.getUser());
     ds.setPassword(connectionDataVO.getPassword());
     ds.setDriverClassName("org.postgresql.Driver");
-    ds.setMaximumPoolSize(maxPoolSize);
-    ds.setIdleTimeout(iddleTimeout);
-    ds.setMinimumIdle(minimumIdle);
-    ds.setMaxLifetime(maxLifetime);
 
     return ds;
   }

@@ -3,6 +3,7 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,9 @@ public class FileCommonTest {
   @Mock
   private DatasetSchemaService dataSetSchemaService;
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Mock
   private RecordRepository recordRepository;
 
@@ -164,7 +167,8 @@ public class FileCommonTest {
    */
   @Test
   public void testGetDataSetSchema() {
-    when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any())).thenReturn(dataset);
+    when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+        .thenReturn(dataset);
     assertEquals("fail", dataset, fileCommon.getDataSetSchema(1L));
   }
 
