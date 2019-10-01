@@ -29,6 +29,7 @@ import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 import { ScrollPanel } from 'primereact/scrollpanel';
+import { routes } from 'ui/routes';
 
 export const ReportingDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
@@ -64,7 +65,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push(getUrl(config.DATAFLOWS.url))
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   const onLoadReportingDataflow = async () => {
@@ -73,7 +74,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       setDataflowData(dataflow);
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(config.DATAFLOWS.url));
+        history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setLoading(false);
@@ -93,7 +94,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(config.DATAFLOWS.url))
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages.dataflow

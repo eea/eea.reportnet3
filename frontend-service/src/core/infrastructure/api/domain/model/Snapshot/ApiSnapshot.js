@@ -30,7 +30,7 @@ export const apiSnapshot = {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
-        url: getUrl(config.deleteSnapshotByID.url, {
+        url: getUrl(config.deleteSnapshotById.url, {
           datasetId,
           snapshotId: snapshotId
         }),

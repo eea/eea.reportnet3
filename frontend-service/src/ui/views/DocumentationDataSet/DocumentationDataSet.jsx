@@ -29,8 +29,9 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
-export const DocumentationDataSet = withRouter(({ match, history }) => {
+export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
@@ -47,7 +48,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push(getUrl(config.DATAFLOWS.url))
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(config.DATAFLOWS.url))
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
@@ -119,7 +120,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
       setDocuments(await DocumentService.all(`${match.params.dataflowId}`));
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(config.DATAFLOWS.url));
+        history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setIsLoading(false);
