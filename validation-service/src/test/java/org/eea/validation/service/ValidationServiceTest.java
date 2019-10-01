@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -149,6 +150,11 @@ public class ValidationServiceTest {
    */
   @Mock
   private TableValidationRepository tableValidationRepository;
+
+  /** The kafka sender utils. */
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /**
    * The dataset value.
    */
@@ -485,8 +491,6 @@ public class ValidationServiceTest {
     recordValue.setFields(fields);
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
-    // when(kieBase.newKieSession()).thenReturn(kieSession);
-    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateRecord(1L, kieBase, null);
 
   }
@@ -1130,5 +1134,33 @@ public class ValidationServiceTest {
     validationServiceImpl.tableValidationQueryNonReturnResult(Mockito.any());
     Mockito.verify(tableValidationQuerysDroolsRepository, times(1))
         .tableValidationQueryNonReturnResult(Mockito.any());
+  }
+
+  /**
+   * Force validations test.
+   */
+  @Test
+  public void forceValidationsTest() {
+    validationServiceImpl.forceValidations(1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Count records dataset test.
+   */
+  @Test
+  public void countRecordsDatasetTest() {
+    when(recordRepository.countRecordsDataset()).thenReturn(1);
+    assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countRecordsDataset(1L));
+  }
+
+  /**
+   * Count fields dataset test.
+   */
+  @Test
+  public void countFieldsDatasetTest() {
+    when(recordRepository.countFieldsDataset()).thenReturn(1);
+    assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
 }
