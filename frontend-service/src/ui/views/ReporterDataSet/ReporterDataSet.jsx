@@ -485,7 +485,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={e => {
+              onClick={() => {
                 onLoadSnapshotList();
                 return onSetVisible(setSnapshotIsVisible, true);
               }}
