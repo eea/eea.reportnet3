@@ -14,8 +14,8 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required(resources.messages['emptyNameValidationError']),
-    description: Yup.string().required(resources.messages['emptyDescriptionValidationError'])
+    dataflowName: Yup.string().required(resources.messages['emptyNameValidationError']),
+    dataflowDescription: Yup.string().required(resources.messages['emptyDescriptionValidationError'])
   });
 
   if (!isFormReset) {
@@ -27,23 +27,26 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
       {({ isSubmitting, errors, touched }) => (
         <Form>
           <fieldset>
-            <div className={`formField${!isEmpty(errors.name) && touched.name ? ' error' : ''}`}>
-              <Field name="name" type="text" placeholder={resources.messages['createDataflowName']} />
-              <ErrorMessage className="error" name="name" component="div" />
+            <div className={`formField${!isEmpty(errors.dataflowName) && touched.dataflowName ? ' error' : ''}`}>
+              <Field name="dataflowName" type="text" placeholder={resources.messages['createDataflowName']} />
+              <ErrorMessage className="error" name="dataflowName" component="div" />
             </div>
-            <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
+            <div
+              className={`formField${
+                !isEmpty(errors.dataflowDescription) && touched.dataflowDescription ? ' error' : ''
+              }`}>
               <Field
-                name="description"
+                name="dataflowDescription"
                 component="textarea"
                 placeholder={resources.messages['createDataflowDescription']}
               />
-              <ErrorMessage className="error" name="description" component="div" />
+              <ErrorMessage className="error" name="dataflowDescription" component="div" />
             </div>
             <div className={styles.search}>
               <Field
                 className={styles.searchInput}
                 disabled={true}
-                name="obligation"
+                name="associatedObligation"
                 placeholder={resources.messages['associatedObligation']}
                 type="text"
               />
