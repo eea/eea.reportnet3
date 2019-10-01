@@ -61,7 +61,7 @@ public class KafkaSender {
     } else {
       message = MessageBuilder.withPayload(event)
           .setHeader(KafkaHeaders.PARTITION_ID,
-              ThreadLocalRandom.current().nextInt(partitions.size() - 1))
+              ThreadLocalRandom.current().nextInt(partitions.size()))
           .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
           .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
     }

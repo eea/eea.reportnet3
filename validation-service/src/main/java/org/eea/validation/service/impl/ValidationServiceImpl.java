@@ -53,6 +53,7 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
@@ -292,13 +293,13 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie base
+   * @param pageable the pageable
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void validateRecord(Long datasetId, KieBase kieBase) throws EEAException {
-    long timer = System.currentTimeMillis();
-
+  public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
+      throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -307,8 +308,8 @@ public class ValidationServiceImpl implements ValidationService {
     tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
-      List<RecordValue> recordsByTable =
-          sanitizeRecordsValidations(recordRepository.findAllRecordsByTableValueId(tableId));
+      List<RecordValue> recordsByTable = sanitizeRecordsValidations(
+          recordRepository.findAllRecordsByTableValueIdPaginated(tableId, pageable));
       List<RecordValidation> recordValidationsByTable = new ArrayList<>();
       recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
         KieSession session = kieBase.newKieSession();
@@ -325,7 +326,6 @@ public class ValidationServiceImpl implements ValidationService {
       });
       saveRecordValidations(recordValidationsByTable);
     });
-    System.out.println(System.currentTimeMillis() - timer);
   }
 
   /**
@@ -343,13 +343,13 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie base
+   * @param pageable the pageable
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void validateFields(Long datasetId, KieBase kieBase) throws EEAException {
-    long timer = System.currentTimeMillis();
-
+  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable)
+      throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -360,8 +360,8 @@ public class ValidationServiceImpl implements ValidationService {
       List<FieldValidation> fieldValidations = new ArrayList<>();
       Long tableId = tableValue.getId();
       // read Dataset records Data for each table
-      List<RecordValue> recordsByTable =
-          sanitizeRecords(recordRepository.findAllRecordsByTableValueId(tableId));
+      List<RecordValue> recordsByTable = sanitizeRecords(
+          recordRepository.findAllRecordsByTableValueIdPaginated(tableId, pageable));
       // Execute field rules validation
       recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
 
@@ -381,8 +381,6 @@ public class ValidationServiceImpl implements ValidationService {
       });
       saveFieldValidations(fieldValidations);
     });
-    System.out.println(System.currentTimeMillis() - timer);
-
   }
 
   /**
@@ -855,5 +853,15 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void forceValidations(Long datasetId) {
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+  }
+
+  @Override
+  public Integer countRecordsDataset(Long datasetId) {
+    return recordRepository.countRecordsDataset();
+  }
+
+  @Override
+  public Integer countFieldsDataset(Long datasetId) {
+    return recordRepository.countFieldsDataset();
   }
 }

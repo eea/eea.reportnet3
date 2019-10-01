@@ -797,7 +797,7 @@
   },
   {
     "key": "config/application/eea.keycloak.secret",
-    "value": "NTAzODcxMjktZDRkYi00Nzc1LTkxYWEtNzU1MDdmM2M4MGE2"
+    "value": "JHtLRVlDTE9BS19TRUNSRVQ6MmJjNTA2NzItZTVkNS00OWQzLTkxZWEtMWY1MTdkZTk2ZjczfQ=="
   },
   {
     "key": "config/application/eea.keycloak.clientId",
@@ -813,7 +813,7 @@
   },
   {
     "key": "config/application/eea.keycloak.publicKey",
-    "value": "TUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyNGZpRzJJcDdNUnRFTDhhWEZwc2pGcHRxdEk2eWpkbjBVTFhhMUs2NHhXN2h6RmQwWmpEOUcySEFpdENwRWNKOXhwSG9UTytGMzBWVWlWLy8zL3EyNVZnYjJjdmc4b2NYZ01VdzNHQzF5S0FHUTRwRyt2dkFqemtaQzNVelBqTVZlTmt0T01malZqWDNvVFEzZ1JSUGxtckpLM3NyazJodnVQbWU2ZTRaSk1IcitsN2d6WEFyRG5PNFhGci9GdFNXc1l4bXZQRDh0c2ZYV2tnZTBIVDM3QkJWN2J1ZzJwNGJtMDNCVUNDSnk1elcyUjY4VCswbzBjaWl1ZUpZVXNRRlYzS2lFZVpuUEN1SnJhQXN6ejZLM3NWbzlNcUgwZ2dSM29hNVcxU1RwcEhjeGdYdzM0c1hrVGlNeWJ3R056MVpqTEY4bTRQSStGUG9IT0k1bnZzV1FJREFRQUI="
+    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQWk5RSt6bTVPSUw3M1hhaGg3bjdqMXlaWHgvZ2NmTlJoTkFuYkJRazY4UTJPZkZwRDlpU0RTNngveTlpOFlSSVYrMzFvaFdPandrOGdCOE95SHoyMXo0SDUrSHd1dnY4MFc0S2dSSjdkNnpIaFdZRFZscUhZSVVxK0V4MzFXMVR5OU1aZDljeGczRnpDeXhuRGd5VjhNaDZtZ0NSWElDWUhuTFpwSnNKSGxoUXM1NndxakJraGUrVkJlbGtjQy9iMEcvRTlBb3NPb3pVWitpZllOZEF2amJPNVBDdXorZ3Q3ajNSZmFVTDNLejdGUHQxRkNTcnJTL1R6NEtBYXNoTlVYYk0raVhmY2RPSmhzeEJrVC9DQ2lrbTk2SlNTQXIrUkJudlJYL2hvVnltNGlaSzcxV29WNHo3ZW15WWcwbkdjTEhGTTFKcXBlcUd4bzNRbzhRZXczUUlEQVFBQn0="
   },
   {
     "key": "config/application/hystrix.shareSecurityContext",
@@ -1054,6 +1054,14 @@
   {
     "key": "config/indexsearch/elasticsearch.password",
     "value": ""
+  },
+  {
+    "key": "config/validation/validation.recordBatchSize",
+    "value": "JHtWQUxJREFUSU9OX1JFQ09SRF9CQVRDSF9TSVpFOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/validation/validation.fieldBatchSize",
+    "value": "JHtWQUxJREFUSU9OX0ZJRUxEX0JBVENIX1NJWkU6MTAwMDAwfQ=="
   }
 
 ]

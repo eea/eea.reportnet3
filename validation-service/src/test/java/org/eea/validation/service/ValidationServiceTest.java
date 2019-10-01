@@ -385,7 +385,7 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testValidateRecordException() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    validationServiceImpl.validateRecord(1L, kieBase);
+    validationServiceImpl.validateRecord(1L, kieBase, null);
   }
 
   /**
@@ -436,7 +436,7 @@ public class ValidationServiceTest {
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateRecord(1L, kieBase);
+    validationServiceImpl.validateRecord(1L, kieBase, null);
 
   }
 
@@ -486,7 +486,7 @@ public class ValidationServiceTest {
     records.add(recordValue);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    validationServiceImpl.validateRecord(1L, kieBase);
+    validationServiceImpl.validateRecord(1L, kieBase, null);
 
   }
 
@@ -527,7 +527,7 @@ public class ValidationServiceTest {
     records.add(recordValue);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateRecord(1L, kieBase);
+    validationServiceImpl.validateRecord(1L, kieBase, null);
 
   }
 
@@ -539,7 +539,7 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testValidateDataSetDataSessionExcep() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    validationServiceImpl.validateFields(1L, kieBase);
+    validationServiceImpl.validateFields(1L, kieBase, null);
   }
 
   /**
@@ -583,7 +583,7 @@ public class ValidationServiceTest {
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateFields(1L, kieBase);
+    validationServiceImpl.validateFields(1L, kieBase, null);
 
   }
 
@@ -627,7 +627,7 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateFields(1L, kieBase);
+    validationServiceImpl.validateFields(1L, kieBase, null);
   }
 
   /**

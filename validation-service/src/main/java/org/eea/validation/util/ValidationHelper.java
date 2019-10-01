@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +43,14 @@ public class ValidationHelper {
   /** The processes map. */
   private ConcurrentHashMap<String, Integer> processesMap;
 
+  /** The field batch size. */
+  @Value("${validation.fieldBatchSize}")
+  private int fieldBatchSize;
+
+  /** The record batch size. */
+  @Value("${validation.recordBatchSize}")
+  private int recordBatchSize;
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -70,10 +79,40 @@ public class ValidationHelper {
     LOG.info("Validating Tables");
     releaseTableValidation(datasetId, uuId, kieBase);
     LOG.info("Validating Records");
-    releaseRecordValidation(datasetId, uuId, kieBase);
+    releaseRecordsValidation(datasetId, uuId, kieBase);
     LOG.info("Validating Fields");
-    releaseFieldValidation(datasetId, uuId, kieBase);
+    releaseFieldsValidation(datasetId, uuId, kieBase);
 
+  }
+
+  /**
+   * Release fields validation.
+   *
+   * @param datasetId the dataset id
+   * @param uuId the uu id
+   * @param kieBase the kie base
+   */
+  private void releaseFieldsValidation(Long datasetId, String uuId, KieBase kieBase) {
+    Integer totalFields = validationService.countFieldsDataset(datasetId);
+    for (int i = 0; totalFields >= 0; totalFields = totalFields - fieldBatchSize) {
+      releaseFieldValidation(datasetId, uuId, kieBase, i);
+      i++;
+    }
+  }
+
+  /**
+   * Release records validation.
+   *
+   * @param datasetId the dataset id
+   * @param uuId the uu id
+   * @param kieBase the kie base
+   */
+  private void releaseRecordsValidation(Long datasetId, String uuId, KieBase kieBase) {
+    Integer totalRecords = validationService.countRecordsDataset(datasetId);
+    for (int i = 0; totalRecords >= 0; totalRecords = totalRecords - recordBatchSize) {
+      releaseRecordValidation(datasetId, uuId, kieBase, i);
+      i++;
+    }
   }
 
   /**
@@ -125,13 +164,15 @@ public class ValidationHelper {
    * @param datasetId the dataset id
    * @param uuid the uuid
    * @param kieBase the kie base
+   * @param numPag the numPag
    */
   public void releaseRecordValidation(final Long datasetId, final String uuid,
-      final KieBase kieBase) {
+      final KieBase kieBase, int numPag) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
     value.put("kieBase", kieBase);
+    value.put("numPag", numPag);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_RECORD, value);
   }
@@ -142,13 +183,15 @@ public class ValidationHelper {
    * @param datasetId the dataset id
    * @param uuid the uuid
    * @param kieBase the kie base
+   * @param numPag the numPag
    */
-  public void releaseFieldValidation(final Long datasetId, final String uuid,
-      final KieBase kieBase) {
+  public void releaseFieldValidation(final Long datasetId, final String uuid, final KieBase kieBase,
+      int numPag) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
     value.put("kieBase", kieBase);
+    value.put("numPag", numPag);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_FIELD, value);
   }
