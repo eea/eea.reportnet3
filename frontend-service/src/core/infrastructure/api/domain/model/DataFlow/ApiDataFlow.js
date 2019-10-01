@@ -92,7 +92,7 @@ export const apiDataflow = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_DataflowById.json'
-        : getUrl(config.loadDataSetsByDataflowId.url, {
+        : getUrl(config.loadDatasetsByDataflowId.url, {
             dataflowId: dataflowId
           }),
       queryString: {},
