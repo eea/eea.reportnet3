@@ -102,7 +102,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
       },
       { label: resources.messages['dataset'] }
     ]);
-    onLoadSnapshotList();
+    /* onLoadSnapshotList(); */
   }, []);
 
   useEffect(() => {
@@ -475,7 +475,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => onSetVisible(setSnapshotIsVisible, true)}
+              onClick={e => {
+                onLoadSnapshotList();
+                return onSetVisible(setSnapshotIsVisible, true);
+              }}
             />
           </div>
         </Toolbar>
