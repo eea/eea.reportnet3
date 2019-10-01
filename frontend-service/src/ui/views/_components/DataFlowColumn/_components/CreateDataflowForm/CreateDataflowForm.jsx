@@ -32,7 +32,11 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
               <ErrorMessage className="error" name="name" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
-              <Field name="description" type="text" placeholder={resources.messages['createDataflowDescription']} />
+              <Field
+                name="description"
+                component="textarea"
+                placeholder={resources.messages['createDataflowDescription']}
+              />
               <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={styles.search}>
