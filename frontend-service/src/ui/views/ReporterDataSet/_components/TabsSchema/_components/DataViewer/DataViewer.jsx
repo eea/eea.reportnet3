@@ -28,6 +28,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
 import { Object } from 'es6-shim';
+import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
@@ -356,7 +357,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
         }
       } finally {
         setLoading(false);
@@ -408,7 +409,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -446,7 +447,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+            history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
           setLoading(false);
@@ -462,7 +463,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+            history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
           onCancelRowEdit();

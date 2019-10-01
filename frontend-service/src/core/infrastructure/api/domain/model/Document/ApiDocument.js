@@ -10,7 +10,7 @@ export const apiDocument = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
-        : getUrl(config.loadDataSetsByDataflowId.url, {
+        : getUrl(config.loadDatasetsByDataflowId.url, {
             dataflowId: dataflowId
           }),
       queryString: {},

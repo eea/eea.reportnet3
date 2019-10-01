@@ -16,6 +16,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
@@ -52,7 +53,7 @@ const Login = ({ history }) => {
               try {
                 const userObject = await UserService.login(values.userName, values.password);
                 user.onLogin(userObject);
-                history.push(getUrl(config.DATAFLOWS.url));
+                history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
                 console.error(error);
                 user.onLogout();
