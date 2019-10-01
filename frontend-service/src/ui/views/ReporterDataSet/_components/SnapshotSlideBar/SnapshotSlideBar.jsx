@@ -88,7 +88,13 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoading
             )}
           />
         </div>
-        {isLoadingSnapshotListData ? <Spinner /> : <SnapshotList snapshotListData={snapshotListData} />}
+        {isLoadingSnapshotListData ? (
+          <Spinner />
+        ) : snapshotListData.length > 0 ? (
+          <SnapshotList snapshotListData={snapshotListData} />
+        ) : (
+          <h3>{resources.messages.snapshotsDontExist}</h3>
+        )}
       </div>
     </Sidebar>
   );
