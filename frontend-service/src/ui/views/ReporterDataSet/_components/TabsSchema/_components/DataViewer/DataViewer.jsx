@@ -24,6 +24,7 @@ import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import { VisibilityMenu } from './_components/VisibilityMenu';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
@@ -79,6 +80,7 @@ const DataViewer = withRouter(
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [visibilityButtonMenu, setVisibilityButtonMenu] = useState([]);
 
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
@@ -88,6 +90,7 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let contextMenuRef = useRef();
     let divRef = useRef();
+    let visibilityMenuRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -99,10 +102,13 @@ const DataViewer = withRouter(
       );
 
       let colOptions = [];
+      let visibilityMenu = [];
       for (let colSchema of colsSchema) {
         colOptions.push({ label: colSchema.header, value: colSchema });
+        visibilityMenu.push({ label: colSchema.header, command: () => {} });
       }
       setColumnOptions(colOptions);
+      setVisibilityButtonMenu(visibilityMenu);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -375,7 +381,6 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
-        console.log(pastedData);
         setPastedRecords(getClipboardData(pastedData));
       }
     };
@@ -980,9 +985,23 @@ const DataViewer = withRouter(
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={true}
+              disabled={false}
               icon={'eye'}
               label={resources.messages['visibility']}
+              onClick={event => {
+                visibilityMenuRef.current.show(event);
+              }}
+            />
+            <VisibilityMenu
+              columns={visibilityButtonMenu}
+              popup={true}
+              ref={visibilityMenuRef}
+              id="exportTableMenu"
+              onShow={e => {
+                console.log('hello');
+
+                getExportButtonPosition(e);
+              }}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
