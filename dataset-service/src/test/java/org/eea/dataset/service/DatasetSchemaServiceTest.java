@@ -104,7 +104,7 @@ public class DatasetSchemaServiceTest {
 
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
 
-    Mockito.verify(schemasRepository.save(Mockito.any()), times(1));
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
 
@@ -130,9 +130,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
 
-    Mockito.verify(schemasRepository.save(Mockito.any()), times(1));
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
 
@@ -158,9 +159,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
 
-    Mockito.verify(schemasRepository.save(Mockito.any()), times(1));
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
 
@@ -186,9 +188,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
 
-    Mockito.verify(schemasRepository.save(Mockito.any()), times(1));
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   @Test
@@ -213,9 +216,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
 
-    Mockito.verify(schemasRepository.save(Mockito.any()), times(1));
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   @Test
@@ -240,9 +244,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
 
-    Mockito.verify(schemasRepository.save(Mockito.any()), times(1));
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   /**
