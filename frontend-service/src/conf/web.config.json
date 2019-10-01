@@ -83,17 +83,11 @@
 	"refreshToken":{
 		"url": "/user/refreshToken?refreshToken={:refreshToken}"
 	},
-	"DATAFLOW": {
-		"url": "/dataflow/{:dataflowId}"
-		},
 	"updateTableDataField":{
 		"url": "/dataset/{:datasetId}/updateField"
 	},
 	"updateTableDataRecord":{
 		"url":"/dataset/{:datasetId}/updateRecord"
-	},
-	"DATAFLOWS":{
-		"url":"/dataflows"
 	},
 	"deleteDocument":{
 		"url":"/document/{:documentId}"

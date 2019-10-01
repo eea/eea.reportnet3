@@ -34,6 +34,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
 export const ReporterDataset = withRouter(({ match, history }) => {
   const {
@@ -71,7 +72,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push(getUrl(config.DATAFLOWS.url))
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   useEffect(() => {
@@ -94,7 +95,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(config.DATAFLOWS.url))
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
@@ -228,7 +229,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     } catch (error) {
       const errorResponse = error.response;
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     }
 

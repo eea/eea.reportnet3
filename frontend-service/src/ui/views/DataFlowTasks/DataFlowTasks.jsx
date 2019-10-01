@@ -16,6 +16,7 @@ import { TabMenu } from 'primereact/tabmenu';
 import { DataflowService } from 'core/services/DataFlow';
 import { UserContext } from '../_components/_context/UserContext';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
 export const DataflowTasks = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
@@ -42,7 +43,7 @@ export const DataflowTasks = withRouter(({ match, history }) => {
   const [completedContent, setcompletedContent] = useState([]);
   const home = {
     icon: config.icons['home'],
-    command: () => history.push(getUrl(config.DATAFLOWS.url))
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   const dataFetch = async () => {
