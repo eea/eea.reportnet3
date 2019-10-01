@@ -761,7 +761,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public void errorScale(Long datasetId, KieBase kieBase) throws EEAException {
-    long timer = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -842,7 +841,6 @@ public class ValidationServiceImpl implements ValidationService {
       datasetValidations.add(datasetVal);
     });
     validationDatasetRepository.saveAll(datasetValidations);
-    System.out.println(System.currentTimeMillis() - timer);
   }
 
   /**
