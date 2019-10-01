@@ -135,7 +135,7 @@ export const apiDataset = {
   exportDataById: async (datasetId, fileType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.download({
-      url: getUrl(config.exportDataSetData.url, {
+      url: getUrl(config.exportDatasetData.url, {
         datasetId: datasetId,
         fileType: fileType
       }),
@@ -150,7 +150,7 @@ export const apiDataset = {
   exportTableDataById: async (datasetId, tableSchemaId, fileType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.download({
-      url: getUrl(config.exportDataSetTableData.url, {
+      url: getUrl(config.exportDatasetTableData.url, {
         datasetId: datasetId,
         tableSchemaId: tableSchemaId,
         fileType: fileType

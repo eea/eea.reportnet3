@@ -14,7 +14,7 @@
 	"webFormDataViewerAPI": {
 		"url": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"
 	},
-	"deleteSnapshotByID": {
+	"deleteSnapshotById": {
 		"url": "/snapshot/{:snapshotId}/dataset/{:datasetId}/delete"
 	},
 	"restoreSnapshot": {
@@ -35,10 +35,10 @@
 	"downloadDocumentByIdAPI": {
 		"url": "/document/{:documentId}"
 	},
-	"exportDataSetData": {
+	"exportDatasetData": {
 		"url": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}"
 	},
-	"exportDataSetTableData": {
+	"exportDatasetTableData": {
 		"url": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}"
 	},
 	"listValidationsAPI": {

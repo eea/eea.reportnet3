@@ -30,7 +30,7 @@ import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
-export const DocumentationDataSet = withRouter(({ match, history }) => {
+export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
