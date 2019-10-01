@@ -9,6 +9,8 @@ import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CreateDataflowForm } from './_components/CreateDataflowForm';
+import { Dialog } from 'ui/views/_components/Dialog';
 import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -26,6 +28,7 @@ const DataflowColumn = withRouter(
     match
   }) => {
     const resources = useContext(ResourcesContext);
+    const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
     const [isCustodian, setIsCustodian] = useState(false);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
     const user = useContext(UserContext);
@@ -42,6 +45,10 @@ const DataflowColumn = withRouter(
 
     const onConfirmSubscribeHandler = () => {
       setSubscribeDialogVisible(false);
+    };
+
+    const onCancelDialog = () => {
+      setCreateDataflowDialogVisible(false);
     };
 
     return (
@@ -81,17 +88,28 @@ const DataflowColumn = withRouter(
               setVisibleHandler(setSubscribeDialogVisible, true);
             }}
           />
-          <ConfirmDialog
-            header={resources.messages['subscribeButtonTitle']}
-            maximizable={false}
-            labelCancel={resources.messages['close']}
-            labelConfirm={resources.messages['yes']}
-            onConfirm={onConfirmSubscribeHandler}
-            onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
-            visible={subscribeDialogVisible}>
-            {resources.messages['subscribeDataflow']}
-          </ConfirmDialog>
         </div>
+
+        <Dialog
+          header={resources.messages['createDataflowButton']}
+          visible={createDataflowDialogVisible}
+          className={styles.dialog}
+          dismissableMask={false}
+          onHide={onCancelDialog}>
+          {' '}
+          <CreateDataflowForm></CreateDataflowForm>
+        </Dialog>
+
+        <ConfirmDialog
+          header={resources.messages['subscribeButtonTitle']}
+          maximizable={false}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmSubscribeHandler}
+          onHide={() => setVisibleHandler(setSubscribeDialogVisible, false)}
+          visible={subscribeDialogVisible}>
+          {resources.messages['subscribeDataflow']}
+        </ConfirmDialog>
       </div>
     );
   }

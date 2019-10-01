@@ -54,7 +54,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       );
     }
 
-    if (!isUndefined(user.mainRole)) {
+    if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
         UserService.hasPermission(
           user,
