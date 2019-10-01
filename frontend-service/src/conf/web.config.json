@@ -6,7 +6,7 @@
 		"url": "/snapshot/dataset/{:datasetId}/create?description={:description}"
 	},
 	"dataSchemaAPI": {
-		"url": "/dataschema/dataflow/{:dataflowId}"
+		"url": "/dataschema/noRules/dataflow/{:dataflowId}"
 	},
 	"dataViewerAPI": {
 		"url": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}"
