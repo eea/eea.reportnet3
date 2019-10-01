@@ -60,7 +60,8 @@ public class ValidationControllerImplTest {
 
   @Test
   public void testValidateDataSetDataException() throws EEAException {
-    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any());
+    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any(),
+        Mockito.any());
     validationController.validateDataSetData(0L);
   }
 
