@@ -52,8 +52,9 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
-  const [isWebFormDataset, setIsWebFormDataset] = useState(false);
+  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
+  const [isWebFormDataset, setIsWebFormDataset] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
@@ -103,7 +104,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       },
       { label: resources.messages['dataset'] }
     ]);
-    onLoadSnapshotList();
   }, []);
 
   useEffect(() => {
@@ -190,7 +190,17 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const onLoadSnapshotList = async () => {
-    setSnapshotListData(await SnapshotService.all(datasetId));
+    try {
+      setIsLoadingSnapshotListData(true);
+
+      const snapshotsData = await SnapshotService.all(datasetId);
+
+      setSnapshotListData(snapshotsData);
+
+      setIsLoadingSnapshotListData(false);
+    } catch (error) {
+      setIsLoadingSnapshotListData(false);
+    }
   };
 
   const onLoadDatasetSchema = async () => {
@@ -476,7 +486,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => onSetVisible(setSnapshotIsVisible, true)}
+              onClick={() => {
+                onLoadSnapshotList();
+                return onSetVisible(setSnapshotIsVisible, true);
+              }}
             />
           </div>
         </Toolbar>
@@ -554,6 +567,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         }}>
         <SnapshotSlideBar
           isVisible={snapshotIsVisible}
+          isLoadingSnapshotListData={isLoadingSnapshotListData}
           setIsVisible={setSnapshotIsVisible}
           setSnapshotDialogVisible={setSnapshotDialogVisible}
           snapshotListData={snapshotListData}
