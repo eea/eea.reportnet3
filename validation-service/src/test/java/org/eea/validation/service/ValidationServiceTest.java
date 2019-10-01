@@ -433,7 +433,8 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
 
-    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    when(recordRepository.findAllRecordsByTableValueIdPaginated(Mockito.any(), Mockito.any()))
+        .thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
     validationServiceImpl.validateRecord(1L, kieBase, null);
@@ -484,7 +485,7 @@ public class ValidationServiceTest {
     recordValue.setFields(fields);
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
-    when(kieBase.newKieSession()).thenReturn(kieSession);
+    // when(kieBase.newKieSession()).thenReturn(kieSession);
     when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
     validationServiceImpl.validateRecord(1L, kieBase, null);
 
@@ -524,9 +525,13 @@ public class ValidationServiceTest {
     recordValidations.add(recordValidation);
     recordValue.setFields(fields);
     recordValue.setRecordValidations(recordValidations);
+    recordValue.setIdRecordSchema("jasdjksadn");
     records.add(recordValue);
-    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    when(recordRepository.findAllRecordsByTableValueIdPaginated(Mockito.any(), Mockito.any()))
+        .thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
+    when(kieSession.insert(Mockito.any())).thenReturn(null);
+    when(kieSession.fireAllRules()).thenReturn(1);
     validationServiceImpl.validateRecord(1L, kieBase, null);
 
   }
@@ -580,54 +585,12 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(1).setId(2L);
     datasetValue.getTableValues().get(1).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
+    when(recordRepository.findAllRecordsByTableValueIdPaginated(Mockito.any(), Mockito.any()))
+        .thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
     validationServiceImpl.validateFields(1L, kieBase, null);
 
-  }
-
-  /**
-   * Test validate fields success data.
-   *
-   * @throws EEAException the EEA exception
-   */
-  // @Test
-  public void testValidateFieldsSuccessData() throws EEAException {
-    List<RecordValue> records = new ArrayList<>();
-    RecordValue recordValue = new RecordValue();
-    recordValue.setId(1L);
-    List<FieldValue> fields = new ArrayList<>();
-    FieldValue fieldValue = new FieldValue();
-    List<FieldValidation> fieldValidations = new ArrayList<>();
-    FieldValidation fieldValidation = new FieldValidation();
-    fieldValue.setId(1L);
-    fieldValue.setLevelError(TypeErrorEnum.WARNING);
-    validation.setId(1L);
-    validation.setTypeEntity(TypeEntityEnum.DATASET);
-    fieldValidation.setValidation(validation);
-    fieldValidation.setFieldValue(fieldValue);
-    fieldValidation.setId(1L);
-    fieldValidations.add(fieldValidation);
-    fieldValue.setFieldValidations(fieldValidations);
-    fields.add(fieldValue);
-    List<RecordValidation> recordValidations = new ArrayList<>();
-    RecordValidation recordValidation = new RecordValidation();
-    recordValidation.setId(1l);
-    recordValidation.setValidation(validation);
-    recordValidations.add(recordValidation);
-    recordValue.setFields(fields);
-    recordValue.setRecordValidations(recordValidations);
-    records.add(recordValue);
-    datasetValue.getTableValues().get(0).setId(1L);
-    datasetValue.getTableValues().get(0).setIdTableSchema("123123");
-    datasetValue.getTableValues().get(1).setId(2L);
-    datasetValue.getTableValues().get(1).setIdTableSchema("123123");
-    when(kieBase.newKieSession()).thenReturn(kieSession);
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(recordRepository.findAllRecordsByTableValueId(Mockito.any())).thenReturn(records);
-    when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateFields(1L, kieBase, null);
   }
 
   /**
