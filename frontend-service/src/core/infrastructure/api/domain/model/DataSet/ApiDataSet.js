@@ -1,4 +1,4 @@
-import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
@@ -10,7 +10,7 @@ export const apiDataset = {
       const response = await HTTPRequester.post({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${datasetId}/table/${tableSchemaId}/record`
-          : getUrl(config.addNewRecord.url, {
+          : getUrl(DatasetConfig.addNewRecord, {
               datasetId: datasetId,
               tableSchemaId: tableSchemaId
             }),
@@ -33,7 +33,7 @@ export const apiDataset = {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${datasetId}/deleteImportData`
-          : getUrl(config.deleteImportData.url, {
+          : getUrl(DatasetConfig.deleteImportData, {
               datasetId: datasetId
             }),
         queryString: {},
@@ -54,7 +54,7 @@ export const apiDataset = {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${datasetId}/record/${recordId}`
-          : getUrl(config.deleteRecord.url, {
+          : getUrl(DatasetConfig.deleteRecord, {
               datasetId,
               recordId
             }),
@@ -76,7 +76,7 @@ export const apiDataset = {
       const response = await HTTPRequester.delete({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${datasetId}/deleteImportTable/${tableId}`
-          : getUrl(config.deleteImportTable.url, {
+          : getUrl(DatasetConfig.deleteImportTable, {
               datasetId: datasetId,
               tableId: tableId
             }),
@@ -97,7 +97,7 @@ export const apiDataset = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_getTableFromAnyObjectId.json'
-        : getUrl(config.validationViewerAPI.url, {
+        : getUrl(DatasetConfig.validationViewer, {
             objectId: objectId,
             datasetId: datasetId,
             entityType: entityType
@@ -117,7 +117,7 @@ export const apiDataset = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'
-        : getUrl(config.listValidationsAPI.url, {
+        : getUrl(DatasetConfig.listValidations, {
             datasetId: datasetId,
             pageNum: pageNum,
             pageSize: pageSize,
@@ -135,7 +135,7 @@ export const apiDataset = {
   exportDataById: async (datasetId, fileType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.download({
-      url: getUrl(config.exportDatasetData.url, {
+      url: getUrl(DatasetConfig.exportDatasetData, {
         datasetId: datasetId,
         fileType: fileType
       }),
@@ -150,7 +150,7 @@ export const apiDataset = {
   exportTableDataById: async (datasetId, tableSchemaId, fileType) => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.download({
-      url: getUrl(config.exportDatasetTableData.url, {
+      url: getUrl(DatasetConfig.exportDatasetTableData, {
         datasetId: datasetId,
         tableSchemaId: tableSchemaId,
         fileType: fileType
@@ -168,7 +168,7 @@ export const apiDataset = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
-        : getUrl(config.dataSchemaAPI.url, {
+        : getUrl(DatasetConfig.dataSchema, {
             dataflowId: dataflowId
           }),
       queryString: {},
@@ -183,7 +183,7 @@ export const apiDataset = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/error-statistics.json'
-        : getUrl(config.loadStatisticsAPI.url, {
+        : getUrl(DatasetConfig.loadStatistics, {
             datasetId: datasetId
           }),
       queryString: {},
@@ -198,7 +198,7 @@ export const apiDataset = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_dataset_values2.json'
-        : getUrl(config.dataViewerAPI.url, {
+        : getUrl(DatasetConfig.dataViewer, {
             datasetId: datasetId,
             tableSchemaId: tableSchemaId,
             pageNum: pageNum,
@@ -217,7 +217,7 @@ export const apiDataset = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_dataset_values2.json'
-        : getUrl(config.webFormDataViewerAPI.url, {
+        : getUrl(DatasetConfig.webFormDataViewer, {
             datasetId: datasetId,
             tableSchemaId: tableSchemaId
           }),
@@ -234,7 +234,7 @@ export const apiDataset = {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${datasetId}/updateField`
-          : getUrl(config.updateTableDataField.url, {
+          : getUrl(DatasetConfig.updateTableDataField, {
               datasetId: datasetId
             }),
         data: datasetTableRecords,
@@ -256,7 +256,7 @@ export const apiDataset = {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
           ? `/dataset/${datasetId}/updateRecord`
-          : getUrl(config.updateTableDataRecord.url, {
+          : getUrl(DatasetConfig.updateTableDataRecord, {
               datasetId: datasetId
             }),
         data: datasetTableRecords,
@@ -278,7 +278,7 @@ export const apiDataset = {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
           ? `/jsons/list-of-errors.json`
-          : getUrl(config.validateDataSetAPI.url, {
+          : getUrl(DatasetConfig.validateDataSet, {
               datasetId: datasetId
             }),
         queryString: {},

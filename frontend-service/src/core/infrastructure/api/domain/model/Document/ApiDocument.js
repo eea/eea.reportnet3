@@ -1,8 +1,8 @@
-import { config } from 'conf';
+import { DataflowConfig } from 'conf/domain/model/DataFlow';
+import { DocumentConfig } from 'conf/domain/model/Document';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { async } from 'q';
 
 export const apiDocument = {
   all: async dataflowId => {
@@ -10,7 +10,7 @@ export const apiDocument = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
-        : getUrl(config.loadDatasetsByDataflowId.url, {
+        : getUrl(DataflowConfig.loadDatasetsByDataflowId, {
             dataflowId: dataflowId
           }),
       queryString: {},
@@ -25,7 +25,7 @@ export const apiDocument = {
     const response = await HTTPRequester.download({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
-        : getUrl(config.downloadDocumentByIdAPI.url, {
+        : getUrl(DocumentConfig.downloadDocumentById, {
             documentId: documentId
           }),
       queryString: {},
@@ -41,7 +41,7 @@ export const apiDocument = {
     const formData = new FormData();
     formData.append('file', file, file.name);
     const response = await HTTPRequester.postWithFiles({
-      url: getUrl(config.uploadDocumentAPI.url, {
+      url: getUrl(DocumentConfig.uploadDocument, {
         dataflowId: dataflowId,
         description: description,
         language: language
@@ -58,7 +58,7 @@ export const apiDocument = {
   deleteDocument: async documentId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
-      url: getUrl(config.deleteDocument.url, {
+      url: getUrl(DocumentConfig.deleteDocument, {
         documentId
       }),
       queryString: {},

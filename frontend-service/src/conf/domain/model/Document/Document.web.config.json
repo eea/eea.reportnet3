@@ -1,0 +1,5 @@
+{
+    "deleteDocument": "/document/{:documentId}",
+    "downloadDocumentById": "/document/{:documentId}",
+    "uploadDocument": "/document/upload/{:dataflowId}?description={:description}&language={:language}"
+}

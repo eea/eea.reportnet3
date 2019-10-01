@@ -1,0 +1,17 @@
+{
+    "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
+    "dataViewer": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}",
+    "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
+    "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
+    "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
+    "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
+    "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
+    "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}",
+    "loadDataTable": "/dataset/{:datasetId}/loadTableData/{:tableId}",
+    "loadStatistics": "/dataset/loadStatistics/{:datasetId}",
+    "updateTableDataField": "/dataset/{:datasetId}/updateField",
+    "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
+    "validateDataSet": "/validation/dataset/{:datasetId}",
+    "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
+    "webFormDataViewer":"/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"
+}
