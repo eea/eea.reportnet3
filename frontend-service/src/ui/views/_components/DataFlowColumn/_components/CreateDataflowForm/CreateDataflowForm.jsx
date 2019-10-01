@@ -1,38 +1,73 @@
 import React, { useContext, useRef } from 'react';
 
+import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isPlainObject, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './CreateDataflowForm.module.css';
-
-import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const CreateDataflowForm = () => {
+export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required(resources.messages['emptyNameValidationError']),
+    description: Yup.string().required(resources.messages['emptyDescriptionValidationError'])
+  });
+
+  if (!isFormReset) {
+    form.current.resetForm();
+  }
+
   return (
-    <Formik ref={form} initialValues={initialValues}>
-      {({ isSubmitting, setFieldValue, errors, touched }) => (
+    <Formik ref={form} initialValues={initialValues} validationSchema={validationSchema} onSubmit>
+      {({ isSubmitting, errors, touched }) => (
         <Form>
           <fieldset>
-            <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
-              <Field name="name" type="text" placeholder={resources.messages.createDataflowName} />
+            <div className={`formField${!isEmpty(errors.name) && touched.name ? ' error' : ''}`}>
+              <Field name="name" type="text" placeholder={resources.messages['createDataflowName']} />
               <ErrorMessage className="error" name="name" component="div" />
+            </div>
+            <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
+              <Field name="description" type="text" placeholder={resources.messages['createDataflowDescription']} />
+              <ErrorMessage className="error" name="description" component="div" />
+            </div>
+            <div className={styles.search}>
+              <Field
+                className={styles.searchInput}
+                disabled={true}
+                name="obligation"
+                placeholder={resources.messages['associatedObligation']}
+                type="text"
+              />
+              <Button
+                className={styles.searchButton}
+                disabled={true}
+                icon="search"
+                label={resources.messages['search']}
+                layout="simple"
+              />
             </div>
           </fieldset>
           <fieldset>
-            <div className={styles.btnWrapper}>
-              <Button type="reset" className="p-button-rounded" label={resources.messages.reset} layout="simple" />
+            <div className={styles.wrapButtons}>
               <Button
-                type="submit"
-                className="p-button-primary"
-                disabled={isSubmitting}
-                label={resources.messages.upload}
+                className={styles.resetButton}
+                icon="cancel"
+                label={resources.messages['reset']}
                 layout="simple"
+                type="reset"
+              />
+              <Button
+                className={styles.submitButton}
+                disabled={isSubmitting}
+                icon="plus"
+                label={resources.messages['createNewDataflow']}
+                layout="simple"
+                type="submit"
               />
             </div>
           </fieldset>

@@ -30,6 +30,7 @@ const DataflowColumn = withRouter(
     const resources = useContext(ResourcesContext);
     const [createDataflowDialogVisible, setCreateDataflowDialogVisible] = useState(false);
     const [isCustodian, setIsCustodian] = useState(false);
+    const [isFormReset, setIsFormReset] = useState(true);
     const [subscribeDialogVisible, setSubscribeDialogVisible] = useState(false);
     const user = useContext(UserContext);
 
@@ -47,8 +48,13 @@ const DataflowColumn = withRouter(
       setSubscribeDialogVisible(false);
     };
 
-    const onCancelDialog = () => {
+    const onCreateDataflow = () => {
       setCreateDataflowDialogVisible(false);
+    };
+
+    const onHideDialog = () => {
+      setCreateDataflowDialogVisible(false);
+      setIsFormReset(false);
     };
 
     return (
@@ -77,6 +83,7 @@ const DataflowColumn = withRouter(
               className={`${styles.columnButton} p-button-warning`}
               icon="plus"
               label={createDataflowButtonTitle}
+              onClick={() => (setCreateDataflowDialogVisible(true), setIsFormReset(true))}
             />
           )}
 
@@ -91,13 +98,12 @@ const DataflowColumn = withRouter(
         </div>
 
         <Dialog
-          header={resources.messages['createDataflowButton']}
+          header={resources.messages['createNewDataflow']}
           visible={createDataflowDialogVisible}
           className={styles.dialog}
           dismissableMask={false}
-          onHide={onCancelDialog}>
-          {' '}
-          <CreateDataflowForm></CreateDataflowForm>
+          onHide={onHideDialog}>
+          <CreateDataflowForm isFormReset={isFormReset} onCreate={onCreateDataflow}></CreateDataflowForm>
         </Dialog>
 
         <ConfirmDialog

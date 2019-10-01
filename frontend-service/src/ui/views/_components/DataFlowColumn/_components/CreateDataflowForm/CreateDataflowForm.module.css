@@ -1,0 +1,34 @@
+.wrapButtons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resetButton,
+.submitButton {
+  width: 49% !important;
+}
+
+.resetButton {
+  composes: rp-btn from global;
+  composes: default from global;
+  color: var(--black) !important;
+  vertical-align: middle !important;
+}
+.submitButton {
+  composes: rp-btn from global;
+  composes: primary from global;
+}
+
+.search {
+  display: flex;
+  flex-direction: row;
+}
+
+.searchInput {
+  border-right: none;
+  padding: 5px;
+  outline: none;
+  border-radius: 3px 0 0 3px;
+}
