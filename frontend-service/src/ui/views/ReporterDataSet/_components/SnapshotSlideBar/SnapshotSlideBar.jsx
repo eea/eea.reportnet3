@@ -10,11 +10,12 @@ import styles from './SnapshotSliderBar.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotList } from './_components/SnapshotList';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
+const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoadingSnapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const form = useRef(null);
@@ -87,7 +88,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
             )}
           />
         </div>
-        <SnapshotList snapshotListData={snapshotListData} />
+        {isLoadingSnapshotListData ? <Spinner /> : <SnapshotList snapshotListData={snapshotListData} />}
       </div>
     </Sidebar>
   );
