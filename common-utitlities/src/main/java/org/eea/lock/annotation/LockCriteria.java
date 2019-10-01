@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Lock Criteria to be used to prevent a method from being executed more than once at a time with
  * the same Criteria.
  *
- * Works together with {@link org.eea.lock.annotation.ExecuteOnlyOnce}
+ * Works together with {@link org.eea.lock.annotation.LockMethod}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

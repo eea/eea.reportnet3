@@ -2,7 +2,6 @@ package org.eea.lock.aspect;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,14 +24,13 @@ public class LockAspect {
 
   private static Map<Integer, CompletableFuture<Object>> map = new ConcurrentHashMap<>();
 
-  @Around("@annotation(org.eea.lock.annotation.ExecuteOnlyOnce)")
+  @Around("@annotation(org.eea.lock.annotation.LockMethod)")
   public Object checkDaasetBlocked(ProceedingJoinPoint jointPoint) throws Throwable {
 
     CompletableFuture<Object> alreadyExists;
     CompletableFuture<Object> response = new CompletableFuture<>();
     List<Object> lockCriteria = getLockCriteria(jointPoint);
-    Integer hash =
-        generateHashCode(jointPoint.getSignature().toShortString(), lockCriteria);
+    Integer hash = generateHashCode(jointPoint.getSignature().toShortString(), lockCriteria);
 
     synchronized (map) {
       alreadyExists = map.putIfAbsent(hash, response);

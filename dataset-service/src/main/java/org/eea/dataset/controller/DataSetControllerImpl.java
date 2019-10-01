@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.Produces;
-import org.eea.annotation.ExecuteOnlyOnce;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -20,6 +19,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +172,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void loadTableData(@PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file,
@@ -466,7 +467,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @throws Exception the exception
    */
   @Override
-  @ExecuteOnlyOnce
+  @LockMethod
   @HystrixCommand
   @GetMapping("/exportFile")
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
