@@ -38,6 +38,7 @@ import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
+import org.eea.validation.persistence.data.repository.RecordValidationRepository.EntityErrors;
 import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
@@ -155,6 +156,10 @@ public class ValidationServiceTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The record validation repository. */
+  @Mock
+  private RecordValidationRepository recordValidationRepository;
+
   /**
    * The dataset value.
    */
@@ -186,6 +191,11 @@ public class ValidationServiceTest {
 
   /** The validation. */
   private Validation validation;
+
+  private EntityErrors error;
+
+  /** The error 2. */
+  private EntityErrors error2;
 
   /** The dataset metabase. */
   @Mock
@@ -227,7 +237,40 @@ public class ValidationServiceTest {
     dataSetVO.setId(1L);
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
+    error = new EntityErrors() {
 
+      @Override
+      public String getOrigin() {
+        return "TABLE";
+      }
+
+      @Override
+      public BigInteger getId() {
+        return BigInteger.valueOf(1L);
+      }
+
+      @Override
+      public String getError() {
+        return "ERROR";
+      }
+    };
+    error2 = new EntityErrors() {
+
+      @Override
+      public String getOrigin() {
+        return "TABLE";
+      }
+
+      @Override
+      public BigInteger getId() {
+        return BigInteger.valueOf(2L);
+      }
+
+      @Override
+      public String getError() {
+        return "WARNING";
+      }
+    };
     MockitoAnnotations.initMocks(this);
     List<DatasetValidation> datasetValidations = new ArrayList<>();
     DatasetValidation datasetValidation = new DatasetValidation();
@@ -702,24 +745,12 @@ public class ValidationServiceTest {
     recordValidation.setValidation(validation);
     List<RecordValidation> recordValidations = new ArrayList<>();
     recordValidations.add(recordValidation);
-    DatasetValidation datasetValidation = new DatasetValidation();
-    datasetValidation.setValidation(validation);
-    datasetValidation.setDatasetValue(datasetValue);
-    List<DatasetValidation> datasetValidations = new ArrayList<>();
-    datasetValidations.add(datasetValidation);
-    datasetValue.setDatasetValidations(datasetValidations);
-    FieldValidation fieldValidation = new FieldValidation();
-    recordValue.setTableValue(tableValue);
-    fieldValue.setRecord(recordValue);
-    fieldValidation.setFieldValue(fieldValue);
-    fieldValidation.setValidation(validation);
-    List<FieldValidation> fieldValidations = new ArrayList<>();
-    fieldValidations.add(fieldValidation);
+    recordValidations.add(recordValidation);
 
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    when(validationRecordRepository.findByValidationIds(Mockito.any()))
+    when(recordValidationRepository.findByValidationIds(Mockito.any()))
         .thenReturn(recordValidations);
     assertNotNull("error", validationServiceImpl.getRecordErrors(1L, new ArrayList<Long>()));
   }
@@ -1162,5 +1193,24 @@ public class ValidationServiceTest {
   public void countFieldsDatasetTest() {
     when(recordRepository.countFieldsDataset()).thenReturn(1);
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void errorScaleTestException() throws EEAException {
+    validationServiceImpl.errorScale(null, null);
+  }
+
+  @Test
+  public void errorScaleTest() throws EEAException {
+    DatasetValue dataset = new DatasetValue();
+    dataset.setId(1L);
+    List<EntityErrors> failedEntities = new ArrayList<>();
+    failedEntities.add(error);
+    failedEntities.add(error2);
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(recordValidationRepository.findFailedRecords()).thenReturn(failedEntities);
+    when(recordValidationRepository.findFailedTables()).thenReturn(failedEntities);
+    when(recordValidationRepository.findFailedDatasets()).thenReturn(failedEntities);
+    validationServiceImpl.errorScale(1L, kieBase);
   }
 }
