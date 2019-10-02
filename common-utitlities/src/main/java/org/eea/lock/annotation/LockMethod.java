@@ -16,4 +16,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface LockMethod {
 
+  /**
+   * Removes the lock after method is finished. If false, the lock must be removed manually
+   *
+   * @return true, if successful
+   */
+  public boolean removeWhenFinish() default true;
 }

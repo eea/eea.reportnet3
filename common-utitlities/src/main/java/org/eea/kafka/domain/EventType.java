@@ -69,8 +69,27 @@ public enum EventType {
   /**
    * The WebSocket notification event.
    */
-  WEBSOCKET_NOTIFICATION("DATA_REPORTING_TOPIC", "websocket_notification");
+  WEBSOCKET_NOTIFICATION("DATA_REPORTING_TOPIC", "websocket_notification"),
 
+  /**
+   * The lock method.
+   */
+  LOCK_METHOD("DATA_REPORTING_TOPIC", "lock_method"),
+
+  /**
+   * The lock entity.
+   */
+  LOCK_ENTITY("DATA_REPORTING_TOPIC", "lock_entity"),
+
+  /**
+   * The unlock method.
+   */
+  UNLOCK_METHOD("DATA_REPORTING_TOPIC", "unlock_method"),
+
+  /**
+   * The unlock entity.
+   */
+  UNLOCK_ENTITY("DATA_REPORTING_TOPIC", "unlock_entity");
 
   /**
    * The topic.

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 /**
  * Configures Lock Aspect to prevent one method to be executed more than onece at a time.
  *
- * @see org.eea.lock.aspect.LockAspect
+ * @see org.eea.lock.aspect.MethodLockAspect
  */
 @Configuration
 @EnableAspectJAutoProxy

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
 /**
  * Enables Lock Aspect to prevent one method to be executed more than onece at a time.
  *
- * @see org.eea.lock.aspect.LockAspect
+ * @see org.eea.lock.aspect.MethodLockAspect
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
