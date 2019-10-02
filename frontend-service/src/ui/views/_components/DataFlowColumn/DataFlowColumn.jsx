@@ -80,7 +80,7 @@ const DataflowColumn = withRouter(
 
           {isCustodian && components.includes('createDataflow') && (
             <Button
-              className={`${styles.columnButton} p-button-warning`}
+              className={`${styles.columnButton} p-button-primary`}
               icon="plus"
               label={createDataflowButtonTitle}
               onClick={() => (setCreateDataflowDialogVisible(true), setIsFormReset(true))}
