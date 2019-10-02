@@ -386,18 +386,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
-      // Table value
-
-      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          idReportingDataset, "_table_TableValue.snap");
-
-      String copyQueryTable = "COPY dataset_" + idReportingDataset
-          + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-
-      copyFromFile(copyQueryTable, nameFileTableValue, cm);
+      // It is not neccesary to restore the table values
 
       // Record value
-
       String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           idReportingDataset, "_table_RecordValue.snap");
 

@@ -54,6 +54,7 @@ CREATE INDEX idx_field_validation_field ON %dataset_name%.field_validation(id_fi
 CREATE INDEX idx_field_validation_validation ON %dataset_name%.field_validation(id_validation);
 CREATE INDEX idx_record_validation_record ON %dataset_name%.record_validation(id_record);
 CREATE INDEX idx_record_validation_validation ON %dataset_name%.record_validation(id_validation);
+CREATE INDEX idx_validation_level_error ON %dataset_name%.validation(level_error);
 
 ALTER SEQUENCE %dataset_name%.field_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.field_validation_sequence TO %user%;
