@@ -1,0 +1,7 @@
+{
+    "createSnapshot": "/snapshot/dataset/{:datasetId}/create?description={:description}",
+    "deleteSnapshotById": "/snapshot/{:snapshotId}/dataset/{:datasetId}/delete",        
+    "loadSnapshotsList": "/snapshot/dataset/{:datasetId}/listSnapshots",        
+    "releaseSnapshot": "/snapshot/{:snapshotId}/dataset/{:datasetId}/release",
+    "restoreSnapshot": "/snapshot/{:snapshotId}/dataset/{:datasetId}/restore"
+}
