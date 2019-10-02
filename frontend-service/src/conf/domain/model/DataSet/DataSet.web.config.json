@@ -1,5 +1,6 @@
 {
     "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
+    "dataSchema":  "/dataschema/dataflow/{:dataflowId}",
     "dataViewer": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}",
     "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
     "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
@@ -11,7 +12,7 @@
     "loadStatistics": "/dataset/loadStatistics/{:datasetId}",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
-    "validateDataSet": "/validation/dataset/{:datasetId}",
+    "validateDataset": "/validation/dataset/{:datasetId}",
     "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
     "webFormDataViewer":"/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"
 }

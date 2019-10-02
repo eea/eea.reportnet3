@@ -278,7 +278,7 @@ export const apiDataset = {
       const response = await HTTPRequester.update({
         url: window.env.REACT_APP_JSON
           ? `/jsons/list-of-errors.json`
-          : getUrl(DatasetConfig.validateDataSet, {
+          : getUrl(DatasetConfig.validateDataset, {
               datasetId: datasetId
             }),
         queryString: {},

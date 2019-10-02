@@ -1,6 +1,5 @@
 {
     "acceptDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
-    "dataSchema":  "/dataschema/dataflow/{:dataflowId}",
     "loadDataflowTaskPendingAccepted":  "/dataflow/pendingaccepted",
     "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
     "rejectDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
