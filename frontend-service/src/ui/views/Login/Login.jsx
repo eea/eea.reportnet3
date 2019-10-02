@@ -6,8 +6,6 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './Login.module.css';
 
-import { config } from 'conf';
-
 import logo from 'assets/images/logo.png';
 
 import { Button } from 'ui/views/_components/Button';
@@ -16,6 +14,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
@@ -52,7 +51,7 @@ const Login = ({ history }) => {
               try {
                 const userObject = await UserService.login(values.userName, values.password);
                 user.onLogin(userObject);
-                history.push(getUrl(config.DATAFLOWS.url));
+                history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
                 console.error(error);
                 user.onLogout();
@@ -95,12 +94,7 @@ const Login = ({ history }) => {
                   <ErrorMessage className="error" name="password" component="div" />
                 </fieldset>
                 <fieldset className={`${styles.buttonHolder}`}>
-                  <Button
-                    layout="simple"
-                    type="submit"
-                    label={resources.messages.loginLogin}
-                    className="rp-btn primary"
-                  />
+                  <Button layout="simple" type="submit" label={resources.messages.login} className="rp-btn primary" />
                 </fieldset>
               </Form>
             )}

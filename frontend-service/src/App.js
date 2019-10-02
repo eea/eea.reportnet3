@@ -6,9 +6,9 @@ import { routes } from 'ui/routes';
 
 import { DataflowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
 import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
-import { DocumentationDataSet } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
+import { DocumentationDataset } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
 import { Login } from 'ui/views/Login';
-import { ReporterDataSet } from 'ui/views/ReporterDataSet/ReporterDataSet';
+import { ReporterDataset } from 'ui/views/ReporterDataSet/ReporterDataSet';
 import { ReportingDataflow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
@@ -57,8 +57,8 @@ const App = () => {
               <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
               <PrivateRoute exact path={routes.DATA_CUSTODIAN_DASHBOARDS} component={DataCustodianDashboards} />
               <PrivateRoute exact path={routes.DATAFLOW} component={ReportingDataflow} />
-              <PrivateRoute exact path={routes.DATASET} component={ReporterDataSet} />
-              <PrivateRoute exact path={routes.DOCUMENTATION_DATASET} component={DocumentationDataSet} />
+              <PrivateRoute exact path={routes.DATASET} component={ReporterDataset} />
+              <PrivateRoute exact path={routes.DOCUMENTATION_DATASET} component={DocumentationDataset} />
               <PrivateRoute path={'/'} component={DataflowTasks} />
             </Switch>
           </Router>

@@ -1,4 +1,4 @@
-import { config } from 'conf';
+import { DataflowConfig } from 'conf/domain/model/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
@@ -8,7 +8,7 @@ export const apiDataflow = {
   accept: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(config.acceptDataflow.url, { dataflowId, type: 'ACCEPTED' }),
+      url: getUrl(DataflowConfig.acceptDataflow, { dataflowId, type: 'ACCEPTED' }),
       data: { id: dataflowId },
       queryString: {},
       headers: {
@@ -20,7 +20,9 @@ export const apiDataflow = {
   all: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataflowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -31,7 +33,9 @@ export const apiDataflow = {
   accepted: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataflowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -42,7 +46,9 @@ export const apiDataflow = {
   completed: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataflowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -67,7 +73,9 @@ export const apiDataflow = {
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataflowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -78,7 +86,7 @@ export const apiDataflow = {
   reject: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(config.rejectDataflow.url, { dataflowId, type: 'REJECTED' }),
+      url: getUrl(DataflowConfig.rejectDataflow, { dataflowId, type: 'REJECTED' }),
       data: { id: dataflowId },
       queryString: {},
       headers: {
@@ -92,7 +100,7 @@ export const apiDataflow = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_DataflowById.json'
-        : getUrl(config.loadDataSetsByDataflowId.url, {
+        : getUrl(DataflowConfig.loadDatasetsByDataflowId, {
             dataflowId: dataflowId
           }),
       queryString: {},

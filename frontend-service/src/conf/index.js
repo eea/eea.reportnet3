@@ -1,12 +1,11 @@
 import primeIcons from './prime.icons';
-import webConfig from './web.config';
 import countryCode from './countries.code.json';
 import languageCode from './language.code.json';
 import exportTypeCode from './exportType.code.json';
 import permissions from './permissions';
 
+const config = {};
 const { icons } = primeIcons;
-const config = { ...webConfig };
 const { countries } = countryCode;
 const { languages } = languageCode;
 const { exportTypes } = exportTypeCode;

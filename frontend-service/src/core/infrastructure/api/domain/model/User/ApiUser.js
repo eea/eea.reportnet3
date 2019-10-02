@@ -1,4 +1,4 @@
-import { config } from 'conf';
+import { UserConfig } from 'conf/domain/model/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
@@ -7,7 +7,7 @@ export const apiUser = {
     const tokens = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON
         ? ''
-        : getUrl(config.loginUser.url, {
+        : getUrl(UserConfig.login, {
             userName,
             password
           }),
@@ -19,7 +19,7 @@ export const apiUser = {
     const response = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON
         ? ''
-        : getUrl(config.logout.url, {
+        : getUrl(UserConfig.logout, {
             refreshToken
           }),
       queryString: {}
@@ -30,7 +30,7 @@ export const apiUser = {
     const tokens = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON
         ? ''
-        : getUrl(config.refreshToken.url, {
+        : getUrl(UserConfig.refreshToken, {
             refreshToken
           }),
       queryString: {}

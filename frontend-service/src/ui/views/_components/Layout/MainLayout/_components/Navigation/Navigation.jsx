@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import logo from 'assets/images/logo.png';
 import styles from './Navigation.module.css';
 
-import { config } from 'conf';
+import { routes } from 'ui/routes';
 
 import { UserCard } from './_components/UserCard';
 
@@ -22,7 +22,7 @@ const Navigation = withRouter(({ history }) => {
         title={resources.messages['titleHeader']}
         onClick={e => {
           e.preventDefault();
-          history.push(getUrl(config.DATAFLOWS.url));
+          history.push(getUrl(routes.DATAFLOWS));
         }}>
         <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
         <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
