@@ -1780,7 +1780,8 @@ fieldset {
   margin-bottom: 1rem;
 }
 input,
-select {
+select,
+textarea {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -1789,8 +1790,13 @@ select {
   border-radius: 3px;
 }
 
+textarea {
+  min-height: 5rem;
+}
+
 select:focus,
-input:focus {
+input:focus,
+textarea:focus {
   border-color: var(--c-corporate-blue);
   box-shadow: inset 0px 0px 0px 1px var(--c-corporate-blue);
   outline: none;
@@ -1802,6 +1808,11 @@ input:focus {
   outline: none;
 }
 .formField.error select {
+  border-color: var(--errors);
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  outline: none;
+}
+.formField.error textarea {
   border-color: var(--errors);
   box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;

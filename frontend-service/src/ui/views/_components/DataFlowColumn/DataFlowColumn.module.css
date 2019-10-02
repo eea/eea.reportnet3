@@ -7,7 +7,8 @@
   width: 90%;
 }
 
-.subscribeBtn {
+.columnButton {
   width: 90%;
-  font-size: 0.8rem !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 1rem !important;
 }

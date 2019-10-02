@@ -45,7 +45,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   useEffect(() => {
-    if (!isUndefined(user.roles)) {
+    if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
         UserService.hasPermission(
           user,
@@ -53,6 +53,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
         )
       );
+    }
+
+    if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
         UserService.hasPermission(
           user,
@@ -156,7 +159,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <DataflowColumn
-        buttonTitle={resources.messages.subscribeThisButton}
+        subscribeButtonTitle={resources.messages.subscribeThisButton}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages.dataflow}
         components={[]}
