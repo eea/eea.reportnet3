@@ -69,6 +69,10 @@ public class ExecuteFieldValidationCommand extends AbstractEEAEventHandlerComman
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
           e);
+      eeaEventVO.getData().put("error", e);
+    } finally {
+      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_FIELD_COMPLETED,
+          eeaEventVO.getData());
     }
   }
 

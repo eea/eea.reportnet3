@@ -51,7 +51,7 @@ public class ExecuteDatasetValidationCommandTest {
   private EEAEventVO eeaEventVO;
 
   /** The processes map. */
-  private ConcurrentHashMap<String, Integer> processesMap;
+  private Map<String, Integer> processesMap;
 
   /**
    * Inits the mocks.

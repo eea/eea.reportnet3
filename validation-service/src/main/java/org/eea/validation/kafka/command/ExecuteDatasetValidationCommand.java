@@ -55,12 +55,13 @@ public class ExecuteDatasetValidationCommand extends AbstractEEAEventHandlerComm
 
     try {
       validationService.validateDataSet(datasetId, kieBase);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
-          eeaEventVO.getData());
-
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
           e);
+      eeaEventVO.getData().put("error", e);
+    } finally {
+      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
+          eeaEventVO.getData());
     }
   }
 
