@@ -25,6 +25,8 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import { UserContext } from 'ui/views/_components/_context/UserContext';
+import { UserService } from 'core/services/User';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
@@ -33,12 +35,14 @@ import { routes } from 'ui/routes';
 
 export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
+  const user = useContext(UserContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documents, setDocuments] = useState([]);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [isCustodian, setIsCustodian] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState('');
@@ -50,6 +54,18 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
   };
+
+  useEffect(() => {
+    if (!isUndefined(user.contextRoles)) {
+      setIsCustodian(
+        UserService.hasPermission(
+          user,
+          [config.permissions.CUSTODIAN],
+          `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
+        )
+      );
+    }
+  }, [user]);
 
   useEffect(() => {
     onLoadDocumentsAndWebLinks();
