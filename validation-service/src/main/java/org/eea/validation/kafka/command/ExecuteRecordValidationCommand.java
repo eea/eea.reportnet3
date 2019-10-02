@@ -63,12 +63,13 @@ public class ExecuteRecordValidationCommand extends AbstractEEAEventHandlerComma
     try {
       Pageable pageable = PageRequest.of(numPag, recordBatchSize);
       validationService.validateRecord(datasetId, kieBase, pageable);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_RECORD_COMPLETED,
-          eeaEventVO.getData());
-
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
           e);
+      eeaEventVO.getData().put("error", e);
+    } finally {
+      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_RECORD_COMPLETED,
+          eeaEventVO.getData());
     }
   }
 

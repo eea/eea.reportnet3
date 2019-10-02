@@ -2,8 +2,8 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.validation.util.ValidationHelper;
+import org.eea.validation.service.ValidationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,24 +21,25 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * The Class DatasetValidatedCommandTest.
+ * The Class ExecuteRecordValidationCommandTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DatasetValidatedCommandTest {
+public class ExecuteRecordValidationCommandTest {
 
-  /** The dataset validated command. */
+  /** The execute record validation command. */
   @InjectMocks
-  private DatasetValidatedCommand datasetValidatedCommand;
+  private ExecuteRecordValidationCommand executeRecordValidationCommand;
 
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation helper. */
+  /** The validation service. */
   @Mock
-  private ValidationHelper validationHelper;
+  private ValidationService validationService;
 
   /** The kie base. */
   @Mock
@@ -51,7 +52,7 @@ public class DatasetValidatedCommandTest {
   private EEAEventVO eeaEventVO;
 
   /** The processes map. */
-  private ConcurrentHashMap<String, Integer> processesMap;
+  private Map<String, Integer> processesMap;
 
   /**
    * Inits the mocks.
@@ -62,12 +63,12 @@ public class DatasetValidatedCommandTest {
     data.put("uuid", "uuid");
     data.put("datasetId", "1L");
     data.put("kieBase", kieBase);
+    data.put("numPag", 1);
     eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_DATASET_COMPLETED);
+    eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_RECORD);
     eeaEventVO.setData(data);
     processesMap = new ConcurrentHashMap<>();
     MockitoAnnotations.initMocks(this);
-
   }
 
   /**
@@ -77,39 +78,41 @@ public class DatasetValidatedCommandTest {
    */
   @Test
   public void getEventTypeTest() {
-    assertEquals(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
-        datasetValidatedCommand.getEventType());
+    assertEquals(EventType.COMMAND_VALIDATE_RECORD, executeRecordValidationCommand.getEventType());
   }
 
   /**
-   * Execute self test.
+   * Execute test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeSelfTest() throws EEAException {
+  public void executeTest() throws EEAException {
     // self uuid
     processesMap.put("uuid", 1);
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    datasetValidatedCommand.execute(eeaEventVO);
+    ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
+    doNothing().when(validationService).validateRecord(Mockito.any(), Mockito.any(), Mockito.any());
 
-    Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    executeRecordValidationCommand.execute(eeaEventVO);
+
+    Mockito.verify(validationService, times(1)).validateRecord(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
-   * Execute throw test.
+   * Execute exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeThrowTest() throws EEAException {
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    datasetValidatedCommand.execute(eeaEventVO);
-    Mockito.verify(validationHelper, times(1)).getProcessesMap();
-  }
+  public void executeExceptionTest() throws EEAException {
+    ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
+    doThrow(new EEAException()).when(validationService).validateRecord(Mockito.any(), Mockito.any(),
+        Mockito.any());
 
+    executeRecordValidationCommand.execute(eeaEventVO);
+
+    Mockito.verify(validationService, times(1)).validateRecord(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
 }

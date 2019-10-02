@@ -22,27 +22,40 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class TableValidatedCommandTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class TableValidatedCommandTest {
 
+  /** The table validated command. */
   @InjectMocks
   private TableValidatedCommand tableValidatedCommand;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The validation helper. */
   @Mock
   private ValidationHelper validationHelper;
 
+  /** The kie base. */
   @Mock
   private KieBase kieBase;
 
+  /** The data. */
   private Map<String, Object> data;
 
+  /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
+  /** The processes map. */
   private ConcurrentHashMap<String, Integer> processesMap;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     data = new HashMap<>();
@@ -56,11 +69,21 @@ public class TableValidatedCommandTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Gets the event type test.
+   *
+   * @return the event type test
+   */
   @Test
   public void getEventTypeTest() {
     assertEquals(EventType.COMMAND_VALIDATED_TABLE_COMPLETED, tableValidatedCommand.getEventType());
   }
 
+  /**
+   * Execute self test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeSelfTest() throws EEAException {
     // self uuid
@@ -75,6 +98,11 @@ public class TableValidatedCommandTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Execute throw test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeThrowTest() throws EEAException {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
