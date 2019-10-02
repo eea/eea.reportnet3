@@ -104,7 +104,7 @@ public class ExecuteRecordValidationCommandTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test
   public void executeExceptionTest() throws EEAException {
     ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
     doThrow(new EEAException()).when(validationService).validateRecord(Mockito.any(), Mockito.any(),
