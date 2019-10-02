@@ -20,26 +20,39 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * The Class FieldValidatedCommandTest.
+ */
 public class FieldValidatedCommandTest {
 
+  /** The field validated command. */
   @InjectMocks
   private FieldValidatedCommand fieldValidatedCommand;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The validation helper. */
   @Mock
   private ValidationHelper validationHelper;
 
+  /** The kie base. */
   @Mock
   private KieBase kieBase;
 
+  /** The data. */
   private Map<String, Object> data;
 
+  /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
+  /** The processes map. */
   private ConcurrentHashMap<String, Integer> processesMap;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     data = new HashMap<>();
@@ -53,11 +66,21 @@ public class FieldValidatedCommandTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Gets the event type test.
+   *
+   * @return the event type test
+   */
   @Test
   public void getEventTypeTest() {
     assertEquals(EventType.COMMAND_VALIDATED_FIELD_COMPLETED, fieldValidatedCommand.getEventType());
   }
 
+  /**
+   * Execute self test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeSelfTest() throws EEAException {
     // self uuid
@@ -72,6 +95,11 @@ public class FieldValidatedCommandTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Execute throw test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeThrowTest() throws EEAException {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);

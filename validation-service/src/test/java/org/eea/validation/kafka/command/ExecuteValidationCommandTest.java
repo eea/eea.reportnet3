@@ -2,15 +2,13 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,18 +21,14 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
- * The Class DatasetValidatedCommandTest.
+ * The Class ExecuteValidationCommandTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DatasetValidatedCommandTest {
+public class ExecuteValidationCommandTest {
 
-  /** The dataset validated command. */
+  /** The execute validation command. */
   @InjectMocks
-  private DatasetValidatedCommand datasetValidatedCommand;
-
-  /** The kafka sender utils. */
-  @Mock
-  private KafkaSenderUtils kafkaSenderUtils;
+  private ExecuteValidationCommand executeValidationCommand;
 
   /** The validation helper. */
   @Mock
@@ -50,9 +44,6 @@ public class DatasetValidatedCommandTest {
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
-  private ConcurrentHashMap<String, Integer> processesMap;
-
   /**
    * Inits the mocks.
    */
@@ -63,11 +54,9 @@ public class DatasetValidatedCommandTest {
     data.put("datasetId", "1L");
     data.put("kieBase", kieBase);
     eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_DATASET_COMPLETED);
+    eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_TABLE_COMPLETED);
     eeaEventVO.setData(data);
-    processesMap = new ConcurrentHashMap<>();
     MockitoAnnotations.initMocks(this);
-
   }
 
   /**
@@ -77,39 +66,36 @@ public class DatasetValidatedCommandTest {
    */
   @Test
   public void getEventTypeTest() {
-    assertEquals(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
-        datasetValidatedCommand.getEventType());
+    assertEquals(EventType.COMMAND_EXECUTE_VALIDATION, executeValidationCommand.getEventType());
   }
 
   /**
-   * Execute self test.
+   * Execute test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeSelfTest() throws EEAException {
-    // self uuid
-    processesMap.put("uuid", 1);
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any(),
+  public void executeTest() throws EEAException {
+    doNothing().when(validationHelper).executeValidation(Mockito.any(), Mockito.any());
+
+    executeValidationCommand.execute(eeaEventVO);
+
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Execute exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any(),
         Mockito.any());
-    datasetValidatedCommand.execute(eeaEventVO);
 
-    Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
-        Mockito.any(), Mockito.any());
-  }
+    executeValidationCommand.execute(eeaEventVO);
 
-  /**
-   * Execute throw test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeThrowTest() throws EEAException {
-    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    datasetValidatedCommand.execute(eeaEventVO);
-    Mockito.verify(validationHelper, times(1)).getProcessesMap();
+    Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any());
   }
 
 }
