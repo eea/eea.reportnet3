@@ -50,6 +50,7 @@ const DataViewer = withRouter(
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
+    const [originColumns, setOriginColumns] = useState([]);
     const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -105,7 +106,7 @@ const DataViewer = withRouter(
       let visibilityMenu = [];
       for (let colSchema of colsSchema) {
         colOptions.push({ label: colSchema.header, value: colSchema });
-        visibilityMenu.push({ label: colSchema.header, command: () => {} });
+        visibilityMenu.push({ label: colSchema.header, key: colSchema.field });
       }
       setColumnOptions(colOptions);
       setVisibilityButtonMenu(visibilityMenu);
@@ -196,7 +197,23 @@ const DataViewer = withRouter(
       }
 
       setColumns(columnsArr);
+      setOriginColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
+
+    const hideColumn = columnKey => {
+      setColumns(columns.filter(column => column.key !== columnKey));
+    };
+
+    const addColumn = columnKey => {
+      const visibleColumns = columns.map(column => {
+        if (column) return column.key;
+      });
+      visibleColumns.push(columnKey);
+      const newColumns = originColumns.map(column => {
+        if (visibleColumns.includes(column.key)) return column;
+      });
+      setColumns(newColumns);
+    };
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
@@ -997,6 +1014,8 @@ const DataViewer = withRouter(
               popup={true}
               ref={visibilityMenuRef}
               id="exportTableMenu"
+              hideColumn={hideColumn}
+              addColumn={addColumn}
               onShow={e => {
                 console.log('hello');
 

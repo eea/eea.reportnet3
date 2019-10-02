@@ -1,12 +1,10 @@
 .visibilityMenu {
   position: absolute;
-  bottom: 0px;
-  right: -52px;
   cursor: pointer;
   font-size: 0.8rem;
   border: 1px solid var(--c-black-200);
   background-color: var(--white);
-  width: 170px;
+  min-width: 170px;
   border-radius: 2%;
   z-index: 1000;
   padding: 0 0.8rem;
@@ -29,6 +27,6 @@
   background-color: rgba(0, 0, 0, 0);
 }
 
-.visibilityMenu ul li a i {
+.visibilityMenu ul li a svg {
   margin-right: 0.5rem;
 }
