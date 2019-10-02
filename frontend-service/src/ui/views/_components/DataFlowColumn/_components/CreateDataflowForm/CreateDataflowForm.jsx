@@ -67,17 +67,10 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
           </fieldset>
           <fieldset>
             <div className={styles.wrapButtons}>
-              <Button
-                className={styles.resetButton}
-                icon="cancel"
-                label={resources.messages['reset']}
-                layout="simple"
-                type="reset"
-              />
+              <Button className={styles.resetButton} label={resources.messages['reset']} layout="simple" type="reset" />
               <Button
                 className={styles.submitButton}
                 disabled={isSubmitting}
-                icon="plus"
                 label={resources.messages['createNewDataflow']}
                 layout="simple"
                 type="submit"
