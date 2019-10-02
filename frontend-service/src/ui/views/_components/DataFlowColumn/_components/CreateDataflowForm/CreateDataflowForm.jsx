@@ -25,7 +25,11 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
   }
 
   return (
-    <Formik ref={form} initialValues={initialValues} validationSchema={createDataflowValidationSchema} onSubmit>
+    <Formik
+      ref={form}
+      initialValues={initialValues}
+      validationSchema={createDataflowValidationSchema}
+      onSubmit={onCreate}>
       {({ isSubmitting, errors, touched }) => (
         <Form>
           <fieldset>
