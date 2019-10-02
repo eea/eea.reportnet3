@@ -34,8 +34,9 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
-export const ReporterDataSet = withRouter(({ match, history }) => {
+export const ReporterDataset = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -48,12 +49,12 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
-  const [exportDataSetData, setExportDataSetData] = useState(undefined);
-  const [exportDataSetDataName, setExportDataSetDataName] = useState('');
+  const [exportDatasetData, setExportDatasetData] = useState(undefined);
+  const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
-  const [isWebFormDataSet, setIsWebFormDataSet] = useState(false);
+  const [isWebFormDataset, setIsWebFormDataset] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
@@ -72,7 +73,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push(getUrl(config.DATAFLOWS.url))
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   useEffect(() => {
@@ -84,7 +85,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    setIsWebFormDataSet(checkWebFormDataSet());
+    setIsWebFormDataset(checkIsWebFormDataset());
   }, []);
 
   useEffect(() => {
@@ -95,7 +96,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(config.DATAFLOWS.url))
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages['dataflow'],
@@ -119,10 +120,10 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   }, [datasetTitle]);
 
   useEffect(() => {
-    if (!isUndefined(exportDataSetData)) {
-      DownloadFile(exportDataSetData, exportDataSetDataName);
+    if (!isUndefined(exportDatasetData)) {
+      DownloadFile(exportDatasetData, exportDatasetDataName);
     }
-  }, [exportDataSetData]);
+  }, [exportDatasetData]);
 
   const onConfirmDelete = async () => {
     setDeleteDialogVisible(false);
@@ -156,8 +157,8 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   const onExportData = async fileType => {
     setLoadingFile(true);
     try {
-      setExportDataSetDataName(createFileName(datasetTitle, fileType));
-      setExportDataSetData(await DatasetService.exportDataById(datasetId, fileType));
+      setExportDatasetDataName(createFileName(datasetTitle, fileType));
+      setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
     } catch (error) {
       console.error(error);
     } finally {
@@ -238,7 +239,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     } catch (error) {
       const errorResponse = error.response;
       if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     }
 
@@ -339,9 +340,9 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     const buttonTopPosition = button.top;
     const buttonLeftPosition = button.left;
 
-    const exportDataSetMenu = document.getElementById('exportDataSetMenu');
-    exportDataSetMenu.style.top = buttonTopPosition;
-    exportDataSetMenu.style.left = buttonLeftPosition;
+    const exportDatasetMenu = document.getElementById('exportDataSetMenu');
+    exportDatasetMenu.style.top = buttonTopPosition;
+    exportDatasetMenu.style.left = buttonLeftPosition;
   };
 
   const layout = children => {
@@ -365,7 +366,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
   );
 
   const showWebFormInputSwitch = () => {
-    if (isWebFormDataSet) {
+    if (isWebFormDataset) {
       return (
         <div className={styles.InputSwitchContainer}>
           <div className={styles.InputSwitchDiv}>
@@ -378,7 +379,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
     }
   };
 
-  const checkWebFormDataSet = () => {
+  const checkIsWebFormDataset = () => {
     if (Number(datasetId) === 5 || Number(datasetId) === 142) {
       setIsInputSwitchChecked(true);
       return true;
@@ -404,7 +405,7 @@ export const ReporterDataSet = withRouter(({ match, history }) => {
             selectedRecordErrorId={selectedRecordErrorId}
             tables={tableSchema}
             tableSchemaColumns={tableSchemaColumns}
-            isWebFormMMR={isWebFormDataSet}
+            isWebFormMMR={isWebFormDataset}
             hasWritePermissions={hasWritePermissions}
           />
         </SnapshotContext.Provider>

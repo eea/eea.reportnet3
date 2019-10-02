@@ -3,8 +3,6 @@ import { withRouter } from 'react-router-dom';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
-import { config } from 'conf';
-
 import styles from './WebFormData.module.css';
 
 import { InputText } from 'ui/views/_components/InputText';
@@ -12,6 +10,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
+import { routes } from 'ui/routes';
 
 const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
@@ -85,7 +84,7 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
     const errorResponse = error.response;
     console.error('WebForm errorResponse: ', errorResponse);
     if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-      history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+      history.push(getUrl(routes.DATAFLOW, { dataflowId }));
     }
   };
 

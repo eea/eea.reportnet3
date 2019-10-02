@@ -5,6 +5,7 @@ import { isEmpty, isUndefined, isNull, isString } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
+import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
@@ -28,6 +29,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
 import { Object } from 'es6-shim';
+import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
@@ -356,7 +358,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
         }
       } finally {
         setLoading(false);
@@ -408,7 +410,7 @@ const DataViewer = withRouter(
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
         if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+          history.push(getUrl(routes.DATAFLOW, { dataflowId }));
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -446,7 +448,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+            history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
           setLoading(false);
@@ -462,7 +464,7 @@ const DataViewer = withRouter(
           const errorResponse = error.response;
           console.error('DataViewer errorResponse: ', errorResponse);
           if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-            history.push(getUrl(config.DATAFLOW.url, { dataflowId }));
+            history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
           onCancelRowEdit();
@@ -1088,7 +1090,7 @@ const DataViewer = withRouter(
             multiple={false}
             name="file"
             onUpload={onUpload}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(config.loadDataTableAPI.url, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
               datasetId: datasetId,
               tableId: tableId
             })}`}

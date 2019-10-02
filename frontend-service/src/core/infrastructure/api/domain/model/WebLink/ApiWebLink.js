@@ -1,4 +1,4 @@
-import { config } from 'conf';
+import { DataflowConfig } from 'conf/domain/model/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
@@ -9,7 +9,7 @@ export const apiWebLink = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-documents.json'
-        : getUrl(config.loadDataSetsByDataflowId.url, {
+        : getUrl(DataflowConfig.loadDatasetsByDataflowId, {
             dataflowId: dataflowId
           }),
       queryString: {},
