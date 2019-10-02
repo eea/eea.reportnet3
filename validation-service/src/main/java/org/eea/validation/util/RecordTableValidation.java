@@ -21,7 +21,7 @@ public class RecordTableValidation {
   }
 
 
-
+  ////////////////////////// PART OF CHARACTERIZTION////////////////////////////////
   public static Boolean RD03ARule(Long idDataset, String idSchemaGroupIdentifier,
       String idSchemaBathingWaterIdentifier) {
 
@@ -42,6 +42,27 @@ public class RecordTableValidation {
         "The group identifier is identical to an existing bathing water identifier.";
 
     return validationService.tableRecordRIds(RD03ARule, MessageError, TypeErrorEnum.ERROR);
+
+  }
+
+  public static Boolean RD03BRule(Long idDataset) {
+
+    String RD03BRule = "";
+
+    String MessageError =
+        "The group identifier of the bathing water has changed since last season. ";
+
+    return validationService.tableRecordRIds(RD03BRule, MessageError, TypeErrorEnum.WARNING);
+
+  }
+
+  public static Boolean RD03CRule(Long idDataset) {
+
+    String RD03CRule = "";
+
+    String MessageError = "The group members have changed.";
+
+    return validationService.tableRecordRIds(RD03CRule, MessageError, TypeErrorEnum.ERROR);
 
   }
 

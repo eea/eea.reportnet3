@@ -785,7 +785,7 @@ public class ValidationServiceImpl implements ValidationService {
       TypeErrorEnum typeError) {
     List<BigInteger> listRecords =
         tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(queryValidate);
-    if (null != listRecords) {
+    if (null != listRecords && !listRecords.isEmpty()) {
       for (BigInteger recordId : listRecords) {
         Optional<RecordValue> record = recordRepository.findByIdValidation(recordId.longValue());
         RecordValidation recordVal = new RecordValidation();
