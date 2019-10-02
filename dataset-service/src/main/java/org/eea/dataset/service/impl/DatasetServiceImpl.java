@@ -55,7 +55,6 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
@@ -169,12 +168,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-
-  /**
-   * The record store controller zull.
-   */
-  @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * The file parser factory.

@@ -84,4 +84,5 @@ public interface FieldValidationRepository extends CrudRepository<FieldValidatio
    */
   @Query("SELECT fv FROM FieldValidation fv  WHERE fv.validation.id in(:ids) ")
   List<FieldValidation> findByValidationIds(@Param("ids") List<Long> ids);
+
 }

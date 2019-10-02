@@ -797,7 +797,7 @@
   },
   {
     "key": "config/application/eea.keycloak.secret",
-    "value": "YTNmNmNhZDEtMDJjOC00ODA0LTg0OTgtODhiZjUyMGRkYjM0"
+    "value": "JHtLRVlDTE9BS19TRUNSRVQ6MmJjNTA2NzItZTVkNS00OWQzLTkxZWEtMWY1MTdkZTk2ZjczfQ=="
   },
   {
     "key": "config/application/eea.keycloak.clientId",
@@ -813,7 +813,7 @@
   },
   {
     "key": "config/application/eea.keycloak.publicKey",
-    "value": "TUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyOTh0ZDV6MEFVMWh5UCtZeFRUQTlNMHhKMXdob1JxeW96ZjQzU1liNFdnTWpZMU5ManJrckF4TlRHVC96MjZBaytFSUlIV0tsa3kyblFlU1cza0hlZkpRNDZOVTd2dDhVaEQvY1o1MW9sQ2tvY0RMYnBJbE9PY2U4cXg3MElWelhZa1I3RTFLOG1oWWVZMHFSdUw4a3NaOVAwUXp3eDFTK1hPdVB6ZnNyWXRIeGFHT01GVGRVeW5oSzBOMitSQXFSZUVOK21icUJwQUpHUDg2SEh5bjhZL3V5TDlIOWEzSk9HOUZtWXpzSmszY1hPbEYxQ1dpNitML3NnVzN1SC8rb2FMSE90dzNDVVN2TmZERnByQWpYUFN2MVhZTGhBQzk0K1R0eFpLMGpESVJ4aFNoTDhpVVJxanFHZHZTS3B3NVVKaHFYVkVCQXh1cW1lUHRvMkhzQlFJREFRQUI="
+    "value": "JHtLRVlDTE9BS19DTElFTlRfUFVCTElDX0tFWTpNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQWk5RSt6bTVPSUw3M1hhaGg3bjdqMXlaWHgvZ2NmTlJoTkFuYkJRazY4UTJPZkZwRDlpU0RTNngveTlpOFlSSVYrMzFvaFdPandrOGdCOE95SHoyMXo0SDUrSHd1dnY4MFc0S2dSSjdkNnpIaFdZRFZscUhZSVVxK0V4MzFXMVR5OU1aZDljeGczRnpDeXhuRGd5VjhNaDZtZ0NSWElDWUhuTFpwSnNKSGxoUXM1NndxakJraGUrVkJlbGtjQy9iMEcvRTlBb3NPb3pVWitpZllOZEF2amJPNVBDdXorZ3Q3ajNSZmFVTDNLejdGUHQxRkNTcnJTL1R6NEtBYXNoTlVYYk0raVhmY2RPSmhzeEJrVC9DQ2lrbTk2SlNTQXIrUkJudlJYL2hvVnltNGlaSzcxV29WNHo3ZW15WWcwbkdjTEhGTTFKcXBlcUd4bzNRbzhRZXczUUlEQVFBQn0="
   },
   {
     "key": "config/application/hystrix.shareSecurityContext",
@@ -910,5 +910,158 @@
   {
     "key": "config/recordstore/pathSnapshot",
     "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
+  },
+    {
+    "key": "config/indexsearch/mongodb.hibernate.ddl-auto",
+    "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/indexsearch/mongodb.primary.host",
+    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
+  },
+  {
+    "key": "config/indexsearch/mongodb.primary.port",
+    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
+  },
+  {
+    "key": "config/indexsearch/mongodb.primary.username",
+    "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/indexsearch/mongodb.primary.password",
+    "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.hibernate.metabase.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.datasource.metasource.url",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
+  },
+  {
+    "key": "config/indexsearch/spring.datasource.metasource.hikari.connection-timeout",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.datasource.metasource.hikari.maximum-pool-size",
+    "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.datasource.metasource.username",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
+  },
+  {
+    "key": "config/indexsearch/spring.datasource.metasource.password",
+    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
+  },
+  {
+    "key": "config/indexsearch/spring.datasource.metasource.driver-class-name",
+    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
+    "key": "config/indexsearch/indexsearch.loadDataDelimiter",
+    "value": "fA=="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/indexsearch/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/indexsearch/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/indexsearch/spring.sleuth.sampler.probability",
+    "value": "JHtTTEVVVEhfU0FNUExFUl9QUk9CQUJJTElUWToxLjB9"
+  },
+  {
+    "key": "config/indexsearch/spring.sleuth.web.skipPattern",
+    "value": "JHtTTEVVVEhfU0tJUF9QQVRURVJOOiIoXmNsZWFudXAuKnwuK2Zhdmljb24uKnwuK2FjdHVhdG9yLip8Litwcm9tZXRoZXVzLiopIn0="
+  },
+  {
+    "key": "config/indexsearch/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/indexsearch/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/indexsearch/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/indexsearch/hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds",
+    "value": "JHtIWVNUUklYX1RJTUVPVVQ6NjUwMDB9"
+  },
+  {
+    "key": "config/indexsearch/hystrix.command.default.circuitBreaker.requestVolumeThreshold",
+    "value": "JHtIWVNUUklYX1JFUVVFU1RfVk9MVU1FTl9USFJFU0hPTEQ6Mn0="
+  },
+  {
+    "key": "config/indexsearch/hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds",
+    "value": "JHtIWVNUUklYX1NMRUVQX1dJTkRPVzoxMDAwfQ=="
+  },
+  {
+    "key": "config/indexsearch/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.properties.hibernate.order_updates",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.properties.hibernate.order_inserts",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.properties.hibernate.jdbc.batch_size",
+    "value": "JHtEQVRBU0VUX0JBQ0hfSlBBX1NJWkU6MTAwfQ=="
+  },
+  {
+    "key": "config/indexsearch/spring.jpa.hibernate.flushMode",
+    "value": "Y29tbWl0"
+  },
+    {
+    "key": "config/indexsearch/elasticsearch.host",
+    "value": "bG9jYWxob3N0"
+  },
+    {
+    "key": "config/indexsearch/elasticsearch.port",
+    "value": "OTIwMA=="
+  },
+  {
+    "key": "config/indexsearch/elasticsearch.username",
+    "value": ""
+  },
+  {
+    "key": "config/indexsearch/elasticsearch.password",
+    "value": ""
+  },
+  {
+    "key": "config/validation/validation.recordBatchSize",
+    "value": "JHtWQUxJREFUSU9OX1JFQ09SRF9CQVRDSF9TSVpFOjUwMDB9"
+  },
+  {
+    "key": "config/validation/validation.fieldBatchSize",
+    "value": "JHtWQUxJREFUSU9OX0ZJRUxEX0JBVENIX1NJWkU6NTAwMH0="
   }
+
 ]

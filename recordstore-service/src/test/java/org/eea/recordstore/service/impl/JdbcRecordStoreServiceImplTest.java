@@ -177,7 +177,7 @@ public class JdbcRecordStoreServiceImplTest {
 
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L);
 
-    Mockito.verify(kafkaSender, Mockito.times(1))
+    Mockito.verify(kafkaSender, Mockito.times(2))
         .releaseDatasetKafkaEvent(Mockito.any(EventType.class), Mockito.anyLong());
   }
 

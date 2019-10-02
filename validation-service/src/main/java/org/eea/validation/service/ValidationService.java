@@ -19,6 +19,7 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The Class ValidationService.
@@ -31,9 +32,11 @@ public interface ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie session
+   * @param pageable the pageable
    * @throws EEAException the EEA exception
    */
-  void validateFields(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateFields(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable)
+      throws EEAException;
 
 
   /**
@@ -60,7 +63,7 @@ public interface ValidationService {
    * Validate data set.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   void validateDataSet(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
@@ -70,7 +73,7 @@ public interface ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   void validateTable(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
@@ -80,11 +83,12 @@ public interface ValidationService {
    * Validate record.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
-   * @return
+   * @param kieBase the kie base
+   * @param pageable the pageable
    * @throws EEAException the EEA exception
    */
-  void validateRecord(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateRecord(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable)
+      throws EEAException;
 
 
   /**
@@ -264,6 +268,41 @@ public interface ValidationService {
    * @return the boolean
    */
   Boolean tableValidationQueryPeriodMonitoring(String QUERY);
+
+
+  /**
+   * Error scale.
+   *
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  void errorScale(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+
+
+  /**
+   * Force validations.
+   *
+   * @param datasetId the dataset id
+   */
+  void forceValidations(@DatasetId Long datasetId);
+
+  /**
+   * Count records dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  Integer countRecordsDataset(@DatasetId Long datasetId);
+
+  /**
+   * Count fields dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  Integer countFieldsDataset(@DatasetId Long datasetId);
 
 
 }
