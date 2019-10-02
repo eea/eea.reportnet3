@@ -20,12 +20,16 @@ import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -48,6 +52,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
+import org.joda.time.LocalDate;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
@@ -136,6 +141,10 @@ public class ValidationServiceImpl implements ValidationService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The user management controller. */
+  @Autowired
+  private UserManagementController userManagementController;
 
   /**
    * Gets the element lenght.
@@ -444,6 +453,30 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void deleteAllValidation(Long datasetId) {
     datasetRepository.deleteValidationTable();
+    initVariablesToValidate(datasetId);
+  }
+
+  /**
+   * Inits the variables to validate.
+   *
+   * @param datasetId the dataset id
+   */
+  private void initVariablesToValidate(Long datasetId) {
+    ResourceInfoVO resourceInfoVO =
+        userManagementController.getResourceDetail(datasetId, ResourceGroupEnum.DATASET_PROVIDER);
+    String countryCode = "''";
+    String dataCallYear = "" + new LocalDate().getYear();
+    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {
+      if (resourceInfoVO.getAttributes().containsKey("countryCode")) {
+        countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+      }
+
+      if (resourceInfoVO.getAttributes().containsKey("dataCallYear")) {
+        dataCallYear = resourceInfoVO.getAttributes().get("dataCallYear").get(0);
+      }
+    }
+    ThreadPropertiesManager.setVariable("dataCallYear", dataCallYear);
+    ThreadPropertiesManager.setVariable("countryCode", countryCode);
   }
 
   /**
