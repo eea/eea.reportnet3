@@ -1,12 +1,9 @@
 package org.eea.indexsearch.io.kafka.domain;
 
+import java.util.Objects;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-@Getter
-@Setter
 public class ElasticDataset {
 
   String Name;
@@ -15,6 +12,11 @@ public class ElasticDataset {
   String Release;
   String AccesURL;
   ElasticUser elasticUser;
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(AccesURL, Countries, Issue, Name, Release, elasticUser);
+  }
 
 
 }
