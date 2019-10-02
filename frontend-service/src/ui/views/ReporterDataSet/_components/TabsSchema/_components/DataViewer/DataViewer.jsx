@@ -5,6 +5,7 @@ import { isEmpty, isUndefined, isNull, isString } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
+import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { config } from 'conf';
 
 import styles from './DataViewer.module.css';
@@ -1089,7 +1090,7 @@ const DataViewer = withRouter(
             multiple={false}
             name="file"
             onUpload={onUpload}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(config.loadDataTableAPI.url, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.loadDataTable, {
               datasetId: datasetId,
               tableId: tableId
             })}`}
