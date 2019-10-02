@@ -8,7 +8,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 public interface DatasetSchemaService {
 
 
-
   /**
    * Creates the data schema.
    *
@@ -22,17 +21,21 @@ public interface DatasetSchemaService {
    * Gets dataschema by id.
    *
    * @param dataschemaId the dataschema id
+   *
    * @return the data schema by id
    */
   DataSetSchemaVO getDataSchemaById(String dataschemaId);
 
   /**
-   * Gets dataschema by id.
+   * Gets dataschema by id. If addRules is true, the whole schema including rules will be retrieved
+   * Otherwise only the schema (table, records, fields and dataset) will be retrieved
    *
    * @param idFlow the id flow
+   * @param addRules the add rules
+   *
    * @return the data schema by id flow
    */
-  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow);
+  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules);
 
 
 }

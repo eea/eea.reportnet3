@@ -1,119 +1,122 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import { isUndefined } from 'lodash';
 
 import styles from './InfoTable.module.css';
 
 import { Button } from 'ui/views/_components/Button';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import { IconTooltip } from '../IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const InfoTable = ({ data, columns, onDeletePastedRecord }) => {
+export const InfoTable = ({ data, filteredColumns, numRecords, onDeletePastedRecord }) => {
   const resources = useContext(ResourcesContext);
-  const previewPastedData = () => {
+
+  const actionTemplate = record => {
     return (
-      <div className="p-datatable-wrapper">
-        <table className="p-datatable" style={{ width: '100%' }}>
-          <thead className="p-datatable-thead">
-            <tr>{previewPastedDataHeaders()}</tr>
-          </thead>
-          <tbody className="p-datatable-tbody">{previewPastedDataBody()}</tbody>
-        </table>
+      <div className={styles.infoTableCellCorrect}>
+        <Button
+          type="button"
+          icon="trash"
+          onClick={() => {
+            onDeletePastedRecord(record.recordId);
+          }}
+        />
       </div>
     );
   };
-
-  const previewPastedDataHeaders = () => {
-    if (!isUndefined(data) && !isUndefined(columns)) {
-      if (data.length > 0) {
-        const filteredColumns = columns.filter(
-          column =>
-            column.key !== 'actions' &&
-            column.key !== 'recordValidation' &&
-            column.key !== 'id' &&
-            column.key !== 'dataSetPartitionId'
-        );
-
-        const headers = filteredColumns.map((column, i) => {
-          return (
-            <th key={i} className="p-resizable-column">
-              {column.props.header}
-            </th>
-          );
-        });
-        let deleteCol = <th key="deleteRecord" className="p-resizable-column"></th>;
-        let validationCol = <th key="validationRecord" className="p-resizable-column"></th>;
-        headers.unshift(deleteCol, validationCol);
-        return headers;
-      }
+  const dataTemplate = (recordData, column) => {
+    let field = recordData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+    if (isUndefined(field.fieldData[column.field])) {
+      return (
+        <div className={styles.infoTableCellError}>
+          <br />
+          <br />
+          <br />
+        </div>
+      );
+    } else {
+      return <div className={styles.infoTableCellCorrect}>{field ? field.fieldData[column.field] : null}</div>;
     }
   };
 
-  const previewPastedDataBody = () => {
-    if (!isUndefined(data) && !isUndefined(columns)) {
-      if (data.length > 0) {
-        const filteredColumns = columns.filter(
-          column =>
-            column.key !== 'actions' &&
-            column.key !== 'recordValidation' &&
-            column.key !== 'id' &&
-            column.key !== 'dataSetPartitionId'
-        );
-        let records = [...data];
-        if (!isUndefined(records)) {
-          records = records.map((record, i) => {
-            return (
-              <tr key={i} className="p-datatable-row">
-                <td id="deleteRecord">
-                  <Button
-                    type="button"
-                    icon="trash"
-                    onClick={e => {
-                      onDeletePastedRecord(i);
-                    }}
-                  />
-                </td>
-                <td>
-                  {record.copiedCols !== filteredColumns.length ? (
-                    <IconTooltip
-                      levelError="WARNING"
-                      message={
-                        record.copiedCols < filteredColumns.length
-                          ? resources.messages['pasteColumnErrorLessMessage']
-                          : resources.messages['pasteColumnErrorMoreMessage']
-                      }
-                    />
-                  ) : null}
-                </td>
-                {record.dataRow.map((column, j) => {
-                  return (
-                    <td
-                      key={j}
-                      className={isUndefined(Object.values(column.fieldData)[0]) ? styles.infoTableCellError : ''}>
-                      {Object.values(column.fieldData)[0]}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          });
+  const getColumns = () => {
+    const columnsArr = filteredColumns.map(column => {
+      return <Column body={dataTemplate} field={column.field} header={column.header} key={column.field} />;
+    });
+
+    const editCol = (
+      <Column
+        key="delete"
+        body={row => actionTemplate(row)}
+        sortable={false}
+        style={{ width: '150px', height: '45px' }}
+      />
+    );
+
+    const validationCol = (
+      <Column
+        body={validationsTemplate}
+        field="validations"
+        header=""
+        key="recordValidation"
+        sortable={false}
+        style={{ width: '15px' }}
+      />
+    );
+    columnsArr.unshift(editCol, validationCol);
+    return columnsArr;
+  };
+
+  const totalCount = (
+    <span>
+      {resources.messages['totalPastedRecords']} {!isUndefined(numRecords) ? data.length : 0}{' '}
+    </span>
+  );
+
+  const validationsTemplate = recordData => {
+    return recordData.copiedCols !== filteredColumns.length ? (
+      <IconTooltip
+        levelError="WARNING"
+        message={
+          recordData.copiedCols < filteredColumns.length
+            ? resources.messages['pasteColumnErrorLessMessage']
+            : resources.messages['pasteColumnErrorMoreMessage']
         }
-        return records;
-      }
-    }
+      />
+    ) : null;
   };
 
   return (
     <React.Fragment>
-      <InfoTableMessages data={data} columns={columns} />
+      <InfoTableMessages data={data} filteredColumns={filteredColumns} numRecords={numRecords} />
       <hr />
+      <br />
       {!isUndefined(data) && data.length > 0 ? (
-        previewPastedData()
+        <DataTable
+          className={styles.infoTableData}
+          value={data}
+          autoLayout={true}
+          paginator={true}
+          paginatorRight={totalCount}
+          rowsPerPageOptions={[5, 10]}
+          rows={5}
+          totalRecords={numRecords}>
+          {getColumns()}
+        </DataTable>
       ) : (
+        //previewPastedData()
         <div className={styles.infoTablePaste}>
-          <span>{resources.messages['pasteRecordsMessage']}</span>
+          <div className={styles.infoTableItem}>
+            <p>{resources.messages['pasteRecordsMessage']}</p>
+          </div>
+          <div className={styles.lineBreak}></div>
+          <div className={styles.infoTableItem}>
+            <p>{resources.messages['pasteRecordsMaxMessage']}</p>
+          </div>
         </div>
       )}
     </React.Fragment>

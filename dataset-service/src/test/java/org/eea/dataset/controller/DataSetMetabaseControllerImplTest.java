@@ -1,11 +1,14 @@
 package org.eea.dataset.controller;
 
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +79,13 @@ public class DataSetMetabaseControllerImplTest {
     dataSetMetabaseControllerImpl.createEmptyDataSet("", "", 1L);
   }
 
+  @Test()
+  public void createEmptyDataSetTestExceptionFail() throws Exception {
+    doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset("datasetName", null,
+        1L);
+    dataSetMetabaseControllerImpl.createEmptyDataSet("datasetName", null, 1L);
+  }
+
   /**
    * Creates the removeDatasetData data set test.
    *
@@ -93,4 +103,11 @@ public class DataSetMetabaseControllerImplTest {
 
 
 
+  @Test
+  public void findDatasetMetabaseByIdTest() throws Exception {
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    dataSetMetabaseControllerImpl.findDatasetMetabaseById(Mockito.anyLong());
+    Mockito.verify(datasetMetabaseService, times(1)).findDatasetMetabase(Mockito.anyLong());
+  }
 }

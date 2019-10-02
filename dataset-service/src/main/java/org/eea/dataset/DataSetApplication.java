@@ -1,7 +1,5 @@
 package org.eea.dataset;
 
-import org.eea.multitenancy.MultiTenantApplication;
-import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
@@ -26,7 +24,7 @@ public class DataSetApplication {
    * @param args the arguments
    */
   public static void main(final String[] args) {
-    MultiTenantApplication.executeApplication(DataSetApplication.class, args);
+    SpringApplication.run(DataSetApplication.class, args);
   }
 
 

@@ -663,4 +663,18 @@ public class DataSetControllerImplTest {
         Mockito.any());
     dataSetControllerImpl.updateField(1L, new FieldVO());
   }
+
+  @Test
+  public void insertIdDataSchema() throws EEAException {
+    doNothing().when(datasetService).insertSchema(Mockito.anyLong(), Mockito.any());
+    dataSetControllerImpl.insertIdDataSchema(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).insertSchema(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void insertIdDataSchemaThrow() throws EEAException {
+    doThrow(EEAException.class).when(datasetService).insertSchema(Mockito.anyLong(), Mockito.any());
+    dataSetControllerImpl.insertIdDataSchema(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).insertSchema(Mockito.anyLong(), Mockito.any());
+  }
 }

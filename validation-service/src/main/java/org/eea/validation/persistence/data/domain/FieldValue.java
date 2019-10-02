@@ -70,7 +70,8 @@ public class FieldValue {
   /**
    * The field validations.
    */
-  @OneToMany(mappedBy = "fieldValue", cascade = CascadeType.ALL, orphanRemoval = false)
+  @OneToMany(mappedBy = "fieldValue",
+      cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = false)
   private List<FieldValidation> fieldValidations;
 
   @Transient

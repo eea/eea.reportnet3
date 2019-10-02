@@ -35,7 +35,6 @@ const DataFlowColumn = withRouter(
               className={styles.searchInput}
               id=""
               placeholder={resources.messages['searchDataFlow']}
-              title={resources.messages['typeDataFlowName']}
               type="text"
             />
           </div>

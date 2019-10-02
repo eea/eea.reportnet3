@@ -7,6 +7,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 export const ConfirmDialog = forwardRef((props, _) => {
   const {
     children,
+    className,
     dialogStyle,
     divRef,
     hasPasteOption = false,
@@ -78,12 +79,13 @@ export const ConfirmDialog = forwardRef((props, _) => {
   return (
     <div onPaste={onPaste} ref={divRef}>
       <Dialog
+        className={className}
         focusOnShow={false}
         footer={footer}
         header={header}
         maximizable={maximizable}
         onHide={onHide}
-        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh', minHeight: '30vh' }}
+        style={dialogStyle ? dialogStyle : { minWidth: '50vw', maxWidth: '80vw', maxHeight: '80vh' }}
         visible={visible}>
         {children}
       </Dialog>

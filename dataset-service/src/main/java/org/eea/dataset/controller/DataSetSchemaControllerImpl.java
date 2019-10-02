@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -74,21 +75,18 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
 
-    return dataschemaService.getDataSchemaByIdFlow(idFlow);
+    return dataschemaService.getDataSchemaByIdFlow(idFlow, true);
 
   }
 
-  /**
-   * Error handler schema.
-   *
-   * @param id the id
-   *
-   * @return the data set schema VO
-   */
-  public DataSetSchemaVO errorHandlerSchema(@PathVariable("id") String id) {
+  @Override
+  @HystrixCommand()
+  @RequestMapping(value = "/noRules/dataflow/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
+  public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow) {
 
-    return new DataSetSchemaVO();
+    return dataschemaService.getDataSchemaByIdFlow(idFlow, false);
+
   }
-
-
 }

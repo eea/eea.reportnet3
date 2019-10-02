@@ -12,7 +12,8 @@ import org.springframework.data.repository.query.Param;
 /**
  * The Interface RecordRepository.
  */
-public interface RecordRepository extends PagingAndSortingRepository<RecordValue, Integer> {
+public interface RecordRepository
+    extends PagingAndSortingRepository<RecordValue, Integer>, RecordRepositoryPaginated {
 
   /**
    * Find by table value id.
@@ -52,9 +53,8 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    *
    * @return the list
    */
-  @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields WHERE tv.id = :id")
+  @Query("SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH rv.fields WHERE tv.id = :id")
   List<RecordValue> findAllRecordsByTableValueId(@Param("id") Long tableId);
-
 
   /**
    * Find all records and fields by table value id.
@@ -73,5 +73,21 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
    */
   @Query("SELECT rv from RecordValue rv WHERE rv.id = :id")
   Optional<RecordValue> findByIdValidation(@Param("id") Long recordId);
+
+  /**
+   * Count records dataset.
+   *
+   * @return the integer
+   */
+  @Query(nativeQuery = true, value = "SELECT count(*) from record_value")
+  Integer countRecordsDataset();
+
+  /**
+   * Count fields dataset.
+   *
+   * @return the integer
+   */
+  @Query(nativeQuery = true, value = "SELECT count(*) from field_value")
+  Integer countFieldsDataset();
 
 }

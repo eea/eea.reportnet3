@@ -1,14 +1,11 @@
 package org.eea.validation.configuration;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.multitenancy.MultiTenantDataSource;
-import org.eea.security.jwt.configuration.EeaEnableSecurity;
+import org.eea.validation.configuration.util.EeaDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -40,7 +35,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     basePackages = "org.eea.validation.persistence.data.repository")
 @EnableWebMvc
 public class DatasetConfiguration implements WebMvcConfigurer {
-
 
   /**
    * The dll.
@@ -91,6 +85,21 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String orderInserts;
 
   /**
+   * The max pool size.
+   */
+  @Value("${spring.datasource.hikari.maximum-pool-size}")
+  private int maxPoolSize;
+
+  @Value("${spring.datasource.hikari.minimumIdle}")
+  private Integer minimumIdle;
+
+  @Value("${spring.datasource.hikari.idleTimeout}")
+  private Integer iddleTimeout;
+
+  @Value("${spring.datasource.hikari.maxLifetime}")
+  private Integer maxLifetime;
+
+  /**
    * The record store controller zull.
    */
   @Autowired
@@ -103,13 +112,15 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    * @return the data source
    */
 
-  @Bean
-  @Primary
-  public DataSource dataSource() {
-    final AbstractRoutingDataSource ds = new MultiTenantDataSource();
 
-    ds.setTargetDataSources(targetDataSources());
-    return ds;
+  @Bean
+  public DataSource datasetDataSource() {
+    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
+    DataSource dataSource = null;
+    if (null != connections && connections.size() > 0) {
+      dataSource = dataSetsDataSource(connections.get(0));
+    }
+    return dataSource;
   }
 
   /**
@@ -117,17 +128,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the map
    */
-  @Bean
-  @Qualifier("targetDataSources")
-  public Map<Object, Object> targetDataSources() {
-    final Map<Object, Object> targetDataSources = new ConcurrentHashMap<>();
 
-    final List<ConnectionDataVO> connections = recordStoreControllerZull.getDataSetConnections();
-    for (final ConnectionDataVO connectionDataVO : connections) {
-      targetDataSources.put(connectionDataVO.getSchema(), dataSetsDataSource(connectionDataVO));
-    }
-    return targetDataSources;
-  }
 
   /**
    * Data sets data source.
@@ -136,14 +137,14 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    *
    * @return the data source
    */
-  @Primary
-  private static DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
-    final DriverManagerDataSource ds = new DriverManagerDataSource();
+  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
+
+    EeaDataSource ds = new EeaDataSource();
     ds.setUrl(connectionDataVO.getConnectionString());
     ds.setUsername(connectionDataVO.getUser());
     ds.setPassword(connectionDataVO.getPassword());
     ds.setDriverClassName("org.postgresql.Driver");
-    ds.setSchema(connectionDataVO.getSchema());
+
     return ds;
   }
 
@@ -157,15 +158,16 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Primary
   @Qualifier("dataSetsEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean dataSetsEntityManagerFactory() {
-    final LocalContainerEntityManagerFactoryBean dataSetsEM =
+    final LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean =
         new LocalContainerEntityManagerFactoryBean();
-    dataSetsEM.setDataSource(dataSource());
-    dataSetsEM.setPackagesToScan("org.eea.validation.persistence.data.domain");
+    localContainerEntityManagerFactoryBean.setDataSource(datasetDataSource());
+    localContainerEntityManagerFactoryBean
+        .setPackagesToScan("org.eea.validation.persistence.data.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    dataSetsEM.setJpaVendorAdapter(vendorAdapter);
+    localContainerEntityManagerFactoryBean.setJpaVendorAdapter(vendorAdapter);
 
-    dataSetsEM.setJpaProperties(additionalProperties());
-    return dataSetsEM;
+    localContainerEntityManagerFactoryBean.setJpaProperties(additionalProperties());
+    return localContainerEntityManagerFactoryBean;
   }
 
   /**

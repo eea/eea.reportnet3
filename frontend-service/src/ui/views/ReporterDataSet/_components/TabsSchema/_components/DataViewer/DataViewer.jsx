@@ -32,6 +32,7 @@ import { Object } from 'es6-shim';
 const DataViewer = withRouter(
   ({
     hasWritePermissions,
+    isWebFormMMR,
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
@@ -48,6 +49,7 @@ const DataViewer = withRouter(
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
+    const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -154,7 +156,7 @@ const DataViewer = withRouter(
           <Column
             body={dataTemplate}
             className={visibleColumn}
-            editor={hasWritePermissions ? row => cellDataEditor(row, selectedRecord) : null}
+            editor={hasWritePermissions && !isWebFormMMR ? row => cellDataEditor(row, selectedRecord) : null}
             //editorValidator={requiredValidator}
             field={column.field}
             header={column.header}
@@ -182,7 +184,11 @@ const DataViewer = withRouter(
           style={{ width: '15px' }}
         />
       );
-      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+
+      if (!isWebFormMMR) {
+        hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      }
+
       setColumns(columnsArr);
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
@@ -238,7 +244,7 @@ const DataViewer = withRouter(
 
     const onDeletePastedRecord = recordIndex => {
       const inmPastedRecords = [...pastedRecords];
-      inmPastedRecords.splice(recordIndex, 1);
+      inmPastedRecords.splice(getRecordIdByIndex(inmPastedRecords, recordIndex), 1);
       setPastedRecords(inmPastedRecords);
     };
 
@@ -369,6 +375,7 @@ const DataViewer = withRouter(
       if (event) {
         const clipboardData = event.clipboardData;
         const pastedData = clipboardData.getData('Text');
+        console.log(pastedData);
         setPastedRecords(getClipboardData(pastedData));
       }
     };
@@ -412,6 +419,7 @@ const DataViewer = withRouter(
     };
 
     const onPasteCancel = () => {
+      setPastedRecords([]);
       setConfirmPasteVisible(false);
     };
 
@@ -709,8 +717,8 @@ const DataViewer = withRouter(
     };
 
     const getCellId = (tableData, field) => {
-      const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
-      return value.length > 0 ? value[0].fieldData.id : undefined;
+      const completeField = tableData.rowData.dataRow.filter(data => Object.keys(data.fieldData)[0] === field)[0];
+      return !isUndefined(completeField) ? completeField.fieldData.id : undefined;
     };
 
     const getCellValue = (tableData, field) => {
@@ -719,8 +727,14 @@ const DataViewer = withRouter(
     };
 
     const getClipboardData = pastedData => {
-      const copiedClipboardRecords = pastedData.split('\n').filter(l => l.length > 0);
-      const copiedRecords = !isUndefined(pastedRecords) ? [...pastedRecords] : [];
+      //Delete double quotes from strings
+      const copiedClipboardRecords = pastedData
+        .split('\r\n')
+        .filter(l => l.length > 0)
+        .map(d => d.replace(/["]+/g, '').replace('\n', ' '));
+      //Maximum number of records to paste should be 500
+      setNumCopiedRecords(copiedClipboardRecords.length);
+      const copiedBulkRecords = !isUndefined(pastedRecords) ? [...pastedRecords].slice(0, 500) : [];
       copiedClipboardRecords.forEach(row => {
         let emptyRecord = createEmptyObject(colsSchema, fetchedDataFirstRow);
         const copiedCols = row.split('\t');
@@ -733,9 +747,12 @@ const DataViewer = withRouter(
             Object.keys(column.fieldData)[0] !== 'id' && Object.keys(column.fieldData)[0] !== 'dataSetPartitionId'
         );
         emptyRecord.copiedCols = copiedCols.length;
-        copiedRecords.push(emptyRecord);
+        copiedBulkRecords.push(emptyRecord);
       });
-      return copiedRecords;
+      //Slice to 500 records and renumber de records for delete button
+      return copiedBulkRecords.slice(0, 500).map((record, i) => {
+        return { ...record, recordId: i };
+      });
     };
 
     const getExportButtonPosition = e => {
@@ -774,6 +791,14 @@ const DataViewer = withRouter(
         .indexOf(record.recordId);
     };
 
+    const getRecordIdByIndex = (tableData, recordIdx) => {
+      return tableData
+        .map(e => {
+          return e.recordId;
+        })
+        .indexOf(recordIdx);
+    };
+
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -798,7 +823,7 @@ const DataViewer = withRouter(
     };
 
     //Template for Record validation
-    const validationsTemplate = (recordData, column) => {
+    const validationsTemplate = recordData => {
       if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
         const validations = recordData.recordValidations;
 
@@ -913,7 +938,8 @@ const DataViewer = withRouter(
 
     const totalCount = (
       <span>
-        {resources.messages['totalRecords']} {totalRecords ? totalRecords : 0} {resources.messages['rows']}
+        {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+        {resources.messages['rows']}
       </span>
     );
 
@@ -923,7 +949,7 @@ const DataViewer = withRouter(
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || isWebFormMMR}
               icon={'export'}
               label={resources.messages['import']}
               onClick={() => setImportDialogVisible(true)}
@@ -947,7 +973,7 @@ const DataViewer = withRouter(
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions}
+              disabled={!hasWritePermissions || isWebFormMMR || isUndefined(totalRecords)}
               icon={'trash'}
               label={resources.messages['deleteTable']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
@@ -997,7 +1023,7 @@ const DataViewer = withRouter(
             //emptyMessage={resources.messages['noDataInDataTable']}
             id={tableId}
             first={firstRow}
-            footer={hasWritePermissions ? addRowFooter : null}
+            footer={hasWritePermissions && !isWebFormMMR ? addRowFooter : null}
             header={header}
             lazy={true}
             loading={loading}
@@ -1088,6 +1114,7 @@ const DataViewer = withRouter(
           {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
         <ConfirmDialog
+          className="edit-table"
           header={resources.messages['pasteRecords']}
           hasPasteOption={true}
           labelCancel={resources.messages['no']}
@@ -1098,9 +1125,23 @@ const DataViewer = withRouter(
           onPasteAsync={onPasteAsync}
           divRef={divRef}
           visible={confirmPasteVisible}>
-          <InfoTable data={pastedRecords} columns={columns} onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
+          <InfoTable
+            data={pastedRecords}
+            filteredColumns={colsSchema.filter(
+              column =>
+                column.field !== 'actions' &&
+                column.field !== 'recordValidation' &&
+                column.field !== 'id' &&
+                column.field !== 'dataSetPartitionId'
+            )}
+            numRecords={numCopiedRecords}
+            onDeletePastedRecord={onDeletePastedRecord}></InfoTable>
+          <br />
+          <br />
+          <hr />
         </ConfirmDialog>
         <Dialog
+          className="edit-table"
           blockScroll={false}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={addRowDialogFooter}
@@ -1112,6 +1153,7 @@ const DataViewer = withRouter(
           <div className="p-grid p-fluid">{newRecordForm}</div>
         </Dialog>
         <Dialog
+          className="edit-table"
           blockScroll={false}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           footer={editRowDialogFooter}
