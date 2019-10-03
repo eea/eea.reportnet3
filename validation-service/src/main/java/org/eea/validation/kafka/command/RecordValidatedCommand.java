@@ -7,8 +7,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.kie.api.KieBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +17,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RecordValidatedCommand extends AbstractEEAEventHandlerCommand {
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The validation helper. */
   @Autowired

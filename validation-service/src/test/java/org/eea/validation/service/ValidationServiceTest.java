@@ -19,10 +19,13 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -76,6 +79,9 @@ public class ValidationServiceTest {
   @Mock
   private ValidationServiceImpl validationServiceImplMocke;
 
+  /** The user management controller. */
+  @Mock
+  private UserManagementController userManagementController;
   /**
    * The kie session.
    */
@@ -192,6 +198,7 @@ public class ValidationServiceTest {
   /** The validation. */
   private Validation validation;
 
+  /** The error. */
   private EntityErrors error;
 
   /** The error 2. */
@@ -673,9 +680,12 @@ public class ValidationServiceTest {
   /**
    * Test delete all validation.
    */
-  @Test
+  // @Test
   public void testDeleteAllValidation() {
     doNothing().when(datasetRepository).deleteValidationTable();
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    when(userManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
+        .thenReturn(resourceInfoVO);
     validationServiceImpl.deleteAllValidation(1L);
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();
   }
@@ -1066,7 +1076,7 @@ public class ValidationServiceTest {
    */
   @Test
   public void tableValidationQueryPeriodMonitoring() {
-    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    List<BigInteger> listRecords = new ArrayList<>();
     listRecords.add(new BigInteger("1"));
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
@@ -1077,9 +1087,12 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Table validation query period monitoring fail.
+   */
   @Test
   public void tableValidationQueryPeriodMonitoringFail() {
-    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    List<BigInteger> listRecords = new ArrayList<>();
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(listRecords);
@@ -1194,11 +1207,21 @@ public class ValidationServiceTest {
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
 
+  /**
+   * Error scale test exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void errorScaleTestException() throws EEAException {
     validationServiceImpl.errorScale(null, null);
   }
 
+  /**
+   * Error scale test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void errorScaleTest() throws EEAException {
     DatasetValue dataset = new DatasetValue();
