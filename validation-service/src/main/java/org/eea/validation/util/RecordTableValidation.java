@@ -45,24 +45,75 @@ public class RecordTableValidation {
 
   }
 
-  public static Boolean RD03BRule(Long idDataset) {
+  public static Boolean RD03BRule(Long idDataset, Long datasetLegazy) {
 
-    String RD03BRule = "";
+    String RD03BRule = "  with characterization as(" + " SELECT "
+        + "        (select field_value.value from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c42') as bathingWaterIdentifier, "
+        + "        (select         " + "        case " + "            when dataset_" + idDataset
+        + ".is_numeric(field_value.value)= true"
+        + "                then cast (field_value.value as INTEGER)" + "            when dataset_"
+        + idDataset + ".is_numeric(field_value.value)= false"
+        + "                then cast('0000' as INTEGER)" + "            end       "
+        + "        from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c39') as season,"
+        + "        (select field_value.value from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c4b') as groupIdentifier,"
+        + "        rv.id as idrecord" + "        FROM dataset_" + idDataset + ".record_value rv),"
+        + "        LEGAZY_CHAR as(SELECT" + "        (select field_value.value from dataset_"
+        + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c46d39786d35d95e2aca') as bathingWaterIdentifier, "
+        + "        (select " + "        case " + "            when dataset_" + idDataset
+        + ".is_numeric(field_value.value)= true"
+        + "                then cast (field_value.value as INTEGER)" + "            when dataset_"
+        + idDataset + ".is_numeric(field_value.value)= false"
+        + "                then cast('0000' as INTEGER)" + "            end       "
+        + "            from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c468822c6b00d3cba2fc') as season,"
+        + "        (select field_value.value from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c4737194d80d25e67b4b') as groupIdentifier"
+        + "        ,rv.id as idrecord" + "        FROM dataset_" + datasetLegazy
+        + ".record_value rv)" + "" + "    " + " " + "select a.idrecord" + "from characterization a "
+        + "inner join LEGAZY_CHAR b" + "ON a.bathingWaterIdentifier = b.bathingWaterIdentifier "
+        + "AND (a.season) = cast(b.season as INTEGER)"
+        + "AND coalesce(a.groupIdentifier,'') != coalesce(b.groupIdentifier,'')";
 
     String MessageError =
         "The group identifier of the bathing water has changed since last season. ";
-
-    return validationService.tableRecordRIds(RD03BRule, MessageError, TypeErrorEnum.WARNING);
+    return true;
+    // return validationService.tableRecordRIds(RD03BRule, MessageError, TypeErrorEnum.WARNING);
 
   }
 
-  public static Boolean RD03CRule(Long idDataset) {
+  public static Boolean RD03CRule(Long idDataset, Long datasetLegazy) {
 
-    String RD03CRule = "";
+    String RD03CRule = "with characterization as(" + " SELECT "
+        + "        (select field_value.value from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c42') as bathingWaterIdentifier, "
+        + "        (select field_value.value from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c39') as season,"
+        + "        (select field_value.value from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c4b') as groupIdentifier,"
+        + "    rv.id as idrecord" + "    FROM dataset_" + idDataset + ".record_value rv)," + "    "
+        + "    BW_IMPORT as(" + "    SELECT" + "            (select field_value.value from dataset_"
+        + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c724c47d87218a3c336d') as groupIdentifier, "
+        + "            (select field_value.value from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c7294c9467a291f6e7f7') as members"
+        + "    FROM dataset_" + datasetLegazy + ".record_value rv)" + "" + "" + "" + "" + "    "
+        + " " + "select a.idrecord" + "from characterization a "
+        + "inner JOIN(select groupIdentifier,"
+        + "string_agg(bathingWaterIdentifier, ', 'ORDER BY bathingWaterIdentifier) AS members"
+        + "   from (SELECT DISTINCT bathingWaterIdentifier, groupIdentifier "
+        + "        FROM characterization        " + "         WHERE groupIdentifier is not null) a"
+        + "   group by groupIdentifier) b" + " on a.groupIdentifier = b.groupIdentifier"
+        + "inner JOIN BW_IMPORT c" + " on a.groupIdentifier = c.groupIdentifier"
+        + "where b.members != c.members";
 
     String MessageError = "The group members have changed.";
 
-    return validationService.tableRecordRIds(RD03CRule, MessageError, TypeErrorEnum.ERROR);
+    return true;
+    // return validationService.tableRecordRIds(RD03CRule, MessageError, TypeErrorEnum.ERROR);
 
   }
 

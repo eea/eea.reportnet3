@@ -336,6 +336,12 @@ function boolean ruleSVA(String value){
 function boolean RD03ARule(Long idDataset,String idSchemaGroupIdentifier, String idSchemaBathingWaterIdentifier){
  	return RecordTableValidation.RD03ARule(idDataset,idSchemaGroupIdentifier,idSchemaBathingWaterIdentifier);
 }
+function boolean RD03BRule(Long idDataset,Long datasetLegazy){
+ 	return RecordTableValidation.RD03ARule(idDataset,datasetLegazy);
+}
+function boolean RD03CRule(Long idDataset,Long datasetLegazy){
+ 	return RecordTableValidation.RD03ARule(idDataset,datasetLegazy);
+}
 function boolean RD20BRule(Long idDataset){
  	return RecordTableValidation.RD20BRule(idDataset);
 }
@@ -361,6 +367,8 @@ function boolean RD20HRule(Long idDataset){
 function boolean RD17BRule(Long idDataset){
  	return RecordTableValidation.RD17BRule(idDataset);
 }
+//PART CHARACTERIZATION
+
 
 //PART LEGAZY
 function boolean RD12DRule(Long idDataset){
