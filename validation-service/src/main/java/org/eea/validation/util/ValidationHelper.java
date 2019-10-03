@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.eea.validation.service.ValidationService;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
@@ -67,7 +69,9 @@ public class ValidationHelper {
    * @throws EEAException the EEA exception
    */
   @Async
-  public void executeValidation(final Long datasetId, String uuId) throws EEAException {
+  @LockMethod
+  public void executeValidation(@LockCriteria final Long datasetId, String uuId)
+      throws EEAException {
     processesMap.put(uuId, 0);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
