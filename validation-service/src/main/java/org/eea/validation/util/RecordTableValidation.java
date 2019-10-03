@@ -548,5 +548,12 @@ public class RecordTableValidation {
   }
 
 
+  public static Boolean RD17BRule(Long idDataset) {
+
+    String RD17B = "";
+    String MessageError = "The sampleDate is not in the same year as the bathing season. ";
+    // return validationService.tableRecordRIds(RD11F, MessageError, TypeErrorEnum.ERROR);
+    return true;
+  }
 
 }
