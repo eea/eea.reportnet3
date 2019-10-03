@@ -550,10 +550,62 @@ public class RecordTableValidation {
 
   public static Boolean RD17BRule(Long idDataset) {
 
-    String RD17B = "";
+    String RD17B = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  " + "        (select  "
+        + "        case " + "         when dataset_+" + idDataset
+        + ".is_numeric(field_value.value)= true "
+        + "                then cast (field_value.value as NUMERIC) " + "            when dataset_+"
+        + idDataset + ".is_numeric(field_value.value)= false "
+        + "                then cast('0000' as NUMERIC) " + "            end "
+        + "        from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c7c') as season,  "
+        + "        (select field_value.value from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c85') as bathingWaterIdentifier, "
+        + "        (select field_value.value from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c8e') as periodType,  "
+        + "        (select  " + "         case  " + "            when dataset_+" + idDataset
+        + ".is_date(field_value.value)= true "
+        + "                then cast (field_value.value as Date) " + "            when dataset_+"
+        + idDataset + ".is_date(field_value.value)= false "
+        + "                then cast('01/01/1970' as Date) " + "            end "
+        + "        from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c97') as startDate, "
+        + "        (select  " + "         case  " + "            when dataset_+" + idDataset
+        + ".is_date(field_value.value)= true "
+        + "                then cast (field_value.value as Date) " + "            when dataset_+"
+        + idDataset + ".is_date(field_value.value)= false "
+        + "                then cast('01/01/1970' as Date) " + "            end "
+        + "        from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90ca0') as endDate "
+        + "    FROM dataset_+" + idDataset + ".record_value rv), " + "MonitoringResult AS ( "
+        + "    select " + "    (select  " + "    case " + "         when dataset_+" + idDataset
+        + ".is_numeric(field_value.value)= true "
+        + "                then cast (field_value.value as NUMERIC) " + "            when dataset_+"
+        + idDataset + ".is_numeric(field_value.value)= false "
+        + "                then cast('0000' as NUMERIC) " + "            end "
+        + "    from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cbf') as season,  "
+        + "    (select field_value.VALUE from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cc8') as bathingWaterIdentifier,  "
+        + "    (select  " + " case  " + "            when dataset_+" + idDataset
+        + ".is_date(field_value.value)= true "
+        + "                then cast (field_value.value as Date) " + "            when dataset_+"
+        + idDataset + ".is_date(field_value.value)= false "
+        + "                then cast('01/01/1970' as Date) " + "            end "
+        + "    from dataset_+" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cd1') as sampleDate, "
+        + "    rv.id_record as idrecord   " + "    FROM dataset_+" + idDataset + ".Field_Value rv) "
+        + "     " + "    select a.idrecord  " + "from MonitoringResult a "
+        + "left join SeasonalPeriod b "
+        + "  on a.bathingWaterIdentifier = b.bathingWaterIdentifier  "
+        + "  and b.periodType = 'bathingSeason' " + "  and a.season = b.season "
+        + "  where a.bathingWaterIdentifier is not null "
+        + "  and EXTRACT(YEAR FROM CAST(a.sampleDate AS DATE)) != cast(a.season as numeric) "
+        + "  and EXTRACT(MONTH FROM CAST(a.sampleDate AS DATE)) -  EXTRACT(MONTH FROM CAST(b.startDate AS DATE)) > 1 "
+        + "  and EXTRACT(MONTH FROM CAST(b.startDate AS DATE)) -  EXTRACT(MONTH FROM CAST(b.endDate AS DATE)) != 11";
+
     String MessageError = "The sampleDate is not in the same year as the bathing season. ";
-    // return validationService.tableRecordRIds(RD11F, MessageError, TypeErrorEnum.ERROR);
-    return true;
+
+    return validationService.tableRecordRIds(RD17B, MessageError, TypeErrorEnum.ERROR);
   }
 
 }
