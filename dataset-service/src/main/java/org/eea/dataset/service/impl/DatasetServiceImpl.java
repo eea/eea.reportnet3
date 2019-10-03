@@ -849,12 +849,36 @@ public class DatasetServiceImpl implements DatasetService {
       final Map<String, String> mapIdNameDatasetSchema) {
 
 
-    Long totalRecordsWithErrors = recordValidationRepository
-        .countRecordIdFromRecordWithErrorValidations(tableValue.getIdTableSchema());
+    /*
+     * Long totalRecordsWithErrors = recordValidationRepository
+     * .countRecordIdFromRecordWithErrorValidations(tableValue.getIdTableSchema());
+     * 
+     * 
+     * Long totalRecordsWithWarnings = recordValidationRepository
+     * .countRecordIdFromRecordWithWarningValidations(tableValue.getIdTableSchema());
+     */
+    // 1
+    Set<Long> recordIdsFromRecordWithValidationError =
+        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    Set<Long> recordIdsFromRecordWithValidationWarning =
+        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
+    Set<Long> idsErrors = new HashSet<>();
+    idsErrors.addAll(recordIdsFromRecordWithValidationError);
 
 
-    Long totalRecordsWithWarnings = recordValidationRepository
-        .countRecordIdFromRecordWithWarningValidations(tableValue.getIdTableSchema());
+    Set<Long> idsWarnings = new HashSet<>();
+    idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
+
+    idsWarnings.removeAll(idsErrors);
+
+    Long totalRecordsWithErrors = Long.valueOf(idsErrors.size());
+    Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
+
+    // FIN 1
 
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());

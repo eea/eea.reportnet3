@@ -10,11 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.helper.StatsHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +53,9 @@ public class DataFlowControllerImplTest {
    */
   @Mock
   private DataflowService dataflowService;
+
+  @Mock
+  private StatsHelper statisticsHelper;
 
 
   /**
@@ -364,4 +370,24 @@ public class DataFlowControllerImplTest {
     Mockito.verify(dataflowService, times(1)).createDataFlow(dataflowVO);
   }
 
+
+  @Test
+  public void testGlobalStatistics() throws EEAException {
+
+    List<StatisticsVO> stats = new ArrayList<>();
+    when(statisticsHelper.executeStatsProcess(Mockito.any())).thenReturn(stats);
+    dataFlowControllerImpl.getStatisticsByDataflow(1L);
+
+  }
+
+  @Test
+  public void testGlobalStatisticsError() throws EEAException {
+
+    doThrow(new EEAException()).when(statisticsHelper).executeStatsProcess(Mockito.any());
+    dataFlowControllerImpl.getStatisticsByDataflow(1L);
+
+  }
+
+
 }
+
