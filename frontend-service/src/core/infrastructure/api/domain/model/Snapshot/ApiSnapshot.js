@@ -1,4 +1,4 @@
-import { config } from 'conf';
+import { SnapshotConfig } from 'conf/domain/model/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
@@ -9,7 +9,7 @@ export const apiSnapshot = {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
-        url: getUrl(config.createSnapshot.url, {
+        url: getUrl(SnapshotConfig.createSnapshot, {
           datasetId,
           description: description
         }),
@@ -30,7 +30,7 @@ export const apiSnapshot = {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
-        url: getUrl(config.deleteSnapshotByID.url, {
+        url: getUrl(SnapshotConfig.deleteSnapshotById, {
           datasetId,
           snapshotId: snapshotId
         }),
@@ -49,7 +49,7 @@ export const apiSnapshot = {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
-        url: getUrl(config.restoreSnapshot.url, {
+        url: getUrl(SnapshotConfig.restoreSnapshot, {
           dataflowId,
           datasetId,
           snapshotId
@@ -71,7 +71,7 @@ export const apiSnapshot = {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
-        url: getUrl(config.releaseSnapshot.url, {
+        url: getUrl(SnapshotConfig.releaseSnapshot, {
           dataflowId,
           datasetId,
           snapshotId
@@ -94,7 +94,7 @@ export const apiSnapshot = {
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/snapshots.json'
-        : getUrl(config.loadSnapshotsListAPI.url, {
+        : getUrl(SnapshotConfig.loadSnapshotsList, {
             datasetId: datasetId
           }),
       queryString: {},

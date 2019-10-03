@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isPlainObject, isEmpty } from 'lodash';
+import { isPlainObject, isEmpty, isNull } from 'lodash';
 
 import styles from './DocumentFileUpload.module.css';
 
@@ -29,7 +29,7 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset })
       })
   });
 
-  if (!isFormReset) {
+  if (!isNull(form.current) && !isFormReset) {
     form.current.resetForm();
   }
 

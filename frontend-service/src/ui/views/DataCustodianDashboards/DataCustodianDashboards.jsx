@@ -6,6 +6,7 @@ import { isEmpty, isArray } from 'lodash';
 import styles from './DataCustodianDashboards.module.scss';
 
 import { config } from 'conf';
+import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Chart } from 'primereact/chart';
@@ -32,7 +33,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push(getUrl(config.DATAFLOWS.url))
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   const onNewLegend = function(e, legendItem) {
@@ -68,7 +69,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setBreadCrumbItems([
       {
         label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(config.DATAFLOWS.url))
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
         label: resources.messages.dataflow,
