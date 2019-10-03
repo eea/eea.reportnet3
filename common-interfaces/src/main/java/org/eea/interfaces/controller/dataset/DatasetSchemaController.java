@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public interface DatasetSchemaController {
 
+
   /**
    * The interface Data set controller zuul.
    */
@@ -26,6 +27,7 @@ public interface DatasetSchemaController {
    * Creates the data schema.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    */
   @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
   void createDataSchema(@PathVariable("id") final Long datasetId,
@@ -35,6 +37,7 @@ public interface DatasetSchemaController {
    * Find data schema by id.
    *
    * @param id the dataschema id
+   *
    * @return the data set schema VO
    */
   @RequestMapping(value = "/{id}", method = RequestMethod.GET,
@@ -45,10 +48,21 @@ public interface DatasetSchemaController {
    * Find data schema by dataflow.
    *
    * @param idFlow the id flow
+   *
    * @return the data set schema VO
    */
   @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
 
+  /**
+   * Find data schema with no rules by dataflow.
+   *
+   * @param idFlow the id flow
+   *
+   * @return the data set schema vo
+   */
+  @RequestMapping(value = "/noRules/dataflow/{id}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow);
 }

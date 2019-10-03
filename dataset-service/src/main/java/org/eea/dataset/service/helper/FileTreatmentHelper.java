@@ -121,6 +121,7 @@ public class FileTreatmentHelper {
     lockService.removeLockByCriteria("DataSetControllerImpl.loadTableData(..)", criteria);
 
     // after the dataset has been saved, an event is sent to notify it
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
   }
 
