@@ -34,6 +34,7 @@ public class LockServiceImpl implements LockService {
       return lock;
     }
 
+    LOG.info("Already locked: {}", lock.getId());
     return null;
   }
 
@@ -41,6 +42,11 @@ public class LockServiceImpl implements LockService {
   public Boolean removeLock(Integer lockId) {
     LOG.info("Lock removed: {}", lockId);
     return locks.remove(lockId) != null;
+  }
+
+  @Override
+  public Boolean removeLockByCriteria(String signature, List<Object> args) {
+    return removeLock(generateHashCode(signature, args));
   }
 
   @Override

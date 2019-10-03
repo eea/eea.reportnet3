@@ -70,7 +70,7 @@ public class MethodLockAspect {
         }
       }
     }
-    criteria.put(-1, signature.toShortString());
+
     return criteria;
   }
 }

@@ -13,6 +13,8 @@ public interface LockService {
 
   public Boolean removeLock(Integer lockId);
 
+  public Boolean removeLockByCriteria(String signature, List<Object> args);
+
   public Lock findLock(Integer lockId);
 
   public List<Lock> findAll();
