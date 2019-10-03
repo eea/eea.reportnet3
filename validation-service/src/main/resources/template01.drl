@@ -337,10 +337,10 @@ function boolean RD03ARule(Long idDataset,String idSchemaGroupIdentifier, String
  	return RecordTableValidation.RD03ARule(idDataset,idSchemaGroupIdentifier,idSchemaBathingWaterIdentifier);
 }
 function boolean RD03BRule(Long idDataset,Long datasetLegazy){
- 	return RecordTableValidation.RD03ARule(idDataset,datasetLegazy);
+ 	return RecordTableValidation.RD03BRule(idDataset,datasetLegazy);
 }
 function boolean RD03CRule(Long idDataset,Long datasetLegazy){
- 	return RecordTableValidation.RD03ARule(idDataset,datasetLegazy);
+ 	return RecordTableValidation.RD03CRule(idDataset,datasetLegazy);
 }
 function boolean RD20BRule(Long idDataset){
  	return RecordTableValidation.RD20BRule(idDataset);
