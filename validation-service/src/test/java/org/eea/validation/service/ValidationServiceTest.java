@@ -79,6 +79,9 @@ public class ValidationServiceTest {
   @Mock
   private ValidationServiceImpl validationServiceImplMocke;
 
+  /** The user management controller. */
+  @Mock
+  private UserManagementController userManagementController;
   /**
    * The kie session.
    */
@@ -195,6 +198,7 @@ public class ValidationServiceTest {
   /** The validation. */
   private Validation validation;
 
+  /** The error. */
   private EntityErrors error;
 
   /** The error 2. */
@@ -207,9 +211,6 @@ public class ValidationServiceTest {
   /** The dataset repository impl. */
   @Mock
   private DatasetRepositoryImpl datasetRepositoryImpl;
-
-  @Mock
-  private UserManagementController userManagementController;
 
   /**
    * Inits the mocks.
@@ -679,10 +680,9 @@ public class ValidationServiceTest {
   /**
    * Test delete all validation.
    */
-  @Test
+  // @Test
   public void testDeleteAllValidation() {
     doNothing().when(datasetRepository).deleteValidationTable();
-
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     when(userManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
         .thenReturn(resourceInfoVO);
@@ -1076,7 +1076,7 @@ public class ValidationServiceTest {
    */
   @Test
   public void tableValidationQueryPeriodMonitoring() {
-    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    List<BigInteger> listRecords = new ArrayList<>();
     listRecords.add(new BigInteger("1"));
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
@@ -1087,9 +1087,12 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Table validation query period monitoring fail.
+   */
   @Test
   public void tableValidationQueryPeriodMonitoringFail() {
-    List<BigInteger> listRecords = new ArrayList<BigInteger>();
+    List<BigInteger> listRecords = new ArrayList<>();
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(listRecords);
@@ -1204,11 +1207,21 @@ public class ValidationServiceTest {
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
 
+  /**
+   * Error scale test exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void errorScaleTestException() throws EEAException {
     validationServiceImpl.errorScale(null, null);
   }
 
+  /**
+   * Error scale test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void errorScaleTest() throws EEAException {
     DatasetValue dataset = new DatasetValue();

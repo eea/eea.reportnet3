@@ -357,6 +357,11 @@ function boolean RD20GRule(Long idDataset){
 function boolean RD20HRule(Long idDataset){
  	return RecordTableValidation.RD20HRule(idDataset);
 }
+
+function boolean RD17BRule(Long idDataset){
+ 	return RecordTableValidation.RD17BRule(idDataset);
+}
+
 //PART LEGAZY
 function boolean RD12DRule(Long idDataset){
  	return RecordTableValidation.RD12DRule(idDataset);
