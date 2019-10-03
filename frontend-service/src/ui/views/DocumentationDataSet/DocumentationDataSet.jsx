@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import isUndefined from 'lodash/isUndefined';
+import { isUndefined, isArray } from 'lodash';
 
 import styles from './DocumentationDataSet.module.scss';
 
@@ -48,7 +48,8 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const [isDownloading, setIsDownloading] = useState('');
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
-  const [webLinks, setWebLinks] = useState([]);
+  const [webLinks, setWebLinks] = useState();
+  const [webLinksColumns, setWebLinksColumns] = useState([]);
 
   const home = {
     icon: config.icons['home'],
@@ -70,6 +71,45 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   useEffect(() => {
     onLoadDocumentsAndWebLinks();
   }, []);
+
+  const webLinkEditButtons = () => {
+    return (
+      <div className={styles.webLinkEditButtons}>
+        <Button
+          type="button"
+          icon="edit"
+          className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+        />
+        <Button
+          type="button"
+          icon="trash"
+          className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
+        />
+      </div>
+    );
+  };
+
+  const webLinkEditionColumn = <Column body={row => webLinkEditButtons(row)} />;
+
+  useEffect(() => {
+    let webLinkKeys = isArray(webLinks) ? Object.keys(webLinks[0]) : [];
+    let webLinkColArray = webLinkKeys.map(key => (
+      <Column
+        columnResizeMode="expand"
+        field={key}
+        filter={false}
+        filterMatchMode="contains"
+        header={key}
+        body={key === 'url' ? actionWeblink : null}
+      />
+    ));
+
+    if (isCustodian) {
+      webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
+    }
+
+    setWebLinksColumns(webLinkColArray);
+  }, [documents, webLinks]);
 
   //Bread Crumbs settings
   useEffect(() => {
@@ -322,20 +362,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
                 paginator={true}
                 rowsPerPageOptions={[5, 10, 100]}
                 rows={10}>
-                <Column
-                  columnResizeMode="expand"
-                  field="description"
-                  header={resources.messages['description']}
-                  filter={false}
-                  filterMatchMode="contains"
-                />
-                <Column
-                  body={actionWeblink}
-                  field="url"
-                  header={resources.messages['url']}
-                  filter={false}
-                  filterMatchMode="contains"
-                />
+                {webLinksColumns}
               </DataTable>
             }
           </TabPanel>
