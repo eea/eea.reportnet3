@@ -35,12 +35,36 @@ class VisibilityMenu extends React.Component {
       });
     }
   }
+  hide(e) {
+    console.log('hide click', e);
+
+    // this.state.htmlElement.removeEventListener('click', this.state.listener, false);
+    // this.setState(
+    //   state => {
+    //     return { ...state, listener: null };
+    //   },
+    //   () => {
+    //     this.state.element.style.display = 'none';
+    //     this.state.element.style.opacity = 0;
+    //   }
+    // );
+  }
 
   show(event) {
     // if (this.state.listener) this.state.htmlElement.removeEventListener('click', this.state.listener, false);
     const { currentTarget } = event;
     const { nextSibling } = currentTarget;
     const left = currentTarget.offsetLeft;
+
+    this.setState(state => {
+      return {
+        ...state,
+        element: nextSibling,
+        listener: this.state.htmlElement.addEventListener('click', e => {
+          this.hide(e);
+        })
+      };
+    });
 
     if (nextSibling.style.display === 'none') {
       nextSibling.style.display = 'block';
@@ -78,7 +102,12 @@ class VisibilityMenu extends React.Component {
   render() {
     const { fields } = this.state;
     return (
-      <div className={styles.visibilityMenu} style={{ display: 'none', opacity: 0 }}>
+      <div
+        className={`${styles.visibilityMenu} p-menu-overlay-visible`}
+        style={{ display: 'none', opacity: 0 }}
+        onClick={e => {
+          console.log('menu click', e);
+        }}>
         <ul>
           {fields.map((field, i) => (
             <li key={i}>
