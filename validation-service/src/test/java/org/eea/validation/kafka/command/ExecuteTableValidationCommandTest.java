@@ -90,11 +90,12 @@ public class ExecuteTableValidationCommandTest {
   public void executeTest() throws EEAException {
     // self uuid
     processesMap.put("uuid", 1);
-    doNothing().when(validationService).validateTable(Mockito.any(), Mockito.any());
+    doNothing().when(validationService).validateTable(Mockito.any(), Mockito.any(), Mockito.any());
 
     executeTableValidationCommand.execute(eeaEventVO);
 
-    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any());
+    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -104,11 +105,13 @@ public class ExecuteTableValidationCommandTest {
    */
   @Test
   public void executeExceptionTest() throws EEAException {
-    doThrow(new EEAException()).when(validationService).validateTable(Mockito.any(), Mockito.any());
+    doThrow(new EEAException()).when(validationService).validateTable(Mockito.any(), Mockito.any(),
+        Mockito.any());
 
     executeTableValidationCommand.execute(eeaEventVO);
 
-    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any());
+    Mockito.verify(validationService, times(1)).validateTable(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
 }

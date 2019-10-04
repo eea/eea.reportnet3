@@ -5,6 +5,7 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.service.ValidationService;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ public class ExecuteDatasetValidationCommand extends AbstractEEAEventHandlerComm
   @Override
   public void execute(final EEAEventVO eeaEventVO) {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    TenantResolver.setTenantName("dataset_" + datasetId);
     try {
       KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
       validationService.validateDataSet(datasetId, kieBase);

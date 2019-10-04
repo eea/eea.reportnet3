@@ -973,7 +973,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void validateTableThrow() throws EEAException {
-    validationServiceImpl.validateTable(1L, kieBase);
+    validationServiceImpl.validateTable(1L, 1L, kieBase);
   }
 
   /**
@@ -1023,7 +1023,7 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(0).setTableValidations(tableVals);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateTable(1L, kieBase);
+    validationServiceImpl.validateTable(1L, 1L, kieBase);
   }
 
   /**
@@ -1068,7 +1068,7 @@ public class ValidationServiceTest {
     datasetValue.getTableValues().get(0).setIdTableSchema("123123");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateTable(1L, kieBase);
+    validationServiceImpl.validateTable(1L, 1L, kieBase);
   }
 
   /**

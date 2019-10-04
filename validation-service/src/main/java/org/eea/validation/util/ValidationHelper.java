@@ -1,11 +1,15 @@
 package org.eea.validation.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.multitenancy.TenantResolver;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +35,9 @@ public class ValidationHelper {
    */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private TableRepository tableRepository;
 
   /**
    * The validation service.
@@ -68,6 +75,7 @@ public class ValidationHelper {
   @Async
   public void executeValidation(final Long datasetId, String uuId) throws EEAException {
     processesMap.put(uuId, 0);
+    TenantResolver.setTenantName("dataset_" + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
 
@@ -112,6 +120,18 @@ public class ValidationHelper {
     }
   }
 
+
+  private void releaseTableValidation(Long datasetId, String uuId) {
+    TenantResolver.setTenantName("dataset_" + datasetId);
+    Integer totalTables = tableRepository.findAllTables().size();
+    List<TableValue> tableList = tableRepository.findAll();
+    for (int i = 0; totalTables > 0; totalTables = totalTables - 1) {
+      Long idTable = tableList.get(i).getId();
+      releaseTableValidation(datasetId, uuId, idTable);
+      i++;
+    }
+  }
+
   /**
    * Gets the processes map.
    *
@@ -141,10 +161,11 @@ public class ValidationHelper {
    * @param datasetId the dataset id
    * @param uuid the uuid
    */
-  public void releaseTableValidation(final Long datasetId, final String uuid) {
+  public void releaseTableValidation(final Long datasetId, final String uuid, Long Tablenum) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
+    value.put("idTable", Tablenum);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_TABLE, value);
   }

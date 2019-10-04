@@ -77,7 +77,7 @@ public interface ValidationService {
    * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
-  void validateTable(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase) throws EEAException;
 
 
   /**
@@ -304,4 +304,5 @@ public interface ValidationService {
 
 
   Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError);
+
 }

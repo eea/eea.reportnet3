@@ -45,6 +45,7 @@ import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository.EntityErrors;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
@@ -119,6 +120,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private RecordRepository recordRepository;
+
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
 
   /**
    * The schemas repository.
@@ -259,7 +264,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public void validateDataSet(Long datasetId, KieBase kieBase) throws EEAException {
-
+    TenantResolver.setTenantName("dataset_" + datasetId);
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -278,21 +283,23 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, KieBase kieBase) throws EEAException {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase) throws EEAException {
     // Validating tables
+    TenantResolver.setTenantName("dataset_" + datasetId);
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+    TableValue table = tableRepository.findById(idTable).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    dataset.getTableValues().stream().forEach(table -> {
-      List<TableValidation> validations = runTableValidations(table, kieBase.newKieSession());
-      if (table.getTableValidations() != null) {
-        table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-          tableValidation.setTableValue(table);
-        });
-      }
-      tableValidationRepository.saveAll(validations);
-    });
+    // dataset.getTableValues().stream().forEach(table -> {
+    List<TableValidation> validations = runTableValidations(table, kieBase.newKieSession());
+    if (table.getTableValidations() != null) {
+      table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
+        tableValidation.setTableValue(table);
+      });
+    }
+    tableValidationRepository.saveAll(validations);
+    // });
 
   }
 
@@ -309,6 +316,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
+    TenantResolver.setTenantName("dataset_" + datasetId);
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
