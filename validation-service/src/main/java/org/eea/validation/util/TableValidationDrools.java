@@ -95,6 +95,10 @@ public class TableValidationDrools {
   public static Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
       String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, Long idDataset,
       String idDatasetToContribute) {
+    String countryCode = "''";
+        if(null != ThreadPropertiesManager.getVariable("countryCode") && ThreadPropertiesManager.getVariable("countryCode").equals("")) {
+          countryCode =  ThreadPropertiesManager.getVariable("countryCode").toString();
+        }
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
             + "dato2.statusCode as statusCode, dato3.countryCode as countryCode "
@@ -114,7 +118,7 @@ public class TableValidationDrools {
             + "select s.thematicIdIdentifier from  sparcial s left join characterisation c on "
             + "s.thematicIdIdentifier = c.bathingWaterIdentifier where "
             + "s.statusCode NOT in('experimental','retired','superseded') and s.countryCode in("
-            + ThreadPropertiesManager.getVariable("countryCode").toString() + ") "
+            + countryCode + ") "
             + "and c.bathingWaterIdentifier is null";
 
     return validationService.tableValidationQueryNonReturnResult(ruleDO01);

@@ -99,14 +99,13 @@ public class RecordTableValidation {
         + datasetLegazy
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c724c47d87218a3c336d') as groupIdentifier, "
         + "            (select field_value.value from dataset_" + datasetLegazy
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c7294c9467a291f6e7f7') as members"
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c7294c9467a291f6e7f7') as members "
         + "    FROM dataset_" + datasetLegazy + ".record_value rv)" + "" + "" + "" + "" + "    "
-        + " " + "select a.idrecord" + "from characterization a "
-        + "inner JOIN(select groupIdentifier,"
-        + "string_agg(bathingWaterIdentifier, ', 'ORDER BY bathingWaterIdentifier) AS members"
+        + " " + "select a.idrecord from characterization a " + "inner JOIN(select groupIdentifier,"
+        + "string_agg(bathingWaterIdentifier, ', 'ORDER BY bathingWaterIdentifier) AS members "
         + "   from (SELECT DISTINCT bathingWaterIdentifier, groupIdentifier "
-        + "        FROM characterization        " + "         WHERE groupIdentifier is not null) a"
-        + "   group by groupIdentifier) b" + " on a.groupIdentifier = b.groupIdentifier"
+        + "        FROM characterization        " + "         WHERE groupIdentifier is not null) a "
+        + "   group by groupIdentifier) b" + " on a.groupIdentifier = b.groupIdentifier "
         + "inner JOIN BW_IMPORT c" + " on a.groupIdentifier = c.groupIdentifier"
         + "where b.members != c.members";
 
