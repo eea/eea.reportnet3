@@ -101,8 +101,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const releasedOptionsObject = {
     tooltips: {
-      mode: 'index',
-      intersect: false
+      enabled: false
     },
     responsive: true,
     scales: {
