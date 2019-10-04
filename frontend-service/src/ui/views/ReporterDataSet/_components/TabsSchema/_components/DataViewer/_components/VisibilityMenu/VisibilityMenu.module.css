@@ -30,3 +30,6 @@
 .visibilityMenu ul li a svg {
   margin-right: 0.5rem;
 }
+.isNotChecked {
+  color: var(--c-black-300) !important;
+}

@@ -14,10 +14,10 @@ class VisibilityMenu extends React.Component {
         display: 'none'
       },
       htmlElement: document.getElementsByTagName('html')[0],
-      listener: null,
-      fields: []
+      fields: [],
+      menuClick: false
     };
-    ['show', 'updateChecked'].map(item => {
+    ['show', 'updateChecked', 'hide'].map(item => {
       this[item] = this[item].bind(this);
     });
   }
@@ -36,47 +36,63 @@ class VisibilityMenu extends React.Component {
     }
   }
   hide(e) {
-    console.log('hide click', e);
-
-    // this.state.htmlElement.removeEventListener('click', this.state.listener, false);
-    // this.setState(
-    //   state => {
-    //     return { ...state, listener: null };
-    //   },
-    //   () => {
-    //     this.state.element.style.display = 'none';
-    //     this.state.element.style.opacity = 0;
-    //   }
-    // );
+    if (!this.state.menuClick) {
+      this.setState(
+        state => {
+          return {
+            ...state,
+            style: {
+              ...state.style,
+              display: 'none'
+            }
+          };
+        },
+        () => {
+          document.removeEventListener('click', this.hide, false);
+        }
+      );
+    } else {
+      this.setState(state => {
+        return {
+          ...state,
+          menuClick: false
+        };
+      });
+    }
   }
 
   show(event) {
-    // if (this.state.listener) this.state.htmlElement.removeEventListener('click', this.state.listener, false);
+    console.log('click');
+
     const { currentTarget } = event;
-    const { nextSibling } = currentTarget;
     const left = currentTarget.offsetLeft;
 
-    this.setState(state => {
-      return {
-        ...state,
-        element: nextSibling,
-        listener: this.state.htmlElement.addEventListener('click', e => {
-          this.hide(e);
-        })
-      };
-    });
-
-    if (nextSibling.style.display === 'none') {
-      nextSibling.style.display = 'block';
-      nextSibling.style.left = `${left}px`;
-
-      setTimeout(() => {
-        nextSibling.style.opacity = 1;
-      }, 50);
-    } else {
-      nextSibling.style.display = 'none';
-      nextSibling.style.opacity = 0;
-    }
+    this.setState(
+      state => {
+        return {
+          ...state,
+          style: {
+            ...state.style,
+            display: 'block',
+            left: `${left}px`
+          }
+        };
+      },
+      () => {
+        document.addEventListener('click', this.hide);
+        setTimeout(() => {
+          this.setState(state => {
+            return {
+              ...state,
+              style: {
+                ...state.style,
+                opacity: 1
+              }
+            };
+          });
+        });
+      }
+    );
   }
   updateChecked(fieldKey) {
     let checked = null;
@@ -99,19 +115,28 @@ class VisibilityMenu extends React.Component {
       };
     });
   }
+  menuClick(e) {
+    this.setState(state => {
+      return {
+        ...state,
+        menuClick: true
+      };
+    });
+  }
   render() {
     const { fields } = this.state;
     return (
       <div
         className={`${styles.visibilityMenu} p-menu-overlay-visible`}
-        style={{ display: 'none', opacity: 0 }}
+        style={this.state.style}
         onClick={e => {
-          console.log('menu click', e);
+          this.menuClick(e);
         }}>
         <ul>
           {fields.map((field, i) => (
             <li key={i}>
               <a
+                className={!field.checked ? styles.isNotChecked : ''}
                 onClick={e => {
                   this.updateChecked(field.key);
                 }}>
