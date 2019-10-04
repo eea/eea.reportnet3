@@ -203,7 +203,7 @@ public interface ValidationService {
    * @return the boolean
    * @throws EEAException the EEA exception
    */
-  void errorScale(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void errorScale(@DatasetId Long datasetId) throws EEAException;
 
 
   /**

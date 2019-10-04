@@ -6,7 +6,6 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
-import org.kie.api.KieBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,10 +45,9 @@ public class DatasetValidatedCommand extends AbstractEEAEventHandlerCommand {
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final String uuid = (String) eeaEventVO.getData().get("uuid");
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
-    final KieBase kieBase = (KieBase) eeaEventVO.getData().get("kieBase");
     if (validationHelper.getProcessesMap().containsKey(uuid)) {
       validationHelper.getProcessesMap().merge(uuid, -1, Integer::sum);
-      validationHelper.checkFinishedValidations(datasetId, uuid, kieBase);
+      validationHelper.checkFinishedValidations(datasetId, uuid);
     } else {
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
           eeaEventVO.getData());

@@ -58,9 +58,9 @@ public class ExecuteFieldValidationCommand extends AbstractEEAEventHandlerComman
   @Override
   public void execute(final EEAEventVO eeaEventVO) {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
-    final KieBase kieBase = (KieBase) eeaEventVO.getData().get("kieBase");
     final int numPag = (int) eeaEventVO.getData().get("numPag");
     try {
+      KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
       validationService.validateFields(datasetId, kieBase, pageable);
 

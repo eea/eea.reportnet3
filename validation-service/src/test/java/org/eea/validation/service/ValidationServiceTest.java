@@ -1214,7 +1214,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void errorScaleTestException() throws EEAException {
-    validationServiceImpl.errorScale(null, null);
+    validationServiceImpl.errorScale(null);
   }
 
   /**
@@ -1233,6 +1233,6 @@ public class ValidationServiceTest {
     when(recordValidationRepository.findFailedRecords()).thenReturn(failedEntities);
     when(recordValidationRepository.findFailedTables()).thenReturn(failedEntities);
     when(recordValidationRepository.findFailedDatasets()).thenReturn(failedEntities);
-    validationServiceImpl.errorScale(1L, kieBase);
+    validationServiceImpl.errorScale(1L);
   }
 }

@@ -240,7 +240,10 @@ public class ForeingKeyDrools {
     if ("".equalsIgnoreCase(value.trim())) {
       return true;
     }
-    String countryCode = TenantResolver.getVariable("countryCode").toString().replace("'", "");
+    String countryCode = "";
+    if (null != TenantResolver.getVariable("countryCode")) {
+      countryCode = TenantResolver.getVariable("countryCode").toString().replace("'", "");
+    }
     if (!countryCode.equals(value.substring(0, 2))) {
       return false;
     } else {

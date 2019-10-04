@@ -49,7 +49,7 @@ public class FieldValidatedCommand extends AbstractEEAEventHandlerCommand {
     final KieBase kieBase = (KieBase) eeaEventVO.getData().get("kieBase");
     if (validationHelper.getProcessesMap().containsKey(uuid)) {
       validationHelper.getProcessesMap().merge(uuid, -1, Integer::sum);
-      validationHelper.checkFinishedValidations(datasetId, uuid, kieBase);
+      validationHelper.checkFinishedValidations(datasetId, uuid);
     } else {
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_FIELD_COMPLETED,
           eeaEventVO.getData());

@@ -658,12 +658,11 @@ public class ValidationServiceImpl implements ValidationService {
    * Error scale.
    *
    * @param datasetId the dataset id
-   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void errorScale(Long datasetId, KieBase kieBase) throws EEAException {
+  public void errorScale(Long datasetId) throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);

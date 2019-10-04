@@ -15,7 +15,6 @@ import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.api.KieBase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -40,10 +39,6 @@ public class TableValidatedCommandTest {
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The kie base. */
-  @Mock
-  private KieBase kieBase;
-
   /** The data. */
   private Map<String, Object> data;
 
@@ -61,7 +56,6 @@ public class TableValidatedCommandTest {
     data = new HashMap<>();
     data.put("uuid", "uuid");
     data.put("datasetId", "1L");
-    data.put("kieBase", kieBase);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_TABLE_COMPLETED);
     eeaEventVO.setData(data);
@@ -90,12 +84,11 @@ public class TableValidatedCommandTest {
     processesMap.put("uuid", 1);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any());
     tableValidatedCommand.execute(eeaEventVO);
 
     Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**

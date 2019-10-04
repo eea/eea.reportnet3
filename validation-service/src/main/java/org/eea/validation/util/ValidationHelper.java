@@ -7,7 +7,6 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.service.ValidationService;
-import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,17 +70,15 @@ public class ValidationHelper {
     processesMap.put(uuId, 0);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
-    LOG.info("Load Rules");
-    KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
 
     LOG.info("Validating Dataset");
-    releaseDatasetValidation(datasetId, uuId, kieBase);
+    releaseDatasetValidation(datasetId, uuId);
     LOG.info("Validating Tables");
-    releaseTableValidation(datasetId, uuId, kieBase);
+    releaseTableValidation(datasetId, uuId);
     LOG.info("Validating Records");
-    releaseRecordsValidation(datasetId, uuId, kieBase);
+    releaseRecordsValidation(datasetId, uuId);
     LOG.info("Validating Fields");
-    releaseFieldsValidation(datasetId, uuId, kieBase);
+    releaseFieldsValidation(datasetId, uuId);
 
   }
 
@@ -92,10 +89,10 @@ public class ValidationHelper {
    * @param uuId the uu id
    * @param kieBase the kie base
    */
-  private void releaseFieldsValidation(Long datasetId, String uuId, KieBase kieBase) {
+  private void releaseFieldsValidation(Long datasetId, String uuId) {
     Integer totalFields = validationService.countFieldsDataset(datasetId);
     for (int i = 0; totalFields >= 0; totalFields = totalFields - fieldBatchSize) {
-      releaseFieldValidation(datasetId, uuId, kieBase, i);
+      releaseFieldValidation(datasetId, uuId, i);
       i++;
     }
   }
@@ -107,10 +104,10 @@ public class ValidationHelper {
    * @param uuId the uu id
    * @param kieBase the kie base
    */
-  private void releaseRecordsValidation(Long datasetId, String uuId, KieBase kieBase) {
+  private void releaseRecordsValidation(Long datasetId, String uuId) {
     Integer totalRecords = validationService.countRecordsDataset(datasetId);
     for (int i = 0; totalRecords >= 0; totalRecords = totalRecords - recordBatchSize) {
-      releaseRecordValidation(datasetId, uuId, kieBase, i);
+      releaseRecordValidation(datasetId, uuId, i);
       i++;
     }
   }
@@ -129,14 +126,11 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
-   * @param kieBase the kie base
    */
-  public void releaseDatasetValidation(final Long datasetId, final String uuid,
-      final KieBase kieBase) {
+  public void releaseDatasetValidation(final Long datasetId, final String uuid) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
-    value.put("kieBase", kieBase);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_DATASET, value);
   }
@@ -146,14 +140,11 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
-   * @param kieBase the kie base
    */
-  public void releaseTableValidation(final Long datasetId, final String uuid,
-      final KieBase kieBase) {
+  public void releaseTableValidation(final Long datasetId, final String uuid) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
-    value.put("kieBase", kieBase);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_TABLE, value);
   }
@@ -163,15 +154,12 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
-   * @param kieBase the kie base
    * @param numPag the numPag
    */
-  public void releaseRecordValidation(final Long datasetId, final String uuid,
-      final KieBase kieBase, int numPag) {
+  public void releaseRecordValidation(final Long datasetId, final String uuid, int numPag) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
-    value.put("kieBase", kieBase);
     value.put("numPag", numPag);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_RECORD, value);
@@ -182,15 +170,12 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
-   * @param kieBase the kie base
    * @param numPag the numPag
    */
-  public void releaseFieldValidation(final Long datasetId, final String uuid, final KieBase kieBase,
-      int numPag) {
+  public void releaseFieldValidation(final Long datasetId, final String uuid, int numPag) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
-    value.put("kieBase", kieBase);
     value.put("numPag", numPag);
     processesMap.merge(uuid, 1, Integer::sum);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_FIELD, value);
@@ -205,11 +190,11 @@ public class ValidationHelper {
    * @throws EEAException the EEA exception
    */
 
-  public void checkFinishedValidations(final Long datasetId, final String uuid,
-      final KieBase kieBase) throws EEAException {
+  public void checkFinishedValidations(final Long datasetId, final String uuid)
+      throws EEAException {
     if (processesMap.get(uuid) == 0) {
       LOG.info("scaling errors");
-      validationService.errorScale(datasetId, kieBase);
+      validationService.errorScale(datasetId);
       // after the dataset has been saved, an event is sent to notify it
       processesMap.remove(uuid);
       kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);

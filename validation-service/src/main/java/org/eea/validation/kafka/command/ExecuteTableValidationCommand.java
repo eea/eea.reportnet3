@@ -51,9 +51,9 @@ public class ExecuteTableValidationCommand extends AbstractEEAEventHandlerComman
   @Override
   public void execute(final EEAEventVO eeaEventVO) {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
-    final KieBase kieBase = (KieBase) eeaEventVO.getData().get("kieBase");
 
     try {
+      KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
       validationService.validateTable(datasetId, kieBase);
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
@@ -62,6 +62,7 @@ public class ExecuteTableValidationCommand extends AbstractEEAEventHandlerComman
     } finally {
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_TABLE_COMPLETED,
           eeaEventVO.getData());
+
     }
   }
 
