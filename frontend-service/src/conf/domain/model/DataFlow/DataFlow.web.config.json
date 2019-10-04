@@ -1,6 +1,7 @@
 {
     "acceptDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
     "datasetReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
+    "globalStatistics": "/dataflow/{:dataflowId}/globalStatistics",
     "loadDataflowTaskPendingAccepted":  "/dataflow/pendingaccepted",
     "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
     "rejectDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"

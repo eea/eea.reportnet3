@@ -3,7 +3,6 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 import dataCustodianDashboards from './response_GlobalStatsDataflow.json';
-//'./dashboardData.json';
 
 export const apiDataflow = {
   accept: async dataflowId => {
@@ -58,17 +57,17 @@ export const apiDataflow = {
     return response.data;
   },
   datasetStatisticsStatus: async dataflowId => {
-    // const tokens = userStorage.get();
-    // const response = await HTTPRequester.get({
-    //   url: '/jsons/dataCustodianDashboards.json',
-    //   queryString: {},
-    //   headers: {
-    //     Authorization: `Bearer ${tokens.accessToken}`
-    //   }
-    // });
-    // return response.data;
-    const hardcodedDashboardTest = dataCustodianDashboards;
-    return hardcodedDashboardTest;
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    // const hardcodedDashboardTest = dataCustodianDashboards;
+    // return hardcodedDashboardTest;
   },
   datasetReleasedStatus: async dataflowId => {
     const tokens = userStorage.get();
