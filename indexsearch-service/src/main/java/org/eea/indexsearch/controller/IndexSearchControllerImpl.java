@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/index")
-public class IndexSearchControllerImpl<Employee> implements IndexSearchControler {
+public class IndexSearchControllerImpl implements IndexSearchController {
 
 
   @Autowired

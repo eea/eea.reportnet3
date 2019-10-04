@@ -6,7 +6,7 @@ import org.eea.indexsearch.io.kafka.domain.ElasticSearchData;
 /**
  * The Interface IndexSearchControler.
  */
-public interface IndexSearchControler {
+public interface IndexSearchController {
 
   /**
    * Search by name.

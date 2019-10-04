@@ -14,6 +14,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,9 @@ public class FileTreatmentHelperTest {
 
   @Mock
   private TableRepository tableRepository;
+
+  @Mock
+  private LockService lockService;
 
 
   /**

@@ -5,6 +5,8 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,8 @@ public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
    * @param eeaEventVO the eea event VO
    */
   @Override
-  public void execute(EEAEventVO eeaEventVO) {
+  @LockMethod(removeWhenFinish = false)
+  public void execute(@LockCriteria EEAEventVO eeaEventVO) {
     Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
     uuid = UUID.randomUUID();
     try {

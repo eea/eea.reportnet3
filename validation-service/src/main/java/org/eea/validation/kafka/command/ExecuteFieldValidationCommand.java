@@ -63,8 +63,6 @@ public class ExecuteFieldValidationCommand extends AbstractEEAEventHandlerComman
     try {
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
       validationService.validateFields(datasetId, kieBase, pageable);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_FIELD_COMPLETED,
-          eeaEventVO.getData());
 
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
