@@ -122,7 +122,81 @@ const completed = async () => {
 };
 
 const datasetStatisticsStatus = async dataflowId => {
-  const datasetsDashboardsData = await apiDataflow.datasetStatisticsStatus(dataflowId);
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetStatisticsStatus(dataflowId);
+
+  const datasetsDashboardsData = {};
+  datasetsDashboardsData.dataSetId = datasetsDashboardsDataDTO.idDataSetSchema;
+
+  const dataSetReporters = [];
+  const tables = [];
+  let tablePercentages = [];
+  let tableValues = [];
+
+  datasetsDashboardsDataDTO.map(dataset => {
+    datasetsDashboardsData.dataSetId = dataset.idDataSetSchema;
+    dataSetReporters.push({
+      reporterName: dataset.nameDataSetSchema
+    });
+
+    dataset.tables.map((table, i) => {
+      let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
+      //Check if table has been already added
+      if (index === -1) {
+        tablePercentages.push(
+          [
+            getPercentageOfValue(
+              table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+              table.totalRecords
+            )
+          ],
+          [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
+          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)]
+        );
+
+        tableValues.push(
+          [table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)],
+          [table.totalRecordsWithWarnings],
+          [table.totalRecordsWithErrors]
+        );
+
+        tables.push({
+          tableId: table.idTableSchema,
+          tableName: table.nameTableSchema,
+          tableStatisticPercentages: tablePercentages,
+          tableStatisticValues: tableValues
+        });
+        tablePercentages = [];
+        tableValues = [];
+      } else {
+        const tableById = tables.filter(tab => tab.tableId === table.idTableSchema)[0];
+
+        tableById.tableStatisticPercentages[0].push(
+          getPercentageOfValue(
+            table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings),
+            table.totalRecords
+          )
+        );
+        tableById.tableStatisticPercentages[1].push(
+          getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
+        );
+        tableById.tableStatisticPercentages[2].push(
+          getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
+        );
+
+        tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
+
+        tableById.tableStatisticValues[0].push(
+          table.totalRecords - (table.totalRecordsWithErrors + table.totalRecordsWithWarnings)
+        );
+        tableById.tableStatisticValues[1].push(table.totalRecordsWithWarnings);
+        tableById.tableStatisticValues[2].push(table.totalRecordsWithErrors);
+        tables[index] = tableById;
+      }
+    });
+  });
+
+  datasetsDashboardsData.dataSetReporters = dataSetReporters;
+  datasetsDashboardsData.tables = tables;
 
   const datasets = datasetsDashboardsData.tables
     .map(table => [
@@ -150,7 +224,7 @@ const datasetStatisticsStatus = async dataflowId => {
         tableId: table.tableId,
         backgroundColor: '#DA2131',
         data: table.tableStatisticPercentages[2],
-        totalData: table.tableStatisticPercentages[2],
+        totalData: table.tableStatisticValues[2],
         stack: table.tableName
       }
     ])
@@ -206,6 +280,14 @@ const accept = async dataflowId => {
 const reject = async dataflowId => {
   const status = await apiDataflow.reject(dataflowId);
   return status;
+};
+
+const getPercentageOfValue = (val, total) => {
+  return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
+};
+
+const transposeMatrix = matrix => {
+  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
 };
 
 export const ApiDataflowRepository = {

@@ -2,7 +2,8 @@ import { DataflowConfig } from 'conf/domain/model/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import dataCustodianDashboards from './dashboardData.json';
+import dataCustodianDashboards from './response_GlobalStatsDataflow.json';
+//'./dashboardData.json';
 
 export const apiDataflow = {
   accept: async dataflowId => {
