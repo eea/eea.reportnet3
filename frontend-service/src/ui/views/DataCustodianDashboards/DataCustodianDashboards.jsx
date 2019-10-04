@@ -83,7 +83,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     scales: {
       xAxes: [
         {
-          stacked: true
+          stacked: true,
+          maxBarThickness: 100
         }
       ],
       yAxes: [
@@ -107,7 +108,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     scales: {
       xAxes: [
         {
-          stacked: true
+          stacked: true,
+          maxBarThickness: 100
         }
       ],
       yAxes: [

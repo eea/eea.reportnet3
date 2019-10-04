@@ -62,24 +62,24 @@
   }
 
   &[data-status='correct'] {
-    background: var(--c-corporate-blue);
+    background: rgba(153, 204, 51, 1);
   }
   &[data-status='warning'] {
-    background: var(--yellow-120);
+    background: rgba(255, 204, 0, 1);
   }
   &[data-status='error'] {
-    background: var(--errors);
+    background: rgba(204, 51, 0, 1);
   }
 
   &:not(:checked) {
     &[data-status='correct'] {
-      background: var(--blue-50);
+      background: rgba(153, 204, 51, 0.5);
     }
     &[data-status='warning'] {
-      background: var(--yellow-50);
+      background: rgba(255, 204, 0, 0.5);
     }
     &[data-status='error'] {
-      background: rgba(218, 33, 49, 0.5);
+      background: rgba(204, 51, 0, 0.5);
     }
   }
 }

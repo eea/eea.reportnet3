@@ -204,7 +204,7 @@ const datasetStatisticsStatus = async dataflowId => {
         label: `CORRECT`,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: '#004494',
+        backgroundColor: 'rgba(153, 204, 51, 1)',
         data: table.tableStatisticPercentages[0],
         totalData: table.tableStatisticValues[0],
         stack: table.tableName
@@ -213,7 +213,7 @@ const datasetStatisticsStatus = async dataflowId => {
         label: `WARNINGS`,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: '#ffd617',
+        backgroundColor: 'rgba(255, 204, 0, 1)',
         data: table.tableStatisticPercentages[1],
         totalData: table.tableStatisticValues[1],
         stack: table.tableName
@@ -222,7 +222,7 @@ const datasetStatisticsStatus = async dataflowId => {
         label: `ERRORS`,
         tableName: table.tableName,
         tableId: table.tableId,
-        backgroundColor: '#DA2131',
+        backgroundColor: 'rgba(204, 51, 0, 1)',
         data: table.tableStatisticPercentages[2],
         totalData: table.tableStatisticValues[2],
         stack: table.tableName
@@ -248,13 +248,13 @@ const datasetReleasedStatus = async dataflowId => {
     datasets: [
       {
         label: 'Released',
-        backgroundColor: 'rgb(50, 205, 50)',
+        backgroundColor: 'rgba(51, 153, 0, 1)',
 
         data: releasedDashboardsData.map(dataset => dataset.isReleased)
       },
       {
         label: 'Unreleased',
-        backgroundColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(208, 208, 206, 1)',
         data: releasedDashboardsData.map(dataset => !dataset.isReleased)
       }
     ]
