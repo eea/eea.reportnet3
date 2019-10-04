@@ -5,8 +5,6 @@ import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-import { DatasetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
-
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
@@ -125,88 +123,40 @@ const completed = async () => {
 
 const datasetStatisticsStatus = async dataflowId => {
   const datasetsDashboardsData = await apiDataflow.datasetStatisticsStatus(dataflowId);
-  console.log('datasetsDashboardsData', datasetsDashboardsData);
 
-  const datasetsArray = datasetsDashboardsData.map((dataset, i) => {
-    let datasetObject = new Dataset();
-    datasetObject.datasetSchemaName = dataset.nameDataSetSchema;
-    datasetObject.datasetErrors = dataset.datasetErrors;
-
-    const tableStatisticValues = [];
-
-    const datasetTables = datasetsDashboardsData.map(dataset =>
-      dataset.tables.map(datasetTableDTO => {
-        tableStatisticValues.push([
-          datasetTableDTO.totalRecords -
-            (datasetTableDTO.totalRecordsWithErrors + datasetTableDTO.totalRecordsWithWarnings),
-          datasetTableDTO.totalRecordsWithWarnings,
-          datasetTableDTO.totalRecordsWithErrors
-        ]);
-
-        return new DatasetTable(
-          datasetTableDTO.tableErrors,
-          datasetTableDTO.idTableSchema,
-          datasetTableDTO.nameTableSchema
-        );
-      })
-    );
-
-    let transposedValues = transposeMatrix(tableStatisticValues);
-
-    datasetObject.tableStatisticValues = transposedValues;
-    datasetObject.tableStatisticPercentages = getPercentage(transposedValues);
-    datasetObject.tables = datasetTables;
-
-    return datasetObject;
-  });
-
-  console.log('datasetsArray', datasetsArray);
-
-  const labels = datasetsArray.map(dataset => dataset.datasetSchemaName);
-  const values = datasetsArray.map(dataset => dataset.tableStatisticValues);
-  const percentages = datasetsArray.map(dataset => dataset.tableStatisticPercentages);
-  const tablesData = datasetsArray.map(dataset => dataset.tables);
-
-  console.log('labels', labels);
-  console.log('values', values);
-  console.log('percentages', percentages);
-  console.log('tablesData', tablesData);
-
-  console.log('table names', datasetsArray[0].tables.map(tab => tab.map(table => table.tableSchemaName)));
-
-  const datasets = datasetsArray[0].tables
+  const datasets = datasetsDashboardsData.tables
     .map(table => [
-      ({
+      {
         label: `CORRECT`,
-        tableName: table.tableSchemaName,
-        tableId: table.tableSchemaId,
+        tableName: table.tableName,
+        tableId: table.tableId,
         backgroundColor: '#004494',
-        // data: percentages[0],
-        // totalData: values[0],
-        stack: table.tableSchemaName
+        data: table.tableStatisticPercentages[0],
+        totalData: table.tableStatisticValues[0],
+        stack: table.tableName
       },
       {
         label: `WARNINGS`,
-        tableName: table.tableSchemaName,
-        tableId: table.tableSchemaId,
+        tableName: table.tableName,
+        tableId: table.tableId,
         backgroundColor: '#ffd617',
-        // data: percentages[1],
-        // totalData: values[1],
-        stack: table.tableSchemaName
+        data: table.tableStatisticPercentages[1],
+        totalData: table.tableStatisticValues[1],
+        stack: table.tableName
       },
       {
         label: `ERRORS`,
-        tableName: table.tableSchemaName,
-        tableId: table.tableSchemaId,
+        tableName: table.tableName,
+        tableId: table.tableId,
         backgroundColor: '#DA2131',
-        // data: percentages[2],
-        // totalData: values[2],
-        stack: table.tableSchemaName
-      })
+        data: table.tableStatisticPercentages[2],
+        totalData: table.tableStatisticPercentages[2],
+        stack: table.tableName
+      }
     ])
     .flat();
 
-  console.log('datasets', datasets);
+  const labels = datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName);
 
   const datasetDataObject = {
     labels: labels,
@@ -214,15 +164,6 @@ const datasetStatisticsStatus = async dataflowId => {
   };
 
   return datasetDataObject;
-};
-
-const getPercentage = valArr => {
-  let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
-  return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
-};
-
-const transposeMatrix = matrix => {
-  return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
 };
 
 const datasetReleasedStatus = async dataflowId => {
