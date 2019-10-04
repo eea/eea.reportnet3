@@ -28,6 +28,15 @@ public interface SecurityProviderInterfaceService {
   TokenVO doLogin(String username, String password, Object... extraParams);
 
   /**
+   * Do login string based on cas code.
+   *
+   * @param code the code
+   *
+   * @return the string
+   */
+  TokenVO doLogin(String code);
+
+  /**
    * Check access permission boolean.
    *
    * @param resource the resource
