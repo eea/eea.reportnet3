@@ -15,6 +15,7 @@ import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.model.Lock;
 import org.eea.lock.service.LockService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +30,11 @@ public class MethodLockAspect {
   public Object addLock(ProceedingJoinPoint joinPoint) throws Throwable {
 
     Object rtn = null;
+    Authentication aux = SecurityContextHolder.getContext().getAuthentication();
 
     Lock lock = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-        getLockCriteria(joinPoint), joinPoint.getSignature().toShortString());
+        aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint),
+        joinPoint.getSignature().toShortString());
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();

@@ -25,8 +25,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.lock.annotation.LockCriteria;
-import org.eea.lock.annotation.LockMethod;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -251,8 +249,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  @LockMethod
-  public void validateDataSet(@LockCriteria Long datasetId, KieBase kieBase) throws EEAException {
+  public void validateDataSet(Long datasetId, KieBase kieBase) throws EEAException {
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
@@ -272,8 +269,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  @LockMethod
-  public void validateTable(@LockCriteria Long datasetId, KieBase kieBase) throws EEAException {
+  public void validateTable(Long datasetId, KieBase kieBase) throws EEAException {
     // Validating tables
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
@@ -302,8 +298,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  @LockMethod
-  public void validateRecord(@LockCriteria Long datasetId, KieBase kieBase, Pageable pageable)
+  public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
@@ -353,8 +348,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  @LockMethod
-  public void validateFields(@LockCriteria Long datasetId, KieBase kieBase, Pageable pageable)
+  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
     if (dataset == null) {
