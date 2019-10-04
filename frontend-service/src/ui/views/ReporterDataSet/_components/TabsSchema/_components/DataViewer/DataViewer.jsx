@@ -52,7 +52,7 @@ const DataViewer = withRouter(
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
-    const [originalColumns, setOriginColumns] = useState([]);
+    const [originalColumns, setOriginalColumns] = useState([]);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -206,16 +206,16 @@ const DataViewer = withRouter(
         setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
       } else {
         setColumns(columnsArr);
-        setOriginColumns(columnsArr);
+        setOriginalColumns(columnsArr);
       }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     const showColumns = columnKeys => {
       console.log('originalColumns: ', originalColumns);
 
-      const unHideable = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
+      const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
       const currentVisibleColumns = originalColumns.filter(
-        column => columnKeys.includes(column.key) || unHideable.includes(column.key)
+        column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
       );
       setColumns(currentVisibleColumns);
       setVisibleColumns(currentVisibleColumns);
