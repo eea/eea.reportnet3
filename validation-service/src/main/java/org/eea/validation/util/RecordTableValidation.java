@@ -395,15 +395,17 @@ public class RecordTableValidation {
         + " .field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c85') as bathingWaterIdentifier, "
         + "        (select field_value.value from dataset_" + idDataset
         + " .field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c8e') as periodType,  "
-        + "        (select  " + "        case when dataset_21.is_date(field_value.value)= true "
-        + "                then cast (field_value.value as Date) "
-        + "            when dataset_21.is_date(field_value.value)= false "
+        + "        (select  " + "        case when dataset_" + idDataset
+        + ".is_date(field_value.value)= true "
+        + "                then cast (field_value.value as Date) " + "            when dataset_"
+        + idDataset + ".is_date(field_value.value)= false "
         + "                then cast('1950-01-01' as Date) " + "            end "
         + "        from dataset_" + idDataset
         + " .field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c97') as startDate, "
-        + "        (select  " + "        case when dataset_21.is_date(field_value.value)= true "
-        + "                then cast (field_value.value as Date) "
-        + "            when dataset_21.is_date(field_value.value)= false "
+        + "        (select  " + "        case when dataset_" + idDataset
+        + ".is_date(field_value.value)= true "
+        + "                then cast (field_value.value as Date) " + "            when dataset_"
+        + idDataset + ".is_date(field_value.value)= false "
         + "                then cast('1970-01-01' as Date) " + "            end "
         + "        from dataset_" + idDataset
         + " .field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90ca0') as endDate,  "
@@ -419,9 +421,10 @@ public class RecordTableValidation {
         + " .field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cbf') as season,  "
         + "    (select field_value.VALUE from dataset_" + idDataset
         + " .field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cc8') as bathingWaterIdentifier,  "
-        + "    (select  " + "    case when dataset_21.is_date(field_value.value)= true "
-        + "                then cast (field_value.value as Date) "
-        + "            when dataset_21.is_date(field_value.value)= false "
+        + "    (select  " + "    case when dataset_" + idDataset
+        + ".is_date(field_value.value)= true "
+        + "                then cast (field_value.value as Date) " + "            when dataset_"
+        + idDataset + ".is_date(field_value.value)= false "
         + "                then cast('1980-01-01' as Date) " + "            end "
         + "    from dataset_" + idDataset
         + " .field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cd1') as sampleDate,  "
@@ -602,49 +605,49 @@ public class RecordTableValidation {
   public static Boolean RD17BRule(Long idDataset) {
 
     String RD17B = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  " + "        (select  "
-        + "        case " + "         when dataset_+" + idDataset
+        + "        case " + "         when dataset_" + idDataset
         + ".is_numeric(field_value.value)= true "
-        + "                then cast (field_value.value as NUMERIC) " + "            when dataset_+"
+        + "                then cast (field_value.value as NUMERIC) " + "            when dataset_"
         + idDataset + ".is_numeric(field_value.value)= false "
         + "                then cast('0000' as NUMERIC) " + "            end "
-        + "        from dataset_+" + idDataset
+        + "        from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c7c') as season,  "
-        + "        (select field_value.value from dataset_+" + idDataset
+        + "        (select field_value.value from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c85') as bathingWaterIdentifier, "
-        + "        (select field_value.value from dataset_+" + idDataset
+        + "        (select field_value.value from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c8e') as periodType,  "
-        + "        (select  " + "         case  " + "            when dataset_+" + idDataset
+        + "        (select  " + "         case  " + "            when dataset_" + idDataset
         + ".is_date(field_value.value)= true "
-        + "                then cast (field_value.value as Date) " + "            when dataset_+"
+        + "                then cast (field_value.value as Date) " + "            when dataset_"
         + idDataset + ".is_date(field_value.value)= false "
         + "                then cast('01/01/1970' as Date) " + "            end "
-        + "        from dataset_+" + idDataset
+        + "        from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c97') as startDate, "
-        + "        (select  " + "         case  " + "            when dataset_+" + idDataset
+        + "        (select  " + "         case  " + "            when dataset_" + idDataset
         + ".is_date(field_value.value)= true "
-        + "                then cast (field_value.value as Date) " + "            when dataset_+"
+        + "                then cast (field_value.value as Date) " + "            when dataset_"
         + idDataset + ".is_date(field_value.value)= false "
         + "                then cast('01/01/1970' as Date) " + "            end "
-        + "        from dataset_+" + idDataset
+        + "        from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90ca0') as endDate "
-        + "    FROM dataset_+" + idDataset + ".record_value rv), " + "MonitoringResult AS ( "
-        + "    select " + "    (select  " + "    case " + "         when dataset_+" + idDataset
+        + "    FROM dataset_" + idDataset + ".record_value rv), " + "MonitoringResult AS ( "
+        + "    select " + "    (select  " + "    case " + "         when dataset_" + idDataset
         + ".is_numeric(field_value.value)= true "
-        + "                then cast (field_value.value as NUMERIC) " + "            when dataset_+"
+        + "                then cast (field_value.value as NUMERIC) " + "            when dataset_"
         + idDataset + ".is_numeric(field_value.value)= false "
-        + "                then cast('0000' as NUMERIC) " + "            end "
-        + "    from dataset_+" + idDataset
+        + "                then cast('0000' as NUMERIC) " + "            end " + "    from dataset_"
+        + idDataset
         + ".field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cbf') as season,  "
-        + "    (select field_value.VALUE from dataset_+" + idDataset
+        + "    (select field_value.VALUE from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cc8') as bathingWaterIdentifier,  "
-        + "    (select  " + " case  " + "            when dataset_+" + idDataset
+        + "    (select  " + " case  " + "            when dataset_" + idDataset
         + ".is_date(field_value.value)= true "
-        + "                then cast (field_value.value as Date) " + "            when dataset_+"
+        + "                then cast (field_value.value as Date) " + "            when dataset_"
         + idDataset + ".is_date(field_value.value)= false "
         + "                then cast('01/01/1970' as Date) " + "            end "
-        + "    from dataset_+" + idDataset
+        + "    from dataset_" + idDataset
         + ".field_value field_value where field_value.id_record=rv.id_record and field_value.id_field_schema='5d5cfa24d201fb6084d90cd1') as sampleDate, "
-        + "    rv.id_record as idrecord   " + "    FROM dataset_+" + idDataset + ".Field_Value rv) "
+        + "    rv.id_record as idrecord   " + "    FROM dataset_" + idDataset + ".Field_Value rv) "
         + "     " + "    select a.idrecord  " + "from MonitoringResult a "
         + "left join SeasonalPeriod b "
         + "  on a.bathingWaterIdentifier = b.bathingWaterIdentifier  "
