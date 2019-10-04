@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
@@ -37,12 +35,6 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSchemaServiceTest {
-
-  /**
-   * The dataschema service.
-   */
-  @Mock
-  private DataschemaServiceImpl dataschemaService;
 
   /**
    * The schemas repository.
@@ -109,9 +101,10 @@ public class DatasetSchemaServiceTest {
     table.setTableHeadersCollections(headers);
     tables.add(table);
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
-    dataschemaService.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
+
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
 
@@ -137,9 +130,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
-    dataschemaService.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
+
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
 
@@ -165,9 +159,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
-    dataschemaService.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
+
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
 
@@ -193,9 +188,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
-    dataschemaService.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
+
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   @Test
@@ -220,9 +216,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
-    dataschemaService.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
+
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   @Test
@@ -247,9 +244,10 @@ public class DatasetSchemaServiceTest {
     tables2.add(table);
 
     when(dataSetMetabaseTableCollection.findAllByDataSetId(Mockito.any())).thenReturn(tables2);
+
     dataSchemaServiceImpl.createDataSchema(1L, 1L);
-    dataschemaService.createDataSchema(1L, 1L);
-    Mockito.verify(dataschemaService, times(1)).createDataSchema(Mockito.any(), Mockito.any());
+
+    Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   /**
@@ -278,10 +276,10 @@ public class DatasetSchemaServiceTest {
     DataSetSchemaVO result = dataSchemaServiceImpl.getDataSchemaByIdFlow(1L, true);
     Assert.assertNotNull(result);
     Assert.assertNotNull(result.getRuleDataSet());
-    Mockito
-        .verify(dataSchemaMapper, Mockito.times(1)).entityToClass(Mockito.any(DataSetSchema.class));
-    Mockito.verify(noRulesDataSchemaMapper,
-        Mockito.times(0)).entityToClass(Mockito.any(DataSetSchema.class));
+    Mockito.verify(dataSchemaMapper, Mockito.times(1))
+        .entityToClass(Mockito.any(DataSetSchema.class));
+    Mockito.verify(noRulesDataSchemaMapper, Mockito.times(0))
+        .entityToClass(Mockito.any(DataSetSchema.class));
 
   }
 
@@ -296,10 +294,10 @@ public class DatasetSchemaServiceTest {
     DataSetSchemaVO result = dataSchemaServiceImpl.getDataSchemaByIdFlow(1L, false);
     Assert.assertNotNull(result);
     Assert.assertNull(result.getRuleDataSet());
-    Mockito
-        .verify(dataSchemaMapper, Mockito.times(0)).entityToClass(Mockito.any(DataSetSchema.class));
-    Mockito.verify(noRulesDataSchemaMapper,
-        Mockito.times(1)).entityToClass(Mockito.any(DataSetSchema.class));
+    Mockito.verify(dataSchemaMapper, Mockito.times(0))
+        .entityToClass(Mockito.any(DataSetSchema.class));
+    Mockito.verify(noRulesDataSchemaMapper, Mockito.times(1))
+        .entityToClass(Mockito.any(DataSetSchema.class));
 
   }
 

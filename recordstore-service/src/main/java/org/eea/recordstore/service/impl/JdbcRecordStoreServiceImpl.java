@@ -413,6 +413,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     final EEAEventVO event = new EEAEventVO();
     event.setEventType(EventType.SNAPSHOT_RESTORED_EVENT);
 
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
+        idReportingDataset);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.SNAPSHOT_RESTORED_EVENT,
         idReportingDataset);
   }

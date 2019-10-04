@@ -248,7 +248,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       RuleField rule2 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<>();
       switch (header.getHeaderType().toString().toLowerCase().trim()) {
-        case "string":
+        case "text":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
