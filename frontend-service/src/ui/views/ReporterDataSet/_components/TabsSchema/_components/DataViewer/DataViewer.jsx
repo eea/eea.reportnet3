@@ -52,7 +52,7 @@ const DataViewer = withRouter(
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
-    const [originColumns, setOriginColumns] = useState([]);
+    const [originalColumns, setOriginColumns] = useState([]);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -200,30 +200,25 @@ const DataViewer = withRouter(
       }
 
       if (visibleColumns.length > 0 && columnsArr.length != visibleColumns.length) {
-        const excludeColumns = differenceBy(columnsArr, visibleColumns, 'key');
-        setColumns(differenceBy(columnsArr, excludeColumns, 'key'));
+        const visibleKeys = visibleColumns.map(column => {
+          return column.key;
+        });
+        setColumns(columnsArr.filter(column => visibleKeys.includes(column.key)));
       } else {
         setColumns(columnsArr);
         setOriginColumns(columnsArr);
       }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
-    const hideColumn = columnKey => {
-      const currentVisibleColumns = columns.filter(column => column.key !== columnKey);
+    const showColumns = columnKeys => {
+      console.log('originalColumns: ', originalColumns);
+
+      const unHideable = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
+      const currentVisibleColumns = originalColumns.filter(
+        column => columnKeys.includes(column.key) || unHideable.includes(column.key)
+      );
       setColumns(currentVisibleColumns);
       setVisibleColumns(currentVisibleColumns);
-    };
-
-    const addColumn = columnKey => {
-      const visibleColumns = columns.map(column => {
-        if (column) return column.key;
-      });
-      visibleColumns.push(columnKey);
-      const newColumns = originColumns.map(column => {
-        if (visibleColumns.includes(column.key)) return column;
-      });
-      setColumns(newColumns);
-      setVisibleColumns(newColumns);
     };
 
     useEffect(() => {
@@ -1025,8 +1020,7 @@ const DataViewer = withRouter(
               popup={true}
               ref={visibilityMenuRef}
               id="exportTableMenu"
-              hideColumn={hideColumn}
-              addColumn={addColumn}
+              showColumns={showColumns}
               onShow={e => {
                 console.log('hello');
 

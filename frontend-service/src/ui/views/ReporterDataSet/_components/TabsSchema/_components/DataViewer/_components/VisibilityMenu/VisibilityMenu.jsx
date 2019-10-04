@@ -93,25 +93,30 @@ class VisibilityMenu extends React.Component {
     );
   }
   updateChecked(fieldKey) {
-    let checked = null;
-    const fields = this.state.fields.map(field => {
+    const { fields } = this.state;
+    const newFields = fields.map(field => {
       if (field.key === fieldKey) {
         field.checked = !field.checked;
-        checked = !field.checked;
       }
       return field;
     });
-    if (checked) {
-      this.props.hideColumn(fieldKey);
-    } else {
-      this.props.addColumn(fieldKey);
-    }
-    this.setState(state => {
-      return {
-        ...state,
-        fields: fields
-      };
-    });
+    this.setState(
+      state => {
+        return {
+          ...state,
+          fields: newFields
+        };
+      },
+      () => {
+        this.props.showColumns(
+          this.state.fields
+            .filter(field => field.checked)
+            .map(field => {
+              return field.key;
+            })
+        );
+      }
+    );
   }
   menuClick(e) {
     this.setState(state => {
