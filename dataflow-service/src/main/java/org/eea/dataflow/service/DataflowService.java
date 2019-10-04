@@ -112,4 +112,14 @@ public interface DataflowService {
    */
   void createDataFlow(DataFlowVO dataflowVO);
 
+
+  /**
+   * Gets the datasets id.
+   *
+   * @param id the id
+   * @return the datasets id
+   * @throws EEAException the EEA exception
+   */
+  DataFlowVO getDatasetsId(Long id) throws EEAException;
+
 }

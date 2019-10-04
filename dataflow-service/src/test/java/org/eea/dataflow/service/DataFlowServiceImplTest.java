@@ -369,4 +369,18 @@ public class DataFlowServiceImplTest {
     DataFlowVO dataFlowVO = new DataFlowVO();
     dataflowServiceImpl.createDataFlow(dataFlowVO);
   }
+
+
+  @Test
+  public void testGetDatasetsId() throws EEAException {
+
+    dataflowServiceImpl.getDatasetsId(1L);
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testGetDatasetsIdError() throws EEAException {
+
+    dataflowServiceImpl.getDatasetsId(null);
+  }
 }
