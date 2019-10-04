@@ -62,8 +62,6 @@ class VisibilityMenu extends React.Component {
   }
 
   show(event) {
-    console.log('click');
-
     const { currentTarget } = event;
     const left = currentTarget.offsetLeft;
 

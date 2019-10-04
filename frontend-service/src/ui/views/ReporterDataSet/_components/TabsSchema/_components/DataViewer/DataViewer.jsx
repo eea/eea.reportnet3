@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isEmpty, isUndefined, isNull, isString } from 'lodash';
+import { isEmpty, isUndefined, isNull, isString, differenceBy } from 'lodash';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -53,6 +53,7 @@ const DataViewer = withRouter(
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
     const [originColumns, setOriginColumns] = useState([]);
+    const [visibleColumns, setVisibleColumns] = useState([]);
     const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
@@ -198,12 +199,19 @@ const DataViewer = withRouter(
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       }
 
-      setColumns(columnsArr);
-      setOriginColumns(columnsArr);
+      if (visibleColumns.length > 0 && columnsArr.length != visibleColumns.length) {
+        const excludeColumns = differenceBy(columnsArr, visibleColumns, 'key');
+        setColumns(differenceBy(columnsArr, excludeColumns, 'key'));
+      } else {
+        setColumns(columnsArr);
+        setOriginColumns(columnsArr);
+      }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     const hideColumn = columnKey => {
-      setColumns(columns.filter(column => column.key !== columnKey));
+      const currentVisibleColumns = columns.filter(column => column.key !== columnKey);
+      setColumns(currentVisibleColumns);
+      setVisibleColumns(currentVisibleColumns);
     };
 
     const addColumn = columnKey => {
@@ -215,6 +223,7 @@ const DataViewer = withRouter(
         if (visibleColumns.includes(column.key)) return column;
       });
       setColumns(newColumns);
+      setVisibleColumns(newColumns);
     };
 
     useEffect(() => {
