@@ -46,14 +46,20 @@ public class ValidationHelper {
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private ConcurrentHashMap<String, Integer> processesMap;
 
-  /** The field batch size. */
+  /**
+   * The field batch size.
+   */
   @Value("${validation.fieldBatchSize}")
   private int fieldBatchSize;
 
-  /** The record batch size. */
+  /**
+   * The record batch size.
+   */
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
@@ -70,11 +76,14 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuId the main process id
+   *
    * @throws EEAException the EEA exception
    */
   @Async
   public void executeValidation(final Long datasetId, String uuId) throws EEAException {
-    processesMap.put(uuId, 0);
+    synchronized (processesMap) {
+      processesMap.put(uuId, 0);
+    }
     TenantResolver.setTenantName("dataset_" + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
@@ -95,7 +104,6 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuId the uu id
-   * @param kieBase the kie base
    */
   private void releaseFieldsValidation(Long datasetId, String uuId) {
     Integer totalFields = validationService.countFieldsDataset(datasetId);
@@ -110,7 +118,6 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuId the uu id
-   * @param kieBase the kie base
    */
   private void releaseRecordsValidation(Long datasetId, String uuId) {
     Integer totalRecords = validationService.countRecordsDataset(datasetId);
@@ -151,7 +158,9 @@ public class ValidationHelper {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
-    processesMap.merge(uuid, 1, Integer::sum);
+    synchronized (processesMap) {
+      processesMap.merge(uuid, 1, Integer::sum);
+    }
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_DATASET, value);
   }
 
@@ -160,13 +169,17 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
+   * @param Tablenum the tablenum
    */
   public void releaseTableValidation(final Long datasetId, final String uuid, Long Tablenum) {
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
     value.put("idTable", Tablenum);
-    processesMap.merge(uuid, 1, Integer::sum);
+    synchronized (processesMap) {
+      processesMap.merge(uuid, 1, Integer::sum);
+    }
+
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_TABLE, value);
   }
 
@@ -182,7 +195,9 @@ public class ValidationHelper {
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
     value.put("numPag", numPag);
-    processesMap.merge(uuid, 1, Integer::sum);
+    synchronized (processesMap) {
+      processesMap.merge(uuid, 1, Integer::sum);
+    }
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_RECORD, value);
   }
 
@@ -198,7 +213,9 @@ public class ValidationHelper {
     value.put("dataset_id", datasetId);
     value.put("uuid", uuid);
     value.put("numPag", numPag);
-    processesMap.merge(uuid, 1, Integer::sum);
+    synchronized (processesMap) {
+      processesMap.merge(uuid, 1, Integer::sum);
+    }
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATE_FIELD, value);
   }
 
@@ -207,17 +224,18 @@ public class ValidationHelper {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
-   * @param kieBase the kie base
+   *
    * @throws EEAException the EEA exception
    */
-
   public void checkFinishedValidations(final Long datasetId, final String uuid)
       throws EEAException {
     if (processesMap.get(uuid) == 0) {
       LOG.info("scaling errors");
       validationService.errorScale(datasetId);
-      // after the dataset has been saved, an event is sent to notify it
-      processesMap.remove(uuid);
+      // after  last dataset validations have been saved, an event is sent to notify it
+      synchronized (processesMap) {
+        processesMap.remove(uuid);
+      }
       kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
     }
   }

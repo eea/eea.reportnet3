@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -79,7 +80,9 @@ public class ValidationServiceTest {
   @Mock
   private ValidationServiceImpl validationServiceImplMocke;
 
-  /** The user management controller. */
+  /**
+   * The user management controller.
+   */
   @Mock
   private UserManagementController userManagementController;
   /**
@@ -88,7 +91,9 @@ public class ValidationServiceTest {
   @Mock
   private KieSession kieSession;
 
-  /** The kie session. */
+  /**
+   * The kie session.
+   */
   @Mock
   private KieBase kieBase;
 
@@ -140,16 +145,22 @@ public class ValidationServiceTest {
   @Mock
   private FieldValidationRepository validationFieldRepository;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Mock
   private SchemasRepository schemasRepository;
 
-  /** The dataset validation repository. */
+  /**
+   * The dataset validation repository.
+   */
   @Mock
   private ValidationDatasetRepository datasetValidationRepository;
 
 
-  /** The table validation querys drools repository. */
+  /**
+   * The table validation querys drools repository.
+   */
   @Mock
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
   /**
@@ -158,11 +169,15 @@ public class ValidationServiceTest {
   @Mock
   private TableValidationRepository tableValidationRepository;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The record validation repository. */
+  /**
+   * The record validation repository.
+   */
   @Mock
   private RecordValidationRepository recordValidationRepository;
 
@@ -171,44 +186,70 @@ public class ValidationServiceTest {
    */
   private DatasetValue datasetValue;
 
-  /** The field value. */
+  /**
+   * The field value.
+   */
   private FieldValue fieldValue;
 
-  /** The record value. */
+  /**
+   * The record value.
+   */
   private RecordValue recordValue;
 
-  /** The record values. */
+  /**
+   * The record values.
+   */
   private ArrayList<RecordValue> recordValues;
 
-  /** The table value. */
+  /**
+   * The table value.
+   */
   private TableValue tableValue;
 
-  /** The table values. */
+  /**
+   * The table values.
+   */
   private ArrayList<TableValue> tableValues;
 
-  /** The data set VO. */
+  /**
+   * The data set VO.
+   */
   private DataSetVO dataSetVO;
 
-  /** The table V os. */
+  /**
+   * The table V os.
+   */
   private ArrayList<TableVO> tableVOs;
 
-  /** The table VO. */
+  /**
+   * The table VO.
+   */
   private TableVO tableVO;
 
-  /** The validation. */
+  /**
+   * The validation.
+   */
   private Validation validation;
 
-  /** The error. */
+  /**
+   * The error.
+   */
   private EntityErrors error;
 
-  /** The error 2. */
+  /**
+   * The error 2.
+   */
   private EntityErrors error2;
 
-  /** The dataset metabase. */
+  /**
+   * The dataset metabase.
+   */
   @Mock
   private DatasetMetabaseController datasetMetabase;
 
-  /** The dataset repository impl. */
+  /**
+   * The dataset repository impl.
+   */
   @Mock
   private DatasetRepositoryImpl datasetRepositoryImpl;
 
@@ -421,7 +462,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
-    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any(),
+    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(
         Mockito.any());
     try {
       validationServiceImpl.loadRulesKnowledgeBase(1L);
@@ -657,7 +698,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBase() throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
-    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
+    when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
@@ -694,6 +735,7 @@ public class ValidationServiceTest {
    * Gets the field errors test.
    *
    * @return the field errors test
+   *
    * @throws Exception the exception
    */
   @Test
@@ -730,13 +772,14 @@ public class ValidationServiceTest {
     schema.setTableSchemas(new ArrayList<>());
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     when(validationFieldRepository.findByValidationIds(Mockito.any())).thenReturn(fieldValidations);
-    assertNotNull("error", validationServiceImpl.getFieldErrors(1L, new ArrayList<Long>()));
+    assertNotNull("error", validationServiceImpl.getFieldErrors(1L, new ArrayList<>()));
   }
 
   /**
    * Gets the record errors test.
    *
    * @return the record errors test
+   *
    * @throws Exception the exception
    */
   @Test
@@ -762,13 +805,14 @@ public class ValidationServiceTest {
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     when(recordValidationRepository.findByValidationIds(Mockito.any()))
         .thenReturn(recordValidations);
-    assertNotNull("error", validationServiceImpl.getRecordErrors(1L, new ArrayList<Long>()));
+    assertNotNull("error", validationServiceImpl.getRecordErrors(1L, new ArrayList<>()));
   }
 
   /**
    * Gets the table errors test.
    *
    * @return the table errors test
+   *
    * @throws Exception the exception
    */
   @Test
@@ -806,13 +850,14 @@ public class ValidationServiceTest {
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
 
     when(tableValidationRepository.findByValidationIds(Mockito.any())).thenReturn(tableValidations);
-    assertNotNull("error", validationServiceImpl.getTableErrors(1L, new ArrayList<Long>()));
+    assertNotNull("error", validationServiceImpl.getTableErrors(1L, new ArrayList<>()));
   }
 
   /**
    * Gets the dataset errors test.
    *
    * @return the dataset errors test
+   *
    * @throws Exception the exception
    */
   @Test
@@ -850,7 +895,7 @@ public class ValidationServiceTest {
     schema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
 
     assertNotNull("error",
-        validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<Long>()));
+        validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>()));
   }
 
 
@@ -858,6 +903,7 @@ public class ValidationServiceTest {
    * Gets the dataset valueby id test exception.
    *
    * @return the dataset valueby id test exception
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -869,6 +915,7 @@ public class ValidationServiceTest {
    * Gets the dataset valueby id test success.
    *
    * @return the dataset valueby id test success
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -882,6 +929,7 @@ public class ValidationServiceTest {
    * Gets the find by id data set schema test exception.
    *
    * @return the find by id data set schema test exception
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -893,6 +941,7 @@ public class ValidationServiceTest {
    * Gets the find by id data set schema test null exception.
    *
    * @return the find by id data set schema test null exception
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -904,6 +953,7 @@ public class ValidationServiceTest {
    * Gets the find by id data set schema test success.
    *
    * @return the find by id data set schema test success
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -1102,7 +1152,6 @@ public class ValidationServiceTest {
         .thenReturn(null);
     validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
   }
-
 
 
   /**

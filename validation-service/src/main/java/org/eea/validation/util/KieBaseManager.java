@@ -41,7 +41,9 @@ public class KieBaseManager {
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The dataset metabase controller. */
+  /**
+   * The dataset metabase controller.
+   */
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
@@ -49,15 +51,17 @@ public class KieBaseManager {
   /**
    * Reload rules.
    *
-   * @param dataFlowId the data flow id
    * @param datasetId the dataset id
+   *
    * @return the kie base
+   *
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long dataFlowId, Long datasetId) throws FileNotFoundException {
-    DataSetSchema schema = schemasRepository.findSchemaByIdFlow(dataFlowId);
+  public KieBase reloadRules(Long datasetId) throws FileNotFoundException {
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    DataSetSchema schema = schemasRepository.findSchemaByIdFlow(dataSetMetabaseVO.getDataflowId());
+
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     schema.getRuleDataSet().stream().forEach(rule -> {
       ruleAttributes.add(passDataToMap(rule.getIdDataSetSchema().toString(),

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,27 +23,39 @@ import org.mockito.MockitoAnnotations;
 /**
  * The Class FieldValidatedCommandTest.
  */
-public class FieldValidatedCommandTest {
+public class CheckFieldValidatedCommandTest {
 
-  /** The field validated command. */
+  /**
+   * The field validated command.
+   */
   @InjectMocks
-  private FieldValidatedCommand fieldValidatedCommand;
+  private CheckFieldValidatedCommand checkFieldValidatedCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private ConcurrentHashMap<String, Integer> processesMap;
 
   /**
@@ -67,7 +80,8 @@ public class FieldValidatedCommandTest {
    */
   @Test
   public void getEventTypeTest() {
-    assertEquals(EventType.COMMAND_VALIDATED_FIELD_COMPLETED, fieldValidatedCommand.getEventType());
+    assertEquals(EventType.COMMAND_VALIDATED_FIELD_COMPLETED,
+        checkFieldValidatedCommand.getEventType());
   }
 
   /**
@@ -82,7 +96,7 @@ public class FieldValidatedCommandTest {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any());
-    fieldValidatedCommand.execute(eeaEventVO);
+    checkFieldValidatedCommand.execute(eeaEventVO);
 
     Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
         Mockito.any());
@@ -96,7 +110,7 @@ public class FieldValidatedCommandTest {
   @Test
   public void executeThrowTest() throws EEAException {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    fieldValidatedCommand.execute(eeaEventVO);
+    checkFieldValidatedCommand.execute(eeaEventVO);
     Mockito.verify(validationHelper, times(1)).getProcessesMap();
   }
 

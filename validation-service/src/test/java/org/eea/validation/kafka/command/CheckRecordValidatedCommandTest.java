@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,27 +26,39 @@ import org.mockito.junit.MockitoJUnitRunner;
  * The Class RecordValidatedCommandTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RecordValidatedCommandTest {
+public class CheckRecordValidatedCommandTest {
 
-  /** The record validated command. */
+  /**
+   * The record validated command.
+   */
   @InjectMocks
-  private RecordValidatedCommand recordValidatedCommand;
+  private CheckRecordValidatedCommand checkRecordValidatedCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private ConcurrentHashMap<String, Integer> processesMap;
 
   /**
@@ -71,7 +84,7 @@ public class RecordValidatedCommandTest {
   @Test
   public void getEventTypeTest() {
     assertEquals(EventType.COMMAND_VALIDATED_RECORD_COMPLETED,
-        recordValidatedCommand.getEventType());
+        checkRecordValidatedCommand.getEventType());
   }
 
   /**
@@ -86,7 +99,7 @@ public class RecordValidatedCommandTest {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any());
-    recordValidatedCommand.execute(eeaEventVO);
+    checkRecordValidatedCommand.execute(eeaEventVO);
 
     Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
         Mockito.any());
@@ -100,7 +113,7 @@ public class RecordValidatedCommandTest {
   @Test
   public void executeThrowTest() throws EEAException {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    recordValidatedCommand.execute(eeaEventVO);
+    checkRecordValidatedCommand.execute(eeaEventVO);
     Mockito.verify(validationHelper, times(1)).getProcessesMap();
   }
 

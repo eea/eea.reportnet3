@@ -14,20 +14,20 @@ import org.springframework.stereotype.Component;
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
- *
  */
 @Component
 public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Autowired
   private ValidationHelper validationHelper;
-
-  /** The uuid. */
-  private UUID uuid = null;
 
 
   /**
@@ -48,22 +48,13 @@ public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
   @Override
   public void execute(EEAEventVO eeaEventVO) {
     Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
-    uuid = UUID.randomUUID();
     try {
-      validationHelper.executeValidation(datasetId, getUuid());
+      validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
           e);
     }
   }
 
-  /**
-   * Gets the uuid.
-   *
-   * @return the uuid
-   */
-  public String getUuid() {
-    return uuid.toString();
-  }
 
 }

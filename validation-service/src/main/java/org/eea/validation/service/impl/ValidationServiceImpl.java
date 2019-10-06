@@ -41,6 +41,7 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
+import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
@@ -121,9 +122,14 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RecordRepository recordRepository;
 
-  /** The table repository. */
+  /**
+   * The table repository.
+   */
   @Autowired
   private TableRepository tableRepository;
+
+  @Autowired
+  private FieldRepository fieldRepository;
 
   /**
    * The schemas repository.
@@ -143,11 +149,15 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private TableValidationQuerysDroolsRepository tableValidationQuerysDroolsRepository;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The user management controller. */
+  /**
+   * The user management controller.
+   */
   @Autowired
   private UserManagementController userManagementController;
 
@@ -237,13 +247,8 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public KieBase loadRulesKnowledgeBase(Long datasetId) throws EEAException {
     KieBase kieBase;
-    // Get Dataflow id
-    Long dataflowId = datasetController.getDataFlowIdById(datasetId);
-    if (dataflowId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
     try {
-      kieBase = kieBaseManager.reloadRules(dataflowId, datasetId);
+      kieBase = kieBaseManager.reloadRules(datasetId);
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -259,6 +264,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie base
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -279,6 +285,7 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie base
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -299,7 +306,6 @@ public class ValidationServiceImpl implements ValidationService {
       });
     }
     tableValidationRepository.saveAll(validations);
-    // });
 
   }
 
@@ -310,50 +316,62 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
+//    TenantResolver.setTenantName("dataset_" + datasetId);
+//    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+//    if (dataset == null) {
+//      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+//    }
+//    List<TableValue> tableValues = dataset.getTableValues();
+//    tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
+//      Long tableId = tableValue.getId();
+//      // read Dataset records Data for each table
+//      List<RecordValue> recordsByTable = sanitizeRecordsValidations(
+//          recordRepository.findAllRecordsByTableValueIdPaginated(tableId, pageable));
+//      List<RecordValidation> recordValidationsByTable = new ArrayList<>();
+//      recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+//        KieSession session = kieBase.newKieSession();
+//        runRecordValidations(row, session);
+//        session.dispose();
+//        List<RecordValidation> recordValidations = row.getRecordValidations();
+//        if (null != recordValidations) {
+//          recordValidations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
+//            rowValidation.setRecordValue(row);
+//          });
+//        }
+//        TenantResolver.setTenantName("dataset_" + datasetId);
+//        recordValidationsByTable.addAll(recordValidations);
+//      });
+//      recordValidationRepository.saveAll(recordValidationsByTable);
+//    });
     TenantResolver.setTenantName("dataset_" + datasetId);
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
-    if (dataset == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    List<TableValue> tableValues = dataset.getTableValues();
-    tableValues.stream().filter(Objects::nonNull).forEach(tableValue -> {
-      Long tableId = tableValue.getId();
-      // read Dataset records Data for each table
-      List<RecordValue> recordsByTable = sanitizeRecordsValidations(
-          recordRepository.findAllRecordsByTableValueIdPaginated(tableId, pageable));
-      List<RecordValidation> recordValidationsByTable = new ArrayList<>();
-      recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
-        KieSession session = kieBase.newKieSession();
-        runRecordValidations(row, session);
-        session.dispose();
-        List<RecordValidation> recordValidations = row.getRecordValidations();
-        if (null != recordValidations) {
-          recordValidations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
-            rowValidation.setRecordValue(row);
-          });
-        }
-        TenantResolver.setTenantName("dataset_" + datasetId);
-        recordValidationsByTable.addAll(recordValidations);
-      });
-      saveRecordValidations(recordValidationsByTable);
+    List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
+    List<RecordValidation> recordValidations = new ArrayList<>();
+
+    records.stream().filter(Objects::nonNull).forEach(row -> {
+      KieSession session = kieBase.newKieSession();
+      runRecordValidations(row, session);
+      session.dispose();
+      List<RecordValidation> validations = row.getRecordValidations();
+      if (null != validations) {
+        validations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
+          rowValidation.setRecordValue(row);
+        });
+      }
+      TenantResolver.setTenantName("dataset_" + datasetId);
+      recordValidations.addAll(validations);
     });
+    if (recordValidations.size() > 0) {
+      recordValidationRepository.saveAll(recordValidations);
+    }
   }
 
-  /**
-   * Save record validations.
-   *
-   * @param recordValidations the record validations
-   */
-  @Transactional
-  private void saveRecordValidations(List<RecordValidation> recordValidations) {
-    recordValidationRepository.saveAll(recordValidations);
-  }
 
   /**
    * Validate data set data.
@@ -361,54 +379,65 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable)
       throws EEAException {
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
-    if (dataset == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    // Fields
-    List<TableValue> tableValues = dataset.getTableValues();
-    tableValues.stream().forEach(tableValue -> {
-      List<FieldValidation> fieldValidations = new ArrayList<>();
-      Long tableId = tableValue.getId();
-      // read Dataset records Data for each table
-      List<RecordValue> recordsByTable = sanitizeRecords(
-          recordRepository.findAllRecordsByTableValueIdPaginated(tableId, pageable));
-      // Execute field rules validation
-      recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+//    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
+//    if (dataset == null) {
+//      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+//    }
+//    // Fields
+//    List<TableValue> tableValues = dataset.getTableValues();
+//    tableValues.stream().forEach(tableValue -> {
+//      List<FieldValidation> fieldValidations = new ArrayList<>();
+//      Long tableId = tableValue.getId();
+//      // read Dataset records Data for each table
+//      List<RecordValue> recordsByTable = sanitizeRecords(
+//          recordRepository.findAllRecordsByTableValueIdPaginated(tableId, pageable));
+//      // Execute field rules validation
+//      recordsByTable.stream().filter(Objects::nonNull).forEach(row -> {
+//
+//        List<FieldValue> fields = row.getFields();
+//        fields.stream().filter(Objects::nonNull).forEach(field -> {
+//          KieSession session = kieBase.newKieSession();
+//          List<FieldValidation> resultFields = runFieldValidations(field, session);
+//          session.dispose();
+//          if (null != field.getFieldValidations()) {
+//            field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
+//              fieldVal.setFieldValue(field);
+//            });
+//          }
+//          TenantResolver.setTenantName("dataset_" + datasetId);
+//          fieldValidations.addAll(resultFields);
+//        });
+//      });
+//      validationFieldRepository.saveAll(fieldValidations);
+//    });
 
-        List<FieldValue> fields = row.getFields();
-        fields.stream().filter(Objects::nonNull).forEach(field -> {
-          KieSession session = kieBase.newKieSession();
-          List<FieldValidation> resultFields = runFieldValidations(field, session);
-          session.dispose();
-          if (null != field.getFieldValidations()) {
-            field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
-              fieldVal.setFieldValue(field);
-            });
-          }
-          TenantResolver.setTenantName("dataset_" + datasetId);
-          fieldValidations.addAll(resultFields);
+    List<FieldValue> fields = this.fieldRepository.findAll(pageable).getContent();
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    fields.stream().filter(Objects::nonNull).forEach(field -> {
+      KieSession session = kieBase.newKieSession();
+      List<FieldValidation> resultFields = runFieldValidations(field, session);
+      session.dispose();
+      if (null != field.getFieldValidations()) {
+        field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
+          fieldVal.setFieldValue(field);
         });
-      });
-      saveFieldValidations(fieldValidations);
+      }
+      TenantResolver.setTenantName("dataset_" + datasetId);
+      fieldValidations.addAll(resultFields);
     });
+    if (fieldValidations.size() > 0) {
+      validationFieldRepository.saveAll(fieldValidations);
+    }
+
   }
 
-  /**
-   * Save field validations.
-   *
-   * @param fieldValidations the field validations
-   */
-  @Transactional
-  private void saveFieldValidations(List<FieldValidation> fieldValidations) {
-    validationFieldRepository.saveAll(fieldValidations);
-  }
 
   /**
    * Sanitize records.
@@ -666,6 +695,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Error scale.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -699,7 +729,7 @@ public class ValidationServiceImpl implements ValidationService {
       recordVal.getValidation().setOriginName(entry.getValue().getOrigin());
       recordValidations.add(recordVal);
     });
-    saveRecordValidations(recordValidations);
+    this.recordValidationRepository.saveAll(recordValidations);
 
     Map<BigInteger, EntityErrors> map2 = new LinkedHashMap<>();
     List<EntityErrors> tableErrorList = recordValidationRepository.findFailedTables();
@@ -725,7 +755,6 @@ public class ValidationServiceImpl implements ValidationService {
       tableValidations.add(tableVal);
     });
     tableValidationRepository.saveAll(tableValidations);
-
 
     Map<BigInteger, EntityErrors> map3 = new LinkedHashMap<>();
     List<EntityErrors> datasetErrorList = recordValidationRepository.findFailedDatasets();
@@ -784,6 +813,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DO 02 query.
    *
    * @param DO02 the do02
+   *
    * @return the boolean
    */
   @Override
@@ -795,6 +825,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DO 03 query.
    *
    * @param DO03 the do03
+   *
    * @return the boolean
    */
   @Override
@@ -806,6 +837,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 01 A query.
    *
    * @param DC01A the dc01a
+   *
    * @return the boolean
    */
   @Override
@@ -817,6 +849,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 01 B query.
    *
    * @param DC01B the dc01b
+   *
    * @return the boolean
    */
   @Override
@@ -828,6 +861,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 02 query.
    *
    * @param DC02 the dc02
+   *
    * @return the boolean
    */
   @Override
@@ -839,6 +873,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 03 query.
    *
    * @param DC03 the dc03
+   *
    * @return the boolean
    */
   @Override
