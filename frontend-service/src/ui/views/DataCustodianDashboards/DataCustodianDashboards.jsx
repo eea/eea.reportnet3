@@ -1,6 +1,8 @@
 import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isEmpty, isNull } from 'lodash';
+
 import styles from './DataCustodianDashboards.module.scss';
 
 import { config } from 'conf';
@@ -121,6 +123,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
+    if (isEmpty(originalData)) {
+      return;
+    }
+
     let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
 
     const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
@@ -263,6 +269,39 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     );
   };
 
+  const errorsDashboard = () => {
+    if (!isEmpty(filterState.data)) {
+      return (
+        <div className="rep-row">
+          <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
+          <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
+        </div>
+      );
+    }
+    return (
+      <div>
+        <h2>{resources.messages['emptyErrorsDashboard']}</h2>
+      </div>
+    );
+  };
+
+  const releasedDashboard = () => {
+    if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
+      if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
+        return (
+          <div className={`rep-row ${styles.chart_released}`}>
+            <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
+          </div>
+        );
+      }
+    }
+    return (
+      <div>
+        <h2>{resources.messages['emptyReleasedDashboard']}</h2>
+      </div>
+    );
+  };
+
   if (loading) {
     return layout(<Spinner />);
   }
@@ -272,13 +311,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       <div className="rep-row">
         <h1>{resources.messages['dataflow']}</h1>
       </div>
-      <div className="rep-row">
-        <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
-      </div>
-      <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
-      </div>
+      {errorsDashboard()}
+      {releasedDashboard()}
     </>
   );
 });

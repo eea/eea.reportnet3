@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { uniqBy } from 'lodash';
+import { isUndefined, uniqBy } from 'lodash';
 
 import styles from './FilterList.module.scss';
 
@@ -25,9 +25,9 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
     tableNamesIdsArray.push(datasetObject);
   });
 
-  return (
-    <>
-      <Accordion>
+  const filterByReporters = () => {
+    if (labels.length > 0) {
+      return (
         <AccordionTab header={resources.messages['filterByReporters']}>
           <ul className={styles.list}>
             {labels.map(item => (
@@ -35,6 +35,13 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
             ))}
           </ul>
         </AccordionTab>
+      );
+    }
+  };
+
+  const filterByTables = () => {
+    if (tableNamesIdsArray.length > 0) {
+      return (
         <AccordionTab header={resources.messages['filterByTables']}>
           <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
@@ -42,8 +49,16 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
             ))}
           </ul>
         </AccordionTab>
-      </Accordion>
+      );
+    }
+  };
 
+  return (
+    <>
+      <Accordion>
+        {filterByReporters()}
+        {filterByTables()}
+      </Accordion>
       <StatusList filterDispatch={filterDispatch}></StatusList>
     </>
   );
