@@ -107,7 +107,7 @@ public class KafkaConfiguration {
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
     props.put("heartbeat.interval.ms", 3000);
-    props.put("session.timeout.ms", 13000);
+    props.put("session.timeout.ms", 130000);
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
     return new DefaultKafkaConsumerFactory<>(props);

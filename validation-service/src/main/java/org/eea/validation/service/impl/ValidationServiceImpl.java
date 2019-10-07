@@ -276,10 +276,15 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     KieSession session = kieBase.newKieSession();
-    List<DatasetValidation> validations = runDatasetValidations(dataset, session);
-    session.destroy();
-    validations.stream().forEach(validation -> validation.setDatasetValue(dataset));
-    validationDatasetRepository.saveAll(validations);
+    try {
+      List<DatasetValidation> validations = runDatasetValidations(dataset, session);
+
+      validations.stream().forEach(validation -> validation.setDatasetValue(dataset));
+      validationDatasetRepository.saveAll(validations);
+    } finally {
+      session.destroy();
+    }
+
   }
 
   /**
@@ -298,15 +303,18 @@ public class ValidationServiceImpl implements ValidationService {
     TableValue table = tableRepository.findById(idTable).orElse(null);
     // dataset.getTableValues().stream().forEach(table -> {
     KieSession session = kieBase.newKieSession();
-    List<TableValidation> validations = runTableValidations(table, session);
-    if (table.getTableValidations() != null) {
-      table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
-        tableValidation.setTableValue(table);
-      });
+    try {
+      List<TableValidation> validations = runTableValidations(table, session);
+      if (table.getTableValidations() != null) {
+        table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
+          tableValidation.setTableValue(table);
+        });
+      }
+      tableValidationRepository.saveAll(validations);
+    } finally {
+      session.destroy();
     }
-    session.destroy();
 
-    tableValidationRepository.saveAll(validations);
 
   }
 
@@ -328,22 +336,25 @@ public class ValidationServiceImpl implements ValidationService {
     TenantResolver.setTenantName("dataset_" + datasetId);
     List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
     List<RecordValidation> recordValidations = new ArrayList<>();
+    KieSession session = kieBase.newKieSession();
+    try {
+      records.stream().filter(Objects::nonNull).forEach(row -> {
 
-    records.stream().filter(Objects::nonNull).forEach(row -> {
-      KieSession session = kieBase.newKieSession();
-      runRecordValidations(row, session);
-      session.destroy();
-      List<RecordValidation> validations = row.getRecordValidations();
-      if (null != validations) {
-        validations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
-          rowValidation.setRecordValue(row);
-        });
+        runRecordValidations(row, session);
+        List<RecordValidation> validations = row.getRecordValidations();
+        if (null != validations) {
+          validations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
+            rowValidation.setRecordValue(row);
+          });
+        }
+        TenantResolver.setTenantName("dataset_" + datasetId);
+        recordValidations.addAll(validations);
+      });
+      if (recordValidations.size() > 0) {
+        recordValidationRepository.saveAll(recordValidations);
       }
-      TenantResolver.setTenantName("dataset_" + datasetId);
-      recordValidations.addAll(validations);
-    });
-    if (recordValidations.size() > 0) {
-      recordValidationRepository.saveAll(recordValidations);
+    } finally {
+      session.destroy();
     }
   }
 
@@ -364,22 +375,26 @@ public class ValidationServiceImpl implements ValidationService {
 
     List<FieldValue> fields = fieldRepository.findAll(pageable).getContent();
     List<FieldValidation> fieldValidations = new ArrayList<>();
-    fields.stream().filter(Objects::nonNull).forEach(field -> {
-      KieSession session = kieBase.newKieSession();
-      List<FieldValidation> resultFields = runFieldValidations(field, session);
-      session.destroy();
-      if (null != field.getFieldValidations()) {
-        field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
-          fieldVal.setFieldValue(field);
-        });
-      }
-      TenantResolver.setTenantName("dataset_" + datasetId);
-      fieldValidations.addAll(resultFields);
-    });
-    if (fieldValidations.size() > 0) {
-      validationFieldRepository.saveAll(fieldValidations);
-    }
+    KieSession session = kieBase.newKieSession();
+    try {
+      fields.stream().filter(Objects::nonNull).forEach(field -> {
 
+        List<FieldValidation> resultFields = runFieldValidations(field, session);
+
+        if (null != field.getFieldValidations()) {
+          field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
+            fieldVal.setFieldValue(field);
+          });
+        }
+        TenantResolver.setTenantName("dataset_" + datasetId);
+        fieldValidations.addAll(resultFields);
+      });
+      if (fieldValidations.size() > 0) {
+        validationFieldRepository.saveAll(fieldValidations);
+      }
+    } finally {
+      session.destroy();
+    }
   }
 
 
