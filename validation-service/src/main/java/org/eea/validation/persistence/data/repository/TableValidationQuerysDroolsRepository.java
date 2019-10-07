@@ -15,10 +15,11 @@ import org.springframework.stereotype.Repository;
 public class TableValidationQuerysDroolsRepository {
 
 
-  /** The entity manager. */
+  /**
+   * The entity manager.
+   */
   @PersistenceContext
   private EntityManager entityManager;
-
 
 
   /**
@@ -26,9 +27,9 @@ public class TableValidationQuerysDroolsRepository {
    *
    * @param QUERY the query
    * @param previous the previous
+   *
    * @return the boolean
    */
-  @SuppressWarnings("unchecked")
   public Boolean tableValidationDR01ABQuery(String queryValidate, Boolean previous) {
 
     Query query = entityManager.createNativeQuery(queryValidate);
@@ -41,7 +42,8 @@ public class TableValidationQuerysDroolsRepository {
     }
     if (value.size() == 1 && Boolean.TRUE.equals(previous)) {
       Integer localDateYear =
-          Integer.valueOf(ThreadPropertiesManager.getVariable("dataCallYear").toString());
+          null != ThreadPropertiesManager.getVariable("dataCallYear") ? Integer
+              .valueOf(ThreadPropertiesManager.getVariable("dataCallYear").toString()) : 0;
       Integer yearSession;
       try {
         yearSession = Integer.valueOf(value.get(0));
@@ -59,9 +61,9 @@ public class TableValidationQuerysDroolsRepository {
    * Table validation query non return result.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
-  @SuppressWarnings("unchecked")
   public Boolean tableValidationQueryNonReturnResult(String queryValidate) {
 
     Query query = entityManager.createNativeQuery(queryValidate);
@@ -77,9 +79,9 @@ public class TableValidationQuerysDroolsRepository {
    * Table validation query period monitoring.
    *
    * @param QUERY the query
+   *
    * @return the list
    */
-  @SuppressWarnings("unchecked")
   public List<BigInteger> tableValidationQueryReturnListIds(String queryValidate) {
 
     Query query = entityManager.createNativeQuery(queryValidate);
@@ -96,9 +98,9 @@ public class TableValidationQuerysDroolsRepository {
    * Table validation query non return result.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
-  @SuppressWarnings("unchecked")
   public Boolean tableValidationQueryReturnResult(String queryRecieve) {
 
     Query query = entityManager.createNativeQuery(queryRecieve);

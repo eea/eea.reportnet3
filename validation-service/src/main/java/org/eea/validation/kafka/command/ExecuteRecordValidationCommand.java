@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,6 +72,7 @@ public class ExecuteRecordValidationCommand extends AbstractEEAEventHandlerComma
    * @param eeaEventVO the eea event VO
    */
   @Override
+  @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
     final String uuid = (String) eeaEventVO.getData().get("uuid");

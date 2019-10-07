@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -62,6 +63,7 @@ public class ExecuteTableValidationCommand extends AbstractEEAEventHandlerComman
    * @param eeaEventVO the eea event VO
    */
   @Override
+  @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
     final String uuid = (String) eeaEventVO.getData().get("uuid");

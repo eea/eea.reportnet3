@@ -272,15 +272,13 @@ public class ValidationHelper {
    *
    * @throws EEAException the EEA exception
    */
+
   public void checkFinishedValidations(final Long datasetId, final String uuid)
       throws EEAException {
     if (processesMap.get(uuid) == 0) {
       LOG.info("scaling errors");
       validationService.errorScale(datasetId);
       // after  last dataset validations have been saved, an event is sent to notify it
-      synchronized (processesMap) {
-        processesMap.remove(uuid);
-      }
       Map<String, Object> value = new HashMap<>();
       value.put("dataset_id", datasetId);
       value.put("uuid", uuid);

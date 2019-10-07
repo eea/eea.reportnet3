@@ -7,6 +7,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 
 public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerCommand {
 
@@ -15,12 +16,6 @@ public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerComma
    */
   @Autowired
   private ValidationHelper validationHelper;
-
-  /**
-   * The kafka sender utils.
-   */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
 
   /**
@@ -31,6 +26,7 @@ public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerComma
    * @throws EEAException
    */
   @Override
+  @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final String uuid = (String) eeaEventVO.getData().get("uuid");
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
