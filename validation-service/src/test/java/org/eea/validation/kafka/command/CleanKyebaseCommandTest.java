@@ -16,12 +16,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ * The Class CleanKyebaseCommandTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class CleanKyebaseCommandTest {
 
+  /** The clean kyebase command. */
   @InjectMocks
   private CleanKyebaseCommand cleanKyebaseCommand;
 
+  /** The validation helper. */
   @Mock
   private ValidationHelper validationHelper;
 
@@ -49,11 +54,21 @@ public class CleanKyebaseCommandTest {
     eeaEventVO.setData(data);
   }
 
+  /**
+   * Gets the event type test.
+   *
+   * @return the event type test
+   */
   @Test
   public void getEventTypeTest() {
     assertEquals(EventType.COMMAND_CLEAN_KYEBASE, cleanKyebaseCommand.getEventType());
   }
 
+  /**
+   * Test data.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testData() throws EEAException {
     doNothing().when(validationHelper).removeKieBase(Mockito.anyString());

@@ -9,15 +9,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -44,7 +43,6 @@ import org.eea.validation.persistence.data.repository.DatasetRepositoryImpl;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
-import org.eea.validation.persistence.data.repository.RecordRepositoryPaginated;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository.EntityErrors;
 import org.eea.validation.persistence.data.repository.TableRepository;
@@ -70,7 +68,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 /**
  * The Class ValidationServiceTest.
@@ -251,6 +248,7 @@ public class ValidationServiceTest {
    */
   private EntityErrors error2;
 
+  private Map<String, List<String>> attributes;
   /**
    * The dataset metabase.
    */
@@ -272,7 +270,12 @@ public class ValidationServiceTest {
    */
   @Before
   public void initMocks() {
-
+    attributes = new HashMap<String, List<String>>();
+    List<String> data = new ArrayList<>();
+    data.add("'IT'");
+    attributes.put("countryCode", data);
+    data.set(0, "2019");
+    attributes.put("dataCallYear", data);
     validation = new Validation();
     fieldValue = new FieldValue();
     recordValues = new ArrayList<>();
@@ -589,12 +592,14 @@ public class ValidationServiceTest {
   /**
    * Test delete all validation.
    */
-  // @Test
+  @Test
   public void testDeleteAllValidation() {
     doNothing().when(datasetRepository).deleteValidationTable();
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setAttributes(attributes);
     when(userManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
         .thenReturn(resourceInfoVO);
+
     validationServiceImpl.deleteAllValidation(1L);
     Mockito.verify(datasetRepository, times(1)).deleteValidationTable();
   }
@@ -882,6 +887,14 @@ public class ValidationServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
     validationServiceImpl.validateDataSet(1L, kieBase);
+  }
+
+
+  @Test
+  public void validateTable() throws EEAException {
+    when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
+    when(kieBase.newKieSession()).thenReturn(kieSession);
+    validationServiceImpl.validateTable(1L, Mockito.any(), kieBase);
   }
 
 

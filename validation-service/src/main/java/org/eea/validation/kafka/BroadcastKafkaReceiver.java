@@ -21,6 +21,7 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaReceiver.class);
 
+
   /**
    * Listen message.
    *
@@ -29,7 +30,8 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
    * @throws EEAException
    */
   @Override
-  @KafkaListener(topics = "BROADCAST_TOPIC", containerFactory = "broadcastKafkaListenerContainerFactory")
+  @KafkaListener(topics = "BROADCAST_TOPIC",
+      containerFactory = "broadcastKafkaListenerContainerFactory")
   public void listenMessage(Message<EEAEventVO> message) throws EEAException {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
