@@ -14,7 +14,7 @@ const Menu = ({ model }) => {
                   className={item.disabled ? style.menuItemDisabled : null}
                   onClick={e => {
                     e.preventDefault();
-                    item.command();
+                    if (!item.disabled) item.command();
                   }}
                   disabled={item.disabled}>
                   <Icon icon={item.icon} />
