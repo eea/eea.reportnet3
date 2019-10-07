@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './DataCustodianDashboards.module.scss';
 
@@ -66,37 +66,40 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   function buildDatasetDashboardObject(datasetsDashboardsData) {
-    const datasets = datasetsDashboardsData.tables
-      .map(table => [
-        {
-          label: `CORRECT`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: 'rgba(153, 204, 51, 1)',
-          data: table.tableStatisticPercentages[0],
-          totalData: table.tableStatisticValues[0],
-          stack: table.tableName
-        },
-        {
-          label: `WARNINGS`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: 'rgba(255, 204, 0, 1)',
-          data: table.tableStatisticPercentages[1],
-          totalData: table.tableStatisticValues[1],
-          stack: table.tableName
-        },
-        {
-          label: `ERRORS`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: 'rgba(204, 51, 0, 1)',
-          data: table.tableStatisticPercentages[2],
-          totalData: table.tableStatisticValues[2],
-          stack: table.tableName
-        }
-      ])
-      .flat();
+    const datasets = [];
+    if (!isUndefined(datasetsDashboardsData.tables)) {
+      datasets = datasetsDashboardsData.tables
+        .map(table => [
+          {
+            label: `CORRECT`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: 'rgba(153, 204, 51, 1)',
+            data: table.tableStatisticPercentages[0],
+            totalData: table.tableStatisticValues[0],
+            stack: table.tableName
+          },
+          {
+            label: `WARNINGS`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: 'rgba(255, 204, 0, 1)',
+            data: table.tableStatisticPercentages[1],
+            totalData: table.tableStatisticValues[1],
+            stack: table.tableName
+          },
+          {
+            label: `ERRORS`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: 'rgba(204, 51, 0, 1)',
+            data: table.tableStatisticPercentages[2],
+            totalData: table.tableStatisticValues[2],
+            stack: table.tableName
+          }
+        ])
+        .flat();
+    }
     const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
     const datasetDataObject = {
       labels: labels,
