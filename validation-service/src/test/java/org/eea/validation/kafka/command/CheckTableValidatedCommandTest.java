@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +16,6 @@ import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.api.KieBase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -26,31 +26,39 @@ import org.mockito.junit.MockitoJUnitRunner;
  * The Class TableValidatedCommandTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TableValidatedCommandTest {
+public class CheckTableValidatedCommandTest {
 
-  /** The table validated command. */
+  /**
+   * The table validated command.
+   */
   @InjectMocks
-  private TableValidatedCommand tableValidatedCommand;
+  private CheckTableValidatedCommand checkTableValidatedCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The kie base. */
-  @Mock
-  private KieBase kieBase;
-
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private ConcurrentHashMap<String, Integer> processesMap;
 
   /**
@@ -61,7 +69,6 @@ public class TableValidatedCommandTest {
     data = new HashMap<>();
     data.put("uuid", "uuid");
     data.put("datasetId", "1L");
-    data.put("kieBase", kieBase);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_TABLE_COMPLETED);
     eeaEventVO.setData(data);
@@ -76,7 +83,8 @@ public class TableValidatedCommandTest {
    */
   @Test
   public void getEventTypeTest() {
-    assertEquals(EventType.COMMAND_VALIDATED_TABLE_COMPLETED, tableValidatedCommand.getEventType());
+    assertEquals(EventType.COMMAND_VALIDATED_TABLE_COMPLETED,
+        checkTableValidatedCommand.getEventType());
   }
 
   /**
@@ -90,12 +98,11 @@ public class TableValidatedCommandTest {
     processesMap.put("uuid", 1);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    tableValidatedCommand.execute(eeaEventVO);
+    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any());
+    checkTableValidatedCommand.execute(eeaEventVO);
 
     Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**
@@ -106,7 +113,7 @@ public class TableValidatedCommandTest {
   @Test
   public void executeThrowTest() throws EEAException {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    tableValidatedCommand.execute(eeaEventVO);
+    checkTableValidatedCommand.execute(eeaEventVO);
     Mockito.verify(validationHelper, times(1)).getProcessesMap();
   }
 

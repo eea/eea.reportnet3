@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,40 +15,50 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
-import org.kie.api.KieBase;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
- * The Class FieldValidatedCommandTest.
+ * The Class RecordValidatedCommandTest.
  */
-public class FieldValidatedCommandTest {
+@RunWith(MockitoJUnitRunner.class)
+public class CheckRecordValidatedCommandTest {
 
-  /** The field validated command. */
+  /**
+   * The record validated command.
+   */
   @InjectMocks
-  private FieldValidatedCommand fieldValidatedCommand;
+  private CheckRecordValidatedCommand checkRecordValidatedCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Mock
   private ValidationHelper validationHelper;
 
-  /** The kie base. */
-  @Mock
-  private KieBase kieBase;
-
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private ConcurrentHashMap<String, Integer> processesMap;
 
   /**
@@ -58,9 +69,8 @@ public class FieldValidatedCommandTest {
     data = new HashMap<>();
     data.put("uuid", "uuid");
     data.put("datasetId", "1L");
-    data.put("kieBase", kieBase);
     eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_FIELD_COMPLETED);
+    eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
     eeaEventVO.setData(data);
     processesMap = new ConcurrentHashMap<>();
     MockitoAnnotations.initMocks(this);
@@ -73,7 +83,8 @@ public class FieldValidatedCommandTest {
    */
   @Test
   public void getEventTypeTest() {
-    assertEquals(EventType.COMMAND_VALIDATED_FIELD_COMPLETED, fieldValidatedCommand.getEventType());
+    assertEquals(EventType.COMMAND_VALIDATED_RECORD_COMPLETED,
+        checkRecordValidatedCommand.getEventType());
   }
 
   /**
@@ -87,12 +98,11 @@ public class FieldValidatedCommandTest {
     processesMap.put("uuid", 1);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    fieldValidatedCommand.execute(eeaEventVO);
+    doNothing().when(validationHelper).checkFinishedValidations(Mockito.any(), Mockito.any());
+    checkRecordValidatedCommand.execute(eeaEventVO);
 
     Mockito.verify(validationHelper, times(1)).checkFinishedValidations(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
   }
 
   /**
@@ -103,7 +113,7 @@ public class FieldValidatedCommandTest {
   @Test
   public void executeThrowTest() throws EEAException {
     when(validationHelper.getProcessesMap()).thenReturn(processesMap);
-    fieldValidatedCommand.execute(eeaEventVO);
+    checkRecordValidatedCommand.execute(eeaEventVO);
     Mockito.verify(validationHelper, times(1)).getProcessesMap();
   }
 

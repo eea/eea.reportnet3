@@ -1,21 +1,20 @@
-package org.eea.kafka.io;
+package org.eea.validation.kafka;
 
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.io.DefaultKafkaReceiver;
+import org.eea.kafka.io.KafkaReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 /**
- * The type Kafka receiver.
+ * The type Broadcast kafka receiver.
  */
 @Component
-//@ConditionalOnProperty
-public class DefaultKafkaReceiver extends KafkaReceiver {
-
+public class BroadcastKafkaReceiver extends KafkaReceiver {
 
   /**
    * The Constant LOG.
@@ -31,12 +30,13 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    * @throws EEAException
    */
   @Override
-  @KafkaListener(topics = "DATA_REPORTING_TOPIC")
-  public void listenMessage(final Message<EEAEventVO> message) throws EEAException {
+  @KafkaListener(topics = "BROADCAST_TOPIC",
+      containerFactory = "broadcastKafkaListenerContainerFactory")
+  public void listenMessage(Message<EEAEventVO> message) throws EEAException {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
       handler.processMessage(message.getPayload());
     }
-
   }
+
 }

@@ -4,9 +4,7 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
-import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,21 +13,21 @@ import org.springframework.stereotype.Component;
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
  * Object[EventHandlerReceiver] and the operation[Close] together as command.
- *
  */
 @Component
-public class DatasetValidatedCommand extends AbstractEEAEventHandlerCommand {
+public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
 
-  /** The Constant LOG_ERROR. */
+  private static final Logger LOG = LoggerFactory.getLogger(CleanKyebaseCommand.class);
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /** The validation helper. */
+  /**
+   * The validation helper.
+   */
   @Autowired
   private ValidationHelper validationHelper;
 
-  /** The kafka sender utils. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the event type.
@@ -38,27 +36,21 @@ public class DatasetValidatedCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public EventType getEventType() {
-    return EventType.COMMAND_VALIDATED_DATASET_COMPLETED;
+    return EventType.COMMAND_CLEAN_KYEBASE;
   }
+
 
   /**
    * Execute.
    *
    * @param eeaEventVO the eea event VO
-   * @throws EEAException
    */
   @Override
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final String uuid = (String) eeaEventVO.getData().get("uuid");
-    final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
-    final KieBase kieBase = (KieBase) eeaEventVO.getData().get("kieBase");
-    if (validationHelper.getProcessesMap().containsKey(uuid)) {
-      validationHelper.getProcessesMap().merge(uuid, -1, Integer::sum);
-      validationHelper.checkFinishedValidations(datasetId, uuid, kieBase);
-    } else {
-      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_VALIDATED_DATASET_COMPLETED,
-          eeaEventVO.getData());
-    }
+    LOG.info("Removing kieBase for process {}", uuid);
+    validationHelper.removeKieBase(uuid);
   }
+
 
 }

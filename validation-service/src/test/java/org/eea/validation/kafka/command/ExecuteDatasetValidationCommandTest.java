@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +13,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,29 +30,48 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ExecuteDatasetValidationCommandTest {
 
-  /** The execute dataset validation command. */
+  /**
+   * The execute dataset validation command.
+   */
   @InjectMocks
   private ExecuteDatasetValidationCommand executeDatasetValidationCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation service. */
+  /**
+   * The validation service.
+   */
   @Mock
   private ValidationService validationService;
 
-  /** The kie base. */
+  /**
+   * The kie base.
+   */
   @Mock
   private KieBase kieBase;
+  /**
+   * the validation helper
+   */
+  @Mock
+  private ValidationHelper validationHelper;
 
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private Map<String, Integer> processesMap;
 
   /**
@@ -92,9 +113,13 @@ public class ExecuteDatasetValidationCommandTest {
     processesMap.put("uuid", 1);
     doNothing().when(validationService).validateDataSet(Mockito.any(), Mockito.any());
 
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
     executeDatasetValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateDataSet(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1))
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_DATASET_COMPLETED),
+            Mockito.any());
   }
 
   /**
@@ -106,10 +131,13 @@ public class ExecuteDatasetValidationCommandTest {
   public void executeExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(validationService).validateDataSet(Mockito.any(),
         Mockito.any());
-
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
     executeDatasetValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateDataSet(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1))
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_DATASET_COMPLETED),
+            Mockito.any());
   }
 
 }

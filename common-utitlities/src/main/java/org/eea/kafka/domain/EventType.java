@@ -95,24 +95,29 @@ public enum EventType {
   COMMAND_VALIDATE_FIELD("COMMAND_TOPIC", "execute_field_validations_key", false),
 
   /**
+   * Command clean kyebase event type.
+   */
+  COMMAND_CLEAN_KYEBASE("BROADCAST_TOPIC", "command_clean_kyebase", true),
+
+  /**
    * The command validated dataset completed.
    */
-  COMMAND_VALIDATED_DATASET_COMPLETED("COMMAND_TOPIC", "dataset_validated_key", false),
+  COMMAND_VALIDATED_DATASET_COMPLETED("BROADCAST_TOPIC", "dataset_validated_key", true),
 
   /**
    * The command validated table completed.
    */
-  COMMAND_VALIDATED_TABLE_COMPLETED("COMMAND_TOPIC", "table_validated_key", false),
+  COMMAND_VALIDATED_TABLE_COMPLETED("BROADCAST_TOPIC", "table_validated_key", true),
 
   /**
    * The command validated record completed.
    */
-  COMMAND_VALIDATED_RECORD_COMPLETED("COMMAND_TOPIC", "record_validated_key", false),
+  COMMAND_VALIDATED_RECORD_COMPLETED("BROADCAST_TOPIC", "record_validated_key", true),
 
   /**
    * The command validated field completed.
    */
-  COMMAND_VALIDATED_FIELD_COMPLETED("COMMAND_TOPIC", "field_validated_key", false),
+  COMMAND_VALIDATED_FIELD_COMPLETED("BROADCAST_TOPIC", "field_validated_key", true),
 
   /**
    * The WebSocket notification event.
@@ -150,7 +155,9 @@ public enum EventType {
    */
   private String key;
 
-  /** The sorted. */
+  /**
+   * The sorted.
+   */
   private Boolean sorted;
 
   /**
