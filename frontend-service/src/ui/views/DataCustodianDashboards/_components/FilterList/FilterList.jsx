@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { isUndefined, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 
 import styles from './FilterList.module.scss';
 

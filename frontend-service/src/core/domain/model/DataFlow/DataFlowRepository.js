@@ -5,9 +5,9 @@ export const DataflowRepository = {
   all: () => Promise.reject('[DataflowRepository#all] must be implemented'),
   accepted: () => Promise.reject('[DataflowRepository#accepted] must be implemented'),
   completed: () => Promise.reject('[DataflowRepository#completed] must be implemented'),
-  datasetValidationStatistics: () =>
-    Promise.reject('[DataflowRepository#datasetValidationStatistics] must be implemented'),
-  datasetReleasedStatus: () => Promise.reject('[DataflowRepository#datasetReleasedStatus] must be implemented'),
+  datasetsValidationStatistics: () =>
+    Promise.reject('[DataflowRepository#datasetsValidationStatistics] must be implemented'),
+  datasetsReleasedStatus: () => Promise.reject('[DataflowRepository#datasetsReleasedStatus] must be implemented'),
   metadata: () => Promise.reject('[DataflowRepository#metadata] must be implemented'),
   pending: () => Promise.reject('[DataflowRepository#pending] must be implemented'),
   reject: () => Promise.reject('[DataflowRepository#reject] must be implemented'),

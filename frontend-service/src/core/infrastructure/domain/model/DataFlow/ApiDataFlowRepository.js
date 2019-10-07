@@ -121,8 +121,8 @@ const completed = async () => {
   return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetValidationStatistics = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetValidationStatistics(dataflowId);
+const datasetsValidationStatistics = async dataflowId => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId);
 
   const datasetsDashboardsData = {};
   datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.idDataSetSchema;
@@ -240,22 +240,22 @@ const datasetValidationStatistics = async dataflowId => {
   return datasetDataObject;
 };
 
-const datasetReleasedStatus = async dataflowId => {
-  const releasedDashboardsData = await apiDataflow.datasetReleasedStatus(dataflowId);
+const datasetsReleasedStatus = async dataflowId => {
+  const datasetsReleasedStatusDTO = await apiDataflow.datasetsReleasedStatus(dataflowId);
 
   const releasedDataObject = {
-    labels: releasedDashboardsData.map(dataset => dataset.dataSetName),
+    labels: datasetsReleasedStatusDTO.map(dataset => dataset.dataSetName),
     datasets: [
       {
         label: 'Released',
         backgroundColor: 'rgba(51, 153, 0, 1)',
 
-        data: releasedDashboardsData.map(dataset => dataset.isReleased)
+        data: datasetsReleasedStatusDTO.map(dataset => dataset.isReleased)
       },
       {
         label: 'Unreleased',
         backgroundColor: 'rgba(208, 208, 206, 1)',
-        data: releasedDashboardsData.map(dataset => !dataset.isReleased)
+        data: datasetsReleasedStatusDTO.map(dataset => !dataset.isReleased)
       }
     ]
   };
@@ -263,8 +263,8 @@ const datasetReleasedStatus = async dataflowId => {
 };
 
 const metadata = async dataflowId => {
-  const metadata = await apiDataflow.metadata(dataflowId);
-  return metadata;
+  const metadataDTO = await apiDataflow.metadata(dataflowId);
+  return metadataDTO;
 };
 
 const pending = async () => {
@@ -300,8 +300,8 @@ export const ApiDataflowRepository = {
   accept,
   accepted,
   completed,
-  datasetValidationStatistics,
-  datasetReleasedStatus,
+  datasetsValidationStatistics,
+  datasetsReleasedStatus,
   metadata,
   pending,
   reject,

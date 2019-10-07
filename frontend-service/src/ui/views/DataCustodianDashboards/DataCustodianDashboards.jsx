@@ -66,9 +66,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const loadDashboards = async () => {
-    setReleasedDashboardData(await DataflowService.datasetReleasedStatus(match.params.dataflowId));
+    setReleasedDashboardData(await DataflowService.datasetsReleasedStatus(match.params.dataflowId));
 
-    const datasetsDashboardsData = await DataflowService.datasetValidationStatistics(match.params.dataflowId);
+    const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
 
     filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
   };

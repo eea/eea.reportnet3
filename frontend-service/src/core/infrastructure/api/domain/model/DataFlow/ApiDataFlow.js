@@ -57,7 +57,7 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  datasetValidationStatistics: async dataflowId => {
+  datasetsValidationStatistics: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),
@@ -70,10 +70,10 @@ export const apiDataflow = {
     // const hardcodedDashboardTest = dataCustodianDashboards;
     // return hardcodedDashboardTest;
   },
-  datasetReleasedStatus: async dataflowId => {
+  datasetsReleasedStatus: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.datasetReleasedStatus, { dataflowId: dataflowId }),
+      url: getUrl(DataflowConfig.datasetsReleasedStatus, { dataflowId: dataflowId }),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
