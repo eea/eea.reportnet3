@@ -11,6 +11,8 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
@@ -65,6 +67,9 @@ public class ValidationHelper {
    */
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
+
+  @Autowired
+  private TableRepository tableRepository;
 
   /**
    * Instantiates a new file loader helper.
