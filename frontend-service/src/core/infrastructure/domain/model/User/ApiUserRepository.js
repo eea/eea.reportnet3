@@ -12,8 +12,8 @@ const timeOut = time => {
   }, time);
 };
 
-const login = async (userName, password) => {
-  const userTokensTDO = await apiUser.login(userName, password);
+const login = async code => {
+  const userTokensTDO = await apiUser.login(code);
   const userTDO = jwt_decode(userTokensTDO.accessToken);
   const user = new User(userTDO.sub, userTDO.name, userTDO.user_groups, userTDO.preferred_username, userTDO.exp);
   userStorage.set(userTokensTDO);
