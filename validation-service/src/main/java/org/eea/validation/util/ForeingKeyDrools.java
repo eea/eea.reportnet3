@@ -3,7 +3,7 @@ package org.eea.validation.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.multitenancy.TenantResolver;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.querysdrools.DataToQuery11;
@@ -241,8 +241,8 @@ public class ForeingKeyDrools {
       return true;
     }
     String countryCode = "";
-    if (null != TenantResolver.getVariable("countryCode")) {
-      countryCode = TenantResolver.getVariable("countryCode").toString().replace("'", "");
+    if (null != ThreadPropertiesManager.getVariable("countryCode")) {
+      countryCode = ThreadPropertiesManager.getVariable("countryCode").toString().replace("'", "");
     }
     if (!countryCode.equals(value.substring(0, 2))) {
       return false;
