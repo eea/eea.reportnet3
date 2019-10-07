@@ -25,25 +25,40 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
     tableNamesIdsArray.push(datasetObject);
   });
 
-  return (
-    <>
-      <Accordion>
-        <AccordionTab header={resources.messages['filterByReporters']}>
+  const filterByReporters = () => {
+    if (labels.length > 0) {
+      return (
+        <AccordionTab header={resources.messages['filterByDataset']}>
           <ul className={styles.list}>
             {labels.map(item => (
               <ReportersListItem key={item} item={item} filterDispatch={filterDispatch} />
             ))}
           </ul>
         </AccordionTab>
-        <AccordionTab header={resources.messages['filterByTables']}>
+      );
+    }
+  };
+
+  const filterByTables = () => {
+    if (tableNamesIdsArray.length > 0) {
+      return (
+        <AccordionTab header={resources.messages['filterByTable']}>
           <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
               <TableListItem key={item.tableId} item={item} filterDispatch={filterDispatch} />
             ))}
           </ul>
         </AccordionTab>
-      </Accordion>
+      );
+    }
+  };
 
+  return (
+    <>
+      <Accordion>
+        {filterByReporters()}
+        {filterByTables()}
+      </Accordion>
       <StatusList filterDispatch={filterDispatch}></StatusList>
     </>
   );

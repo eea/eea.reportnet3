@@ -186,7 +186,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             </div>
             {dataflowData.datasets.map(dataset => {
               return (
-                <div className={`${styles.datasetItem}`} key={dataset.id}>
+                <div className={`${styles.datasetItem}`} key={dataset.datasetId}>
                   <BigButton
                     layout="dataset"
                     label="DS"
@@ -201,7 +201,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                             {
                               label: resources.messages.releaseDataCollection,
                               icon: 'cloudUpload',
-                              command: () => showReleaseSnapshotDialog(dataset.id),
+                              command: () => showReleaseSnapshotDialog(dataset.datasetId),
                               disabled: false
                             },
                             {

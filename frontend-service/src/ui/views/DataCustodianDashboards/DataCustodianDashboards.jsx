@@ -1,6 +1,8 @@
 import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isEmpty, isUndefined } from 'lodash';
+
 import styles from './DataCustodianDashboards.module.scss';
 
 import { config } from 'conf';
@@ -14,14 +16,13 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
-import { UserContext } from '../_components/_context/UserContext';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
-  const userData = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dataflowMetadata, setDataflowMetadata] = useState({});
   const [loading, setLoading] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
@@ -48,21 +49,89 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    loadDashboards();
-  }, []);
-
-  const loadDashboards = async () => {
+    setLoading(true);
     try {
-      setReleasedDashboardData(await DataflowService.datasetReleasedStatus(match.params.dataflowId));
-
-      const datasetsDashboardsData = await DataflowService.datasetStatisticsStatus(match.params.dataflowId);
-
-      filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
+      loadDataflowMetadata();
+      loadDashboards();
     } catch (error) {
       console.error(error.response);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const loadDataflowMetadata = async () => {
+    const dataflowMetadata = await DataflowService.metadata(match.params.dataflowId);
+    setDataflowMetadata(dataflowMetadata);
+  };
+
+  function buildDatasetDashboardObject(datasetsDashboardsData) {
+    let datasets = [];
+    if (!isUndefined(datasetsDashboardsData.tables)) {
+      datasets = datasetsDashboardsData.tables
+        .map(table => [
+          {
+            label: `CORRECT`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: 'rgba(153, 204, 51, 1)',
+            data: table.tableStatisticPercentages[0],
+            totalData: table.tableStatisticValues[0],
+            stack: table.tableName
+          },
+          {
+            label: `WARNINGS`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: 'rgba(255, 204, 0, 1)',
+            data: table.tableStatisticPercentages[1],
+            totalData: table.tableStatisticValues[1],
+            stack: table.tableName
+          },
+          {
+            label: `ERRORS`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: 'rgba(204, 51, 0, 1)',
+            data: table.tableStatisticPercentages[2],
+            totalData: table.tableStatisticValues[2],
+            stack: table.tableName
+          }
+        ])
+        .flat();
+    }
+    const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
+    const datasetDataObject = {
+      labels: labels,
+      datasets: datasets
+    };
+    return datasetDataObject;
+  }
+
+  function buildReleasedDashboardObject(releasedData) {
+    return {
+      labels: releasedData.map(dataset => dataset.dataSetName),
+      datasets: [
+        {
+          label: resources.messages['released'],
+          backgroundColor: 'rgba(51, 153, 0, 1)',
+          data: releasedData.map(dataset => dataset.isReleased)
+        },
+        {
+          label: resources.messages['unreleased'],
+          backgroundColor: 'rgba(208, 208, 206, 1)',
+          data: releasedData.map(dataset => !dataset.isReleased)
+        }
+      ]
+    };
+  }
+
+  const loadDashboards = async () => {
+    const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
+    setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
+
+    const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
+    filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
   };
 
   const datasetOptionsObject = {
@@ -101,8 +170,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const releasedOptionsObject = {
     tooltips: {
-      mode: 'index',
-      intersect: false
+      enabled: false
     },
     responsive: true,
     scales: {
@@ -122,6 +190,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
+    if (isEmpty(originalData)) {
+      return;
+    }
+
     let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
 
     const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
@@ -264,6 +336,39 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     );
   };
 
+  const errorsDashboard = () => {
+    if (!isEmpty(filterState.data)) {
+      return (
+        <div className="rep-row">
+          <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
+          <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
+        </div>
+      );
+    }
+    return (
+      <div>
+        <h2>{resources.messages['emptyErrorsDashboard']}</h2>
+      </div>
+    );
+  };
+
+  const releasedDashboard = () => {
+    if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
+      if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
+        return (
+          <div className={`rep-row ${styles.chart_released}`}>
+            <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
+          </div>
+        );
+      }
+    }
+    return (
+      <div>
+        <h2>{resources.messages['emptyReleasedDashboard']}</h2>
+      </div>
+    );
+  };
+
   if (loading) {
     return layout(<Spinner />);
   }
@@ -271,15 +376,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <div className="rep-row">
-        <h1>{resources.messages['dataflow']}</h1>
+        <h1>
+          {resources.messages['dataflow']}: {dataflowMetadata.name}
+        </h1>
       </div>
-      <div className="rep-row">
-        <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
-      </div>
-      <div className={`rep-row ${styles.chart_released}`}>
-        <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
-      </div>
+      {errorsDashboard()}
+      {releasedDashboard()}
     </>
   );
 });

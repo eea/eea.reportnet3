@@ -121,20 +121,25 @@ const completed = async () => {
   return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetStatisticsStatus = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetStatisticsStatus(dataflowId);
+const datasetsValidationStatistics = async dataflowId => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId);
+  datasetsDashboardsDataDTO.sort((a, b) => {
+    let datasetName_A = a.nameDataSetSchema;
+    let datasetName_B = b.nameDataSetSchema;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
 
   const datasetsDashboardsData = {};
-  datasetsDashboardsData.dataSetId = datasetsDashboardsDataDTO.idDataSetSchema;
+  datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.idDataSetSchema;
 
-  const dataSetReporters = [];
+  const datasetReporters = [];
   const tables = [];
   let tablePercentages = [];
   let tableValues = [];
 
   datasetsDashboardsDataDTO.map(dataset => {
-    datasetsDashboardsData.dataSetId = dataset.idDataSetSchema;
-    dataSetReporters.push({
+    datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
+    datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
 
@@ -195,71 +200,26 @@ const datasetStatisticsStatus = async dataflowId => {
     });
   });
 
-  datasetsDashboardsData.dataSetReporters = dataSetReporters;
+  datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.tables = tables;
 
-  const datasets = datasetsDashboardsData.tables
-    .map(table => [
-      {
-        label: `CORRECT`,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: 'rgba(153, 204, 51, 1)',
-        data: table.tableStatisticPercentages[0],
-        totalData: table.tableStatisticValues[0],
-        stack: table.tableName
-      },
-      {
-        label: `WARNINGS`,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: 'rgba(255, 204, 0, 1)',
-        data: table.tableStatisticPercentages[1],
-        totalData: table.tableStatisticValues[1],
-        stack: table.tableName
-      },
-      {
-        label: `ERRORS`,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: 'rgba(204, 51, 0, 1)',
-        data: table.tableStatisticPercentages[2],
-        totalData: table.tableStatisticValues[2],
-        stack: table.tableName
-      }
-    ])
-    .flat();
-
-  const labels = datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName);
-
-  const datasetDataObject = {
-    labels: labels,
-    datasets: datasets
-  };
-
-  return datasetDataObject;
+  return datasetsDashboardsData;
 };
 
-const datasetReleasedStatus = async dataflowId => {
-  const releasedDashboardsData = await apiDataflow.datasetReleasedStatus(dataflowId);
+const datasetsReleasedStatus = async dataflowId => {
+  const datasetsReleasedStatusDTO = await apiDataflow.datasetsReleasedStatus(dataflowId);
+  datasetsReleasedStatusDTO.sort((a, b) => {
+    let datasetName_A = a.dataSetName;
+    let datasetName_B = b.dataSetName;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
 
-  const releasedDataObject = {
-    labels: releasedDashboardsData.map(dataset => dataset.dataSetName),
-    datasets: [
-      {
-        label: 'Released',
-        backgroundColor: 'rgba(51, 153, 0, 1)',
+  return datasetsReleasedStatusDTO;
+};
 
-        data: releasedDashboardsData.map(dataset => dataset.isReleased)
-      },
-      {
-        label: 'Unreleased',
-        backgroundColor: 'rgba(208, 208, 206, 1)',
-        data: releasedDashboardsData.map(dataset => !dataset.isReleased)
-      }
-    ]
-  };
-  return releasedDataObject;
+const metadata = async dataflowId => {
+  const metadataDTO = await apiDataflow.metadata(dataflowId);
+  return metadataDTO;
 };
 
 const pending = async () => {
@@ -295,8 +255,9 @@ export const ApiDataflowRepository = {
   accept,
   accepted,
   completed,
-  datasetStatisticsStatus,
-  datasetReleasedStatus,
+  datasetsValidationStatistics,
+  datasetsReleasedStatus,
+  metadata,
   pending,
   reject,
   reporting
