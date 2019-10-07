@@ -84,7 +84,7 @@ export const apiDataflow = {
   metadata: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.metadata, { dataflowId }),
+      url: getUrl(DataflowConfig.metadata, { dataflowId: dataflowId }),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
