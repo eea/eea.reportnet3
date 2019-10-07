@@ -125,16 +125,16 @@ const datasetStatisticsStatus = async dataflowId => {
   const datasetsDashboardsDataDTO = await apiDataflow.datasetStatisticsStatus(dataflowId);
 
   const datasetsDashboardsData = {};
-  datasetsDashboardsData.dataSetId = datasetsDashboardsDataDTO.idDataSetSchema;
+  datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.idDataSetSchema;
 
-  const dataSetReporters = [];
+  const datasetReporters = [];
   const tables = [];
   let tablePercentages = [];
   let tableValues = [];
 
   datasetsDashboardsDataDTO.map(dataset => {
-    datasetsDashboardsData.dataSetId = dataset.idDataSetSchema;
-    dataSetReporters.push({
+    datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
+    datasetReporters.push({
       reporterName: dataset.nameDataSetSchema
     });
 
@@ -195,7 +195,7 @@ const datasetStatisticsStatus = async dataflowId => {
     });
   });
 
-  datasetsDashboardsData.dataSetReporters = dataSetReporters;
+  datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.tables = tables;
 
   const datasets = datasetsDashboardsData.tables
@@ -230,7 +230,7 @@ const datasetStatisticsStatus = async dataflowId => {
     ])
     .flat();
 
-  const labels = datasetsDashboardsData.dataSetReporters.map(reporterData => reporterData.reporterName);
+  const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
 
   const datasetDataObject = {
     labels: labels,
