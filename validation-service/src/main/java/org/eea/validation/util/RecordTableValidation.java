@@ -41,7 +41,8 @@ public class RecordTableValidation {
     String MessageError =
         "The group identifier is identical to an existing bathing water identifier.";
 
-    return validationService.tableRecordRIds(RD03ARule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD03ARule, MessageError, TypeErrorEnum.ERROR,
+        "Characterisation");
 
   }
 
@@ -80,8 +81,8 @@ public class RecordTableValidation {
 
     String MessageError =
         "The group identifier of the bathing water has changed since last season. ";
-    return true;
-    // return validationService.tableRecordRIds(RD03BRule, MessageError, TypeErrorEnum.WARNING);
+    return validationService.tableRecordRIds(RD03BRule, MessageError, TypeErrorEnum.WARNING,
+        "Characterisation");
 
   }
 
@@ -110,9 +111,8 @@ public class RecordTableValidation {
         + "where b.members != c.members";
 
     String MessageError = "The group members have changed.";
-
-    return true;
-    // return validationService.tableRecordRIds(RD03CRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD03CRule, MessageError, TypeErrorEnum.ERROR,
+        "Characterisation");
 
   }
 
@@ -174,7 +174,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample was taken during a short-term pollution event, but the sampleStatus is not 'missingSample','shortTermPollutionSample' or 'confirmationSample'";
 
-    return validationService.tableRecordRIds(RD20BRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20BRule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -253,7 +254,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample is the first taken after a short-term pollution period but the sampleStatus is not 'replacementSample'.";
 
-    return validationService.tableRecordRIds(RD20CRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20CRule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -325,7 +327,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample date is before the start of the bathing season and the sampleStatus is not 'preSeasonSample'.";
 
-    return validationService.tableRecordRIds(RD20DRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20DRule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -381,7 +384,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample was not taken within a short-term pollution event and the sampleStatus is 'shortTermPollutionSample'";
 
-    return validationService.tableRecordRIds(RD20ERule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20ERule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -450,7 +454,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample was taken within the bathing season and the sampleStatus is 'preSeasonSample'. ";
 
-    return validationService.tableRecordRIds(RD20FRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20FRule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -518,7 +523,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample was not taken within 7 days of the end of a short-term pollution event and the sampleStatus is 'replacementSample'.";
 
-    return validationService.tableRecordRIds(RD20GRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20GRule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -571,7 +577,8 @@ public class RecordTableValidation {
     String MessageError =
         "The sample was not taken in the last day of a short-term pollution event and the sampleStatus is 'confirmationSample'.";
 
-    return validationService.tableRecordRIds(RD20HRule, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD20HRule, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
 
   }
 
@@ -579,7 +586,8 @@ public class RecordTableValidation {
     String RD12D = "";
     String MessageError =
         "The endDate is not before the startDate of the next seasonal period of the same type.";
-    // return validationService.tableRecordRIds(RD12D, MessageError, TypeErrorEnum.ERROR);
+    // return validationService.tableRecordRIds(RD12D, MessageError,
+    // TypeErrorEnum.ERROR,"SeasonalPeriod");
     return true;
   }
 
@@ -587,7 +595,8 @@ public class RecordTableValidation {
     String RD11E = " ";
     String MessageError =
         "The startDate is not after the endDate of the previous seasonal period of the same type.";
-    // return validationService.tableRecordRIds(RD11E, MessageError, TypeErrorEnum.ERROR);
+    // return validationService.tableRecordRIds(RD11E, MessageError,
+    // TypeErrorEnum.ERROR,"SeasonalPeriod");
     return true;
   }
 
@@ -596,7 +605,8 @@ public class RecordTableValidation {
     String RD11F = "";
     String MessageError =
         "The startDate of the bathing season is not after the endDate of the previous bathing season.";
-    // return validationService.tableRecordRIds(RD11F, MessageError, TypeErrorEnum.ERROR);
+    // return validationService.tableRecordRIds(RD11F, MessageError,
+    // TypeErrorEnum.ERROR,"SeasonalPeriod");
     return true;
   }
 
@@ -658,7 +668,8 @@ public class RecordTableValidation {
 
     String MessageError = "The sampleDate is not in the same year as the bathing season. ";
 
-    return validationService.tableRecordRIds(RD17B, MessageError, TypeErrorEnum.ERROR);
+    return validationService.tableRecordRIds(RD17B, MessageError, TypeErrorEnum.ERROR,
+        "MonitoringResult");
   }
 
 }

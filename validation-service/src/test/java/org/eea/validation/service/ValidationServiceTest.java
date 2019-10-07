@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -462,8 +461,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
-    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(
-        Mockito.any());
+    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
     try {
       validationServiceImpl.loadRulesKnowledgeBase(1L);
     } catch (EEAException e) {
@@ -1133,7 +1131,7 @@ public class ValidationServiceTest {
         .thenReturn(listRecords);
     when(recordRepository.findByIdValidation(Mockito.anyLong()))
         .thenReturn(Optional.of(new RecordValue()));
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
+    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
   }
 
 
@@ -1146,11 +1144,11 @@ public class ValidationServiceTest {
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(listRecords);
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
+    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
 
     when(tableValidationQuerysDroolsRepository.tableValidationQueryReturnListIds(""))
         .thenReturn(null);
-    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR);
+    validationServiceImpl.tableRecordRIds("", "", TypeErrorEnum.ERROR, "");
   }
 
 

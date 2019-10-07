@@ -303,6 +303,7 @@ public interface ValidationService {
   Boolean tableValidationQueryReturnResult(String queryValidate);
 
 
-  Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError);
+  Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError,
+      String originName);
 
 }

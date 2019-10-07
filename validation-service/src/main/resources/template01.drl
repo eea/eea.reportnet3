@@ -212,9 +212,6 @@ function  Boolean ruleDU02B(Long datasetId,Long datasetLegazy){
 			return TableValidationDrools.ruleDU02B(datasetId,datasetLegazy);
 }
 //PART TABLE BUT USING RECORD TO MASK
-function  Boolean monitoringWithPeriodSampleStatus(Long datasetId){
-return RecordValidationDrools.monitoringWithPeriodSampleStatus(datasetId);
-}
 //MONITORING PART
 function Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate, Long datasetId){
  return TableValidationDrools.ruleDU03(idSchemaBWIdent,idSchemaBWSampleDate,datasetId); 

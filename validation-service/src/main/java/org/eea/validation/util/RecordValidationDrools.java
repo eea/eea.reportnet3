@@ -3,7 +3,6 @@ package org.eea.validation.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.ValidationService;
@@ -572,57 +571,4 @@ public class RecordValidationDrools {
     return true;
   }
 
-
-  /**
-   * Monitoring with period sample status.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the boolean
-   */
-  public static Boolean monitoringWithPeriodSampleStatus(Long datasetId) {
-
-    String QUERY =
-        "with MonitoringResult as( select bathingWaterIdentifierTable.bathingWaterIdentifier as BW_IDENT, "
-            + "seasonTable.season as SEASON, sampleDateTable.sampleDate as SAMPLE_DATE, "
-            + "sampleStatusTable.sampleStatus as SAMPLE_STATUS, bathingWaterIdentifierTable.record_id as record_id "
-            + "from( select v.value as bathingWaterIdentifier, v.id_record as record_id from dataset_"
-            + datasetId + ".field_value "
-            + "v where v.id_field_schema = '5d5cfa24d201fb6084d90cc8') as bathingWaterIdentifierTable inner join"
-            + "( select v.value as season, v.id_record as record_id from dataset_" + datasetId
-            + ".field_value v "
-            + "where v.id_field_schema = '5d5cfa24d201fb6084d90cbf') as seasonTable on bathingWaterIdentifierTable.record_id = "
-            + "seasonTable.record_id inner join( select v.value as "
-            + "sampleDate, v.id_record as record_id from dataset_" + datasetId
-            + ".field_value v where v.id_field_schema = "
-            + "'5d5cfa24d201fb6084d90cd1') as sampleDateTable on seasonTable.record_id = sampleDateTable.record_id "
-            + "inner join( select v.value as sampleStatus, v.id_record as record_id from dataset_"
-            + datasetId + ".field_value v "
-            + "where v.id_field_schema = '5d5cfa24d201fb6084d90cec') as sampleStatusTable on sampleDateTable.record_id = "
-            + "sampleStatusTable.record_id) , SeasonalPeriod as( select bathingWaterIdentifierTable.bathingWaterIdentifier as BW_IDENT,"
-            + " seasonTable.season as SEASON, periodeTypeTable.periodeType as PERIODE_TYPE,"
-            + " startDateTable.startDate as START_DATE, endDateTable.endDate as "
-            + "END_DATE from( select v.value as bathingWaterIdentifier, v.id_record as record_id from dataset_"
-            + datasetId + ".field_value v "
-            + "where v.id_field_schema = '5d5cfa24d201fb6084d90c85') as bathingWaterIdentifierTable inner join( select v.value as season, "
-            + "v.id_record as record_id from dataset_" + datasetId
-            + ".field_value v where v.id_field_schema = '5d5cfa24d201fb6084d90c7c') "
-            + "as seasonTable on bathingWaterIdentifierTable.record_id = seasonTable.record_id inner join( select v.value as periodeType,"
-            + " v.id_record as record_id from dataset_" + datasetId
-            + ".field_value v where v.id_field_schema = '5d5cfa24d201fb6084d90c8e') "
-            + "as periodeTypeTable on seasonTable.record_id = periodeTypeTable.record_id "
-            + "inner join( select v.value as startDate, v.id_record as record_id from dataset_"
-            + datasetId + ".field_value v where v.id_field_schema "
-            + "= '5d5cfa24d201fb6084d90c97') as startDateTable on periodeTypeTable.record_id = startDateTable.record_id "
-            + "inner join( select v.value as endDate, v.id_record as record_id from dataset_"
-            + datasetId + ".field_value v where v.id_field_schema "
-            + "= '5d5cfa24d201fb6084d90ca0') as endDateTable on startDateTable.record_id = endDateTable.record_id) select "
-            + " m.record_id from  MonitoringResult m inner JOIN SeasonalPeriod s "
-            + "on m.BW_IDENT = s.BW_IDENT and m.SEASON = s.SEASON and s.PERIODE_TYPE = 'shortTermPollution' and m.SAMPLE_DATE "
-            + "between s.START_DATE and s.END_DATE and coalesce(m.SAMPLE_STATUS,'') != 'shortTermPollutionSample'";
-
-    String messageError =
-        "The sample was taken during a short-term pollution event, but the sampleStatus is not 'shortTermPollutionSample'.";
-    return validationService.tableRecordRIds(QUERY, messageError, TypeErrorEnum.ERROR);
-  }
 }
