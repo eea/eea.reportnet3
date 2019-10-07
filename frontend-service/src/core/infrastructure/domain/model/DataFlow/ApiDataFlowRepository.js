@@ -209,24 +209,7 @@ const datasetsValidationStatistics = async dataflowId => {
 
 const datasetsReleasedStatus = async dataflowId => {
   const datasetsReleasedStatusDTO = await apiDataflow.datasetsReleasedStatus(dataflowId);
-
-  const releasedDataObject = {
-    labels: datasetsReleasedStatusDTO.map(dataset => dataset.dataSetName),
-    datasets: [
-      {
-        label: 'Released',
-        backgroundColor: 'rgba(51, 153, 0, 1)',
-
-        data: datasetsReleasedStatusDTO.map(dataset => dataset.isReleased)
-      },
-      {
-        label: 'Unreleased',
-        backgroundColor: 'rgba(208, 208, 206, 1)',
-        data: datasetsReleasedStatusDTO.map(dataset => !dataset.isReleased)
-      }
-    ]
-  };
-  return releasedDataObject;
+  return datasetsReleasedStatusDTO;
 };
 
 const metadata = async dataflowId => {

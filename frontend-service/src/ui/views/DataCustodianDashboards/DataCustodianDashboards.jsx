@@ -66,10 +66,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const loadDashboards = async () => {
-    setReleasedDashboardData(await DataflowService.datasetsReleasedStatus(match.params.dataflowId));
+    const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
+    setReleasedDashboardData(buildRealesedDashboardObject(releasedData));
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
-
     filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
   };
 
@@ -363,6 +363,24 @@ function buildDatasetDashboardObject(datasetsDashboardsData) {
     datasets: datasets
   };
   return datasetDataObject;
+}
+
+function buildRealesedDashboardObject(releasedData) {
+  return {
+    labels: releasedData.map(dataset => dataset.dataSetName),
+    datasets: [
+      {
+        label: 'Released',
+        backgroundColor: 'rgba(51, 153, 0, 1)',
+        data: releasedData.map(dataset => dataset.isReleased)
+      },
+      {
+        label: 'Unreleased',
+        backgroundColor: 'rgba(208, 208, 206, 1)',
+        data: releasedData.map(dataset => !dataset.isReleased)
+      }
+    ]
+  };
 }
 
 function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
