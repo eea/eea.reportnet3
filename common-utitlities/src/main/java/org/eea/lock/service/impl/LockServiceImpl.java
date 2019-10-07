@@ -40,8 +40,9 @@ public class LockServiceImpl implements LockService {
 
   @Override
   public Boolean removeLock(Integer lockId) {
-    LOG.info("Lock removed: {}", lockId);
-    return locks.remove(lockId) != null;
+    Boolean isRemoved = locks.remove(lockId) != null;
+    LOG.info("Lock removed: {} - {}", lockId, isRemoved);
+    return isRemoved;
   }
 
   @Override
