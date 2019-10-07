@@ -137,7 +137,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const datasetOptionsObject = {
     tooltips: {
       model: 'index',
-      intersect: false,
+      intersect: true,
       callbacks: {
         label: (tooltipItems, data) =>
           `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
