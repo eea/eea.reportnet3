@@ -66,7 +66,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   function buildDatasetDashboardObject(datasetsDashboardsData) {
-    const datasets = [];
+    let datasets = [];
     if (!isUndefined(datasetsDashboardsData.tables)) {
       datasets = datasetsDashboardsData.tables
         .map(table => [
