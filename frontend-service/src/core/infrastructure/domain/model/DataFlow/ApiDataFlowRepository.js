@@ -122,7 +122,13 @@ const completed = async () => {
 };
 
 const datasetsValidationStatistics = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId);
+  const datasetsDashboardsDataDTO_unsorted = await apiDataflow.datasetsValidationStatistics(dataflowId);
+
+  const datasetsDashboardsDataDTO = datasetsDashboardsDataDTO_unsorted.sort(function(a, b) {
+    var datasetName_A = a.nameDataSetSchema;
+    var datasetName_B = b.nameDataSetSchema;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
 
   const datasetsDashboardsData = {};
   datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.idDataSetSchema;
