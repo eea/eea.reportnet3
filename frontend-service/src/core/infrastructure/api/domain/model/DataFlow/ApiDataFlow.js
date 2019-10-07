@@ -3,6 +3,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 import dataCustodianDashboards from './response_GlobalStatsDataflow.json';
+import metadataJson from './metadata.json';
 
 export const apiDataflow = {
   accept: async dataflowId => {
@@ -79,6 +80,18 @@ export const apiDataflow = {
       }
     });
     return response.data;
+  },
+  metadata: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.metadata, { dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    // return metadataJson;
   },
   pending: async () => {
     const tokens = userStorage.get();

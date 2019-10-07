@@ -16,13 +16,13 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
-import { UserContext } from '../_components/_context/UserContext';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dataflowMetadata, setDataflowMetadata] = useState({});
   const [loading, setLoading] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
@@ -49,21 +49,28 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    loadDashboards();
-  }, []);
-
-  const loadDashboards = async () => {
+    setLoading(true);
     try {
-      setReleasedDashboardData(await DataflowService.datasetReleasedStatus(match.params.dataflowId));
-
-      const datasetsDashboardsData = await DataflowService.datasetValidationStatistics(match.params.dataflowId);
-
-      filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
+      loadDataflowMetadata();
+      loadDashboards();
     } catch (error) {
       console.error(error.response);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const loadDataflowMetadata = async () => {
+    const dataflowMetadata = await DataflowService.metadata(match.params.dataflowId);
+    setDataflowMetadata(dataflowMetadata);
+  };
+
+  const loadDashboards = async () => {
+    setReleasedDashboardData(await DataflowService.datasetReleasedStatus(match.params.dataflowId));
+
+    const datasetsDashboardsData = await DataflowService.datasetValidationStatistics(match.params.dataflowId);
+
+    filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
   };
 
   const datasetOptionsObject = {
@@ -308,7 +315,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <div className="rep-row">
-        <h1>{resources.messages['dataflow']}</h1>
+        <h1>
+          {resources.messages['dataflow']}: {dataflowMetadata.name}
+        </h1>
       </div>
       {errorsDashboard()}
       {releasedDashboard()}

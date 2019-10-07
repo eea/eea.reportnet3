@@ -8,6 +8,7 @@ export const DataflowRepository = {
   datasetValidationStatistics: () =>
     Promise.reject('[DataflowRepository#datasetValidationStatistics] must be implemented'),
   datasetReleasedStatus: () => Promise.reject('[DataflowRepository#datasetReleasedStatus] must be implemented'),
+  metadata: () => Promise.reject('[DataflowRepository#metadata] must be implemented'),
   pending: () => Promise.reject('[DataflowRepository#pending] must be implemented'),
   reject: () => Promise.reject('[DataflowRepository#reject] must be implemented'),
   reporting: () => Promise.reject('[DataflowRepository#reporting] must be implemented')

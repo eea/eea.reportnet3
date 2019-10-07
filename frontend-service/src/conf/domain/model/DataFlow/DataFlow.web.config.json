@@ -4,5 +4,6 @@
     "globalStatistics": "/dataflow/{:dataflowId}/globalStatistics",
     "loadDataflowTaskPendingAccepted":  "/dataflow/pendingaccepted",
     "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
+    "metadata": "/dataflow/{:dataflowId}/getmetabase",
     "rejectDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
 }

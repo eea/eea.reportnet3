@@ -262,6 +262,11 @@ const datasetReleasedStatus = async dataflowId => {
   return releasedDataObject;
 };
 
+const metadata = async dataflowId => {
+  const metadata = await apiDataflow.metadata(dataflowId);
+  return metadata;
+};
+
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
@@ -297,6 +302,7 @@ export const ApiDataflowRepository = {
   completed,
   datasetValidationStatistics,
   datasetReleasedStatus,
+  metadata,
   pending,
   reject,
   reporting
