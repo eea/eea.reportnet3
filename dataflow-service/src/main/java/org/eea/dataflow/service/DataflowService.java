@@ -122,4 +122,14 @@ public interface DataflowService {
    */
   DataFlowVO getDatasetsId(Long id) throws EEAException;
 
+
+  /**
+   * Gets the metabase by id.
+   *
+   * @param id the id
+   * @return the metabase by id
+   * @throws EEAException the EEA exception
+   */
+  DataFlowVO getMetabaseById(Long id) throws EEAException;
+
 }

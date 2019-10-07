@@ -54,6 +54,7 @@ public class DataFlowControllerImplTest {
   @Mock
   private DataflowService dataflowService;
 
+  /** The statistics helper. */
   @Mock
   private StatsHelper statisticsHelper;
 
@@ -371,6 +372,11 @@ public class DataFlowControllerImplTest {
   }
 
 
+  /**
+   * Test global statistics.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testGlobalStatistics() throws EEAException {
 
@@ -380,12 +386,52 @@ public class DataFlowControllerImplTest {
 
   }
 
+  /**
+   * Test global statistics error.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testGlobalStatisticsError() throws EEAException {
 
     doThrow(new EEAException()).when(statisticsHelper).executeStatsProcess(Mockito.any());
     dataFlowControllerImpl.getStatisticsByDataflow(1L);
 
+  }
+
+
+
+  /**
+   * Test get metabase by id.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testGetMetabaseById() throws EEAException {
+    when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    dataFlowControllerImpl.getMetabaseById(1L);
+    Mockito.verify(dataflowService, times(1)).getMetabaseById(1L);
+  }
+
+  /**
+   * Test get metabase by id exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testGetMetabaseByIdException() throws EEAException {
+    when(dataflowService.getMetabaseById(Mockito.any())).thenThrow(EEAException.class);
+    dataFlowControllerImpl.getMetabaseById(1L);
+    Mockito.verify(dataflowService, times(1)).getMetabaseById(1L);
+  }
+
+  /**
+   * Test get metabase by id exception null.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testGetMetabaseByIdExceptionNull() {
+    dataFlowControllerImpl.getMetabaseById(null);
+    Mockito.verify(dataFlowControllerImpl, times(1)).getMetabaseById(Mockito.any());
   }
 
 

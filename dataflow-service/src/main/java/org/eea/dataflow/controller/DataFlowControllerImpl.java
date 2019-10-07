@@ -290,4 +290,30 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  /**
+   * Gets the metabase by id.
+   *
+   * @param id the id
+   * @return the metabase by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTOR'))")
+  public DataFlowVO getMetabaseById(@PathVariable("id") final Long id) {
+
+    if (id == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    DataFlowVO result = null;
+    try {
+      result = dataflowService.getMetabaseById(id);
+
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
+  }
+
 }
