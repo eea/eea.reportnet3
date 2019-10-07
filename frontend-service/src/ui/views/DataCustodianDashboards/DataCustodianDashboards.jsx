@@ -65,9 +65,67 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setDataflowMetadata(dataflowMetadata);
   };
 
+  function buildDatasetDashboardObject(datasetsDashboardsData) {
+    const datasets = datasetsDashboardsData.tables
+      .map(table => [
+        {
+          label: `CORRECT`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: 'rgba(153, 204, 51, 1)',
+          data: table.tableStatisticPercentages[0],
+          totalData: table.tableStatisticValues[0],
+          stack: table.tableName
+        },
+        {
+          label: `WARNINGS`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: 'rgba(255, 204, 0, 1)',
+          data: table.tableStatisticPercentages[1],
+          totalData: table.tableStatisticValues[1],
+          stack: table.tableName
+        },
+        {
+          label: `ERRORS`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: 'rgba(204, 51, 0, 1)',
+          data: table.tableStatisticPercentages[2],
+          totalData: table.tableStatisticValues[2],
+          stack: table.tableName
+        }
+      ])
+      .flat();
+    const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
+    const datasetDataObject = {
+      labels: labels,
+      datasets: datasets
+    };
+    return datasetDataObject;
+  }
+
+  function buildReleasedDashboardObject(releasedData) {
+    return {
+      labels: releasedData.map(dataset => dataset.dataSetName),
+      datasets: [
+        {
+          label: resources.messages['released'],
+          backgroundColor: 'rgba(51, 153, 0, 1)',
+          data: releasedData.map(dataset => dataset.isReleased)
+        },
+        {
+          label: resources.messages['unreleased'],
+          backgroundColor: 'rgba(208, 208, 206, 1)',
+          data: releasedData.map(dataset => !dataset.isReleased)
+        }
+      ]
+    };
+  }
+
   const loadDashboards = async () => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
-    setReleasedDashboardData(buildRealesedDashboardObject(releasedData));
+    setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
     filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
@@ -324,64 +382,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     </>
   );
 });
-
-function buildDatasetDashboardObject(datasetsDashboardsData) {
-  const datasets = datasetsDashboardsData.tables
-    .map(table => [
-      {
-        label: `CORRECT`,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: 'rgba(153, 204, 51, 1)',
-        data: table.tableStatisticPercentages[0],
-        totalData: table.tableStatisticValues[0],
-        stack: table.tableName
-      },
-      {
-        label: `WARNINGS`,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: 'rgba(255, 204, 0, 1)',
-        data: table.tableStatisticPercentages[1],
-        totalData: table.tableStatisticValues[1],
-        stack: table.tableName
-      },
-      {
-        label: `ERRORS`,
-        tableName: table.tableName,
-        tableId: table.tableId,
-        backgroundColor: 'rgba(204, 51, 0, 1)',
-        data: table.tableStatisticPercentages[2],
-        totalData: table.tableStatisticValues[2],
-        stack: table.tableName
-      }
-    ])
-    .flat();
-  const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
-  const datasetDataObject = {
-    labels: labels,
-    datasets: datasets
-  };
-  return datasetDataObject;
-}
-
-function buildRealesedDashboardObject(releasedData) {
-  return {
-    labels: releasedData.map(dataset => dataset.dataSetName),
-    datasets: [
-      {
-        label: 'Released',
-        backgroundColor: 'rgba(51, 153, 0, 1)',
-        data: releasedData.map(dataset => dataset.isReleased)
-      },
-      {
-        label: 'Unreleased',
-        backgroundColor: 'rgba(208, 208, 206, 1)',
-        data: releasedData.map(dataset => !dataset.isReleased)
-      }
-    ]
-  };
-}
 
 function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
   return tablesData.map(table => ({
