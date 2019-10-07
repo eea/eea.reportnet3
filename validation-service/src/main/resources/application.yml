@@ -1,5 +1,5 @@
 server:
-  port: ${VALIDATION_PORT:8015}
+  port: 8015
 spring:
   application:
     name: validation
