@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +13,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,29 +31,49 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class ExecuteFieldValidationCommandTest {
 
-  /** The execute field validation command. */
+  /**
+   * The execute field validation command.
+   */
   @InjectMocks
   private ExecuteFieldValidationCommand executeFieldValidationCommand;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The validation service. */
+  /**
+   * The validation service.
+   */
   @Mock
   private ValidationService validationService;
 
-  /** The kie base. */
+  /**
+   * The validation helper
+   */
+  @Mock
+  private ValidationHelper validationHelper;
+
+  /**
+   * The kie base.
+   */
   @Mock
   private KieBase kieBase;
 
-  /** The data. */
+  /**
+   * The data.
+   */
   private Map<String, Object> data;
 
-  /** The eea event VO. */
+  /**
+   * The eea event VO.
+   */
   private EEAEventVO eeaEventVO;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private Map<String, Integer> processesMap;
 
   /**
@@ -92,11 +114,14 @@ public class ExecuteFieldValidationCommandTest {
     processesMap.put("uuid", 1);
     ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
     doNothing().when(validationService).validateFields(Mockito.any(), Mockito.any(), Mockito.any());
-
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
     executeFieldValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1))
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED),
+            Mockito.any());
   }
 
   /**
@@ -109,10 +134,13 @@ public class ExecuteFieldValidationCommandTest {
     ReflectionTestUtils.setField(executeFieldValidationCommand, "fieldBatchSize", 20);
     doThrow(new EEAException()).when(validationService).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
-
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
     executeFieldValidationCommand.execute(eeaEventVO);
 
     Mockito.verify(validationService, times(1)).validateFields(Mockito.any(), Mockito.any(),
         Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1))
+        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_VALIDATED_FIELD_COMPLETED),
+            Mockito.any());
   }
 }

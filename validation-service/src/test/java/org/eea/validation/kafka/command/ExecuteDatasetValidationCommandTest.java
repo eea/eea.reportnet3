@@ -53,7 +53,9 @@ public class ExecuteDatasetValidationCommandTest {
    */
   @Mock
   private KieBase kieBase;
-
+  /**
+   * the validation helper
+   */
   @Mock
   private ValidationHelper validationHelper;
 
