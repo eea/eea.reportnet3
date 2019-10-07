@@ -56,7 +56,7 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  datasetStatisticsStatus: async dataflowId => {
+  datasetValidationStatistics: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),

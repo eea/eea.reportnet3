@@ -14,7 +14,7 @@ export const DataflowService = {
   accepted: GetAccepted({ dataflowRepository }),
   pending: GetPending({ dataflowRepository }),
   completed: GetCompleted({ dataflowRepository }),
-  datasetStatisticsStatus: GetDatasetStatisticStatus({ dataflowRepository }),
+  datasetValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
   datasetReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
   accept: Accept({ dataflowRepository }),

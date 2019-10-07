@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isNull } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './DataCustodianDashboards.module.scss';
 
@@ -22,7 +22,6 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
-  const userData = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
@@ -57,7 +56,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     try {
       setReleasedDashboardData(await DataflowService.datasetReleasedStatus(match.params.dataflowId));
 
-      const datasetsDashboardsData = await DataflowService.datasetStatisticsStatus(match.params.dataflowId);
+      const datasetsDashboardsData = await DataflowService.datasetValidationStatistics(match.params.dataflowId);
 
       filterDispatch({ type: 'INIT_DATA', payload: datasetsDashboardsData });
     } catch (error) {

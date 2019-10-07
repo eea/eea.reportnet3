@@ -1,2 +1,2 @@
 export const GetDatasetStatisticStatus = ({ dataflowRepository }) => async dataflowId =>
-  dataflowRepository.datasetStatisticsStatus(dataflowId);
+  dataflowRepository.datasetValidationStatistics(dataflowId);

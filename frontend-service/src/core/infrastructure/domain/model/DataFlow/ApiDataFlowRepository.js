@@ -121,8 +121,8 @@ const completed = async () => {
   return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetStatisticsStatus = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetStatisticsStatus(dataflowId);
+const datasetValidationStatistics = async dataflowId => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetValidationStatistics(dataflowId);
 
   const datasetsDashboardsData = {};
   datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.idDataSetSchema;
@@ -295,7 +295,7 @@ export const ApiDataflowRepository = {
   accept,
   accepted,
   completed,
-  datasetStatisticsStatus,
+  datasetValidationStatistics,
   datasetReleasedStatus,
   pending,
   reject,
