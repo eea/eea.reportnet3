@@ -1,2 +1,2 @@
-export const UpdateRecord = ({ dataSetRepository }) => async (dataSetId, record) =>
-  dataSetRepository.updateRecordsById(dataSetId, record);
+export const UpdateRecord = ({ datasetRepository }) => async (datasetId, record) =>
+  datasetRepository.updateRecordsById(datasetId, record);

@@ -15,14 +15,14 @@ import { Dropdown } from 'primereact/dropdown';
 import { ContributorService } from 'core/services/Contributor';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export function ContributorsList({ dataFlowId }) {
+export function ContributorsList({ dataflowId }) {
   const resources = useContext(ResourcesContext);
   const [contributorsArray, setContributorsArray] = useState([]);
 
   const rolesList = [{ roleLabel: 'Read only', role: 'read' }, { roleLabel: 'Read/Write', role: 'read_write' }];
 
   const loadContributorsList = async () => {
-    setContributorsArray(await ContributorService.all(dataFlowId));
+    setContributorsArray(await ContributorService.all(dataflowId));
   };
 
   useEffect(() => {
@@ -30,15 +30,15 @@ export function ContributorsList({ dataFlowId }) {
   }, []);
 
   const onContributorRoleUpdate = async (contributorId, newRole) => {
-    await ContributorService.updateById(dataFlowId, contributorId, newRole);
+    await ContributorService.updateById(dataflowId, contributorId, newRole);
   };
 
   const onContributorAdd = async (login, role) => {
-    await ContributorService.addByLogin(dataFlowId, login, role);
+    await ContributorService.addByLogin(dataflowId, login, role);
   };
 
   const onContributorDelete = async contributorId => {
-    await ContributorService.deleteById(dataFlowId, contributorId);
+    await ContributorService.deleteById(dataflowId, contributorId);
   };
   /* #region Actions Reducer */
   const initialState = { role: '', contributorId: '' };

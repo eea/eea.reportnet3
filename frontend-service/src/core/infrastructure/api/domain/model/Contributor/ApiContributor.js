@@ -4,7 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiContributor = {
-  all: async dataFlowId => {
+  all: async dataflowId => {
     /* 
         const response = await HTTPRequester.get({
           url: '/jsons/contributors.json',
@@ -29,22 +29,22 @@ export const apiContributor = {
 
     return hardcodedResponseExample;
   },
-  addByLogin: async (dataFlowId, contributorLogin, contributorRole) => {
+  addByLogin: async (dataflowId, contributorLogin, contributorRole) => {
     console.log(
-      'Adding Contributor to dataFlowId: ',
-      dataFlowId,
+      'Adding Contributor to dataflowId: ',
+      dataflowId,
       ' contributorLogin:',
       contributorLogin,
       ' role:',
       contributorRole
     );
   },
-  deleteById: async (dataFlowId, contributorId) => {
-    console.log('Deliting Contributor from dataFlowId: ', dataFlowId, ' contributorId', contributorId);
+  deleteById: async (dataflowId, contributorId) => {
+    console.log('Deliting Contributor from dataflowId: ', dataflowId, ' contributorId', contributorId);
   },
-  updateById: async (dataFlowId, contributorId, newRole) => {
+  updateById: async (dataflowId, contributorId, newRole) => {
     console.log(
-      `Updating Contributor from dataFlowId: ${dataFlowId}, contributor Id: ${contributorId}, new Role: ${newRole}`
+      `Updating Contributor from dataflowId: ${dataflowId}, contributor Id: ${contributorId}, new Role: ${newRole}`
     );
   }
 };
