@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +13,7 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.service.ValidationService;
+import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +42,8 @@ public class ExecuteRecordValidationCommandTest {
   /** The validation service. */
   @Mock
   private ValidationService validationService;
+  @Mock
+  private ValidationHelper validationHelper;
 
   /** The kie base. */
   @Mock
@@ -52,7 +56,7 @@ public class ExecuteRecordValidationCommandTest {
   private EEAEventVO eeaEventVO;
 
   /** The processes map. */
-  private Map<String, Integer> processesMap;
+  private ConcurrentHashMap<String, Integer> processesMap;
 
   /**
    * Inits the mocks.
@@ -88,10 +92,12 @@ public class ExecuteRecordValidationCommandTest {
    */
   @Test
   public void executeTest() throws EEAException {
-    // self uuid
     processesMap.put("uuid", 1);
     ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
-    doNothing().when(validationService).validateRecord(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
+    doNothing().when(validationService).validateRecord(Mockito.anyLong(), Mockito.any(),
+        Mockito.any());
+    when(validationHelper.getKieBase(Mockito.any(), Mockito.any())).thenReturn(kieBase);
 
     executeRecordValidationCommand.execute(eeaEventVO);
 
@@ -106,6 +112,21 @@ public class ExecuteRecordValidationCommandTest {
    */
   @Test
   public void executeExceptionTest() throws EEAException {
+    processesMap.put("uuid", 1);
+    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
+    ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
+    doThrow(new EEAException()).when(validationService).validateRecord(Mockito.any(), Mockito.any(),
+        Mockito.any());
+
+    executeRecordValidationCommand.execute(eeaEventVO);
+
+    Mockito.verify(validationService, times(1)).validateRecord(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void executeExceptionSendTest() throws EEAException {
+    when(validationHelper.getProcessesMap()).thenReturn(processesMap);
     ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
     doThrow(new EEAException()).when(validationService).validateRecord(Mockito.any(), Mockito.any(),
         Mockito.any());
