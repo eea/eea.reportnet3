@@ -1,7 +1,6 @@
 package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -95,8 +94,7 @@ public class ExecuteRecordValidationCommandTest {
     processesMap.put("uuid", 1);
     ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
     Mockito.when(validationHelper.getProcessesMap()).thenReturn(new ConcurrentHashMap<>());
-    doNothing().when(validationService).validateRecord(Mockito.anyLong(), Mockito.any(),
-        Mockito.any());
+
     when(validationHelper.getKieBase(Mockito.any(), Mockito.any())).thenReturn(kieBase);
 
     executeRecordValidationCommand.execute(eeaEventVO);
