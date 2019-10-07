@@ -1,12 +1,9 @@
 package org.eea.indexsearch.io.kafka.domain;
 
+import java.util.Objects;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-@Getter
-@Setter
 public class ElasticSearchData {
 
   private String id;
@@ -18,5 +15,11 @@ public class ElasticSearchData {
   private String registerUserURL;
   private String organizationName;
   private EntityEvent entityEvent;
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(elasticCrossoverFilter, elasticUser, entityEvent, id, organizationName,
+        registerUserAuthorization, registerUserName, registerUserURL, roleName);
+  }
 
 }

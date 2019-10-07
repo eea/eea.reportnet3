@@ -1,15 +1,16 @@
 package org.eea.validation.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
+import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.validation.persistence.data.domain.TableValue;
-import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class ValidationHelper {
   private KafkaSenderUtils kafkaSenderUtils;
 
   @Autowired
-  private TableRepository tableRepository;
+  private LockService lockService;
 
   /**
    * The validation service.
@@ -135,7 +136,6 @@ public class ValidationHelper {
     releaseRecordsValidation(datasetId, uuId);
     LOG.info("Validating Fields");
     releaseFieldsValidation(datasetId, uuId);
-
   }
 
   /**
@@ -282,6 +282,14 @@ public class ValidationHelper {
       this.removeKieBase(uuid);
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value);
+      List<Object> criteria = new ArrayList<>();
+      final EEAEventVO event = new EEAEventVO();
+      final Map<String, Object> data = new HashMap<>();
+      data.put("dataset_id", datasetId);
+      event.setEventType(EventType.COMMAND_EXECUTE_VALIDATION);
+      event.setData(data);
+      criteria.add(event);
+      lockService.removeLockByCriteria("ExecuteValidationCommand.execute(..)", criteria);
     }
   }
 

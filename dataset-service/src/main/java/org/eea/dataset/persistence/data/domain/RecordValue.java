@@ -34,7 +34,8 @@ public class RecordValue {
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence")
+  @SequenceGenerator(name = "record_sequence_generator", sequenceName = "record_sequence",
+      allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;

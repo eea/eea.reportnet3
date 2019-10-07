@@ -19,6 +19,8 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,13 +170,14 @@ public class DataSetControllerImpl implements DatasetController {
    * @param idTableSchema the id table schema
    */
 
+  @LockMethod(removeWhenFinish = false)
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void loadTableData(@PathVariable("id") final Long datasetId,
+  public void loadTableData(@LockCriteria @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file,
-      @PathVariable(value = "idTableSchema") String idTableSchema) {
+      @LockCriteria @PathVariable(value = "idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
@@ -188,13 +191,13 @@ public class DataSetControllerImpl implements DatasetController {
     // extract the file content
     try {
       InputStream is = file.getInputStream();
+      // This method will realease the lock
       fileTreatmentHelper.executeFileProcess(datasetId, fileName, is, idTableSchema);
       // NOPMD this cannot be avoid since Callable throws Exception in
     } catch (IOException | EEAException | InterruptedException e) {
       LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-
   }
 
   /**

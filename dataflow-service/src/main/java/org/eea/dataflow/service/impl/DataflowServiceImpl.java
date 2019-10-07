@@ -313,4 +313,28 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+
+  /**
+   * Gets the datasets id.
+   *
+   * @param id the id
+   * @return the datasets id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataFlowVO getDatasetsId(Long id) throws EEAException {
+
+    if (id == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(id);
+    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
+
+
+    return dataflowVO;
+  }
+
 }
