@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import styles from './App.module.css';
 import { routes } from 'ui/routes';
 
+import { AccessPoint } from 'ui/views/AccessPoint';
 import { DataflowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
 import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
 import { DocumentationDataset } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
@@ -53,7 +54,8 @@ const App = () => {
         <ResourcesContext.Provider value={resources}>
           <Router>
             <Switch>
-              <Route exact path="/" component={Login} />
+              {/* <Route exact path="/" component={Login} /> */}
+              <Route path={routes.ACCESS_POINT} component={AccessPoint} />
               <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
               <PrivateRoute exact path={routes.DATA_CUSTODIAN_DASHBOARDS} component={DataCustodianDashboards} />
               <PrivateRoute exact path={routes.DATAFLOW} component={ReportingDataflow} />
