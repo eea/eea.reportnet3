@@ -16,10 +16,5 @@ public class ElasticSearchData {
   private String organizationName;
   private EntityEvent entityEvent;
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(elasticCrossoverFilter, elasticUser, entityEvent, id, organizationName,
-        registerUserAuthorization, registerUserName, registerUserURL, roleName);
-  }
 
 }
