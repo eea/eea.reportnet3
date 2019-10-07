@@ -121,8 +121,8 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
     props.put("heartbeat.interval.ms", 3000);
     props.put("session.timeout.ms", 130000);
-    props.put("enable.auto.commit", "false");
-    props.put("isolation.level", "read_committed");
+    //props.put("enable.auto.commit", "false");
+    //props.put("isolation.level", "read_committed");
 
     return new DefaultKafkaConsumerFactory<>(props);
   }
