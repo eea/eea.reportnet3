@@ -2,7 +2,8 @@ import { DataflowConfig } from 'conf/domain/model/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import dataCustodianDashboards from './dashboardData.json';
+import dataCustodianDashboards from './response_GlobalStatsDataflow.json';
+import metadataJson from './metadata.json';
 
 export const apiDataflow = {
   accept: async dataflowId => {
@@ -56,19 +57,41 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  dashboards: async dataflowId => {
-    console.log('Getting all the dashboards', dataflowId);
-    // const tokens = userStorage.get();
-    // const response = await HTTPRequester.get({
-    //   url: '/jsons/dataCustodianDashboards.json',
-    //   queryString: {},
-    //   headers: {
-    //     Authorization: `Bearer ${tokens.accessToken}`
-    //   }
-    // });
-    // return response.data;
-    const hardcodedDashboardTest = dataCustodianDashboards;
-    return hardcodedDashboardTest;
+  datasetsValidationStatistics: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    // const hardcodedDashboardTest = dataCustodianDashboards;
+    // return hardcodedDashboardTest;
+  },
+  datasetsReleasedStatus: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.datasetsReleasedStatus, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
+  metadata: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.metadata, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    // return metadataJson;
   },
   pending: async () => {
     const tokens = userStorage.get();
