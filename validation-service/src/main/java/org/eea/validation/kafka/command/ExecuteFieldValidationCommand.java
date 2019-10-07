@@ -73,10 +73,11 @@ public class ExecuteFieldValidationCommand extends AbstractEEAEventHandlerComman
   @Override
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    final String uuid = (String) eeaEventVO.getData().get("uuid");
     TenantResolver.setTenantName("dataset_" + datasetId);
     final int numPag = (int) eeaEventVO.getData().get("numPag");
     try {
-      KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
+      KieBase kieBase = validationHelper.getKieBase(uuid, datasetId);
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
       validationService.validateFields(datasetId, kieBase, pageable);
 
@@ -85,7 +86,7 @@ public class ExecuteFieldValidationCommand extends AbstractEEAEventHandlerComman
           e);
       eeaEventVO.getData().put("error", e);
     } finally {
-      final String uuid = (String) eeaEventVO.getData().get("uuid");
+
       //if this is the coordinator validation  instance, then no need to send message, just updates expected validations and verify if process is finished
       ConcurrentHashMap<String, Integer> processMap = validationHelper.getProcessesMap();
       synchronized (processMap) {

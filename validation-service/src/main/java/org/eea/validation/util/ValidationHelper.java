@@ -11,6 +11,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.service.ValidationService;
+import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ public class ValidationHelper {
    * The processes map.
    */
   private ConcurrentHashMap<String, Integer> processesMap;
+  private Map<String, KieBase> droolsActiveSessions;
 
   /**
    * The field batch size.
@@ -69,6 +71,43 @@ public class ValidationHelper {
   public ValidationHelper() {
     super();
     processesMap = new ConcurrentHashMap<>();
+    droolsActiveSessions = new ConcurrentHashMap<>();
+  }
+
+  /**
+   * Gets kie base for given process.
+   *
+   * @param processId the process id
+   * @param datasetId the dataset id
+   *
+   * @return the kie base
+   *
+   * @throws EEAException the eea exception
+   */
+  public KieBase getKieBase(String processId, Long datasetId) throws EEAException {
+    KieBase kieBase = null;
+    synchronized (droolsActiveSessions) {
+      if (!droolsActiveSessions.containsKey(processId)) {
+        LOG.info("KieBase created for process {}", processId);
+        droolsActiveSessions.put(processId, validationService.loadRulesKnowledgeBase(datasetId));
+      }
+      kieBase = droolsActiveSessions.get(processId);
+    }
+    return kieBase;
+  }
+
+  /**
+   * Remove kie base after given process finishes.
+   *
+   * @param processId the process id
+   */
+  public void removeKieBase(String processId) {
+    synchronized (droolsActiveSessions) {
+      if (droolsActiveSessions.containsKey(processId)) {
+        LOG.info("KieBase removed for process {}", processId);
+        droolsActiveSessions.remove(processId);
+      }
+    }
   }
 
   /**
@@ -147,6 +186,7 @@ public class ValidationHelper {
   public ConcurrentHashMap<String, Integer> getProcessesMap() {
     return processesMap;
   }
+
 
   /**
    * Release dataset validation.
@@ -236,7 +276,12 @@ public class ValidationHelper {
       synchronized (processesMap) {
         processesMap.remove(uuid);
       }
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, datasetId);
+      Map<String, Object> value = new HashMap<>();
+      value.put("dataset_id", datasetId);
+      value.put("uuid", uuid);
+      this.removeKieBase(uuid);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value);
     }
   }
 

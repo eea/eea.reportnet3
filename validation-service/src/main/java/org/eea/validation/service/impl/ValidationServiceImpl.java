@@ -275,7 +275,9 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
-    List<DatasetValidation> validations = runDatasetValidations(dataset, kieBase.newKieSession());
+    KieSession session = kieBase.newKieSession();
+    List<DatasetValidation> validations = runDatasetValidations(dataset, session);
+    session.destroy();
     validations.stream().forEach(validation -> validation.setDatasetValue(dataset));
     validationDatasetRepository.saveAll(validations);
   }
@@ -299,12 +301,15 @@ public class ValidationServiceImpl implements ValidationService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
     // dataset.getTableValues().stream().forEach(table -> {
-    List<TableValidation> validations = runTableValidations(table, kieBase.newKieSession());
+    KieSession session = kieBase.newKieSession();
+    List<TableValidation> validations = runTableValidations(table, session);
     if (table.getTableValidations() != null) {
       table.getTableValidations().stream().filter(Objects::nonNull).forEach(tableValidation -> {
         tableValidation.setTableValue(table);
       });
     }
+    session.destroy();
+
     tableValidationRepository.saveAll(validations);
 
   }
@@ -357,7 +362,7 @@ public class ValidationServiceImpl implements ValidationService {
     records.stream().filter(Objects::nonNull).forEach(row -> {
       KieSession session = kieBase.newKieSession();
       runRecordValidations(row, session);
-      session.dispose();
+      session.destroy();
       List<RecordValidation> validations = row.getRecordValidations();
       if (null != validations) {
         validations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
@@ -423,7 +428,7 @@ public class ValidationServiceImpl implements ValidationService {
     fields.stream().filter(Objects::nonNull).forEach(field -> {
       KieSession session = kieBase.newKieSession();
       List<FieldValidation> resultFields = runFieldValidations(field, session);
-      session.dispose();
+      session.destroy();
       if (null != field.getFieldValidations()) {
         field.getFieldValidations().stream().filter(Objects::nonNull).forEach(fieldVal -> {
           fieldVal.setFieldValue(field);

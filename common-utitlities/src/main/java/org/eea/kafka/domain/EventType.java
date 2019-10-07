@@ -95,6 +95,11 @@ public enum EventType {
   COMMAND_VALIDATE_FIELD("COMMAND_TOPIC", "execute_field_validations_key", false),
 
   /**
+   * Command clean kyebase event type.
+   */
+  COMMAND_CLEAN_KYEBASE("BROADCAST_TOPIC", "command_clean_kyebase", true),
+
+  /**
    * The command validated dataset completed.
    */
   COMMAND_VALIDATED_DATASET_COMPLETED("BROADCAST_TOPIC", "dataset_validated_key", true),

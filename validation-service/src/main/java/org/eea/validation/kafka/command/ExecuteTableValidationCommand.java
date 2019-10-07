@@ -64,17 +64,17 @@ public class ExecuteTableValidationCommand extends AbstractEEAEventHandlerComman
   @Override
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
+    final String uuid = (String) eeaEventVO.getData().get("uuid");
     TenantResolver.setTenantName("dataset_" + datasetId);
     final Long idTable = (Long) eeaEventVO.getData().get("idTable");
     try {
-      KieBase kieBase = validationService.loadRulesKnowledgeBase(datasetId);
+      KieBase kieBase = validationHelper.getKieBase(uuid, datasetId);
       validationService.validateTable(datasetId, idTable, kieBase);
     } catch (EEAException e) {
       LOG_ERROR.error("Error processing validations for dataset {} due to exception {}", datasetId,
           e);
       eeaEventVO.getData().put("error", e);
     } finally {
-      final String uuid = (String) eeaEventVO.getData().get("uuid");
       //if this is the coordinator validation  instance, then no need to send message, just updates expected validations and verify if process is finished
       ConcurrentHashMap<String, Integer> processMap = validationHelper.getProcessesMap();
       synchronized (processMap) {
