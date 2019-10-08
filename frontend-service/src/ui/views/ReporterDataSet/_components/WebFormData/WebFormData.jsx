@@ -3,17 +3,16 @@ import { withRouter } from 'react-router-dom';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
-import { config } from 'conf';
-
 import styles from './WebFormData.module.css';
 
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
+import { routes } from 'ui/routes';
 
-const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { dataFlowId } }, history }) => {
+const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { dataflowId } }, history }) => {
   const [fetchedData, setFetchedData] = useState([]);
   const [initialCellValue, setInitialCellValue] = useState();
   const [loading, setLoading] = useState(true);
@@ -46,8 +45,8 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
   const onEditorSubmitValue = async (cell, value) => {
     if (!isEmpty(cell)) {
       if (value !== initialCellValue) {
-        const fieldUpdated = DataSetService.updateFieldById(
-          dataSetId,
+        const fieldUpdated = DatasetService.updateFieldById(
+          datasetId,
           cell.fieldSchemaId,
           cell.fieldId,
           cell.type,
@@ -71,17 +70,21 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
 
   const onLoadWebForm = async () => {
     try {
-      const webFormData = await DataSetService.webFormDataById(dataSetId, tableSchemaId);
+      const webFormData = await DatasetService.webFormDataById(datasetId, tableSchemaId);
       setFetchedData(webFormData);
     } catch (error) {
-      console.error('WebForm error: ', error);
-      const errorResponse = error.response;
-      console.error('WebForm errorResponse: ', errorResponse);
-      if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        history.push(getUrl(config.REPORTING_DATAFLOW.url, { dataFlowId }));
-      }
+      onErrorLoadingWebForm(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onErrorLoadingWebForm = error => {
+    console.error('WebForm error: ', error);
+    const errorResponse = error.response;
+    console.error('WebForm errorResponse: ', errorResponse);
+    if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+      history.push(getUrl(routes.DATAFLOW, { dataflowId }));
     }
   };
 
@@ -97,27 +100,42 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return tableData;
   };
 
-  const form = () => {
+  const getWebFormData = () => {
     let webFormData = fetchedData;
 
     if (isEmpty(webFormData)) {
-      return <div></div>;
+      return;
     }
 
     let dataColumns = webFormData.dataColumns;
     let columnHeaders = webFormData.columnHeaders;
 
     let columnTitles = getColumnHeaders(columnHeaders);
-    let grid = getGrid(dataColumns);
+    let webFormRows = getWebFormRows(dataColumns);
 
+    let data = { titles: columnTitles, rows: webFormRows };
+
+    return data;
+  };
+
+  const form = data => {
     return (
       <table className={styles.webFormTable}>
         <thead>
-          <tr className={styles.columnHeaders}>{columnTitles}</tr>
+          <tr className={styles.columnHeaders}>{data.titles}</tr>
         </thead>
-        <tbody>{grid}</tbody>
+        <tbody>{data.rows}</tbody>
       </table>
     );
+  };
+
+  const webForm = () => {
+    let webFormCreated = getWebFormData();
+    console.log(webFormCreated);
+    if (isEmpty(webFormCreated)) {
+      return <div></div>;
+    }
+    return <div>{form(webFormCreated)}</div>;
   };
 
   const getColumnHeaders = columnHeaders => {
@@ -172,20 +190,17 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
     return columns;
   };
 
-  const getGrid = dataColumns => {
-    let grid = [];
+  const onFillWebFormRows = (minsAndMaxRowsAndColumns, dataColumns) => {
+    // console.log(minsAndMaxRowsAndColumns);
+    let firstRow = parseInt(minsAndMaxRowsAndColumns.rows.firstRow);
+    let lastRow = minsAndMaxRowsAndColumns.rows.lastRow;
 
-    let rows = getMinAndMaxRows(dataColumns);
-    let firstRow = parseInt(rows.firstRow);
-    let lastRow = rows.lastRow;
-
-    let columns = getMinAndMaxColumns(dataColumns);
-    let firstColumn = columns.firstColumn.charCodeAt(0) - 64;
-    let lastColumn = columns.lastColumn.charCodeAt(0) - 64;
+    let firstColumn = minsAndMaxRowsAndColumns.columns.firstColumn.charCodeAt(0) - 64;
+    let lastColumn = minsAndMaxRowsAndColumns.columns.lastColumn.charCodeAt(0) - 64;
 
     let headerLetterColumn = String.fromCharCode(97 + firstColumn - 2).toUpperCase();
 
-    let rowsFilled = [];
+    let filledRows = [];
     let header = '';
 
     for (var rowIndex = firstRow; rowIndex <= lastRow; rowIndex++) {
@@ -221,7 +236,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
         }
       }
       if (!isEmpty(header))
-        rowsFilled.push(
+        filledRows.push(
           <tr key={rowIndex} name={rowIndex}>
             <td
               key={`${headerLetterColumn}${rowIndex}`}
@@ -232,11 +247,33 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
             {tds}
           </tr>
         );
-
       header = '';
     }
-    grid.push(rowsFilled);
-    return grid;
+    return filledRows;
+  };
+
+  // const inputRow = (indexes, column) => {
+  //   return (
+  //     <td key={`${columnIndex}${rowIndex}`} name={`${columnPosition}${rowIndex}`}>
+  //       <InputText
+  //         value={filteredColumn[0].value}
+  //         onBlur={e => onEditorSubmitValue(filteredColumn[0], e.target.value)}
+  //         onChange={e => onEditorValueChange(filteredColumn[0], e.target.value)}
+  //         onFocus={e => onEditorValueFocus(e.target.value)}
+  //         onKeyDown={e => onEditorKeyChange(filteredColumn[0], e)}
+  //       />
+  //     </td>
+  //   );
+  // };
+
+  const getWebFormRows = dataColumns => {
+    let webFormRows = [];
+    let minAndMaxRows = getMinAndMaxRows(dataColumns);
+    let minAndMaxColumns = getMinAndMaxColumns(dataColumns);
+    let minsAndMaxRowsAndColumns = { rows: minAndMaxRows, columns: minAndMaxColumns };
+    let filledRows = onFillWebFormRows(minsAndMaxRowsAndColumns, dataColumns);
+    webFormRows.push(filledRows);
+    return webFormRows;
   };
 
   if (loading) {
@@ -245,7 +282,7 @@ const WebFormData = withRouter(({ dataSetId, tableSchemaId, match: { params: { d
 
   return (
     <div className={styles.webFormWrapper}>
-      <div>{form()}</div>
+      <div>{webForm()}</div>
     </div>
   );
 });

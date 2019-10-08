@@ -1,1 +1,1 @@
-export { DataFlowColumn } from './DataFlowColumn';
+export { DataflowColumn } from './DataFlowColumn';

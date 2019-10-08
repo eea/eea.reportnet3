@@ -1,6 +1,7 @@
 package org.eea.validation.util;
 
 import static org.mockito.Mockito.when;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,11 +46,11 @@ public class KieBaseManagerTest {
   public void testKieBaseManager() throws FileNotFoundException {
     DataSetSchema dataSchema = new DataSetSchema();
     // LIST STRINGS
-    List<String> listString = new ArrayList<String>();
+    List<String> listString = new ArrayList<>();
     listString.add("ERROR VALIDATION");
     listString.add("ERROR");
     // RULES DATASET
-    List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
+    List<RuleDataSet> ruleDataSetList = new ArrayList<>();
     RuleDataSet ruleDataset = new RuleDataSet();
     ruleDataset.setIdDataSetSchema(new ObjectId());
     ruleDataset.setRuleId(new ObjectId());
@@ -58,7 +59,7 @@ public class KieBaseManagerTest {
     ruleDataset.setThenCondition(listString);
     ruleDataSetList.add(ruleDataset);
     // RULE TABLE
-    List<RuleTable> ruleTableList = new ArrayList<RuleTable>();
+    List<RuleTable> ruleTableList = new ArrayList<>();
     RuleTable ruleTable = new RuleTable();
     ruleTable.setIdTableSchema(new ObjectId());
     ruleTable.setRuleId(new ObjectId());
@@ -68,7 +69,7 @@ public class KieBaseManagerTest {
     ruleTableList.add(ruleTable);
 
     // RULES RECORDS
-    List<RuleRecord> ruleRecordList = new ArrayList<RuleRecord>();
+    List<RuleRecord> ruleRecordList = new ArrayList<>();
     RuleRecord ruleRecord = new RuleRecord();
     ruleRecord.setIdRecordSchema(new ObjectId());
     ruleRecord.setRuleId(new ObjectId());
@@ -78,7 +79,7 @@ public class KieBaseManagerTest {
     ruleRecordList.add(ruleRecord);
 
     // RULES FIELDS
-    List<RuleField> ruleFieldList = new ArrayList<RuleField>();
+    List<RuleField> ruleFieldList = new ArrayList<>();
     ruleDataset.setIdDataSetSchema(new ObjectId());
     RuleField ruleField = new RuleField();
     ruleField.setIdFieldSchema(new ObjectId());
@@ -89,10 +90,10 @@ public class KieBaseManagerTest {
     ruleFieldList.add(ruleField);
 
     // PART TO COMPONT THE OBJET TO RETURN
-    List<TableSchema> tableSchemasList = new ArrayList<TableSchema>();
+    List<TableSchema> tableSchemasList = new ArrayList<>();
     TableSchema tableSchema = new TableSchema();
     RecordSchema record = new RecordSchema();
-    List<FieldSchema> fieldSchemaList = new ArrayList<FieldSchema>();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
     FieldSchema fieldSchema = new FieldSchema();
     fieldSchema.setRuleField(ruleFieldList);
     fieldSchema.setIdFieldSchema(new ObjectId());
@@ -110,7 +111,7 @@ public class KieBaseManagerTest {
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
     when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
-    kieBaseManager.reloadRules(1L, 1L);
+    kieBaseManager.reloadRules(1L);
   }
 
 }

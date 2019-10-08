@@ -1,10 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -40,7 +36,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.test.util.ReflectionTestUtils;
 
-//@RunWith(MockitoJUnitRunner.class)
+// @RunWith(MockitoJUnitRunner.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DriverManager.class, JdbcRecordStoreServiceImpl.class})
 public class JdbcRecordStoreServiceImplTest {
@@ -82,7 +78,7 @@ public class JdbcRecordStoreServiceImplTest {
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
-    Mockito.verify(jdbcTemplate, Mockito.times(85)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(86)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -177,12 +173,11 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot",
-        "./src/test/resources/");
+    ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
 
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L);
 
-    Mockito.verify(kafkaSender, Mockito.times(1))
+    Mockito.verify(kafkaSender, Mockito.times(2))
         .releaseDatasetKafkaEvent(Mockito.any(EventType.class), Mockito.anyLong());
   }
 

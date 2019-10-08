@@ -13,6 +13,9 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
+import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
+
 const Login = ({ history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -38,7 +41,7 @@ const Login = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
             {!isEmpty(loginError) && <div class={styles.error}>{loginError}</div>}
-            {/* <Link to={routes.DATAFLOW_TASKS}>cast</Link> */}
+            {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
           <Formik
             initialValues={initialValues}
@@ -48,12 +51,12 @@ const Login = ({ history }) => {
               try {
                 const userObject = await UserService.login(values.userName, values.password);
                 user.onLogin(userObject);
-                history.push('/data-flow-task/');
+                history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {
                 console.error(error);
                 user.onLogout();
                 const errorResponse = error.response;
-                if (!isUndefined(errorResponse) && errorResponse.data.message.includes('401')) {
+                if (!isUndefined(errorResponse) && errorResponse.status === 500) {
                   setLoginError('Incorrect username or password');
                   console.error(errorResponse.data.message);
                 }
@@ -91,12 +94,7 @@ const Login = ({ history }) => {
                   <ErrorMessage className="error" name="password" component="div" />
                 </fieldset>
                 <fieldset className={`${styles.buttonHolder}`}>
-                  <Button
-                    layout="simple"
-                    type="submit"
-                    label={resources.messages.loginLogin}
-                    className="rp-btn primary"
-                  />
+                  <Button layout="simple" type="submit" label={resources.messages.login} className="rp-btn primary" />
                 </fieldset>
               </Form>
             )}

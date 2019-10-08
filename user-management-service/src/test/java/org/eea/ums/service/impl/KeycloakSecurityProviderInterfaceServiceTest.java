@@ -46,6 +46,17 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
   @Test
+  public void doLoginByCode() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
+    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString()))
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("code");
+    Assert.assertNotNull(token);
+    Assert.assertEquals("token", token.getAccessToken());
+  }
+
+  @Test
   public void refreshToken() {
     TokenInfo tokenInfo = new TokenInfo();
     tokenInfo.setAccessToken("token");

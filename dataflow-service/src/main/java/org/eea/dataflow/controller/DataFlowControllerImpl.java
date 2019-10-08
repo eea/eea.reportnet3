@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.helper.StatsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,10 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Autowired
   private DataflowService dataflowService;
+
+  /** The statistics helper. */
+  @Autowired
+  private StatsHelper statisticsHelper;
 
 
   /**
@@ -259,6 +265,55 @@ public class DataFlowControllerImpl implements DataFlowController {
           EEAErrorMessage.DATE_AFTER_INCORRECT);
     }
     dataflowService.createDataFlow(dataFlowVO);
+  }
+
+  /**
+   * Gets the statistics by dataflow.
+   *
+   * @param idDataflow the id dataflow
+   * @return the statistics by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{idDataflow}/globalStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow) {
+
+    List<StatisticsVO> statistics = null;
+    try {
+      statistics = statisticsHelper.executeStatsProcess(idDataflow);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return statistics;
+  }
+
+
+  /**
+   * Gets the metabase by id.
+   *
+   * @param id the id
+   * @return the metabase by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTOR'))")
+  public DataFlowVO getMetabaseById(@PathVariable("id") final Long id) {
+
+    if (id == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    DataFlowVO result = null;
+    try {
+      result = dataflowService.getMetabaseById(id);
+
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return result;
   }
 
 }

@@ -46,6 +46,17 @@ public class UserManagementControllerImplTest {
   }
 
   @Test
+  public void generateTokenByCodeTest() {
+    TokenVO tokenVO = new TokenVO();
+    tokenVO.setAccessToken("token");
+    Mockito.when(securityProviderInterfaceService.doLogin(Mockito.anyString()))
+        .thenReturn(tokenVO);
+    TokenVO result = userManagementController.generateToken("");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("token", result.getAccessToken());
+  }
+
+  @Test
   public void refreshTokenTest() {
     TokenVO tokenVO = new TokenVO();
     tokenVO.setAccessToken("token");

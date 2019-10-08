@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
 
@@ -10,13 +10,15 @@ import styles from './SnapshotSliderBar.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotList } from './_components/SnapshotList';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
+const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoadingSnapshotListData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
+  const form = useRef(null);
 
   useEffect(() => {
     const bodySelector = document.querySelector('body');
@@ -29,6 +31,10 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
       .max(100, resources.messages['snapshotDescriptionValidationMax'])
       .required(resources.messages['snapshotDescriptionValidationRequired'])
   });
+
+  if (isVisible) {
+    form.current.resetForm();
+  }
 
   return (
     <Sidebar
@@ -43,6 +49,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
           <Formik
+            ref={form}
             initialValues={{ createSnapshotDescription: '' }}
             validationSchema={snapshotValidationSchema}
             onSubmit={values => {
@@ -81,7 +88,13 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData }) => {
             )}
           />
         </div>
-        <SnapshotList snapshotListData={snapshotListData} />
+        {isLoadingSnapshotListData ? (
+          <Spinner />
+        ) : snapshotListData.length > 0 ? (
+          <SnapshotList snapshotListData={snapshotListData} />
+        ) : (
+          <h3>{resources.messages.snapshotsDontExist}</h3>
+        )}
       </div>
     </Sidebar>
   );

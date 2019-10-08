@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
@@ -32,17 +33,29 @@ import com.google.common.collect.Lists;
 @Service("datachemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The data set metabase table collection. */
+  /**
+   * The data set metabase table collection.
+   */
   @Autowired
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
-  /** The dataschema mapper. */
+  /**
+   * The dataschema mapper.
+   */
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
+
+  /**
+   * Mapper to map dataset schemas with no rules
+   */
+  @Autowired
+  private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
 
   /**
    * The Constant LOG.
@@ -50,38 +63,60 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
 
-  /** The Constant GENERAL_WARNING. */
+  /**
+   * The Constant GENERAL_WARNING.
+   */
   private static final String GENERAL_WARNING = "WARNING";
 
-  /** The Constant VALIDATION_WARNING. */
+  /**
+   * The Constant VALIDATION_WARNING.
+   */
   private static final String VALIDATION_WARNING = "WARNING!,PROBABLY THIS IS NOT CORRECT";
 
-  /** The Constant GENERAL_ERROR. */
+  /**
+   * The Constant GENERAL_ERROR.
+   */
   private static final String GENERAL_ERROR = "ERROR";
 
-  /** The Constant STRING_WARNING. */
+  /**
+   * The Constant STRING_WARNING.
+   */
   private static final String STRING_WARNING =
       "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
 
-  /** The Constant INTEGER_ERROR. */
+  /**
+   * The Constant INTEGER_ERROR.
+   */
   private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
 
-  /** The Constant BOOLEAN_ERROR. */
+  /**
+   * The Constant BOOLEAN_ERROR.
+   */
   private static final String BOOLEAN_ERROR = "ERROR!, THIS IS NOT A TRUE/FALSE VALUE";
 
-  /** The Constant COORDINATE_LAT_ERROR. */
+  /**
+   * The Constant COORDINATE_LAT_ERROR.
+   */
   private static final String COORDINATE_LAT_ERROR = "ERROR!, THIS IS NOT A COORDINATE LAT";
 
-  /** The Constant COORDINATE_LONG_ERROR. */
+  /**
+   * The Constant COORDINATE_LONG_ERROR.
+   */
   private static final String COORDINATE_LONG_ERROR = "ERROR!, THIS IS NOT A COORDINATE LONG";
 
-  /** The Constant DATE_ERROR. */
+  /**
+   * The Constant DATE_ERROR.
+   */
   private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
-  /** The Constant WARNING. */
+  /**
+   * The Constant WARNING.
+   */
   private static final String WARNING = "WARNING";
 
-  /** The Constant NULL. */
+  /**
+   * The Constant NULL.
+   */
   private static final String NULL = "id == null";
 
   /**
@@ -103,9 +138,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setNameDataSetSchema("dataSet_" + datasetId);
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
-    List<RuleDataSet> ruleDataSetList = new ArrayList<RuleDataSet>();
+    List<RuleDataSet> ruleDataSetList = new ArrayList<>();
     RuleDataSet ruleDataset = new RuleDataSet();
-    List<String> listaStrinsDataset = new ArrayList<String>();
+    List<String> listaStrinsDataset = new ArrayList<>();
     listaStrinsDataset.add(GENERAL_ERROR);
     listaStrinsDataset.add(GENERAL_WARNING);
     ruleDataset.setThenCondition(listaStrinsDataset);
@@ -125,7 +160,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TableSchema tableSchema = new TableSchema();
       tableSchema.setIdTableSchema(idTableSchema);
 
-
       List<RuleTable> ruleTableList = new ArrayList<>();
       RuleTable ruleTable = new RuleTable();
       List<String> listaStrinsRuleTable = new ArrayList<>();
@@ -141,7 +175,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       ruleTable.setScope(TypeEntityEnum.TABLE);
       ruleTableList.add(ruleTable);
 
-
       tableSchema.setNameTableSchema(table.getTableName());
       ObjectId idRecordSchema = new ObjectId();
       RecordSchema recordSchema = new RecordSchema();
@@ -151,14 +184,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<>();
 
-
-
       // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
       createRuleFields(i, table, recordSchema, fieldSchemas, headersSize, dataflowId);
-
 
       RuleRecord ruleRecord = new RuleRecord();
       List<String> listaStrinsRuleRecord = new ArrayList<>();
@@ -218,7 +248,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       RuleField rule2 = new RuleField();
       List<String> listaMsgTypeValidation = new ArrayList<>();
       switch (header.getHeaderType().toString().toLowerCase().trim()) {
-        case "string":
+        case "text":
           rule2.setRuleId(new ObjectId());
           rule2.setDataFlowId(dataflowId);
           rule2.setIdFieldSchema(idFieldSchema);
@@ -308,6 +338,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Find the dataschema per id.
    *
    * @param dataschemaId the idDataschema
+   *
    * @return the data schema by id
    */
   @Override
@@ -329,14 +360,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Find the dataschema per idDataFlow.
    *
    * @param idFlow the idDataFlow to look for
+   *
    * @return the data schema by id flow
    */
   @Override
-  public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow) {
+  public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules) {
 
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
     LOG.info("Schema retrived by idFlow {}", idFlow);
-    return dataSchemaMapper.entityToClass(dataschema);
+    return addRules ? dataSchemaMapper.entityToClass(dataschema)
+        : noRulesDataSchemaMapper.entityToClass(dataschema);
 
   }
 

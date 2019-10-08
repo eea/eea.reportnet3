@@ -1,1 +1,1 @@
-export const GetCompleted = ({ dataFlowRepository }) => async () => dataFlowRepository.completed();
+export const GetCompleted = ({ dataflowRepository }) => async () => dataflowRepository.completed();

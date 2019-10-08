@@ -1,1 +1,1 @@
-export const Reject = ({ dataFlowRepository }) => async dataFlowId => dataFlowRepository.reject(dataFlowId);
+export const Reject = ({ dataflowRepository }) => async dataflowId => dataflowRepository.reject(dataflowId);

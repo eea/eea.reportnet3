@@ -5,6 +5,7 @@
 .defaultBtn {
   composes: rp-btn from global;
   composes: default from global;
+  color: var(--black) !important;
 }
 .btnWrapper {
   display: flex;

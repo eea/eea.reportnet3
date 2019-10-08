@@ -9,33 +9,33 @@ import { Icon } from 'ui/views/_components/Icon';
 import { Link } from 'react-router-dom';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { DataFlowService } from 'core/services/DataFlow';
+import { DataflowService } from 'core/services/DataFlow';
 
-export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
+export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
   const resources = useContext(ResourcesContext);
 
   const onAccept = async () => {
     try {
-      const status = await DataFlowService.accept(itemContent.requestId);
+      const status = await DataflowService.accept(itemContent.requestId);
       if (status >= 200 && status <= 299) {
         dataFetch();
       } else {
-        console.error('AcceptDataFlow error with status: ', status);
+        console.error('AcceptDataflow error with status: ', status);
       }
     } catch (error) {
-      console.error('AcceptDataFlow error: ', error);
+      console.error('AcceptDataflow error: ', error);
     }
   };
   const onReject = async () => {
     try {
-      const status = await DataFlowService.reject(itemContent.requestId);
+      const status = await DataflowService.reject(itemContent.requestId);
       if (status >= 200 && status <= 299) {
         dataFetch();
       } else {
-        console.error('RejectDataFlow error with status: ', status);
+        console.error('RejectDataflow error with status: ', status);
       }
     } catch (error) {
-      console.error('RejectDataFlow error: ', error);
+      console.error('RejectDataflow error: ', error);
     }
   };
 
@@ -48,7 +48,7 @@ export const DataFlowItem = ({ itemContent, listType, dataFetch }) => {
             : `${styles.container}`
         }>
         {listType === 'accepted' ? (
-          <Link className={styles.containerLink} to={`/reporting-data-flow/${itemContent.id}`}>
+          <Link className={styles.containerLink} to={`/dataflow/${itemContent.id}`}>
             {children}
           </Link>
         ) : (
