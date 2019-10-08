@@ -16,12 +16,7 @@ export const AccessPoint = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
             <h2>
-              <a
-                onClick={e => {
-                  history.push(
-                    '/eulogin?state=1489230d-c1b1-4era25-8b85-1f9a5b109171&session_state=86974635-7d00-473f-80db-acb72bce1750&code=1c012476-b252-46c4-b853-251c97f3672f.86974635-7d00-473f-80db-acb72bce1750.a598977f-b726-4a35-9211-6aefd4ac6bdc'
-                  );
-                }}>
+              <a href="http://reportnet3-backend.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Freportnet3.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid">
                 {resources.messages.linkInEulogin}
               </a>
             </h2>
