@@ -7,6 +7,7 @@ import logo from 'assets/images/logo.png';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const AccessPoint = ({ history }) => {
+  //comentario tonto
   const resources = useContext(ResourcesContext);
   return (
     <div className="rp-container">
