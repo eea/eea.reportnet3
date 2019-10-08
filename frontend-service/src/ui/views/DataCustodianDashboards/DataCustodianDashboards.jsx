@@ -49,14 +49,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     try {
       loadDataflowMetadata();
       loadDashboards();
     } catch (error) {
       console.error(error.response);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -127,16 +124,23 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   const loadDashboards = async () => {
+    setLoading(true);
+
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
     setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
     filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
+
+    setLoading(false);
   };
 
   const datasetOptionsObject = {
+    hover: {
+      mode: 'nearest'
+    },
     tooltips: {
-      model: 'index',
+      mode: 'nearest',
       intersect: true,
       callbacks: {
         label: (tooltipItems, data) =>
