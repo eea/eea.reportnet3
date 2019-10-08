@@ -1,0 +1,12 @@
+:global .p-accordion .p-accordion-content {
+  padding: 1rem;
+  margin: auto;
+}
+
+.list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  grid-gap: 10px;
+  padding: 0;
+}
