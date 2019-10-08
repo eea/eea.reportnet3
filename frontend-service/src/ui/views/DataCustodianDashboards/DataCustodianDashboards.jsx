@@ -136,8 +136,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const datasetOptionsObject = {
+    hover: {
+      mode: 'nearest'
+    },
     tooltips: {
-      model: 'index',
+      mode: 'nearest',
       intersect: true,
       callbacks: {
         label: (tooltipItems, data) =>
