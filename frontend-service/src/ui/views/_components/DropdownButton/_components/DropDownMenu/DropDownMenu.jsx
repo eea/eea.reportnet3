@@ -12,9 +12,7 @@ class DropDownMenu extends Component {
       menuClick: false
     };
 
-    ['show', 'hide'].map(item => {
-      this[item] = this[item].bind(this);
-    });
+    ['show', 'hide'].map(item => (this[item] = this[item].bind(this)));
   }
 
   hide(event) {

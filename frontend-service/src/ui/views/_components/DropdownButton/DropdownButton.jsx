@@ -2,8 +2,6 @@ import React, { useRef } from 'react';
 
 import styles from './DropdownButton.module.scss';
 
-import { config } from 'conf';
-
 import { DropDownMenu } from './_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 
