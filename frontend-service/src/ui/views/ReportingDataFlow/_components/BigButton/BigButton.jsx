@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -7,29 +7,8 @@ import style from './BigButton.module.css';
 import { Menu } from './_components/Menu';
 import { Icon } from 'ui/views/_components/Icon';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
 export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
-  const resources = useContext(ResourcesContext);
-  const toggleVisibility = target => {
-    const incommingMenu = target.nextSibling;
-    const display = incommingMenu.style.display === 'none' ? true : false;
-
-    const allMenus = document.querySelectorAll('.p-menu-overlay-visible');
-    allMenus.forEach(other => (other.style.display = 'none'));
-    if (display) {
-      incommingMenu.style.opacity = 0;
-      incommingMenu.style.display = 'block';
-
-      setTimeout(() => {
-        incommingMenu.style.bottom = `-${incommingMenu.offsetHeight}px`;
-        incommingMenu.style.opacity = 1;
-      }, 50);
-    } else {
-      incommingMenu.style.display = 'none';
-    }
-  };
-
+  let menuRef = useRef();
   const dataset = model ? (
     <>
       <div className={`${style.bigButton} ${style.dataset}`}>
@@ -41,10 +20,10 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
           }}>
           <FontAwesomeIcon icon={AwesomeIcons('dataset')} />
         </a>
-        <span className={style.dropDwonIcon} onClick={e => toggleVisibility(e.currentTarget)}>
+        <span className={style.dropDwonIcon} onClick={e => menuRef.current.show(e)}>
           <FontAwesomeIcon icon={AwesomeIcons('dropDown')} />
         </span>
-        <Menu model={model} />
+        <Menu ref={menuRef} model={model} />
         {isReleased && (
           <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
         )}
