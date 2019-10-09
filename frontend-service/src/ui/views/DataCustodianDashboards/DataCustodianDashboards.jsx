@@ -22,11 +22,11 @@ import { filterReducer } from './_components/_context/filterReducer';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 const SEVERITY_CODE = {
-  CORRECT: 1,
-  WARNING: 2,
-  ERROR: 3,
-  RELEASED: 4,
-  UNRELEASED: 5
+  CORRECT: 'CORRECT',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+  RELEASED: 'RELEASED',
+  UNRELEASED: 'UNRELEASED'
 };
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
@@ -203,7 +203,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         ]
       });
     }
-  }, [dashboardColors]);
+  }, []);
 
   const loadDashboards = async () => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
@@ -278,9 +278,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onChangeColor = (color, type) => {
-    const inmDashboardColors = { ...dashboardColors };
-    inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
-    setDashboardColors(inmDashboardColors);
+    setDashboardColors({ ...dashboardColors, [type]: `#${color}` });
   };
 
   console.log('filterState', filterState);
