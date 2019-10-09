@@ -37,6 +37,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [isLoadingReleasedData, setIsLoadingReleasedData] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
   const [releasedData, setReleasedData] = useState();
+  const [validationDashboardData, setValidationDashboardData] = useState();
+  const [validationData, setValidationData] = useState();
 
   const home = {
     icon: config.icons['home'],
@@ -127,6 +129,45 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     return datasetDataObject;
   }
 
+  useEffect(() => {
+    if (!isUndefined(validationData)) {
+      setValidationDashboardData({
+        labels: validationData.datasetReporters.map(reporterData => reporterData.reporterName),
+        datasets: validationData.tables
+          .map(table => [
+            {
+              label: `CORRECT`,
+              tableName: table.tableName,
+              tableId: table.tableId,
+              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : '#99CC33',
+              data: table.tableStatisticPercentages[0],
+              totalData: table.tableStatisticValues[0],
+              stack: table.tableName
+            },
+            {
+              label: `WARNINGS`,
+              tableName: table.tableName,
+              tableId: table.tableId,
+              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : '#ffCC00',
+              data: table.tableStatisticPercentages[1],
+              totalData: table.tableStatisticValues[1],
+              stack: table.tableName
+            },
+            {
+              label: `ERRORS`,
+              tableName: table.tableName,
+              tableId: table.tableId,
+              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : '#CC3300',
+              data: table.tableStatisticPercentages[2],
+              totalData: table.tableStatisticValues[2],
+              stack: table.tableName
+            }
+          ])
+          .flat()
+      });
+    }
+  }, [dashboardColors]);
+
   function buildReleasedDashboardObject(releasedData) {
     return {
       labels: releasedData.map(dataset => dataset.dataSetName),
@@ -167,12 +208,13 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const loadDashboards = async () => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
-    setReleasedData(releasedData);
     setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
+    setReleasedData(releasedData);
     setIsLoadingReleasedData(false);
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
-    filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
+    setValidationDashboardData(buildDatasetDashboardObject(datasetsDashboardsData));
+    setValidationData(datasetsDashboardsData);
     setIsLoadingValidationData(false);
   };
 
@@ -380,6 +422,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
 
+  useEffect(() => {
+    filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
+  }, [validationDashboardData]);
+
   const layout = children => {
     return (
       <MainLayout>
@@ -410,26 +456,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
         return (
           <>
-            <fieldset className={styles.colorPickerWrap}>
-              <legend>Choose your dashboard color</legend>
-              {Object.keys(SEVERITY_CODE).map((type, i) => {
-                return (
-                  <React.Fragment key={i}>
-                    <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
-                      .slice(1)
-                      .toLowerCase()}: `}</span>
-                    <ColorPicker
-                      key={type}
-                      value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
-                      onChange={e => {
-                        e.preventDefault();
-                        onChangeColor(e.value, SEVERITY_CODE[type]);
-                      }}
-                    />
-                  </React.Fragment>
-                );
-              })}
-            </fieldset>
             <div className={`rep-row ${styles.chart_released}`}>
               <Chart
                 type="bar"
@@ -457,6 +483,24 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           {resources.messages['dataflow']}: {dataflowMetadata.name}
         </h1>
       </div>
+      <fieldset className={styles.colorPickerWrap}>
+        <legend>Choose your dashboard color</legend>
+        {Object.keys(SEVERITY_CODE).map((type, i) => {
+          return (
+            <React.Fragment key={i}>
+              <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()}: `}</span>
+              <ColorPicker
+                key={type}
+                value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+                onChange={e => {
+                  e.preventDefault();
+                  onChangeColor(e.value, SEVERITY_CODE[type]);
+                }}
+              />
+            </React.Fragment>
+          );
+        })}
+      </fieldset>
       <div> {isLoadingValidationData ? <Spinner className={styles.positioning} /> : errorsDashboard()}</div>
       <div> {isLoadingReleasedData ? <Spinner className={styles.positioning} /> : releasedDashboard()}</div>
     </>
