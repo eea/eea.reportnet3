@@ -10,7 +10,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { StatusList } from '../_components/StatusList';
 import { TableListItem } from '../_components/TableListItem';
 
-function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
+const FilterList = ({ originalData: { datasets, labels }, filterDispatch }) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
     return { tableName: dataset.tableName, tableId: dataset.tableId };
@@ -62,6 +62,6 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
       <StatusList filterDispatch={filterDispatch}></StatusList>
     </>
   );
-}
+};
 
 export { FilterList };

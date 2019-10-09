@@ -18,6 +18,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
 
+import { filterReducer } from './_components/_context/filterReducer';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 const SEVERITY_CODE = {
@@ -29,6 +30,16 @@ const SEVERITY_CODE = {
 };
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
+  const initialFiltersState = {
+    reporterFilter: [],
+    tableFilter: [],
+    statusFilter: [],
+    originalData: {},
+    data: {}
+  };
+
+  const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
+  console.log('filterState: ', filterReducer);
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashboardColors, setDashboardColors] = useState({
@@ -91,7 +102,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             label: `CORRECT`,
             tableName: table.tableName,
             tableId: table.tableId,
-            backgroundColor: 'rgba(153, 204, 51, 1)',
+            backgroundColor: dashboardColors.CORRECT,
             data: table.tableStatisticPercentages[0],
             totalData: table.tableStatisticValues[0],
             stack: table.tableName
@@ -100,7 +111,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             label: `WARNINGS`,
             tableName: table.tableName,
             tableId: table.tableId,
-            backgroundColor: 'rgba(255, 204, 0, 1)',
+            backgroundColor: dashboardColors.WARNING,
             data: table.tableStatisticPercentages[1],
             totalData: table.tableStatisticValues[1],
             stack: table.tableName
@@ -109,7 +120,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
             label: `ERRORS`,
             tableName: table.tableName,
             tableId: table.tableId,
-            backgroundColor: 'rgba(204, 51, 0, 1)',
+            backgroundColor: dashboardColors.ERROR,
             data: table.tableStatisticPercentages[2],
             totalData: table.tableStatisticValues[2],
             stack: table.tableName
@@ -126,41 +137,33 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   useEffect(() => {
-    if (!isUndefined(validationData)) {
-      setValidationDashboardData({
-        labels: validationData.datasetReporters.map(reporterData => reporterData.reporterName),
-        datasets: validationData.tables
-          .map(table => [
-            {
-              label: `CORRECT`,
-              tableName: table.tableName,
-              tableId: table.tableId,
-              backgroundColor: dashboardColors.CORRECT,
-              data: table.tableStatisticPercentages[0],
-              totalData: table.tableStatisticValues[0],
-              stack: table.tableName
-            },
-            {
-              label: `WARNINGS`,
-              tableName: table.tableName,
-              tableId: table.tableId,
-              backgroundColor: dashboardColors.WARNING,
-              data: table.tableStatisticPercentages[1],
-              totalData: table.tableStatisticValues[1],
-              stack: table.tableName
-            },
-            {
-              label: `ERRORS`,
-              tableName: table.tableName,
-              tableId: table.tableId,
-              backgroundColor: dashboardColors.ERROR,
-              data: table.tableStatisticPercentages[2],
-              totalData: table.tableStatisticValues[2],
-              stack: table.tableName
+    console.log('filterstate.data', filterState.data);
+    if (!isUndefined(filterState.data)) {
+      const {
+        data: { labels, datasets }
+      } = filterState;
+      if (labels && datasets) {
+        setValidationDashboardData({
+          labels: labels,
+          datasets: datasets.map(dataset => {
+            switch (dataset.label) {
+              case 'CORRECT':
+                dataset.backgroundColor = dashboardColors.CORRECT;
+                break;
+              case 'WARNINGS':
+                dataset.backgroundColor = dashboardColors.WARNING;
+                break;
+              case 'ERRORS':
+                dataset.backgroundColor = dashboardColors.ERROR;
+                break;
+
+              default:
+                break;
             }
-          ])
-          .flat()
-      });
+            return dataset;
+          })
+        });
+      }
     }
   }, [dashboardColors]);
 
@@ -280,143 +283,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     setDashboardColors(inmDashboardColors);
   };
 
-  const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
-    if (isEmpty(originalData)) {
-      return;
-    }
-
-    let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
-
-    const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
-
-    const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
-
-    tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
-
-    tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
-
-    return { labels: labels, datasets: tablesData };
-  };
-
-  const initialFiltersState = {
-    reporterFilter: [],
-    tableFilter: [],
-    statusFilter: [],
-    originalData: {},
-    data: {}
-  };
-
-  const filterReducer = (state, { type, payload }) => {
-    let reportersLabelsArr = [];
-    let tablesIdsArray = [];
-    let msgStatusTypesArray = [];
-    let filteredTableData;
-    switch (type) {
-      case 'INIT_DATA':
-        return {
-          ...state,
-          originalData: payload,
-          data: payload
-        };
-
-      case 'TABLE_CHECKBOX_ON':
-        tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
-        filteredTableData = onFilteringData(
-          state.originalData,
-          tablesIdsArray,
-          state.reporterFilter,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          tableFilter: tablesIdsArray,
-          data: filteredTableData
-        };
-
-      case 'TABLE_CHECKBOX_OFF':
-        tablesIdsArray = [...state.tableFilter, payload.tableId];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          tablesIdsArray,
-          state.reporterFilter,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          tableFilter: tablesIdsArray,
-          data: filteredTableData
-        };
-
-      case 'REPORTER_CHECKBOX_ON':
-        reportersLabelsArr = state.reporterFilter.filter(label => label !== payload.label);
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          reportersLabelsArr,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          reporterFilter: reportersLabelsArr,
-          data: filteredTableData
-        };
-
-      case 'REPORTER_CHECKBOX_OFF':
-        reportersLabelsArr = [...state.reporterFilter, payload.label];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          reportersLabelsArr,
-          state.statusFilter
-        );
-        return {
-          ...state,
-          reporterFilter: reportersLabelsArr,
-          data: filteredTableData
-        };
-      case 'STATUS_FILTER_ON':
-        msgStatusTypesArray = state.statusFilter.filter(status => status !== payload.msg);
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          state.reporterFilter,
-          msgStatusTypesArray
-        );
-
-        return {
-          ...state,
-          statusFilter: msgStatusTypesArray,
-          data: filteredTableData
-        };
-      case 'STATUS_FILTER_OFF':
-        msgStatusTypesArray = [...state.statusFilter, payload.msg];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          state.reporterFilter,
-          msgStatusTypesArray
-        );
-
-        return {
-          ...state,
-          statusFilter: msgStatusTypesArray,
-          data: filteredTableData
-        };
-
-      default:
-        return state;
-    }
-  };
-
-  const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
+  console.log('filterState', filterState);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
@@ -502,19 +369,3 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     </>
   );
 });
-
-function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
-  return tablesData.map(table => ({
-    ...table,
-    data: table.data.filter((d, i) => !labelsPositionsInFilteredLabelsArray.includes(i)),
-    totalData: table.totalData.filter((td, i) => !labelsPositionsInFilteredLabelsArray.includes(i))
-  }));
-}
-
-function getLabelIndex(originalData, label) {
-  return originalData.labels.indexOf(label);
-}
-
-function showArrayItem(array, item) {
-  return !array.includes(item);
-}
