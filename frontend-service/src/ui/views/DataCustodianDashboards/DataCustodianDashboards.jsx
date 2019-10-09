@@ -16,14 +16,13 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
-
+import { GlobalValidationDashboard } from 'ui/views/_components/GlobalValidationDashboard/';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowMetadata, setDataflowMetadata] = useState({});
-  const [isLoadingValidationData, setIsLoadingValidationData] = useState(true);
   const [isLoadingReleasedData, setIsLoadingReleasedData] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
@@ -128,50 +127,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
     setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
     setIsLoadingReleasedData(false);
-
-    const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
-    filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
-
-    setIsLoadingValidationData(false);
-  };
-
-  const datasetOptionsObject = {
-    hover: {
-      mode: 'point',
-      intersect: false
-    },
-    tooltips: {
-      mode: 'point',
-      intersect: true,
-      callbacks: {
-        label: (tooltipItems, data) =>
-          `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
-            data.datasets[tooltipItems.datasetIndex].totalData[tooltipItems.index]
-          } (${tooltipItems.yLabel}%)`
-      }
-    },
-
-    legend: {
-      display: false
-    },
-    responsive: true,
-    scales: {
-      xAxes: [
-        {
-          stacked: true,
-          maxBarThickness: 100
-        }
-      ],
-      yAxes: [
-        {
-          stacked: true,
-          ticks: {
-            // Include a % sign in the ticks
-            callback: (value, index, values) => `${value}%`
-          }
-        }
-      ]
-    }
   };
 
   const releasedOptionsObject = {
@@ -195,166 +150,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     }
   };
 
-  const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
-    if (isEmpty(originalData)) {
-      return;
-    }
-
-    let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
-
-    const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
-
-    const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
-
-    tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
-
-    tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
-
-    return { labels: labels, datasets: tablesData };
-  };
-
-  const initialFiltersState = {
-    reporterFilter: [],
-    tableFilter: [],
-    statusFilter: [],
-    originalData: {},
-    data: {}
-  };
-
-  const filterReducer = (state, { type, payload }) => {
-    let reportersLabelsArr = [];
-    let tablesIdsArray = [];
-    let msgStatusTypesArray = [];
-    let filteredTableData;
-    switch (type) {
-      case 'INIT_DATA':
-        return {
-          ...state,
-          originalData: payload,
-          data: payload
-        };
-
-      case 'TABLE_CHECKBOX_ON':
-        tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
-        filteredTableData = onFilteringData(
-          state.originalData,
-          tablesIdsArray,
-          state.reporterFilter,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          tableFilter: tablesIdsArray,
-          data: filteredTableData
-        };
-
-      case 'TABLE_CHECKBOX_OFF':
-        tablesIdsArray = [...state.tableFilter, payload.tableId];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          tablesIdsArray,
-          state.reporterFilter,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          tableFilter: tablesIdsArray,
-          data: filteredTableData
-        };
-
-      case 'REPORTER_CHECKBOX_ON':
-        reportersLabelsArr = state.reporterFilter.filter(label => label !== payload.label);
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          reportersLabelsArr,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          reporterFilter: reportersLabelsArr,
-          data: filteredTableData
-        };
-
-      case 'REPORTER_CHECKBOX_OFF':
-        reportersLabelsArr = [...state.reporterFilter, payload.label];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          reportersLabelsArr,
-          state.statusFilter
-        );
-        return {
-          ...state,
-          reporterFilter: reportersLabelsArr,
-          data: filteredTableData
-        };
-      case 'STATUS_FILTER_ON':
-        msgStatusTypesArray = state.statusFilter.filter(status => status !== payload.msg);
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          state.reporterFilter,
-          msgStatusTypesArray
-        );
-
-        return {
-          ...state,
-          statusFilter: msgStatusTypesArray,
-          data: filteredTableData
-        };
-      case 'STATUS_FILTER_OFF':
-        msgStatusTypesArray = [...state.statusFilter, payload.msg];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          state.reporterFilter,
-          msgStatusTypesArray
-        );
-
-        return {
-          ...state,
-          statusFilter: msgStatusTypesArray,
-          data: filteredTableData
-        };
-
-      default:
-        return state;
-    }
-  };
-
-  const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
-
   const layout = children => {
     return (
       <MainLayout>
         <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
       </MainLayout>
-    );
-  };
-
-  const errorsDashboard = () => {
-    if (!isEmpty(filterState.data)) {
-      return (
-        <div className="rep-row">
-          <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
-          <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
-        </div>
-      );
-    }
-    return (
-      <div>
-        <h2>{resources.messages['emptyErrorsDashboard']}</h2>
-      </div>
     );
   };
 
@@ -382,7 +183,10 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           {resources.messages['dataflow']}: {dataflowMetadata.name}
         </h1>
       </div>
-      <div> {isLoadingValidationData ? <Spinner className={styles.positioning} /> : errorsDashboard()}</div>
+      {/* <div> {isLoadingValidationData ? <Spinner className={styles.positioning} /> : errorsDashboard()}</div> */}
+      <div>
+        <GlobalValidationDashboard dataflowId={match.params.dataflowId}></GlobalValidationDashboard>
+      </div>
       <div> {isLoadingReleasedData ? <Spinner className={styles.positioning} /> : releasedDashboard()}</div>
     </>
   );
