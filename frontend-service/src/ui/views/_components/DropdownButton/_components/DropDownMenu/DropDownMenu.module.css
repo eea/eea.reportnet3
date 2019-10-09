@@ -20,6 +20,9 @@
   list-style: none;
   padding: 0px;
 }
+.dropDownMenu ul li {
+  margin-bottom: 1rem;
+}
 
 .dropDownMenu ul li a {
   color: var(--c-black-400);
