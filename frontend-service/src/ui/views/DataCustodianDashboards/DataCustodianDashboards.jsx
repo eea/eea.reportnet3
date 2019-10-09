@@ -409,8 +409,9 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     if (!isEmpty(releasedDashboardData.datasets) && isEmpty(!releasedDashboardData.labels)) {
       if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
         return (
-          <div className={`rep-row ${styles.chart_released}`}>
-            <div className="rep-row">
+          <>
+            <fieldset className={styles.colorPickerWrap}>
+              <legend>Choose your dashboard color</legend>
               {Object.keys(SEVERITY_CODE).map((type, i) => {
                 return (
                   <React.Fragment key={i}>
@@ -428,9 +429,17 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
                   </React.Fragment>
                 );
               })}
+            </fieldset>
+            <div className={`rep-row ${styles.chart_released}`}>
+              <Chart
+                type="bar"
+                data={releasedDashboardData}
+                options={releasedOptionsObject}
+                width="100%"
+                height="25%"
+              />
             </div>
-            <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
-          </div>
+          </>
         );
       }
     }
