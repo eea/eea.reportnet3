@@ -10,6 +10,7 @@ import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Chart } from 'primereact/chart';
+import { ColorPicker } from 'primereact/colorpicker';
 import { FilterList } from './_components/FilterList/FilterList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -19,13 +20,23 @@ import { DataflowService } from 'core/services/DataFlow';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
+const SEVERITY_CODE = {
+  CORRECT: 1,
+  WARNING: 2,
+  ERROR: 3,
+  RELEASED: 4,
+  UNRELEASED: 5
+};
+
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [dashboardColors, setDashboardColors] = useState();
   const [dataflowMetadata, setDataflowMetadata] = useState({});
   const [isLoadingValidationData, setIsLoadingValidationData] = useState(true);
   const [isLoadingReleasedData, setIsLoadingReleasedData] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
+  const [releasedData, setReleasedData] = useState();
 
   const home = {
     icon: config.icons['home'],
@@ -47,6 +58,16 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         label: resources.messages.dataCustodianDashboards
       }
     ]);
+  }, []);
+
+  useEffect(() => {
+    setDashboardColors({
+      CORRECT: '#99CC33',
+      WARNING: '#ffCC00',
+      ERROR: '#CC3300',
+      RELEASED: '#339900',
+      UNRELEASED: '#D0D0CE'
+    });
   }, []);
 
   useEffect(() => {
@@ -112,26 +133,46 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       datasets: [
         {
           label: resources.messages['released'],
-          backgroundColor: 'rgba(51, 153, 0, 1)',
+          backgroundColor: '#339900',
           data: releasedData.map(dataset => dataset.isReleased)
         },
         {
           label: resources.messages['unreleased'],
-          backgroundColor: 'rgba(208, 208, 206, 1)',
+          backgroundColor: '#D0D0CE',
           data: releasedData.map(dataset => !dataset.isReleased)
         }
       ]
     };
   }
 
+  useEffect(() => {
+    if (!isUndefined(releasedData)) {
+      setReleasedDashboardData({
+        labels: releasedData.map(dataset => dataset.dataSetName),
+        datasets: [
+          {
+            label: resources.messages['released'],
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.RELEASED : '#339900',
+            data: releasedData.map(dataset => dataset.isReleased)
+          },
+          {
+            label: resources.messages['unreleased'],
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.UNRELEASED : '#D0D0CE',
+            data: releasedData.map(dataset => !dataset.isReleased)
+          }
+        ]
+      });
+    }
+  }, [dashboardColors]);
+
   const loadDashboards = async () => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
+    setReleasedData(releasedData);
     setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
     setIsLoadingReleasedData(false);
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
     filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
-
     setIsLoadingValidationData(false);
   };
 
@@ -193,6 +234,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         }
       ]
     }
+  };
+
+  const onChangeColor = (color, type) => {
+    const inmDashboardColors = { ...dashboardColors };
+    inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
+    setDashboardColors(inmDashboardColors);
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
@@ -363,6 +410,25 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       if (releasedDashboardData.datasets.length > 0 && releasedDashboardData.labels.length > 0) {
         return (
           <div className={`rep-row ${styles.chart_released}`}>
+            <div className="rep-row">
+              {Object.keys(SEVERITY_CODE).map((type, i) => {
+                return (
+                  <React.Fragment key={i}>
+                    <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+                      .slice(1)
+                      .toLowerCase()}: `}</span>
+                    <ColorPicker
+                      key={type}
+                      value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+                      onChange={e => {
+                        e.preventDefault();
+                        onChangeColor(e.value, SEVERITY_CODE[type]);
+                      }}
+                    />
+                  </React.Fragment>
+                );
+              })}
+            </div>
             <Chart type="bar" data={releasedDashboardData} options={releasedOptionsObject} width="100%" height="25%" />
           </div>
         );

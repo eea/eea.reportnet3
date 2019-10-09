@@ -5,12 +5,11 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dashboard.module.css';
 
+import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'primereact/colorpicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { DatasetService } from 'core/services/DataSet';
-
-import { Chart } from 'primereact/chart';
 
 const SEVERITY_CODE = {
   CORRECT: 1,
