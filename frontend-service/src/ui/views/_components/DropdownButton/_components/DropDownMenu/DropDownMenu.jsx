@@ -89,7 +89,7 @@ class DropDownMenu extends Component {
     const { model } = this.props;
     if (model) {
       return (
-        <div className={`${style.dropDownMenu} p-menu-overlay-visible`} style={this.state.style}>
+        <div className={style.dropDownMenu} style={this.state.style}>
           <ul>
             {model ? (
               model.map((item, i) => (
