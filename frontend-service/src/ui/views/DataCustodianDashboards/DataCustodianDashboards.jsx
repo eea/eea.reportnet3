@@ -31,7 +31,13 @@ const SEVERITY_CODE = {
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dashboardColors, setDashboardColors] = useState();
+  const [dashboardColors, setDashboardColors] = useState({
+    CORRECT: '#99CC33',
+    WARNING: '#ffCC00',
+    ERROR: '#CC3300',
+    RELEASED: '#339900',
+    UNRELEASED: '#D0D0CE'
+  });
   const [dataflowMetadata, setDataflowMetadata] = useState({});
   const [isLoadingValidationData, setIsLoadingValidationData] = useState(true);
   const [isLoadingReleasedData, setIsLoadingReleasedData] = useState(true);
@@ -60,16 +66,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         label: resources.messages.dataCustodianDashboards
       }
     ]);
-  }, []);
-
-  useEffect(() => {
-    setDashboardColors({
-      CORRECT: '#99CC33',
-      WARNING: '#ffCC00',
-      ERROR: '#CC3300',
-      RELEASED: '#339900',
-      UNRELEASED: '#D0D0CE'
-    });
   }, []);
 
   useEffect(() => {
@@ -139,7 +135,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
               label: `CORRECT`,
               tableName: table.tableName,
               tableId: table.tableId,
-              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : '#99CC33',
+              backgroundColor: dashboardColors.CORRECT,
               data: table.tableStatisticPercentages[0],
               totalData: table.tableStatisticValues[0],
               stack: table.tableName
@@ -148,7 +144,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
               label: `WARNINGS`,
               tableName: table.tableName,
               tableId: table.tableId,
-              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : '#ffCC00',
+              backgroundColor: dashboardColors.WARNING,
               data: table.tableStatisticPercentages[1],
               totalData: table.tableStatisticValues[1],
               stack: table.tableName
@@ -157,7 +153,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
               label: `ERRORS`,
               tableName: table.tableName,
               tableId: table.tableId,
-              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : '#CC3300',
+              backgroundColor: dashboardColors.ERROR,
               data: table.tableStatisticPercentages[2],
               totalData: table.tableStatisticValues[2],
               stack: table.tableName
