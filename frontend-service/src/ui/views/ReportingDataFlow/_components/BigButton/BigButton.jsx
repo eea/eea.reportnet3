@@ -24,6 +24,7 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
           icon="caretDown"
           model={model}
           buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+          iconStyle={{ fontSize: '1.8rem' }}
         />
         {isReleased && (
           <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
