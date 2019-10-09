@@ -23,7 +23,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowMetadata, setDataflowMetadata] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [isLoadingValidationData, setIsLoadingValidationData] = useState(true);
+  const [isLoadingReleasedData, setIsLoadingReleasedData] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   const home = {
@@ -49,14 +50,11 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     try {
       loadDataflowMetadata();
       loadDashboards();
     } catch (error) {
       console.error(error.response);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -129,15 +127,22 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const loadDashboards = async () => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
     setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
+    setIsLoadingReleasedData(false);
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
     filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
+
+    setIsLoadingValidationData(false);
   };
 
   const datasetOptionsObject = {
+    hover: {
+      mode: 'point',
+      intersect: false
+    },
     tooltips: {
-      model: 'index',
-      intersect: false,
+      mode: 'point',
+      intersect: true,
       callbacks: {
         label: (tooltipItems, data) =>
           `${data.datasets[tooltipItems.datasetIndex].tableName}: ${
@@ -145,6 +150,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           } (${tooltipItems.yLabel}%)`
       }
     },
+
     legend: {
       display: false
     },
@@ -369,10 +375,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     );
   };
 
-  if (loading) {
-    return layout(<Spinner />);
-  }
-
   return layout(
     <>
       <div className="rep-row">
@@ -380,8 +382,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           {resources.messages['dataflow']}: {dataflowMetadata.name}
         </h1>
       </div>
-      {errorsDashboard()}
-      {releasedDashboard()}
+      <div> {isLoadingValidationData ? <Spinner className={styles.positioning} /> : errorsDashboard()}</div>
+      <div> {isLoadingReleasedData ? <Spinner className={styles.positioning} /> : releasedDashboard()}</div>
     </>
   );
 });
