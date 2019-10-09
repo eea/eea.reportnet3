@@ -1710,9 +1710,6 @@ body .p-accordion .p-accordion-header a .p-accordion-toggle-icon.pi-caret-down:b
 body .p-accordion .p-accordion-header:not(.p-disabled) a:focus {
   outline: 0 none;
   outline-offset: 0;
-  -webkit-box-shadow: 0 0 0 0.2em #004494;
-  -moz-box-shadow: 0 0 0 0.2em #004494;
-  box-shadow: 0 0 0 0.2em #004494;
 }
 body .p-accordion .p-accordion-header:not(.p-highlight):not(.p-disabled):hover a {
   background-color: #dbdbdb;
