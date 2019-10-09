@@ -7,10 +7,7 @@ import style from './BigButton.module.css';
 import { Menu } from './_components/Menu';
 import { Icon } from 'ui/views/_components/Icon';
 
-import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-
 export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
-  const resources = useContext(ResourcesContext);
   let menuRef = useRef();
   const dataset = model ? (
     <>

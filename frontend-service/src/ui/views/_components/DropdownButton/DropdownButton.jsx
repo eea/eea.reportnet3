@@ -1,25 +1,20 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 
 import styles from './DropdownButton.module.scss';
 
 import { config } from 'conf';
 
+import { DropDownMenu } from './_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 
 const DropdownButton = ({ children, icon, model, hasWritePermissions }) => {
-  const [isVisible, setisVisible] = useState(false);
-  const toggleMenu = () => {
-    const otherElements = document.querySelectorAll('.p-menu-overlay-visible');
-    otherElements.forEach(element => {
-      element.style.display = 'none';
-    });
-    setisVisible(!isVisible);
-  };
+  const menuRef = useRef();
   return (
-    <div className={styles.dropdown} onClick={e => toggleMenu()}>
-      <Icon icon={icon} style={{ fontSize: '1.5rem' }} />
-      {children}
-      <div
+    <div className={styles.dropDownWrapper}>
+      <div className={styles.dropdown} onClick={e => menuRef.current.show(e)}>
+        <Icon icon={icon} style={{ fontSize: '1.5rem' }} />
+        {children}
+        {/* <div
         className={`${styles.dropdown_content} p-menu p-menu-dynamic p-menu-overlay p-component p-menu-overlay-visible`}
         style={{ display: isVisible ? 'block' : 'none' }}>
         <ul className="p-menu-list p-reset">
@@ -35,7 +30,9 @@ const DropdownButton = ({ children, icon, model, hasWritePermissions }) => {
             );
           })}
         </ul>
+      </div> */}
       </div>
+      <DropDownMenu ref={menuRef} model={model} />
     </div>
   );
 };
