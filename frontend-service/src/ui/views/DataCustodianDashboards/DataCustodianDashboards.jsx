@@ -189,12 +189,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         datasets: [
           {
             label: resources.messages['released'],
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.RELEASED : '#339900',
+            backgroundColor: dashboardColors.RELEASED,
             data: releasedData.map(dataset => dataset.isReleased)
           },
           {
             label: resources.messages['unreleased'],
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.UNRELEASED : '#D0D0CE',
+            backgroundColor: dashboardColors.UNRELEASED,
             data: releasedData.map(dataset => !dataset.isReleased)
           }
         ]
