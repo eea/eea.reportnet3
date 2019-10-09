@@ -21,11 +21,11 @@ import { DataflowService } from 'core/services/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 const SEVERITY_CODE = {
-  CORRECT: 1,
-  WARNING: 2,
-  ERROR: 3,
-  RELEASED: 4,
-  UNRELEASED: 5
+  CORRECT: 'CORRECT',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+  RELEASED: 'RELEASED',
+  UNRELEASED: 'UNRELEASED'
 };
 
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
@@ -189,18 +189,18 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
         datasets: [
           {
             label: resources.messages['released'],
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.RELEASED : '#339900',
+            backgroundColor: dashboardColors.RELEASED,
             data: releasedData.map(dataset => dataset.isReleased)
           },
           {
             label: resources.messages['unreleased'],
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.UNRELEASED : '#D0D0CE',
+            backgroundColor: dashboardColors.UNRELEASED,
             data: releasedData.map(dataset => !dataset.isReleased)
           }
         ]
       });
     }
-  }, [dashboardColors]);
+  }, []);
 
   const loadDashboards = async () => {
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
@@ -275,9 +275,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const onChangeColor = (color, type) => {
-    const inmDashboardColors = { ...dashboardColors };
-    inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
-    setDashboardColors(inmDashboardColors);
+    setDashboardColors({ ...dashboardColors, [type]: `#${color}` });
   };
 
   const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
