@@ -34,6 +34,11 @@ const addRecordsById = async (datasetId, tableSchemaId, records) => {
   return recordsAdded;
 };
 
+const createValidation = (entityType, id, levelError, message) => {
+  const validation = new Validation(id, levelError, entityType, new Date(Date.now()).toString(), message);
+  return validation;
+};
+
 const deleteDataById = async datasetId => {
   const dataDeleted = await apiDataset.deleteDataById(datasetId);
   return dataDeleted;
@@ -371,6 +376,7 @@ const transposeMatrix = matrix => {
 
 export const ApiDatasetRepository = {
   addRecordsById,
+  createValidation,
   deleteDataById,
   deleteRecordById,
   deleteTableDataById,

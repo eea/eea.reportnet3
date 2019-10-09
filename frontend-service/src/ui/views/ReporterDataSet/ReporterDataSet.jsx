@@ -189,20 +189,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
-  const onLoadSnapshotList = async () => {
-    try {
-      setIsLoadingSnapshotListData(true);
-
-      const snapshotsData = await SnapshotService.all(datasetId);
-
-      setSnapshotListData(snapshotsData);
-
-      setIsLoadingSnapshotListData(false);
-    } catch (error) {
-      setIsLoadingSnapshotListData(false);
-    }
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(dataflowId);
@@ -244,6 +230,22 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
 
     setLoading(false);
+  };
+
+  const onLoadSnapshotList = async () => {
+    try {
+      if (snapshotListData.length === 0) {
+        setIsLoadingSnapshotListData(true);
+      }
+      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
+      setTimeout(async () => {
+        const snapshotsData = await SnapshotService.all(datasetId);
+        setSnapshotListData(snapshotsData);
+        setIsLoadingSnapshotListData(false);
+      }, 500);
+    } catch (error) {
+      setIsLoadingSnapshotListData(false);
+    }
   };
 
   const onSetVisible = (fnUseState, visible) => {
@@ -487,8 +489,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               icon={'camera'}
               label={resources.messages['snapshots']}
               onClick={() => {
+                onSetVisible(setSnapshotIsVisible, true);
                 onLoadSnapshotList();
-                return onSetVisible(setSnapshotIsVisible, true);
               }}
             />
           </div>
