@@ -4,7 +4,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import style from './BigButton.module.css';
 
-import { Menu } from './_components/Menu';
+import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Icon } from 'ui/views/_components/Icon';
 
 export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
@@ -20,10 +20,11 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
           }}>
           <FontAwesomeIcon icon={AwesomeIcons('dataset')} />
         </a>
-        <span className={style.dropDwonIcon} onClick={e => menuRef.current.show(e)}>
-          <FontAwesomeIcon icon={AwesomeIcons('dropDown')} />
-        </span>
-        <Menu ref={menuRef} model={model} />
+        <DropdownButton
+          icon="caretDown"
+          model={model}
+          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+        />
         {isReleased && (
           <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
         )}
