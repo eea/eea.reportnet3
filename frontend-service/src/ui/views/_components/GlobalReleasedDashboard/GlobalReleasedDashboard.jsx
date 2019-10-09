@@ -5,7 +5,6 @@ import { isEmpty, isUndefined } from 'lodash';
 import styles from './GlobalReleasedDashboard.module.css';
 
 import { Chart } from 'primereact/chart';
-import { FilterList } from 'ui/views/DataCustodianDashboards/_components/FilterList';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 

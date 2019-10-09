@@ -40,8 +40,6 @@ const GlobalValidationDashboard = dataflowId => {
   };
 
   const filterReducer = (state, { type, payload }) => {
-    console.log(state);
-
     let reportersLabelsArr = [];
     let tablesIdsArray = [];
     let msgStatusTypesArray = [];

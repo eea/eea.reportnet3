@@ -220,7 +220,6 @@ const datasetsReleasedStatus = async dataflowId => {
 const dataflowDetails = async dataflowId => {
   const dataflowDetailsDTO = await apiDataflow.dataflowDetails(dataflowId);
   const dataflowDetails = parseDataflowDTO(dataflowDetailsDTO);
-  console.log(dataflowDetails);
   return dataflowDetails;
 };
 
