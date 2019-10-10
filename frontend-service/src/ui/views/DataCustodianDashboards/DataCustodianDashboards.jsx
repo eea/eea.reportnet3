@@ -1,19 +1,12 @@
 import React, { useEffect, useContext, useState, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isUndefined } from 'lodash';
-
-import styles from './DataCustodianDashboards.module.scss';
-
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { Chart } from 'primereact/chart';
-import { FilterList } from './_components/FilterList/FilterList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { GlobalReleasedDashboard } from 'ui/views/_components/GlobalReleasedDashboard/';
