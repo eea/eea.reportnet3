@@ -1,8 +1,6 @@
 package org.eea.validation.util;
 
-import org.eea.interfaces.controller.ums.UserManagementController;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +13,9 @@ import org.springframework.stereotype.Component;
 public class TableValidationDrools {
 
 
-  /** The validation service. */
+  /**
+   * The validation service.
+   */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
@@ -24,18 +24,9 @@ public class TableValidationDrools {
     TableValidationDrools.validationService = validationService;
   }
 
-
-  /** The user management controller. */
-  private static UserManagementController userManagementController;
-
-  @Autowired
-  private void setUserManagerController(UserManagementController userManagementController) {
-    TableValidationDrools.userManagementController = userManagementController;
-  }
   ////////////////////////////////////////////////////////////////////
   ////////////////////////////////// charaterization //////////////////
   ////////////////////////////////////////////////////////////////////
-
 
   // --# DR01A # The Characterisation file contains records for more than one season. #
   // the boolean is to know if the validation has previous years
@@ -46,23 +37,27 @@ public class TableValidationDrools {
    * @param idSchema the id schema
    * @param previous the previous
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDR01AB(String idSchema, Boolean previous, Long datasetId) {
 
-    String DR01AB = "select v.value from dataset_" + datasetId
-        + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
+//    String DR01AB = "select v.value from dataset_" + datasetId
+//        + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
 
-    return validationService.tableValidationDR01ABQuery(DR01AB, previous);
+    return true;
+    // return validationService.tableValidationDR01ABQuery(DR01AB, previous);
   }
 
   // # DU01A # The Characterisation file contains more than one record for the
   // bathingWaterIdentifier.
+
   /**
    * Rule DU 01 A.
    *
    * @param idSchema the id schema
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU01A(String idSchema, Long datasetId) {
@@ -75,11 +70,13 @@ public class TableValidationDrools {
 
   // # DU01B # The Characterisation file contains a groupIdentifier associated with single btahing
   // water. #
+
   /**
    * Rule DU 01 B.
    *
    * @param idSchema the id schema
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU01B(String idSchema, Long datasetId) {
@@ -91,6 +88,7 @@ public class TableValidationDrools {
   }
 
   // --# DR01A # The Characterisation file contains records for more than one season. #
+
   /**
    * Rule DO 01.
    *
@@ -100,18 +98,16 @@ public class TableValidationDrools {
    * @param idSchemaBathingWaterIdentifier the id schema bathing water identifier
    * @param idDataset the id dataset
    * @param idDatasetToContribute the id dataset to contribute
+   *
    * @return the boolean
    */
   public static Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
       String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, Long idDataset,
       String idDatasetToContribute) {
-
-    ResourceInfoVO resourceInfoVO =
-        userManagementController.getResourceDetail(idDataset, ResourceGroupEnum.DATASET_PROVIDER);
     String countryCode = "''";
-    if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0
-        && resourceInfoVO.getAttributes().containsKey("countryCode")) {
-      countryCode = resourceInfoVO.getAttributes().get("countryCode").get(0);
+    if (null != ThreadPropertiesManager.getVariable("countryCode")
+        && ThreadPropertiesManager.getVariable("countryCode").equals("")) {
+      countryCode = ThreadPropertiesManager.getVariable("countryCode").toString();
     }
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
@@ -137,7 +133,6 @@ public class TableValidationDrools {
     return validationService.tableValidationQueryNonReturnResult(ruleDO01);
   }
 
-
   ////////////////////////////////////////////////////////////////////
   ////////////////////////////////// SeasonalPeriod //////////////////
   ////////////////////////////////////////////////////////////////////
@@ -153,6 +148,7 @@ public class TableValidationDrools {
    * @param idSchemaStartDate the id schema start date
    * @param idSchemaEndDate the id schema end date
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
@@ -177,19 +173,63 @@ public class TableValidationDrools {
     return validationService.tableValidationQueryNonReturnResult(ruleDU02A);
   }
 
+  public static Boolean ruleDU02B(Long datasetId, Long datasetLegazy) {
+
+    String ruleDU02B = "with vMultiple as( "
+        + "select bathingWaterIdentifierTable.bathingWaterIdentifier as bathingWaterIdentifier, "
+        + "seasonTable.season as season, " + "periodTypeTable.periodType as periodType, "
+        + "COUNT(*) " + "from( "
+        + "select v.value as bathingWaterIdentifier, v.id_record as record_id " + "from dataset_"
+        + datasetId + ".field_value v  "
+        + "where v.id_field_schema = '5d5cfa24d201fb6084d90c85') as bathingWaterIdentifierTable "
+        + "inner join( " + "select v.value as season, v.id_record as record_id " + "from dataset_"
+        + datasetId + ".field_value v  "
+        + "where v.id_field_schema = '5d5cfa24d201fb6084d90c7c') as seasonTable "
+        + "on bathingWaterIdentifierTable.record_id = seasonTable.record_id " + "inner join( "
+        + "select v.value as periodType, v.id_record as record_id " + "from dataset_" + datasetId
+        + ".field_value v  "
+        + "where v.id_field_schema = '5d5cfa24d201fb6084d90c8e') as periodTypeTable "
+        + "on seasonTable.record_id = periodTypeTable.record_id "
+        + "GROUP BY bathingWaterIdentifier,season,periodType " + "having count(*) > 1) " + " "
+        + ",      BW_LEGAZY as( " + " SELECT  " + "        (select field_value.value from dataset_"
+        + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5e907738a84f33484e5108') as bathingWaterIdentifier,  "
+        + "        (select field_value.value from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5e907738a84f33484e50ff') as season, "
+        + "        (select field_value.value from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5e907738a84f33484e5111') as periodType,  "
+        + "        (select field_value.value from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d92fa1ae54a5b94f8afba86') as startDate, "
+        + "        (select field_value.value from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d92fa1ae54a5b94f8afba86') as endDate  "
+        + "    FROM dataset_" + datasetLegazy + ".record_value rv), " + " " + " " + " "
+        + "vCandidates as( select row_number() over(partition by a.bathingWaterIdentifier, a.season, a.periodType ORDER BY a.startDate, a.endDate) r, "
+        + "             a.*  " + "from BW_LEGAZY a join vMultiple b "
+        + "on a.bathingWaterIdentifier = b.bathingWaterIdentifier " + "and a.season =b.season "
+        + "and a.periodType = b.periodType " + ") " + " " + "select a.* "
+        + "from vCandidates a left join vCandidates n  "
+        + "ON a.bathingWaterIdentifier = n.bathingWaterIdentifier AND a.season = n.season AND a.periodType = n.periodType AND (a.r + 1) = n.r "
+        + "LEFT JOIN vCandidates p "
+        + "ON a.bathingWaterIdentifier = p.bathingWaterIdentifier AND a.season = p.season AND a.periodType = p.periodType AND (a.r - 1) = p.r "
+        + "where a.endDate >= n.startDate " + "OR  a.startDate <= p.endDate "
+        + "ORDER BY a.bathingWaterIdentifier, a.season, a.periodType, a.r ";
+    return validationService.tableValidationQueryNonReturnResult(ruleDU02B);
+  }
+
   ////////////////////////////////////////////////////////////////////
   ////////////////////////////////// MonitoringResult //////////////////
   ////////////////////////////////////////////////////////////////////
 
-
   // # DU03 # The MonitoringResult file contains more than two records for the combination of
   // bathingWaterIdentifier and sampleDate. #
+
   /**
    * Rule DU 03.
    *
    * @param idSchemaBWIdent the id schema BW ident
    * @param idSchemaBWSampleDate the id schema BW sample date
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate,
@@ -203,7 +243,16 @@ public class TableValidationDrools {
         + ".field_value v " + "where v.id_field_schema = '" + idSchemaBWSampleDate + "') as tabla2 "
         + "on tabla1.record1 = tabla2.record2 " + "GROUP BY campo1,campo2 having count(*) > 1";
 
-
     return validationService.tableValidationQueryNonReturnResult(DU03);
   }
+
+
+  public static Boolean ruleEmptyTable(Long datasetId, Long idTable) {
+
+    String QUERY = "select count(*) from dataset_" + datasetId
+        + ".record_value r where r.id_Table =" + idTable;
+
+    return validationService.tableValidationQueryReturnResult(QUERY);
+  }
+
 }

@@ -6,6 +6,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,10 +83,11 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    * @param description the description
    */
   @Override
+  @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void createSnapshot(@PathVariable("idDataset") Long datasetId,
+  public void createSnapshot(@LockCriteria @PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description) {
 
     if (datasetId == null) {
@@ -92,6 +95,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
+      // This method will release the lock
       datasetSnapshotService.addSnapshot(datasetId, description);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
@@ -137,6 +141,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
@@ -148,6 +153,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
+      // This method will release the lock
       datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());

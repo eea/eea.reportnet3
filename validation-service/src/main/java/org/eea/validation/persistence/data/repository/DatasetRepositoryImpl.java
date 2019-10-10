@@ -6,13 +6,23 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.springframework.stereotype.Repository;
 
+/**
+ * The Class DatasetRepositoryImpl.
+ */
 @Repository
 public class DatasetRepositoryImpl implements DatasetExtendedQueriesRepository {
 
+  /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
 
 
+  /**
+   * Dataset validation query.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
   @SuppressWarnings("unchecked")
   @Override
   public Boolean datasetValidationQuery(String QUERY) {
@@ -26,4 +36,7 @@ public class DatasetRepositoryImpl implements DatasetExtendedQueriesRepository {
     }
 
   }
+
+
+
 }

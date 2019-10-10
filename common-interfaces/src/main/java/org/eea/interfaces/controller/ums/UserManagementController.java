@@ -41,6 +41,16 @@ public interface UserManagementController {
       @RequestParam("password") String password);
 
   /**
+   * Generate token token vo based on authorization code.
+   *
+   * @param code the code
+   *
+   * @return the token vo
+   */
+  @RequestMapping(value = "/generateTokenByCode", method = RequestMethod.POST)
+  TokenVO generateToken(@RequestParam("code") String code);
+
+  /**
    * Refresh token token vo.
    *
    * @param refreshToken the refresh token
