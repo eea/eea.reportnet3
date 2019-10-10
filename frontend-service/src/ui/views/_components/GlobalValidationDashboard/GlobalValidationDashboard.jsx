@@ -61,6 +61,7 @@ const GlobalValidationDashboard = dataflowId => {
 
   function buildDatasetDashboardObject(datasetsDashboardsData) {
     let datasets = [];
+    console.log(datasetsDashboardsData);
     if (!isUndefined(datasetsDashboardsData.tables)) {
       datasets = datasetsDashboardsData.tables
         .map(table => [
@@ -103,9 +104,10 @@ const GlobalValidationDashboard = dataflowId => {
   }
 
   useEffect(() => {
+    console.log(filterState);
     if (!isUndefined(filterState.data)) {
       const {
-        data: { labels, datasets }
+        originalData: { labels, datasets }
       } = filterState;
       if (labels && datasets) {
         setValidationDashboardData({
@@ -171,6 +173,20 @@ const GlobalValidationDashboard = dataflowId => {
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
+    console.log(filterState, validationDashboardData);
+    if (
+      !isEmpty(filterState.data) &&
+      (filterState.data.datasets.length !== validationDashboardData.datasets.length ||
+        !isEmpty(filterState.reporterFilter) ||
+        !isEmpty(filterState.statusFilter) ||
+        !isEmpty(filterState.tableFilter))
+    ) {
+      console.log(filterState, filterState.data.datasets, validationDashboardData.datasets);
+      filterDispatch({
+        type: 'APPLY_FILTERS',
+        payload: filterState
+      });
+    }
   }, [validationDashboardData]);
 
   if (isLoading) {

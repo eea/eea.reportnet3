@@ -17,6 +17,7 @@ function showArrayItem(array, item) {
 }
 
 const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
+  console.log(originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr);
   if (isEmpty(originalData)) {
     return;
   }
@@ -24,13 +25,11 @@ const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgSt
   let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
 
   const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
-
   const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
 
   tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
 
   tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
-
   return { labels: labels, datasets: tablesData };
 };
 
@@ -39,6 +38,7 @@ export const filterReducer = (state, { type, payload }) => {
   let tablesIdsArray = [];
   let msgStatusTypesArray = [];
   let filteredTableData;
+  console.log(type, payload, state);
   switch (type) {
     case 'INIT_DATA':
       return {
@@ -46,7 +46,14 @@ export const filterReducer = (state, { type, payload }) => {
         originalData: payload,
         data: payload
       };
-
+    case 'APPLY_FILTERS':
+      return {
+        ...state,
+        data: { ...payload.originalData },
+        reporterFilter: payload.reporterFilter,
+        statusFilter: payload.statusFilter,
+        tableFilter: payload.tableFilter
+      };
     case 'TABLE_CHECKBOX_ON':
       tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
       filteredTableData = onFilteringData(state.originalData, tablesIdsArray, state.reporterFilter, state.statusFilter);
