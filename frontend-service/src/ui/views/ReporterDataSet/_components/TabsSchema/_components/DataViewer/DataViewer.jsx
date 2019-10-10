@@ -179,6 +179,7 @@ const DataViewer = withRouter(
       });
       let editCol = (
         <Column
+          header={resources.messages['actions']}
           key="actions"
           body={row => actionTemplate(row)}
           sortable={false}
