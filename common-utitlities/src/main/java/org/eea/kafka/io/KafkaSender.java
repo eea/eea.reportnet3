@@ -1,6 +1,7 @@
 package org.eea.kafka.io;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
 import org.slf4j.Logger;
@@ -45,17 +46,25 @@ public class KafkaSender {
    * @param event the event
    */
   public void sendMessage(final EEAEventVO event) {
-    final List<PartitionInfo> partitions = kafkaTemplate
-        .partitionsFor(event.getEventType().getTopic());
-    // partition = hash(message_key)%number_of_partitions
-    final Integer partitionId = Math
-        .floorMod(event.getEventType().getKey().hashCode(), partitions.size());
 
-    final Message<EEAEventVO> message =
-        MessageBuilder.withPayload(event).setHeader(KafkaHeaders.PARTITION_ID, partitionId)
-            .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
-            .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
+    Message<EEAEventVO> message = null;
+    final List<PartitionInfo> partitions =
+        kafkaTemplate.partitionsFor(event.getEventType().getTopic());
+    if (event.getEventType().isSorted()) {
+      // partition = hash(message_key)%number_of_partitions
+      final Integer partitionId =
+          Math.floorMod(event.getEventType().getKey().hashCode(), partitions.size());
 
+      message = MessageBuilder.withPayload(event).setHeader(KafkaHeaders.PARTITION_ID, partitionId)
+          .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
+          .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
+    } else {
+      message = MessageBuilder.withPayload(event)
+          .setHeader(KafkaHeaders.PARTITION_ID,
+              ThreadLocalRandom.current().nextInt(partitions.size()))
+          .setHeader(KafkaHeaders.MESSAGE_KEY, event.getEventType().getKey())
+          .setHeader(KafkaHeaders.TOPIC, event.getEventType().getTopic()).build();
+    }
     final ListenableFuture<SendResult<String, EEAEventVO>> future = kafkaTemplate.send(message);
 
     future.addCallback(new ListenableFutureCallback<SendResult<String, EEAEventVO>>() {
@@ -68,8 +77,7 @@ public class KafkaSender {
       @Override
       public void onSuccess(final SendResult<String, EEAEventVO> result) {
         if (result != null && result.getRecordMetadata() != null) {
-          LOG.info(
-              "Sent message=[ {} ] with offset=[ {} ] and partition [ {} ]", event,
+          LOG.info("Sent message=[ {} ] with offset=[ {} ] and partition [ {} ]", event,
               result.getRecordMetadata().offset(), result.getRecordMetadata().partition());
         }
       }

@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -14,6 +15,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  @Autowired
+  private LockService lockService;
 
   /** The snapshot repository. */
   @Autowired
@@ -109,6 +113,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZull.createSnapshotData(idDataset, snap.getId(), idPartition);
+
+    // Release the lock manually
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(idDataset);
+    lockService.removeLockByCriteria("DataSetSnapshotControllerImpl.createSnapshot(..)", criteria);
+
     LOG.info("Snapshot {} data files created", snap.getId());
   }
 
@@ -128,6 +138,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     snapshotRepository.deleteById(idSnapshot);
     // Delete the file
     recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
+
     LOG.info("Snapshot {} removed", idSnapshot);
   }
 
@@ -150,6 +161,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // 2. Restore the dataset data, using the operation from recordstore
     recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot);
+
+    // Release the lock manually
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(idDataset);
+    lockService.removeLockByCriteria("DataSetSnapshotControllerImpl.restoreSnapshot(..)", criteria);
 
     LOG.info("Snapshot {} restored", idSnapshot);
 

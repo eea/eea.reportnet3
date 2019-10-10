@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -19,6 +20,7 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The Class ValidationService.
@@ -31,9 +33,11 @@ public interface ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie session
+   * @param pageable the pageable
    * @throws EEAException the EEA exception
    */
-  void validateFields(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateFields(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable)
+      throws EEAException;
 
 
   /**
@@ -60,7 +64,7 @@ public interface ValidationService {
    * Validate data set.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
   void validateDataSet(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
@@ -70,21 +74,22 @@ public interface ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
+   * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
-  void validateTable(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase) throws EEAException;
 
 
   /**
    * Validate record.
    *
    * @param datasetId the dataset id
-   * @param kieSession the kie session
-   * @return
+   * @param kieBase the kie base
+   * @param pageable the pageable
    * @throws EEAException the EEA exception
    */
-  void validateRecord(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateRecord(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable)
+      throws EEAException;
 
 
   /**
@@ -189,6 +194,42 @@ public interface ValidationService {
   List<TableValidation> runTableValidations(TableValue table, KieSession kieSession);
 
 
+
+  /**
+   * Error scale.
+   *
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  void errorScale(@DatasetId Long datasetId) throws EEAException;
+
+
+  /**
+   * Force validations.
+   *
+   * @param datasetId the dataset id
+   */
+  void forceValidations(@DatasetId Long datasetId);
+
+  /**
+   * Count records dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  Integer countRecordsDataset(@DatasetId Long datasetId);
+
+  /**
+   * Count fields dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  Integer countFieldsDataset(@DatasetId Long datasetId);
+
+
   /**
    * Dataset validation DO 02 query.
    *
@@ -238,6 +279,7 @@ public interface ValidationService {
   Boolean datasetValidationDC03Query(String DC03);
 
 
+  Boolean datasetValidationDC02BQuery(String DC03);
   /// PART TABLE
 
   /**
@@ -255,15 +297,13 @@ public interface ValidationService {
    * @param QUERY the query
    * @return the boolean
    */
-  Boolean tableValidationQueryNonReturnResult(String QUERY);
+  Boolean tableValidationQueryNonReturnResult(String queryValidate);
 
-  /**
-   * Table validation query period monitoring.
-   *
-   * @param QUERY the query
-   * @return the boolean
-   */
-  Boolean tableValidationQueryPeriodMonitoring(String QUERY);
 
+  Boolean tableValidationQueryReturnResult(String queryValidate);
+
+
+  Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError,
+      String originName);
 
 }

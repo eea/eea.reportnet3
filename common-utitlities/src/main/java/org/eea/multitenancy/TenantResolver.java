@@ -1,29 +1,21 @@
 package org.eea.multitenancy;
 
+import java.util.Map;
 import org.eea.exception.EEARuntimeException;
+import org.eea.thread.ThreadPropertiesManager;
 
 /**
  * The type Tenant resolver.
  */
-public final class TenantResolver {
+public final class TenantResolver extends ThreadPropertiesManager {
 
 
-  /**
-   * The tenant.
-   */
-  private static InheritableThreadLocal<String> tenant = new InheritableThreadLocal<>();
 
   /**
    * The Constant DEFAULT_TENANT. Bust be default
    */
   public static String initTenant = "dataset_1";
 
-  /**
-   * Instantiates a new tenant resolver.
-   */
-  private TenantResolver() {
-    super();
-  }
 
   /**
    * Sets tenant name.
@@ -31,7 +23,7 @@ public final class TenantResolver {
    * @param tenantName the tenant name
    */
   public static void setTenantName(String tenantName) {
-    tenant.set(tenantName);
+    setVariable("datasetName", tenantName);
   }
 
   /**
@@ -41,12 +33,14 @@ public final class TenantResolver {
    */
   public static String getTenantName() {
     if ("".equals(initTenant)) {// application is started already
-      if (null == tenant.get() || tenant.get().isEmpty()) {
+      if (null == thread.get() || thread.get().isEmpty()) {
         throw new EEARuntimeException("Error, connection id is null or empty");
       }
     }
 
-    return null == tenant.get() || tenant.get().isEmpty() ? initTenant : tenant.get();
+    return null == thread.get() || thread.get().isEmpty() ? initTenant
+        : thread.get().get("datasetName").toString();
+
 
   }
 
@@ -54,6 +48,9 @@ public final class TenantResolver {
    * Cleans the tenant name stored in ThreadLocal.
    */
   public static void clean() {
-    tenant.remove();
+    Map<String, Object> properties = thread.get();
+    if (null != properties) {
+      properties.remove("datasetName");
+    }
   }
 }

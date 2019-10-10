@@ -53,6 +53,7 @@ public class DeleteHelper {
     datasetService.deleteTableBySchema(idTableSchema, datasetId);
 
     // after the table has been deleted, an event is sent to notify it
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.DELETED_TABLE, datasetId);
   }
 

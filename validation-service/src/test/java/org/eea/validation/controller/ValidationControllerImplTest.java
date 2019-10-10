@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.kafka.io.KafkaSender;
+import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
 import org.junit.Before;
@@ -29,6 +30,9 @@ public class ValidationControllerImplTest {
   private ValidationHelper validationHelper;
 
   @Mock
+  private ValidationService validationService;
+
+  @Mock
   private KafkaSender kafkaSender;
 
   @Mock
@@ -48,20 +52,9 @@ public class ValidationControllerImplTest {
     validationController.validateDataSetData(null);
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void validateDataSetDataTest() throws EEAException {
-    validationController.validateDataSetData(null);
-  }
-
   @Test
   public void testValidateDataSetDataTest() throws EEAException {
     validationController.validateDataSetData(1L);
-  }
-
-  @Test
-  public void testValidateDataSetDataException() throws EEAException {
-    doThrow(new EEAException()).when(validationHelper).executeValidation(Mockito.any());
-    validationController.validateDataSetData(0L);
   }
 
   @Test

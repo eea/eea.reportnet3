@@ -29,9 +29,9 @@ public class Validation {
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "field_validation_sequence_generator",
-      sequenceName = "field_validation_sequence", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "field_validation_sequence_generator")
+  @SequenceGenerator(name = "validation_sequence_generator", sequenceName = "validation_sequence",
+      allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.AUTO, generator = "validation_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
