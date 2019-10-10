@@ -191,9 +191,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   const onLoadSnapshotList = async () => {
     try {
-      if (snapshotListData.length === 0) {
-        setIsLoadingSnapshotListData(true);
-      }
+      setIsLoadingSnapshotListData(true);
       //Set timeout for avoiding the overlaping between the slidebar transition and the api call
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.all(datasetId);
