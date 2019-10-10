@@ -100,7 +100,15 @@ const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
 
 const errorStatisticsById = async datasetId => {
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
-
+  datasetTablesDTO.tables = datasetTablesDTO.tables.sort(function(a, b) {
+    if (a.nameTableSchema < b.nameTableSchema) {
+      return -1;
+    }
+    if (a.nameTableSchema > b.nameTableSchema) {
+      return 1;
+    }
+    return 0;
+  });
   const dataset = new Dataset();
   dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
@@ -145,6 +153,16 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const schemaById = async dataflowId => {
   const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
+  //reorder tables alphabetically
+  datasetSchemaDTO.tableSchemas = datasetSchemaDTO.tableSchemas.sort(function(a, b) {
+    if (a.nameTableSchema < b.nameTableSchema) {
+      return -1;
+    }
+    if (a.nameTableSchema > b.nameTableSchema) {
+      return 1;
+    }
+    return 0;
+  });
 
   const dataset = new Dataset();
   dataset.datasetSchemaId = datasetSchemaDTO.idDatasetSchema;
