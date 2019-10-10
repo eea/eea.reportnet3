@@ -1,6 +1,9 @@
 package org.eea.validation.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.querysdrools.DataToQuery11;
@@ -39,6 +42,8 @@ public class ForeingKeyDrools {
   /** The validation service. */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
+
+  private final static Pattern dataValue = Pattern.compile("[A-Z]{2,}[0-9_-][^-_]${2,40}");
 
   private static DataToQueryabc abc = new DataToQueryabc();
   private static DataToQuery11 d = new DataToQuery11();
@@ -228,5 +233,28 @@ public class ForeingKeyDrools {
       return true;
     }
     return false;
+  }
+
+  public static Boolean ruleSVA(String value) {
+
+    if ("".equalsIgnoreCase(value.trim())) {
+      return true;
+    }
+    String countryCode = "";
+    if (null != ThreadPropertiesManager.getVariable("countryCode")) {
+      countryCode = ThreadPropertiesManager.getVariable("countryCode").toString().replace("'", "");
+    }
+    if (!countryCode.equals(value.substring(0, 2))) {
+      return false;
+    } else {
+      value = value.substring(2);
+    }
+    Matcher expression = null;
+    try {
+      expression = dataValue.matcher(value);
+    } catch (Exception e) {
+      return false;
+    }
+    return expression.matches() == Boolean.TRUE ? Boolean.TRUE : false;
   }
 }

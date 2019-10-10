@@ -39,6 +39,15 @@ public interface KeycloakConnectorService {
   GroupInfo[] getGroupsByUser(String userId);
 
   /**
+   * Generate token token info based on authorization code.
+   *
+   * @param code the code
+   *
+   * @return the token info
+   */
+  TokenInfo generateToken(String code);
+
+  /**
    * Refresh token token info.
    *
    * @param refreshToken the refresh token

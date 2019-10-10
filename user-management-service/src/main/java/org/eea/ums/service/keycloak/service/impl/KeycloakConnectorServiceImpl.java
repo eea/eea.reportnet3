@@ -54,6 +54,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Value("${eea.keycloak.scheme}")
   private String keycloakScheme;
 
+  @Value("${eea.keycloak.redirect_uri}")
+  private String redirectUri;
+
+
   @Value("${eea.keycloak.admin.user}")
   private String adminUser;
   @Value("${eea.keycloak.admin.password}")
@@ -198,6 +202,27 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     map.add("password", password);
     map.add("client_secret", secret);
     map.add("client_id", clientId);
+
+    return retrieveTokenFromKeycloak(map);
+
+  }
+
+  /**
+   * Generate token string based on cas code.
+   *
+   * @param code the code
+   *
+   * @return the string
+   */
+  @Override
+  public TokenInfo generateToken(String code) {
+
+    MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+    map.add("code", code);
+    map.add("grant_type", "authorization_code");
+    map.add("client_secret", secret);
+    map.add("client_id", clientId);
+    map.add("redirect_uri", redirectUri);
 
     return retrieveTokenFromKeycloak(map);
 

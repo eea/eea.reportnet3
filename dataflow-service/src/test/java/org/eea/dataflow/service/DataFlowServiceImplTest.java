@@ -369,4 +369,55 @@ public class DataFlowServiceImplTest {
     DataFlowVO dataFlowVO = new DataFlowVO();
     dataflowServiceImpl.createDataFlow(dataFlowVO);
   }
+
+
+  /**
+   * Test get datasets id.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testGetDatasetsId() throws EEAException {
+
+    dataflowServiceImpl.getDatasetsId(1L);
+  }
+
+
+  /**
+   * Test get datasets id error.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void testGetDatasetsIdError() throws EEAException {
+
+    dataflowServiceImpl.getDatasetsId(null);
+  }
+
+
+  /**
+   * Gets the metabase by id throws.
+   *
+   * @return the metabase by id throws
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getMetabaseByIdThrows() throws EEAException {
+    dataflowServiceImpl.getMetabaseById(null);
+  }
+
+
+  /**
+   * Gets the metabase by id.
+   *
+   * @return the metabase by id
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getMetabaseById() throws EEAException {
+
+    dataflowServiceImpl.getMetabaseById(1L);
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.any());
+  }
+
 }

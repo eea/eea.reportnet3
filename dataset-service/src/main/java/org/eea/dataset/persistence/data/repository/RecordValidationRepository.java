@@ -110,6 +110,34 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       @Param("idTableSchema") String idTableSchema, @Param("typeError") TypeErrorEnum typeError);
 
 
+
+  /**
+   * Count record id from record with error validations.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  @Query(nativeQuery = true, value = "select count(rv.id_record) "
+      + "from record_validation rv join validation v on rv.id_validation=v.id join record_value rval on rv.id_record=rval.id "
+      + "join table_value tv on rval.id_table=tv.id and v.level_error='ERROR' and tv.id_table_schema=:idTableSchema")
+  Long countRecordIdFromRecordWithErrorValidations(@Param("idTableSchema") String idTableSchema);
+
+
+  /**
+   * Count record id from record with warning validations.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  @Query(nativeQuery = true, value = "select count(ids.id_record) from (" + "(select rv.id_record "
+      + "from record_validation rv join validation v on rv.id_validation=v.id join record_value rval on rv.id_record=rval.id "
+      + "join table_value tv on rval.id_table=tv.id and v.level_error='WARNING' and tv.id_table_schema=:idTableSchema) "
+      + "except " + "(select rv.id_record "
+      + "from record_validation rv join validation v on rv.id_validation=v.id join record_value rval on rv.id_record=rval.id "
+      + "join table_value tv on rval.id_table=tv.id and v.level_error='ERROR' and tv.id_table_schema=:idTableSchema)) ids")
+  Long countRecordIdFromRecordWithWarningValidations(@Param("idTableSchema") String idTableSchema);
+
+
   /**
    * Find record id from field with validations by level error.
    *
@@ -134,4 +162,6 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    */
   @Query("SELECT rv FROM RecordValidation rv  WHERE rv.validation.id in(:ids) ")
   List<RecordValidation> findByValidationIds(@Param("ids") List<Long> ids);
+
+
 }

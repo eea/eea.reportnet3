@@ -55,7 +55,6 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
@@ -169,12 +168,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-
-  /**
-   * The record store controller zull.
-   */
-  @Autowired
-  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * The file parser factory.
@@ -764,6 +757,7 @@ public class DatasetServiceImpl implements DatasetService {
   public StatisticsVO getStatistics(final Long datasetId) throws EEAException {
 
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+
     StatisticsVO stats = new StatisticsVO();
     if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
       List<TableValue> allTableValues = dataset.getTableValues();
@@ -771,11 +765,12 @@ public class DatasetServiceImpl implements DatasetService {
       stats.setDatasetErrors(false);
       stats.setTables(new ArrayList<>());
 
+      DataSetMetabase datasetMb =
+          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
+
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
 
-      DataSetMetabase datasetMb =
-          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
 
       stats.setNameDataSetSchema(datasetMb.getDataSetName());
       List<String> listIdsDataSetSchema = new ArrayList<>();
@@ -810,6 +805,7 @@ public class DatasetServiceImpl implements DatasetService {
       for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
         if (datasetValidation.getValidation() != null) {
           stats.setDatasetErrors(true);
+          break;
         }
       }
 
@@ -823,6 +819,7 @@ public class DatasetServiceImpl implements DatasetService {
         });
       });
       stats.setTables(orderedStats);
+
 
       LOG.info("Statistics received from datasetId {}.", datasetId);
     } else {
@@ -844,6 +841,7 @@ public class DatasetServiceImpl implements DatasetService {
   private TableStatisticsVO processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
 
+
     Set<Long> recordIdsFromRecordWithValidationError =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
@@ -852,32 +850,24 @@ public class DatasetServiceImpl implements DatasetService {
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
-    Set<Long> recordIdsFromFieldWithValidationError =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
-
-    Set<Long> recordIdsFromFieldWithValidationWarning =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
-
     Set<Long> idsErrors = new HashSet<>();
     idsErrors.addAll(recordIdsFromRecordWithValidationError);
-    idsErrors.addAll(recordIdsFromFieldWithValidationError);
+
 
     Set<Long> idsWarnings = new HashSet<>();
     idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
-    idsWarnings.addAll(recordIdsFromFieldWithValidationWarning);
 
     idsWarnings.removeAll(idsErrors);
 
-    Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
+    Long totalRecordsWithErrors = Long.valueOf(idsErrors.size());
+    Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
+
 
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
+    Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
     tableStats.setTotalRecords(countRecords);
 
-    Long totalRecordsWithErrors = Long.valueOf(idsErrors.size());
-    Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
     Long totalTableErrors = totalRecordsWithErrors + totalRecordsWithWarnings;
 
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();

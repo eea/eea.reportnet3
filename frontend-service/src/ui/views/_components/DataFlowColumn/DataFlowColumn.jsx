@@ -67,6 +67,7 @@ const DataflowColumn = withRouter(
               id=""
               placeholder={resources.messages['searchDataflow']}
               type="text"
+              disabled
             />
           </div>
         )}
@@ -94,6 +95,7 @@ const DataflowColumn = withRouter(
             onClick={() => {
               setVisibleHandler(setSubscribeDialogVisible, true);
             }}
+            disabled
           />
         </div>
 
