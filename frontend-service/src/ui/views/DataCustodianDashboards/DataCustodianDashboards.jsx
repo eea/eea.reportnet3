@@ -39,7 +39,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   };
 
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
-  console.log('filterState: ', filterReducer);
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashboardColors, setDashboardColors] = useState({
@@ -55,7 +54,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
   const [releasedData, setReleasedData] = useState();
   const [validationDashboardData, setValidationDashboardData] = useState();
-  const [validationData, setValidationData] = useState();
 
   const home = {
     icon: config.icons['home'],
@@ -137,7 +135,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   useEffect(() => {
-    console.log('filterstate.data', filterState.data);
     if (!isUndefined(filterState.data)) {
       const {
         data: { labels, datasets }
@@ -156,7 +153,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
               case 'ERRORS':
                 dataset.backgroundColor = dashboardColors.ERROR;
                 break;
-
               default:
                 break;
             }
@@ -213,7 +209,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
     setValidationDashboardData(buildDatasetDashboardObject(datasetsDashboardsData));
-    setValidationData(datasetsDashboardsData);
     setIsLoadingValidationData(false);
   };
 
@@ -276,12 +271,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       ]
     }
   };
-
-  const onChangeColor = (color, type) => {
-    setDashboardColors({ ...dashboardColors, [type]: `#${color}` });
-  };
-
-  console.log('filterState', filterState);
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
@@ -355,7 +344,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
                 value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
                 onChange={e => {
                   e.preventDefault();
-                  onChangeColor(e.value, SEVERITY_CODE[type]);
+                  setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
                 }}
               />
             </React.Fragment>
