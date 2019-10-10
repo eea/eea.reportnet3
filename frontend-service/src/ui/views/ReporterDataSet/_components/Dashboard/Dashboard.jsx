@@ -167,25 +167,29 @@ const Dashboard = withRouter(
     return (
       <React.Fragment>
         <h1>{dashboardTitle}</h1>
-        <div>
-          {Object.keys(SEVERITY_CODE).map((type, i) => {
-            return (
-              <React.Fragment key={i}>
-                <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()}: `}</span>
-                <ColorPicker
-                  key={type}
-                  value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
-                  onChange={e => {
-                    e.preventDefault();
-                    onChangeColor(e.value, SEVERITY_CODE[type]);
-                  }}
-                />
-              </React.Fragment>
-            );
-          })}
-        </div>
-        <hr />
         {renderDashboard()}
+        <div className={styles.dashboardWraper}>
+          <fieldset className={styles.colorPickerWrap}>
+            <legend>{resources.messages['colorPickerMessage']}</legend>
+            {Object.keys(SEVERITY_CODE).map((type, i) => {
+              return (
+                <React.Fragment key={i}>
+                  <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+                    .slice(1)
+                    .toLowerCase()}: `}</span>
+                  <ColorPicker
+                    key={type}
+                    value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
+                    onChange={e => {
+                      e.preventDefault();
+                      onChangeColor(e.value, SEVERITY_CODE[type]);
+                    }}
+                  />
+                </React.Fragment>
+              );
+            })}
+          </fieldset>
+        </div>
       </React.Fragment>
     );
   })
