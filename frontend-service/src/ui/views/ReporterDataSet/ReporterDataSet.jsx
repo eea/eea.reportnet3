@@ -191,13 +191,15 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   const onLoadSnapshotList = async () => {
     try {
-      setIsLoadingSnapshotListData(true);
-
-      const snapshotsData = await SnapshotService.all(datasetId);
-
-      setSnapshotListData(snapshotsData);
-
-      setIsLoadingSnapshotListData(false);
+      if (snapshotListData.length === 0) {
+        setIsLoadingSnapshotListData(true);
+      }
+      //Set timeout for avoiding the overlaping between the slidebar transition and the api call
+      setTimeout(async () => {
+        const snapshotsData = await SnapshotService.all(datasetId);
+        setSnapshotListData(snapshotsData);
+        setIsLoadingSnapshotListData(false);
+      }, 500);
     } catch (error) {
       setIsLoadingSnapshotListData(false);
     }
@@ -487,8 +489,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               icon={'camera'}
               label={resources.messages['snapshots']}
               onClick={() => {
+                onSetVisible(setSnapshotIsVisible, true);
                 onLoadSnapshotList();
-                return onSetVisible(setSnapshotIsVisible, true);
               }}
             />
           </div>
