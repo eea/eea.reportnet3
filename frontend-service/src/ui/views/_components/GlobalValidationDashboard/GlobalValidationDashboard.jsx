@@ -171,9 +171,6 @@ const GlobalValidationDashboard = dataflowId => {
     console.error('Dashboard error: ', error);
     const errorResponse = error.response;
     console.error('Dashboard errorResponse: ', errorResponse);
-    if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-      // history.push(getUrl(routes.DATAFLOW, { match.params.dataflowId }));
-    }
   };
 
   const datasetOptionsObject = {
