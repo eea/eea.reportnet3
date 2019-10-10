@@ -120,6 +120,7 @@
 		"pendingDataflowText": "You are required to accept and report data to these dataflows",
 		"pendingDataflowTitle": "Pending dataflows",
 		"properties": "Properties",
+		"recordErrors": "ONE OR MORE FIELDS HAVE ERRORS",
 		"refresh": "Refresh",
 		"reject": "Reject",
 		"released": "Released",

@@ -1,8 +1,8 @@
-import React, { Component, useEffect } from 'react';
-import style from '../BigButton.module.css';
+import React, { Component } from 'react';
+import style from './DropDownMenu.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
-class Menu extends Component {
+class DropDownMenu extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -12,9 +12,7 @@ class Menu extends Component {
       menuClick: false
     };
 
-    ['show', 'hide'].map(item => {
-      this[item] = this[item].bind(this);
-    });
+    ['show', 'hide'].map(item => (this[item] = this[item].bind(this)));
   }
 
   hide(event) {
@@ -89,7 +87,7 @@ class Menu extends Component {
     const { model } = this.props;
     if (model) {
       return (
-        <div className={`${style.dropDownMenu} p-menu-overlay-visible`} style={this.state.style}>
+        <div className={style.dropDownMenu} style={this.state.style}>
           <ul>
             {model ? (
               model.map((item, i) => (
@@ -122,4 +120,4 @@ class Menu extends Component {
   }
 }
 
-export { Menu };
+export { DropDownMenu };

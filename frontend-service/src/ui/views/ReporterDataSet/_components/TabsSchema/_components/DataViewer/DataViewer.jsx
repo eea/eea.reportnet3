@@ -139,8 +139,10 @@ const DataViewer = withRouter(
     }, [selectedRecord]);
 
     useEffect(() => {
-      onRefresh();
-      setConfirmDeleteVisible(false);
+      if (isRecordDeleted) {
+        onRefresh();
+        setConfirmDeleteVisible(false);
+      }
     }, [isRecordDeleted]);
 
     useEffect(() => {
@@ -853,38 +855,40 @@ const DataViewer = withRouter(
     //Template for Record validation
     const validationsTemplate = recordData => {
       if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
-        const validations = recordData.recordValidations;
-
+        const validations = [...recordData.recordValidations];
         let message = '';
+        let hasFieldErrors = false;
+        hasFieldErrors =
+          recordData.dataRow.filter(row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)).length >
+          0;
+
+        if (hasFieldErrors) {
+          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+        }
+
         validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
 
-        let levelError = '';
-        let lvlFlag = 0;
+        const levelError = getLevelError(validations);
 
-        validations.forEach(validation => {
-          if (validation.levelError === 'WARNING') {
-            const wNum = 1;
-            if (wNum > lvlFlag) {
-              lvlFlag = wNum;
-              levelError = 'WARNING';
-            }
-          } else if (validation.levelError === 'ERROR') {
-            const eNum = 2;
-            if (eNum > lvlFlag) {
-              lvlFlag = eNum;
-              levelError = 'ERROR';
-            }
-          } else if (validation.levelError === 'BLOCKER') {
-            const bNum = 2;
-            if (bNum > lvlFlag) {
-              lvlFlag = bNum;
-              levelError = 'BLOCKER';
-            }
-          }
-        });
-
-        return <IconTooltip levelError={levelError} message={message} />;
+        return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
       } else {
+        //If there is no recordValidations check por field validations (if there is more than zero fields with errors show the generic message)
+        const validations = [];
+        let message = '';
+        let hasFieldErrors = false;
+        hasFieldErrors =
+          recordData.dataRow.filter(row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)).length >
+          0;
+
+        if (hasFieldErrors) {
+          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+          validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
+        }
+        if (validations.length > 0) {
+          const levelError = getLevelError(validations);
+          return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
+        }
+
         return;
       }
     };
@@ -893,32 +897,10 @@ const DataViewer = withRouter(
     const dataTemplate = (rowData, column) => {
       let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
       if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = field.fieldValidations;
+        const validations = [...field.fieldValidations];
         let message = [];
         validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
-        let levelError = '';
-        let lvlFlag = 0;
-        validations.forEach(validation => {
-          if (validation.levelError === 'WARNING') {
-            const wNum = 1;
-            if (wNum > lvlFlag) {
-              lvlFlag = wNum;
-              levelError = 'WARNING';
-            }
-          } else if (validation.levelError === 'ERROR') {
-            const eNum = 2;
-            if (eNum > lvlFlag) {
-              lvlFlag = eNum;
-              levelError = 'ERROR';
-            }
-          } else if (validation.levelError === 'BLOCKER') {
-            const bNum = 2;
-            if (bNum > lvlFlag) {
-              lvlFlag = bNum;
-              levelError = 'BLOCKER';
-            }
-          }
-        });
+        const levelError = getLevelError(validations);
 
         return (
           <div
@@ -944,6 +926,34 @@ const DataViewer = withRouter(
       } else {
         return string;
       }
+    };
+
+    const getLevelError = validations => {
+      let levelError = '';
+      let lvlFlag = 0;
+
+      validations.forEach(validation => {
+        if (validation.levelError === 'WARNING') {
+          const wNum = 1;
+          if (wNum > lvlFlag) {
+            lvlFlag = wNum;
+            levelError = 'WARNING';
+          }
+        } else if (validation.levelError === 'ERROR') {
+          const eNum = 2;
+          if (eNum > lvlFlag) {
+            lvlFlag = eNum;
+            levelError = 'ERROR';
+          }
+        } else if (validation.levelError === 'BLOCKER') {
+          const bNum = 2;
+          if (bNum > lvlFlag) {
+            lvlFlag = bNum;
+            levelError = 'BLOCKER';
+          }
+        }
+      });
+      return levelError;
     };
 
     const rowClassName = rowData => {
