@@ -23,7 +23,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowMetadata, setDataflowMetadata] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [isLoadingValidationData, setIsLoadingValidationData] = useState(true);
+  const [isLoadingReleasedData, setIsLoadingReleasedData] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
   const home = {
@@ -124,23 +125,23 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }
 
   const loadDashboards = async () => {
-    setLoading(true);
-
     const releasedData = await DataflowService.datasetsReleasedStatus(match.params.dataflowId);
     setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
+    setIsLoadingReleasedData(false);
 
     const datasetsDashboardsData = await DataflowService.datasetsValidationStatistics(match.params.dataflowId);
     filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsDashboardsData) });
 
-    setLoading(false);
+    setIsLoadingValidationData(false);
   };
 
   const datasetOptionsObject = {
     hover: {
-      mode: 'nearest'
+      mode: 'point',
+      intersect: false
     },
     tooltips: {
-      mode: 'nearest',
+      mode: 'point',
       intersect: true,
       callbacks: {
         label: (tooltipItems, data) =>
@@ -149,6 +150,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           } (${tooltipItems.yLabel}%)`
       }
     },
+
     legend: {
       display: false
     },
@@ -373,10 +375,6 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     );
   };
 
-  if (loading) {
-    return layout(<Spinner />);
-  }
-
   return layout(
     <>
       <div className="rep-row">
@@ -384,8 +382,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
           {resources.messages['dataflow']}: {dataflowMetadata.name}
         </h1>
       </div>
-      {errorsDashboard()}
-      {releasedDashboard()}
+      <div> {isLoadingValidationData ? <Spinner className={styles.positioning} /> : errorsDashboard()}</div>
+      <div> {isLoadingReleasedData ? <Spinner className={styles.positioning} /> : releasedDashboard()}</div>
     </>
   );
 });
