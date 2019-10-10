@@ -61,25 +61,7 @@
     border: 1px solid var(--grey-50);
   }
 
-  &[data-status='correct'] {
-    background: rgba(153, 204, 51, 1);
-  }
-  &[data-status='warning'] {
-    background: rgba(255, 204, 0, 1);
-  }
-  &[data-status='error'] {
-    background: rgba(204, 51, 0, 1);
-  }
-
   &:not(:checked) {
-    &[data-status='correct'] {
-      background: rgba(153, 204, 51, 0.5);
-    }
-    &[data-status='warning'] {
-      background: rgba(255, 204, 0, 0.5);
-    }
-    &[data-status='error'] {
-      background: rgba(204, 51, 0, 0.5);
-    }
+    opacity: 0.5;
   }
 }

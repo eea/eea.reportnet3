@@ -4,7 +4,7 @@ import styles from './StatusList.module.scss';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-function StatusList({ filterDispatch }) {
+function StatusList({ color, filterDispatch }) {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -13,7 +13,7 @@ function StatusList({ filterDispatch }) {
         <input
           id="correct"
           className={styles.checkbox}
-          data-status="correct"
+          style={{ backgroundColor: color.CORRECT }}
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -38,7 +38,7 @@ function StatusList({ filterDispatch }) {
         <input
           id="warning"
           className={styles.checkbox}
-          data-status="warning"
+          style={{ backgroundColor: color.WARNING }}
           type="checkbox"
           defaultChecked={true}
           onChange={e => {
@@ -63,7 +63,7 @@ function StatusList({ filterDispatch }) {
         <input
           id="error"
           className={styles.checkbox}
-          data-status="error"
+          style={{ backgroundColor: color.ERROR }}
           type="checkbox"
           defaultChecked={true}
           onChange={e => {

@@ -289,7 +289,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     if (!isEmpty(filterState.data)) {
       return (
         <div className="rep-row">
-          <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
+          <FilterList color={dashboardColors} filterDispatch={filterDispatch} originalData={filterState.originalData} />
           <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
         </div>
       );
