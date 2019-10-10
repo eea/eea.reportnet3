@@ -16,3 +16,13 @@
   color: var(--errors) !important;
   margin-left: 3px !important;
 }
+.dataViewerToolbar {
+  border-top: 1px solid #c8c8c8 !important;
+  border-left: 1px solid #c8c8c8 !important;
+  border-right: 1px solid #c8c8c8 !important;
+  border-bottom: 0px !important;
+  border-top-left-radius: 3px !important;
+  border-top-right-radius: 3px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
