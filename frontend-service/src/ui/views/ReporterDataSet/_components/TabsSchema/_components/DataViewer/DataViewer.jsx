@@ -213,8 +213,6 @@ const DataViewer = withRouter(
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     const showColumns = columnKeys => {
-      console.log('originalColumns: ', originalColumns);
-
       const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
       const currentVisibleColumns = originalColumns.filter(
         column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
@@ -858,18 +856,27 @@ const DataViewer = withRouter(
         const validations = [...recordData.recordValidations];
         let message = '';
         let hasFieldErrors = false;
-        hasFieldErrors =
-          recordData.dataRow.filter(row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)).length >
-          0;
+        const recordsWithFieldValidations = recordData.dataRow.filter(
+          row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+        );
+        hasFieldErrors = recordsWithFieldValidations.length > 0;
 
+        const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
+        const fieldsLevelErrors = getLevelError(filteredFieldValidations);
         if (hasFieldErrors) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+          validations.push(
+            DatasetService.createValidation(
+              'RECORD',
+              0,
+              fieldsLevelErrors,
+              fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
+            )
+          );
         }
 
         validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
 
         const levelError = getLevelError(validations);
-
         return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
       } else {
         //If there is no recordValidations check por field validations (if there is more than zero fields with errors show the generic message)
@@ -931,7 +938,6 @@ const DataViewer = withRouter(
     const getLevelError = validations => {
       let levelError = '';
       let lvlFlag = 0;
-
       validations.forEach(validation => {
         if (validation.levelError === 'WARNING') {
           const wNum = 1;
@@ -1032,8 +1038,6 @@ const DataViewer = withRouter(
               id="exportTableMenu"
               showColumns={showColumns}
               onShow={e => {
-                console.log('hello');
-
                 getExportButtonPosition(e);
               }}
             />

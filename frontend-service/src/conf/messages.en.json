@@ -121,6 +121,7 @@
 		"pendingDataflowTitle": "Pending dataflows",
 		"properties": "Properties",
 		"recordErrors": "ONE OR MORE FIELDS HAVE ERRORS",
+		"recordWarnings":"ONE OR MORE FIELDS HAVE WARNINGS",
 		"refresh": "Refresh",
 		"reject": "Reject",
 		"released": "Released",
