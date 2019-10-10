@@ -1,0 +1,5 @@
+{   
+    "login": "/user/generateToken?password={:password}&username={:userName}",
+    "logout": "/user/logout?refreshToken={:refreshToken}",
+    "refreshToken": "/user/refreshToken?refreshToken={:refreshToken}"
+}

@@ -11,8 +11,15 @@ import {
   faFileImage,
   faFilePowerpoint,
   faFileVideo,
-  faTrashAlt
+  faTrashAlt,
+  faCaretDown,
+  faChartBar
 } from '@fortawesome/free-solid-svg-icons';
+
+import {
+  faSquare as farSquareRegular,
+  faCheckSquare as faCheckSquareRegular
+} from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
@@ -104,6 +111,16 @@ export const AwesomeIcons = icon => {
       return faFileVideo;
     case 'delete':
       return faTrashAlt;
+    case 'dropDown':
+      return faCaretDown;
+    case 'barChart':
+      return faChartBar;
+    case 'dataset':
+      return faDatabase;
+    case 'square':
+      return farSquareRegular;
+    case 'checkedSquare':
+      return faCheckSquareRegular;
     default:
       return faFileAlt;
   }

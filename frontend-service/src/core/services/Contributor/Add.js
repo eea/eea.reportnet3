@@ -1,2 +1,2 @@
-export const Add = ({ contributorRepository }) => async (dataFlowId, contributorLogin, contributorRole) =>
-  contributorRepository.addByLogin(dataFlowId, contributorLogin, contributorRole);
+export const Add = ({ contributorRepository }) => async (dataflowId, contributorLogin, contributorRole) =>
+  contributorRepository.addByLogin(dataflowId, contributorLogin, contributorRole);

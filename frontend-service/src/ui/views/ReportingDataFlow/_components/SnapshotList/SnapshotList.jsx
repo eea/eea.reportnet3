@@ -4,7 +4,7 @@ import styles from './SnapshotList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';
 
-export function SnapshotList({ snapshotListData, onLoadSnapshotList, dataFlowId, dataSetId }) {
+export function SnapshotList({ snapshotListData, onLoadSnapshotList, dataflowId, datasetId }) {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
@@ -13,8 +13,8 @@ export function SnapshotList({ snapshotListData, onLoadSnapshotList, dataFlowId,
             <SnapshotItem
               itemData={item}
               onLoadSnapshotList={onLoadSnapshotList}
-              dataFlowId={dataFlowId}
-              dataSetId={dataSetId}
+              dataflowId={dataflowId}
+              datasetId={datasetId}
             />
             <hr />
           </div>

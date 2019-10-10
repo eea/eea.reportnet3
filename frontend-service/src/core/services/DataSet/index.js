@@ -1,4 +1,4 @@
-import { dataSetRepository } from 'core/domain/model/DataSet/DataSetRepository';
+import { datasetRepository } from 'core/domain/model/DataSet/DataSetRepository';
 
 import { AddRecords } from './AddRecords';
 import { DeleteData } from './DeleteData';
@@ -16,20 +16,20 @@ import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { ValidateData } from './ValidateData';
 
-export const DataSetService = {
-  addRecordsById: AddRecords({ dataSetRepository }),
-  deleteDataById: DeleteData({ dataSetRepository }),
-  deleteRecordById: DeleteRecord({ dataSetRepository }),
-  deleteTableDataById: DeleteTableData({ dataSetRepository }),
-  errorsById: GetErrors({ dataSetRepository }),
-  errorPositionByObjectId: GetErrorPosition({ dataSetRepository }),
-  errorStatisticsById: GetStatistics({ dataSetRepository }),
-  exportDataById: ExportData({ dataSetRepository }),
-  exportTableDataById: ExportTableData({ dataSetRepository }),
-  schemaById: GetSchema({ dataSetRepository }),
-  tableDataById: GetData({ dataSetRepository }),
-  updateFieldById: UpdateField({ dataSetRepository }),
-  updateRecordsById: UpdateRecord({ dataSetRepository }),
-  validateDataById: ValidateData({ dataSetRepository }),
-  webFormDataById: GetWebFormData({ dataSetRepository })
+export const DatasetService = {
+  addRecordsById: AddRecords({ datasetRepository }),
+  deleteDataById: DeleteData({ datasetRepository }),
+  deleteRecordById: DeleteRecord({ datasetRepository }),
+  deleteTableDataById: DeleteTableData({ datasetRepository }),
+  errorsById: GetErrors({ datasetRepository }),
+  errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
+  errorStatisticsById: GetStatistics({ datasetRepository }),
+  exportDataById: ExportData({ datasetRepository }),
+  exportTableDataById: ExportTableData({ datasetRepository }),
+  schemaById: GetSchema({ datasetRepository }),
+  tableDataById: GetData({ datasetRepository }),
+  updateFieldById: UpdateField({ datasetRepository }),
+  updateRecordsById: UpdateRecord({ datasetRepository }),
+  validateDataById: ValidateData({ datasetRepository }),
+  webFormDataById: GetWebFormData({ datasetRepository })
 };

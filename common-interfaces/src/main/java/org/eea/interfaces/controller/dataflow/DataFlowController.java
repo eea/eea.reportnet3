@@ -136,5 +136,14 @@ public interface DataFlowController {
   List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow);
 
 
+  /**
+   * Gets the metabase by id.
+   *
+   * @param id the id
+   * @return the metabase by id
+   */
+  @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO getMetabaseById(@PathVariable("id") Long id);
+
 
 }

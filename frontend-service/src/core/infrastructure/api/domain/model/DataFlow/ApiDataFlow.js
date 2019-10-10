@@ -1,15 +1,16 @@
-import { config } from 'conf';
+import { DataflowConfig } from 'conf/domain/model/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import dataCustodianDashboards from './dashboardData.json';
+import dataCustodianDashboards from './response_GlobalStatsDataflow.json';
+import metadataJson from './metadata.json';
 
-export const apiDataFlow = {
-  accept: async dataFlowId => {
+export const apiDataflow = {
+  accept: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(config.acceptDataFlow.url, { dataFlowId, type: 'ACCEPTED' }),
-      data: { id: dataFlowId },
+      url: getUrl(DataflowConfig.acceptDataflow, { dataflowId, type: 'ACCEPTED' }),
+      data: { id: dataflowId },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -20,7 +21,9 @@ export const apiDataFlow = {
   all: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -31,7 +34,9 @@ export const apiDataFlow = {
   accepted: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -42,7 +47,9 @@ export const apiDataFlow = {
   completed: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -50,24 +57,48 @@ export const apiDataFlow = {
     });
     return response.data;
   },
-  dashboards: async dataFlowId => {
-    console.log('Getting all the dashboards', dataFlowId);
-    // const tokens = userStorage.get();
-    // const response = await HTTPRequester.get({
-    //   url: '/jsons/dataCustodianDashboards.json',
-    //   queryString: {},
-    //   headers: {
-    //     Authorization: `Bearer ${tokens.accessToken}`
-    //   }
-    // });
-    // return response.data;
-    const hardcodedDashboardTest = dataCustodianDashboards;
-    return hardcodedDashboardTest;
+  datasetsValidationStatistics: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    // const hardcodedDashboardTest = dataCustodianDashboards;
+    // return hardcodedDashboardTest;
+  },
+  datasetsReleasedStatus: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.datasetsReleasedStatus, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
+  dataflowDetails: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.dataflowDetails, { dataflowId: dataflowId }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+    // return metadataJson;
   },
   pending: async () => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON ? '/jsons/DataFlows2.json' : getUrl(config.loadDataFlowTaskPendingAcceptedAPI.url),
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/DataFlows2.json'
+        : getUrl(DataflowConfig.loadDataflowTaskPendingAccepted),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -75,11 +106,11 @@ export const apiDataFlow = {
     });
     return response.data;
   },
-  reject: async dataFlowId => {
+  reject: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
-      url: getUrl(config.rejectDataFlow.url, { dataFlowId, type: 'REJECTED' }),
-      data: { id: dataFlowId },
+      url: getUrl(DataflowConfig.rejectDataflow, { dataflowId, type: 'REJECTED' }),
+      data: { id: dataflowId },
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
@@ -87,13 +118,13 @@ export const apiDataFlow = {
     });
     return response.status;
   },
-  reporting: async dataFlowId => {
+  reporting: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/response_DataflowById.json'
-        : getUrl(config.loadDataSetsByDataflowID.url, {
-            dataFlowId: dataFlowId
+        : getUrl(DataflowConfig.loadDatasetsByDataflowId, {
+            dataflowId: dataflowId
           }),
       queryString: {},
       headers: {

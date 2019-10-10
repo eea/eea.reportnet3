@@ -29,8 +29,9 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
+import { routes } from 'ui/routes';
 
-export const DocumentationDataSet = withRouter(({ match, history }) => {
+export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
 
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
@@ -38,6 +39,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   const [documents, setDocuments] = useState([]);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState('');
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
@@ -46,7 +48,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const home = {
     icon: config.icons['home'],
-    command: () => history.push('/')
+    command: () => history.push(getUrl(routes.DATAFLOWS))
   };
 
   useEffect(() => {
@@ -57,16 +59,16 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
   useEffect(() => {
     setBreadCrumbItems([
       {
-        label: resources.messages['dataFlowList'],
-        command: () => history.push('/data-flow-task')
+        label: resources.messages['dataflowList'],
+        command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages['reportingDataFlow'],
-        command: () => history.push(`/reporting-data-flow/${match.params.dataFlowId}`)
+        label: resources.messages['dataflow'],
+        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
       },
       { label: resources.messages['documents'] }
     ]);
-  }, [history, match.params.dataFlowId, resources.messages]);
+  }, [history, match.params.dataflowId, resources.messages]);
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
@@ -76,7 +78,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const onDownloadDocument = async rowData => {
     try {
-      setIsDownloading(rowData.title);
+      setIsDownloading(rowData.id);
       setFileName(createFileName(rowData.title));
       setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
     } catch (error) {
@@ -98,9 +100,8 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     }
   };
 
-  const onHide = () => {
+  const onUploadDocument = () => {
     setIsUploadDialogVisible(false);
-    onLoadDocumentsAndWebLinks();
   };
 
   const onHideDeleteDialog = () => {
@@ -109,16 +110,17 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
 
   const onCancelDialog = () => {
     setIsUploadDialogVisible(false);
+    setIsFormReset(false);
   };
 
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
     try {
-      setWebLinks(await WebLinkService.all(`${match.params.dataFlowId}`));
-      setDocuments(await DocumentService.all(`${match.params.dataFlowId}`));
+      setWebLinks(await WebLinkService.all(`${match.params.dataflowId}`));
+      setDocuments(await DocumentService.all(`${match.params.dataflowId}`));
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
-        history.push(getUrl(config.DATAFLOW_TASKS.url));
+        history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setIsLoading(false);
@@ -150,7 +152,7 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
         {' '}
-        {isDownloading === rowData.title ? (
+        {isDownloading === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
           <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
@@ -240,7 +242,12 @@ export const DocumentationDataSet = withRouter(({ match, history }) => {
               className={styles.Dialog}
               dismissableMask={false}
               onHide={onCancelDialog}>
-              <DocumentFileUpload dataFlowId={match.params.dataFlowId} onUpload={onHide} onGrowlAlert={onGrowlAlert} />
+              <DocumentFileUpload
+                dataflowId={match.params.dataflowId}
+                onUpload={onUploadDocument}
+                onGrowlAlert={onGrowlAlert}
+                isFormReset={isFormReset}
+              />
             </Dialog>
             {
               <DataTable

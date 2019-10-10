@@ -7,12 +7,12 @@ import styles from './Dashboard.module.css';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
 
 import { Chart } from 'primereact/chart';
 
 const Dashboard = withRouter(
-  React.memo(({ refresh, match: { params: { dataSetId } } }) => {
+  React.memo(({ refresh, match: { params: { datasetId } } }) => {
     const [dashboardData, setDashboardData] = useState({});
     const [dashboardOptions, setDashboardOptions] = useState({});
     const [dashboardTitle, setDashboardTitle] = useState('');
@@ -27,34 +27,34 @@ const Dashboard = withRouter(
       return () => {
         setDashboardData([]);
       };
-    }, [refresh, dataSetId]);
+    }, [refresh, datasetId]);
 
     const onLoadStatistics = async () => {
       setIsLoading(true);
-      const dataSet = await DataSetService.errorStatisticsById(dataSetId);
-      const tableStatisticValues = dataSet.tableStatisticValues;
-      const tableNames = dataSet.tables.map(table => table.tableSchemaName);
+      const dataset = await DatasetService.errorStatisticsById(datasetId);
+      const tableStatisticValues = dataset.tableStatisticValues;
+      const tableNames = dataset.tables.map(table => table.tableSchemaName);
 
-      setDashboardTitle(dataSet.dataSetSchemaName);
+      setDashboardTitle(dataset.datasetSchemaName);
       setDashboardData({
         labels: tableNames,
         datasets: [
           {
             label: 'Correct',
             backgroundColor: '#004494',
-            data: dataSet.tableStatisticPercentages[0],
+            data: dataset.tableStatisticPercentages[0],
             totalData: tableStatisticValues
           },
           {
             label: 'Warning',
             backgroundColor: '#ffd617',
-            data: dataSet.tableStatisticPercentages[1],
+            data: dataset.tableStatisticPercentages[1],
             totalData: tableStatisticValues
           },
           {
             label: 'Error',
             backgroundColor: '#DA2131',
-            data: dataSet.tableStatisticPercentages[2],
+            data: dataset.tableStatisticPercentages[2],
             totalData: tableStatisticValues
           }
         ]
@@ -89,7 +89,6 @@ const Dashboard = withRouter(
                 labelString: 'Percentage'
               },
               ticks: {
-                // Include a % sign in the ticks
                 callback: (value, index, values) => `${value} %`
               }
             }

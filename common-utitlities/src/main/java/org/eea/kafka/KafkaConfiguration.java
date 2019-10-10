@@ -83,6 +83,8 @@ public class KafkaConfiguration {
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, EEAEventSerializer.class);
+    configProps.put("enable.idempotence", "true");
+//    configProps.put("transactional.id", "prod-1");
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
@@ -102,10 +104,13 @@ public class KafkaConfiguration {
    * @return the consumer factory
    */
   @Bean
-  public ConsumerFactory<String, EEAEventVO> consumerFactory() {
+  public ConsumerFactory<String, EEAEventVO> defaultConsumerFactory() {
     final Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+    props.put("heartbeat.interval.ms", 3000);
+    props.put("session.timeout.ms", 130000);
+    props.put("isolation.level", "read_committed");
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
     return new DefaultKafkaConsumerFactory<>(props);
@@ -121,7 +126,7 @@ public class KafkaConfiguration {
 
     final ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> factory =
         new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory());
+    factory.setConsumerFactory(defaultConsumerFactory());
     return factory;
   }
 

@@ -337,4 +337,27 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVO;
   }
 
+
+  /**
+   * Gets the metabase by id.
+   *
+   * @param id the id
+   * @return the metabase by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataFlowVO getMetabaseById(Long id) throws EEAException {
+
+    if (id == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Dataflow result = dataflowRepository.findById(id).orElse(null);
+    DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(result);
+
+    LOG.info("Get the dataflow metabaser with id {}", id);
+
+    return dataflowVO;
+  }
+
 }

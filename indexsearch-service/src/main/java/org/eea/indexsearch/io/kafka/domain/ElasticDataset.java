@@ -13,10 +13,5 @@ public class ElasticDataset {
   String AccesURL;
   ElasticUser elasticUser;
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(AccesURL, Countries, Issue, Name, Release, elasticUser);
-  }
-
 
 }

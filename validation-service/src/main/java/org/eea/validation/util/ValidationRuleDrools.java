@@ -82,6 +82,7 @@ public class ValidationRuleDrools {
     if (null == fieldValue.getFieldValidations()) {
       fieldValue.setFieldValidations(new ArrayList<>());
     }
+
     fieldValue.getFieldValidations().add(fieldValidation);
   }
 

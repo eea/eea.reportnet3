@@ -1,1 +1,1 @@
-export const ValidateData = ({ dataSetRepository }) => async dataSetId => dataSetRepository.validateDataById(dataSetId);
+export const ValidateData = ({ datasetRepository }) => async datasetId => datasetRepository.validateDataById(datasetId);

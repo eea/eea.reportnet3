@@ -1,18 +1,18 @@
 import { isNull, isUndefined } from 'lodash';
 
-import { apiDataSet } from 'core/infrastructure/api/domain/model/DataSet';
-import { DataSetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
-import { DataSet } from 'core/domain/model/DataSet/DataSet';
-import { DataSetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
-import { DataSetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
-import { DataSetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
+import { apiDataset } from 'core/infrastructure/api/domain/model/DataSet';
+import { DatasetError } from 'core/domain/model/DataSet/DataSetError/DataSetError';
+import { Dataset } from 'core/domain/model/DataSet/DataSet';
+import { DatasetTable } from 'core/domain/model/DataSet/DataSetTable/DataSetTable';
+import { DatasetTableField } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableField/DataSetTableField';
+import { DatasetTableRecord } from 'core/domain/model/DataSet/DataSetTable/DataSetRecord/DataSetTableRecord';
 import { Validation } from 'core/domain/model/Validation/Validation';
 
-const addRecordsById = async (dataSetId, tableSchemaId, records) => {
-  const dataSetTableRecords = [];
+const addRecordsById = async (datasetId, tableSchemaId, records) => {
+  const datasetTableRecords = [];
   records.forEach(record => {
     let fields = record.dataRow.map(DataTableFieldDTO => {
-      let newField = new DataSetTableField();
+      let newField = new DatasetTableField();
       newField.id = null;
       newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
       newField.type = DataTableFieldDTO.fieldData.type;
@@ -20,148 +20,147 @@ const addRecordsById = async (dataSetId, tableSchemaId, records) => {
 
       return newField;
     });
-    let dataSetTableRecord = new DataSetTableRecord();
+    let datasetTableRecord = new DatasetTableRecord();
 
-    dataSetTableRecord.datasetPartitionId = record.dataSetPartitionId;
-    dataSetTableRecord.fields = fields;
-    dataSetTableRecord.idRecordSchema = record.recordSchemaId;
-    dataSetTableRecord.id = null;
+    datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+    datasetTableRecord.fields = fields;
+    datasetTableRecord.idRecordSchema = record.recordSchemaId;
+    datasetTableRecord.id = null;
 
-    dataSetTableRecords.push(dataSetTableRecord);
+    datasetTableRecords.push(datasetTableRecord);
   });
 
-  const recordsAdded = await apiDataSet.addRecordsById(dataSetId, tableSchemaId, dataSetTableRecords);
+  const recordsAdded = await apiDataset.addRecordsById(datasetId, tableSchemaId, datasetTableRecords);
   return recordsAdded;
 };
 
-const deleteDataById = async dataSetId => {
-  const dataDeleted = await apiDataSet.deleteDataById(dataSetId);
+const deleteDataById = async datasetId => {
+  const dataDeleted = await apiDataset.deleteDataById(datasetId);
   return dataDeleted;
 };
 
-const deleteRecordById = async (dataSetId, recordId) => {
-  const recordDeleted = await apiDataSet.deleteRecordById(dataSetId, recordId);
+const deleteRecordById = async (datasetId, recordId) => {
+  const recordDeleted = await apiDataset.deleteRecordById(datasetId, recordId);
   return recordDeleted;
 };
 
-const deleteTableDataById = async (dataSetId, tableId) => {
-  const dataDeleted = await apiDataSet.deleteTableDataById(dataSetId, tableId);
+const deleteTableDataById = async (datasetId, tableId) => {
+  const dataDeleted = await apiDataset.deleteTableDataById(datasetId, tableId);
   return dataDeleted;
 };
 
-const errorsById = async (dataSetId, pageNum, pageSize, sortField, asc) => {
-  const dataSetErrorsDTO = await apiDataSet.errorsById(dataSetId, pageNum, pageSize, sortField, asc);
-
-  const dataSet = new DataSet(
+const errorsById = async (datasetId, pageNum, pageSize, sortField, asc) => {
+  const datasetErrorsDTO = await apiDataset.errorsById(datasetId, pageNum, pageSize, sortField, asc);
+  const dataset = new Dataset(
     null,
-    dataSetErrorsDTO.idDataset,
-    dataSetErrorsDTO.idDatasetSchema,
-    dataSetErrorsDTO.nameDataSetSchema,
-    dataSetErrorsDTO.totalErrors
+    datasetErrorsDTO.idDataset,
+    datasetErrorsDTO.idDatasetSchema,
+    datasetErrorsDTO.nameDataSetSchema,
+    datasetErrorsDTO.totalErrors
   );
 
-  const errors = dataSetErrorsDTO.errors.map(
-    dataSetErrorDTO =>
-      dataSetErrorDTO &&
-      new DataSetError(
-        dataSetErrorDTO.typeEntity,
-        dataSetErrorDTO.levelError,
-        dataSetErrorDTO.message,
-        dataSetErrorDTO.idObject,
+  const errors = datasetErrorsDTO.errors.map(
+    datasetErrorDTO =>
+      datasetErrorDTO &&
+      new DatasetError(
+        datasetErrorDTO.typeEntity,
+        datasetErrorDTO.levelError,
+        datasetErrorDTO.message,
+        datasetErrorDTO.idObject,
         null,
         null,
-        dataSetErrorDTO.idTableSchema,
-        dataSetErrorDTO.nameTableSchema,
-        dataSetErrorDTO.validationDate,
-        dataSetErrorDTO.idValidation
+        datasetErrorDTO.idTableSchema,
+        datasetErrorDTO.nameTableSchema,
+        datasetErrorDTO.validationDate,
+        datasetErrorDTO.idValidation
       )
   );
 
-  dataSet.errors = errors;
+  dataset.errors = errors;
 
-  return dataSet;
+  return dataset;
 };
 
-const errorPositionByObjectId = async (objectId, dataSetId, entityType) => {
-  const dataSetErrorDTO = await apiDataSet.errorPositionByObjectId(objectId, dataSetId, entityType);
+const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
+  const datasetErrorDTO = await apiDataset.errorPositionByObjectId(objectId, datasetId, entityType);
 
-  const dataSetError = new DataSetError();
-  dataSetError.position = dataSetErrorDTO.position;
-  dataSetError.recordId = dataSetErrorDTO.idRecord;
-  dataSetError.tableSchemaId = dataSetErrorDTO.idTableSchema;
-  dataSetError.tableSchemaName = dataSetErrorDTO.nameTableSchema;
+  const datasetError = new DatasetError();
+  datasetError.position = datasetErrorDTO.position;
+  datasetError.recordId = datasetErrorDTO.idRecord;
+  datasetError.tableSchemaId = datasetErrorDTO.idTableSchema;
+  datasetError.tableSchemaName = datasetErrorDTO.nameTableSchema;
 
-  return dataSetError;
+  return datasetError;
 };
 
-const errorStatisticsById = async dataSetId => {
-  const dataSetTablesDTO = await apiDataSet.statisticsById(dataSetId);
+const errorStatisticsById = async datasetId => {
+  const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
 
-  const dataSet = new DataSet();
-  dataSet.dataSetSchemaName = dataSetTablesDTO.nameDataSetSchema;
-  dataSet.datasetErrors = dataSetTablesDTO.datasetErrors;
+  const dataset = new Dataset();
+  dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
+  dataset.datasetErrors = datasetTablesDTO.datasetErrors;
 
   const tableStatisticValues = [];
 
-  const dataSetTables = dataSetTablesDTO.tables.map(dataSetTableDTO => {
+  const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
     tableStatisticValues.push([
-      dataSetTableDTO.totalRecords -
-        (dataSetTableDTO.totalRecordsWithErrors + dataSetTableDTO.totalRecordsWithWarnings),
-      dataSetTableDTO.totalRecordsWithWarnings,
-      dataSetTableDTO.totalRecordsWithErrors
+      datasetTableDTO.totalRecords -
+        (datasetTableDTO.totalRecordsWithErrors + datasetTableDTO.totalRecordsWithWarnings),
+      datasetTableDTO.totalRecordsWithWarnings,
+      datasetTableDTO.totalRecordsWithErrors
     ]);
 
-    return new DataSetTable(
-      dataSetTableDTO.tableErrors,
-      dataSetTableDTO.idTableSchema,
-      dataSetTableDTO.nameTableSchema
+    return new DatasetTable(
+      datasetTableDTO.tableErrors,
+      datasetTableDTO.idTableSchema,
+      datasetTableDTO.nameTableSchema
     );
   });
 
   //Transpose value matrix to fit Chart data structure
   let transposedValues = transposeMatrix(tableStatisticValues);
 
-  dataSet.tableStatisticValues = tableStatisticValues;
-  dataSet.tableStatisticPercentages = getPercentage(transposedValues);
+  dataset.tableStatisticValues = tableStatisticValues;
+  dataset.tableStatisticPercentages = getPercentage(transposedValues);
 
-  dataSet.tables = dataSetTables;
+  dataset.tables = datasetTables;
 
-  return dataSet;
+  return dataset;
 };
 
-const exportDataById = async (dataSetId, fileType) => {
-  const dataSetData = await apiDataSet.exportDataById(dataSetId, fileType);
-  return dataSetData;
+const exportDataById = async (datasetId, fileType) => {
+  const datasetData = await apiDataset.exportDataById(datasetId, fileType);
+  return datasetData;
 };
 
-const exportTableDataById = async (dataSetId, tableSchemaId, fileType) => {
-  const dataSetTableData = await apiDataSet.exportTableDataById(dataSetId, tableSchemaId, fileType);
-  return dataSetTableData;
+const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
+  const datasetTableData = await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
+  return datasetTableData;
 };
 
-const schemaById = async dataFlowId => {
-  const dataSetSchemaDTO = await apiDataSet.schemaById(dataFlowId);
+const schemaById = async dataflowId => {
+  const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
 
-  const dataSet = new DataSet();
-  dataSet.dataSetSchemaId = dataSetSchemaDTO.idDatasetSchema;
-  dataSet.dataSetSchemaName = dataSetSchemaDTO.nameDataSetSchema;
+  const dataset = new Dataset();
+  dataset.datasetSchemaId = datasetSchemaDTO.idDatasetSchema;
+  dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
 
-  const tables = dataSetSchemaDTO.tableSchemas.map(dataSetTableDTO => {
-    const records = [dataSetTableDTO.recordSchema].map(dataTableRecordDTO => {
+  const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
+    const records = [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
       const fields = dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
-        return new DataSetTableField(
+        return new DatasetTableField(
           DataTableFieldDTO.id,
           DataTableFieldDTO.idRecord,
           DataTableFieldDTO.name,
           DataTableFieldDTO.type
         );
       });
-      return new DataSetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
+      return new DatasetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
     });
-    return new DataSetTable(
+    return new DatasetTable(
       null,
-      dataSetTableDTO.idTableSchema,
-      dataSetTableDTO.nameTableSchema,
+      datasetTableDTO.idTableSchema,
+      datasetTableDTO.nameTableSchema,
       null,
       null,
       null,
@@ -169,13 +168,13 @@ const schemaById = async dataFlowId => {
     );
   });
 
-  dataSet.tables = tables;
-  return dataSet;
+  dataset.tables = tables;
+  return dataset;
 };
 
-const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields) => {
-  const tableDataDTO = await apiDataSet.tableDataById(dataSetId, tableSchemaId, pageNum, pageSize, fields);
-  const table = new DataSetTable();
+const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields) => {
+  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields);
+  const table = new DatasetTable();
 
   if (tableDataDTO.totalRecords > 0) {
     table.tableSchemaId = tableDataDTO.idTableSchema;
@@ -184,9 +183,9 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
     let field, record;
 
     const records = tableDataDTO.records.map(dataTableRecordDTO => {
-      record = new DataSetTableRecord();
+      record = new DatasetTableRecord();
       const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
-        field = new DataSetTableField();
+        field = new DatasetTableField();
         field.fieldId = DataTableFieldDTO.id;
         field.fieldSchemaId = DataTableFieldDTO.idFieldSchema;
         field.recordId = dataTableRecordDTO.idRecordSchema;
@@ -208,7 +207,7 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
         return field;
       });
 
-      record.dataSetPartitionId = dataTableRecordDTO.datasetPartitionId;
+      record.datasetPartitionId = dataTableRecordDTO.datasetPartitionId;
       record.recordId = dataTableRecordDTO.id;
       record.recordSchemaId = dataTableRecordDTO.idRecordSchema;
       record.fields = fields;
@@ -232,9 +231,9 @@ const tableDataById = async (dataSetId, tableSchemaId, pageNum, pageSize, fields
   return table;
 };
 
-const webFormDataById = async (dataSetId, tableSchemaId) => {
-  const webFormDataDTO = await apiDataSet.webFormDataById(dataSetId, tableSchemaId);
-  const webForm = new DataSetTable();
+const webFormDataById = async (datasetId, tableSchemaId) => {
+  const webFormDataDTO = await apiDataset.webFormDataById(datasetId, tableSchemaId);
+  const webForm = new DatasetTable();
 
   const headerFieldSchemaId = '5d666d53460a1e0001b16717';
   const valueFieldSchemaId = '5d666d53460a1e0001b16728';
@@ -257,10 +256,10 @@ const webFormDataById = async (dataSetId, tableSchemaId) => {
     let field, record;
 
     const records = webFormDataDTO.records.map(webFormRecordDTO => {
-      record = new DataSetTableRecord();
+      record = new DatasetTableRecord();
       let row = {};
       const fields = webFormRecordDTO.fields.map(webFormFieldDTO => {
-        field = new DataSetTableField();
+        field = new DatasetTableField();
         field.fieldId = webFormFieldDTO.id;
         field.fieldSchemaId = webFormFieldDTO.idFieldSchema;
         field.recordId = webFormRecordDTO.idRecordSchema;
@@ -324,20 +323,20 @@ const createDataColumns = (rowsData, letters) => {
   return columns;
 };
 
-const updateFieldById = async (dataSetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
-  const dataSetTableField = new DataSetTableField();
-  dataSetTableField.id = fieldId;
-  dataSetTableField.idFieldSchema = fieldSchemaId;
-  dataSetTableField.type = fieldType;
-  dataSetTableField.value = fieldValue;
+const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue) => {
+  const datasetTableField = new DatasetTableField();
+  datasetTableField.id = fieldId;
+  datasetTableField.idFieldSchema = fieldSchemaId;
+  datasetTableField.type = fieldType;
+  datasetTableField.value = fieldValue;
 
-  const fieldUpdated = await apiDataSet.updateFieldById(dataSetId, dataSetTableField);
+  const fieldUpdated = await apiDataset.updateFieldById(datasetId, datasetTableField);
   return fieldUpdated;
 };
 
-const updateRecordsById = async (dataSetId, record) => {
+const updateRecordsById = async (datasetId, record) => {
   const fields = record.dataRow.map(DataTableFieldDTO => {
-    let newField = new DataSetTableField();
+    let newField = new DatasetTableField();
     newField.id = DataTableFieldDTO.fieldData.id;
     newField.idFieldSchema = DataTableFieldDTO.fieldData.fieldSchemaId;
     newField.type = DataTableFieldDTO.fieldData.type;
@@ -345,19 +344,19 @@ const updateRecordsById = async (dataSetId, record) => {
 
     return newField;
   });
-  const dataSetTableRecord = new DataSetTableRecord();
+  const datasetTableRecord = new DatasetTableRecord();
 
-  dataSetTableRecord.datasetPartitionId = record.dataSetPartitionId;
-  dataSetTableRecord.fields = fields;
-  dataSetTableRecord.idRecordSchema = record.recordSchemaId;
-  dataSetTableRecord.id = record.recordId;
+  datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+  datasetTableRecord.fields = fields;
+  datasetTableRecord.idRecordSchema = record.recordSchemaId;
+  datasetTableRecord.id = record.recordId;
   //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-  const recordAdded = await apiDataSet.updateRecordsById(dataSetId, [dataSetTableRecord]);
+  const recordAdded = await apiDataset.updateRecordsById(datasetId, [datasetTableRecord]);
   return recordAdded;
 };
 
-const validateDataById = async dataSetId => {
-  const dataValidation = await apiDataSet.validateById(dataSetId);
+const validateDataById = async datasetId => {
+  const dataValidation = await apiDataset.validateById(datasetId);
   return dataValidation;
 };
 
@@ -370,7 +369,7 @@ const transposeMatrix = matrix => {
   return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
 };
 
-export const ApiDataSetRepository = {
+export const ApiDatasetRepository = {
   addRecordsById,
   deleteDataById,
   deleteRecordById,

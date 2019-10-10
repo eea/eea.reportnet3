@@ -10,14 +10,14 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Column } from 'primereact/column';
 
 import { Button } from 'ui/views/_components/Button';
-import { ReporterDataSetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
+import { ReporterDatasetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { DataSetService } from 'core/services/DataSet';
+import { DatasetService } from 'core/services/DataSet';
 
-const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefined, hasWritePermissions }) => {
-  const contextReporterDataSet = useContext(ReporterDataSetContext);
+const ValidationViewer = React.memo(({ visible, datasetId, buttonsList = undefined, hasWritePermissions }) => {
+  const contextReporterDataset = useContext(ReporterDatasetContext);
   const resources = useContext(ResourcesContext);
   const [columns, setColumns] = useState([]);
   const [fetchedData, setFetchedData] = useState([]);
@@ -50,12 +50,10 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     let columnsArr = headers.map(col => <Column sortable={true} key={col.id} field={col.id} header={col.header} />);
     columnsArr.push(<Column key="recordId" field="recordId" header="" className={styles.VisibleHeader} />);
     columnsArr.push(
-      <Column key="dataSetPartitionId" field="dataSetPartitionId" header="" className={styles.VisibleHeader} />
+      <Column key="datasetPartitionId" field="datasetPartitionId" header="" className={styles.VisibleHeader} />
     );
     columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
-
-    fetchData('', sortOrder, firstRow, numRows);
   }, []);
 
   useEffect(() => {
@@ -71,14 +69,14 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
   };
 
   const onLoadErrors = async (fRow, nRows, sField, sOrder) => {
-    const dataSetErrors = await DataSetService.errorsById(dataSetId, Math.floor(fRow / nRows), nRows, sField, sOrder);
-    setTotalRecords(dataSetErrors.totalErrors);
-    setFetchedData(dataSetErrors.errors);
+    const datasetErrors = await DatasetService.errorsById(datasetId, Math.floor(fRow / nRows), nRows, sField, sOrder);
+    setTotalRecords(datasetErrors.totalErrors);
+    setFetchedData(datasetErrors.errors);
     setLoading(false);
   };
 
-  const onLoadErrorPosition = async (objectId, dataSetId, entityType) => {
-    const errorPosition = await DataSetService.errorPositionByObjectId(objectId, dataSetId, entityType);
+  const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
+    const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
     return errorPosition;
   };
 
@@ -97,17 +95,17 @@ const ValidationViewer = React.memo(({ visible, dataSetId, buttonsList = undefin
     switch (event.data.entityType) {
       case 'FIELD':
       case 'RECORD':
-        const dataSetError = await onLoadErrorPosition(event.data.objectId, dataSetId, event.data.entityType);
-        contextReporterDataSet.onSelectValidation(
+        const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
+        contextReporterDataset.onSelectValidation(
           event.data.tableSchemaId,
-          dataSetError.position,
-          dataSetError.recordId
+          datasetError.position,
+          datasetError.recordId
         );
-        contextReporterDataSet.onValidationsVisible();
+        contextReporterDataset.onValidationsVisible();
         break;
       case 'TABLE':
-        contextReporterDataSet.onSelectValidation(event.data.tableSchemaId, -1, -1);
-        contextReporterDataSet.onValidationsVisible();
+        contextReporterDataset.onSelectValidation(event.data.tableSchemaId, -1, -1);
+        contextReporterDataset.onValidationsVisible();
         break;
       default:
         break;

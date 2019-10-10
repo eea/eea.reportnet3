@@ -1,2 +1,2 @@
-export const GetWebFormData = ({ dataSetRepository }) => async (dataSetId, tableSchemaId) =>
-  dataSetRepository.webFormDataById(dataSetId, tableSchemaId);
+export const GetWebFormData = ({ datasetRepository }) => async (datasetId, tableSchemaId) =>
+  datasetRepository.webFormDataById(datasetId, tableSchemaId);
