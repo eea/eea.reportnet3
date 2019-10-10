@@ -204,7 +204,6 @@ const GlobalValidationDashboard = dataflowId => {
         {
           stacked: true,
           ticks: {
-            // Include a % sign in the ticks
             callback: (value, index, values) => `${value}%`
           }
         }
