@@ -975,7 +975,7 @@ const DataViewer = withRouter(
 
     return (
       <div>
-        <Toolbar>
+        <Toolbar className={styles.dataViewerToolbar}>
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
