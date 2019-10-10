@@ -73,7 +73,7 @@
 		"edit": "Edit",
 		"editRow": "Edit row",
 		"emptyDescriptionValidationError":"Please, enter a description",
-		"emptyErrorsDashboard": "There is not any validation data",
+		"emptyErrorsDashboard": "There is not any validation data available now",
 		"emptyFileValidationError":"Please, select a file",
 		"emptyLanguageValidationError":"Please, language must be selected",
 		"emptyReleasedDashboard": "There is not any released data",
