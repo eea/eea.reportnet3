@@ -10,7 +10,7 @@ import { routes } from 'ui/routes';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Chart } from 'primereact/chart';
-import { ColorPicker } from 'primereact/colorpicker';
+import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { FilterList } from './_components/FilterList/FilterList';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
