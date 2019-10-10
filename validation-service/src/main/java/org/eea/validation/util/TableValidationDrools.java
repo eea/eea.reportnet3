@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 public class TableValidationDrools {
 
 
-  /** The validation service. */
+  /**
+   * The validation service.
+   */
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
@@ -26,7 +28,6 @@ public class TableValidationDrools {
   ////////////////////////////////// charaterization //////////////////
   ////////////////////////////////////////////////////////////////////
 
-
   // --# DR01A # The Characterisation file contains records for more than one season. #
   // the boolean is to know if the validation has previous years
 
@@ -36,23 +37,27 @@ public class TableValidationDrools {
    * @param idSchema the id schema
    * @param previous the previous
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDR01AB(String idSchema, Boolean previous, Long datasetId) {
 
-    String DR01AB = "select v.value from dataset_" + datasetId
-        + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
+//    String DR01AB = "select v.value from dataset_" + datasetId
+//        + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
 
-    return validationService.tableValidationDR01ABQuery(DR01AB, previous);
+    return true;
+    // return validationService.tableValidationDR01ABQuery(DR01AB, previous);
   }
 
   // # DU01A # The Characterisation file contains more than one record for the
   // bathingWaterIdentifier.
+
   /**
    * Rule DU 01 A.
    *
    * @param idSchema the id schema
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU01A(String idSchema, Long datasetId) {
@@ -65,11 +70,13 @@ public class TableValidationDrools {
 
   // # DU01B # The Characterisation file contains a groupIdentifier associated with single btahing
   // water. #
+
   /**
    * Rule DU 01 B.
    *
    * @param idSchema the id schema
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU01B(String idSchema, Long datasetId) {
@@ -81,6 +88,7 @@ public class TableValidationDrools {
   }
 
   // --# DR01A # The Characterisation file contains records for more than one season. #
+
   /**
    * Rule DO 01.
    *
@@ -90,15 +98,17 @@ public class TableValidationDrools {
    * @param idSchemaBathingWaterIdentifier the id schema bathing water identifier
    * @param idDataset the id dataset
    * @param idDatasetToContribute the id dataset to contribute
+   *
    * @return the boolean
    */
   public static Boolean ruleDO01(String idSchemaThematicIdIdentifier, String idSchemaStatusCode,
       String idSchemaCountryCode, String idSchemaBathingWaterIdentifier, Long idDataset,
       String idDatasetToContribute) {
     String countryCode = "''";
-        if(null != ThreadPropertiesManager.getVariable("countryCode") && ThreadPropertiesManager.getVariable("countryCode").equals("")) {
-          countryCode =  ThreadPropertiesManager.getVariable("countryCode").toString();
-        }
+    if (null != ThreadPropertiesManager.getVariable("countryCode")
+        && ThreadPropertiesManager.getVariable("countryCode").equals("")) {
+      countryCode = ThreadPropertiesManager.getVariable("countryCode").toString();
+    }
     String ruleDO01 =
         "with sparcial as( select dato1.thematicIdIdentifier as thematicIdIdentifier, "
             + "dato2.statusCode as statusCode, dato3.countryCode as countryCode "
@@ -118,12 +128,10 @@ public class TableValidationDrools {
             + "select s.thematicIdIdentifier from  sparcial s left join characterisation c on "
             + "s.thematicIdIdentifier = c.bathingWaterIdentifier where "
             + "s.statusCode NOT in('experimental','retired','superseded') and s.countryCode in("
-            + countryCode + ") "
-            + "and c.bathingWaterIdentifier is null";
+            + countryCode + ") " + "and c.bathingWaterIdentifier is null";
 
     return validationService.tableValidationQueryNonReturnResult(ruleDO01);
   }
-
 
   ////////////////////////////////////////////////////////////////////
   ////////////////////////////////// SeasonalPeriod //////////////////
@@ -140,6 +148,7 @@ public class TableValidationDrools {
    * @param idSchemaStartDate the id schema start date
    * @param idSchemaEndDate the id schema end date
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
@@ -211,15 +220,16 @@ public class TableValidationDrools {
   ////////////////////////////////// MonitoringResult //////////////////
   ////////////////////////////////////////////////////////////////////
 
-
   // # DU03 # The MonitoringResult file contains more than two records for the combination of
   // bathingWaterIdentifier and sampleDate. #
+
   /**
    * Rule DU 03.
    *
    * @param idSchemaBWIdent the id schema BW ident
    * @param idSchemaBWSampleDate the id schema BW sample date
    * @param datasetId the dataset id
+   *
    * @return the boolean
    */
   public static Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate,
@@ -232,7 +242,6 @@ public class TableValidationDrools {
         + "select v.value as sampleDate, v.id_record as record2 " + "FROM dataset_" + datasetId
         + ".field_value v " + "where v.id_field_schema = '" + idSchemaBWSampleDate + "') as tabla2 "
         + "on tabla1.record1 = tabla2.record2 " + "GROUP BY campo1,campo2 having count(*) > 1";
-
 
     return validationService.tableValidationQueryNonReturnResult(DU03);
   }

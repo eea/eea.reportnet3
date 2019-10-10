@@ -129,7 +129,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       label: resources.messages.manageRoles,
       icon: 'users',
       show: hasWritePermissions,
-      menuItemFunction: () => {
+      command: () => {
         showContributorsDialog();
       }
     },
@@ -138,7 +138,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       label: resources.messages.properties,
       icon: 'settings',
       show: true,
-      menuItemFunction: e => {
+      command: e => {
         setIsActivePropertiesDialog(true);
       }
     }
