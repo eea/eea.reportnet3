@@ -1,5 +1,7 @@
 package org.eea.kafka.handler;
 
+import org.eea.exception.EEAException;
+
 /**
  * The interface Message handler.
  *
@@ -18,7 +20,8 @@ public interface MessageHandler<T> {
    * Process message.
    *
    * @param message the message
+   * @throws EEAException
    */
-  void processMessage(T message);
+  void processMessage(T message) throws EEAException;
 
 }

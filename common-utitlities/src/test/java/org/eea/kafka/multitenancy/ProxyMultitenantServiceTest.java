@@ -1,7 +1,6 @@
 package org.eea.kafka.multitenancy;
 
 import static org.junit.Assert.assertNull;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import org.eea.exception.EEAException;
@@ -46,12 +45,10 @@ public class ProxyMultitenantServiceTest {
   public void testInvoke() throws Throwable {
     Mockito.doNothing().when(proxyTestInterface).testMethod(Mockito.any());
     Method method = ProxyTestInterface.class.getMethod("testMethod", String.class);
-    ProxyMultitenantService<ProxyTestInterface> proxy = new ProxyMultitenantService<>(
-        proxyTestInterface);
+    ProxyMultitenantService<ProxyTestInterface> proxy =
+        new ProxyMultitenantService<>(proxyTestInterface);
 
-    Object result =
-        proxy.invoke(proxyTestInterface, method,
-            new Object[]{"id"});
+    Object result = proxy.invoke(proxyTestInterface, method, new Object[] {"id"});
     assertNull("result not null", result);
   }
 
@@ -64,12 +61,10 @@ public class ProxyMultitenantServiceTest {
   public void testInvokeException() throws Throwable {
     Mockito.doThrow(EEAException.class).when(proxyTestInterface).testMethod(Mockito.any());
     Method method = ProxyTestInterface.class.getMethod("testMethod", String.class);
-    ProxyMultitenantService<ProxyTestInterface> proxy = new ProxyMultitenantService<>(
-        proxyTestInterface);
+    ProxyMultitenantService<ProxyTestInterface> proxy =
+        new ProxyMultitenantService<>(proxyTestInterface);
 
-    Object result =
-        proxy.invoke(proxyTestInterface, method,
-            new Object[]{"id"});
+    Object result = proxy.invoke(proxyTestInterface, method, new Object[] {"id"});
   }
 
 }

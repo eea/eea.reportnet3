@@ -1,6 +1,6 @@
 package org.eea.validation;
 
-import org.eea.multitenancy.MultiTenantApplication;
+import org.eea.lock.annotation.EnableLockAspect;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +16,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EeaEnableSecurity
+@EnableLockAspect
 public class ValidationServiceApplication {
 
   /**
@@ -24,7 +25,8 @@ public class ValidationServiceApplication {
    * @param args the arguments
    */
   public static void main(final String[] args) {
-    MultiTenantApplication.executeApplication(ValidationServiceApplication.class, args);
+    SpringApplication.run(ValidationServiceApplication.class, args);
+
   }
 
 }

@@ -14,6 +14,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class FileTreatmentHelper {
    */
   @Autowired
   private DataSetMapper dataSetMapper;
+
+  @Autowired
+  private LockService lockService;
 
   /**
    * Instantiates a new file loader helper.
@@ -110,7 +114,14 @@ public class FileTreatmentHelper {
 
     LOG.info("File processed and saved into DB");
 
+    // Release the lock manually
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(datasetId);
+    criteria.add(idTableSchema);
+    lockService.removeLockByCriteria("DataSetControllerImpl.loadTableData(..)", criteria);
+
     // after the dataset has been saved, an event is sent to notify it
+    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.LOAD_DATA_COMPLETED_EVENT, datasetId);
   }
 

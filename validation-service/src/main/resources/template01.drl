@@ -51,13 +51,6 @@ function boolean isCodeList( String value ,String codeList){
 	return CodeListUtils.codeListValidate(value,codeList);
 }
 
-//RECORDS PART 
-function boolean isInSameRecord( String value ,RecordValue record, Integer position, String valueToHave){
-	if(!isBlank(value)){
-		value = "";
-	}
-	return ForeingKeyDrools.isInSameRecord(value,record,position,valueToHave);
-}
 
 //URL PART
 function boolean isURL( String value ){
@@ -184,6 +177,7 @@ function boolean isCordenateLong( String value ){
    }
    return false;
  }
+
  
  
  //// PART OF TABLE
@@ -213,13 +207,19 @@ function  Boolean ruleDU02A(String idSchemaBathingWaterIdentifierTable,
 			return TableValidationDrools.ruleDU02A(idSchemaBathingWaterIdentifierTable,idSchemaPeriodType,
 			idSchemaStartDate,idSchemaEndDate,datasetId);
 }
-//PART TABLE BUT USING RECORD TO MASK
-function  Boolean monitoringWithPeriodSampleStatus(Long datasetId){
-return RecordValidationDrools.monitoringWithPeriodSampleStatus(datasetId);
+
+function  Boolean ruleDU02B(Long datasetId,Long datasetLegazy){
+			return TableValidationDrools.ruleDU02B(datasetId,datasetLegazy);
 }
+//PART TABLE BUT USING RECORD TO MASK
 //MONITORING PART
 function Boolean ruleDU03(String idSchemaBWIdent, String idSchemaBWSampleDate, Long datasetId){
  return TableValidationDrools.ruleDU03(idSchemaBWIdent,idSchemaBWSampleDate,datasetId); 
+}
+
+//PART TABLES EMPTY
+ function Boolean ruleEmptyTable(Long datasetId, Long idTable){
+return TableValidationDrools.ruleEmptyTable(datasetId,idTable);
 }
  
  
@@ -249,6 +249,19 @@ function Boolean datasetValidationDC03(Long idDataset) {
 return DatasetValidations.datasetValidationDC03(idDataset);
 }
  
+function Boolean datasetValidationDC02B(Long idDataset) {
+return DatasetValidations.datasetValidationDC02B(idDataset);
+}
+
+function Boolean ruleEM01(Long idDataset) {
+return DatasetValidations.ruleEM01(idDataset);
+}
+function Boolean ruleEM02(Long idDataset) {
+return DatasetValidations.ruleEM02(idDataset);
+}
+function Boolean ruleEM03(Long idDataset) {
+return DatasetValidations.ruleEM03(idDataset);
+}
  //PART RECORD
  
 //SEASIONALPERIOD TABLE
@@ -287,42 +300,81 @@ function boolean endUnknownPeriod(RecordValue recordValue,String idFieldSchemaPe
 }
 
 // MONITORING PART OF TABLES
-//1
 function boolean sameYearValidatioMonitoring(RecordValue recordValue, String idFieldShemaDate, String idFieldSchemaSeason){
 	return RecordValidationDrools.sameYearValidatioMonitoring(recordValue,idFieldShemaDate,idFieldSchemaSeason);
 }
 
-//2
-
 function boolean maxValueintestinal(RecordValue recordValue, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemaIntestinalEnterococciStatus){
 	return RecordValidationDrools.maxValueintestinal(recordValue,idFieldShemaIntestinalEnterococciValue,idFieldSchemaIntestinalEnterococciStatus);
 }
-//3
 function boolean maxValueEscherichiaColi(RecordValue recordValue,  String idFieldSchemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
 	return RecordValidationDrools.maxValueEscherichiaColi(recordValue,idFieldSchemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
 }
-//4
 function boolean generalStatusValidation(RecordValue recordValue, String idFieldShemaIntestinalEnterococciStatus , 
 String idFieldSchemaEscherichiaColiStatus,String idFieldSchemaSampleStatus ){
 	return RecordValidationDrools.generalStatusValidation(recordValue,idFieldShemaIntestinalEnterococciStatus,
 	idFieldSchemaEscherichiaColiStatus,idFieldSchemaSampleStatus);
 }
 
-//5
-
-
-//6
-
-//7
-
-
-//8
 function boolean intestinalEnterococciValueValidation(RecordValue recordValue, String idFieldShemaIntestinalEnterococciValue, String idFieldSchemIntestinalEnterococciStatus){
 	return RecordValidationDrools.intestinalEnterococciValueValidation(recordValue,idFieldShemaIntestinalEnterococciValue,idFieldSchemIntestinalEnterococciStatus);
 }
-
-
-//9
 function boolean escherichiaColiStatusValidation(RecordValue recordValue, String idFieldShemaEscherichiaColiValue, String idFieldSchemaEscherichiaColiStatus){
 	return RecordValidationDrools.escherichiaColiStatusValidation(recordValue,idFieldShemaEscherichiaColiValue,idFieldSchemaEscherichiaColiStatus);
+}
+
+function boolean ruleSVA(String value){
+ 	return ForeingKeyDrools.ruleSVA(value);
+}
+
+///NEW RECORDS LUNES
+
+
+function boolean RD03ARule(Long idDataset,String idSchemaGroupIdentifier, String idSchemaBathingWaterIdentifier){
+ 	return RecordTableValidation.RD03ARule(idDataset,idSchemaGroupIdentifier,idSchemaBathingWaterIdentifier);
+}
+function boolean RD03BRule(Long idDataset,Long datasetLegazy){
+ 	return RecordTableValidation.RD03BRule(idDataset,datasetLegazy);
+}
+function boolean RD03CRule(Long idDataset,Long datasetLegazy){
+ 	return RecordTableValidation.RD03CRule(idDataset,datasetLegazy);
+}
+function boolean RD20BRule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20CRule(Long idDataset){
+ 	return RecordTableValidation.RD20CRule(idDataset);
+}
+function boolean RD20DRule(Long idDataset){
+ 	return RecordTableValidation.RD20DRule(idDataset);
+}
+function boolean RD20ERule(Long idDataset){
+ 	return RecordTableValidation.RD20BRule(idDataset);
+}
+function boolean RD20FRule(Long idDataset){
+ 	return RecordTableValidation.RD20FRule(idDataset);
+}
+function boolean RD20GRule(Long idDataset){
+ 	return RecordTableValidation.RD20GRule(idDataset);
+}
+function boolean RD20HRule(Long idDataset){
+ 	return RecordTableValidation.RD20HRule(idDataset);
+}
+
+function boolean RD17BRule(Long idDataset){
+ 	return RecordTableValidation.RD17BRule(idDataset);
+}
+//PART CHARACTERIZATION
+
+
+//PART LEGAZY
+function boolean RD12DRule(Long idDataset){
+ 	return RecordTableValidation.RD12DRule(idDataset);
+}
+
+function boolean RD11ERule(Long idDataset){
+ 	return RecordTableValidation.RD11ERule(idDataset);
+}
+function boolean RD11FRule(Long idDataset){
+ 	return RecordTableValidation.RD11FRule(idDataset);
 }
