@@ -3,17 +3,15 @@
   color: #404040;
   background-color: #ffffff;
   padding: 5px;
-  margin: 0.5rem;
-  border-radius: 15px;
-  -moz-border-radius: 15px;
-  -webkit-border-radius: 15px;
-  cursor: pointer;
-}
-.listItem:hover {
-  background: aliceblue;
+  margin: 0;
+  align-items: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .labelItem {
-  margin: 0.5rem;
+  margin: 0.3rem;
   margin-left: 0rem;
   cursor: pointer;
 }
@@ -27,6 +25,7 @@
   display: inline-flex;
   flex-direction: row;
   max-width: 1rem;
+  align-items: center;
 }
 .checkbox:focus {
   border-color: transparent;

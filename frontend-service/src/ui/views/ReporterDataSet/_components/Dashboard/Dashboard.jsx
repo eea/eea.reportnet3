@@ -5,12 +5,11 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dashboard.module.css';
 
-import { ColorPicker } from 'primereact/colorpicker';
+import { Chart } from 'primereact/chart';
+import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { DatasetService } from 'core/services/DataSet';
-
-import { Chart } from 'primereact/chart';
 
 const SEVERITY_CODE = {
   CORRECT: 1,
@@ -140,7 +139,6 @@ const Dashboard = withRouter(
                 labelString: 'Percentage'
               },
               ticks: {
-                // Include a % sign in the ticks
                 callback: (value, index, values) => `${value} %`
               }
             }

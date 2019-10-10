@@ -81,10 +81,10 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  metadata: async dataflowId => {
+  dataflowDetails: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.metadata, { dataflowId: dataflowId }),
+      url: getUrl(DataflowConfig.dataflowDetails, { dataflowId: dataflowId }),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`

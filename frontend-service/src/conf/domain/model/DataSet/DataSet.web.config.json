@@ -1,6 +1,6 @@
 {
     "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
-    "dataSchema":  "/dataschema/dataflow/{:dataflowId}",
+    "dataSchema":  "/dataschema/noRules/dataflow/{:dataflowId}",
     "dataViewer": "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}",
     "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
     "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
