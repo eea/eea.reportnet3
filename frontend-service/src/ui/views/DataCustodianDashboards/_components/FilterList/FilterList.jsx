@@ -5,10 +5,10 @@ import { uniqBy } from 'lodash';
 import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { ReportersListItem } from '../_components/ReportersListItem';
+import { ReportersListItem } from './_components/ReportersListItem';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { StatusList } from '../_components/StatusList';
-import { TableListItem } from '../_components/TableListItem';
+import { StatusList } from './_components/StatusList';
+import { TableListItem } from './_components/TableListItem';
 
 function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
   const resources = useContext(ResourcesContext);
@@ -17,7 +17,6 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
   };
 
   const tableNamesIdsArray = [];
-
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
   uniqDatasets.map(dataset => {
