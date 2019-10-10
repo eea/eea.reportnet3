@@ -270,7 +270,7 @@ public class ValidationServiceTest {
    */
   @Before
   public void initMocks() {
-    attributes = new HashMap<String, List<String>>();
+    attributes = new HashMap<>();
     List<String> data = new ArrayList<>();
     data.add("'IT'");
     attributes.put("countryCode", data);
@@ -582,7 +582,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBaseThrowErrorNull()
       throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
-    KieBase kiebase = kieHelper.build();
+    kieHelper.build();
     Mockito.doThrow(new FileNotFoundException()).when(kieBaseManager)
         .reloadRules(Mockito.anyLong());
 
@@ -850,7 +850,7 @@ public class ValidationServiceTest {
         .setValidationDate(new Date().toString());
     when(validationDatasetRepository.findByValidationIds(Mockito.any()))
         .thenReturn(datasetValue.getDatasetValidations());
-    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList());
+    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>());
   }
 
   /**
