@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useReducer, useState } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
@@ -35,9 +35,6 @@ const GlobalReleasedDashboard = dataflowId => {
     console.error('Released dashboard error: ', error);
     const errorResponse = error.response;
     console.error('Released dashboard errorResponse: ', errorResponse);
-    if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-      // history.push(getUrl(routes.DATAFLOW, { match.params.dataflowId }));
-    }
   };
 
   const releasedOptionsObject = {
