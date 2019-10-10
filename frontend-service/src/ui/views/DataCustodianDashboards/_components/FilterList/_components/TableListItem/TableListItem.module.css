@@ -10,7 +10,7 @@
   user-select: none;
 }
 .labelItem {
-  margin: 0.5rem;
+  margin: 0.3rem;
   margin-left: 0rem;
   cursor: pointer;
 }
@@ -24,6 +24,7 @@
   display: inline-flex;
   flex-direction: row;
   max-width: 1rem;
+  align-items: center;
 }
 .checkbox:focus {
   border-color: transparent;
