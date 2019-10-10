@@ -494,6 +494,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
+
       <ReporterDatasetContext.Provider
         value={{
           validationsVisibleHandler: null,
@@ -506,6 +507,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         {showWebFormInputSwitch()}
         {isWebForm()}
       </ReporterDatasetContext.Provider>
+
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -514,6 +516,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} />
       </Dialog>
+
       <ReporterDatasetContext.Provider
         value={{
           onValidationsVisible: () => {
@@ -539,6 +542,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       </ReporterDatasetContext.Provider>
+
       <ConfirmDialog
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}
@@ -549,6 +553,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={deleteDialogVisible}>
         {resources.messages['deleteDatasetConfirm']}
       </ConfirmDialog>
+
       <ConfirmDialog
         header={resources.messages['validateDataset']}
         labelCancel={resources.messages['no']}
@@ -572,6 +577,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           setSnapshotDialogVisible={setSnapshotDialogVisible}
           snapshotListData={snapshotListData}
         />
+
         <ConfirmDialog
           className={styles.snapshotDialog}
           header={snapshotState.dialogMessage}

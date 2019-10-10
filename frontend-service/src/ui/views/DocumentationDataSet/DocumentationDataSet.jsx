@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { isUndefined, isArray } from 'lodash';
+import { isUndefined, isArray, isNull, isString } from 'lodash';
 
 import styles from './DocumentationDataSet.module.scss';
 
@@ -19,6 +19,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
+import { InputText } from 'ui/views/_components/InputText';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -36,21 +37,25 @@ import { routes } from 'ui/routes';
 export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documents, setDocuments] = useState([]);
+  const [editedRecord, setEditedRecord] = useState({});
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
+  const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
+  const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
+  const [isDownloading, setIsDownloading] = useState('');
+  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDownloading, setIsDownloading] = useState('');
+  const [isNewRecord, setIsNewRecord] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
+  const [newRecord, setNewRecord] = useState({});
   const [rowDataState, setRowDataState] = useState();
   const [webLinks, setWebLinks] = useState();
   const [webLinksColumns, setWebLinksColumns] = useState([]);
-
   const home = {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -79,22 +84,25 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
+          onClick={() => setIsEditDialogVisible(true)}
         />
         <Button
           type="button"
           icon="trash"
           className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
+          onClick={() => setIsConfirmDeleteVisible(true)}
         />
       </div>
     );
   };
 
-  const webLinkEditionColumn = <Column body={row => webLinkEditButtons(row)} />;
+  const webLinkEditionColumn = <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} />;
 
   useEffect(() => {
     let webLinkKeys = isArray(webLinks) ? Object.keys(webLinks[0]) : [];
     let webLinkColArray = webLinkKeys.map(key => (
       <Column
+        key={key}
         columnResizeMode="expand"
         field={key}
         filter={false}
@@ -107,7 +115,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     if (isCustodian) {
       webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
     }
-
     setWebLinksColumns(webLinkColArray);
   }, [documents, webLinks]);
 
@@ -225,6 +232,71 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       </a>
     );
   };
+
+  const newRecordForm = webLinksColumns.map((column, i) => {
+    console.log('column', column);
+    if (isAddDialogVisible) {
+      if (i == 0) {
+        return;
+      }
+      return (
+        <React.Fragment key={column.props.field}>
+          <div className="p-col-4" style={{ padding: '.75em' }}>
+            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
+          </div>
+          <div className="p-col-8" style={{ padding: '.5em' }}>
+            <InputText
+              id={column.props.field}
+              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
+            />
+          </div>
+        </React.Fragment>
+      );
+    }
+  });
+
+  const onEditAddFormInput = (property, value) => {
+    if (!isNewRecord) {
+      setEditedRecord({ ...editedRecord });
+    } else {
+      setNewRecord({ ...newRecord });
+    }
+  };
+
+  const onSaveRecord = newRecord => console.log('saving ', newRecord);
+
+  const addRowDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          setIsAddDialogVisible(false);
+        }}
+      />
+      <Button
+        label={resources.messages['save']}
+        icon="save"
+        onClick={() => {
+          onSaveRecord(newRecord);
+        }}
+      />
+    </div>
+  );
+
+  const addRowHeader = (
+    <div className="p-clearfix" style={{ width: '100%' }}>
+      <Button
+        style={{ float: 'left' }}
+        label={resources.messages['add']}
+        icon="add"
+        onClick={() => {
+          setIsNewRecord(true);
+          setIsAddDialogVisible(true);
+        }}
+      />
+    </div>
+  );
 
   const onGrowlAlert = message => {
     growlRef.current.show(message);
@@ -361,6 +433,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
                 autoLayout={true}
                 paginator={true}
                 rowsPerPageOptions={[5, 10, 100]}
+                header={isCustodian ? addRowHeader : null}
                 rows={10}>
                 {webLinksColumns}
               </DataTable>
@@ -377,6 +450,32 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
           visible={deleteDialogVisible}>
           {resources.messages['deleteDocument']}
         </ConfirmDialog>
+
+        <Dialog
+          className={styles.add_dialog}
+          blockScroll={false}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+          footer={addRowDialogFooter}
+          header={resources.messages['addNewRow']}
+          modal={true}
+          onHide={() => setIsAddDialogVisible(false)}
+          style={{ width: '50%', height: '80%' }}
+          visible={isAddDialogVisible}>
+          <div className="p-grid p-fluid">{newRecordForm}</div>
+        </Dialog>
+
+        {/* <Dialog
+          className="edit-table"
+          blockScroll={false}
+          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+          footer={editRowDialogFooter}
+          header={resources.messages['editRow']}
+          modal={true}
+          onHide={() => setIsEditDialogVisible(false)}
+          style={{ width: '50%', height: '80%' }}
+          visible={isEditDialogVisible}>
+          <div className="p-grid p-fluid">{editRecordForm}</div>
+        </Dialog> */}
       </>
     );
   } else {
