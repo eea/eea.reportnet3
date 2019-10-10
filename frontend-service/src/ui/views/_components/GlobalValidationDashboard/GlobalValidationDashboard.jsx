@@ -179,9 +179,9 @@ const GlobalValidationDashboard = dataflowId => {
 
   if (!isEmpty(filterState.data)) {
     return (
-      <div className="rep-row">
+      <div className={`rep-row ${styles.chart_released}`}>
         <fieldset className={styles.colorPickerWrap}>
-          <legend>Choose your dashboard color</legend>
+          <legend>{resources.messages['chooseChartColor']}</legend>
           {Object.keys(SEVERITY_CODE).map((type, i) => {
             return (
               <React.Fragment key={i}>

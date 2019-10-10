@@ -10,6 +10,7 @@
 		"appName": "Reportnet 3.0",		
 		"cancel": "Cancel",
 		"category": "Category",
+		"chooseChartColor": "Choose your dashboard color",
 		"close": "Close",
 		"confirmDeleteRow": "Are you sure you want to delete this row?",
 		"contributorLoginValidationMax": "Login is too long!",
