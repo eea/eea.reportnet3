@@ -170,7 +170,7 @@ const Dashboard = withRouter(
         {renderDashboard()}
         <div className={styles.dashboardWraper}>
           <fieldset className={styles.colorPickerWrap}>
-            <legend>{resources.messages['colorPickerMessage']}</legend>
+            <legend>{resources.messages['chooseChartColor']}</legend>
             {Object.keys(SEVERITY_CODE).map((type, i) => {
               return (
                 <React.Fragment key={i}>
