@@ -10,6 +10,7 @@
 		"appName": "Reportnet 3.0",		
 		"cancel": "Cancel",
 		"category": "Category",
+		"chooseChartColor": "Choose your dashboard color",
 		"close": "Close",
 		"colorPickerMessage": "Choose your dashboard color",
 		"completedDataflowText": "These are the completed dataflows",
