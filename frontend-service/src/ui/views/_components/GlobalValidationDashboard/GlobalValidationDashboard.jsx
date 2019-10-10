@@ -180,6 +180,11 @@ const GlobalValidationDashboard = dataflowId => {
   if (!isEmpty(filterState.data)) {
     return (
       <div className={`rep-row ${styles.chart_released}`}>
+        <FilterList
+          color={dashboardColors}
+          originalData={filterState.originalData}
+          filterDispatch={filterDispatch}></FilterList>
+        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
         <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           {Object.keys(SEVERITY_CODE).map((type, i) => {
@@ -198,11 +203,6 @@ const GlobalValidationDashboard = dataflowId => {
             );
           })}
         </fieldset>
-        <FilterList
-          color={dashboardColors}
-          originalData={filterState.originalData}
-          filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
       </div>
     );
   } else {

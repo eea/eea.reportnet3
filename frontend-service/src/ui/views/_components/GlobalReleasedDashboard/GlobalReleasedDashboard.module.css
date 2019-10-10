@@ -1,12 +1,6 @@
 .positioning {
   position: sticky !important;
 }
-.colorPickerWrap {
-  border: 1px solid var(--grey-50);
-  padding: 20px;
-  width: 100%;
-  margin-bottom: 15px;
-}
 .chart_released {
   padding-bottom: 100px;
 }
