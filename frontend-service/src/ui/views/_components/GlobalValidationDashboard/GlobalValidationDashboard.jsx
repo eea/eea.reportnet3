@@ -32,9 +32,9 @@ const GlobalValidationDashboard = dataflowId => {
 
     const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
 
-    tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray);
-
-    tablesData = tablesData.filter(table => showArrayItem(msgStatusTypesArr, table.label));
+    tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray).filter(table =>
+      showArrayItem(msgStatusTypesArr, table.label)
+    );
 
     return { labels: labels, datasets: tablesData };
   };
