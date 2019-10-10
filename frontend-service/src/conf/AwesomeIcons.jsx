@@ -17,6 +17,11 @@ import {
   faPlus
 } from '@fortawesome/free-solid-svg-icons';
 
+import {
+  faSquare as farSquareRegular,
+  faCheckSquare as faCheckSquareRegular
+} from '@fortawesome/free-regular-svg-icons';
+
 export const AwesomeIcons = icon => {
   switch (icon) {
     case 'pdf':
@@ -115,6 +120,10 @@ export const AwesomeIcons = icon => {
       return faDatabase;
     case 'plus':
       return faPlus;
+    case 'square':
+      return farSquareRegular;
+    case 'checkedSquare':
+      return faCheckSquareRegular;
     default:
       return faFileAlt;
   }

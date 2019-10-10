@@ -1846,3 +1846,8 @@ body .p-dialog.edit-table .p-dialog-content {
     stroke: var(--yellow-120);
   }
 }
+
+/* Toolbar */
+.p-toolbar.p-component {
+  position: relative;
+}
