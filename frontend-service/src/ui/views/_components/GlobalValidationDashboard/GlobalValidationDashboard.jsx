@@ -163,6 +163,8 @@ const GlobalValidationDashboard = dataflowId => {
         {
           stacked: true,
           ticks: {
+            min: 0,
+            max: 100,
             callback: (value, index, values) => `${value}%`
           }
         }
