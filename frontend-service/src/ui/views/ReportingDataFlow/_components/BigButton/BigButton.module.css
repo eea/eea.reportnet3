@@ -1,5 +1,5 @@
 .bigButton {
-  border-radius: 20px;
+  border-radius: 10px;
   font-size: 2rem;
 }
 .bigButton > a {
@@ -17,7 +17,7 @@
 
 .dataset a {
   color: var(--white);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 .dataset a:hover {
   color: var(--white);
@@ -32,7 +32,7 @@
 }
 .documents a {
   color: var(--white);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 .documents a:hover {
   background-color: var(--c-orange-300);
@@ -102,7 +102,7 @@
 }
 .dashboard a {
   color: var(--white);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 .dashboard a:hover {
   background-color: var(--c-purple-300);
