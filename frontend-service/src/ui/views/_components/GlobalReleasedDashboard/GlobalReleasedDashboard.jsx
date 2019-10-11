@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 
@@ -10,7 +10,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
 
-const GlobalReleasedDashboard = dataflowId => {
+export const GlobalReleasedDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
   const [isLoading, setLoading] = useState(true);
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
@@ -64,12 +64,12 @@ const GlobalReleasedDashboard = dataflowId => {
       datasets: [
         {
           label: resources.messages['released'],
-          backgroundColor: 'rgba(51, 153, 0, 1)',
+          backgroundColor: '#339900',
           data: releasedData.map(dataset => dataset.isReleased)
         },
         {
           label: resources.messages['unreleased'],
-          backgroundColor: 'rgba(208, 208, 206, 1)',
+          backgroundColor: '#D0D0CE',
           data: releasedData.map(dataset => !dataset.isReleased)
         }
       ]
@@ -95,5 +95,3 @@ const GlobalReleasedDashboard = dataflowId => {
     </div>
   );
 };
-
-export { GlobalReleasedDashboard };
