@@ -170,7 +170,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             </h2>
           </div>
           <div>
-            <DropdownButton icon="ellipsis" model={dropDownItems} />
+            <DropdownButton icon="ellipsis" model={dropDownItems} disabled />
           </div>
         </div>
 
