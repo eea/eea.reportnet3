@@ -54,7 +54,7 @@ const FilterList = ({ color, filterDispatch, originalData: { datasets, labels } 
 
   return (
     <>
-      <Accordion>
+      <Accordion multiple={true}>
         {filterByReporters()}
         {filterByTables()}
       </Accordion>
