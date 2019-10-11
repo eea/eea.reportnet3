@@ -36,7 +36,7 @@ const MainLayout = ({ children }) => {
         BETA VERSION FOR TESTING ONLY
         <br />
         The data and illustrated errors are for testing purposes only and do not reflect the actual data delivered by
-        any countries featured.
+        any countries featured
       </div>
       <div className={styles.mainContent}>{children}</div>
       <Footer />

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { isUndefined } from 'lodash';
 

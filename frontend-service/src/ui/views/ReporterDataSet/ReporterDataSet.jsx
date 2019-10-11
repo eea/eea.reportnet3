@@ -85,10 +85,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    setIsWebFormDataset(checkIsWebFormDataset());
-  }, []);
-
-  useEffect(() => {
     onLoadDatasetSchema();
   }, [isDataDeleted]);
 
@@ -189,26 +185,13 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     onSetVisible(setSnapshotDialogVisible, false);
   };
 
-  const onLoadSnapshotList = async () => {
-    try {
-      setIsLoadingSnapshotListData(true);
-      //Set timeout for avoiding the overlaping between the slidebar transition and the api call
-      setTimeout(async () => {
-        const snapshotsData = await SnapshotService.all(datasetId);
-        setSnapshotListData(snapshotsData);
-        setIsLoadingSnapshotListData(false);
-      }, 500);
-    } catch (error) {
-      setIsLoadingSnapshotListData(false);
-    }
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(dataflowId);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
+      checkIsWebFormDataset(datasetStatistics.datasetSchemaName);
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           return {
@@ -244,6 +227,20 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
 
     setLoading(false);
+  };
+
+  const onLoadSnapshotList = async () => {
+    try {
+      setIsLoadingSnapshotListData(true);
+      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
+      setTimeout(async () => {
+        const snapshotsData = await SnapshotService.all(datasetId);
+        setSnapshotListData(snapshotsData);
+        setIsLoadingSnapshotListData(false);
+      }, 500);
+    } catch (error) {
+      setIsLoadingSnapshotListData(false);
+    }
   };
 
   const onSetVisible = (fnUseState, visible) => {
@@ -379,12 +376,12 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const checkIsWebFormDataset = () => {
-    if (Number(datasetId) === 5 || Number(datasetId) === 142) {
+  const checkIsWebFormDataset = datasetName => {
+    if (datasetName.toString() === 'MMR_TEST') {
       setIsInputSwitchChecked(true);
-      return true;
+      setIsWebFormDataset(true);
     } else {
-      return false;
+      setIsWebFormDataset(false);
     }
   };
 
@@ -534,7 +531,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}>
+          visible={validationsVisible}
+          className={styles.paginatorValidationViewer}>
           <ValidationViewer
             datasetId={datasetId}
             visible={validationsVisible}
