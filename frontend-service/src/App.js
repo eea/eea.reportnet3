@@ -55,7 +55,6 @@ const App = () => {
         <ResourcesContext.Provider value={resources}>
           <Router>
             <Switch>
-              {/* <Route exact path="/" component={Login} /> */}
               <Route exact path="/" component={AccessPoint} />
               <Route exact path={routes.EULOGIN} component={Eulogin} />
               <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
@@ -63,7 +62,6 @@ const App = () => {
               <PrivateRoute exact path={routes.DATAFLOW} component={ReportingDataflow} />
               <PrivateRoute exact path={routes.DATASET} component={ReporterDataset} />
               <PrivateRoute exact path={routes.DOCUMENTATION_DATASET} component={DocumentationDataset} />
-              <PrivateRoute path={'/'} component={DataflowTasks} />
             </Switch>
           </Router>
         </ResourcesContext.Provider>
