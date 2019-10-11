@@ -35,7 +35,6 @@ public class DeleteDocumentCommand extends AbstractEEAEventHandlerCommand {
     return EventType.DELETE_DOCUMENT_COMPLETED_EVENT;
   }
 
-
   /**
    * Execute.
    *

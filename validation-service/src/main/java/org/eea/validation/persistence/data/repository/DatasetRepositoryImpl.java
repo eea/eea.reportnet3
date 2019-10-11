@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DatasetRepositoryImpl implements DatasetExtendedQueriesRepository {
 
-  /** The entity manager. */
+  /**
+   * The entity manager.
+   */
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -36,7 +38,4 @@ public class DatasetRepositoryImpl implements DatasetExtendedQueriesRepository {
     }
 
   }
-
-
-
 }

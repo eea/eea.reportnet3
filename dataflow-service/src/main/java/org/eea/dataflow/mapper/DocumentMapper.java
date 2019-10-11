@@ -14,6 +14,12 @@ import org.mapstruct.MappingTarget;
 public interface DocumentMapper extends IMapper<Document, DocumentVO> {
 
 
+  /**
+   * Fill category.
+   *
+   * @param document the document
+   * @param documentVO the document VO
+   */
   @AfterMapping
   default void fillCategory(Document document, @MappingTarget DocumentVO documentVO) {
     documentVO.setDataflowId(document.getDataflow().getId());

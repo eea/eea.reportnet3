@@ -6,19 +6,16 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -68,10 +65,6 @@ import org.springframework.stereotype.Service;
 @Service("validationService")
 public class ValidationServiceImpl implements ValidationService {
 
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceImpl.class);
   /**
    * The Constant LOG_ERROR.
    */
@@ -126,6 +119,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private TableRepository tableRepository;
 
+  /** The field repository. */
   @Autowired
   private FieldRepository fieldRepository;
 
@@ -134,12 +128,6 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-
-  /**
-   * The dataset controller.
-   */
-  @Autowired
-  private DataSetControllerZuul datasetController;
 
   /**
    * The table validation querys drools repository.
@@ -289,8 +277,8 @@ public class ValidationServiceImpl implements ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
+   * @param idTable the id table
    * @param kieBase the kie base
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -393,49 +381,6 @@ public class ValidationServiceImpl implements ValidationService {
     } finally {
       session.destroy();
     }
-  }
-
-
-  /**
-   * Sanitize records.
-   *
-   * @param records the records
-   *
-   * @return the list
-   */
-  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
-    List<RecordValue> sanitizedRecords = new ArrayList<>();
-    Set<Long> processedRecords = new HashSet<>();
-    for (RecordValue recordValue : records) {
-      if (!processedRecords.contains(recordValue.getId())) {
-        processedRecords.add(recordValue.getId());
-        recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
-        sanitizedRecords.add(recordValue);
-      }
-
-    }
-    return sanitizedRecords;
-
-  }
-
-  /**
-   * Sanitize records validations.
-   *
-   * @param records the records
-   *
-   * @return the list
-   */
-  private List<RecordValue> sanitizeRecordsValidations(List<RecordValue> records) {
-    List<RecordValue> sanitizedRecords = new ArrayList<>();
-    Set<Long> processedRecords = new HashSet<>();
-    for (RecordValue recordValue : records) {
-      if (!processedRecords.contains(recordValue.getId())) {
-        processedRecords.add(recordValue.getId());
-        recordValue.setRecordValidations(new ArrayList<>());
-        sanitizedRecords.add(recordValue);
-      }
-    }
-    return sanitizedRecords;
   }
 
   /**
@@ -659,11 +604,23 @@ public class ValidationServiceImpl implements ValidationService {
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
   }
 
+  /**
+   * Count records dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
   @Override
   public Integer countRecordsDataset(Long datasetId) {
     return recordRepository.countRecordsDataset();
   }
 
+  /**
+   * Count fields dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
   @Override
   public Integer countFieldsDataset(Long datasetId) {
     return recordRepository.countFieldsDataset();
@@ -748,6 +705,12 @@ public class ValidationServiceImpl implements ValidationService {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);
   }
 
+  /**
+   * Dataset validation DC 02 B query.
+   *
+   * @param DC03 the dc03
+   * @return the boolean
+   */
   @Override
   public Boolean datasetValidationDC02BQuery(String DC03) {
     return datasetRepositoryImpl.datasetValidationQuery(DC03);
@@ -779,12 +742,27 @@ public class ValidationServiceImpl implements ValidationService {
     return tableValidationQuerysDroolsRepository.tableValidationQueryNonReturnResult(QUERY);
   }
 
+  /**
+   * Table validation query return result.
+   *
+   * @param QUERY the query
+   * @return the boolean
+   */
   @Override
   public Boolean tableValidationQueryReturnResult(String QUERY) {
     return tableValidationQuerysDroolsRepository.tableValidationQueryReturnResult(QUERY);
   }
 
 
+  /**
+   * Table record R ids.
+   *
+   * @param queryValidate the query validate
+   * @param MessageError the message error
+   * @param typeError the type error
+   * @param originName the origin name
+   * @return the boolean
+   */
   @Override
   public Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError,
       String originName) {
