@@ -40,12 +40,6 @@ const DataflowColumn = withRouter(
           </div>
         )}
         <div className="navSection">
-          {dataflowTitle && (
-            <h4 className={styles.title}>
-              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '0.8rem' }} /> {dataflowTitle}
-            </h4>
-          )}
-
           <Button
             className={styles.subscribeBtn}
             icon="plus"
