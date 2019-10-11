@@ -49,7 +49,8 @@ export const filterReducer = (state, { type, payload }) => {
     case 'APPLY_FILTERS':
       return {
         ...state,
-        data: { ...payload.originalData },
+        originalData: payload.originalData,
+        data: payload.data,
         reporterFilter: payload.reporterFilter,
         statusFilter: payload.statusFilter,
         tableFilter: payload.tableFilter
