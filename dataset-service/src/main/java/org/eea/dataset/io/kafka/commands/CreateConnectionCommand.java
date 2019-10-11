@@ -64,6 +64,22 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
           String[] aux = dataset.split("_");
           Long idDataset = Long.valueOf(aux[aux.length - 1]);
           datasetService.insertSchema(idDataset, idDatasetSchema);
+
+          // First insert of the statistics
+          new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+              try {
+                datasetService.saveStatistics(idDataset);
+              } catch (EEAException e) {
+                LOG_ERROR.error(e.getMessage());
+              }
+
+            }
+
+          }).start();
+
         } catch (EEAException e) {
           LOG_ERROR.error(e.getMessage());
         }
