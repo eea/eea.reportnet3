@@ -21,7 +21,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 
-const Documents = ({ onLoadDocumentsAndWebLinks, match, documents }) => {
+const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }) => {
   const resources = useContext(ResourcesContext);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [fileName, setFileName] = useState('');
@@ -30,9 +30,6 @@ const Documents = ({ onLoadDocumentsAndWebLinks, match, documents }) => {
   const [isFormReset, setIsFormReset] = useState(true);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   /*   const [rowDataState, setRowDataState] = useState(); */
-  useEffect(() => {
-    console.log('documents render');
-  }, [documents]);
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
