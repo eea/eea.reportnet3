@@ -14,6 +14,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,9 @@ public class FileTreatmentHelperTest {
 
   @Mock
   private TableRepository tableRepository;
+
+  @Mock
+  private LockService lockService;
 
 
   /**
@@ -73,7 +77,7 @@ public class FileTreatmentHelperTest {
     when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
     fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+    Mockito.verify(kafkaSenderUtils, times(2)).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
   }
 
@@ -101,7 +105,7 @@ public class FileTreatmentHelperTest {
     when(datasetService.findTableIdByTableSchema(Mockito.any(), Mockito.any())).thenReturn(1L);
     doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(), Mockito.any());
     fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+    Mockito.verify(kafkaSenderUtils, times(2)).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
   }
 

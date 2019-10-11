@@ -1,9 +1,11 @@
 package org.eea.dataset.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,17 @@ import org.springframework.stereotype.Service;
 @Service("reportingDatasetService")
 public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
+  /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The reporting dataset mapper. */
   @Autowired
   private ReportingDatasetMapper reportingDatasetMapper;
+
+  /** The snapshot repository. */
+  @Autowired
+  private SnapshotRepository snapshotRepository;
 
 
   /**
@@ -31,11 +39,34 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   @Override
   public List<ReportingDatasetVO> getDataSetIdByDataflowId(Long idFlow) {
 
-
     List<ReportingDataset> datasets = reportingDatasetRepository.findByDataflowId(idFlow);
 
+    List<ReportingDatasetVO> datasetsVO = reportingDatasetMapper.entityListToClass(datasets);
 
-    return reportingDatasetMapper.entityListToClass(datasets);
+    // Check if dataset is released
+    isReleased(datasetsVO);
+
+    return datasetsVO;
   }
+
+  /**
+   * Checks if is released.
+   *
+   * @param datasetsVO the datasets VO
+   */
+  private void isReleased(List<ReportingDatasetVO> datasetsVO) {
+    if (datasetsVO != null && !datasetsVO.isEmpty()) {
+      List<Long> collection =
+          datasetsVO.stream().map(ReportingDatasetVO::getId).collect(Collectors.toList());
+      List<Long> result = snapshotRepository.findByReportingDatasetAndRelease(collection);
+      for (ReportingDatasetVO dataset : datasetsVO) {
+        if (result != null && dataset != null && dataset.getId() != null) {
+          Boolean isReleased = result.contains(dataset.getId());
+          dataset.setIsReleased(isReleased);
+        }
+      }
+    }
+  }
+
 
 }

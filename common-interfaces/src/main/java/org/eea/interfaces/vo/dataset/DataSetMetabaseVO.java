@@ -15,16 +15,28 @@ import lombok.ToString;
 @ToString
 public class DataSetMetabaseVO implements Serializable {
 
-  /** The Constant serialVersionUID. */
+  /**
+   * The Constant serialVersionUID.
+   */
   private static final long serialVersionUID = -1348263779137653665L;
 
-  /** The id. */
+  /**
+   * The id.
+   */
   private Long id;
 
-  /** The data set name. */
+  /**
+   * The data set name.
+   */
   private String dataSetName;
 
-  /** The creation date. */
+  /**
+   * The creation date.
+   */
   private Date creationDate;
 
+  /**
+   * The Dataflow id.
+   */
+  private Long dataflowId;
 }

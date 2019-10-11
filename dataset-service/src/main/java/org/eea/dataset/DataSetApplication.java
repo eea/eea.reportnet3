@@ -1,13 +1,13 @@
 package org.eea.dataset;
 
-import org.eea.multitenancy.MultiTenantApplication;
-import org.eea.multitenancy.TenantResolver;
+import org.eea.lock.annotation.EnableLockAspect;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * The Class DataSetApplication.
@@ -17,6 +17,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EeaEnableSecurity
+@EnableLockAspect
 public class DataSetApplication {
 
 
@@ -26,7 +27,7 @@ public class DataSetApplication {
    * @param args the arguments
    */
   public static void main(final String[] args) {
-    MultiTenantApplication.executeApplication(DataSetApplication.class, args);
+    SpringApplication.run(DataSetApplication.class, args);
   }
 
 

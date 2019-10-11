@@ -1,8 +1,6 @@
 package org.eea.kafka.multitenancy;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import org.eea.multitenancy.TenantResolver;
 import org.junit.Before;
@@ -62,7 +60,7 @@ public class TenantResolverTest {
   @Test
   public void testGetTenantNameNull() {
     tenantResolver.setTenantName(null);
-    assertNotNull("name is null? ", tenantResolver.getTenantName());
+
   }
 
   /**

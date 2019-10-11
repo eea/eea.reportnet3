@@ -1,5 +1,12 @@
 package org.eea.validation.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.serializer.EEAEventDeserializer;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +16,9 @@ import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mongodb.MongoClient;
 
@@ -52,6 +62,18 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   private String password;
 
   /**
+   * The bootstrap address.
+   */
+  @Value(value = "${kafka.bootstrapAddress}")
+  private String bootstrapAddress;
+
+  /**
+   * The group id.
+   */
+  @Value(value = "${spring.application.name}")
+  private String groupId;
+
+  /**
    * Schemas transaction manager.
    *
    * @param dbFactory the db factory
@@ -83,4 +105,39 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
     return new MongoClient(host, port);
   }
 
+
+  /**
+   * Broadcast consumer factory consumer factory.
+   *
+   * @return the consumer factory
+   */
+  @Bean
+  public ConsumerFactory<String, EEAEventVO> broadcastConsumerFactory() {
+    final Map<String, Object> props = new HashMap<>();
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG,
+        groupId + UUID.randomUUID());//single group in one partition topic garantees broadcasting
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EEAEventDeserializer.class);
+    props.put("heartbeat.interval.ms", 3000);
+    props.put("session.timeout.ms", 150000);
+    //props.put("enable.auto.commit", "false");
+    props.put("isolation.level", "read_committed");
+
+    return new DefaultKafkaConsumerFactory<>(props);
+  }
+
+  /**
+   * Kafka listener container factory.
+   *
+   * @return the concurrent kafka listener container factory
+   */
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> broadcastKafkaListenerContainerFactory() {
+
+    final ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> factory =
+        new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(broadcastConsumerFactory());
+    return factory;
+  }
 }

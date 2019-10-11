@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -15,6 +16,7 @@ import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +67,6 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.getDataSchemaById(Mockito.any())).thenReturn(new DataSetSchemaVO());
     dataSchemaControllerImpl.findDataSchemaById(Mockito.any());
 
-
     assertNull("failed", schemasRepository.findSchemaByIdFlow(1L));
 
   }
@@ -73,11 +74,23 @@ public class DataSetSchemaControllerImplTest {
   @Test
   public void testFindDataSchemaByDataFlow() {
 
-    when(dataSchemaController.findDataSchemaByDataflow(Mockito.any()))
+    Mockito.when(dataschemaService.getDataSchemaByIdFlow(Mockito.eq(1l), Mockito.eq(Boolean.TRUE)))
         .thenReturn(new DataSetSchemaVO());
-    dataSchemaControllerImpl.findDataSchemaByDataflow(Mockito.any());
-    dataSchemaController.findDataSchemaByDataflow(1L);
-    Mockito.verify(dataSchemaController, times(1)).findDataSchemaByDataflow(Mockito.any());
+    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDataflow(1l);
+    Assert.assertNotNull(result);
+
+
+  }
+
+  @Test
+  public void testFindDataSchemaWithNoRulesByDataflow() {
+
+    Mockito.when(dataschemaService.getDataSchemaByIdFlow(Mockito.eq(1l), Mockito.eq(Boolean.FALSE)))
+        .thenReturn(new DataSetSchemaVO());
+    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaWithNoRulesByDataflow(1l);
+    Assert.assertNotNull(result);
+
+
   }
 
   @Test
@@ -93,10 +106,9 @@ public class DataSetSchemaControllerImplTest {
 
     assertEquals("error, not equals", field, field2);
 
-
     RecordSchema record = new RecordSchema();
     record.setNameSchema("test");
-    List<FieldSchema> listaFields = new ArrayList<FieldSchema>();
+    List<FieldSchema> listaFields = new ArrayList<>();
     listaFields.add(field);
     record.setFieldSchema(listaFields);
 
@@ -119,10 +131,9 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
-    List<TableSchema> listaTables = new ArrayList<TableSchema>();
+    List<TableSchema> listaTables = new ArrayList<>();
     listaTables.add(table);
     schema.setTableSchemas(listaTables);
-
 
     DataSetSchema schema2 = new DataSetSchema();
     schema2.setNameDataSetSchema("test");
