@@ -16,3 +16,6 @@
 .disabledInput {
   background: #dddddd !important;
 }
+.webFormSpinner {
+  top: 0 !important;
+}

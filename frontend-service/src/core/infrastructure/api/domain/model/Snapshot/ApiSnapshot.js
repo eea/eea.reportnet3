@@ -5,7 +5,6 @@ import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiSnapshot = {
   createById: async (datasetId, description) => {
-    console.log(datasetId, description);
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
