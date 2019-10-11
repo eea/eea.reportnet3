@@ -59,7 +59,7 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
           try {
             datasetService.saveStatistics(datasetId);
           } catch (EEAException e) {
-            LOG_ERROR.error(e.getMessage());
+            LOG_ERROR.error("Error saving statistics. Error message: {}", e.getMessage(), e);
           }
 
         }

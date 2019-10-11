@@ -810,36 +810,23 @@ public class DatasetServiceImpl implements DatasetService {
 
     List<Statistics> stats = new ArrayList<>();
 
-    Statistics statsIdTable = new Statistics();
-    statsIdTable.setIdTableSchema(tableValue.getIdTableSchema());
-    statsIdTable.setStatName("idTableSchema");
-    statsIdTable.setValue(tableValue.getIdTableSchema());
+    Statistics statsIdTable =
+        fillStat(tableValue.getIdTableSchema(), "idTableSchema", tableValue.getIdTableSchema());
 
-    Statistics statsNameTable = new Statistics();
-    statsNameTable.setIdTableSchema(tableValue.getIdTableSchema());
-    statsNameTable.setStatName("nameTableSchema");
-    statsNameTable.setValue(mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
+    Statistics statsNameTable = fillStat(tableValue.getIdTableSchema(), "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
 
+    Statistics statsTotalTableError =
+        fillStat(tableValue.getIdTableSchema(), "totalErrors", totalTableErrors.toString());
 
-    Statistics statsTotalTableError = new Statistics();
-    statsTotalTableError.setIdTableSchema(tableValue.getIdTableSchema());
-    statsTotalTableError.setStatName("totalErrors");
-    statsTotalTableError.setValue(totalTableErrors.toString());
+    Statistics statsTotalRecords =
+        fillStat(tableValue.getIdTableSchema(), "totalRecords", countRecords.toString());
 
-    Statistics statsTotalRecords = new Statistics();
-    statsTotalRecords.setIdTableSchema(tableValue.getIdTableSchema());
-    statsTotalRecords.setStatName("totalRecords");
-    statsTotalRecords.setValue(countRecords.toString());
+    Statistics statsTotalRecordsWithErrors = fillStat(tableValue.getIdTableSchema(),
+        "totalRecordsWithErrors", totalRecordsWithErrors.toString());
 
-    Statistics statsTotalRecordsWithErrors = new Statistics();
-    statsTotalRecordsWithErrors.setIdTableSchema(tableValue.getIdTableSchema());
-    statsTotalRecordsWithErrors.setStatName("totalRecordsWithErrors");
-    statsTotalRecordsWithErrors.setValue(totalRecordsWithErrors.toString());
-
-    Statistics statsTotalRecordsWithWarnings = new Statistics();
-    statsTotalRecordsWithWarnings.setIdTableSchema(tableValue.getIdTableSchema());
-    statsTotalRecordsWithWarnings.setStatName("totalRecordsWithWarnings");
-    statsTotalRecordsWithWarnings.setValue(totalRecordsWithWarnings.toString());
+    Statistics statsTotalRecordsWithWarnings = fillStat(tableValue.getIdTableSchema(),
+        "totalRecordsWithWarnings", totalRecordsWithWarnings.toString());
 
     Statistics statsTableErrors = new Statistics();
     statsTableErrors.setIdTableSchema(tableValue.getIdTableSchema());
@@ -863,6 +850,24 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+
+  /**
+   * Fill table stat.
+   *
+   * @param idTableSchema the id table schema
+   * @param statName the stat name
+   * @param value the value
+   * @return the statistics
+   */
+  private Statistics fillStat(String idTableSchema, String statName, String value) {
+
+    Statistics stat = new Statistics();
+    stat.setIdTableSchema(idTableSchema);
+    stat.setStatName(statName);
+    stat.setValue(value);
+
+    return stat;
+  }
 
 
   /**
@@ -913,19 +918,15 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
 
-      Statistics statsIdDatasetSchema = new Statistics();
-      statsIdDatasetSchema.setStatName("idDataSetSchema");
-      statsIdDatasetSchema.setValue(dataset.getIdDatasetSchema());
+      Statistics statsIdDatasetSchema =
+          fillStat(null, "idDataSetSchema", dataset.getIdDatasetSchema());
       statsList.add(statsIdDatasetSchema);
 
-      Statistics statsNameDatasetSchema = new Statistics();
-      statsNameDatasetSchema.setStatName("nameDataSetSchema");
-      statsNameDatasetSchema.setValue(datasetMb.getDataSetName());
+      Statistics statsNameDatasetSchema =
+          fillStat(null, "nameDataSetSchema", datasetMb.getDataSetName());
       statsList.add(statsNameDatasetSchema);
 
-      Statistics statsDatasetErrors = new Statistics();
-      statsDatasetErrors.setStatName("datasetErrors");
-      statsDatasetErrors.setValue(datasetErrors.toString());
+      Statistics statsDatasetErrors = fillStat(null, "datasetErrors", datasetErrors.toString());
       statsList.add(statsDatasetErrors);
 
       statisticsRepository.deleteAll();

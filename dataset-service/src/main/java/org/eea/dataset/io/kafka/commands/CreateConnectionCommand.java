@@ -81,7 +81,9 @@ public class CreateConnectionCommand extends AbstractEEAEventHandlerCommand {
           }).start();
 
         } catch (EEAException e) {
-          LOG_ERROR.error(e.getMessage());
+          LOG_ERROR.error(
+              "Error executing the processes after creating a new empty dataset. Error message: {}",
+              e.getMessage(), e);
         }
       }
 
