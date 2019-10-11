@@ -85,10 +85,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    setIsWebFormDataset(checkIsWebFormDataset());
-  }, []);
-
-  useEffect(() => {
     onLoadDatasetSchema();
   }, [isDataDeleted]);
 
@@ -381,7 +377,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const checkIsWebFormDataset = datasetName => {
-    if ((datasetName = 'MMR_Test')) {
+    if (datasetName.toString() === 'MMR_TEST') {
       setIsInputSwitchChecked(true);
       setIsWebFormDataset(true);
     } else {
