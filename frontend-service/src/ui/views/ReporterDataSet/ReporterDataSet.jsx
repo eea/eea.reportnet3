@@ -531,7 +531,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}>
+          visible={validationsVisible}
+          className={styles.paginatorValidationViewer}>
           <ValidationViewer
             datasetId={datasetId}
             visible={validationsVisible}

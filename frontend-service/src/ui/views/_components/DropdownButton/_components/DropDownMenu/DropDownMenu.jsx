@@ -91,18 +91,18 @@ class DropDownMenu extends Component {
           <ul>
             {model ? (
               model.map((item, i) => (
-                <li key={i}>
-                  <a
-                    className={item.disabled ? style.menuItemDisabled : null}
-                    onClick={e => {
-                      e.preventDefault();
-                      if (!item.disabled) item.command();
-                      else
-                        this.setState(state => {
-                          return { ...state, menuClick: true };
-                        });
-                    }}
-                    disabled={item.disabled}>
+                <li
+                  key={i}
+                  className={item.disabled ? style.listItemDisabled : style.listItemEnabled}
+                  onClick={e => {
+                    e.preventDefault();
+                    if (!item.disabled) item.command();
+                    else
+                      this.setState(state => {
+                        return { ...state, menuClick: true };
+                      });
+                  }}>
+                  <a className={item.disabled ? style.menuItemDisabled : null} disabled={item.disabled}>
                     <Icon icon={item.icon} />
                     {item.label}
                   </a>
