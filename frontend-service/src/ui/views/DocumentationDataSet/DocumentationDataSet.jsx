@@ -1,33 +1,24 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { isUndefined, isArray, isNull, isString } from 'lodash';
+import { isUndefined } from 'lodash';
 
 import styles from './DocumentationDataSet.module.scss';
 
 import { config } from 'conf';
 
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
-import { Button } from 'ui/views/_components/Button';
-import { Column } from 'primereact/column';
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { DataTable } from 'ui/views/_components/DataTable';
-import { Dialog } from 'ui/views/_components/Dialog';
-import { DocumentFileUpload } from './_components/DocumentFileUpload';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
-import { Icon } from 'ui/views/_components/Icon';
-import { InputText } from 'ui/views/_components/InputText';
+import { Documents } from './_components/Documents';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabView, TabPanel } from 'primereact/tabview';
-import { Toolbar } from 'ui/views/_components/Toolbar';
+import { TabView } from 'primereact/tabview';
+import { TabPanel } from 'primereact/tabview';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
+import { WebLinks } from './_components/WebLinks';
 
 import { DocumentService } from 'core/services/Document';
 import { WebLinkService } from 'core/services/WebLink';
@@ -38,24 +29,12 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+
   const [documents, setDocuments] = useState([]);
-  const [editedRecord, setEditedRecord] = useState({});
-  const [fileName, setFileName] = useState('');
-  const [fileToDownload, setFileToDownload] = useState(undefined);
-  const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
-  const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
-  const [isDownloading, setIsDownloading] = useState('');
-  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
-  const [isFormReset, setIsFormReset] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [isNewRecord, setIsNewRecord] = useState(false);
-  const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
-  const [newRecord, setNewRecord] = useState({});
-  const [rowDataState, setRowDataState] = useState();
   const [webLinks, setWebLinks] = useState();
-  const [webLinksColumns, setWebLinksColumns] = useState([]);
+
   const home = {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -77,47 +56,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     onLoadDocumentsAndWebLinks();
   }, []);
 
-  const webLinkEditButtons = () => {
-    return (
-      <div className={styles.webLinkEditButtons}>
-        <Button
-          type="button"
-          icon="edit"
-          className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={() => setIsEditDialogVisible(true)}
-        />
-        <Button
-          type="button"
-          icon="trash"
-          className={`${`p-button-rounded p-button-secondary ${styles.deleteRowButton}`}`}
-          onClick={() => setIsConfirmDeleteVisible(true)}
-        />
-      </div>
-    );
-  };
-
-  const webLinkEditionColumn = <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} />;
-
-  useEffect(() => {
-    let webLinkKeys = isArray(webLinks) ? Object.keys(webLinks[0]) : [];
-    let webLinkColArray = webLinkKeys.map(key => (
-      <Column
-        key={key}
-        columnResizeMode="expand"
-        field={key}
-        filter={false}
-        filterMatchMode="contains"
-        header={key}
-        body={key === 'url' ? actionWeblink : null}
-      />
-    ));
-
-    if (isCustodian) {
-      webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
-    }
-    setWebLinksColumns(webLinkColArray);
-  }, [documents, webLinks]);
-
   //Bread Crumbs settings
   useEffect(() => {
     setBreadCrumbItems([
@@ -133,49 +71,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
-  useEffect(() => {
-    if (!isUndefined(fileToDownload)) {
-      DownloadFile(fileToDownload, fileName);
-    }
-  }, [fileToDownload]);
-
-  const onDownloadDocument = async rowData => {
-    try {
-      setIsDownloading(rowData.id);
-      setFileName(createFileName(rowData.title));
-      setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
-    } catch (error) {
-      console.error(error.response);
-    } finally {
-      setIsDownloading('');
-    }
-  };
-
-  const onDeleteDocument = async documentData => {
-    setDeleteDialogVisible(false);
-    try {
-      const response = await DocumentService.deleteDocument(documentData.id);
-      if (response >= 200 && response <= 299) {
-        setDocuments(documents.filter(document => document.id !== documentData.id));
-      }
-    } catch (error) {
-      console.error(error.response);
-    }
-  };
-
-  const onUploadDocument = () => {
-    setIsUploadDialogVisible(false);
-  };
-
-  const onHideDeleteDialog = () => {
-    setDeleteDialogVisible(false);
-  };
-
-  const onCancelDialog = () => {
-    setIsUploadDialogVisible(false);
-    setIsFormReset(false);
-  };
-
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
     try {
@@ -189,114 +84,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
       setIsLoading(false);
     }
   };
-
-  const createFileName = title => {
-    return `${title.split(' ').join('_')}`;
-  };
-
-  const crudTemplate = (rowData, column) => {
-    return (
-      <>
-        <span
-          className={styles.delete}
-          onClick={() => {
-            setDeleteDialogVisible(true);
-            setRowDataState(rowData);
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-        </span>
-      </>
-    );
-  };
-
-  const actionTemplate = (rowData, column) => {
-    switch (rowData.category) {
-    }
-    return (
-      <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
-        {' '}
-        {isDownloading === rowData.id ? (
-          <Icon icon="spinnerAnimate" />
-        ) : (
-          <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
-        )}
-      </span>
-    );
-  };
-
-  const actionWeblink = (rowData, column) => {
-    return (
-      <a href={rowData.url} target="_blank" rel="noopener noreferrer">
-        {' '}
-        {rowData.url}
-      </a>
-    );
-  };
-
-  const newRecordForm = webLinksColumns.map((column, i) => {
-    console.log('column', column);
-    if (isAddDialogVisible) {
-      if (i == 0) {
-        return;
-      }
-      return (
-        <React.Fragment key={column.props.field}>
-          <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
-          </div>
-          <div className="p-col-8" style={{ padding: '.5em' }}>
-            <InputText
-              id={column.props.field}
-              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
-            />
-          </div>
-        </React.Fragment>
-      );
-    }
-  });
-
-  const onEditAddFormInput = (property, value) => {
-    if (!isNewRecord) {
-      setEditedRecord({ ...editedRecord });
-    } else {
-      setNewRecord({ ...newRecord });
-    }
-  };
-
-  const onSaveRecord = newRecord => console.log('saving ', newRecord);
-
-  const addRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => {
-          setIsAddDialogVisible(false);
-        }}
-      />
-      <Button
-        label={resources.messages['save']}
-        icon="save"
-        onClick={() => {
-          onSaveRecord(newRecord);
-        }}
-      />
-    </div>
-  );
-
-  const addRowHeader = (
-    <div className="p-clearfix" style={{ width: '100%' }}>
-      <Button
-        style={{ float: 'left' }}
-        label={resources.messages['add']}
-        icon="add"
-        onClick={() => {
-          setIsNewRecord(true);
-          setIsAddDialogVisible(true);
-        }}
-      />
-    </div>
-  );
 
   const onGrowlAlert = message => {
     growlRef.current.show(message);
@@ -320,163 +107,23 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
 
   if (documents) {
     return layout(
-      <>
-        <TabView>
-          <TabPanel header={resources.messages['documents']}>
-            <Toolbar>
-              <div className="p-toolbar-group-left">
-                <Button
-                  className={`p-button-rounded p-button-secondary`}
-                  disabled={false}
-                  icon={'export'}
-                  label={resources.messages['upload']}
-                  onClick={() => setIsUploadDialogVisible(true)}
-                />
-                <Button
-                  className={`p-button-rounded p-button-secondary`}
-                  disabled={true}
-                  icon={'eye'}
-                  label={resources.messages['visibility']}
-                  onClick={null}
-                />
-                <Button
-                  className={`p-button-rounded p-button-secondary`}
-                  disabled={true}
-                  icon={'filter'}
-                  label={resources.messages['filter']}
-                  onClick={null}
-                />
-                <Button
-                  className={`p-button-rounded p-button-secondary`}
-                  disabled={true}
-                  icon={'import'}
-                  label={resources.messages['export']}
-                  onClick={null}
-                />
-              </div>
-              <div className="p-toolbar-group-right">
-                <Button
-                  className={`p-button-rounded p-button-secondary`}
-                  disabled={false}
-                  icon={'refresh'}
-                  label={resources.messages['refresh']}
-                  onClick={() => onLoadDocumentsAndWebLinks()}
-                />
-              </div>
-            </Toolbar>
-            <Dialog
-              header={resources.messages['upload']}
-              visible={isUploadDialogVisible}
-              className={styles.Dialog}
-              dismissableMask={false}
-              onHide={onCancelDialog}>
-              <DocumentFileUpload
-                dataflowId={match.params.dataflowId}
-                onUpload={onUploadDocument}
-                onGrowlAlert={onGrowlAlert}
-                isFormReset={isFormReset}
-              />
-            </Dialog>
-            {
-              <DataTable
-                value={documents}
-                autoLayout={true}
-                paginator={true}
-                rowsPerPageOptions={[5, 10, 100]}
-                rows={10}>
-                <Column className={styles.crudColumn} body={crudTemplate} />
-                <Column
-                  columnResizeMode="expand"
-                  field="title"
-                  filter={false}
-                  filterMatchMode="contains"
-                  header={resources.messages['title']}
-                  sortable={true}
-                />
-                <Column
-                  field="description"
-                  filter={false}
-                  filterMatchMode="contains"
-                  header={resources.messages['description']}
-                  sortable={true}
-                />
-                <Column
-                  field="category"
-                  filter={false}
-                  filterMatchMode="contains"
-                  header={resources.messages['category']}
-                  sortable={true}
-                />
-                <Column
-                  field="language"
-                  filter={false}
-                  filterMatchMode="contains"
-                  header={resources.messages['language']}
-                  sortable={true}
-                />
-                <Column
-                  body={actionTemplate}
-                  field="url"
-                  filter={false}
-                  filterMatchMode="contains"
-                  header={resources.messages['file']}
-                  style={{ textAlign: 'center', width: '8em' }}
-                />
-              </DataTable>
-            }
-          </TabPanel>
-
-          <TabPanel header={resources.messages['webLinks']}>
-            {
-              <DataTable
-                value={webLinks}
-                autoLayout={true}
-                paginator={true}
-                rowsPerPageOptions={[5, 10, 100]}
-                header={isCustodian ? addRowHeader : null}
-                rows={10}>
-                {webLinksColumns}
-              </DataTable>
-            }
-          </TabPanel>
-        </TabView>
-        <ConfirmDialog
-          header={resources.messages['delete']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={() => onDeleteDocument(rowDataState)}
-          onHide={onHideDeleteDialog}
-          visible={deleteDialogVisible}>
-          {resources.messages['deleteDocument']}
-        </ConfirmDialog>
-
-        <Dialog
-          className={styles.add_dialog}
-          blockScroll={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={addRowDialogFooter}
-          header={resources.messages['addNewRow']}
-          modal={true}
-          onHide={() => setIsAddDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={isAddDialogVisible}>
-          <div className="p-grid p-fluid">{newRecordForm}</div>
-        </Dialog>
-
-        {/* <Dialog
-          className="edit-table"
-          blockScroll={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={editRowDialogFooter}
-          header={resources.messages['editRow']}
-          modal={true}
-          onHide={() => setIsEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={isEditDialogVisible}>
-          <div className="p-grid p-fluid">{editRecordForm}</div>
-        </Dialog> */}
-      </>
+      <TabView>
+        <TabPanel header={resources.messages['documents']}>
+          <Documents
+            onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
+            match={match}
+            documents={documents}
+            isCustodian={isCustodian}
+          />
+        </TabPanel>
+        <TabPanel header={resources.messages['webLinks']}>
+          <WebLinks
+            onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
+            webLinks={webLinks}
+            isCustodian={isCustodian}
+          />
+        </TabPanel>
+      </TabView>
     );
   } else {
     return <></>;
