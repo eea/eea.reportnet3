@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
@@ -23,10 +23,11 @@ const Dashboard = withRouter(
     const [dashboardData, setDashboardData] = useState({});
     const [dashboardOptions, setDashboardOptions] = useState({});
     const [dashboardTitle, setDashboardTitle] = useState('');
-    const [datasetData, setDatasetData] = useState();
     const [isLoading, setIsLoading] = useState(false);
 
     const resources = useContext(ResourcesContext);
+
+    const chartRef = useRef();
 
     useEffect(() => {
       setDashboardColors({
@@ -45,38 +46,12 @@ const Dashboard = withRouter(
       };
     }, [refresh, datasetId]);
 
-    useEffect(() => {
-      if (!isUndefined(datasetData)) {
-        setDashboardData({
-          labels: datasetData.tables.map(table => table.tableSchemaName),
-          datasets: [
-            {
-              label: 'Correct',
-              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : '#004494',
-              data: datasetData.tableStatisticPercentages[0],
-              totalData: datasetData.tableStatisticValues
-            },
-            {
-              label: 'Warning',
-              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : '#ffd617',
-              data: datasetData.tableStatisticPercentages[1],
-              totalData: datasetData.tableStatisticValues
-            },
-            {
-              label: 'Error',
-              backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : '#DA2131',
-              data: datasetData.tableStatisticPercentages[2],
-              totalData: datasetData.tableStatisticValues
-            }
-          ]
-        });
-      }
-    }, [dashboardColors]);
-
     const onChangeColor = (color, type) => {
       const inmDashboardColors = { ...dashboardColors };
       inmDashboardColors[Object.keys(SEVERITY_CODE)[type - 1]] = `#${color}`;
       setDashboardColors(inmDashboardColors);
+      chartRef.current.chart.data.datasets[type - 1].backgroundColor = `#${color}`;
+      chartRef.current.refresh();
     };
 
     const onLoadStatistics = async () => {
@@ -84,7 +59,6 @@ const Dashboard = withRouter(
       const dataset = await DatasetService.errorStatisticsById(datasetId);
       const tableStatisticValues = dataset.tableStatisticValues;
       const tableNames = dataset.tables.map(table => table.tableSchemaName);
-      setDatasetData(dataset);
       setDashboardTitle(dataset.datasetSchemaName);
       setDashboardData({
         labels: tableNames,
@@ -157,7 +131,7 @@ const Dashboard = withRouter(
           dashboardData.datasets.length > 0 &&
           ![].concat.apply([], dashboardData.datasets[0].totalData).every(total => total === 0)
         ) {
-          return <Chart type="bar" data={dashboardData} options={dashboardOptions} />;
+          return <Chart ref={chartRef} type="bar" data={dashboardData} options={dashboardOptions} />;
         } else {
           return <div className={styles.NoErrorData}>{resources.messages['noErrorData']}</div>;
         }
