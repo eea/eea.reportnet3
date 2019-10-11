@@ -33,6 +33,7 @@ import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
+import org.eea.dataset.persistence.data.repository.StatisticsRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
@@ -179,6 +180,9 @@ public class DatasetServiceTest {
   @Mock
   private FileCommonUtils fileCommon;
 
+  @Mock
+  private StatisticsRepository statisticsRepository;
+
   private FieldValue fieldValue;
   private RecordValue recordValue;
   private ArrayList<RecordValue> recordValues;
@@ -216,6 +220,7 @@ public class DatasetServiceTest {
     dataSetVO.setId(1L);
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
+    datasetValue.setId(1L);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -570,6 +575,7 @@ public class DatasetServiceTest {
     DataSetSchema schema = new DataSetSchema();
     schema.setTableSchemas(new ArrayList<>());
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
 
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
@@ -662,6 +668,7 @@ public class DatasetServiceTest {
     schema.setTableSchemas(tableSchemas);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    when(statisticsRepository.findAllStatistics()).thenReturn(new ArrayList<>());
 
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
@@ -704,6 +711,7 @@ public class DatasetServiceTest {
     tableSchemas.add(table);
     schema.setTableSchemas(tableSchemas);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
 
     datasetService.getStatistics(1L);
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
@@ -930,6 +938,18 @@ public class DatasetServiceTest {
   public void testDeleteRecordValuesToRestoreSnapshot() throws EEAException {
     datasetService.deleteRecordValuesToRestoreSnapshot(1L, 1L);
     Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
+  }
+
+  @Test
+  public void testSaveStats() throws EEAException {
+    DataSetSchema schema = new DataSetSchema();
+    schema.setTableSchemas(new ArrayList<>());
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+
+    datasetService.saveStatistics(1L);
+    Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
+
   }
 
 

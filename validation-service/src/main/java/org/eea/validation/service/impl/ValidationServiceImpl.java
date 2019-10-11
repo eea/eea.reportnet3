@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +41,6 @@ import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
-import org.eea.validation.persistence.data.repository.RecordValidationRepository.EntityErrors;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
@@ -595,96 +593,6 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
 
-  /**
-   * Error scale.
-   *
-   * @param datasetId the dataset id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public void errorScale(Long datasetId) throws EEAException {
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
-    if (dataset == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-
-    Map<BigInteger, EntityErrors> map = new LinkedHashMap<>();
-    List<EntityErrors> recordErrorList = recordValidationRepository.findFailedRecords();
-    recordErrorList.stream().forEach(object -> map.put(object.getId(), object));
-    List<RecordValidation> recordValidations = new ArrayList<>();
-    map.entrySet().stream().forEach(entry -> {
-      RecordValidation recordVal = new RecordValidation();
-      recordVal.setValidation(new Validation());
-      RecordValue recordValue = new RecordValue();
-      recordValue.setId(Long.valueOf(entry.getValue().getId().toString()));
-      recordVal.setRecordValue(recordValue);
-      if (TypeErrorEnum.ERROR.getValue().equals(entry.getValue().getError())) {
-        recordVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
-        recordVal.getValidation().setMessage("ONE OR MORE FIELDS HAVE ERRORS");
-      } else {
-        recordVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
-        recordVal.getValidation().setMessage("ONE OR MORE FIELDS HAVE WARNINGS");
-      }
-      recordVal.getValidation().setIdRule(new ObjectId().toString());
-      recordVal.getValidation().setTypeEntity(TypeEntityEnum.RECORD);
-      recordVal.getValidation().setValidationDate(new Date().toString());
-      recordVal.getValidation().setOriginName(entry.getValue().getOrigin());
-      recordValidations.add(recordVal);
-    });
-    this.recordValidationRepository.saveAll(recordValidations);
-
-    Map<BigInteger, EntityErrors> map2 = new LinkedHashMap<>();
-    List<EntityErrors> tableErrorList = recordValidationRepository.findFailedTables();
-    tableErrorList.stream().forEach(object -> map2.put(object.getId(), object));
-    List<TableValidation> tableValidations = new ArrayList<>();
-    map2.entrySet().stream().forEach(entry -> {
-      TableValidation tableVal = new TableValidation();
-      tableVal.setValidation(new Validation());
-      TableValue tableValue = new TableValue();
-      tableValue.setId(Long.valueOf(entry.getValue().getId().toString()));
-      tableVal.setTableValue(tableValue);
-      if (TypeErrorEnum.ERROR.getValue().equals(entry.getValue().getError())) {
-        tableVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
-        tableVal.getValidation().setMessage("ONE OR MORE RECORDS HAVE ERRORS");
-      } else {
-        tableVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
-        tableVal.getValidation().setMessage("ONE OR MORE RECORDS HAVE WARNINGS");
-      }
-      tableVal.getValidation().setIdRule(new ObjectId().toString());
-      tableVal.getValidation().setTypeEntity(TypeEntityEnum.TABLE);
-      tableVal.getValidation().setValidationDate(new Date().toString());
-      tableVal.getValidation().setOriginName(entry.getValue().getOrigin());
-      tableValidations.add(tableVal);
-    });
-    tableValidationRepository.saveAll(tableValidations);
-
-    Map<BigInteger, EntityErrors> map3 = new LinkedHashMap<>();
-    List<EntityErrors> datasetErrorList = recordValidationRepository.findFailedDatasets();
-    datasetErrorList.stream().forEach(object -> map3.put(object.getId(), object));
-    List<DatasetValidation> datasetValidations = new ArrayList<>();
-    map3.entrySet().stream().forEach(entry -> {
-      DatasetValidation datasetVal = new DatasetValidation();
-      datasetVal.setValidation(new Validation());
-      DatasetValue datasetValue = new DatasetValue();
-      datasetValue.setId(Long.valueOf(entry.getValue().getId().toString()));
-      datasetVal.setDatasetValue(datasetValue);
-      if (TypeErrorEnum.ERROR.getValue().equals(entry.getValue().getError())) {
-        datasetVal.getValidation().setLevelError(TypeErrorEnum.ERROR);
-        datasetVal.getValidation().setMessage("ONE OR MORE TABLES HAVE ERRORS");
-      } else {
-        datasetVal.getValidation().setLevelError(TypeErrorEnum.WARNING);
-        datasetVal.getValidation().setMessage("ONE OR MORE TABLES HAVE WARNINGS");
-      }
-      datasetVal.getValidation().setIdRule(new ObjectId().toString());
-      datasetVal.getValidation().setTypeEntity(TypeEntityEnum.DATASET);
-      datasetVal.getValidation().setValidationDate(new Date().toString());
-      datasetVal.getValidation().setOriginName(entry.getValue().getOrigin());
-      datasetValidations.add(datasetVal);
-    });
-    validationDatasetRepository.saveAll(datasetValidations);
-  }
 
   /**
    * Force validations.
