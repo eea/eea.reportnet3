@@ -377,7 +377,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const checkIsWebFormDataset = datasetName => {
-    if (datasetName.toString() === 'MMR_TEST') {
+    const mmrDatasetName = 'MMR_TEST';
+    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
       setIsInputSwitchChecked(true);
       setIsWebFormDataset(true);
     } else {
