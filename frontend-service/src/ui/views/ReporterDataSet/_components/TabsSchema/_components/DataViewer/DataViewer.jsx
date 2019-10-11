@@ -595,6 +595,10 @@ const DataViewer = withRouter(
       </div>
     );
 
+    const capitalizeFirstLetterAndToLowerCase = string => {
+      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
+
     const cellDataEditor = (cells, record) => {
       return (
         <InputText
@@ -663,22 +667,42 @@ const DataViewer = withRouter(
       return `${tableName}.${fileType}`;
     };
 
-    const editRowDialogFooter = (
-      <div className="ui-dialog-buttonpane p-clearfix">
-        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
-        <Button
-          label={resources.messages['save']}
-          icon="save"
-          onClick={() => {
-            try {
-              onSaveRecord(editedRecord);
-            } catch (error) {
-              console.error(error);
-            }
-          }}
-        />
-      </div>
-    );
+    //Template for Field validation
+    const dataTemplate = (rowData, column) => {
+      let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+        const validations = [...field.fieldValidations];
+        let message = [];
+        validations.forEach(validation =>
+          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
+        );
+        const levelError = getLevelError(validations);
+
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+            {' '}
+            {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
+          </div>
+        );
+      } else {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+        );
+      }
+    };
+
+    const editLargeStringWithDots = (string, length) => {
+      if (string.length > length) {
+        return string.substring(0, length).concat('...');
+      } else {
+        return string;
+      }
+    };
 
     const editRecordForm = colsSchema.map((column, i) => {
       //Avoid row id Field and dataSetPartitionId
@@ -708,6 +732,23 @@ const DataViewer = withRouter(
         }
       }
     });
+
+    const editRowDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
+        <Button
+          label={resources.messages['save']}
+          icon="save"
+          onClick={() => {
+            try {
+              onSaveRecord(editedRecord);
+            } catch (error) {
+              console.error(error);
+            }
+          }}
+        />
+      </div>
+    );
 
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
@@ -743,6 +784,33 @@ const DataViewer = withRouter(
         setFetchedData([]);
       }
       setFetchedData(dataFiltered);
+    };
+
+    const getLevelError = validations => {
+      let levelError = '';
+      let lvlFlag = 0;
+      validations.forEach(validation => {
+        if (validation.levelError === 'WARNING') {
+          const wNum = 1;
+          if (wNum > lvlFlag) {
+            lvlFlag = wNum;
+            levelError = 'WARNING';
+          }
+        } else if (validation.levelError === 'ERROR') {
+          const eNum = 2;
+          if (eNum > lvlFlag) {
+            lvlFlag = eNum;
+            levelError = 'ERROR';
+          }
+        } else if (validation.levelError === 'BLOCKER') {
+          const bNum = 2;
+          if (bNum > lvlFlag) {
+            lvlFlag = bNum;
+            levelError = 'BLOCKER';
+          }
+        }
+      });
+      return levelError;
     };
 
     const getCellId = (tableData, field) => {
@@ -875,7 +943,9 @@ const DataViewer = withRouter(
           );
         }
 
-        validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
+        validations.forEach(validation =>
+          validation.message ? capitalizeFirstLetterAndToLowerCase((message += '- ')) + validation.message + '\n' : ''
+        );
 
         const levelError = getLevelError(validations);
         return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
@@ -900,7 +970,9 @@ const DataViewer = withRouter(
               fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
             )
           );
-          validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
+          validations.forEach(validation =>
+            validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
+          );
         }
         if (validations.length > 0) {
           const levelError = getLevelError(validations);
@@ -909,68 +981,6 @@ const DataViewer = withRouter(
 
         return;
       }
-    };
-
-    //Template for Field validation
-    const dataTemplate = (rowData, column) => {
-      let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = [...field.fieldValidations];
-        let message = [];
-        validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
-        const levelError = getLevelError(validations);
-
-        return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-            {' '}
-            {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
-          </div>
-        );
-      } else {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
-        );
-      }
-    };
-
-    const editLargeStringWithDots = (string, length) => {
-      if (string.length > length) {
-        return string.substring(0, length).concat('...');
-      } else {
-        return string;
-      }
-    };
-
-    const getLevelError = validations => {
-      let levelError = '';
-      let lvlFlag = 0;
-      validations.forEach(validation => {
-        if (validation.levelError === 'WARNING') {
-          const wNum = 1;
-          if (wNum > lvlFlag) {
-            lvlFlag = wNum;
-            levelError = 'WARNING';
-          }
-        } else if (validation.levelError === 'ERROR') {
-          const eNum = 2;
-          if (eNum > lvlFlag) {
-            lvlFlag = eNum;
-            levelError = 'ERROR';
-          }
-        } else if (validation.levelError === 'BLOCKER') {
-          const bNum = 2;
-          if (bNum > lvlFlag) {
-            lvlFlag = bNum;
-            levelError = 'BLOCKER';
-          }
-        }
-      });
-      return levelError;
     };
 
     const rowClassName = rowData => {
