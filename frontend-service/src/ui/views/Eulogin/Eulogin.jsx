@@ -14,9 +14,8 @@ export const Eulogin = ({ location, history }) => {
   const user = useContext(UserContext);
   const onLogin = async () => {
     try {
-      const params = new URLSearchParams(location.search);
+      const params = new URLSearchParams(location.hash);
       const code = params.get('code');
-
       if (code) {
         const userObject = await UserService.login(code);
         user.onLogin(userObject);
