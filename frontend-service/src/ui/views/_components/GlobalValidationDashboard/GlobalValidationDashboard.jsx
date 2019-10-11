@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useReducer, useState } from 'react';
+import React, { useEffect, useContext, useReducer, useState, useRef } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
@@ -37,6 +37,7 @@ const GlobalValidationDashboard = dataflowId => {
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
   const [isLoading, setLoading] = useState(true);
   const [validationDashboardData, setValidationDashboardData] = useState();
+  const chartRef = useRef();
 
   useEffect(() => {
     onLoadDashboard();
@@ -74,7 +75,7 @@ const GlobalValidationDashboard = dataflowId => {
             stack: table.tableName
           },
           {
-            label: `WARNINGS`,
+            label: `WARNING`,
             tableName: table.tableName,
             tableId: table.tableId,
             backgroundColor: dashboardColors.WARNING,
@@ -83,7 +84,7 @@ const GlobalValidationDashboard = dataflowId => {
             stack: table.tableName
           },
           {
-            label: `ERRORS`,
+            label: `ERROR`,
             tableName: table.tableName,
             tableId: table.tableId,
             backgroundColor: dashboardColors.ERROR,
@@ -102,34 +103,34 @@ const GlobalValidationDashboard = dataflowId => {
     return datasetDataObject;
   }
 
-  useEffect(() => {
-    if (!isUndefined(filterState.data)) {
-      const {
-        originalData: { labels, datasets }
-      } = filterState;
-      if (labels && datasets) {
-        setValidationDashboardData({
-          labels: labels,
-          datasets: datasets.map(dataset => {
-            switch (dataset.label) {
-              case 'CORRECT':
-                dataset.backgroundColor = dashboardColors.CORRECT;
-                break;
-              case 'WARNINGS':
-                dataset.backgroundColor = dashboardColors.WARNING;
-                break;
-              case 'ERRORS':
-                dataset.backgroundColor = dashboardColors.ERROR;
-                break;
-              default:
-                break;
-            }
-            return dataset;
-          })
-        });
-      }
-    }
-  }, [dashboardColors]);
+  // useEffect(() => {
+  //   if (!isUndefined(filterState.data)) {
+  //     const {
+  //       originalData: { labels, datasets }
+  //     } = filterState;
+  //     if (labels && datasets) {
+  //       setValidationDashboardData({
+  //         labels: labels,
+  //         datasets: datasets.map(dataset => {
+  //           switch (dataset.label) {
+  //             case 'CORRECT':
+  //               dataset.backgroundColor = dashboardColors.CORRECT;
+  //               break;
+  //             case 'WARNINGS':
+  //               dataset.backgroundColor = dashboardColors.WARNING;
+  //               break;
+  //             case 'ERRORS':
+  //               dataset.backgroundColor = dashboardColors.ERROR;
+  //               break;
+  //             default:
+  //               break;
+  //           }
+  //           return dataset;
+  //         })
+  //       });
+  //     }
+  //   }
+  // }, [dashboardColors]);
 
   const datasetOptionsObject = {
     hover: {
@@ -171,18 +172,18 @@ const GlobalValidationDashboard = dataflowId => {
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
-    if (
-      !isEmpty(filterState.data) &&
-      (filterState.data.datasets.length !== validationDashboardData.datasets.length ||
-        !isEmpty(filterState.reporterFilter) ||
-        !isEmpty(filterState.statusFilter) ||
-        !isEmpty(filterState.tableFilter))
-    ) {
-      filterDispatch({
-        type: 'APPLY_FILTERS',
-        payload: filterState
-      });
-    }
+    // if (
+    //   !isEmpty(filterState.data) &&
+    //   (filterState.data.datasets.length !== validationDashboardData.datasets.length ||
+    //     !isEmpty(filterState.reporterFilter) ||
+    //     !isEmpty(filterState.statusFilter) ||
+    //     !isEmpty(filterState.tableFilter))
+    // ) {
+    //   filterDispatch({
+    //     type: 'APPLY_FILTERS',
+    //     payload: filterState
+    //   });
+    // }
   }, [validationDashboardData]);
 
   if (isLoading) {
@@ -196,8 +197,15 @@ const GlobalValidationDashboard = dataflowId => {
           color={dashboardColors}
           originalData={filterState.originalData}
           filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
-        <fieldset className={styles.colorPickerWrap}>
+        <Chart
+          ref={chartRef}
+          type="bar"
+          data={filterState.data}
+          options={datasetOptionsObject}
+          width="100%"
+          height="30%"
+        />
+        {/* <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           {Object.keys(SEVERITY_CODE).map((type, i) => {
             return (
@@ -209,12 +217,19 @@ const GlobalValidationDashboard = dataflowId => {
                   onChange={e => {
                     e.preventDefault();
                     setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
+                    const filteredDatasets = chartRef.current.chart.data.datasets.filter(
+                      dataset => dataset.label === SEVERITY_CODE[type]
+                    );
+                    filteredDatasets.forEach(dataset => {
+                      dataset.backgroundColor = `#${e.value}`;
+                    });
+                    chartRef.current.refresh();
                   }}
                 />
               </React.Fragment>
             );
           })}
-        </fieldset>
+        </fieldset> */}
       </div>
     );
   } else {
