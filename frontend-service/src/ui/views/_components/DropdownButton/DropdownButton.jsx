@@ -10,7 +10,7 @@ const DropdownButton = ({ children, icon, model, buttonStyle, iconStyle, disable
   return (
     <div className={styles.dropDownWrapper} style={buttonStyle}>
       <div
-        className={styles.dropdown}
+        className={!disabled ? styles.dropdown : null}
         onClick={e => {
           if (!disabled) menuRef.current.show(e);
         }}>
