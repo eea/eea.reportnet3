@@ -1291,9 +1291,9 @@ body .p-button.p-button-raised {
 }
 body .p-button.p-button-rounded {
   margin: 0.1rem;
-  -moz-border-radius: 15px;
-  -webkit-border-radius: 15px;
-  border-radius: 15px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 body .p-fluid .p-button-icon-only {
   width: 2.357em;
@@ -1710,9 +1710,6 @@ body .p-accordion .p-accordion-header a .p-accordion-toggle-icon.pi-caret-down:b
 body .p-accordion .p-accordion-header:not(.p-disabled) a:focus {
   outline: 0 none;
   outline-offset: 0;
-  -webkit-box-shadow: 0 0 0 0.2em #004494;
-  -moz-box-shadow: 0 0 0 0.2em #004494;
-  box-shadow: 0 0 0 0.2em #004494;
 }
 body .p-accordion .p-accordion-header:not(.p-highlight):not(.p-disabled):hover a {
   background-color: #dbdbdb;
@@ -3411,13 +3408,9 @@ body .p-lightbox .p-lightbox-content-wrapper .p-lightbox-content.p-lightbox-load
 }
 
 body .p-breadcrumb {
-  /*background-color: #ffffff;  border: 1px solid #c8c8c8;*/
   background-color: var(--blue-120);
   border-bottom: 5px solid var(--yellow-120);
   padding: 0.571em 1em;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
 }
 body .p-breadcrumb ul li .p-menuitem-link {
   color: #ffffff;

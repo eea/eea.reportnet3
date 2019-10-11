@@ -44,6 +44,17 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   @Override
+  public TokenVO doLogin(String code) {
+    TokenInfo tokenInfo = keycloakConnectorService.generateToken(code);
+    TokenVO tokenVO = new TokenVO();
+    if (null != tokenInfo) {
+      tokenVO.setAccessToken(tokenInfo.getAccessToken());
+      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+    }
+    return tokenVO;
+  }
+
+  @Override
   public TokenVO refreshToken(String refreshToken) {
     TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
     TokenVO tokenVO = new TokenVO();

@@ -5,19 +5,18 @@ import { uniqBy } from 'lodash';
 import styles from './FilterList.module.scss';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { ReportersListItem } from '../_components/ReportersListItem';
+import { ReportersListItem } from './_components/ReportersListItem';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { StatusList } from '../_components/StatusList';
-import { TableListItem } from '../_components/TableListItem';
+import { StatusList } from './_components/StatusList';
+import { TableListItem } from './_components/TableListItem';
 
-function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
+const FilterList = ({ color, filterDispatch, originalData: { datasets, labels } }) => {
   const resources = useContext(ResourcesContext);
   const createTableCheckBoxObject = dataset => {
     return { tableName: dataset.tableName, tableId: dataset.tableId };
   };
 
   const tableNamesIdsArray = [];
-
   const uniqDatasets = uniqBy(datasets, 'tableId');
 
   uniqDatasets.map(dataset => {
@@ -31,7 +30,7 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
         <AccordionTab header={resources.messages['filterByDataset']}>
           <ul className={styles.list}>
             {labels.map(item => (
-              <ReportersListItem key={item} item={item} filterDispatch={filterDispatch} />
+              <ReportersListItem key={item} filterDispatch={filterDispatch} item={item} />
             ))}
           </ul>
         </AccordionTab>
@@ -45,7 +44,7 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
         <AccordionTab header={resources.messages['filterByTable']}>
           <ul className={styles.list}>
             {tableNamesIdsArray.map(item => (
-              <TableListItem key={item.tableId} item={item} filterDispatch={filterDispatch} />
+              <TableListItem key={item.tableId} filterDispatch={filterDispatch} item={item} />
             ))}
           </ul>
         </AccordionTab>
@@ -59,9 +58,9 @@ function FilterList({ originalData: { datasets, labels }, filterDispatch }) {
         {filterByReporters()}
         {filterByTables()}
       </Accordion>
-      <StatusList filterDispatch={filterDispatch}></StatusList>
+      <StatusList color={color} filterDispatch={filterDispatch} />
     </>
   );
-}
+};
 
 export { FilterList };

@@ -90,6 +90,23 @@ public class KeycloakConnectorServiceImplTest {
   }
 
   @Test
+  public void generateTokenByCode() {
+    TokenInfo body = new TokenInfo();
+    body.setAccessToken("JWT");
+    ResponseEntity<TokenInfo> result = new ResponseEntity<>(
+        body,
+        HttpStatus.OK);
+    Mockito.when(restTemplate
+        .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(result);
+
+    TokenInfo token = keycloakConnectorService.generateToken("code1");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("JWT", token.getAccessToken());
+
+  }
+
+  @Test
   public void refreshToken() {
     TokenInfo body = new TokenInfo();
     body.setAccessToken("JWT");

@@ -27,4 +27,7 @@ public class ReportingDatasetVO implements Serializable {
   /** The creation date. */
   private Date creationDate;
 
+  /** The is released. */
+  private Boolean isReleased;
+
 }

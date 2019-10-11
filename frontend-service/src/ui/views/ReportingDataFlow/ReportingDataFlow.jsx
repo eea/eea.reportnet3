@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { isUndefined } from 'lodash';
 
@@ -129,7 +131,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       label: resources.messages.manageRoles,
       icon: 'users',
       show: hasWritePermissions,
-      menuItemFunction: () => {
+      command: () => {
         showContributorsDialog();
       }
     },
@@ -138,7 +140,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       label: resources.messages.properties,
       icon: 'settings',
       show: true,
-      menuItemFunction: e => {
+      command: e => {
         setIsActivePropertiesDialog(true);
       }
     }
@@ -165,12 +167,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
-              <Icon icon="shoppingCart" />
-              {dataflowData.name}
+              <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
             </h2>
           </div>
           <div>
-            <DropdownButton icon="ellipsis" model={dropDownItems} />
+            <DropdownButton icon="ellipsis" model={dropDownItems} disabled />
           </div>
         </div>
 

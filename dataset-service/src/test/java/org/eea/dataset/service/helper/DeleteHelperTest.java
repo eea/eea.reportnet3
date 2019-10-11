@@ -39,7 +39,7 @@ public class DeleteHelperTest {
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
     doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
     deleteHelper.executeDeleteProcess(1L, "");
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseDatasetKafkaEvent(Mockito.any(),
+    Mockito.verify(kafkaSenderUtils, times(2)).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
 
   }

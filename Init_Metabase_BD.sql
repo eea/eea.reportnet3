@@ -186,6 +186,10 @@ GRANT ALL ON TABLE public.USER_REQUEST TO testuser;
 ALTER TABLE public.dataflow_user_request OWNER TO testuser;
 GRANT ALL ON TABLE public.dataflow_user_request TO testuser;
 
+--INDEXES--
+CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);
+CREATE INDEX INDX_REPORTING_DS_ID ON SNAPSHOT (reporting_dataset_id);
+
 -- SEQUENCES
 
 /*CREATE SEQUENCE public.hibernate_sequence

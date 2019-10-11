@@ -19,6 +19,7 @@ import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,9 @@ public class DatasetSnapshotServiceTest {
   /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Mock
+  private LockService lockService;
 
   /** The snapshot repository. */
   @Mock

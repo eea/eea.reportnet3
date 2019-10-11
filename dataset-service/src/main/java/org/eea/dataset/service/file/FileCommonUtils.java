@@ -31,7 +31,9 @@ public class FileCommonUtils {
   private DatasetSchemaService dataSetSchemaService;
 
 
-  /** The record repository. */
+  /**
+   * The record repository.
+   */
   @Autowired
   private RecordRepository recordRepository;
 
@@ -64,6 +66,7 @@ public class FileCommonUtils {
    *
    * @param tableName the table name
    * @param dataSetSchema the data set schema
+   *
    * @return the id table schema
    */
   public String getIdTableSchema(String tableName, DataSetSchemaVO dataSetSchema) {
@@ -141,9 +144,9 @@ public class FileCommonUtils {
   public DataSetSchemaVO getDataSetSchema(Long dataflowId) {
     LOG.info("Getting DataSchema from Mongo DB");
     DataSetSchemaVO dataSetSchema = null;
-    // get data set schema of mongo DB
+    // get dataset schema from mongo DB
     if (null != dataflowId) {
-      dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId);
+      dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId, false);
     }
     return dataSetSchema;
   }
@@ -153,6 +156,7 @@ public class FileCommonUtils {
    *
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
+   *
    * @return the table name
    */
   public String getTableName(String idTableSchema, DataSetSchemaVO dataSetSchema) {
@@ -165,6 +169,7 @@ public class FileCommonUtils {
    *
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
+   *
    * @return the field schemas
    */
   public List<FieldSchemaVO> getFieldSchemas(String idTableSchema, DataSetSchemaVO dataSetSchema) {
@@ -179,6 +184,7 @@ public class FileCommonUtils {
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   *
    * @return the record values
    */
   public List<RecordValue> getRecordValues(@DatasetId Long datasetId, String idTableSchema) {
@@ -190,6 +196,7 @@ public class FileCommonUtils {
    * Sanitize records.
    *
    * @param records the records
+   *
    * @return the list
    */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {

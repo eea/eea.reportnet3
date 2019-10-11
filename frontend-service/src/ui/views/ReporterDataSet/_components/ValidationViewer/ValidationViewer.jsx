@@ -54,8 +54,6 @@ const ValidationViewer = React.memo(({ visible, datasetId, buttonsList = undefin
     );
     columnsArr.push(<Column key="tableSchemaId" field="tableSchemaId" header="" className={styles.VisibleHeader} />);
     setColumns(columnsArr);
-
-    fetchData('', sortOrder, firstRow, numRows);
   }, []);
 
   useEffect(() => {
@@ -121,7 +119,7 @@ const ValidationViewer = React.memo(({ visible, datasetId, buttonsList = undefin
       {!isUndefined(buttonsList) ? (
         buttonsList
       ) : (
-        <Toolbar>
+        <Toolbar className={styles.validationToolbar}>
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}

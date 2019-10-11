@@ -52,6 +52,20 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   /**
+   * Generate token based on authorization code.
+   *
+   * @param code the code
+   *
+   * @return the token VO
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/generateTokenByCode", method = RequestMethod.POST)
+  public TokenVO generateToken(@RequestParam("code") String code) {
+    return securityProviderInterfaceService.doLogin(code);
+  }
+
+  /**
    * Refresh token.
    *
    * @param refreshToken the refresh token
