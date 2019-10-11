@@ -195,6 +195,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
+      checkIsWebFormDataset(datasetStatistics.datasetSchemaName);
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           return {
@@ -379,12 +380,12 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const checkIsWebFormDataset = () => {
-    if (Number(datasetId) === 5 || Number(datasetId) === 142) {
+  const checkIsWebFormDataset = datasetName => {
+    if ((datasetName = 'MMR_Test')) {
       setIsInputSwitchChecked(true);
-      return true;
+      setIsWebFormDataset(true);
     } else {
-      return false;
+      setIsWebFormDataset(false);
     }
   };
 
