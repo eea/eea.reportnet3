@@ -1,6 +1,7 @@
 import { datasetRepository } from 'core/domain/model/DataSet/DataSetRepository';
 
 import { AddRecords } from './AddRecords';
+import { CreateValidation } from './CreateValidation';
 import { DeleteData } from './DeleteData';
 import { DeleteRecord } from './DeleteRecord';
 import { DeleteTableData } from './DeleteTableData';
@@ -18,6 +19,7 @@ import { ValidateData } from './ValidateData';
 
 export const DatasetService = {
   addRecordsById: AddRecords({ datasetRepository }),
+  createValidation: CreateValidation({ datasetRepository }),
   deleteDataById: DeleteData({ datasetRepository }),
   deleteRecordById: DeleteRecord({ datasetRepository }),
   deleteTableDataById: DeleteTableData({ datasetRepository }),
