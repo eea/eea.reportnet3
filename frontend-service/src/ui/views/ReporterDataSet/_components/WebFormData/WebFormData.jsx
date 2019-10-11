@@ -277,7 +277,7 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
   };
 
   if (loading) {
-    return <Spinner />;
+    return <Spinner className={styles.webFormSpinner} />;
   }
 
   return (

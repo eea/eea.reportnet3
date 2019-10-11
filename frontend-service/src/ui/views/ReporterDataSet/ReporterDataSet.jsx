@@ -85,10 +85,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   }, [user]);
 
   useEffect(() => {
-    setIsWebFormDataset(checkIsWebFormDataset());
-  }, []);
-
-  useEffect(() => {
     onLoadDatasetSchema();
   }, [isDataDeleted]);
 
@@ -195,6 +191,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
+      checkIsWebFormDataset(datasetStatistics.datasetSchemaName);
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           return {
@@ -379,12 +376,13 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const checkIsWebFormDataset = () => {
-    if (Number(datasetId) === 5 || Number(datasetId) === 142) {
+  const checkIsWebFormDataset = datasetName => {
+    const mmrDatasetName = 'MMR_TEST';
+    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
       setIsInputSwitchChecked(true);
-      return true;
+      setIsWebFormDataset(true);
     } else {
-      return false;
+      setIsWebFormDataset(false);
     }
   };
 
@@ -531,7 +529,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}>
+          visible={validationsVisible}
+          className={styles.paginatorValidationViewer}>
           <ValidationViewer
             datasetId={datasetId}
             visible={validationsVisible}

@@ -1,5 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DataFlowColumn.module.css';
 
@@ -38,13 +40,6 @@ const DataflowColumn = withRouter(
           </div>
         )}
         <div className="navSection">
-          {dataflowTitle && (
-            <h4 className={styles.title}>
-              <Icon icon="shoppingCart" />
-              {dataflowTitle}
-            </h4>
-          )}
-
           <Button
             className={styles.subscribeBtn}
             icon="plus"
