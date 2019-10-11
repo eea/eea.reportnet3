@@ -10,9 +10,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.eea.interfaces.lock.enums.LockType;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
-import org.eea.lock.model.Lock;
 import org.eea.lock.service.LockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -32,7 +32,7 @@ public class MethodLockAspect {
     Object rtn = null;
     Authentication aux = SecurityContextHolder.getContext().getAuthentication();
 
-    Lock lock = lockService.createLock(new Timestamp(System.currentTimeMillis()),
+    LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
         aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint),
         joinPoint.getSignature().toShortString());
 
@@ -41,10 +41,10 @@ public class MethodLockAspect {
 
     LockMethod lockMethod = method.getAnnotation(LockMethod.class);
 
-    if (lock != null) {
+    if (lockVO != null) {
       rtn = joinPoint.proceed();
       if (lockMethod.removeWhenFinish()) {
-        lockService.removeLock(lock.getId());
+        lockService.removeLock(lockVO.getId());
       }
     }
 

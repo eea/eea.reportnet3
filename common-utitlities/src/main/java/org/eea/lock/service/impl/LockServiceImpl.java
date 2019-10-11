@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.eea.interfaces.lock.enums.LockType;
-import org.eea.lock.model.Lock;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,29 +18,29 @@ public class LockServiceImpl implements LockService {
 
   private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
 
-  private Map<Integer, Lock> locks = new ConcurrentHashMap<>();
+  private Map<Integer, LockVO> lockVOs = new ConcurrentHashMap<>();
   // private KafkaSender kafkaSender;
 
   @Override
-  public Lock createLock(Timestamp createDate, String createdBy, LockType lockType,
+  public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
       Map<Integer, Object> lockCriteria, String signature) {
 
-    Lock lock = new Lock(createDate, createdBy, lockType,
+    LockVO lockVO = new LockVO(createDate, createdBy, lockType,
         generateHashCode(signature, lockCriteria.values().stream().collect(Collectors.toList())),
         lockCriteria);
 
-    if (locks.putIfAbsent(lock.getId(), lock) == null) {
-      LOG.info("Lock added: {}", lock.getId());
-      return lock;
+    if (lockVOs.putIfAbsent(lockVO.getId(), lockVO) == null) {
+      LOG.info("Lock added: {}", lockVO.getId());
+      return lockVO;
     }
 
-    LOG.info("Already locked: {}", lock.getId());
+    LOG.info("Already locked: {}", lockVO.getId());
     return null;
   }
 
   @Override
   public Boolean removeLock(Integer lockId) {
-    Boolean isRemoved = locks.remove(lockId) != null;
+    Boolean isRemoved = lockVOs.remove(lockId) != null;
     LOG.info("Lock removed: {} - {}", lockId, isRemoved);
     return isRemoved;
   }
@@ -51,13 +51,13 @@ public class LockServiceImpl implements LockService {
   }
 
   @Override
-  public Lock findLock(Integer lockId) {
-    return locks.get(lockId);
+  public LockVO findLock(Integer lockId) {
+    return lockVOs.get(lockId);
   }
 
   @Override
-  public List<Lock> findAll() {
-    return locks.values().stream().collect(Collectors.toList());
+  public List<LockVO> findAll() {
+    return lockVOs.values().stream().collect(Collectors.toList());
   }
 
   private Integer generateHashCode(String signature, List<Object> args) {
