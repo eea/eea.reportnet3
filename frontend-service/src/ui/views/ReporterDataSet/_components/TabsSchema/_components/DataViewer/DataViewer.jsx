@@ -884,12 +884,22 @@ const DataViewer = withRouter(
         const validations = [];
         let message = '';
         let hasFieldErrors = false;
-        hasFieldErrors =
-          recordData.dataRow.filter(row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)).length >
-          0;
+        const recordsWithFieldValidations = recordData.dataRow.filter(
+          row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+        );
+        hasFieldErrors = recordsWithFieldValidations.length > 0;
 
+        const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
+        const fieldsLevelErrors = getLevelError(filteredFieldValidations);
         if (hasFieldErrors) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+          validations.push(
+            DatasetService.createValidation(
+              'RECORD',
+              0,
+              fieldsLevelErrors,
+              fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
+            )
+          );
           validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
         }
         if (validations.length > 0) {
