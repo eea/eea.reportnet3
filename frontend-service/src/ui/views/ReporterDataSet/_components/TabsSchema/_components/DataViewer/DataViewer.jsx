@@ -596,7 +596,16 @@ const DataViewer = withRouter(
     );
 
     const capitalizeFirstLetterAndToLowerCase = string => {
-      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+      return (
+        string
+          .trim()
+          .charAt(0)
+          .toUpperCase() +
+        string
+          .trim()
+          .slice(1)
+          .toLowerCase()
+      );
     };
 
     const cellDataEditor = (cells, record) => {
@@ -944,7 +953,7 @@ const DataViewer = withRouter(
         }
 
         validations.forEach(validation =>
-          validation.message ? capitalizeFirstLetterAndToLowerCase((message += '- ')) + validation.message + '\n' : ''
+          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
         );
 
         const levelError = getLevelError(validations);
@@ -957,6 +966,7 @@ const DataViewer = withRouter(
         const recordsWithFieldValidations = recordData.dataRow.filter(
           row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
         );
+
         hasFieldErrors = recordsWithFieldValidations.length > 0;
 
         const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
