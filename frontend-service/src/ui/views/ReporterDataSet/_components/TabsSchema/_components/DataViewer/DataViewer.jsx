@@ -556,17 +556,17 @@ const DataViewer = withRouter(
     const addRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
-          label={resources.messages['cancel']}
-          icon="cancel"
-          onClick={() => {
-            setAddDialogVisible(false);
-          }}
-        />
-        <Button
           label={resources.messages['save']}
           icon="save"
           onClick={() => {
             onSaveRecord(newRecord);
+          }}
+        />
+        <Button
+          label={resources.messages['cancel']}
+          icon="cancel"
+          onClick={() => {
+            setAddDialogVisible(false);
           }}
         />
       </div>
@@ -744,7 +744,6 @@ const DataViewer = withRouter(
 
     const editRowDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
         <Button
           label={resources.messages['save']}
           icon="save"
@@ -756,6 +755,7 @@ const DataViewer = withRouter(
             }
           }}
         />
+        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
       </div>
     );
 
