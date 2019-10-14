@@ -1,7 +1,10 @@
-.delete {
-  color: var(--errors);
-  cursor: pointer;
+.add_dialog {
+  height: auto !important;
 }
 .crudColumn {
   text-align: center;
+}
+.delete {
+  color: var(--errors);
+  cursor: pointer;
 }
