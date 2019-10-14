@@ -35,7 +35,6 @@ public class LoadDocumentCommand extends AbstractEEAEventHandlerCommand {
     return EventType.LOAD_DOCUMENT_COMPLETED_EVENT;
   }
 
-
   /**
    * Execute.
    *

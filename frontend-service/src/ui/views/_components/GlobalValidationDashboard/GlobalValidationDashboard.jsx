@@ -1,15 +1,24 @@
-import React, { useEffect, useContext, useReducer, useState } from 'react';
+import React, { useEffect, useContext, useReducer, useState, useRef } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './GlobalValidationDashboard.module.css';
 
 import { Chart } from 'primereact/chart';
+import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { FilterList } from 'ui/views/DataCustodianDashboards/_components/FilterList';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { filterReducer } from './_components/_context/filterReducer';
+
 import { DataflowService } from 'core/services/DataFlow';
+
+const SEVERITY_CODE = {
+  CORRECT: 'CORRECT',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR'
+};
 
 const GlobalValidationDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
@@ -20,137 +29,15 @@ const GlobalValidationDashboard = dataflowId => {
     originalData: {},
     data: {}
   };
-
-  const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
-    if (isEmpty(originalData)) {
-      return;
-    }
-
-    let tablesData = originalData.datasets.filter(table => showArrayItem(datasetsIdsArr, table.tableId));
-
-    const labels = originalData.labels.filter(label => showArrayItem(reportersLabelsArr, label));
-
-    const labelsPositionsInFilteredLabelsArray = reportersLabelsArr.map(label => getLabelIndex(originalData, label));
-
-    tablesData = cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray).filter(table =>
-      showArrayItem(msgStatusTypesArr, table.label)
-    );
-
-    return { labels: labels, datasets: tablesData };
-  };
-
-  const filterReducer = (state, { type, payload }) => {
-    let reportersLabelsArr = [];
-    let tablesIdsArray = [];
-    let msgStatusTypesArray = [];
-    let filteredTableData;
-    switch (type) {
-      case 'INIT_DATA':
-        return {
-          ...state,
-          originalData: payload,
-          data: payload
-        };
-
-      case 'TABLE_CHECKBOX_ON':
-        tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
-        filteredTableData = onFilteringData(
-          state.originalData,
-          tablesIdsArray,
-          state.reporterFilter,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          tableFilter: tablesIdsArray,
-          data: filteredTableData
-        };
-
-      case 'TABLE_CHECKBOX_OFF':
-        tablesIdsArray = [...state.tableFilter, payload.tableId];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          tablesIdsArray,
-          state.reporterFilter,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          tableFilter: tablesIdsArray,
-          data: filteredTableData
-        };
-
-      case 'REPORTER_CHECKBOX_ON':
-        reportersLabelsArr = state.reporterFilter.filter(label => label !== payload.label);
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          reportersLabelsArr,
-          state.statusFilter
-        );
-
-        return {
-          ...state,
-          reporterFilter: reportersLabelsArr,
-          data: filteredTableData
-        };
-
-      case 'REPORTER_CHECKBOX_OFF':
-        reportersLabelsArr = [...state.reporterFilter, payload.label];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          reportersLabelsArr,
-          state.statusFilter
-        );
-        return {
-          ...state,
-          reporterFilter: reportersLabelsArr,
-          data: filteredTableData
-        };
-      case 'STATUS_FILTER_ON':
-        msgStatusTypesArray = state.statusFilter.filter(status => status !== payload.msg);
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          state.reporterFilter,
-          msgStatusTypesArray
-        );
-
-        return {
-          ...state,
-          statusFilter: msgStatusTypesArray,
-          data: filteredTableData
-        };
-      case 'STATUS_FILTER_OFF':
-        msgStatusTypesArray = [...state.statusFilter, payload.msg];
-
-        filteredTableData = onFilteringData(
-          state.originalData,
-          state.tableFilter,
-          state.reporterFilter,
-          msgStatusTypesArray
-        );
-
-        return {
-          ...state,
-          statusFilter: msgStatusTypesArray,
-          data: filteredTableData
-        };
-
-      default:
-        return state;
-    }
-  };
-
+  const [dashboardColors, setDashboardColors] = useState({
+    CORRECT: '#99CC33',
+    WARNING: '#ffCC00',
+    ERROR: '#CC3300'
+  });
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
   const [isLoading, setLoading] = useState(true);
+  const [validationDashboardData, setValidationDashboardData] = useState();
+  const chartRef = useRef();
 
   useEffect(() => {
     onLoadDashboard();
@@ -159,7 +46,7 @@ const GlobalValidationDashboard = dataflowId => {
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(dataflowId.dataflowId);
-      filterDispatch({ type: 'INIT_DATA', payload: buildDatasetDashboardObject(datasetsValidationStatistics) });
+      setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
     } catch (error) {
       onErrorLoadingDashboard(error);
     } finally {
@@ -172,6 +59,78 @@ const GlobalValidationDashboard = dataflowId => {
     const errorResponse = error.response;
     console.error('Dashboard errorResponse: ', errorResponse);
   };
+
+  function buildDatasetDashboardObject(datasetsDashboardsData) {
+    let datasets = [];
+    if (!isUndefined(datasetsDashboardsData.tables)) {
+      datasets = datasetsDashboardsData.tables
+        .map(table => [
+          {
+            label: `CORRECT`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: dashboardColors.CORRECT,
+            data: table.tableStatisticPercentages[0],
+            totalData: table.tableStatisticValues[0],
+            stack: table.tableName
+          },
+          {
+            label: `WARNING`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: dashboardColors.WARNING,
+            data: table.tableStatisticPercentages[1],
+            totalData: table.tableStatisticValues[1],
+            stack: table.tableName
+          },
+          {
+            label: `ERROR`,
+            tableName: table.tableName,
+            tableId: table.tableId,
+            backgroundColor: dashboardColors.ERROR,
+            data: table.tableStatisticPercentages[2],
+            totalData: table.tableStatisticValues[2],
+            stack: table.tableName
+          }
+        ])
+        .flat();
+    }
+    const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
+    const datasetDataObject = {
+      labels: labels,
+      datasets: datasets
+    };
+    return datasetDataObject;
+  }
+
+  // useEffect(() => {
+  //   if (!isUndefined(filterState.data)) {
+  //     const {
+  //       originalData: { labels, datasets }
+  //     } = filterState;
+  //     if (labels && datasets) {
+  //       setValidationDashboardData({
+  //         labels: labels,
+  //         datasets: datasets.map(dataset => {
+  //           switch (dataset.label) {
+  //             case 'CORRECT':
+  //               dataset.backgroundColor = dashboardColors.CORRECT;
+  //               break;
+  //             case 'WARNINGS':
+  //               dataset.backgroundColor = dashboardColors.WARNING;
+  //               break;
+  //             case 'ERRORS':
+  //               dataset.backgroundColor = dashboardColors.ERROR;
+  //               break;
+  //             default:
+  //               break;
+  //           }
+  //           return dataset;
+  //         })
+  //       });
+  //     }
+  //   }
+  // }, [dashboardColors]);
 
   const datasetOptionsObject = {
     hover: {
@@ -204,6 +163,8 @@ const GlobalValidationDashboard = dataflowId => {
         {
           stacked: true,
           ticks: {
+            min: 0,
+            max: 100,
             callback: (value, index, values) => `${value}%`
           }
         }
@@ -211,15 +172,66 @@ const GlobalValidationDashboard = dataflowId => {
     }
   };
 
+  useEffect(() => {
+    filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
+    // if (
+    //   !isEmpty(filterState.data) &&
+    //   (filterState.data.datasets.length !== validationDashboardData.datasets.length ||
+    //     !isEmpty(filterState.reporterFilter) ||
+    //     !isEmpty(filterState.statusFilter) ||
+    //     !isEmpty(filterState.tableFilter))
+    // ) {
+    //   filterDispatch({
+    //     type: 'APPLY_FILTERS',
+    //     payload: filterState
+    //   });
+    // }
+  }, [validationDashboardData]);
+
   if (isLoading) {
     return <Spinner className={styles.positioning} />;
   }
 
   if (!isEmpty(filterState.data)) {
     return (
-      <div className="rep-row">
-        <FilterList originalData={filterState.originalData} filterDispatch={filterDispatch}></FilterList>
-        <Chart type="bar" data={filterState.data} options={datasetOptionsObject} width="100%" height="30%" />
+      <div className={`rep-row ${styles.chart_released}`}>
+        <FilterList
+          color={dashboardColors}
+          originalData={filterState.originalData}
+          filterDispatch={filterDispatch}></FilterList>
+        <Chart
+          ref={chartRef}
+          type="bar"
+          data={filterState.data}
+          options={datasetOptionsObject}
+          width="100%"
+          height="30%"
+        />
+        {/* <fieldset className={styles.colorPickerWrap}>
+          <legend>{resources.messages['chooseChartColor']}</legend>
+          {Object.keys(SEVERITY_CODE).map((type, i) => {
+            return (
+              <React.Fragment key={i}>
+                <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()}: `}</span>
+                <ColorPicker
+                  key={type}
+                  value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+                  onChange={e => {
+                    e.preventDefault();
+                    setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
+                    const filteredDatasets = chartRef.current.chart.data.datasets.filter(
+                      dataset => dataset.label === SEVERITY_CODE[type]
+                    );
+                    filteredDatasets.forEach(dataset => {
+                      dataset.backgroundColor = `#${e.value}`;
+                    });
+                    chartRef.current.refresh();
+                  }}
+                />
+              </React.Fragment>
+            );
+          })}
+        </fieldset> */}
       </div>
     );
   } else {
@@ -230,64 +242,5 @@ const GlobalValidationDashboard = dataflowId => {
     );
   }
 };
-
-function buildDatasetDashboardObject(datasetsDashboardsData) {
-  let datasets = [];
-  if (!isUndefined(datasetsDashboardsData.tables)) {
-    datasets = datasetsDashboardsData.tables
-      .map(table => [
-        {
-          label: `CORRECT`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: 'rgba(153, 204, 51, 1)',
-          data: table.tableStatisticPercentages[0],
-          totalData: table.tableStatisticValues[0],
-          stack: table.tableName
-        },
-        {
-          label: `WARNINGS`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: 'rgba(255, 204, 0, 1)',
-          data: table.tableStatisticPercentages[1],
-          totalData: table.tableStatisticValues[1],
-          stack: table.tableName
-        },
-        {
-          label: `ERRORS`,
-          tableName: table.tableName,
-          tableId: table.tableId,
-          backgroundColor: 'rgba(204, 51, 0, 1)',
-          data: table.tableStatisticPercentages[2],
-          totalData: table.tableStatisticValues[2],
-          stack: table.tableName
-        }
-      ])
-      .flat();
-  }
-  const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
-  const datasetDataObject = {
-    labels: labels,
-    datasets: datasets
-  };
-  return datasetDataObject;
-}
-
-function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
-  return tablesData.map(table => ({
-    ...table,
-    data: table.data.filter((d, i) => !labelsPositionsInFilteredLabelsArray.includes(i)),
-    totalData: table.totalData.filter((td, i) => !labelsPositionsInFilteredLabelsArray.includes(i))
-  }));
-}
-
-function getLabelIndex(originalData, label) {
-  return originalData.labels.indexOf(label);
-}
-
-function showArrayItem(array, item) {
-  return !array.includes(item);
-}
 
 export { GlobalValidationDashboard };

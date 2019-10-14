@@ -140,12 +140,13 @@ public interface DatasetService {
    * Gets the statistics.
    *
    * @param datasetId the dataset id
-   *
    * @return the statistics
-   *
    * @throws EEAException the EEA exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
    */
-  StatisticsVO getStatistics(@DatasetId Long datasetId) throws EEAException;
+  StatisticsVO getStatistics(@DatasetId Long datasetId)
+      throws EEAException, InstantiationException, IllegalAccessException;
 
   /**
    * Update record.
@@ -279,5 +280,12 @@ public interface DatasetService {
   void deleteRecordValuesToRestoreSnapshot(@DatasetId Long datasetId, Long partitionId)
       throws EEAException;
 
+  /**
+   * Save statistics.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  void saveStatistics(@DatasetId Long datasetId) throws EEAException;
 
 }

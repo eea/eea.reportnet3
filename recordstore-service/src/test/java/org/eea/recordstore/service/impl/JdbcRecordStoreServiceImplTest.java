@@ -78,7 +78,7 @@ public class JdbcRecordStoreServiceImplTest {
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
-    Mockito.verify(jdbcTemplate, Mockito.times(86)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(93)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
