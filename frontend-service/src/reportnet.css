@@ -1792,6 +1792,7 @@ textarea {
 
 textarea {
   min-height: 5rem;
+  font-family: arial;
 }
 
 select:focus,
