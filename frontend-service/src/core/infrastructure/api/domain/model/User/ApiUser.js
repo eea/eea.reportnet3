@@ -3,13 +3,12 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiUser = {
-  login: async (userName, password) => {
+  login: async code => {
     const tokens = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON
         ? ''
         : getUrl(UserConfig.login, {
-            userName,
-            password
+            code
           }),
       queryString: {}
     });
