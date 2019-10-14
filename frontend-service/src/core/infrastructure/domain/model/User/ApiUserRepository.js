@@ -45,8 +45,8 @@ const refreshToken = async refreshToken => {
 
 const hasPermission = (user, permissions, entity) => {
   let allow = false;
-  permissions.forEach(permision => {
-    const role = `${entity}-${permision}`;
+  permissions.forEach(permission => {
+    const role = `${entity}-${permission}`;
     if (user.roles.includes(role)) allow = true;
   });
   return allow;

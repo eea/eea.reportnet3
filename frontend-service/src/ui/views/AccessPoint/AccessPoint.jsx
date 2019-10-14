@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 
 import styles from './AccessPoint.module.css';
 
@@ -8,7 +8,7 @@ import logo from 'assets/images/logo.png';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const AccessPoint = ({ history }) => {
+export const AccessPoint = () => {
   const resources = useContext(ResourcesContext);
   return (
     <div className="rp-container">
