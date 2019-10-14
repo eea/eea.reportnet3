@@ -197,7 +197,7 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
       </DataTable>
 
       <Dialog
-        className={styles.add_dialog}
+        className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         footer={addRowDialogFooter}
@@ -208,8 +208,9 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
         visible={isAddDialogVisible}>
         <div className="p-grid p-fluid">{newRecordForm}</div>
       </Dialog>
+
       <Dialog
-        className={styles.editDialog}
+        className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
         footer={editRowDialogFooter}
@@ -220,6 +221,7 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
         visible={isEditDialogVisible}>
         <div className="p-grid p-fluid">{editRecordForm}</div>
       </Dialog>
+
       <ConfirmDialog
         header={resources.messages['delete']}
         labelCancel={resources.messages['no']}
