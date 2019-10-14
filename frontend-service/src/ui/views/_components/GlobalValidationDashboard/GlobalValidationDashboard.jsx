@@ -103,35 +103,6 @@ const GlobalValidationDashboard = dataflowId => {
     return datasetDataObject;
   }
 
-  // useEffect(() => {
-  //   if (!isUndefined(filterState.data)) {
-  //     const {
-  //       originalData: { labels, datasets }
-  //     } = filterState;
-  //     if (labels && datasets) {
-  //       setValidationDashboardData({
-  //         labels: labels,
-  //         datasets: datasets.map(dataset => {
-  //           switch (dataset.label) {
-  //             case 'CORRECT':
-  //               dataset.backgroundColor = dashboardColors.CORRECT;
-  //               break;
-  //             case 'WARNINGS':
-  //               dataset.backgroundColor = dashboardColors.WARNING;
-  //               break;
-  //             case 'ERRORS':
-  //               dataset.backgroundColor = dashboardColors.ERROR;
-  //               break;
-  //             default:
-  //               break;
-  //           }
-  //           return dataset;
-  //         })
-  //       });
-  //     }
-  //   }
-  // }, [dashboardColors]);
-
   const datasetOptionsObject = {
     hover: {
       mode: 'point',
@@ -174,18 +145,6 @@ const GlobalValidationDashboard = dataflowId => {
 
   useEffect(() => {
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
-    // if (
-    //   !isEmpty(filterState.data) &&
-    //   (filterState.data.datasets.length !== validationDashboardData.datasets.length ||
-    //     !isEmpty(filterState.reporterFilter) ||
-    //     !isEmpty(filterState.statusFilter) ||
-    //     !isEmpty(filterState.tableFilter))
-    // ) {
-    //   filterDispatch({
-    //     type: 'APPLY_FILTERS',
-    //     payload: filterState
-    //   });
-    // }
   }, [validationDashboardData]);
 
   if (isLoading) {
@@ -207,7 +166,7 @@ const GlobalValidationDashboard = dataflowId => {
           width="100%"
           height="30%"
         />
-        {/* Check if there is data to show colorPicker
+        {/* Check if there is data to show colorPicker */}
         <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           {Object.keys(SEVERITY_CODE).map((type, i) => {
@@ -220,19 +179,27 @@ const GlobalValidationDashboard = dataflowId => {
                   onChange={e => {
                     e.preventDefault();
                     setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
-                    const filteredDatasets = chartRef.current.chart.data.datasets.filter(
+                    const filteredDatasets = filterState.originalData.datasets.filter(
+                      dataset => dataset.label === SEVERITY_CODE[type]
+                    );
+
+                    const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
                       dataset => dataset.label === SEVERITY_CODE[type]
                     );
                     filteredDatasets.forEach(dataset => {
                       dataset.backgroundColor = `#${e.value}`;
                     });
+                    filteredDatasetsCurrent.forEach(dataset => {
+                      dataset.backgroundColor = `#${e.value}`;
+                    });
+
                     chartRef.current.refresh();
                   }}
                 />
               </React.Fragment>
             );
           })}
-        </fieldset> */}
+        </fieldset>
       </div>
     );
   } else {
