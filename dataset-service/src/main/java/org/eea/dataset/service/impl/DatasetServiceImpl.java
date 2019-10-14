@@ -416,6 +416,14 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteImportData(final Long dataSetId) {
     datasetRepository.removeDatasetData(dataSetId);
+
+    try {
+      this.saveStatistics(dataSetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error saving statistics after deleting all the dataset values. Error message: {}",
+          e.getMessage(), e);
+    }
     LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 
