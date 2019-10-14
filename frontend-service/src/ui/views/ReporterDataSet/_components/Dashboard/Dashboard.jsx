@@ -132,22 +132,25 @@ const Dashboard = withRouter(
           <div className={styles.dashboardWraper}>
             <fieldset className={styles.colorPickerWrap}>
               <legend>{resources.messages['chooseChartColor']}</legend>
-              {Object.keys(SEVERITY_CODE).map((type, i) => {
-                return (
-                  <React.Fragment key={i}>
-                    <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
-                      .slice(1)
-                      .toLowerCase()}: `}</span>
-                    <ColorPicker
-                      value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
-                      onChange={e => {
-                        e.preventDefault();
-                        onChangeColor(e.value, SEVERITY_CODE[type]);
-                      }}
-                    />
-                  </React.Fragment>
-                );
-              })}
+              <div className={styles.fieldsetContent}>
+                {Object.keys(SEVERITY_CODE).map((type, i) => {
+                  return (
+                    <div className={styles.colorPickerItem} key={i}>
+                      <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+                        .slice(1)
+                        .toLowerCase()}: `}</span>
+                      <ColorPicker
+                        className={styles.colorPicker}
+                        onChange={e => {
+                          e.preventDefault();
+                          onChangeColor(e.value, SEVERITY_CODE[type]);
+                        }}
+                        value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </fieldset>
           </div>
         );
