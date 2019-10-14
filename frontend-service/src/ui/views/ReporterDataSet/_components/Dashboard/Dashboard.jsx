@@ -152,7 +152,6 @@ const Dashboard = withRouter(
                     .slice(1)
                     .toLowerCase()}: `}</span>
                   <ColorPicker
-                    key={type}
                     value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
                     onChange={e => {
                       e.preventDefault();
