@@ -1,4 +1,6 @@
 export const routes = {
+  ACCESS_POINT: '/',
+  EULOGIN: '/eulogin',
   LOGIN: '/',
   DATA_CUSTODIAN_DASHBOARDS: '/dataflow/:dataflowId/data-custodian-dashboards',
   DATAFLOWS: '/dataflows',
