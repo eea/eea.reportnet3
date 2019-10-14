@@ -69,21 +69,6 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
 
-  const crudTemplate = (rowData, column) => {
-    return (
-      <>
-        <span
-          className={styles.delete}
-          onClick={() => {
-            setDeleteDialogVisible(true);
-            /* setRowDataState(rowData); */
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-        </span>
-      </>
-    );
-  };
-
   const onHideDeleteDialog = () => {
     setDeleteDialogVisible(false);
   };

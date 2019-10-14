@@ -9,6 +9,7 @@ import styles from './Documents.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
@@ -21,21 +22,68 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
 
-const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }) => {
+const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }) => {
   const resources = useContext(ResourcesContext);
+
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [fileName, setFileName] = useState('');
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [isDownloading, setIsDownloading] = useState('');
   const [isFormReset, setIsFormReset] = useState(true);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
-  /*   const [rowDataState, setRowDataState] = useState(); */
+  const [rowDataState, setRowDataState] = useState();
+
+  const growlRef = useRef();
 
   useEffect(() => {
     if (!isUndefined(fileToDownload)) {
       DownloadFile(fileToDownload, fileName);
     }
   }, [fileToDownload]);
+
+  const onGrowlAlert = message => {
+    growlRef.current.show(message);
+  };
+
+  const onUploadDocument = () => {
+    setIsUploadDialogVisible(false);
+  };
+
+  const onCancelDialog = () => {
+    setIsUploadDialogVisible(false);
+    setIsFormReset(false);
+  };
+
+  const onDeleteDocument = async documentData => {
+    setDeleteDialogVisible(false);
+    try {
+      const response = await DocumentService.deleteDocument(documentData.id);
+      if (response >= 200 && response <= 299) {
+        documents.filter(document => document.id !== documentData.id);
+      }
+    } catch (error) {
+      console.error(error.response);
+    }
+  };
+
+  const onHideDeleteDialog = () => {
+    setDeleteDialogVisible(false);
+  };
+
+  const documentsEditButtons = rowData => {
+    return (
+      <>
+        <span
+          className={styles.delete}
+          onClick={() => {
+            setDeleteDialogVisible(true);
+            setRowDataState(rowData);
+          }}>
+          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
+        </span>
+      </>
+    );
+  };
 
   const onDownloadDocument = async rowData => {
     try {
@@ -53,47 +101,17 @@ const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }
     return `${title.split(' ').join('_')}`;
   };
 
-  const onUploadDocument = () => {
-    setIsUploadDialogVisible(false);
-  };
-
-  const actionTemplate = (rowData, column) => {
+  const downloadTemplate = rowData => {
     switch (rowData.category) {
     }
     return (
       <span className={styles.downloadIcon} onClick={() => onDownloadDocument(rowData)}>
-        {' '}
         {isDownloading === rowData.id ? (
           <Icon icon="spinnerAnimate" />
         ) : (
           <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
         )}
       </span>
-    );
-  };
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
-
-  let growlRef = useRef();
-
-  const onCancelDialog = () => {
-    setIsUploadDialogVisible(false);
-    setIsFormReset(false);
-  };
-
-  const crudTemplate = (rowData, column) => {
-    return (
-      <>
-        <span
-          className={styles.delete}
-          onClick={() => {
-            setDeleteDialogVisible(true);
-            /*  setRowDataState(rowData); */
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('delete')} />
-        </span>
-      </>
     );
   };
 
@@ -157,7 +175,7 @@ const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }
 
       {
         <DataTable value={documents} autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-          <Column className={styles.crudColumn} body={crudTemplate} />
+          <Column className={styles.crudColumn} body={documentsEditButtons} />
           <Column
             columnResizeMode="expand"
             field="title"
@@ -188,7 +206,7 @@ const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }
             sortable={true}
           />
           <Column
-            body={actionTemplate}
+            body={downloadTemplate}
             field="url"
             filter={false}
             filterMatchMode="contains"
@@ -197,6 +215,16 @@ const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }
           />
         </DataTable>
       }
+      <ConfirmDialog
+        header={resources.messages['delete']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={() => onDeleteDocument(rowDataState)}
+        onHide={onHideDeleteDialog}
+        visible={deleteDialogVisible}>
+        {resources.messages['deleteDocument']}
+      </ConfirmDialog>
     </>
   );
 };
