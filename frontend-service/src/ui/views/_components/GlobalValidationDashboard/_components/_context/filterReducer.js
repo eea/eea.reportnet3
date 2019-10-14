@@ -17,7 +17,6 @@ function showArrayItem(array, item) {
 }
 
 const onFilteringData = (originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr) => {
-  console.log(originalData, datasetsIdsArr, reportersLabelsArr, msgStatusTypesArr);
   if (isEmpty(originalData)) {
     return;
   }
@@ -38,22 +37,12 @@ export const filterReducer = (state, { type, payload }) => {
   let tablesIdsArray = [];
   let msgStatusTypesArray = [];
   let filteredTableData;
-  console.log(type, payload, state);
   switch (type) {
     case 'INIT_DATA':
       return {
         ...state,
         originalData: payload,
         data: payload
-      };
-    case 'APPLY_FILTERS':
-      return {
-        ...state,
-        originalData: payload.originalData,
-        data: payload.data,
-        reporterFilter: payload.reporterFilter,
-        statusFilter: payload.statusFilter,
-        tableFilter: payload.tableFilter
       };
     case 'TABLE_CHECKBOX_ON':
       tablesIdsArray = state.tableFilter.filter(table => table !== payload.tableId);
