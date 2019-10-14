@@ -207,7 +207,8 @@ const GlobalValidationDashboard = dataflowId => {
           width="100%"
           height="30%"
         />
-        {/* <fieldset className={styles.colorPickerWrap}>
+        {/* Check if there is data to show colorPicker
+        <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           {Object.keys(SEVERITY_CODE).map((type, i) => {
             return (
