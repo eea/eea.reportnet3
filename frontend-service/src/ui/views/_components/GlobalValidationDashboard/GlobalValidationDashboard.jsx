@@ -169,36 +169,41 @@ const GlobalValidationDashboard = dataflowId => {
         {/* Check if there is data to show colorPicker */}
         <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
-          {Object.keys(SEVERITY_CODE).map((type, i) => {
-            return (
-              <React.Fragment key={i}>
-                <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()}: `}</span>
-                <ColorPicker
-                  key={type}
-                  value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
-                  onChange={e => {
-                    e.preventDefault();
-                    setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
-                    const filteredDatasets = filterState.originalData.datasets.filter(
-                      dataset => dataset.label === SEVERITY_CODE[type]
-                    );
+          <div className={styles.fieldsetContent}>
+            {Object.keys(SEVERITY_CODE).map((type, i) => {
+              return (
+                <div className={styles.colorPickerItem} key={i}>
+                  <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+                    .slice(1)
+                    .toLowerCase()}: `}</span>
+                  <ColorPicker
+                    className={styles.colorPicker}
+                    key={type}
+                    value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+                    onChange={e => {
+                      e.preventDefault();
+                      setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
+                      const filteredDatasets = filterState.originalData.datasets.filter(
+                        dataset => dataset.label === SEVERITY_CODE[type]
+                      );
 
-                    const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
-                      dataset => dataset.label === SEVERITY_CODE[type]
-                    );
-                    filteredDatasets.forEach(dataset => {
-                      dataset.backgroundColor = `#${e.value}`;
-                    });
-                    filteredDatasetsCurrent.forEach(dataset => {
-                      dataset.backgroundColor = `#${e.value}`;
-                    });
+                      const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
+                        dataset => dataset.label === SEVERITY_CODE[type]
+                      );
+                      filteredDatasets.forEach(dataset => {
+                        dataset.backgroundColor = `#${e.value}`;
+                      });
+                      filteredDatasetsCurrent.forEach(dataset => {
+                        dataset.backgroundColor = `#${e.value}`;
+                      });
 
-                    chartRef.current.refresh();
-                  }}
-                />
-              </React.Fragment>
-            );
-          })}
+                      chartRef.current.refresh();
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </fieldset>
       </div>
     );
