@@ -1,6 +1,9 @@
 .positioning {
   position: sticky !important;
 }
+.colorPicker {
+  margin-left: 3px;
+}
 .colorPicker > input {
   font-size: 12px !important;
 }
