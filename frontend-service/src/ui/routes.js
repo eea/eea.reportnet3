@@ -1,5 +1,4 @@
 export const routes = {
-  // ACCESS_POINT: '/:state/:session_state/:code',
   ACCESS_POINT: '/',
   EULOGIN: '/eulogin',
   LOGIN: '/',

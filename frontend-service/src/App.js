@@ -9,7 +9,6 @@ import { DataflowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
 import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
 import { DocumentationDataset } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
 import { Eulogin } from 'ui/views/Eulogin';
-import { Login } from 'ui/views/Login';
 import { ReporterDataset } from 'ui/views/ReporterDataSet/ReporterDataSet';
 import { ReportingDataflow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';

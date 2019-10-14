@@ -1,1 +1,1 @@
-export { AccessPointWeConfig } from './AccessPoint.web.config';
+export { AccessPointWebConfig } from './AccessPoint.web.config';

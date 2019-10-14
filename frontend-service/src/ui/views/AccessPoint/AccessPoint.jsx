@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react';
 
 import styles from './AccessPoint.module.css';
 
-import { AccessPointWeConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
+import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 
 import logo from 'assets/images/logo.png';
 
@@ -18,7 +18,7 @@ export const AccessPoint = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages.appName}</h1>
             <h2>
-              <a href={AccessPointWeConfig.euloginUrl}>{resources.messages.linkInEulogin}</a>
+              <a href={AccessPointWebConfig.euloginUrl}>{resources.messages.linkInEulogin}</a>
             </h2>
           </div>
         </div>
