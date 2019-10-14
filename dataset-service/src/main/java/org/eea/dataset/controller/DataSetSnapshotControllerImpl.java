@@ -145,7 +145,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void restoreSnapshot(@PathVariable("idDataset") Long datasetId,
+  public void restoreSnapshot(@LockCriteria @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
