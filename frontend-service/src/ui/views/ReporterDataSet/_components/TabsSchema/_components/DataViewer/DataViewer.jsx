@@ -179,6 +179,7 @@ const DataViewer = withRouter(
       });
       let editCol = (
         <Column
+          header={resources.messages['actions']}
           key="actions"
           body={row => actionTemplate(row)}
           sortable={false}
@@ -213,8 +214,6 @@ const DataViewer = withRouter(
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
     const showColumns = columnKeys => {
-      console.log('originalColumns: ', originalColumns);
-
       const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
       const currentVisibleColumns = originalColumns.filter(
         column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
@@ -596,6 +595,19 @@ const DataViewer = withRouter(
       </div>
     );
 
+    const capitalizeFirstLetterAndToLowerCase = string => {
+      return (
+        string
+          .trim()
+          .charAt(0)
+          .toUpperCase() +
+        string
+          .trim()
+          .slice(1)
+          .toLowerCase()
+      );
+    };
+
     const cellDataEditor = (cells, record) => {
       return (
         <InputText
@@ -664,22 +676,42 @@ const DataViewer = withRouter(
       return `${tableName}.${fileType}`;
     };
 
-    const editRowDialogFooter = (
-      <div className="ui-dialog-buttonpane p-clearfix">
-        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
-        <Button
-          label={resources.messages['save']}
-          icon="save"
-          onClick={() => {
-            try {
-              onSaveRecord(editedRecord);
-            } catch (error) {
-              console.error(error);
-            }
-          }}
-        />
-      </div>
-    );
+    //Template for Field validation
+    const dataTemplate = (rowData, column) => {
+      let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
+      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
+        const validations = [...field.fieldValidations];
+        let message = [];
+        validations.forEach(validation =>
+          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
+        );
+        const levelError = getLevelError(validations);
+
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+            {' '}
+            {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
+          </div>
+        );
+      } else {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
+        );
+      }
+    };
+
+    const editLargeStringWithDots = (string, length) => {
+      if (string.length > length) {
+        return string.substring(0, length).concat('...');
+      } else {
+        return string;
+      }
+    };
 
     const editRecordForm = colsSchema.map((column, i) => {
       //Avoid row id Field and dataSetPartitionId
@@ -709,6 +741,23 @@ const DataViewer = withRouter(
         }
       }
     });
+
+    const editRowDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button label={resources.messages['cancel']} icon="cancel" onClick={onCancelRowEdit} />
+        <Button
+          label={resources.messages['save']}
+          icon="save"
+          onClick={() => {
+            try {
+              onSaveRecord(editedRecord);
+            } catch (error) {
+              console.error(error);
+            }
+          }}
+        />
+      </div>
+    );
 
     const filterDataResponse = data => {
       const dataFiltered = data.records.map(record => {
@@ -744,6 +793,33 @@ const DataViewer = withRouter(
         setFetchedData([]);
       }
       setFetchedData(dataFiltered);
+    };
+
+    const getLevelError = validations => {
+      let levelError = '';
+      let lvlFlag = 0;
+      validations.forEach(validation => {
+        if (validation.levelError === 'WARNING') {
+          const wNum = 1;
+          if (wNum > lvlFlag) {
+            lvlFlag = wNum;
+            levelError = 'WARNING';
+          }
+        } else if (validation.levelError === 'ERROR') {
+          const eNum = 2;
+          if (eNum > lvlFlag) {
+            lvlFlag = eNum;
+            levelError = 'ERROR';
+          }
+        } else if (validation.levelError === 'BLOCKER') {
+          const bNum = 2;
+          if (bNum > lvlFlag) {
+            lvlFlag = bNum;
+            levelError = 'BLOCKER';
+          }
+        }
+      });
+      return levelError;
     };
 
     const getCellId = (tableData, field) => {
@@ -855,96 +931,65 @@ const DataViewer = withRouter(
     //Template for Record validation
     const validationsTemplate = recordData => {
       if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
-        const validations = recordData.recordValidations;
-
+        const validations = [...recordData.recordValidations];
         let message = '';
-        validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
+        let hasFieldErrors = false;
+        const recordsWithFieldValidations = recordData.dataRow.filter(
+          row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+        );
+        hasFieldErrors = recordsWithFieldValidations.length > 0;
 
-        let levelError = '';
-        let lvlFlag = 0;
+        const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
+        const fieldsLevelErrors = getLevelError(filteredFieldValidations);
+        if (hasFieldErrors) {
+          validations.push(
+            DatasetService.createValidation(
+              'RECORD',
+              0,
+              fieldsLevelErrors,
+              fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
+            )
+          );
+        }
 
-        validations.forEach(validation => {
-          if (validation.levelError === 'WARNING') {
-            const wNum = 1;
-            if (wNum > lvlFlag) {
-              lvlFlag = wNum;
-              levelError = 'WARNING';
-            }
-          } else if (validation.levelError === 'ERROR') {
-            const eNum = 2;
-            if (eNum > lvlFlag) {
-              lvlFlag = eNum;
-              levelError = 'ERROR';
-            }
-          } else if (validation.levelError === 'BLOCKER') {
-            const bNum = 2;
-            if (bNum > lvlFlag) {
-              lvlFlag = bNum;
-              levelError = 'BLOCKER';
-            }
-          }
-        });
+        validations.forEach(validation =>
+          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
+        );
 
-        return <IconTooltip levelError={levelError} message={message} />;
+        const levelError = getLevelError(validations);
+        return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
       } else {
+        //If there is no recordValidations check por field validations (if there is more than zero fields with errors show the generic message)
+        const validations = [];
+        let message = '';
+        let hasFieldErrors = false;
+        const recordsWithFieldValidations = recordData.dataRow.filter(
+          row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+        );
+
+        hasFieldErrors = recordsWithFieldValidations.length > 0;
+
+        const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
+        const fieldsLevelErrors = getLevelError(filteredFieldValidations);
+        if (hasFieldErrors) {
+          validations.push(
+            DatasetService.createValidation(
+              'RECORD',
+              0,
+              fieldsLevelErrors,
+              fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
+            )
+          );
+          validations.forEach(validation =>
+            validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
+          );
+        }
+        if (validations.length > 0) {
+          const levelError = getLevelError(validations);
+          return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
+        }
+
         return;
-      }
-    };
-
-    //Template for Field validation
-    const dataTemplate = (rowData, column) => {
-      let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
-      if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
-        const validations = field.fieldValidations;
-        let message = [];
-        validations.forEach(validation => (validation.message ? (message += '- ' + validation.message + '\n') : ''));
-        let levelError = '';
-        let lvlFlag = 0;
-        validations.forEach(validation => {
-          if (validation.levelError === 'WARNING') {
-            const wNum = 1;
-            if (wNum > lvlFlag) {
-              lvlFlag = wNum;
-              levelError = 'WARNING';
-            }
-          } else if (validation.levelError === 'ERROR') {
-            const eNum = 2;
-            if (eNum > lvlFlag) {
-              lvlFlag = eNum;
-              levelError = 'ERROR';
-            }
-          } else if (validation.levelError === 'BLOCKER') {
-            const bNum = 2;
-            if (bNum > lvlFlag) {
-              lvlFlag = bNum;
-              levelError = 'BLOCKER';
-            }
-          }
-        });
-
-        return (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-            {' '}
-            {field ? field.fieldData[column.field] : null} <IconTooltip levelError={levelError} message={message} />
-          </div>
-        );
-      } else {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{field ? field.fieldData[column.field] : null}</div>
-        );
-      }
-    };
-
-    const editLargeStringWithDots = (string, length) => {
-      if (string.length > length) {
-        return string.substring(0, length).concat('...');
-      } else {
-        return string;
       }
     };
 
@@ -975,7 +1020,7 @@ const DataViewer = withRouter(
 
     return (
       <div>
-        <Toolbar>
+        <Toolbar className={styles.dataViewerToolbar}>
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary`}
@@ -1024,8 +1069,6 @@ const DataViewer = withRouter(
               id="exportTableMenu"
               showColumns={showColumns}
               onShow={e => {
-                console.log('hello');
-
                 getExportButtonPosition(e);
               }}
             />

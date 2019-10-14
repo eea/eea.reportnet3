@@ -196,17 +196,6 @@ public interface ValidationService {
 
 
   /**
-   * Error scale.
-   *
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @return the boolean
-   * @throws EEAException the EEA exception
-   */
-  void errorScale(@DatasetId Long datasetId) throws EEAException;
-
-
-  /**
    * Force validations.
    *
    * @param datasetId the dataset id

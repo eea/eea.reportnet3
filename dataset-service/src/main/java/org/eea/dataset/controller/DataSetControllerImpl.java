@@ -344,8 +344,8 @@ public class DataSetControllerImpl implements DatasetController {
     StatisticsVO statistics = null;
     try {
       statistics = datasetService.getStatistics(datasetId);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+    } catch (EEAException | InstantiationException | IllegalAccessException e) {
+      LOG_ERROR.error("Error getting statistics. Error message: {}", e.getMessage(), e);
     }
 
     return statistics;

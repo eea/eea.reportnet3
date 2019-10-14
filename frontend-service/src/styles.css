@@ -105,6 +105,7 @@ body .p-inputtext {
   -webkit-border-radius: 3px;
   border-radius: 3px;
 }
+
 body .p-inputtext:enabled:hover {
   border-color: #212121;
 }
@@ -1291,9 +1292,9 @@ body .p-button.p-button-raised {
 }
 body .p-button.p-button-rounded {
   margin: 0.1rem;
-  -moz-border-radius: 15px;
-  -webkit-border-radius: 15px;
-  border-radius: 15px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 body .p-fluid .p-button-icon-only {
   width: 2.357em;
@@ -3408,13 +3409,9 @@ body .p-lightbox .p-lightbox-content-wrapper .p-lightbox-content.p-lightbox-load
 }
 
 body .p-breadcrumb {
-  /*background-color: #ffffff;  border: 1px solid #c8c8c8;*/
   background-color: var(--blue-120);
   border-bottom: 5px solid var(--yellow-120);
   padding: 0.571em 1em;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
 }
 body .p-breadcrumb ul li .p-menuitem-link {
   color: #ffffff;

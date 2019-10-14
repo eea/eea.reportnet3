@@ -1,5 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DataFlowColumn.module.css';
 
@@ -33,17 +35,11 @@ const DataflowColumn = withRouter(
               id=""
               placeholder={resources.messages['searchDataflow']}
               type="text"
+              disabled
             />
           </div>
         )}
         <div className="navSection">
-          {dataflowTitle && (
-            <h4 className={styles.title}>
-              <Icon icon="shoppingCart" />
-              {dataflowTitle}
-            </h4>
-          )}
-
           <Button
             className={styles.subscribeBtn}
             icon="plus"
@@ -51,6 +47,7 @@ const DataflowColumn = withRouter(
             onClick={() => {
               setVisibleHandler(setSubscribeDialogVisible, true);
             }}
+            disabled
           />
           <ConfirmDialog
             header={resources.messages['subscribeButtonTitle']}

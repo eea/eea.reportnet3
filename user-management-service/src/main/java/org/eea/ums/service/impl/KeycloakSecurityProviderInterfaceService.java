@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceEnum;
@@ -22,16 +22,29 @@ import org.eea.ums.service.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * The Class KeycloakSecurityProviderInterfaceService.
+ */
 @Service
 public class KeycloakSecurityProviderInterfaceService implements SecurityProviderInterfaceService {
 
 
+  /** The keycloak connector service. */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
 
+  /** The group info mapper. */
   @Autowired
   private GroupInfoMapper groupInfoMapper;
 
+  /**
+   * Do login.
+   *
+   * @param username the username
+   * @param password the password
+   * @param extraParams the extra params
+   * @return the token VO
+   */
   @Override
   public TokenVO doLogin(String username, String password, Object... extraParams) {
     TokenInfo tokenInfo = keycloakConnectorService.generateToken(username, password);
@@ -43,6 +56,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Do login.
+   *
+   * @param code the code
+   * @return the token VO
+   */
   @Override
   public TokenVO doLogin(String code) {
     TokenInfo tokenInfo = keycloakConnectorService.generateToken(code);
@@ -54,6 +73,12 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Refresh token.
+   *
+   * @param refreshToken the refresh token
+   * @return the token VO
+   */
   @Override
   public TokenVO refreshToken(String refreshToken) {
     TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
@@ -65,11 +90,22 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return tokenVO;
   }
 
+  /**
+   * Do logout.
+   *
+   * @param refreshToken the refresh token
+   */
   @Override
   public void doLogout(String refreshToken) {
     keycloakConnectorService.logout(refreshToken);
   }
 
+  /**
+   * Gets the group detail.
+   *
+   * @param groupName the group name
+   * @return the group detail
+   */
   @Override
   public ResourceInfoVO getGroupDetail(String groupName) {
     GroupInfo[] groups = keycloakConnectorService.getGroups();
@@ -78,8 +114,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != groups && groups.length > 0) {
       groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
-          .map(GroupInfo::getId)
-          .findFirst().orElse("");
+          .map(GroupInfo::getId).findFirst().orElse("");
     }
     if (StringUtils.isNotBlank(groupId)) {
       result = this.groupInfoMapper.entityToClass(keycloakConnectorService.getGroupDetail(groupId));
@@ -87,30 +122,54 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     return result;
   }
 
+  /**
+   * Check access permission.
+   *
+   * @param resource the resource
+   * @param scopes the scopes
+   * @return the boolean
+   */
   @Override
   public Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes) {
     return !keycloakConnectorService.checkUserPermision(resource, scopes).equals("DENY");
   }
 
+  /**
+   * Gets the users.
+   *
+   * @param userId the user id
+   * @return the users
+   */
   @Override
   public List<UserVO> getUsers(@Nullable String userId) {
     throw new UnsupportedOperationException("Method Not implemented yet");
   }
 
+  /**
+   * Creates the resource instance.
+   *
+   * @param userGroupName the user group name
+   * @param attributes the attributes
+   */
   @Override
   public void createResourceInstance(String userGroupName, Map<String, String> attributes) {
     throw new UnsupportedOperationException("Method Not implemented yet");
   }
 
 
+  /**
+   * Adds the user to user group.
+   *
+   * @param userId the user id
+   * @param groupName the group name
+   */
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
-          .map(GroupInfo::getId)
-          .findFirst().orElse("");
+          .map(GroupInfo::getId).findFirst().orElse("");
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
       }
@@ -118,18 +177,30 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
 
   }
 
+  /**
+   * Removes the user from user group.
+   *
+   * @param userId the user id
+   * @param groupId the group id
+   */
   @Override
   public void removeUserFromUserGroup(String userId, String groupId) {
     throw new UnsupportedOperationException("Method Not implemented yet");
   }
 
+  /**
+   * Gets the resources by user.
+   *
+   * @param userId the user id
+   * @return the resources by user
+   */
   @Override
   public List<ResourceAccessVO> getResourcesByUser(String userId) {
     GroupInfo[] groupInfos = keycloakConnectorService.getGroupsByUser(userId);
     List<ResourceAccessVO> result = new ArrayList<>();
     if (null != groupInfos && groupInfos.length > 0) {
       for (GroupInfo group : groupInfos) {
-        //name has the format <ResourceName>-<ResourceId>-<RoleName>
+        // name has the format <ResourceName>-<ResourceId>-<RoleName>
         if (!StringUtils.isBlank(group.getName())) {
           String name = group.getName();
           String[] splittedName = name.split("-");

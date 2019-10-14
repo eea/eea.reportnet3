@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DatasetExtendedQueriesRepository {
 
+
   /**
    * Dataset validation query.
    *

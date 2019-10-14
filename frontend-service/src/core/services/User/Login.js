@@ -1,1 +1,1 @@
-export const Login = ({ userRepository }) => async (userName, password) => userRepository.login(userName, password);
+export const Login = ({ userRepository }) => async code => userRepository.login(code);

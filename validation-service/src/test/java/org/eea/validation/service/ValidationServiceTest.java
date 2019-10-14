@@ -270,7 +270,7 @@ public class ValidationServiceTest {
    */
   @Before
   public void initMocks() {
-    attributes = new HashMap<String, List<String>>();
+    attributes = new HashMap<>();
     List<String> data = new ArrayList<>();
     data.add("'IT'");
     attributes.put("countryCode", data);
@@ -582,7 +582,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBaseThrowErrorNull()
       throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
-    KieBase kiebase = kieHelper.build();
+    kieHelper.build();
     Mockito.doThrow(new FileNotFoundException()).when(kieBaseManager)
         .reloadRules(Mockito.anyLong());
 
@@ -850,7 +850,7 @@ public class ValidationServiceTest {
         .setValidationDate(new Date().toString());
     when(validationDatasetRepository.findByValidationIds(Mockito.any()))
         .thenReturn(datasetValue.getDatasetValidations());
-    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList());
+    validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>());
   }
 
   /**
@@ -1033,32 +1033,5 @@ public class ValidationServiceTest {
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
 
-  /**
-   * Error scale test exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void errorScaleTestException() throws EEAException {
-    validationServiceImpl.errorScale(null);
-  }
 
-  /**
-   * Error scale test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void errorScaleTest() throws EEAException {
-    DatasetValue dataset = new DatasetValue();
-    dataset.setId(1L);
-    List<EntityErrors> failedEntities = new ArrayList<>();
-    failedEntities.add(error);
-    failedEntities.add(error2);
-    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
-    when(recordValidationRepository.findFailedRecords()).thenReturn(failedEntities);
-    when(recordValidationRepository.findFailedTables()).thenReturn(failedEntities);
-    when(recordValidationRepository.findFailedDatasets()).thenReturn(failedEntities);
-    validationServiceImpl.errorScale(1L);
-  }
 }
