@@ -9,6 +9,7 @@ import { DataflowTasks } from 'ui/views/DataFlowTasks/DataFlowTasks';
 import { DataCustodianDashboards } from 'ui/views/DataCustodianDashboards/DataCustodianDashboards';
 import { DocumentationDataset } from 'ui/views/DocumentationDataSet/DocumentationDataSet';
 import { Eulogin } from 'ui/views/Eulogin';
+import { Login } from 'ui/views/Login';
 import { ReporterDataset } from 'ui/views/ReporterDataSet/ReporterDataSet';
 import { ReportingDataflow } from 'ui/views/ReportingDataFlow/ReportingDataFlow';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -54,7 +55,7 @@ const App = () => {
         <ResourcesContext.Provider value={resources}>
           <Router>
             <Switch>
-              <Route exact path="/" component={AccessPoint} />
+              <Route exact path="/" component={window.env.REACT_APP_EULOGIN ? AccessPoint : Login} />
               <Route exact path={routes.EULOGIN} component={Eulogin} />
               <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
               <PrivateRoute exact path={routes.DATA_CUSTODIAN_DASHBOARDS} component={DataCustodianDashboards} />

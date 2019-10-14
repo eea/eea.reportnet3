@@ -28,6 +28,16 @@ const logout = async userId => {
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
+const oldLogin = async (userName, password) => {
+  const userTokensTDO = await apiUser.oldLogin(userName, password);
+  const userTDO = jwt_decode(userTokensTDO.accessToken);
+  const user = new User(userTDO.sub, userTDO.name, userTDO.user_groups, userTDO.preferred_username, userTDO.exp);
+  userStorage.set(userTokensTDO);
+  //calculate difference between now and expiration
+  const remain = userTDO.exp - moment().unix();
+  timeOut((remain - 10) * 1000);
+  return user;
+};
 const refreshToken = async refreshToken => {
   try {
     const currentTokens = userStorage.get();
@@ -63,6 +73,7 @@ const userRole = (user, entity) => {
 export const ApiUserRepository = {
   login,
   logout,
+  oldLogin,
   refreshToken,
   hasPermission,
   userRole
