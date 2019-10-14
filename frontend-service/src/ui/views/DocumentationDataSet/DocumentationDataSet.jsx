@@ -85,18 +85,11 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
-
-  let growlRef = useRef();
-
   const layout = children => {
     return (
       <MainLayout>
         <BreadCrumb model={breadCrumbItems} home={home} />
         <div className="rep-container">{children}</div>
-        <Growl ref={growlRef} />
       </MainLayout>
     );
   };

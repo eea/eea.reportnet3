@@ -12,11 +12,11 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from '../DocumentFileUpload';
+import { Growl } from 'primereact/growl';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { TabPanel } from 'primereact/tabview';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
@@ -99,6 +99,7 @@ const Documents = ({ onLoadDocumentsAndWebLinks, match, documents, isCustodian }
 
   return (
     <>
+      <Growl ref={growlRef} />
       <Toolbar>
         <div className="p-toolbar-group-left">
           <Button
