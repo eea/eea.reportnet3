@@ -54,7 +54,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
-  const [isWebFormDataset, setIsWebFormDataset] = useState(false);
+  const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
@@ -191,7 +191,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
-      checkIsWebFormDataset(datasetStatistics.datasetSchemaName);
+      checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           return {
@@ -363,7 +363,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   );
 
   const showWebFormInputSwitch = () => {
-    if (isWebFormDataset) {
+    if (isWebFormMMR) {
       return (
         <div className={styles.InputSwitchContainer}>
           <div className={styles.InputSwitchDiv}>
@@ -376,13 +376,13 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const checkIsWebFormDataset = datasetName => {
+  const checkIsWebFormMMR = datasetName => {
     const mmrDatasetName = 'MMR_TEST';
     if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
       setIsInputSwitchChecked(true);
-      setIsWebFormDataset(true);
+      setIsWebFormMMR(true);
     } else {
-      setIsWebFormDataset(false);
+      setIsWebFormMMR(false);
     }
   };
 
@@ -403,7 +403,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             selectedRecordErrorId={selectedRecordErrorId}
             tables={tableSchema}
             tableSchemaColumns={tableSchemaColumns}
-            isWebFormMMR={isWebFormDataset}
+            isWebFormMMR={isWebFormMMR}
             hasWritePermissions={hasWritePermissions}
           />
         </SnapshotContext.Provider>
@@ -442,7 +442,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               disabled={false}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions || (Number(datasetId) === 5 || Number(datasetId) === 142)}
+              disabled={!hasWritePermissions || isWebFormMMR}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
@@ -456,7 +456,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!hasWritePermissions || (Number(datasetId) === 5 || Number(datasetId) === 142)}
+              disabled={!hasWritePermissions || isWebFormMMR}
               icon={'validate'}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
@@ -465,7 +465,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={!datasetHasErrors || (Number(datasetId) === 5 || Number(datasetId) === 142)}
+              disabled={!datasetHasErrors || isWebFormMMR}
               icon={'warning'}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
@@ -474,7 +474,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={Number(datasetId) === 5 || Number(datasetId) === 142}
+              disabled={isWebFormMMR}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
