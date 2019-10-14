@@ -1,7 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import React, { useState, useEffect, useContext } from 'react';
 
 import { isArray } from 'lodash';
 
@@ -14,12 +11,10 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { TabPanel } from 'primereact/tabview';
 
 const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
   const resources = useContext(ResourcesContext);
 
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [editedRecord, setEditedRecord] = useState({});
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
@@ -27,6 +22,118 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [newRecord, setNewRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
+
+  const addRowHeader = (
+    <div className="p-clearfix" style={{ width: '100%' }}>
+      <Button
+        style={{ float: 'left' }}
+        label={resources.messages['add']}
+        icon="add"
+        onClick={() => {
+          setIsNewRecord(true);
+          setIsAddDialogVisible(true);
+        }}
+      />
+    </div>
+  );
+
+  const addRowDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          setIsAddDialogVisible(false);
+        }}
+      />
+      <Button
+        label={resources.messages['save']}
+        icon="save"
+        onClick={() => {
+          onSaveRecord(newRecord);
+        }}
+      />
+    </div>
+  );
+
+  const newRecordForm = webLinksColumns.map((column, i) => {
+    console.log('column', column);
+    if (isAddDialogVisible) {
+      if (i == 0) {
+        return;
+      }
+      return (
+        <React.Fragment key={column.props.field}>
+          <div className="p-col-4" style={{ padding: '.75em' }}>
+            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
+          </div>
+          <div className="p-col-8" style={{ padding: '.5em' }}>
+            <InputText
+              id={column.props.field}
+              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
+            />
+          </div>
+        </React.Fragment>
+      );
+    }
+  });
+
+  const editRowDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button label={resources.messages['cancel']} icon="cancel" onClick />
+      <Button
+        label={resources.messages['save']}
+        icon="save"
+        onClick={() => {
+          try {
+            onSaveRecord(editedRecord);
+          } catch (error) {
+            console.error(error);
+          }
+        }}
+      />
+    </div>
+  );
+
+  const editRecordForm = webLinksColumns.map((column, i) => {
+    console.log('column', column);
+    if (isEditDialogVisible) {
+      if (i == 0) {
+        return;
+      }
+      return (
+        <React.Fragment key={column.props.field}>
+          <div className="p-col-4" style={{ padding: '.75em' }}>
+            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
+          </div>
+          <div className="p-col-8" style={{ padding: '.5em' }}>
+            <InputText
+              id={column.props.field}
+              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
+            />
+          </div>
+        </React.Fragment>
+      );
+    }
+  });
+
+  const onEditAddFormInput = (input, value) => {
+    if (!isNewRecord) {
+      setEditedRecord({ ...editedRecord });
+    } else {
+      setNewRecord({ ...newRecord });
+    }
+  };
+
+  const onSaveRecord = newRecord => console.log('saving ', newRecord);
+
+  const onDeleteWeblink = () => {
+    console.log('deleting web link');
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsConfirmDeleteVisible(false);
+  };
 
   const webLinkEditButtons = () => {
     return (
@@ -59,7 +166,7 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
         filter={false}
         filterMatchMode="contains"
         header={key}
-        body={key === 'url' ? actionWeblink : null}
+        body={key === 'url' ? linkTemplate : null}
       />
     ));
 
@@ -69,110 +176,25 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
 
-  const onHideDeleteDialog = () => {
-    setDeleteDialogVisible(false);
-  };
-
-  const actionWeblink = (rowData, column) => {
+  const linkTemplate = rowData => {
     return (
       <a href={rowData.url} target="_blank" rel="noopener noreferrer">
-        {' '}
         {rowData.url}
       </a>
     );
   };
 
-  const newRecordForm = webLinksColumns.map((column, i) => {
-    console.log('column', column);
-    if (isAddDialogVisible) {
-      if (i == 0) {
-        return;
-      }
-      return (
-        <React.Fragment key={column.props.field}>
-          <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
-          </div>
-          <div className="p-col-8" style={{ padding: '.5em' }}>
-            <InputText
-              id={column.props.field}
-              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
-            />
-          </div>
-        </React.Fragment>
-      );
-    }
-  });
-  const onDeleteWeblink = () => {
-    console.log('deleting web link');
-  };
-
-  const onEditAddFormInput = (property, value) => {
-    if (!isNewRecord) {
-      setEditedRecord({ ...editedRecord });
-    } else {
-      setNewRecord({ ...newRecord });
-    }
-  };
-
-  const onSaveRecord = newRecord => console.log('saving ', newRecord);
-
-  const addRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => {
-          setIsAddDialogVisible(false);
-        }}
-      />
-      <Button
-        label={resources.messages['save']}
-        icon="save"
-        onClick={() => {
-          onSaveRecord(newRecord);
-        }}
-      />
-    </div>
-  );
-
-  const addRowHeader = (
-    <div className="p-clearfix" style={{ width: '100%' }}>
-      <Button
-        style={{ float: 'left' }}
-        label={resources.messages['add']}
-        icon="add"
-        onClick={() => {
-          setIsNewRecord(true);
-          setIsAddDialogVisible(true);
-        }}
-      />
-    </div>
-  );
-
   return (
     <>
-      {
-        <DataTable
-          value={webLinks}
-          autoLayout={true}
-          paginator={true}
-          rowsPerPageOptions={[5, 10, 100]}
-          header={isCustodian ? addRowHeader : null}
-          rows={10}>
-          {webLinksColumns}
-        </DataTable>
-      }
-      <ConfirmDialog
-        header={resources.messages['delete']}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
-        maximizable={false}
-        onConfirm={e => onDeleteWeblink(e.target)}
-        onHide={onHideDeleteDialog}
-        visible={deleteDialogVisible}>
-        {resources.messages['deleteDocument']}
-      </ConfirmDialog>
+      <DataTable
+        value={webLinks}
+        autoLayout={true}
+        paginator={true}
+        rowsPerPageOptions={[5, 10, 100]}
+        header={isCustodian ? addRowHeader : null}
+        rows={10}>
+        {webLinksColumns}
+      </DataTable>
 
       <Dialog
         className={styles.add_dialog}
@@ -186,20 +208,28 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
         visible={isAddDialogVisible}>
         <div className="p-grid p-fluid">{newRecordForm}</div>
       </Dialog>
-
-      {/*
-        <Dialog
-          className="edit-table"
-          blockScroll={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={editRowDialogFooter}
-          header={resources.messages['editRow']}
-          modal={true}
-          onHide={() => setIsEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={isEditDialogVisible}>
-          <div className="p-grid p-fluid">{editRecordForm}</div>
-        </Dialog> */}
+      <Dialog
+        className={styles.editDialog}
+        blockScroll={false}
+        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+        footer={editRowDialogFooter}
+        header={resources.messages['editRow']}
+        modal={true}
+        onHide={() => setIsEditDialogVisible(false)}
+        style={{ width: '50%', height: '80%' }}
+        visible={isEditDialogVisible}>
+        <div className="p-grid p-fluid">{editRecordForm}</div>
+      </Dialog>
+      <ConfirmDialog
+        header={resources.messages['delete']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={() => onDeleteWeblink()}
+        onHide={onHideDeleteDialog}
+        visible={isConfirmDeleteVisible}>
+        {resources.messages['deleteWebLink']}
+      </ConfirmDialog>
     </>
   );
 };

@@ -64,6 +64,7 @@
 		"deleteSnapshotMessage": "Delete snapshot",
 		"deleteSnapshotTooltip": "Delete snapshot",
 		"deleteTable": "Delete table data",
+		"deleteWebLink": "Delete weblink",
 		"description": "Description",
 		"descriptionTooShort": "Description must be at least 5 characters",
 		"do": "DO",
