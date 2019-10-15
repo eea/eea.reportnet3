@@ -1,7 +1,7 @@
 import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import { isEmpty } from 'lodash';
 
 import styles from './CreateDataflowForm.module.css';
@@ -14,10 +14,8 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
   const createDataflowValidationSchema = Yup.object().shape({
-    dataflowName: Yup.string().required(resources.messages['emptyNameValidationError']),
-    dataflowDescription: Yup.string()
-      .required(resources.messages['emptyDescriptionValidationError'])
-      .min(5, resources.messages['descriptionTooShort'])
+    dataflowName: Yup.string().required(),
+    dataflowDescription: Yup.string().required()
   });
 
   if (!isFormReset) {
@@ -35,7 +33,6 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
           <fieldset>
             <div className={`formField${!isEmpty(errors.dataflowName) && touched.dataflowName ? ' error' : ''}`}>
               <Field name="dataflowName" type="text" placeholder={resources.messages['createDataflowName']} />
-              <ErrorMessage className="error" name="dataflowName" component="div" />
             </div>
             <div
               className={`formField${
@@ -46,7 +43,6 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
                 component="textarea"
                 placeholder={resources.messages['createDataflowDescription']}
               />
-              <ErrorMessage className="error" name="dataflowDescription" component="div" />
             </div>
             <div className={styles.search}>
               <Field
@@ -67,7 +63,6 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
           </fieldset>
           <fieldset>
             <div className={styles.wrapButtons}>
-              <Button className={styles.resetButton} label={resources.messages['reset']} layout="simple" type="reset" />
               <Button
                 className={styles.submitButton}
                 disabled={isSubmitting}
@@ -75,6 +70,7 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
                 layout="simple"
                 type="submit"
               />
+              <Button className={styles.resetButton} label={resources.messages['reset']} layout="simple" type="reset" />
             </div>
           </fieldset>
         </Form>
