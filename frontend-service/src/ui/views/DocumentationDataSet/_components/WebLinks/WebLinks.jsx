@@ -158,17 +158,20 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
 
   useEffect(() => {
     let webLinkKeys = isArray(webLinks) ? Object.keys(webLinks[0]) : [];
-    let webLinkColArray = webLinkKeys.map(key => (
-      <Column
-        key={key}
-        columnResizeMode="expand"
-        field={key}
-        filter={false}
-        filterMatchMode="contains"
-        header={key}
-        body={key === 'url' ? linkTemplate : null}
-      />
-    ));
+    let webLinkColArray = webLinkKeys
+      .filter(key => key !== 'id')
+      .map(key => (
+        <Column
+          key={key}
+          columnResizeMode="expand"
+          field={key}
+          filter={false}
+          filterMatchMode="contains"
+          sortable={true}
+          header={key}
+          body={key === 'url' ? linkTemplate : null}
+        />
+      ));
 
     if (isCustodian) {
       webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
