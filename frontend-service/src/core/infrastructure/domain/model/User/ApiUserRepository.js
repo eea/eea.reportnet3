@@ -16,7 +16,14 @@ const timeOut = time => {
 const login = async code => {
   const userTokensDTO = await apiUser.login(code);
   const userDTO = jwt_decode(userTokensDTO.accessToken);
-  const user = new User(userDTO.sub, userDTO.name, userDTO.user_groups, userDTO.preferred_username, userDTO.exp);
+  const user = new User(
+    userDTO.sub,
+    userDTO.name,
+    userDTO.realm_access[0],
+    userDTO.user_groups,
+    userDTO.preferred_username,
+    userDTO.exp
+  );
   userStorage.set(userTokensDTO);
   //calculate difference between now and expiration
   const remain = userDTO.exp - moment().unix();
@@ -33,7 +40,14 @@ const logout = async () => {
 const oldLogin = async (userName, password) => {
   const userTokensDTO = await apiUser.oldLogin(userName, password);
   const userDTO = jwt_decode(userTokensDTO.accessToken);
-  const user = new User(userDTO.sub, userDTO.name, userDTO.user_groups, userDTO.preferred_username, userDTO.exp);
+  const user = new User(
+    userDTO.sub,
+    userDTO.name,
+    userDTO.realm_access[0],
+    userDTO.user_groups,
+    userDTO.preferred_username,
+    userDTO.exp
+  );
   userStorage.set(userTokensDTO);
   //calculate difference between now and expiration
   const remain = userDTO.exp - moment().unix();
@@ -76,6 +90,7 @@ const hasPermission = (user, permissions, entity) => {
 };
 
 const userRole = (user, entity) => {
+  console.log('user', user);
   const roleDTO = user.contextRoles.filter(role => role.includes(entity));
   if (roleDTO.length) {
     const [roleName] = roleDTO[0].split('-').reverse();
