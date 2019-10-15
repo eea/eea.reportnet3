@@ -13,18 +13,18 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { DocumentService } from 'core/services/Document';
 
-const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset }) => {
+const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset, setIsUploadDialogVisible }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { description: '', lang: '', uploadFile: {} };
   const validationSchema = Yup.object().shape({
-    description: Yup.string().required(resources.messages.emptyDescriptionValidationError),
-    lang: Yup.string().required(resources.messages.emptyLanguageValidationError),
+    description: Yup.string().required(),
+    lang: Yup.string().required(),
     uploadFile: Yup.mixed()
-      .test('fileEmpty', resources.messages.emptyFileValidationError, value => {
+      .test('fileEmpty', resources.messages['emptyFileValidationError'], value => {
         return !isPlainObject(value);
       })
-      .test('fileSize', resources.messages.tooLargeFileValidationError, value => {
+      .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
         return value.size <= config.MAX_FILE_SIZE;
       })
   });
@@ -78,7 +78,6 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset })
           <fieldset>
             <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
               <Field name="description" type="text" placeholder={resources.messages.fileDescription} />
-              <ErrorMessage className="error" name="description" component="div" />
             </div>
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field name="lang" component="select">
@@ -89,7 +88,6 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset })
                   </option>
                 ))}
               </Field>
-              <ErrorMessage className="error" name="lang" component="div" />
             </div>
           </fieldset>
           <fieldset>
@@ -110,15 +108,27 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset })
             </div>
           </fieldset>
           <fieldset>
-            <div className={styles.btnWrapper}>
+            <hr />
+            <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
-                type="submit"
-                className={styles.primaryBtn}
+                className={
+                  !isEmpty(touched)
+                    ? isEmpty(errors)
+                      ? styles.primaryButton
+                      : styles.disabledButton
+                    : styles.disabledButton
+                }
+                label={resources.messages['upload']}
                 disabled={isSubmitting}
-                label={resources.messages.upload}
-                layout="simple"
+                icon="add"
+                type={isSubmitting ? '' : 'submit'}
               />
-              <Button type="reset" className={styles.defaultBtn} label={resources.messages.reset} layout="simple" />
+              <Button
+                className={`${styles.cancelButton} p-button-secondary`}
+                label={resources.messages['cancel']}
+                icon="cancel"
+                onClick={() => setIsUploadDialogVisible(false)}
+              />
             </div>
           </fieldset>
         </Form>

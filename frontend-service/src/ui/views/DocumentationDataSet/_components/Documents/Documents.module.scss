@@ -10,3 +10,7 @@
   cursor: pointer;
   color: var(--c-corporate-blue);
 }
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}

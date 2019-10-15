@@ -161,8 +161,8 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
       </Toolbar>
       <Dialog
         header={resources.messages['upload']}
+        className={styles.dialog}
         visible={isUploadDialogVisible}
-        className={styles.Dialog}
         dismissableMask={false}
         onHide={onCancelDialog}>
         <DocumentFileUpload
@@ -170,6 +170,7 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
           onUpload={onUploadDocument}
           onGrowlAlert={onGrowlAlert}
           isFormReset={isFormReset}
+          setIsUploadDialogVisible={setIsUploadDialogVisible}
         />
       </Dialog>
 

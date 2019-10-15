@@ -1,19 +1,11 @@
-.primaryBtn {
-  composes: rp-btn from global;
-  composes: primary from global;
-}
-.defaultBtn {
-  composes: rp-btn from global;
-  composes: default from global;
-  color: var(--black) !important;
-}
-.btnWrapper {
+.buttonWrap {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
 }
-.btnWrapper .primaryBtn,
-.btnWrapper .defaultBtn {
-  width: 49%;
+.cancelButton {
+  margin-left: 0.5rem !important;
+}
+hr {
+  border: 0.5px solid var(--grey-50);
 }

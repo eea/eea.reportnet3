@@ -54,7 +54,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
         }}
       />
       <Button
-        className="p-button-warning"
+        className="p-button-secondary"
         label={resources.messages['cancel']}
         icon="cancel"
         onClick={() => {
