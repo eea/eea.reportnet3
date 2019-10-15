@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
-import { isArray } from 'lodash';
+import { isArray, isUndefined, isNull, isString } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -84,15 +84,29 @@ const WebLinks = ({ webLinks, isCustodian }) => {
     }
   });
 
-  const onEditAddFormInput = (property, value) => {
+  const onEditAddFormInput = (field, value) => {
     let record = {};
     if (!isNewRecord) {
-      record = { ...editedRecord, [property]: value };
+      value = changeRecordValue(field, value);
+      record = { ...editedRecord, [field]: value };
       setEditedRecord(record);
     } else {
-      record = { ...newRecord, [property]: value };
+      value = changeRecordValue(field, value);
+      record = { ...newRecord, [field]: value };
       setNewRecord(record);
     }
+  };
+
+  const changeRecordValue = (field, value) => {
+    if (!isUndefined(value) && !isNull(value) && isString(value)) {
+      if (field == 'url') {
+        value = value
+          .replace(`\r`, '')
+          .replace(`\n`, '')
+          .replace(/\s/g, '');
+      }
+    }
+    return value;
   };
 
   const editRowDialogFooter = (
