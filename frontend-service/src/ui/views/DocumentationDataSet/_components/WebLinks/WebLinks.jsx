@@ -47,17 +47,18 @@ const WebLinks = ({ webLinks, isCustodian }) => {
   const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => {
-          setIsAddDialogVisible(false);
-        }}
-      />
-      <Button
         label={resources.messages['save']}
         icon="save"
         onClick={() => {
           onSaveRecord(newRecord);
+        }}
+      />
+      <Button
+        className="p-button-warning"
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => {
+          setIsAddDialogVisible(false);
         }}
       />
     </div>
@@ -71,7 +72,11 @@ const WebLinks = ({ webLinks, isCustodian }) => {
       return (
         <React.Fragment key={column.props.field}>
           <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
+            <label htmlFor={column.props.field}>
+              {column.props.header === 'url'
+                ? column.props.header.toUpperCase()
+                : column.props.header.charAt(0).toUpperCase() + column.props.header.slice(1)}
+            </label>
           </div>
           <div className="p-col-8" style={{ padding: '.5em' }}>
             <InputText
@@ -111,7 +116,6 @@ const WebLinks = ({ webLinks, isCustodian }) => {
 
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['cancel']} icon="cancel" onClick={() => setIsEditDialogVisible(false)} />
       <Button
         label={resources.messages['save']}
         icon="save"
@@ -122,6 +126,12 @@ const WebLinks = ({ webLinks, isCustodian }) => {
             console.error(error);
           }
         }}
+      />
+      <Button
+        className="p-button-warning"
+        label={resources.messages['cancel']}
+        icon="cancel"
+        onClick={() => setIsEditDialogVisible(false)}
       />
     </div>
   );
@@ -134,7 +144,11 @@ const WebLinks = ({ webLinks, isCustodian }) => {
       return (
         <React.Fragment key={column.props.field}>
           <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>{column.props.header.toUpperCase()}</label>
+            <label htmlFor={column.props.field}>
+              {column.props.header === 'url'
+                ? column.props.header.toUpperCase()
+                : column.props.header.charAt(0).toUpperCase() + column.props.header.slice(1)}
+            </label>
           </div>
           <div className="p-col-8" style={{ padding: '.5em' }}>
             <InputText
