@@ -222,7 +222,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
           filter={false}
           filterMatchMode="contains"
           sortable={true}
-          header={key}
+          header={key === 'url' ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1)}
           body={key === 'url' ? linkTemplate : null}
         />
       ));
