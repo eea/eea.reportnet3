@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './BigButton.module.css';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
+import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { Menu } from 'primereact/menu';
 
 export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
+  const newDatasetRef = useRef();
   const dataset = model ? (
     <>
       <div className={`${styles.bigButton} ${styles.dataset}`}>
@@ -69,14 +71,14 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
     <>
       <div className={`${styles.bigButton} ${styles.addNewDataset}`}>
         <a
-          href=""
+          href="#"
           onClick={e => {
             e.preventDefault();
-            // toggleVisibility(e.currentTarget);// TODO IGOR
+            newDatasetRef.current.show(e);
           }}>
           <FontAwesomeIcon icon={AwesomeIcons('plus')} />
         </a>
-        <Menu model={model} />
+        <DropDownMenu ref={newDatasetRef} model={model} />
       </div>
       <p className={styles.caption}>{caption}</p>
     </>

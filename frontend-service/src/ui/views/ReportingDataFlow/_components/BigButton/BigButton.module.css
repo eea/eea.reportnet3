@@ -119,7 +119,7 @@
 }
 .addNewDataset a {
   color: var(--white);
-  border-radius: 20px;
+  border-radius: 10px;
 }
 .addNewDataset a:hover {
   background-color: var(--c-blue-200);
