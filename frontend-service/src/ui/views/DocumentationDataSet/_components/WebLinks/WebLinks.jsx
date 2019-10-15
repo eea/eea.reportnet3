@@ -97,7 +97,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
 
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['cancel']} icon="cancel" onClick />
+      <Button label={resources.messages['cancel']} icon="cancel" onClick={() => setIsEditDialogVisible(false)} />
       <Button
         label={resources.messages['save']}
         icon="save"
