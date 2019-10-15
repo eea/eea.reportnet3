@@ -9,7 +9,7 @@ import styles from './CreateDataflowForm.module.css';
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
+export const CreateDataflowForm = ({ isFormReset, onCreate, setCreateDataflowDialogVisible }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
   const initialValues = { dataflowName: '', dataflowDescription: '', associatedObligation: '' };
@@ -64,13 +64,25 @@ export const CreateDataflowForm = ({ isFormReset, onCreate }) => {
           <fieldset>
             <div className={styles.wrapButtons}>
               <Button
-                className={styles.submitButton}
+                className={
+                  !isEmpty(touched)
+                    ? isEmpty(errors)
+                      ? styles.submitButton
+                      : styles.cancelButton
+                    : styles.cancelButton
+                }
                 disabled={isSubmitting}
                 label={resources.messages['createNewDataflow']}
                 layout="simple"
                 type="submit"
               />
-              <Button className={styles.resetButton} label={resources.messages['reset']} layout="simple" type="reset" />
+              <Button
+                className={styles.submitButton}
+                label={resources.messages['cancel']}
+                onClick={() => setCreateDataflowDialogVisible(false)}
+                layout="simple"
+                type="button"
+              />
             </div>
           </fieldset>
         </Form>

@@ -107,7 +107,10 @@ const DataflowColumn = withRouter(
           className={styles.dialog}
           dismissableMask={false}
           onHide={onHideDialog}>
-          <CreateDataflowForm isFormReset={isFormReset} onCreate={onCreateDataflow}></CreateDataflowForm>
+          <CreateDataflowForm
+            isFormReset={isFormReset}
+            onCreate={onCreateDataflow}
+            setCreateDataflowDialogVisible={setCreateDataflowDialogVisible}></CreateDataflowForm>
         </Dialog>
 
         <ConfirmDialog

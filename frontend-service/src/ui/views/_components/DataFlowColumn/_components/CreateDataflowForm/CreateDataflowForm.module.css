@@ -5,12 +5,12 @@
   align-items: center;
 }
 
-.resetButton,
+.cancelButton,
 .submitButton {
   width: 49% !important;
 }
 
-.resetButton {
+.cancelButton {
   composes: rp-btn from global;
   composes: default from global;
   color: var(--black) !important;
@@ -31,4 +31,7 @@
   padding: 5px;
   outline: none;
   border-radius: 3px 0 0 3px;
+}
+textarea {
+  resize: none;
 }
