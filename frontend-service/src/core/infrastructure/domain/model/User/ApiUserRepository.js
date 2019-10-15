@@ -13,17 +13,10 @@ const timeOut = time => {
   }, time);
 };
 
-const login = async (userName, password) => {
-  const userTokensDTO = await apiUser.login(userName, password);
+const login = async code => {
+  const userTokensDTO = await apiUser.login(code);
   const userDTO = jwt_decode(userTokensDTO.accessToken);
-  const user = new User(
-    userDTO.sub,
-    userDTO.name,
-    userDTO.realm_access.roles[0],
-    userDTO.user_groups,
-    userDTO.preferred_username,
-    userDTO.exp
-  );
+  const user = new User(userDTO.sub, userDTO.name, userDTO.user_groups, userDTO.preferred_username, userDTO.exp);
   userStorage.set(userTokensDTO);
   //calculate difference between now and expiration
   const remain = userDTO.exp - moment().unix();
@@ -37,8 +30,17 @@ const logout = async () => {
   const response = await apiUser.logout(currentTokens.refreshToken);
   return response;
 };
-
-const refreshToken = async () => {
+const oldLogin = async (userName, password) => {
+  const userTokensDTO = await apiUser.oldLogin(userName, password);
+  const userDTO = jwt_decode(userTokensDTO.accessToken);
+  const user = new User(userDTO.sub, userDTO.name, userDTO.user_groups, userDTO.preferred_username, userDTO.exp);
+  userStorage.set(userTokensDTO);
+  //calculate difference between now and expiration
+  const remain = userDTO.exp - moment().unix();
+  timeOut((remain - 10) * 1000);
+  return user;
+};
+const refreshToken = async refreshToken => {
   try {
     const currentTokens = userStorage.get();
     const userTokensDTO = await apiUser.refreshToken(currentTokens.refreshToken);
@@ -63,7 +65,7 @@ const refreshToken = async () => {
 const hasPermission = (user, permissions, entity) => {
   let allow = false;
   if (isUndefined(entity)) {
-    if (permissions.includes(user.mainRole)) allow = true;
+    if (permissions.includes(user.accessRole)) allow = true;
   } else {
     permissions.forEach(permission => {
       const role = `${entity}-${permission}`;
@@ -85,6 +87,7 @@ const userRole = (user, entity) => {
 export const ApiUserRepository = {
   login,
   logout,
+  oldLogin,
   refreshToken,
   hasPermission,
   userRole

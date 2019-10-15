@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,18 +23,19 @@ import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
 import org.eea.dataset.persistence.data.SortFieldsHelper;
-import org.eea.dataset.persistence.data.domain.DatasetValidation;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.Statistics;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
+import org.eea.dataset.persistence.data.repository.StatisticsRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -217,6 +219,11 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
+
+
+  /** The statistics repository. */
+  @Autowired
+  private StatisticsRepository statisticsRepository;
 
 
 
@@ -409,6 +416,14 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteImportData(final Long dataSetId) {
     datasetRepository.removeDatasetData(dataSetId);
+
+    try {
+      this.saveStatistics(dataSetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error saving statistics after deleting all the dataset values. Error message: {}",
+          e.getMessage(), e);
+    }
     LOG.info("All data value deleted from dataSetId {}", dataSetId);
   }
 
@@ -743,91 +758,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-  /**
-   * Gets the statistics.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the statistics
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public StatisticsVO getStatistics(final Long datasetId) throws EEAException {
-
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-
-    StatisticsVO stats = new StatisticsVO();
-    if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
-      List<TableValue> allTableValues = dataset.getTableValues();
-      stats.setIdDataSetSchema(dataset.getIdDatasetSchema());
-      stats.setDatasetErrors(false);
-      stats.setTables(new ArrayList<>());
-
-      DataSetMetabase datasetMb =
-          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
-
-      DataSetSchema schema =
-          schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-
-
-      stats.setNameDataSetSchema(datasetMb.getDataSetName());
-      List<String> listIdsDataSetSchema = new ArrayList<>();
-      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
-      for (TableSchema tableSchema : schema.getTableSchemas()) {
-        listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
-        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-            tableSchema.getNameTableSchema());
-      }
-
-      List<String> listIdDataSetSchema = new ArrayList<>();
-      for (TableValue tableValue : allTableValues) {
-        listIdDataSetSchema.add(tableValue.getIdTableSchema());
-
-        TableStatisticsVO tableStats =
-            processTableStats(tableValue, datasetId, mapIdNameDatasetSchema);
-        if (tableStats.getTableErrors()) {
-          stats.setDatasetErrors(true);
-        }
-
-        stats.getTables().add(tableStats);
-      }
-
-      // Check if there are empty tables
-      listIdsDataSetSchema.removeAll(listIdDataSetSchema);
-      for (String idTableSchem : listIdsDataSetSchema) {
-        stats.getTables()
-            .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
-      }
-
-      // Check dataset validations
-      for (DatasetValidation datasetValidation : dataset.getDatasetValidations()) {
-        if (datasetValidation.getValidation() != null) {
-          stats.setDatasetErrors(true);
-          break;
-        }
-      }
-
-      // Ordering to show stats tables as they are shown on the dataset
-      List<TableStatisticsVO> orderedStats = new ArrayList<>();
-      schema.getTableSchemas().stream().forEach(tableSchema -> {
-        stats.getTables().stream().forEach(table -> {
-          if (tableSchema.getIdTableSchema().toString().equals(table.getIdTableSchema())) {
-            orderedStats.add(table);
-          }
-        });
-      });
-      stats.setTables(orderedStats);
-
-
-      LOG.info("Statistics received from datasetId {}.", datasetId);
-    } else {
-      LOG_ERROR.error("No dataset founded to show statistics. DatasetId:{}", datasetId);
-    }
-    return stats;
-  }
-
 
   /**
    * Process table stats.
@@ -835,10 +765,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tableValue the table value
    * @param datasetId the dataset id
    * @param mapIdNameDatasetSchema the map id name dataset schema
-   *
-   * @return the table statistics VO
+   * @return the list
    */
-  private TableStatisticsVO processTableStats(final TableValue tableValue, final Long datasetId,
+  private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
 
 
@@ -850,12 +779,21 @@ public class DatasetServiceImpl implements DatasetService {
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
 
+    Set<Long> recordIdsFromFieldWithValidationError =
+        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.ERROR);
+
+    Set<Long> recordIdsFromFieldWithValidationWarning =
+        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+            tableValue.getIdTableSchema(), TypeErrorEnum.WARNING);
+
     Set<Long> idsErrors = new HashSet<>();
     idsErrors.addAll(recordIdsFromRecordWithValidationError);
-
+    idsErrors.addAll(recordIdsFromFieldWithValidationError);
 
     Set<Long> idsWarnings = new HashSet<>();
     idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
+    idsWarnings.addAll(recordIdsFromFieldWithValidationWarning);
 
     idsWarnings.removeAll(idsErrors);
 
@@ -878,9 +816,247 @@ public class DatasetServiceImpl implements DatasetService {
     tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);
     tableStats.setTableErrors(totalTableErrors > 0 ? true : false);
 
-    return tableStats;
+    List<Statistics> stats = new ArrayList<>();
+
+    Statistics statsIdTable =
+        fillStat(tableValue.getIdTableSchema(), "idTableSchema", tableValue.getIdTableSchema());
+
+    Statistics statsNameTable = fillStat(tableValue.getIdTableSchema(), "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
+
+    Statistics statsTotalTableError =
+        fillStat(tableValue.getIdTableSchema(), "totalErrors", totalTableErrors.toString());
+
+    Statistics statsTotalRecords =
+        fillStat(tableValue.getIdTableSchema(), "totalRecords", countRecords.toString());
+
+    Statistics statsTotalRecordsWithErrors = fillStat(tableValue.getIdTableSchema(),
+        "totalRecordsWithErrors", totalRecordsWithErrors.toString());
+
+    Statistics statsTotalRecordsWithWarnings = fillStat(tableValue.getIdTableSchema(),
+        "totalRecordsWithWarnings", totalRecordsWithWarnings.toString());
+
+    Statistics statsTableErrors = new Statistics();
+    statsTableErrors.setIdTableSchema(tableValue.getIdTableSchema());
+    statsTableErrors.setStatName("tableErrors");
+    if (tableValue.getTableValidations() != null && tableValue.getTableValidations().size() > 0) {
+      statsTableErrors.setValue("true");
+    } else {
+      statsTableErrors.setValue(totalTableErrors > 0 ? "true" : "false");
+    }
+
+    stats.add(statsIdTable);
+    stats.add(statsNameTable);
+    stats.add(statsTotalTableError);
+    stats.add(statsTotalRecords);
+    stats.add(statsTotalRecordsWithErrors);
+    stats.add(statsTotalRecordsWithWarnings);
+    stats.add(statsTableErrors);
+
+
+    return stats;
 
   }
+
+
+  /**
+   * Fill table stat.
+   *
+   * @param idTableSchema the id table schema
+   * @param statName the stat name
+   * @param value the value
+   * @return the statistics
+   */
+  private Statistics fillStat(String idTableSchema, String statName, String value) {
+
+    Statistics stat = new Statistics();
+    stat.setIdTableSchema(idTableSchema);
+    stat.setStatName(statName);
+    stat.setValue(value);
+
+    return stat;
+  }
+
+
+  /**
+   * Save statistics.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void saveStatistics(final Long datasetId) throws EEAException {
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+
+    if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
+      List<Statistics> statsList = new ArrayList<>();
+      List<TableValue> allTableValues = dataset.getTableValues();
+
+      DataSetMetabase datasetMb =
+          reportingDatasetRepository.findById(datasetId).orElse(new ReportingDataset());
+
+      DataSetSchema schema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+
+
+      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+
+        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+            tableSchema.getNameTableSchema());
+      }
+
+      for (TableValue tableValue : allTableValues) {
+        statsList.addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema));
+      }
+
+      // Check dataset validations
+      Boolean datasetErrors = false;
+      if (dataset.getDatasetValidations() != null && !dataset.getDatasetValidations().isEmpty()) {
+        datasetErrors = true;
+      } else {
+        Optional<Statistics> opt = statsList.stream()
+            .filter(s -> "tableErrors".equals(s.getStatName()) && "true".equals(s.getValue()))
+            .findFirst();
+        if (opt.isPresent()) {
+          datasetErrors = true;
+        }
+      }
+
+
+      Statistics statsIdDatasetSchema =
+          fillStat(null, "idDataSetSchema", dataset.getIdDatasetSchema());
+      statsList.add(statsIdDatasetSchema);
+
+      Statistics statsNameDatasetSchema =
+          fillStat(null, "nameDataSetSchema", datasetMb.getDataSetName());
+      statsList.add(statsNameDatasetSchema);
+
+      Statistics statsDatasetErrors = fillStat(null, "datasetErrors", datasetErrors.toString());
+      statsList.add(statsDatasetErrors);
+
+      statisticsRepository.deleteAll();
+      statisticsRepository.saveAll(statsList);
+
+
+      LOG.info("Statistics save to datasetId {}.", datasetId);
+    } else {
+      LOG_ERROR.error("No dataset found to save statistics. DatasetId:{}", datasetId);
+    }
+
+  }
+
+
+  /**
+   * Gets the statistics.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics
+   * @throws EEAException the EEA exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
+  @Override
+  @Transactional
+  public StatisticsVO getStatistics(final Long datasetId)
+      throws EEAException, InstantiationException, IllegalAccessException {
+
+    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+    StatisticsVO stats = new StatisticsVO();
+
+    List<Statistics> statistics = statisticsRepository.findAllStatistics();
+    List<Statistics> statisticsTables = statistics.stream()
+        .filter(s -> StringUtils.isNotBlank(s.getIdTableSchema())).collect(Collectors.toList());
+    List<Statistics> statisticsDataset = statistics.stream()
+        .filter(s -> StringUtils.isBlank(s.getIdTableSchema())).collect(Collectors.toList());
+
+
+    Map<String, List<Statistics>> tablesMap = statisticsTables.stream()
+        .collect(Collectors.groupingBy(Statistics::getIdTableSchema, Collectors.toList()));
+
+    // Dataset level stats
+    Class<?> clazzStats = stats.getClass();
+    Object instance = clazzStats.newInstance();
+    statisticsDataset.stream().forEach(s -> {
+      setEntityProperty(instance, s.getStatName(), s.getValue());
+    });
+    stats = (StatisticsVO) instance;
+
+
+    // Table statistics
+    stats.setTables(new ArrayList<>());
+    for (List<Statistics> listStats : tablesMap.values()) {
+      TableStatisticsVO tableVO = new TableStatisticsVO();
+      Class<?> clazzTable = tableVO.getClass();
+      Object instanceTable = clazzTable.newInstance();
+      listStats.stream().forEach(s -> {
+        setEntityProperty(instanceTable, s.getStatName(), s.getValue());
+      });
+      stats.getTables().add((TableStatisticsVO) instanceTable);
+    }
+
+
+
+    // Check if there are empty tables
+    DataSetSchema schema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+    List<String> listIdsDataSetSchema = new ArrayList<>();
+    Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
+      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+          tableSchema.getNameTableSchema());
+    }
+    List<String> listIdDataSetSchema = new ArrayList<>();
+    List<TableValue> allTableValues = dataset.getTableValues();
+    for (TableValue tableValue : allTableValues) {
+      listIdDataSetSchema.add(tableValue.getIdTableSchema());
+    }
+    listIdsDataSetSchema.removeAll(listIdDataSetSchema);
+    for (String idTableSchem : listIdsDataSetSchema) {
+      stats.getTables()
+          .add(new TableStatisticsVO(idTableSchem, mapIdNameDatasetSchema.get(idTableSchem)));
+    }
+
+    return stats;
+  }
+
+
+  /**
+   * Sets the entity property.
+   *
+   * @param object the object
+   * @param fieldName the field name
+   * @param fieldValue the field value
+   * @return the boolean
+   */
+  public static Boolean setEntityProperty(Object object, String fieldName, String fieldValue) {
+    Class<?> clazz = object.getClass();
+    while (clazz != null) {
+      try {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+
+        if (field.getType().equals(Long.class)) {
+          field.set(object, Long.valueOf(fieldValue));
+        } else if (field.getType().equals(Boolean.class)) {
+          field.set(object, Boolean.valueOf(fieldValue));
+        } else {
+          field.set(object, fieldValue);
+        }
+
+        return true;
+      } catch (NoSuchFieldException e) {
+        clazz = clazz.getSuperclass();
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    return false;
+  }
+
 
 
   /**

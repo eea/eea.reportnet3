@@ -43,6 +43,33 @@ const GlobalValidationDashboard = dataflowId => {
     onLoadDashboard();
   }, []);
 
+  useEffect(() => {
+    filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
+  }, [validationDashboardData]);
+
+  const onChangeColor = (color, type) => {
+    setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${color}` });
+    const filteredDatasets = filterState.originalData.datasets.filter(dataset => dataset.label === SEVERITY_CODE[type]);
+
+    const filteredDatasetsCurrent = chartRef.current.chart.data.datasets.filter(
+      dataset => dataset.label === SEVERITY_CODE[type]
+    );
+    filteredDatasets.forEach(dataset => {
+      dataset.backgroundColor = `#${color}`;
+    });
+    filteredDatasetsCurrent.forEach(dataset => {
+      dataset.backgroundColor = `#${color}`;
+    });
+
+    chartRef.current.refresh();
+  };
+
+  const onErrorLoadingDashboard = error => {
+    console.error('Dashboard error: ', error);
+    const errorResponse = error.response;
+    console.error('Dashboard errorResponse: ', errorResponse);
+  };
+
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(dataflowId.dataflowId);
@@ -54,13 +81,7 @@ const GlobalValidationDashboard = dataflowId => {
     }
   };
 
-  const onErrorLoadingDashboard = error => {
-    console.error('Dashboard error: ', error);
-    const errorResponse = error.response;
-    console.error('Dashboard errorResponse: ', errorResponse);
-  };
-
-  function buildDatasetDashboardObject(datasetsDashboardsData) {
+  const buildDatasetDashboardObject = datasetsDashboardsData => {
     let datasets = [];
     if (!isUndefined(datasetsDashboardsData.tables)) {
       datasets = datasetsDashboardsData.tables
@@ -101,36 +122,7 @@ const GlobalValidationDashboard = dataflowId => {
       datasets: datasets
     };
     return datasetDataObject;
-  }
-
-  // useEffect(() => {
-  //   if (!isUndefined(filterState.data)) {
-  //     const {
-  //       originalData: { labels, datasets }
-  //     } = filterState;
-  //     if (labels && datasets) {
-  //       setValidationDashboardData({
-  //         labels: labels,
-  //         datasets: datasets.map(dataset => {
-  //           switch (dataset.label) {
-  //             case 'CORRECT':
-  //               dataset.backgroundColor = dashboardColors.CORRECT;
-  //               break;
-  //             case 'WARNINGS':
-  //               dataset.backgroundColor = dashboardColors.WARNING;
-  //               break;
-  //             case 'ERRORS':
-  //               dataset.backgroundColor = dashboardColors.ERROR;
-  //               break;
-  //             default:
-  //               break;
-  //           }
-  //           return dataset;
-  //         })
-  //       });
-  //     }
-  //   }
-  // }, [dashboardColors]);
+  };
 
   const datasetOptionsObject = {
     hover: {
@@ -172,22 +164,6 @@ const GlobalValidationDashboard = dataflowId => {
     }
   };
 
-  useEffect(() => {
-    filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
-    // if (
-    //   !isEmpty(filterState.data) &&
-    //   (filterState.data.datasets.length !== validationDashboardData.datasets.length ||
-    //     !isEmpty(filterState.reporterFilter) ||
-    //     !isEmpty(filterState.statusFilter) ||
-    //     !isEmpty(filterState.tableFilter))
-    // ) {
-    //   filterDispatch({
-    //     type: 'APPLY_FILTERS',
-    //     payload: filterState
-    //   });
-    // }
-  }, [validationDashboardData]);
-
   if (isLoading) {
     return <Spinner className={styles.positioning} />;
   }
@@ -207,32 +183,29 @@ const GlobalValidationDashboard = dataflowId => {
           width="100%"
           height="30%"
         />
-        {/* Check if there is data to show colorPicker
         <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
-          {Object.keys(SEVERITY_CODE).map((type, i) => {
-            return (
-              <React.Fragment key={i}>
-                <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()}: `}</span>
-                <ColorPicker
-                  key={type}
-                  value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
-                  onChange={e => {
-                    e.preventDefault();
-                    setDashboardColors({ ...dashboardColors, [SEVERITY_CODE[type]]: `#${e.value}` });
-                    const filteredDatasets = chartRef.current.chart.data.datasets.filter(
-                      dataset => dataset.label === SEVERITY_CODE[type]
-                    );
-                    filteredDatasets.forEach(dataset => {
-                      dataset.backgroundColor = `#${e.value}`;
-                    });
-                    chartRef.current.refresh();
-                  }}
-                />
-              </React.Fragment>
-            );
-          })}
-        </fieldset> */}
+          <div className={styles.fieldsetContent}>
+            {Object.keys(SEVERITY_CODE).map((type, i) => {
+              return (
+                <div className={styles.colorPickerItem} key={i}>
+                  <span key={`label_${type}`}>{`  ${type.charAt(0).toUpperCase()}${type
+                    .slice(1)
+                    .toLowerCase()}: `}</span>
+                  <ColorPicker
+                    className={styles.colorPicker}
+                    key={type}
+                    value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
+                    onChange={e => {
+                      e.preventDefault();
+                      onChangeColor(e.value, SEVERITY_CODE[type]);
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </fieldset>
       </div>
     );
   } else {

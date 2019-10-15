@@ -37,7 +37,7 @@ const DataflowColumn = withRouter(
     const user = useContext(UserContext);
 
     useEffect(() => {
-      if (!isUndefined(user.mainRole)) {
+      if (!isUndefined(user.accessRole)) {
         setIsCustodian(UserService.hasPermission(user, [config.permissions.CUSTODIAN]));
       }
     }, [user]);

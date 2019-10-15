@@ -45,37 +45,26 @@ public class RecordTableValidation {
 
   public static Boolean RD03BRule(Long idDataset, Long datasetLegazy) {
 
-    String RD03BRule = "  with characterization as(" + " SELECT "
+    String RD03BRule = "   with characterization as( SELECT  "
         + "        (select field_value.value from dataset_" + idDataset
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c42') as bathingWaterIdentifier, "
-        + "        (select         " + "        case " + "            when dataset_" + idDataset
-        + ".is_numeric(field_value.value)= true"
-        + "                then cast (field_value.value as INTEGER)" + "            when dataset_"
-        + idDataset + ".is_numeric(field_value.value)= false"
-        + "                then cast('0000' as INTEGER)" + "            end       "
-        + "        from dataset_" + idDataset
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c39') as season,"
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c42') as bathingWaterIdentifier,  "
+        + "        (select   field_value.value      " + "        from dataset_" + idDataset
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c39') as season, "
         + "        (select field_value.value from dataset_" + idDataset
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c4b') as groupIdentifier,"
-        + "        rv.id as idrecord" + "        FROM dataset_" + idDataset + ".record_value rv),"
-        + "        LEGAZY_CHAR as(SELECT" + "        (select field_value.value from dataset_"
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d5cfa24d201fb6084d90c4b') as groupIdentifier, "
+        + "        rv.id as idrecord        FROM dataset_" + idDataset + ".record_value rv), "
+        + "        LEGAZY_CHAR as(SELECT        (select field_value.value from dataset_"
         + datasetLegazy
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c46d39786d35d95e2aca') as bathingWaterIdentifier, "
-        + "        (select " + "        case " + "            when dataset_" + idDataset
-        + ".is_numeric(field_value.value)= true"
-        + "                then cast (field_value.value as INTEGER)" + "            when dataset_"
-        + idDataset + ".is_numeric(field_value.value)= false"
-        + "                then cast('0000' as INTEGER)" + "            end       "
-        + "            from dataset_" + datasetLegazy
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c468822c6b00d3cba2fc') as season,"
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c46d39786d35d95e2aca') as bathingWaterIdentifier,  "
+        + "        (select    field_value.value " + "            from dataset_" + datasetLegazy
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c468822c6b00d3cba2fc') as season, "
         + "        (select field_value.value from dataset_" + datasetLegazy
-        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c4737194d80d25e67b4b') as groupIdentifier"
-        + "        ,rv.id as idrecord" + "        FROM dataset_" + datasetLegazy
-        + ".record_value rv)" + "" + "    " + " " + "select a.idrecord "
-        + " from characterization a " + "inner join LEGAZY_CHAR b "
-        + "ON a.bathingWaterIdentifier = b.bathingWaterIdentifier "
-        + "AND (a.season) = cast(b.season as INTEGER) "
-        + "AND coalesce(a.groupIdentifier,'') != coalesce(b.groupIdentifier,'')";
+        + ".field_value field_value where field_value.id_record=rv.id and field_value.id_field_schema='5d95c4737194d80d25e67b4b') as groupIdentifier "
+        + "        ,rv.id as idrecord        FROM dataset_" + datasetLegazy
+        + ".record_value rv)     " + " " + "select a.idrecord  "
+        + " from characterization a inner join LEGAZY_CHAR b  "
+        + "ON a.bathingWaterIdentifier = b.bathingWaterIdentifier  " + "AND a.season = b.season "
+        + "AND coalesce(a.groupIdentifier,'') != coalesce(b.groupIdentifier,'') ";
 
     String MessageError =
         "The group identifier of the bathing water has changed since last season. ";
@@ -119,7 +108,7 @@ public class RecordTableValidation {
     String RD20BRule = "with MonitoringResult as(SELECT  season.season as season, "
         + "bathingWaterIdentifier.bathingWaterIdentifier as bathingWaterIdentifier,"
         + "sampleDate.sampleDate as sampleDate," + "sampleStatus.sampleStatus as sampleStatus,"
-        + "season.record as recordId " + "from "
+        + "season.record as idrecord " + "from "
         + "(select v.value  as season , v.id_record as record " + "from dataset_" + idDataset
         + ".field_value v  where v.id_field_schema='5d5cfa24d201fb6084d90cbf') as season "
         + "inner join( " + "select v.value as bathingWaterIdentifier, v.id_record as record "

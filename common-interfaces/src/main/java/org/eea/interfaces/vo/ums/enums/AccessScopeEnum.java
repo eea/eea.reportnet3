@@ -47,13 +47,24 @@ public enum AccessScopeEnum {
    */
   CREATE("CREATE");
 
+  /**
+   * Gets the scope.
+   *
+   * @return the scope
+   */
   @JsonValue
   public String getScope() {
     return scope;
   }
 
+  /** The scope. */
   private String scope;
 
+  /**
+   * Instantiates a new access scope enum.
+   *
+   * @param scope the scope
+   */
   AccessScopeEnum(String scope) {
     this.scope = scope;
   }

@@ -131,7 +131,6 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
 
   const webForm = () => {
     let webFormCreated = getWebFormData();
-    console.log(webFormCreated);
     if (isEmpty(webFormCreated)) {
       return <div></div>;
     }
