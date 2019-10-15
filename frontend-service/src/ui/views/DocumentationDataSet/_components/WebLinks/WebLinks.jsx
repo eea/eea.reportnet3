@@ -12,7 +12,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
+const WebLinks = ({ webLinks, isCustodian }) => {
   const resources = useContext(ResourcesContext);
 
   const [editedRecord, setEditedRecord] = useState({});
@@ -20,8 +20,15 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
-  const [newRecord, setNewRecord] = useState({});
+  const [newRecord, setNewRecord] = useState({ description: '', url: '' });
+  const [selectedRecord, setSelectedRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
+
+  const onSelectRecord = val => {
+    setIsNewRecord(false);
+    setSelectedRecord({ ...val });
+    setEditedRecord({ ...val });
+  };
 
   const addRowHeader = (
     <div className="p-clearfix" style={{ width: '100%' }}>
@@ -57,9 +64,8 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
   );
 
   const newRecordForm = webLinksColumns.map((column, i) => {
-    console.log('column', column);
     if (isAddDialogVisible) {
-      if (i == 0) {
+      if (i == 0 || i == 3) {
         return;
       }
       return (
@@ -77,6 +83,17 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
       );
     }
   });
+
+  const onEditAddFormInput = (property, value) => {
+    let record = {};
+    if (!isNewRecord) {
+      record = { ...editedRecord, [property]: value };
+      setEditedRecord(record);
+    } else {
+      record = { ...newRecord, [property]: value };
+      setNewRecord(record);
+    }
+  };
 
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -96,7 +113,6 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
   );
 
   const editRecordForm = webLinksColumns.map((column, i) => {
-    console.log('column', column);
     if (isEditDialogVisible) {
       if (i == 0) {
         return;
@@ -109,7 +125,10 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
           <div className="p-col-8" style={{ padding: '.5em' }}>
             <InputText
               id={column.props.field}
-              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
+              value={editedRecord[column.props.field]}
+              onChange={e => {
+                return onEditAddFormInput(column.props.field, e.target.value, column.props.field);
+              }}
             />
           </div>
         </React.Fragment>
@@ -117,18 +136,39 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
     }
   });
 
-  const onEditAddFormInput = (input, value) => {
-    if (!isNewRecord) {
-      setEditedRecord({ ...editedRecord });
+  const onSaveRecord = async record => {
+    console.log('Saving record:', record);
+    if (isNewRecord) {
+      try {
+        // await DatasetService.addRecordsById(datasetId, tableId, [record]);
+        setIsAddDialogVisible(false);
+      } catch (error) {
+        console.error('DataViewer error: ', error);
+        const errorResponse = error.response;
+        console.error('DataViewer errorResponse: ', errorResponse);
+      } finally {
+        // setLoading(false);
+      }
     } else {
-      setNewRecord({ ...newRecord });
+      try {
+        // await DatasetService.updateRecordsById(datasetId, record);
+        setIsEditDialogVisible(false);
+      } catch (error) {
+        console.error('DataViewer error: ', error);
+        const errorResponse = error.response;
+        console.error('DataViewer errorResponse: ', errorResponse);
+        // if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
+        //   history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+        // }
+      } finally {
+        // setLoading(false);
+      }
     }
   };
 
-  const onSaveRecord = newRecord => console.log('saving ', newRecord);
-
   const onDeleteWeblink = () => {
-    console.log('deleting web link');
+    console.log('deleting web link', selectedRecord['id']);
+    setIsConfirmDeleteVisible(false);
   };
 
   const onHideDeleteDialog = () => {
@@ -190,12 +230,20 @@ const WebLinks = ({ webLinks, onLoadDocumentsAndWebLinks, isCustodian }) => {
   return (
     <>
       <DataTable
-        value={webLinks}
         autoLayout={true}
-        paginator={true}
-        rowsPerPageOptions={[5, 10, 100]}
+        editable={true}
         header={isCustodian ? addRowHeader : null}
-        rows={10}>
+        onContextMenuSelectionChange={() => {
+          onSelectRecord(webLinks);
+        }}
+        onRowSelect={e => {
+          return onSelectRecord(Object.assign({}, e.data));
+        }}
+        paginator={true}
+        rows={10}
+        rowsPerPageOptions={[5, 10, 100]}
+        selectionMode="single"
+        value={webLinks}>
         {webLinksColumns}
       </DataTable>
 
