@@ -33,8 +33,7 @@ public class MethodLockAspect {
     Authentication aux = SecurityContextHolder.getContext().getAuthentication();
 
     LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint),
-        joinPoint.getSignature().toShortString());
+        aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint));
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();
@@ -51,7 +50,7 @@ public class MethodLockAspect {
     return rtn;
   }
 
-  private Map<Integer, Object> getLockCriteria(ProceedingJoinPoint joinPoint)
+  private Map<String, Object> getLockCriteria(ProceedingJoinPoint joinPoint)
       throws NoSuchMethodException {
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
@@ -61,13 +60,14 @@ public class MethodLockAspect {
         .getMethod(methodName, parameterTypes).getParameterAnnotations();
 
     Object[] arguments = joinPoint.getArgs();
-    HashMap<Integer, Object> criteria = new HashMap<>();
+    HashMap<String, Object> criteria = new HashMap<>();
+    criteria.put("signature", joinPoint.getSignature().toShortString());
     for (int i = 0; i < annotations.length; i++) {
       // annotated parameter, search @LockCriteria annotated parameter if any
       if (annotations[i].length > 0) {
         for (Annotation annotation : annotations[i]) {
           if (annotation.annotationType().equals(LockCriteria.class)) {
-            criteria.put(i, arguments[i]);
+            criteria.put(((LockCriteria) annotation).name(), arguments[i]);
           }
         }
       }

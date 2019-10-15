@@ -174,10 +174,12 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void loadTableData(@LockCriteria @PathVariable("id") final Long datasetId,
-      @RequestParam("file") final MultipartFile file,
-      @LockCriteria @PathVariable(value = "idTableSchema") String idTableSchema) {
+  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND
+  // checkPermission('Dataset','MANAGE_DATA')")
+  public void loadTableData(
+      @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
+      @RequestParam("file") final MultipartFile file, @LockCriteria(
+          name = "idTableSchema") @PathVariable(value = "idTableSchema") String idTableSchema) {
     // filter if the file is empty
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);

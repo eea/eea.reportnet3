@@ -36,7 +36,7 @@ public class LockVO implements Serializable {
   private LockType lockType;
 
   /** The lock criteria. */
-  private Map<Integer, Object> lockCriteria;
+  private Map<String, Object> lockCriteria;
 
   /**
    * Instantiates a new lock.
@@ -48,7 +48,7 @@ public class LockVO implements Serializable {
    * @param lockCriteria the lock criteria
    */
   public LockVO(Timestamp createDate, String createdBy, LockType lockType, Integer id,
-      Map<Integer, Object> lockCriteria) {
+      Map<String, Object> lockCriteria) {
     this.createDate = createDate;
     this.createdBy = createdBy;
     this.lockType = lockType;

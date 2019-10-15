@@ -33,7 +33,7 @@ public interface LockMapper extends IMapper<Lock, LockVO> {
     ObjectInputStream in;
     try {
       in = new ObjectInputStream(byteIn);
-      lockVO.setLockCriteria((Map<Integer, Object>) in.readObject());
+      lockVO.setLockCriteria((Map<String, Object>) in.readObject());
     } catch (ClassNotFoundException | IOException e) {
       e.printStackTrace();
     }

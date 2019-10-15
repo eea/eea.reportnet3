@@ -117,9 +117,10 @@ public class FileTreatmentHelper {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.LOAD_TABLE.getValue());
     criteria.add(datasetId);
     criteria.add(idTableSchema);
-    lockService.removeLockByCriteria(LockSignature.LOAD_TABLE, criteria);
+    lockService.removeLockByCriteria(criteria);
 
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);

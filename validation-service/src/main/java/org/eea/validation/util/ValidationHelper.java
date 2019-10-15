@@ -292,8 +292,9 @@ public class ValidationHelper {
       data.put("dataset_id", datasetId);
       event.setEventType(EventType.COMMAND_EXECUTE_VALIDATION);
       event.setData(data);
+      criteria.add(LockSignature.EXECUTE_VALIDATION.getValue());
       criteria.add(event);
-      lockService.removeLockByCriteria(LockSignature.EXECUTE_VALIDATION, criteria);
+      lockService.removeLockByCriteria(criteria);
     }
   }
 

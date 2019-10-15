@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.interfaces.lock.enums.LockType;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.mapper.LockMapper;
@@ -31,10 +30,10 @@ public class LockServiceImpl implements LockService {
 
   @Override
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
-      Map<Integer, Object> lockCriteria, String signature) {
+      Map<String, Object> lockCriteria) {
 
     LockVO lockVO = new LockVO(createDate, createdBy, lockType,
-        generateHashCode(signature, lockCriteria.values().stream().collect(Collectors.toList())),
+        generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())),
         lockCriteria);
 
     if (lockRepository.saveIfAbsent(lockVO.getId(), lockMapper.classToEntity(lockVO))) {
@@ -54,8 +53,8 @@ public class LockServiceImpl implements LockService {
   }
 
   @Override
-  public Boolean removeLockByCriteria(LockSignature signature, List<Object> args) {
-    return removeLock(generateHashCode(signature.getValue(), args));
+  public Boolean removeLockByCriteria(List<Object> args) {
+    return removeLock(generateHashCode(args));
   }
 
   @Override
@@ -74,7 +73,7 @@ public class LockServiceImpl implements LockService {
     return list;
   }
 
-  private Integer generateHashCode(String signature, List<Object> args) {
-    return Objects.hash(signature, args.hashCode());
+  private Integer generateHashCode(List<Object> args) {
+    return Objects.hash(args.hashCode());
   }
 }

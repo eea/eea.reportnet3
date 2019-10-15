@@ -3,18 +3,17 @@ package org.eea.lock.service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.interfaces.lock.enums.LockType;
 import org.eea.interfaces.vo.lock.LockVO;
 
 public interface LockService {
 
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
-      Map<Integer, Object> lockCriteria, String signature);
+      Map<String, Object> lockCriteria);
 
   public Boolean removeLock(Integer lockId);
 
-  public Boolean removeLockByCriteria(LockSignature signature, List<Object> args);
+  public Boolean removeLockByCriteria(List<Object> args);
 
   public LockVO findLock(Integer lockId);
 

@@ -117,8 +117,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
     criteria.add(idDataset);
-    lockService.removeLockByCriteria(LockSignature.CREATE_SNAPSHOT, criteria);
+    lockService.removeLockByCriteria(criteria);
 
     LOG.info("Snapshot {} data files created", snap.getId());
   }
@@ -165,8 +166,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.RESTORE_SNAPSHOT.getValue());
     criteria.add(idDataset);
-    lockService.removeLockByCriteria(LockSignature.RESTORE_SNAPSHOT, criteria);
+    lockService.removeLockByCriteria(criteria);
 
     LOG.info("Snapshot {} restored", idSnapshot);
 
