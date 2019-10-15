@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.interfaces.lock.enums.LockType;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.mapper.LockMapper;
@@ -53,8 +54,8 @@ public class LockServiceImpl implements LockService {
   }
 
   @Override
-  public Boolean removeLockByCriteria(String signature, List<Object> args) {
-    return removeLock(generateHashCode(signature, args));
+  public Boolean removeLockByCriteria(LockSignature signature, List<Object> args) {
+    return removeLock(generateHashCode(signature.getValue(), args));
   }
 
   @Override

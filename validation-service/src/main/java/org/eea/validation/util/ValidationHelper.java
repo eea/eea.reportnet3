@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -283,6 +284,8 @@ public class ValidationHelper {
       this.removeKieBase(uuid);
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value);
+
+      // Release the lock manually
       List<Object> criteria = new ArrayList<>();
       final EEAEventVO event = new EEAEventVO();
       final Map<String, Object> data = new HashMap<>();
@@ -290,7 +293,7 @@ public class ValidationHelper {
       event.setEventType(EventType.COMMAND_EXECUTE_VALIDATION);
       event.setData(data);
       criteria.add(event);
-      lockService.removeLockByCriteria("ExecuteValidationCommand.execute(..)", criteria);
+      lockService.removeLockByCriteria(LockSignature.EXECUTE_VALIDATION, criteria);
     }
   }
 
