@@ -30,7 +30,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
     setEditedRecord({ ...val });
   };
 
-  const addRowHeader = (
+  const addRowFooter = (
     <div className="p-clearfix" style={{ width: '100%' }}>
       <Button
         style={{ float: 'left' }}
@@ -246,7 +246,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
       <DataTable
         autoLayout={true}
         editable={true}
-        header={isCustodian ? addRowHeader : null}
+        footer={isCustodian ? addRowFooter : null}
         onContextMenuSelectionChange={() => {
           onSelectRecord(webLinks);
         }}
