@@ -74,13 +74,6 @@ const DataflowColumn = withRouter(
           </div>
         )}
         <div className="navSection">
-          {dataflowTitle && (
-            <h4 className={styles.title}>
-              <Icon icon="shoppingCart" />
-              {dataflowTitle}
-            </h4>
-          )}
-
           {isCustodian && components.includes('createDataflow') && (
             <Button
               className={`${styles.columnButton} p-button-primary`}
