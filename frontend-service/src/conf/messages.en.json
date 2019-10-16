@@ -114,6 +114,7 @@
 		"no": "No",
 		"noDataInDataTable": "There is not any data to show",
 		"noErrorData": "There is not any validation data to show",
+		"noWeblinks": "There is not any weblink to show",
 		"origin": "Origin",
 		"paste" : "Paste",
 		"pasteDisableButtonMessage": "This navigator does not support Clipboard API, please paste your data with Ctrl + V or ⌘ + V",
