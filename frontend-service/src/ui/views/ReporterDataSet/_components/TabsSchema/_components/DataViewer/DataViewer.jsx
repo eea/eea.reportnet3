@@ -15,6 +15,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
+import { DropdownFilter } from 'ui/views/ReporterDataSet/_components/DropdownFilter';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
@@ -25,7 +26,6 @@ import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { VisibilityMenu } from './_components/VisibilityMenu';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
@@ -84,7 +84,7 @@ const DataViewer = withRouter(
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
-    const [visibilityButtonMenu, setVisibilityButtonMenu] = useState([]);
+    const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
 
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
@@ -94,7 +94,7 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let contextMenuRef = useRef();
     let divRef = useRef();
-    let visibilityMenuRef = useRef();
+    let dropdownFilterRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -106,13 +106,13 @@ const DataViewer = withRouter(
       );
 
       let colOptions = [];
-      let visibilityMenu = [];
+      let dropdownFilter = [];
       for (let colSchema of colsSchema) {
         colOptions.push({ label: colSchema.header, value: colSchema });
-        visibilityMenu.push({ label: colSchema.header, key: colSchema.field });
+        dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
       }
       setColumnOptions(colOptions);
-      setVisibilityButtonMenu(visibilityMenu);
+      setVisibilityDropdownFilter(dropdownFilter);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -206,7 +206,7 @@ const DataViewer = withRouter(
       }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
-    const showColumns = columnKeys => {
+    const showFilters = columnKeys => {
       const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
       const currentVisibleColumns = originalColumns.filter(
         column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
@@ -1043,15 +1043,15 @@ const DataViewer = withRouter(
               icon={'eye'}
               label={resources.messages['visibility']}
               onClick={event => {
-                visibilityMenuRef.current.show(event);
+                dropdownFilterRef.current.show(event);
               }}
             />
-            <VisibilityMenu
-              columns={visibilityButtonMenu}
+            <DropdownFilter
+              filters={visibilityDropdownFilter}
               popup={true}
-              ref={visibilityMenuRef}
+              ref={dropdownFilterRef}
               id="exportTableMenu"
-              showColumns={showColumns}
+              showFilters={showFilters}
               onShow={e => {
                 getExportButtonPosition(e);
               }}
