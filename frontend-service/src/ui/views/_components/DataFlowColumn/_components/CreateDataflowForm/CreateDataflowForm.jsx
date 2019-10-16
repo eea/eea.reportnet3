@@ -62,26 +62,26 @@ export const CreateDataflowForm = ({ isFormReset, onCreate, setCreateDataflowDia
             </div>
           </fieldset>
           <fieldset>
-            <div className={styles.wrapButtons}>
+            <hr />
+            <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
                 className={
                   !isEmpty(touched)
                     ? isEmpty(errors)
-                      ? styles.submitButton
-                      : styles.cancelButton
-                    : styles.cancelButton
+                      ? styles.primaryButton
+                      : styles.disabledButton
+                    : styles.disabledButton
                 }
+                label={resources.messages['create']}
                 disabled={isSubmitting}
-                label={resources.messages['createNewDataflow']}
-                layout="simple"
-                type="submit"
+                icon="add"
+                type={isSubmitting ? '' : 'submit'}
               />
               <Button
-                className={styles.submitButton}
+                className={`${styles.cancelButton} p-button-secondary`}
                 label={resources.messages['cancel']}
+                icon="cancel"
                 onClick={() => setCreateDataflowDialogVisible(false)}
-                layout="simple"
-                type="button"
               />
             </div>
           </fieldset>

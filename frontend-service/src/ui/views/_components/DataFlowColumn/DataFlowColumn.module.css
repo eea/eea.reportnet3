@@ -12,3 +12,7 @@
   font-size: 0.9rem !important;
   margin-bottom: 1rem !important;
 }
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}

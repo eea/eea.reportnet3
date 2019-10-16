@@ -1793,6 +1793,11 @@ textarea {
 textarea {
   min-height: 5rem;
   font-family: arial;
+  resize: none;
+}
+
+hr {
+  border: 0.5px solid var(--grey-50);
 }
 
 select:focus,

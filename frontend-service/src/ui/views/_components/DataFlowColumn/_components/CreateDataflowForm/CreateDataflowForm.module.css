@@ -1,37 +1,18 @@
-.wrapButtons {
+.buttonWrap {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
 }
-
-.cancelButton,
-.submitButton {
-  width: 49% !important;
-}
-
 .cancelButton {
-  composes: rp-btn from global;
-  composes: default from global;
-  color: var(--black) !important;
-  vertical-align: middle !important;
+  margin-left: 0.5rem !important;
 }
-.submitButton {
-  composes: rp-btn from global;
-  composes: primary from global;
-}
-
 .search {
   display: flex;
   flex-direction: row;
 }
-
 .searchInput {
   border-right: none;
   padding: 5px;
   outline: none;
   border-radius: 3px 0 0 3px;
-}
-textarea {
-  resize: none;
 }
