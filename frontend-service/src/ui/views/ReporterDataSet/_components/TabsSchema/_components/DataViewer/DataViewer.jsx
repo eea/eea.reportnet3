@@ -951,7 +951,6 @@ const DataViewer = withRouter(
           validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
         }
       }
-      console.log(validations);
       const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
       const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
 
@@ -962,11 +961,10 @@ const DataViewer = withRouter(
       );
 
       warningValidations.forEach(validation =>
-        validation.messaFge
+        validation.message
           ? (messageWarnings += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
           : ''
       );
-      console.log(warningValidations);
       return errorValidations.length > 0 && warningValidations.length > 0 ? (
         <div className={styles.iconTooltipWrapper}>
           <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
