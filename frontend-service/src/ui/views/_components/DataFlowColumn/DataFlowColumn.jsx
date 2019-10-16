@@ -87,6 +87,7 @@ const DataflowColumn = withRouter(
               icon="plus"
               label={createDataflowButtonTitle}
               onClick={() => (setCreateDataflowDialogVisible(true), setIsFormReset(true))}
+              disabled={true}
             />
           )}
 

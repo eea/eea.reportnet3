@@ -241,7 +241,8 @@ const WebLinks = ({ webLinks, isCustodian }) => {
         />
       ));
 
-    if (isCustodian) {
+    // if (isCustodian) {
+    if (false) {
       webLinkColArray = [webLinkEditionColumn, ...webLinkColArray];
     }
     setWebLinksColumns(webLinkColArray);
@@ -260,7 +261,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
       <DataTable
         autoLayout={true}
         editable={true}
-        footer={isCustodian ? addRowFooter : null}
+        // footer={isCustodian ? addRowFooter : null}
         onContextMenuSelectionChange={() => {
           onSelectRecord(webLinks);
         }}
