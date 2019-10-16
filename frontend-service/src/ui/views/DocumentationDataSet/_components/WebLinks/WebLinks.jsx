@@ -248,6 +248,11 @@ const WebLinks = ({ webLinks, isCustodian }) => {
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
 
+  const emptyWebLink = [
+    { field: 'description', header: resources.messages['description'] },
+    { field: 'url', header: resources.messages['url'] }
+  ].map(item => <Column field={item.field} header={item.header} />);
+
   const linkTemplate = rowData => {
     return (
       <a href={rowData.url} target="_blank" rel="noopener noreferrer">
@@ -273,7 +278,7 @@ const WebLinks = ({ webLinks, isCustodian }) => {
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
         value={webLinks}>
-        {webLinksColumns}
+        {!isEmpty(webLinks) ? webLinksColumns : emptyWebLink}
       </DataTable>
 
       <Dialog
