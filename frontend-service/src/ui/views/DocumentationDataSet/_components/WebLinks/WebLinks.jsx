@@ -255,68 +255,64 @@ const WebLinks = ({ webLinks, isCustodian }) => {
     );
   };
 
-  if (!isEmpty(webLinks)) {
-    return (
-      <>
-        <DataTable
-          autoLayout={true}
-          editable={true}
-          footer={isCustodian ? addRowFooter : null}
-          onContextMenuSelectionChange={() => {
-            onSelectRecord(webLinks);
-          }}
-          onRowSelect={e => {
-            return onSelectRecord(Object.assign({}, e.data));
-          }}
-          paginator={true}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 100]}
-          selectionMode="single"
-          value={webLinks}>
-          {webLinksColumns}
-        </DataTable>
+  return (
+    <>
+      <DataTable
+        autoLayout={true}
+        editable={true}
+        footer={isCustodian ? addRowFooter : null}
+        onContextMenuSelectionChange={() => {
+          onSelectRecord(webLinks);
+        }}
+        onRowSelect={e => {
+          return onSelectRecord(Object.assign({}, e.data));
+        }}
+        paginator={true}
+        rows={10}
+        rowsPerPageOptions={[5, 10, 100]}
+        selectionMode="single"
+        value={webLinks}>
+        {webLinksColumns}
+      </DataTable>
 
-        <Dialog
-          className={styles.dialog}
-          blockScroll={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={addRowDialogFooter}
-          header={resources.messages['addNewRow']}
-          modal={true}
-          onHide={() => setIsAddDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={isAddDialogVisible}>
-          <div className="p-grid p-fluid">{newRecordForm}</div>
-        </Dialog>
+      <Dialog
+        className={styles.dialog}
+        blockScroll={false}
+        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+        footer={addRowDialogFooter}
+        header={resources.messages['addNewRow']}
+        modal={true}
+        onHide={() => setIsAddDialogVisible(false)}
+        style={{ width: '50%', height: '80%' }}
+        visible={isAddDialogVisible}>
+        <div className="p-grid p-fluid">{newRecordForm}</div>
+      </Dialog>
 
-        <Dialog
-          className={styles.dialog}
-          blockScroll={false}
-          contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-          footer={editRowDialogFooter}
-          header={resources.messages['editRow']}
-          modal={true}
-          onHide={() => setIsEditDialogVisible(false)}
-          style={{ width: '50%', height: '80%' }}
-          visible={isEditDialogVisible}>
-          <div className="p-grid p-fluid">{editRecordForm}</div>
-        </Dialog>
+      <Dialog
+        className={styles.dialog}
+        blockScroll={false}
+        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+        footer={editRowDialogFooter}
+        header={resources.messages['editRow']}
+        modal={true}
+        onHide={() => setIsEditDialogVisible(false)}
+        style={{ width: '50%', height: '80%' }}
+        visible={isEditDialogVisible}>
+        <div className="p-grid p-fluid">{editRecordForm}</div>
+      </Dialog>
 
-        <ConfirmDialog
-          header={resources.messages['delete']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={() => onDeleteWeblink()}
-          onHide={onHideDeleteDialog}
-          visible={isConfirmDeleteVisible}>
-          {resources.messages['deleteWebLink']}
-        </ConfirmDialog>
-      </>
-    );
-  } else {
-    return <h2>{resources.messages.noWeblinks}</h2>;
-  }
+      <ConfirmDialog
+        header={resources.messages['delete']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
+        maximizable={false}
+        onConfirm={() => onDeleteWeblink()}
+        onHide={onHideDeleteDialog}
+        visible={isConfirmDeleteVisible}>
+        {resources.messages['deleteWebLink']}
+      </ConfirmDialog>
+    </>
+  );
 };
 
 export { WebLinks };
