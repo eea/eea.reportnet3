@@ -1,4 +1,4 @@
-String cron_working_branch = BRANCH_NAME != "develop" ? "@daily" : ""
+String cron_working_branch = BRANCH_NAME != "develop" && BRANCH_NAME != "sandbox" ? "@daily" : ""
 
 pipeline {
 
@@ -133,7 +133,9 @@ pipeline {
 
         stage('Build Docker Images') {
             when {
-                branch 'develop' 
+                expression {
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+                }
             }
             parallel {
                 stage('Build Microservices') {
