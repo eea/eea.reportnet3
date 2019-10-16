@@ -10,9 +10,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.eea.interfaces.lock.enums.LockType;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
-import org.eea.lock.model.Lock;
 import org.eea.lock.service.LockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -32,26 +32,25 @@ public class MethodLockAspect {
     Object rtn = null;
     Authentication aux = SecurityContextHolder.getContext().getAuthentication();
 
-    Lock lock = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint),
-        joinPoint.getSignature().toShortString());
+    LockVO lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
+        aux != null ? aux.getName() : null, LockType.METHOD, getLockCriteria(joinPoint));
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();
 
     LockMethod lockMethod = method.getAnnotation(LockMethod.class);
 
-    if (lock != null) {
+    if (lockVO != null) {
       rtn = joinPoint.proceed();
       if (lockMethod.removeWhenFinish()) {
-        lockService.removeLock(lock.getId());
+        lockService.removeLock(lockVO.getId());
       }
     }
 
     return rtn;
   }
 
-  private Map<Integer, Object> getLockCriteria(ProceedingJoinPoint joinPoint)
+  private Map<String, Object> getLockCriteria(ProceedingJoinPoint joinPoint)
       throws NoSuchMethodException {
 
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
@@ -61,13 +60,14 @@ public class MethodLockAspect {
         .getMethod(methodName, parameterTypes).getParameterAnnotations();
 
     Object[] arguments = joinPoint.getArgs();
-    HashMap<Integer, Object> criteria = new HashMap<>();
+    HashMap<String, Object> criteria = new HashMap<>();
+    criteria.put("signature", joinPoint.getSignature().toShortString());
     for (int i = 0; i < annotations.length; i++) {
       // annotated parameter, search @LockCriteria annotated parameter if any
       if (annotations[i].length > 0) {
         for (Annotation annotation : annotations[i]) {
           if (annotation.annotationType().equals(LockCriteria.class)) {
-            criteria.put(i, arguments[i]);
+            criteria.put(((LockCriteria) annotation).name(), arguments[i]);
           }
         }
       }

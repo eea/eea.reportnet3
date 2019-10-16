@@ -1,4 +1,4 @@
-DROP SCHEMA public cascade;
+RDROP SCHEMA public cascade;
 CREATE SCHEMA public;
 commit;
 
@@ -145,6 +145,16 @@ CREATE TABLE public.dataflow_user_request (
 	CONSTRAINT user_request_DATAFLOW_pkey FOREIGN KEY (dataflow_id) REFERENCES dataflow(id)
 );
 
+CREATE TABLE public.lock (
+	id int4 NOT NULL,
+	create_date timestamp NULL,
+	created_by varchar NULL,
+	lock_type varchar NULL,
+	lock_criteria bytea NULL,
+	CONSTRAINT lock_pkey PRIMARY KEY (id),
+);
+
+
 --GRANTS
 
 GRANT USAGE ON SCHEMA public TO testuser ;
@@ -185,6 +195,8 @@ ALTER TABLE public.USER_REQUEST OWNER TO testuser;
 GRANT ALL ON TABLE public.USER_REQUEST TO testuser;
 ALTER TABLE public.dataflow_user_request OWNER TO testuser;
 GRANT ALL ON TABLE public.dataflow_user_request TO testuser;
+ALTER TABLE public.lock OWNER TO testuser;
+GRANT ALL ON TABLE public.lock TO testuser;
 
 --INDEXES--
 CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);
