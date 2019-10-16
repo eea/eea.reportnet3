@@ -174,8 +174,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PostMapping("{id}/loadTableData/{idTableSchema}")
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND
-  // checkPermission('Dataset','MANAGE_DATA')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
   public void loadTableData(
       @LockCriteria(name = "datasetId") @PathVariable("id") final Long datasetId,
       @RequestParam("file") final MultipartFile file, @LockCriteria(
