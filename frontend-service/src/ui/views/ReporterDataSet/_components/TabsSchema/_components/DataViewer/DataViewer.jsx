@@ -188,14 +188,7 @@ const DataViewer = withRouter(
       );
 
       let validationCol = (
-        <Column
-          body={validationsTemplate}
-          field="validations"
-          header=""
-          key="recordValidation"
-          sortable={false}
-          style={{ width: '15px' }}
-        />
+        <Column body={validationsTemplate} field="validations" header="" key="recordValidation" sortable={false} />
       );
 
       if (!isWebFormMMR) {
@@ -930,67 +923,58 @@ const DataViewer = withRouter(
 
     //Template for Record validation
     const validationsTemplate = recordData => {
+      let validations = [];
       if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
-        const validations = [...recordData.recordValidations];
-        let message = '';
-        let hasFieldErrors = false;
-        const recordsWithFieldValidations = recordData.dataRow.filter(
-          row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
-        );
-        hasFieldErrors = recordsWithFieldValidations.length > 0;
-
-        const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
-        const fieldsLevelErrors = getLevelError(filteredFieldValidations);
-        if (hasFieldErrors) {
-          validations.push(
-            DatasetService.createValidation(
-              'RECORD',
-              0,
-              fieldsLevelErrors,
-              fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
-            )
-          );
-        }
-
-        validations.forEach(validation =>
-          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
-        );
-
-        const levelError = getLevelError(validations);
-        return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
-      } else {
-        //If there is no recordValidations check por field validations (if there is more than zero fields with errors show the generic message)
-        const validations = [];
-        let message = '';
-        let hasFieldErrors = false;
-        const recordsWithFieldValidations = recordData.dataRow.filter(
-          row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
-        );
-
-        hasFieldErrors = recordsWithFieldValidations.length > 0;
-
-        const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
-        const fieldsLevelErrors = getLevelError(filteredFieldValidations);
-        if (hasFieldErrors) {
-          validations.push(
-            DatasetService.createValidation(
-              'RECORD',
-              0,
-              fieldsLevelErrors,
-              fieldsLevelErrors === 'ERROR' ? resources.messages['recordErrors'] : resources.messages['recordWarnings']
-            )
-          );
-          validations.forEach(validation =>
-            validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
-          );
-        }
-        if (validations.length > 0) {
-          const levelError = getLevelError(validations);
-          return <IconTooltip key={recordData.recordId} levelError={levelError} message={message} />;
-        }
-
-        return;
+        validations = [...recordData.recordValidations];
       }
+
+      let messageErrors = '';
+      let messageWarnings = '';
+      let hasFieldErrors = false;
+      const recordsWithFieldValidations = recordData.dataRow.filter(
+        row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
+      );
+      hasFieldErrors = recordsWithFieldValidations.length > 0;
+
+      const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
+
+      if (hasFieldErrors) {
+        const filteredFieldValidationsWithError = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'ERROR'
+        );
+        //There are warnings in fields
+        if (filteredFieldValidations.length - filteredFieldValidationsWithError.length > 0) {
+          validations.push(
+            DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
+          );
+        } else {
+          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+        }
+      }
+      const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
+      const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
+
+      errorValidations.forEach(validation =>
+        validation.message
+          ? (messageErrors += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
+          : ''
+      );
+
+      warningValidations.forEach(validation =>
+        validation.message
+          ? (messageWarnings += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
+          : ''
+      );
+      return errorValidations.length > 0 && warningValidations.length > 0 ? (
+        <div className={styles.iconTooltipWrapper}>
+          <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
+          <IconTooltip levelError="ERROR" message={messageErrors} style={{ width: '1.5em' }} />
+        </div>
+      ) : errorValidations.length > 0 ? (
+        <IconTooltip levelError="ERROR" message={messageErrors} />
+      ) : warningValidations.length > 0 ? (
+        <IconTooltip levelError="WARNING" message={messageWarnings} />
+      ) : null;
     };
 
     const rowClassName = rowData => {
