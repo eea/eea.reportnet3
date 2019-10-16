@@ -87,7 +87,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void createSnapshot(@LockCriteria @PathVariable("idDataset") Long datasetId,
+  public void createSnapshot(
+      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @RequestParam("description") String description) {
 
     if (datasetId == null) {
@@ -145,7 +146,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') AND checkPermission('Dataset','MANAGE_DATA')")
-  public void restoreSnapshot(@LockCriteria @PathVariable("idDataset") Long datasetId,
+  public void restoreSnapshot(
+      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
