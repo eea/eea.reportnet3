@@ -119,6 +119,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final String NULL = "id == null";
 
+  @Override
+  public ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema) {
+
+    DataSetSchema dataSetSchema = new DataSetSchema();
+    ObjectId idDataSetSchema = new ObjectId();
+
+    dataSetSchema.setNameDataSetSchema(nameDataSetSchema);
+    dataSetSchema.setIdDataFlow(idDataFlow);
+    dataSetSchema.setIdDataSetSchema(idDataSetSchema);
+    dataSetSchema.setRuleDataSet(new ArrayList<RuleDataSet>());
+    dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
+
+    schemasRepository.save(dataSetSchema);
+
+    return idDataSetSchema;
+  }
+
   /**
    * Creates the data schema.
    *

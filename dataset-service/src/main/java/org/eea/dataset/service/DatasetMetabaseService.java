@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 
 /**
  * The Interface DatasetMetabaseService.
@@ -26,8 +27,8 @@ public interface DatasetMetabaseService {
    * @param idDataflow the id dataflow
    * @throws EEAException the EEA exception
    */
-  void createEmptyDataset(String datasetName, String idDatasetSchema, Long idDataflow)
-      throws EEAException;
+  void createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String idDataSetSchema,
+      Long idDataFlow) throws EEAException;
 
   /**
    * Gets the dataset name.

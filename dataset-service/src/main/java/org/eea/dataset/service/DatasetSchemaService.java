@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 
 /**
@@ -15,6 +16,8 @@ public interface DatasetSchemaService {
    * @param dataflowId the dataflow id
    */
   void createDataSchema(Long datasetId, Long dataflowId);
+
+  ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema);
 
 
   /**

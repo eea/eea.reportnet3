@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataset;
 import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +43,9 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    */
   @PostMapping(value = "/create")
-  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
+  void createEmptyDataSet(
+      @RequestParam(value = "datasetType", required = true) final TypeDatasetEnum datasetType,
+      @RequestParam(value = "datasetName", required = true) String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
       @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 

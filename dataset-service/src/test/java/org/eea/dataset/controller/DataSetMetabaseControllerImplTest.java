@@ -9,6 +9,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +67,7 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry1() throws Exception {
-    dataSetMetabaseControllerImpl.createEmptyDataSet(null, null, 1L);
+    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, null, null, 1L);
   }
 
   /**
@@ -76,14 +77,15 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestExceptionEntry2() throws Exception {
-    dataSetMetabaseControllerImpl.createEmptyDataSet("", "", 1L);
+    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "", "", 1L);
   }
 
   @Test()
   public void createEmptyDataSetTestExceptionFail() throws Exception {
-    doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset("datasetName", null,
+    doThrow(EEAException.class).when(datasetMetabaseService)
+        .createEmptyDataset(TypeDatasetEnum.REPORTING, "datasetName", null, 1L);
+    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
         1L);
-    dataSetMetabaseControllerImpl.createEmptyDataSet("datasetName", null, 1L);
   }
 
   /**
@@ -94,11 +96,12 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void createEmptyDataSetTest() throws Exception {
     doNothing().when(datasetMetabaseService).createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    dataSetMetabaseControllerImpl.createEmptyDataSet("datasetName", null, 1L);
+        Mockito.any(), Mockito.any());
+    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
+        1L);
 
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 

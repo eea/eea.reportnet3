@@ -1,19 +1,22 @@
 package org.eea.dataset.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
+
+  @Autowired
+  private DesignDatasetRepository designDatasetRepository;
 
   /** The record store controller zull. */
   @Autowired
@@ -71,28 +77,40 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * We use spring Transactional with this value to indicate we want to use the metabase
    * transactional manager. Otherwise the operation will be fail
    */
-  public void createEmptyDataset(final String datasetName, String idDatasetSchema, Long idDataflow)
-      throws EEAException {
+  public void createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+      String idDataSetSchema, Long idDataFlow) throws EEAException {
 
-    ReportingDataset reportingData = new ReportingDataset();
-    reportingData.setDataSetName(datasetName);
-    reportingData.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-    reportingData.setDataflowId(idDataflow);
+    DataSetMetabase dataset;
+
+    switch (datasetType) {
+      case REPORTING:
+        dataset = new ReportingDataset();
+        fillDataset(dataset, datasetName, idDataFlow);
+        reportingDatasetRepository.save((ReportingDataset) dataset);
+        break;
+      case DESIGN:
+        dataset = new DesignDataset();
+        fillDataset(dataset, datasetName, idDataFlow);
+        designDatasetRepository.save((DesignDataset) dataset);
+        break;
+      default:
+        throw new EEAException("Unsupported datasetType");
+    }
+
+    recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), idDataSetSchema);
+  }
+
+  private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow) {
+
+    dataset.setDataSetName(datasetName);
+    dataset.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+    dataset.setDataflowId(idDataFlow);
+
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     partition.setUsername("root");
-    partition.setIdDataSet(reportingData);
-    List<PartitionDataSetMetabase> partitions = new ArrayList<>();
-    partitions.add(partition);
-    reportingData.setPartitions(partitions);
-    // save reporting dataset into metabase
-    reportingDatasetRepository.save(reportingData);
+    partition.setIdDataSet(dataset);
 
-    // create the dataset into datasets
-    recordStoreControllerZull.createEmptyDataset("dataset_" + reportingData.getId(),
-        idDatasetSchema);
-
-
-
+    dataset.setPartitions(Arrays.asList(partition));
   }
 
 
@@ -106,6 +124,5 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
     Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
     return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
-
   }
 }

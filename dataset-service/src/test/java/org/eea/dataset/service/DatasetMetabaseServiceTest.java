@@ -12,6 +12,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +84,8 @@ public class DatasetMetabaseServiceTest {
   @Test
   public void testCreateEmptyDataset() throws Exception {
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
-    datasetMetabaseService.createEmptyDataset("", "5d0c822ae1ccd34cfcd97e20", 1L);
+    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
+        "5d0c822ae1ccd34cfcd97e20", 1L);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }

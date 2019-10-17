@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -12,7 +11,9 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -46,6 +47,9 @@ public class DataSetSchemaControllerImplTest {
 
   @Mock
   private DatasetSchemaController dataSchemaController;
+
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
 
   @InjectMocks
   private DataschemaServiceImpl dataSchemaServiceImpl;
@@ -89,8 +93,6 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn(new DataSetSchemaVO());
     DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaWithNoRulesByDataflow(1l);
     Assert.assertNotNull(result);
-
-
   }
 
   @Test
@@ -141,8 +143,16 @@ public class DataSetSchemaControllerImplTest {
     schema2.setTableSchemas(listaTables);
 
     assertEquals("error, not equals", schema, schema2);
-
-
   }
 
+  @Test
+  public void createEmptyDataSetSchemaTest() {
+    try {
+      Mockito.doNothing().when(datasetMetabaseService).createEmptyDataset(Mockito.any(),
+          Mockito.any(), Mockito.any(), Mockito.any());
+    } catch (EEAException e) {
+      e.printStackTrace();
+    }
+    dataSchemaController.createEmptyDataSetSchema("nameDataSetSchema", 1L);
+  }
 }
