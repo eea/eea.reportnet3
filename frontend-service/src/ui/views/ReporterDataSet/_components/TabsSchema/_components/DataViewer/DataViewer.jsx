@@ -96,6 +96,14 @@ const DataViewer = withRouter(
     let divRef = useRef();
     let dropdownFilterRef = useRef();
 
+    let filterMenuRef = useRef();
+
+    let filterMenu = [
+      { label: 'Correct', key: 'correct' },
+      { label: 'Warnings', key: 'warning' },
+      { label: 'Errors', key: 'errors' }
+    ];
+
     useEffect(() => {
       setExportButtonsList(
         config.exportTypes.map(type => ({
@@ -213,6 +221,10 @@ const DataViewer = withRouter(
       );
       setColumns(currentVisibleColumns);
       setVisibleColumns(currentVisibleColumns);
+    };
+
+    const showValidationFilter = filteredKeys => {
+      console.log('filteredKeys==>', filteredKeys);
     };
 
     useEffect(() => {
@@ -1058,9 +1070,22 @@ const DataViewer = withRouter(
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={true}
+              disabled={false}
               icon={'filter'}
               label={resources.messages['filter']}
+              onClick={event => {
+                filterMenuRef.current.show(event);
+              }}
+            />
+            <DropdownFilter
+              filters={filterMenu}
+              popup={true}
+              ref={filterMenuRef}
+              id="exportTableMenu"
+              showFilters={showValidationFilter}
+              onShow={e => {
+                getExportButtonPosition(e);
+              }}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
