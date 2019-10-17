@@ -326,4 +326,23 @@ public class KeycloakConnectorServiceImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void createGroupDetail() {
+    GroupInfo groupInfo = new GroupInfo();
+    ResponseEntity<Void> result = new ResponseEntity<>(
+        null,
+        HttpStatus.OK);
+
+    Mockito.when(restTemplate
+        .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(result);
+
+    keycloakConnectorService.createGroupDetail(groupInfo);
+
+    Mockito.verify(restTemplate, Mockito.times(1)).postForEntity(Mockito.anyString(),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+
+
+  }
 }

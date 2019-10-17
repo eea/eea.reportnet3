@@ -38,12 +38,13 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
         try {
           enumValue = (T) getEnumFromValueMethod.invoke(null, source);
         } catch (IllegalAccessException | InvocationTargetException e) {
-          LOGGER_ERROR.error(
-              "Error trying to invoke Method {} to build the Enum of type {}, using default Enum.valueOf method",
-              getEnumFromValueMethod.getName(), this.enumType.getName());
+
+          enumValue = (T) Enum.valueOf(this.enumType, source);
         }
+      } else {
+        enumValue = (T) Enum.valueOf(this.enumType, source);
       }
-      return enumValue == null ? (T) Enum.valueOf(this.enumType, source) : enumValue;
+      return enumValue;
     }
 
     private Method getCreatorMethod(Class<T> type) {
@@ -52,6 +53,7 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
       for (Method method : methods) {
         if (method.isAnnotationPresent(JsonCreator.class)) {
           result = method;
+          break;
         }
       }
       return result;

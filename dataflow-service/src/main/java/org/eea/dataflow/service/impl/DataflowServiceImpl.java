@@ -23,8 +23,8 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,9 +106,9 @@ public class DataflowServiceImpl implements DataflowService {
     Dataflow result = dataflowRepository.findById(id).orElse(null);
     // filter datasets showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
-        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATASET);
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
     // add to the filter the design datasets (data schemas) too
-    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceEnum.DATA_SCHEMA));
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
@@ -173,7 +173,7 @@ public class DataflowServiceImpl implements DataflowService {
     }
     // Get user's dataflows
     List<ResourceAccessVO> usersDataflows =
-        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATAFLOW);
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
     for (ResourceAccessVO userDataflow : usersDataflows) {
       Optional<Dataflow> df = dataflowRepository.findById(userDataflow.getId());
       if (df.isPresent()) {
@@ -327,7 +327,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the datasets id.
    *
    * @param id the id
+   *
    * @return the datasets id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -343,7 +345,6 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO
         .setReportingDatasets(datasetMetabaseController.findReportingDataSetIdByDataflowId(id));
 
-
     return dataflowVO;
   }
 
@@ -352,7 +353,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the metabase by id.
    *
    * @param id the id
+   *
    * @return the metabase by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override

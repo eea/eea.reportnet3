@@ -70,7 +70,7 @@ public class ValidationControllerImplTest {
     when(loadValidationsHelper.getListValidations(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(failedValidationsDatasetVO);
     assertEquals("result not equals to expected", failedValidationsDatasetVO,
-        validationController.getFailedValidationsByIdDataset(1L, 1, 10, "id", true));
+        validationController.getFailedValidationsByIdDataset(1L, 1, 10, "resourceId", true));
   }
 
   @Test
@@ -78,7 +78,7 @@ public class ValidationControllerImplTest {
     when(loadValidationsHelper.getListValidations(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(failedValidationsDatasetVO);
     assertEquals("result not equals to expected", failedValidationsDatasetVO,
-        validationController.getFailedValidationsByIdDataset(1L, 1, 10, "id", false));
+        validationController.getFailedValidationsByIdDataset(1L, 1, 10, "resourceId", false));
   }
 
   @Test(expected = ResponseStatusException.class)
