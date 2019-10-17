@@ -109,7 +109,16 @@ export const apiDataset = {
     });
     return response.data;
   },
-  errorsById: async (datasetId, pageNum, pageSize, sortField, asc) => {
+  errorsById: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  ) => {
     const tokens = userStorage.get();
     if (asc === -1) {
       asc = 0;
@@ -123,6 +132,9 @@ export const apiDataset = {
             pageSize: pageSize,
             sortField: sortField,
             asc: asc
+            // levelErrorsFilter: levelErrorsFilter,
+            // typeEntitiesFilter: typeEntitiesFilter,
+            // originsFilter: originsFilter
           }),
       queryString: {},
       headers: {
