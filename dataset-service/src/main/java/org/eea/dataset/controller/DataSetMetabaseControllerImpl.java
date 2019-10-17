@@ -3,11 +3,13 @@ package org.eea.dataset.controller;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Autowired
   private ReportingDatasetService reportingDatasetService;
 
+  /** The design dataset service. */
+  @Autowired
+  private DesignDatasetService designDatasetService;
+
   /**
    * The Constant LOG_ERROR.
    */
@@ -58,7 +64,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ReportingDatasetVO> findDataSetIdByDataflowId(Long idDataflow) {
+  public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(Long idDataflow) {
 
     return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
 
@@ -67,7 +73,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * Find dataset name.
    *
-   * @param idDataSet the id data set
+   * @param idDataset the id dataset
    * @return the list
    */
   @Override
@@ -102,4 +108,21 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     }
 
   }
+
+
+  /**
+   * Find design data set id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DesignDatasetVO> findDesignDataSetIdByDataflowId(Long idDataflow) {
+
+    return designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
+
+  }
+
 }

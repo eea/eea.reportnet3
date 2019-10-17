@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -38,6 +39,10 @@ public class DataSetMetabaseControllerImplTest {
   private ReportingDatasetService reportingDatasetService;
 
 
+  @Mock
+  private DesignDatasetService designDatasetService;
+
+
 
   /**
    * Inits the mocks.
@@ -54,7 +59,7 @@ public class DataSetMetabaseControllerImplTest {
   public void testFindDataSetIdByDataflowId() {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    dataSetMetabaseControllerImpl.findDataSetIdByDataflowId(Mockito.anyLong());
+    dataSetMetabaseControllerImpl.findReportingDataSetIdByDataflowId(Mockito.anyLong());
     Mockito.verify(reportingDatasetService, times(1)).getDataSetIdByDataflowId(Mockito.any());
   }
 
@@ -110,4 +115,13 @@ public class DataSetMetabaseControllerImplTest {
     dataSetMetabaseControllerImpl.findDatasetMetabaseById(Mockito.anyLong());
     Mockito.verify(datasetMetabaseService, times(1)).findDatasetMetabase(Mockito.anyLong());
   }
+
+  @Test
+  public void testFindDesignDataSetIdByDataflowId() {
+    when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    dataSetMetabaseControllerImpl.findDesignDataSetIdByDataflowId(Mockito.anyLong());
+    Mockito.verify(designDatasetService, times(1)).getDesignDataSetIdByDataflowId(Mockito.any());
+  }
+
 }

@@ -938,6 +938,7 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(statsDatasetErrors);
 
       statisticsRepository.deleteAll();
+      statisticsRepository.flush();
       statisticsRepository.saveAll(statsList);
 
 
