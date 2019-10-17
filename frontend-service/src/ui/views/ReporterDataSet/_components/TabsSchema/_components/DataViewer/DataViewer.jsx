@@ -117,9 +117,9 @@ const DataViewer = withRouter(
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
       setValidationDropdownFilter([
-        { label: 'Correct', key: 'correct' },
-        { label: 'Warnings', key: 'warning' },
-        { label: 'Errors', key: 'errors' }
+        { label: 'Correct', key: 'CORRECT' },
+        { label: 'Warnings', key: 'WARNING' },
+        { label: 'Errors', key: 'ERROR' }
       ]);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
