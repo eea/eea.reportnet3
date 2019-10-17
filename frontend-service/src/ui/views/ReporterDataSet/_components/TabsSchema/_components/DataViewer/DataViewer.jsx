@@ -86,6 +86,7 @@ const DataViewer = withRouter(
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
+    const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
 
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
@@ -96,14 +97,7 @@ const DataViewer = withRouter(
     let contextMenuRef = useRef();
     let divRef = useRef();
     let dropdownFilterRef = useRef();
-
     let filterMenuRef = useRef();
-
-    const filterMenu = [
-      { label: 'Correct', key: 'correct' },
-      { label: 'Warnings', key: 'warning' },
-      { label: 'Errors', key: 'errors' }
-    ];
 
     useEffect(() => {
       setExportButtonsList(
@@ -122,6 +116,11 @@ const DataViewer = withRouter(
       }
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
+      setValidationDropdownFilter([
+        { label: 'Correct', key: 'correct' },
+        { label: 'Warnings', key: 'warning' },
+        { label: 'Errors', key: 'errors' }
+      ]);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -226,11 +225,7 @@ const DataViewer = withRouter(
 
     const showValidationFilter = filteredKeys => {
       const filteredLevelErrors = filteredKeys.join(',');
-
       setFilterLevelError(filteredLevelErrors);
-
-      //  setFilterLevelError(filteredLevelErrors);
-      console.log('filteredLevelErrors', filteredLevelErrors);
     };
 
     useEffect(() => {
@@ -1088,7 +1083,7 @@ const DataViewer = withRouter(
               }}
             />
             <DropdownFilter
-              filters={filterMenu}
+              filters={validationDropdownFilter}
               popup={true}
               ref={filterMenuRef}
               id="exportTableMenu"

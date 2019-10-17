@@ -1,9 +1,9 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEqual } from 'lodash';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DropdownFilter.module.css';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 class DropdownFilter extends React.Component {
   constructor(props) {
@@ -23,11 +23,7 @@ class DropdownFilter extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { filters } = this.props;
-    console.log('componentDidUpdate', filters, prevProps.filters);
-
-    if (prevProps.filters !== filters)) {
-      console.log('no equals');
-
+    if (prevProps.filters !== filters) {
       const fields = filters.map(column => ({
         checked: true,
         label: column.label,
