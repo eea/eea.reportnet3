@@ -1,50 +1,54 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { isUndefined } from 'lodash';
 
 import styles from './ReportingDataFlow.module.scss';
 
 import { config } from 'conf';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { routes } from 'ui/routes';
 
+import { BigButton } from './_components/BigButton';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ContributorsList } from './_components/ContributorsList';
+import { CreateDatasetForm } from './_components/CreateDatasetForm';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { Icon } from 'ui/views/_components/Icon';
-import { BigButton } from './_components/BigButton';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { UserService } from 'core/services/User';
+import { ScrollPanel } from 'primereact/scrollpanel';
 import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { SplitButton } from 'ui/views/_components/SplitButton';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
-
-import { ScrollPanel } from 'primereact/scrollpanel';
-import { routes } from 'ui/routes';
 
 export const ReportingDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
+
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
-  const [snapshotListData, setSnapshotListData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
-  const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
-  const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
+  const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
+  const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
+  const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
+  const [isFormReset, setIsFormReset] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [newDatasetDialog, setNewDatasetDialog] = useState(false);
+  const [snapshotListData, setSnapshotListData] = useState([]);
+
+  let growlRef = useRef();
+
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
@@ -67,6 +71,19 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     }
   }, [user]);
 
+  //Bread Crumbs settings
+  useEffect(() => {
+    setBreadCrumbItems([
+      {
+        label: resources.messages['dataflowList'],
+        command: () => history.push(getUrl(routes.DATAFLOWS))
+      },
+      {
+        label: resources.messages.dataflow
+      }
+    ]);
+  }, [history, match.params.dataflowId, resources.messages]);
+
   const home = {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
@@ -84,6 +101,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       setLoading(false);
     }
   };
+
   const onLoadSnapshotList = async datasetId => {
     setSnapshotListData(await SnapshotService.all(datasetId));
   };
@@ -93,41 +111,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
   }, [match.params.dataflowId]);
 
-  //Bread Crumbs settings
-  useEffect(() => {
-    setBreadCrumbItems([
-      {
-        label: resources.messages['dataflowList'],
-        command: () => history.push(getUrl(routes.DATAFLOWS))
-      },
-      {
-        label: resources.messages.dataflow
-      }
-    ]);
-  }, [history, match.params.dataflowId, resources.messages]);
-
-  const handleRedirect = target => {
-    history.push(target);
-  };
-
   const onGrowlAlert = message => {
     growlRef.current.show(message);
   };
 
-  let growlRef = useRef();
-
-  const layout = children => {
-    return (
-      <MainLayout>
-        <BreadCrumb model={breadCrumbItems} home={home} />
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
+  const handleRedirect = target => {
+    history.push(target);
   };
-
-  if (loading || isUndefined(dataflowData)) {
-    return layout(<Spinner />);
-  }
 
   const dropDownItems = [
     {
@@ -148,14 +138,39 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       }
     }
   ];
+
+  const onCreateDataset = () => {
+    setNewDatasetDialog(false);
+    console.log('saved');
+  };
+
   const showContributorsDialog = () => {
     setIsActiveContributorsDialog(true);
   };
+
+  const showNewDatasetDialog = () => {
+    setIsFormReset(true);
+    setNewDatasetDialog(true);
+  };
+
   const showReleaseSnapshotDialog = async datasetId => {
     setDatasetIdToProps(datasetId);
     onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
+
+  const layout = children => {
+    return (
+      <MainLayout>
+        <BreadCrumb model={breadCrumbItems} home={home} />
+        <div className="rep-container">{children}</div>
+      </MainLayout>
+    );
+  };
+
+  if (loading || isUndefined(dataflowData)) {
+    return layout(<Spinner />);
+  }
 
   return layout(
     <div className="rep-row">
@@ -180,37 +195,30 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            {false && (
-              <div className={`${styles.datasetItem}`}>
+            <div className={`${styles.datasetItem}`}>
+              {isCustodian && (
                 <BigButton
                   layout="addNewDataset"
-                  caption={resources.messages.add}
+                  caption={resources.messages['newItem']}
                   handleRedirect={() =>
                     handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
                   }
                   model={[
                     {
-                      label: 'New dataset from template',
-                      icon: 'clone',
-                      command: () => showReleaseSnapshotDialog(),
+                      label: resources.messages['createNewEmptyDatasetSchema'],
+                      icon: 'add',
+                      command: () => showNewDatasetDialog(),
                       disabled: false
                     },
                     {
-                      label: 'New empty dataset',
-                      icon: 'clone',
-                      command: () => showReleaseSnapshotDialog(),
-                      disabled: false
-                    },
-                    {
-                      label: 'New linked page',
-                      icon: 'clone',
-                      command: () => showReleaseSnapshotDialog(),
-                      disabled: false
+                      label: resources.messages['createNewDatasetFromTemplate'],
+                      icon: 'add',
+                      disabled: true
                     }
                   ]}
                 />
-              </div>
-            )}
+              )}
+            </div>
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
@@ -288,6 +296,18 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           style={{ width: '50vw' }}
           maximizable>
           <ContributorsList dataflowId={dataflowData.id} />
+        </Dialog>
+        <Dialog
+          header={resources.messages['newDataset']}
+          visible={newDatasetDialog}
+          className={styles.dialog}
+          dismissableMask={false}
+          onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
+          <CreateDatasetForm
+            isFormReset={isFormReset}
+            onCreate={onCreateDataset}
+            setNewDatasetDialog={setNewDatasetDialog}
+          />
         </Dialog>
         <Dialog
           header={dataflowData.name}

@@ -35,6 +35,9 @@
   bottom: 0px;
   top: auto;
 }
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}
 .splitButtonWrapper {
   margin-left: 1rem;
   display: flex;
