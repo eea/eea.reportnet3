@@ -1176,6 +1176,7 @@ const DataViewer = withRouter(
           visible={deleteDialogVisible}>
           {resources.messages['deleteDatasetTableConfirm']}
         </ConfirmDialog>
+
         <ConfirmDialog
           onConfirm={onConfirmDeleteRow}
           onHide={onHideConfirmDeleteDialog}
@@ -1185,6 +1186,7 @@ const DataViewer = withRouter(
           labelCancel={resources.messages['no']}>
           {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
+
         <ConfirmDialog
           className="edit-table"
           header={resources.messages['pasteRecords']}
@@ -1212,6 +1214,7 @@ const DataViewer = withRouter(
           <br />
           <hr />
         </ConfirmDialog>
+
         <Dialog
           className="edit-table"
           blockScroll={false}
