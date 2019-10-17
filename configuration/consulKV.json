@@ -4,22 +4,6 @@
     "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
   {
-    "key": "config/dataset/mongodb.primary.host",
-    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
-  },
-  {
-    "key": "config/dataset/mongodb.primary.port",
-    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
-  },
-  {
-    "key": "config/dataset/mongodb.primary.username",
-    "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
-  },
-  {
-    "key": "config/dataset/mongodb.primary.password",
-    "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
-  },
-  {
     "key": "config/dataset/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
@@ -28,15 +12,15 @@
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
   {
-    "key": "config/dataset/spring.jpa.properties.hibernate.dialect",
+    "key": "config/application/spring.jpa.properties.hibernate.dialect",
     "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
   },
   {
-    "key": "config/dataset/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
+    "key": "config/application/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
     "value": "dHJ1ZQ=="
   },
   {
-    "key": "config/dataset/spring.datasource.metasource.url",
+    "key": "config/application/spring.datasource.metasource.url",
     "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
   },
   {
@@ -48,15 +32,15 @@
     "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
   },
   {
-    "key": "config/dataset/spring.datasource.metasource.username",
+    "key": "config/application/spring.datasource.metasource.username",
     "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
   },
   {
-    "key": "config/dataset/spring.datasource.metasource.password",
+    "key": "config/application/spring.datasource.metasource.password",
     "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
   },
   {
-    "key": "config/dataset/spring.datasource.metasource.driver-class-name",
+    "key": "config/application/spring.datasource.metasource.driver-class-name",
     "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
   {
@@ -176,28 +160,12 @@
     "value": "dHJ1ZQ=="
   },
   {
-    "key": "config/dataflow/spring.datasource.url",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3Q6NTQzMi9tZXRhYmFzZX0="
-  },
-  {
     "key": "config/dataflow/spring.datasource.hikari.connection-timeout",
     "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
   },
   {
     "key": "config/dataflow/spring.datasource.hikari.maximum-pool-size",
     "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
-  },
-  {
-    "key": "config/dataflow/spring.datasource.username",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
-  },
-  {
-    "key": "config/dataflow/spring.datasource.password",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
-  },
-  {
-    "key": "config/dataflow/spring.datasource.driver-class-name",
-    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
   {
     "key": "config/dataflow/management.endpoints.web.exposure.include",
@@ -243,6 +211,22 @@
     "key": "config/dataflow/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
   },
+  {
+    "key": "config/recordstore/spring.datasource.url",
+    "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
+  },
+  {
+    "key": "config/recordstore/spring.datasource.username",
+    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.password",
+    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/recordstore/spring.datasource.driverClassName",
+    "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  }, 
   {
     "key": "config/recordstore/management.endpoints.web.exposure.include",
     "value": "Kg=="
@@ -314,22 +298,6 @@
   {
     "key": "config/recordstore/dockerServerUrl",
     "value": "JHtET0NLRVJfU0VSVkVSX1VSTDp0Y3A6Ly9sb2NhbGhvc3Q6MjM3NX0="
-  },
-  {
-    "key": "config/recordstore/spring.datasource.url",
-    "value": "JHtSRUNPUkRTVE9SRV9DT05ORUNUSU9OX1NUUklORzpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvZGF0YXNldHN9"
-  },
-  {
-    "key": "config/recordstore/spring.datasource.username",
-    "value": "JHtSRUNPUkRTVE9SRV9VU0VSTkFNRTpyb290fQ=="
-  },
-  {
-    "key": "config/recordstore/spring.datasource.password",
-    "value": "JHtSRUNPUkRTVE9SRV9QQVNTV09SRDpyb290fQ=="
-  },
-  {
-    "key": "config/recordstore/spring.datasource.driverClassName",
-    "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
   {
     "key": "config/apiGateway/feign.client.config.default.connectTimeout",
@@ -596,23 +564,23 @@
     "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToxMDczNzQxODI0fQ=="
   },
   {
-    "key": "config/validation/mongodb.hibernate.ddl-auto",
+    "key": "config/application/mongodb.hibernate.ddl-auto",
     "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
   {
-    "key": "config/validation/mongodb.primary.host",
+    "key": "config/application/mongodb.primary.host",
     "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
   },
   {
-    "key": "config/validation/mongodb.primary.port",
+    "key": "config/application/mongodb.primary.port",
     "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
   },
   {
-    "key": "config/validation/mongodb.primary.username",
+    "key": "config/application/mongodb.primary.username",
     "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
   },
   {
-    "key": "config/validation/mongodb.primary.password",
+    "key": "config/application/mongodb.primary.password",
     "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
   },
   {
@@ -626,10 +594,6 @@
   {
     "key": "config/validation/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
     "value": "dHJ1ZQ=="
-  },
-  {
-    "key": "config/validation/spring.datasource.url",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
   },
   {
     "key": "config/validation/spring.datasource.hikari.connection-timeout",
@@ -650,18 +614,6 @@
   {
     "key": "config/validation/spring.datasource.hikari.maxLifetime",
     "value": "JHtEQVRBU0VUX0hJS0FSSV9NQVhfTElGRV9USU1FOjI1MDAwfQ=="
-  },
-  {
-    "key": "config/validation/spring.datasource.username",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
-  },
-  {
-    "key": "config/validation/spring.datasource.password",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
-  },
-  {
-    "key": "config/validation/spring.datasource.driver-class-name",
-    "value": "JHtNRVRBQkFTRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },
   {
     "key": "config/validation/spring.jpa.hibernate.show-sql",
@@ -911,32 +863,8 @@
     "key": "config/recordstore/pathSnapshot",
     "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
   },
-    {
-    "key": "config/indexsearch/mongodb.hibernate.ddl-auto",
-    "value": "JHtNT05HT19EQl9ERExfQVVUTzp2YWxpZGF0ZX0="
-  },
-  {
-    "key": "config/indexsearch/mongodb.primary.host",
-    "value": "JHtNT05HT19EQl9IT1NUOmxvY2FsaG9zdH0="
-  },
-  {
-    "key": "config/indexsearch/mongodb.primary.port",
-    "value": "JHtNT05HT19EQl9QT1JUOjI3MDE3fQ=="
-  },
-  {
-    "key": "config/indexsearch/mongodb.primary.username",
-    "value": "JHtNT05HT19EQl9VU0VSTkFNRTpyb290fQ=="
-  },
-  {
-    "key": "config/indexsearch/mongodb.primary.password",
-    "value": "JHtNT05HT19EQl9QQVNTV09SRDpyb290fQ=="
-  },
   {
     "key": "config/indexsearch/spring.jpa.hibernate.ddl-auto",
-    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
-  },
-  {
-    "key": "config/indexsearch/spring.jpa.hibernate.metabase.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },
   {
@@ -948,24 +876,12 @@
     "value": "dHJ1ZQ=="
   },
   {
-    "key": "config/indexsearch/spring.datasource.metasource.url",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
-  },
-  {
     "key": "config/indexsearch/spring.datasource.metasource.hikari.connection-timeout",
     "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
   },
   {
     "key": "config/indexsearch/spring.datasource.metasource.hikari.maximum-pool-size",
     "value": "JHtNRVRBQkFTRV9ISUtBUklfTUFYX1BPT0xfU0laRTo1fQ=="
-  },
-  {
-    "key": "config/indexsearch/spring.datasource.metasource.username",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VTRVI6cm9vdH0="
-  },
-  {
-    "key": "config/indexsearch/spring.datasource.metasource.password",
-    "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1BBU1NXT1JEOnJvb3R9"
   },
   {
     "key": "config/indexsearch/spring.datasource.metasource.driver-class-name",
