@@ -126,7 +126,7 @@ const DataViewer = withRouter(
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-      onFetchData(undefined, undefined, 0, numRows);
+      onFetchData(undefined, undefined, 0, numRows, filterLevelError);
     }, []);
 
     useEffect(() => {
@@ -165,7 +165,7 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -224,9 +224,13 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      const filteredLevelErrors = filteredKeys.join(',');
-      setFilterLevelError(filteredLevelErrors);
+      setFilterLevelError(filteredKeys.join(','));
     };
+
+    useEffect(() => {
+      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
+      console.log('filterLevelError', filterLevelError);
+    }, [filterLevelError]);
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
@@ -256,7 +260,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       setNumRows(event.rows);
       setFirstRow(event.first);
-      onFetchData(sortField, sortOrder, event.first, event.rows);
+      onFetchData(sortField, sortOrder, event.first, event.rows, filterLevelError);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -351,7 +355,7 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError = null) => {
+    const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError) => {
       setLoading(true);
       try {
         let fields;
@@ -518,7 +522,7 @@ const DataViewer = withRouter(
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);
-      onFetchData(event.sortField, event.sortOrder, 0, numRows);
+      onFetchData(event.sortField, event.sortOrder, 0, numRows, filterLevelError);
     };
 
     const onUpload = () => {
