@@ -53,9 +53,9 @@ public class StatsHelper {
   public List<StatisticsVO> executeStatsProcess(final Long dataflowId) throws EEAException {
 
     List<StatisticsVO> statistics = new ArrayList<>();
-    DataFlowVO dfVO = dataflowService.getDatasetsId(dataflowId);
+    DataFlowVO dfVO = dataflowService.getReportingDatasetsId(dataflowId);
     LOG.info("Retrieving all the datasets' stats from the dataflow: {}", dataflowId);
-    dfVO.getDatasets().parallelStream()
+    dfVO.getReportingDatasets().parallelStream()
         .forEach(d -> statistics.add(datasetController.getStatisticsById(d.getId())));
 
 

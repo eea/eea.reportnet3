@@ -80,6 +80,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+
   /**
    * The Constant LOG.
    */
@@ -106,11 +107,19 @@ public class DataflowServiceImpl implements DataflowService {
     // filter datasets showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
         userManagementControllerZull.getResourcesByUser(ResourceEnum.DATASET);
+    // add to the filter the design datasets (data schemas) too
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceEnum.DATA_SCHEMA));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id).stream()
-        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    dataflowVO.setReportingDatasets(
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    // Add the design datasets
+    dataflowVO
+        .setDesignDatasets(datasetMetabaseController.findDesignDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
@@ -323,7 +332,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public DataFlowVO getDatasetsId(Long id) throws EEAException {
+  public DataFlowVO getReportingDatasetsId(Long id) throws EEAException {
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -331,7 +340,8 @@ public class DataflowServiceImpl implements DataflowService {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setId(id);
-    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
+    dataflowVO
+        .setReportingDatasets(datasetMetabaseController.findReportingDataSetIdByDataflowId(id));
 
 
     return dataflowVO;
