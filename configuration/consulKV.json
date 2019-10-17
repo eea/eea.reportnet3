@@ -16,6 +16,10 @@
     "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
   },
   {
+    "key": "config/application/spring.jpa.hibernate.metabase.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
     "key": "config/application/spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation",
     "value": "dHJ1ZQ=="
   },
