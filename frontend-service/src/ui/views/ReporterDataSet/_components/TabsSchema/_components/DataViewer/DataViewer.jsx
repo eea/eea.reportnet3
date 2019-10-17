@@ -72,6 +72,7 @@ const DataViewer = withRouter(
     const [initialRecordValue, setInitialRecordValue] = useState();
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
+    const [filterLevelError, setFilterLevelError] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
     const [menu, setMenu] = useState();
@@ -98,7 +99,7 @@ const DataViewer = withRouter(
 
     let filterMenuRef = useRef();
 
-    let filterMenu = [
+    const filterMenu = [
       { label: 'Correct', key: 'correct' },
       { label: 'Warnings', key: 'warning' },
       { label: 'Errors', key: 'errors' }
@@ -224,7 +225,12 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      console.log('filteredKeys==>', filteredKeys);
+      const filteredLevelErrors = filteredKeys.join(',');
+
+      setFilterLevelError(filteredLevelErrors);
+
+      //  setFilterLevelError(filteredLevelErrors);
+      console.log('filteredLevelErrors', filteredLevelErrors);
     };
 
     useEffect(() => {
@@ -350,10 +356,11 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows) => {
+    const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError = null) => {
       setLoading(true);
       try {
         let fields;
+
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
@@ -363,7 +370,8 @@ const DataViewer = withRouter(
           tableId,
           Math.floor(fRow / nRows),
           nRows,
-          fields
+          fields,
+          filterLevelError
         );
         if (!isUndefined(colsSchema)) {
           if (!isUndefined(tableData)) {
@@ -448,8 +456,9 @@ const DataViewer = withRouter(
         setConfirmPasteVisible(false);
       }
     };
+
     const onRefresh = () => {
-      onFetchData(sortField, sortOrder, firstRow, numRows);
+      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
     };
 
     const onPasteCancel = () => {
@@ -510,6 +519,7 @@ const DataViewer = withRouter(
     };
 
     const onSort = event => {
+      console.log(event.sortOrder, event.sortField);
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);
