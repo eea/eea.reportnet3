@@ -3,7 +3,7 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 const all = async dataflowId => {
   const webLinksDTO = await apiWebLink.all(dataflowId);
-  return webLinksDTO.map(webLinkDTO => new WebLink(webLinkDTO.description, webLinkDTO.url, webLinkDTO.id));
+  return webLinksDTO.map(webLinkDTO => new WebLink(webLinkDTO.id, webLinkDTO.description, webLinkDTO.url));
 };
 
 export const ApiWebLinkRepository = {
