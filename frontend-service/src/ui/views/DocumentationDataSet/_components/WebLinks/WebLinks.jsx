@@ -12,7 +12,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-const WebLinks = ({ webLinks, isCustodian }) => {
+export const WebLinks = ({ webLinks, isCustodian }) => {
   const resources = useContext(ResourcesContext);
 
   const [editedRecord, setEditedRecord] = useState({});
@@ -168,28 +168,21 @@ const WebLinks = ({ webLinks, isCustodian }) => {
     console.log('Saving record:', record);
     if (isNewRecord) {
       try {
-        // await DatasetService.addRecordsById(datasetId, tableId, [record]);
         setIsAddDialogVisible(false);
       } catch (error) {
         console.error('DataViewer error: ', error);
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
       } finally {
-        // setLoading(false);
       }
     } else {
       try {
-        // await DatasetService.updateRecordsById(datasetId, record);
         setIsEditDialogVisible(false);
       } catch (error) {
         console.error('DataViewer error: ', error);
         const errorResponse = error.response;
         console.error('DataViewer errorResponse: ', errorResponse);
-        // if (!isUndefined(errorResponse) && (errorResponse.status === 401 || errorResponse.status === 403)) {
-        //   history.push(getUrl(routes.DATAFLOW, { dataflowId }));
-        // }
       } finally {
-        // setLoading(false);
       }
     }
   };
@@ -320,5 +313,3 @@ const WebLinks = ({ webLinks, isCustodian }) => {
     </>
   );
 };
-
-export { WebLinks };
