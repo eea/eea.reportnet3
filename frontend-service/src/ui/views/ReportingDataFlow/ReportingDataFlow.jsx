@@ -46,7 +46,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   useEffect(() => {
-    if (!isUndefined(user.roles)) {
+    if (!isUndefined(user.contextRoles)) {
       setHasWritePermissions(
         UserService.hasPermission(
           user,
@@ -54,6 +54,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           `${config.permissions.DATA_FLOW}${match.params.dataflowId}`
         )
       );
+    }
+
+    if (!isUndefined(user.contextRoles)) {
       setIsCustodian(
         UserService.hasPermission(
           user,
@@ -157,7 +160,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <DataflowColumn
-        buttonTitle={resources.messages.subscribeThisButton}
+        subscribeButtonTitle={resources.messages.subscribeThisButton}
         dataflowTitle={dataflowData.name}
         navTitle={resources.messages.dataflow}
         components={[]}
@@ -177,6 +180,37 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
+            {false && (
+              <div className={`${styles.datasetItem}`}>
+                <BigButton
+                  layout="addNewDataset"
+                  caption={resources.messages.add}
+                  handleRedirect={() =>
+                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
+                  }
+                  model={[
+                    {
+                      label: 'New dataset from template',
+                      icon: 'clone',
+                      command: () => showReleaseSnapshotDialog(),
+                      disabled: false
+                    },
+                    {
+                      label: 'New empty dataset',
+                      icon: 'clone',
+                      command: () => showReleaseSnapshotDialog(),
+                      disabled: false
+                    },
+                    {
+                      label: 'New linked page',
+                      icon: 'clone',
+                      command: () => showReleaseSnapshotDialog(),
+                      disabled: false
+                    }
+                  ]}
+                />
+              </div>
+            )}
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
