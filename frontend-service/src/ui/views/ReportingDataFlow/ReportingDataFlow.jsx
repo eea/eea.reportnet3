@@ -180,7 +180,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         <div className={`${styles.buttonsWrapper}`}>
           <div className={styles.splitButtonWrapper}>
-            {isCustodian && (
+            {false && (
               <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="addNewDataset"
@@ -190,7 +190,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                   }
                   model={[
                     {
-                      label: 'New dataset from template' /* resources.messages.releaseDataCollection */,
+                      label: 'New dataset from template',
                       icon: 'clone',
                       command: () => showReleaseSnapshotDialog(),
                       disabled: false
