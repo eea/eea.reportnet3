@@ -288,4 +288,13 @@ public interface DatasetService {
    */
   void saveStatistics(@DatasetId Long datasetId) throws EEAException;
 
+
+  /**
+   * Delete table value.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  void deleteTableValue(@DatasetId Long datasetId, String idTableSchema);
+
 }

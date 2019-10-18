@@ -1,10 +1,11 @@
 package org.eea.dataset.controller;
 
-import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
@@ -88,5 +90,24 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
     return dataschemaService.getDataSchemaByIdFlow(idFlow, false);
 
+  }
+
+  /**
+   * Delete table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @HystrixCommand()
+  @RequestMapping(value = "/{datasetId}/tableschema/{tableSchemaId}", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String idTableSchema) {
+    if (idTableSchema == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+    dataschemaService.deleteTableSchema(datasetId, idTableSchema);
   }
 }

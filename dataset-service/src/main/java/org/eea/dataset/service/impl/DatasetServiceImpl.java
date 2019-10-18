@@ -1313,5 +1313,16 @@ public class DatasetServiceImpl implements DatasetService {
     recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
   }
 
+  /**
+   * Delete table value.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @Transactional
+  public void deleteTableValue(Long datasetId, String idTableSchema) {
+    tableRepository.deleteByIdTableSchema(idTableSchema);
+  }
 
 }
