@@ -253,22 +253,16 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       return <WebFormData datasetId={datasetId} tableSchemaId={tableSchemaId} />;
     } else {
       return (
-        <SnapshotContext.Provider
-          value={{
-            snapshotState: snapshotState,
-            snapshotDispatch: snapshotDispatch
-          }}>
-          <TabsSchema
-            activeIndex={activeIndex}
-            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-            recordPositionId={recordPositionId}
-            selectedRecordErrorId={selectedRecordErrorId}
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            isWebFormMMR={isWebFormMMR}
-            hasWritePermissions={hasWritePermissions}
-          />
-        </SnapshotContext.Provider>
+        <TabsSchema
+          activeIndex={activeIndex}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          recordPositionId={recordPositionId}
+          selectedRecordErrorId={selectedRecordErrorId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+          isWebFormMMR={isWebFormMMR}
+          hasWritePermissions={hasWritePermissions}
+        />
       );
     }
   };
