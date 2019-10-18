@@ -37,6 +37,7 @@
 		"createDataflowDescription": "Dataflow description",
 		"createDataflowName": "Dataflow name",
 		"createDatasetName": "Dataset name",
+		"createdatasetSchemaName": "Dataset schema name",
 		"createSnapshotMessage": "Create snapshot",
 		"createSnapshotPlaceholder": "Description",
 		"createSnapshotTitle": "Snapshots",

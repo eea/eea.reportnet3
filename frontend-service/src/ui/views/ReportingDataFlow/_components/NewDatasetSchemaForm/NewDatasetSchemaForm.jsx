@@ -4,37 +4,54 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import { isEmpty } from 'lodash';
 
-import styles from './CreateDatasetForm.module.css';
+import styles from './NewDatasetSchemaForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export const CreateDatasetForm = ({ isFormReset, onCreate, setNewDatasetDialog }) => {
+import { DataflowService } from 'core/services/DataFlow';
+
+export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, setNewDatasetDialog }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
 
-  const initialValues = { datasetName: '' };
+  const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
-    datasetName: Yup.string().required()
+    datasetSchemaName: Yup.string().required()
   });
 
   if (!isFormReset) {
     form.current.resetForm();
   }
   return (
-    <Formik ref={form} initialValues={initialValues} validationSchema={newDatasetValidationSchema} onSubmit={onCreate}>
+    <Formik
+      ref={form}
+      initialValues={initialValues}
+      validationSchema={newDatasetValidationSchema}
+      onSubmit={async (values, { setSubmitting }) => {
+        console.log('values', values);
+        console.log('setSubmitting', setSubmitting);
+        setSubmitting(true);
+        const response = await DataflowService.newEmptyDatasetSchema(dataflowId, values.datasetSchemaName);
+        onCreate();
+        if (response === 200) {
+          console.log('success');
+          setSubmitting(false);
+          onCreate();
+        } else {
+          console.log('error');
+          setSubmitting(false);
+        }
+      }}>
       {({ errors, touched }) => (
         <Form>
           <fieldset>
             <div
-              className={`${styles.form} formField${
-                !isEmpty(errors.datasetName) && touched.datasetName ? ' error' : ''
-              }`}>
-              <Field name="datasetName" type="text" placeholder={resources.messages['createDatasetName']} />
+              className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
+              <Field name="datasetSchemaName" type="text" placeholder={resources.messages['createdatasetSchemaName']} />
             </div>
           </fieldset>
           <fieldset>
-            <hr />
             <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
                 className={

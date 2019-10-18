@@ -6,9 +6,6 @@
 .cancelButton {
   margin-left: 0.5rem !important;
 }
-.form {
-  margin: 1rem 0 1rem 0;
-}
 .search {
   display: flex;
   flex-direction: row;

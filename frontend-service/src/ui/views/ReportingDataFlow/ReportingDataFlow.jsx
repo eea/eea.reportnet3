@@ -14,7 +14,7 @@ import { BigButton } from './_components/BigButton';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
 import { ContributorsList } from './_components/ContributorsList';
-import { CreateDatasetForm } from './_components/CreateDatasetForm';
+import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -303,7 +303,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           className={styles.dialog}
           dismissableMask={false}
           onHide={() => (setNewDatasetDialog(false), setIsFormReset(false))}>
-          <CreateDatasetForm
+          <NewDatasetSchemaForm
+            dataflowId={match.params.dataflowId}
             isFormReset={isFormReset}
             onCreate={onCreateDataset}
             setNewDatasetDialog={setNewDatasetDialog}
