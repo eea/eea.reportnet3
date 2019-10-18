@@ -26,10 +26,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoading
   }, [isVisible]);
 
   const snapshotValidationSchema = Yup.object().shape({
-    createSnapshotDescription: Yup.string()
-      .min(2, resources.messages['snapshotDescriptionValidationMin'])
-      .max(100, resources.messages['snapshotDescriptionValidationMax'])
-      .required(resources.messages['snapshotDescriptionValidationRequired'])
+    createSnapshotDescription: Yup.string().required()
   });
 
   if (isVisible) {
@@ -81,9 +78,6 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoading
                     />
                   </div>
                 </div>
-                {errors.createSnapshotDescription || touched.createSnapshotDescription ? (
-                  <div className="error">{errors.createSnapshotDescription}</div>
-                ) : null}
               </Form>
             )}
           />

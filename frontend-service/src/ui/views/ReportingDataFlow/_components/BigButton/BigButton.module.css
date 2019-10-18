@@ -108,6 +108,24 @@
   background-color: var(--c-purple-300);
   color: var(--white);
 }
+.addNewDataset {
+  background-color: var(--c-blue-300);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--white);
+}
+.addNewDataset a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.addNewDataset a:hover {
+  background-color: var(--c-blue-200);
+  color: var(--white);
+}
+
 .caption {
   text-align: center;
   text-transform: capitalize;
