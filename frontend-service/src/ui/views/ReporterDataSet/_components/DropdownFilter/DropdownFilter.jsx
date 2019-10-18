@@ -34,6 +34,7 @@ class DropdownFilter extends React.Component {
       });
     }
   }
+
   hide(e) {
     if (!this.state.menuClick) {
       this.setState(
@@ -91,14 +92,17 @@ class DropdownFilter extends React.Component {
       }
     );
   }
+
   updateChecked(fieldKey) {
     const { fields } = this.state;
+
     const newFields = fields.map(field => {
       if (field.key === fieldKey) {
         field.checked = !field.checked;
       }
       return field;
     });
+
     this.setState(
       state => {
         return {
@@ -117,6 +121,7 @@ class DropdownFilter extends React.Component {
       }
     );
   }
+
   menuClick(e) {
     this.setState(state => {
       return {
@@ -125,6 +130,7 @@ class DropdownFilter extends React.Component {
       };
     });
   }
+
   render() {
     const { fields } = this.state;
     return (
