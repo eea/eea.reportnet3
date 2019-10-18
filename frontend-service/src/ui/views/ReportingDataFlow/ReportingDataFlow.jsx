@@ -141,7 +141,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const onCreateDataset = () => {
     setNewDatasetDialog(false);
-    console.log('saved');
   };
 
   const showContributorsDialog = () => {

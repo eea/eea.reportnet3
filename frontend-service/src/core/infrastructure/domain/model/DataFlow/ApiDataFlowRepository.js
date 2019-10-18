@@ -223,6 +223,11 @@ const dataflowDetails = async dataflowId => {
   return dataflowDetails;
 };
 
+const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
+  const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
+  return newEmptyDatasetSchemaResponse;
+};
+
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
@@ -259,6 +264,7 @@ export const ApiDataflowRepository = {
   dataflowDetails,
   datasetsValidationStatistics,
   datasetsReleasedStatus,
+  newEmptyDatasetSchema,
   pending,
   reject,
   reporting

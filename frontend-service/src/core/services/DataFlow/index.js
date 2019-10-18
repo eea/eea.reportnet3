@@ -9,6 +9,7 @@ import { GetReporting } from './GetReporting';
 import { Accept } from './Accept';
 import { Reject } from './Reject';
 import { GetAll } from './GetAll';
+import { PostDatasetSchema } from './PostDatasetSchema';
 
 export const DataflowService = {
   all: GetAll({ dataflowRepository }),
@@ -20,5 +21,6 @@ export const DataflowService = {
   datasetsReleasedStatus: GetReleasedDashboards({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
   accept: Accept({ dataflowRepository }),
-  reject: Reject({ dataflowRepository })
+  reject: Reject({ dataflowRepository }),
+  newEmptyDatasetSchema: PostDatasetSchema({ dataflowRepository })
 };
