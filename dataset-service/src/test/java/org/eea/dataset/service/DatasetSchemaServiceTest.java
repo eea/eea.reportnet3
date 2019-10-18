@@ -11,6 +11,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -18,6 +19,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.junit.Assert;
@@ -47,6 +49,9 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
+
+  @Mock
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   /**
    * The data schema service impl.
@@ -367,9 +372,18 @@ public class DatasetSchemaServiceTest {
     schema2.setTableSchemas(listaTables);
 
     assertEquals("Not equals", schema, schema2);
-
-
   }
 
+  @Test
+  public void createEmptyDataSetSchemaTest() throws EEAException {
+    Mockito.when(dataSetMetabaseRepository.findDataFlowById(Mockito.any())).thenReturn(true);
+    Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
+    Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema"));
+  }
 
+  @Test(expected = EEAException.class)
+  public void createEmptyDataSetSchemaException() throws EEAException {
+    Mockito.when(dataSetMetabaseRepository.findDataFlowById(Mockito.any())).thenReturn(false);
+    dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema");
+  }
 }

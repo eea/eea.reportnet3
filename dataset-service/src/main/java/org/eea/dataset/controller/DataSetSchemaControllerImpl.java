@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
@@ -9,6 +10,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
@@ -64,13 +67,16 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void createEmptyDataSetSchema(
       @RequestParam("nameDataSetSchema") final String nameDataSetSchema,
       @RequestParam("idDataFlow") final Long idDataFlow) {
+
     try {
       datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN,
           nameDataSetSchema + "_dataset",
           dataschemaService.createEmptyDataSetSchema(idDataFlow, nameDataSetSchema).toString(),
           idDataFlow);
     } catch (EEAException e) {
-      LOG.error("Unexpected exception: {}", e.getLocalizedMessage());
+      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
   }
 

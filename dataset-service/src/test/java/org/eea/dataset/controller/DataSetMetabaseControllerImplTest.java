@@ -1,7 +1,6 @@
 package org.eea.dataset.controller;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -71,26 +70,16 @@ public class DataSetMetabaseControllerImplTest {
    * @throws Exception the exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void createEmptyDataSetTestExceptionEntry1() throws Exception {
+  public void createEmptyDataSetTestException1() throws Exception {
     dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, null, null, 1L);
   }
 
-  /**
-   * Creates the removeDatasetData data set test exception entry 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createEmptyDataSetTestExceptionEntry2() throws Exception {
-    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "", "", 1L);
-  }
 
-  @Test()
-  public void createEmptyDataSetTestExceptionFail() throws Exception {
-    doThrow(EEAException.class).when(datasetMetabaseService)
-        .createEmptyDataset(TypeDatasetEnum.REPORTING, "datasetName", null, 1L);
-    dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
-        1L);
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetTestException2() throws Exception {
+    Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
+        .createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetMetabaseControllerImpl.createEmptyDataSet(null, "notBlank", "", 1L);
   }
 
   /**

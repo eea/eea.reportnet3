@@ -53,7 +53,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * The Constant LOG_ERROR.
    */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
 
   /**
    * Find data set id by dataflow id.
@@ -66,9 +66,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(Long idDataflow) {
-
     return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
-
   }
 
   /**
@@ -107,7 +105,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
           idDataflow);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_UNKNOW_TYPE);
     }
 
   }

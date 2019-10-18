@@ -39,6 +39,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
@@ -80,24 +81,27 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public void createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
       String idDataSetSchema, Long idDataFlow) throws EEAException {
 
-    DataSetMetabase dataset;
+    if (datasetType != null && datasetName != null && idDataSetSchema != null
+        && idDataFlow != null) {
+      DataSetMetabase dataset;
 
-    switch (datasetType) {
-      case REPORTING:
-        dataset = new ReportingDataset();
-        fillDataset(dataset, datasetName, idDataFlow);
-        reportingDatasetRepository.save((ReportingDataset) dataset);
-        break;
-      case DESIGN:
-        dataset = new DesignDataset();
-        fillDataset(dataset, datasetName, idDataFlow);
-        designDatasetRepository.save((DesignDataset) dataset);
-        break;
-      default:
-        throw new EEAException("Unsupported datasetType");
+      switch (datasetType) {
+        case REPORTING:
+          dataset = new ReportingDataset();
+          fillDataset(dataset, datasetName, idDataFlow);
+          reportingDatasetRepository.save((ReportingDataset) dataset);
+          break;
+        case DESIGN:
+          dataset = new DesignDataset();
+          fillDataset(dataset, datasetName, idDataFlow);
+          designDatasetRepository.save((DesignDataset) dataset);
+          break;
+        default:
+          throw new EEAException("Unsupported datasetType: " + datasetType);
+      }
+
+      recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), idDataSetSchema);
     }
-
-    recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), idDataSetSchema);
   }
 
   private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow) {

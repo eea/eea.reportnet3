@@ -8,6 +8,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -19,8 +20,10 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
+
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Autowired
+  private KeycloakConnectorService keycloakConnectorService;
 
   /**
    * The dataschema mapper.
@@ -120,7 +129,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final String NULL = "id == null";
 
   @Override
-  public ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema) {
+  public ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema)
+      throws EEAException {
+
+    if (!dataSetMetabaseRepository.findDataFlowById(idDataFlow)) {
+      throw new EEAException("DataFlow with id " + idDataFlow + " not found");
+    }
 
     DataSetSchema dataSetSchema = new DataSetSchema();
     ObjectId idDataSetSchema = new ObjectId();
@@ -134,6 +148,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.save(dataSetSchema);
 
     return idDataSetSchema;
+  }
+
+  public void createGroupAndAddUser() {
+
   }
 
   /**

@@ -8,11 +8,10 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -47,13 +46,6 @@ public class FileTreatmentHelper {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
-
-  /**
-   * The table repository.
-   */
-  @Autowired
-  private TableRepository tableRepository;
-
 
   /**
    * The data set mapper.

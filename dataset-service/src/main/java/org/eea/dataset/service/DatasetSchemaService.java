@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.bson.types.ObjectId;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 
 /**
@@ -17,7 +18,7 @@ public interface DatasetSchemaService {
    */
   void createDataSchema(Long datasetId, Long dataflowId);
 
-  ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema);
+  ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema) throws EEAException;
 
 
   /**
