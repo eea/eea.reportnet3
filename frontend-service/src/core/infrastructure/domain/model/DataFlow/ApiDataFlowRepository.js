@@ -9,6 +9,7 @@ const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.datasets);
+  dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.deadlineDate = dataflowDTO.deadlineDate;
   dataflow.description = dataflowDTO.description;
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);

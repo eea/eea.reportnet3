@@ -42,6 +42,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
@@ -109,7 +110,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   useEffect(() => {
     setLoading(true);
     onLoadReportingDataflow();
-  }, [match.params.dataflowId]);
+  }, [match.params.dataflowId, isDataUpdated]);
 
   const onGrowlAlert = message => {
     growlRef.current.show(message);
@@ -226,6 +227,50 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documentation-data-set/`)}
               />
             </div>
+            {!isUndefined(dataflowData.designDatasets) ? (
+              dataflowData.designDatasets.map(newDatasetSchema => {
+                return (
+                  <div className={`${styles.datasetItem}`} key={newDatasetSchema.datasetId}>
+                    <BigButton
+                      layout="designDatasetSchema"
+                      caption={newDatasetSchema.datasetSchemaName}
+                      // handleRedirect={() => {
+                      //   handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${newDatasetSchema.datasetId}`);
+                      // }}
+                      model={[
+                        {
+                          label: resources.messages['openDataset'],
+                          icon: 'openFolder',
+                          disabled: false
+                        },
+                        {
+                          label: resources.messages['rename'],
+                          icon: 'pencil',
+                          disabled: true
+                        },
+                        {
+                          label: resources.messages['duplicate'],
+                          icon: 'clone',
+                          disabled: true
+                        },
+                        {
+                          label: resources.messages['delete'],
+                          icon: 'trash',
+                          disabled: true
+                        },
+                        {
+                          label: resources.messages['properties'],
+                          icon: 'info',
+                          disabled: true
+                        }
+                      ]}
+                    />
+                  </div>
+                );
+              })
+            ) : (
+              <></>
+            )}
             {dataflowData.datasets.map(dataset => {
               return (
                 <div className={`${styles.datasetItem}`} key={dataset.datasetId}>
@@ -306,6 +351,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             dataflowId={match.params.dataflowId}
             isFormReset={isFormReset}
             onCreate={onCreateDataset}
+            setIsDataUpdated={setIsDataUpdated}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
@@ -332,7 +378,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               <Button
                 className="p-button-secondary"
                 icon="cancel"
-                label={resources.messages.close}
+                label={resources.messages['close']}
                 onClick={() => setIsActivePropertiesDialog(false)}
               />
             </>
