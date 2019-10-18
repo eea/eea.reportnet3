@@ -952,5 +952,9 @@ public class DatasetServiceTest {
 
   }
 
-
+  @Test
+  public void deleteTableValueTest() {
+    datasetService.deleteTableValue(1L, new ObjectId().toString());
+    Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
+  }
 }

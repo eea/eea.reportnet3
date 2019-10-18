@@ -20,7 +20,6 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.slf4j.Logger;
@@ -58,10 +57,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
-
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
 
   /**
    * The Constant LOG.
@@ -383,7 +378,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Transactional
   public void deleteTableSchema(Long datasetId, String idTableSchema) {
     schemasRepository.deleteTableSchemaById(idTableSchema);
-    datasetService.deleteTableValue(datasetId, idTableSchema);
   }
 
 }

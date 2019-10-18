@@ -988,8 +988,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Table statistics
     stats.setTables(new ArrayList<>());
     for (List<Statistics> listStats : tablesMap.values()) {
-      TableStatisticsVO tableVO = new TableStatisticsVO();
-      Class<?> clazzTable = tableVO.getClass();
+      Class<?> clazzTable = TableStatisticsVO.class;
       Object instanceTable = clazzTable.newInstance();
       listStats.stream().forEach(s -> {
         setEntityProperty(instanceTable, s.getStatName(), s.getValue());
