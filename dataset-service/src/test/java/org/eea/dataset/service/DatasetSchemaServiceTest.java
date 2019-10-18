@@ -371,5 +371,13 @@ public class DatasetSchemaServiceTest {
 
   }
 
+  /**
+   * Delete table schema test.
+   */
+  @Test
+  public void deleteTableSchemaTest() {
+    dataSchemaServiceImpl.deleteTableSchema(1L, "idTableSchema");
+    Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
+  }
 
 }
