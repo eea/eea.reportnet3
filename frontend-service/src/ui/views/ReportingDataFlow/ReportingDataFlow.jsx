@@ -197,7 +197,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             <div className={`${styles.datasetItem}`}>
               {isCustodian && (
                 <BigButton
-                  layout="addNewDataset"
+                  layout="newItem"
                   caption={resources.messages['newItem']}
                   handleRedirect={() =>
                     handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)

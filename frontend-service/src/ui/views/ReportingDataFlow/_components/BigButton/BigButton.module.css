@@ -23,6 +23,25 @@
   color: var(--white);
   background-color: var(--c-blue-400);
 }
+
+.designDatasetSchema {
+  background-color: #009490;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.designDatasetSchema a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.designDatasetSchema a:hover {
+  color: var(--white);
+  background-color: #027470;
+}
+
 .documents {
   background-color: #ffba01;
   display: flex;
@@ -108,7 +127,7 @@
   background-color: var(--c-purple-300);
   color: var(--white);
 }
-.addNewDataset {
+.newItem {
   background-color: var(--c-blue-300);
   position: relative;
   display: flex;
@@ -117,11 +136,11 @@
   align-items: center;
   color: var(--white);
 }
-.addNewDataset a {
+.newItem a {
   color: var(--white);
   border-radius: 10px;
 }
-.addNewDataset a:hover {
+.newItem a:hover {
   background-color: var(--c-blue-200);
   color: var(--white);
 }
