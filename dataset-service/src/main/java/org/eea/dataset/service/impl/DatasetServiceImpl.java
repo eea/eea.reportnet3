@@ -1355,7 +1355,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void delete(Long datasetId) {
-    datasetRepository.deleteById(datasetId);
+    datasetRepository.deleteSchema("dataset_" + datasetId);
   }
 
 }

@@ -29,16 +29,4 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     mongo.updateMulti(new Query(), update, DataSetSchema.class);
   }
 
-  /**
-   * Delete dataset schema by id.
-   *
-   * @param schemaId the schema id
-   */
-  @Override
-  public void deleteDatasetSchemaById(String schemaId) {
-    Update update =
-        new Update().pull("datasetSchema", new BasicDBObject("_id", new ObjectId(schemaId)));
-    mongo.updateMulti(new Query(), update, DataSetSchema.class);
-  }
-
 }
