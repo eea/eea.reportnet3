@@ -13,8 +13,10 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -173,5 +175,31 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteTableSchemaExceptionTest() {
     dataSchemaControllerImpl.deleteTableSchema(null, null);
+  }
+
+  @Test
+  public void updateTableSchemaTest() throws EEAException {
+    dataSchemaControllerImpl.updateTableSchema("", new TableSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateTableSchemaTestException() throws EEAException {
+    dataSchemaControllerImpl.updateTableSchema("", new TableSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void createTableSchemaTest() {
+    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void createTableSchemaTestException() {
+    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 }
