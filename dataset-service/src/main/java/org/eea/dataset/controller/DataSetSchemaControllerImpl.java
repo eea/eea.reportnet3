@@ -84,8 +84,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       datasetService.saveTablePropagation(datasetId, tableSchema);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 
