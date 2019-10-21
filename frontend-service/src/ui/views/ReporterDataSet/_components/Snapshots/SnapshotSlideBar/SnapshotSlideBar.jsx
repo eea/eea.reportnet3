@@ -1,15 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect, useRef } from 'react';
-import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
-
+import { Formik, Field, Form } from 'formik';
 import { isEmpty } from 'lodash';
 
 import styles from './SnapshotSliderBar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Sidebar } from 'primereact/sidebar';
-import { SnapshotList } from './_components/SnapshotList';
+import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -85,7 +84,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoading
         {isLoadingSnapshotListData ? (
           <Spinner />
         ) : snapshotListData.length > 0 ? (
-          <SnapshotList snapshotListData={snapshotListData} />
+          <SnapshotsList snapshotListData={snapshotListData} />
         ) : (
           <h3>{resources.messages.snapshotsDontExist}</h3>
         )}
