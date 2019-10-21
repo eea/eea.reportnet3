@@ -1,9 +1,11 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,4 +67,28 @@ public interface DatasetSchemaController {
   @RequestMapping(value = "/noRules/dataflow/{id}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow);
+
+
+
+  /**
+   * Update table schema.
+   *
+   * @param idSchema the id schema
+   * @param tableSchema the table schema
+   */
+  @RequestMapping(value = "/{idSchema}/udpateTableSchema", method = RequestMethod.PUT)
+  void updateTableSchema(String idSchema, TableSchemaVO tableSchema);
+
+  /**
+   * Creates the table schema.
+   *
+   * @param id the id
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   */
+  @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
+  void createTableSchema(@PathVariable("id") String id, @PathVariable("datasetId") Long datasetId,
+      @RequestBody final TableSchemaVO tableSchema);
+
+
 }
