@@ -65,6 +65,7 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
+    const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -227,6 +228,8 @@ const DataViewer = withRouter(
       let concatFilter = filteredKeys.join(',');
 
       let finalFilter = concatFilter == [] ? 'ALL' : concatFilter;
+
+      setIsFilterValidationsActive(filteredKeys.length != 3);
 
       setFilterLevelError(finalFilter);
     };
@@ -1083,7 +1086,8 @@ const DataViewer = withRouter(
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
-              icon={'filter'}
+              icon="filter"
+              iconClasses={isFilterValidationsActive ? styles.filterActive : styles.filterInactive}
               label={resources.messages['filter']}
               onClick={event => {
                 filterMenuRef.current.show(event);
