@@ -314,6 +314,6 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    */
-  void delete(@DatasetId Long datasetId);
+  void delete(Long datasetId);
 
 }
