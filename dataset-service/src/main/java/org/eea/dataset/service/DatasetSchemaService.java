@@ -40,6 +40,24 @@ public interface DatasetSchemaService {
 
 
   /**
+   * Delete table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  void deleteTableSchema(String idTableSchema);
+
+
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
+  void deleteDatasetSchema(Long datasetId, String schemaId);
+
+
+  /**
    * Update name table schema.
    *
    * @param id the id

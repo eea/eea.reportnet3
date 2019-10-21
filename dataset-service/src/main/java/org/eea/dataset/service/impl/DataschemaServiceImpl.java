@@ -3,6 +3,7 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
@@ -87,7 +88,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant STRING_WARNING.
    */
   private static final String STRING_WARNING =
-      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
+      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE SHORTER";
 
   /**
    * The Constant INTEGER_ERROR.
@@ -113,11 +114,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant DATE_ERROR.
    */
   private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
-
-  /**
-   * The Constant WARNING.
-   */
-  private static final String WARNING = "WARNING";
 
   /**
    * The Constant NULL.
@@ -197,7 +193,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<>();
 
-      // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
@@ -381,9 +376,28 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
     LOG.info("Schema retrived by idFlow {}", idFlow);
-    return addRules ? dataSchemaMapper.entityToClass(dataschema)
+    return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
 
+  }
+
+  /**
+   * Delete table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @Transactional
+  public void deleteTableSchema(String idTableSchema) {
+    schemasRepository.deleteTableSchemaById(idTableSchema);
+  }
+
+
+  @Override
+  @Transactional
+  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+    // not yet implemented
   }
 
 
