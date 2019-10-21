@@ -58,32 +58,22 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
+  const [showSnapshots, setShowSnapshots] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
-  const [showSnapshots, setShowSnapshots] = useState(false);
 
   let exportMenuRef = useRef();
+
+  let growlRef = useRef();
 
   const home = {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
   };
-
-  useEffect(() => {
-    if (!isUndefined(user.contextRoles)) {
-      setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
-      );
-    }
-  }, [user]);
-
-  useEffect(() => {
-    onLoadDatasetSchema();
-  }, [isDataDeleted]);
 
   useEffect(() => {
     setBreadCrumbItems([
@@ -98,6 +88,18 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       { label: resources.messages['dataset'] }
     ]);
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(user.contextRoles)) {
+      setHasWritePermissions(
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
+      );
+    }
+  }, [user]);
+
+  useEffect(() => {
+    onLoadDatasetSchema();
+  }, [isDataDeleted]);
 
   useEffect(() => {
     let exportOptions = config.exportTypes;
@@ -117,6 +119,54 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       DownloadFile(exportDatasetData, exportDatasetDataName);
     }
   }, [exportDatasetData]);
+
+  const createFileName = (fileName, fileType) => {
+    return `${fileName}.${fileType}`;
+  };
+
+  const checkIsWebFormMMR = datasetName => {
+    const mmrDatasetName = 'MMR_TEST';
+    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
+      setIsInputSwitchChecked(true);
+      setIsWebFormMMR(true);
+    } else {
+      setIsWebFormMMR(false);
+    }
+  };
+
+  const getPosition = button => {
+    const buttonTopPosition = button.top;
+    const buttonLeftPosition = button.left;
+
+    const exportDatasetMenu = document.getElementById('exportDataSetMenu');
+    exportDatasetMenu.style.top = buttonTopPosition;
+    exportDatasetMenu.style.left = buttonLeftPosition;
+  };
+
+  const onConfirmDelete = async () => {
+    setDeleteDialogVisible(false);
+    const dataDeleted = await DatasetService.deleteDataById(datasetId);
+    if (dataDeleted) {
+      setIsDataDeleted(true);
+    }
+  };
+
+  const onConfirmValidate = async () => {
+    setValidateDialogVisible(false);
+    await DatasetService.validateDataById(datasetId);
+  };
+
+  const onExportData = async fileType => {
+    setLoadingFile(true);
+    try {
+      setExportDatasetDataName(createFileName(datasetTitle, fileType));
+      setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingFile(false);
+    }
+  };
 
   const onLoadDatasetSchema = async () => {
     try {
@@ -162,18 +212,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     setLoading(false);
   };
 
-  const onExportData = async fileType => {
-    setLoadingFile(true);
-    try {
-      setExportDatasetDataName(createFileName(datasetTitle, fileType));
-      setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingFile(false);
-    }
-  };
-
   const onSetVisible = (fnUseState, visible) => {
     fnUseState(visible);
   };
@@ -181,41 +219,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onTabChange = tableSchemaId => {
     setActiveIndex(tableSchemaId.index);
   };
-
-  const createFileName = (fileName, fileType) => {
-    return `${fileName}.${fileType}`;
-  };
-
-  let growlRef = useRef();
-
-  const getPosition = button => {
-    const buttonTopPosition = button.top;
-    const buttonLeftPosition = button.left;
-
-    const exportDatasetMenu = document.getElementById('exportDataSetMenu');
-    exportDatasetMenu.style.top = buttonTopPosition;
-    exportDatasetMenu.style.left = buttonLeftPosition;
-  };
-
-  const layout = children => {
-    return (
-      <MainLayout>
-        <Growl ref={growlRef} />
-        <BreadCrumb model={breadCrumbItems} home={home} />
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
-  };
-
-  let WebFormInputSwitch = (
-    <InputSwitch
-      className={styles.WebFormInputSwitch}
-      checked={isInputSwitchChecked}
-      onChange={e => {
-        setIsInputSwitchChecked(e.value);
-      }}
-    />
-  );
 
   const showWebFormInputSwitch = () => {
     if (isWebFormMMR) {
@@ -228,16 +231,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           </div>
         </div>
       );
-    }
-  };
-
-  const checkIsWebFormMMR = datasetName => {
-    const mmrDatasetName = 'MMR_TEST';
-    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
-      setIsInputSwitchChecked(true);
-      setIsWebFormMMR(true);
-    } else {
-      setIsWebFormMMR(false);
     }
   };
 
@@ -260,25 +253,32 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onConfirmDelete = async () => {
-    setDeleteDialogVisible(false);
-    const dataDeleted = await DatasetService.deleteDataById(datasetId);
-    if (dataDeleted) {
-      setIsDataDeleted(true);
-    }
+  const layout = children => {
+    return (
+      <MainLayout>
+        <Growl ref={growlRef} />
+        <BreadCrumb model={breadCrumbItems} home={home} />
+        <div className="rep-container">{children}</div>
+      </MainLayout>
+    );
   };
 
-  const onConfirmValidate = async () => {
-    setValidateDialogVisible(false);
-    await DatasetService.validateDataById(datasetId);
-  };
+  let WebFormInputSwitch = (
+    <InputSwitch
+      className={styles.WebFormInputSwitch}
+      checked={isInputSwitchChecked}
+      onChange={e => {
+        setIsInputSwitchChecked(e.value);
+      }}
+    />
+  );
 
   if (loading) {
     return layout(<Spinner />);
   }
 
   return layout(
-    <div>
+    <>
       <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
       <div className={styles.ButtonsBar}>
         <Toolbar>
@@ -418,6 +418,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
       <Snapshots datasetId={datasetId} dataflowId={dataflowId} growlRef={growlRef} showSnapshots={showSnapshots} />
-    </div>
+    </>
   );
 });
