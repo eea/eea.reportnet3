@@ -4,13 +4,16 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,6 +55,39 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void createDataSchema(@PathVariable("id") final Long datasetId,
       @RequestParam("idDataflow") final Long dataflowId) {
     dataschemaService.createDataSchema(datasetId, dataflowId);
+  }
+
+  /**
+   * Creates the data schema.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/{idSchema}/udpateTableSchema", method = RequestMethod.PUT)
+  public void updateTableSchema(@PathVariable("idSchema") String idSchema,
+      @RequestBody TableSchemaVO tableSchema) {
+    dataschemaService.updateTableSchema(idSchema, tableSchema);
+  }
+
+  /**
+   * Creates the data schema.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
+  public void createTableSchema(@PathVariable("id") String id,
+      @PathVariable("datasetId") Long datasetId, @RequestBody final TableSchemaVO tableSchema) {
+    dataschemaService.createTableSchema(id, tableSchema, datasetId);
+    try {
+      datasetService.saveTablePropagation(datasetId, tableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
   }
 
 

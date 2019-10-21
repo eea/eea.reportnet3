@@ -69,6 +69,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
 import org.slf4j.Logger;
@@ -1313,6 +1314,27 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Save table propagation.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
+    TableValue table = new TableValue();
+    Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
+    if (dataset.isPresent()) {
+      table.setIdTableSchema(tableSchema.getIdTableSchema());
+      table.setDatasetId(dataset.get());
+      saveTable(datasetId, table);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+  }
+
+  /**
    * Delete table value.
    *
    * @param datasetId the dataset id
@@ -1324,6 +1346,13 @@ public class DatasetServiceImpl implements DatasetService {
     tableRepository.deleteByIdTableSchema(idTableSchema);
   }
 
+
+
+  /**
+   * Delete.
+   *
+   * @param datasetId the dataset id
+   */
   @Override
   public void delete(Long datasetId) {
     datasetRepository.deleteById(datasetId);
