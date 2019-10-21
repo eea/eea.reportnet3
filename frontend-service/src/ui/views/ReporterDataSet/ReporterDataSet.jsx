@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
-import moment from 'moment';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
 
@@ -20,7 +20,8 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+import { Snapshots } from './_components/Snapshots/index';
+
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from './_components/Title';
@@ -29,9 +30,8 @@ import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
 import { DatasetService } from 'core/services/DataSet';
-import { SnapshotService } from 'core/services/Snapshot';
+
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
@@ -52,22 +52,19 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
-  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
-  const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
-  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
-  const [snapshotListData, setSnapshotListData] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [tableSchemaId, setTableSchemaId] = useState();
+  const [showSnapshots, setShowSnapshots] = useState(false);
 
   let exportMenuRef = useRef();
 
@@ -189,10 +186,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     return `${fileName}.${fileType}`;
   };
 
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
-
   let growlRef = useRef();
 
   const getPosition = button => {
@@ -280,131 +273,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     await DatasetService.validateDataById(datasetId);
   };
 
-  const onLoadSnapshotList = async () => {
-    try {
-      setIsLoadingSnapshotListData(true);
-      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
-      setTimeout(async () => {
-        const snapshotsData = await SnapshotService.all(datasetId);
-        setSnapshotListData(snapshotsData);
-        setIsLoadingSnapshotListData(false);
-      }, 500);
-    } catch (error) {
-      setIsLoadingSnapshotListData(false);
-    }
-  };
-
-  const onCreateSnapshot = async () => {
-    const snapshotCreated = await SnapshotService.createById(datasetId, snapshotState.description);
-    if (snapshotCreated) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
-  const onDeleteSnapshot = async () => {
-    const snapshotDeleted = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
-    if (snapshotDeleted) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
-  const onReleaseSnapshot = async () => {
-    const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
-    if (snapshotReleased) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
-  const onRestoreSnapshot = async () => {
-    const response = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
-    if (response) {
-      snapshotDispatch({ type: 'mark_as_restored', payload: {} });
-      onGrowlAlert({
-        severity: 'info',
-        summary: resources.messages.snapshotItemRestoreProcessSummary,
-        detail: resources.messages.snapshotItemRestoreProcessDetail,
-        life: '5000'
-      });
-    }
-
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
-  const snapshotInitialState = {
-    apiCall: '',
-    createdAt: '',
-    description: '',
-    dialogMessage: '',
-    dataflowId,
-    datasetId,
-    snapShotId: '',
-    action: () => {}
-  };
-
-  const snapshotReducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'create_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: '',
-          creationDate: Date.now(),
-          description: payload.description,
-          dialogMessage: resources.messages.createSnapshotMessage,
-          action: onCreateSnapshot
-        };
-
-      case 'delete_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: payload.id,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogMessage: resources.messages.deleteSnapshotMessage,
-          action: onDeleteSnapshot
-        };
-
-      case 'release_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: payload.id,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogMessage: resources.messages.releaseSnapshotMessage,
-          action: onReleaseSnapshot
-        };
-      case 'restore_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: payload.id,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogMessage: resources.messages.restoreSnapshotMessage,
-          action: onRestoreSnapshot
-        };
-      case 'mark_as_restored':
-        return {
-          ...state,
-          restored: state.snapShotId
-        };
-      case 'clear_restored':
-        return {
-          ...state,
-          restored: undefined
-        };
-      default:
-        return state;
-    }
-  };
-
-  const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
-
   if (loading) {
     return layout(<Spinner />);
   }
@@ -478,15 +346,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => {
-                onSetVisible(setSnapshotIsVisible, true);
-                onLoadSnapshotList();
-              }}
+              onClick={() => setShowSnapshots(!showSnapshots)}
             />
           </div>
         </Toolbar>
       </div>
-
       <ReporterDatasetContext.Provider
         value={{
           validationsVisibleHandler: null,
@@ -499,7 +363,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         {showWebFormInputSwitch()}
         {isWebForm()}
       </ReporterDatasetContext.Provider>
-
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -508,7 +371,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={dashDialogVisible}>
         <Dashboard refresh={dashDialogVisible} />
       </Dialog>
-
       <ReporterDatasetContext.Provider
         value={{
           onValidationsVisible: () => {
@@ -535,7 +397,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           />
         </Dialog>
       </ReporterDatasetContext.Provider>
-
       <ConfirmDialog
         header={resources.messages['deleteDatasetHeader']}
         labelCancel={resources.messages['no']}
@@ -546,7 +407,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={deleteDialogVisible}>
         {resources.messages['deleteDatasetConfirm']}
       </ConfirmDialog>
-
       <ConfirmDialog
         header={resources.messages['validateDataset']}
         labelCancel={resources.messages['no']}
@@ -557,42 +417,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={validateDialogVisible}>
         {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
-
-      <SnapshotContext.Provider
-        value={{
-          snapshotState: snapshotState,
-          snapshotDispatch: snapshotDispatch
-        }}>
-        <SnapshotSlideBar
-          isVisible={snapshotIsVisible}
-          isLoadingSnapshotListData={isLoadingSnapshotListData}
-          setIsVisible={setSnapshotIsVisible}
-          setSnapshotDialogVisible={setSnapshotDialogVisible}
-          snapshotListData={snapshotListData}
-        />
-
-        <ConfirmDialog
-          className={styles.snapshotDialog}
-          header={snapshotState.dialogMessage}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={snapshotState.action}
-          onHide={() => onSetVisible(setSnapshotDialogVisible, false)}
-          showHeader={false}
-          visible={snapshotDialogVisible}>
-          <ul>
-            <li>
-              <strong>{resources.messages.creationDate}: </strong>
-              {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-            </li>
-            <li>
-              <strong>{resources.messages.description}: </strong>
-              {snapshotState.description}
-            </li>
-          </ul>
-        </ConfirmDialog>
-      </SnapshotContext.Provider>
+      <Snapshots datasetId={datasetId} dataflowId={dataflowId} growlRef={growlRef} showSnapshots={showSnapshots} />
     </div>
   );
 });
