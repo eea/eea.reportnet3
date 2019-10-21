@@ -72,7 +72,7 @@ const DataViewer = withRouter(
     const [initialRecordValue, setInitialRecordValue] = useState();
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
-    const [filterLevelError, setFilterLevelError] = useState('');
+    const [filterLevelError, setFilterLevelError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
     const [menu, setMenu] = useState();
@@ -224,12 +224,15 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      setFilterLevelError(filteredKeys.join(','));
+      let concatFilter = filteredKeys.join(',');
+
+      let finalFilter = concatFilter == [] ? 'ANY' : concatFilter;
+
+      setFilterLevelError(finalFilter);
     };
 
     useEffect(() => {
       onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
-      console.log('filterLevelError', filterLevelError);
     }, [filterLevelError]);
 
     useEffect(() => {
