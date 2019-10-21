@@ -10,18 +10,16 @@ import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { SnapshotService } from 'core/services/Snapshot';
 import { SnapshotSlideBar } from './SnapshotSlideBar';
 
-const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
+const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, setIsSnapshotsBarVisible }) => {
   const resources = useContext(ResourcesContext);
 
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
-  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
 
   useEffect(() => {
-    setSnapshotIsVisible(true);
     onLoadSnapshotList();
-  }, [showSnapshots]);
+  }, [isSnapshotsBarVisible]);
 
   const onGrowlAlert = message => {
     growlRef.current.show(message);
@@ -179,9 +177,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
           snapshotDispatch: snapshotDispatch
         }}>
         <SnapshotSlideBar
-          isVisible={snapshotIsVisible}
+          isVisible={isSnapshotsBarVisible}
           isLoadingSnapshotListData={isLoadingSnapshotListData}
-          setIsVisible={setSnapshotIsVisible}
+          setIsVisible={setIsSnapshotsBarVisible}
           setSnapshotDialogVisible={setSnapshotDialogVisible}
           snapshotListData={snapshotListData}
         />

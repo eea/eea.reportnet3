@@ -58,7 +58,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
-  const [showSnapshots, setShowSnapshots] = useState(false);
+  const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
@@ -346,7 +346,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => setShowSnapshots(!showSnapshots)}
+              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
           </div>
         </Toolbar>
@@ -417,7 +417,13 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={validateDialogVisible}>
         {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
-      <Snapshots datasetId={datasetId} dataflowId={dataflowId} growlRef={growlRef} showSnapshots={showSnapshots} />
+      <Snapshots
+        datasetId={datasetId}
+        dataflowId={dataflowId}
+        growlRef={growlRef}
+        isSnapshotsBarVisible={isSnapshotsBarVisible}
+        setIsSnapshotsBarVisible={setIsSnapshotsBarVisible}
+      />
     </>
   );
 });
