@@ -1349,4 +1349,14 @@ public class DatasetServiceImpl implements DatasetService {
 
 
 
+  /**
+   * Delete.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void delete(Long datasetId) {
+    datasetRepository.deleteById(datasetId);
+  }
+
 }

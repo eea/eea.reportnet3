@@ -43,7 +43,6 @@ public interface DatasetSchemaService {
   /**
    * Delete table schema.
    *
-   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    */
   void deleteTableSchema(String idTableSchema);
@@ -76,7 +75,6 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    */
   void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
-
 
 
 }
