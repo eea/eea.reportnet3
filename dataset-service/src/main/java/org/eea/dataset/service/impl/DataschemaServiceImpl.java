@@ -28,12 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
-import com.mongodb.BasicDBObject;
 
 /**
  * The type Dataschema service.
@@ -412,21 +408,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     Optional<DataSetSchema> dataset = schemasRepository.findById(new ObjectId(id));
 
     if (dataset.isPresent()) {
-      TableSchema table = getTableSchema(tableSchema.getIdTableSchema().toString(), dataset.get());
+      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset.get());
       if (table != null) {
         // set the attributtes of VO
         table.setNameTableSchema(tableSchema.getNameTableSchema());
         table.setIdDataSet(new ObjectId(id));
         table.setIdTableSchema(new ObjectId(tableSchema.getIdTableSchema()));
 
-        Update updateDrop = new Update().pull("tableSchemas",
-            new BasicDBObject("_id", tableSchema.getIdTableSchema().toString()));
-        mongo.updateMulti(new Query(), updateDrop, DataSetSchema.class);
-
-        Update update = new Update().push("tableSchemas", table);
-        Query query = new Query();
-        query.addCriteria(new Criteria("_id").is(id));
-        mongo.updateMulti(query, update, DataSetSchema.class);
+        schemasRepository.deleteTableSchemaById(tableSchema.getIdTableSchema());
+        schemasRepository.insertTableSchema(table, id);
       }
     }
   }
@@ -471,10 +461,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.setIdTableSchema(new ObjectId().toString());
     }
     TableSchema table = tableMapper.classToEntity(tableSchema);
-    Update update = new Update().push("tableSchemas", table);
-    Query query = new Query();
-    query.addCriteria(new Criteria("_id").is(id));
-    mongo.updateMulti(query, update, DataSetSchema.class);
+    LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
+    schemasRepository.insertTableSchema(table, id);
   }
 
 }

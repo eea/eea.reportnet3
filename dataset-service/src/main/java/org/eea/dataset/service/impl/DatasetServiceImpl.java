@@ -1329,6 +1329,7 @@ public class DatasetServiceImpl implements DatasetService {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
+      LOG.info("Propagation completed");
     } else {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
