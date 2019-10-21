@@ -11,3 +11,10 @@
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
 }
+.filterActive {
+  opacity: 1;
+  /* color: #5798e4 !important; */
+}
+.filterInactive {
+  opacity: 0.25 !important;
+}

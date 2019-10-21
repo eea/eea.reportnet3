@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import isUndefined from 'lodash/isUndefined';
+import { isNull, isUndefined } from 'lodash/';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -27,9 +27,13 @@ const ValidationViewer = React.memo(
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
     const [allTypeEntitiesFilter, setAllTypeEntitiesFilter] = useState([]);
     const [allOriginsFilter, setAllOriginsFilter] = useState([]);
+    const [areActiveFilters, setAreActiveFilters] = useState(false);
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
+    const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
+    const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
+    const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [loading, setLoading] = useState(false);
     const [numberRows, setNumberRows] = useState(10);
@@ -116,6 +120,7 @@ const ValidationViewer = React.memo(
     const onLoadLevelErrorsFilter = () => {
       const allLevelErrorsFilterList = [{ label: 'Error', key: 'Error_Id' }, { label: 'Warning', key: 'Warning_Id' }];
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
+      // setTotalFiltersQty += allLevelErrorsFilterList.length;
     };
 
     const onLoadTypeEntitiesFilter = () => {
@@ -126,6 +131,7 @@ const ValidationViewer = React.memo(
         { label: 'Field', key: 'Field_Id' }
       ];
       setAllTypeEntitiesFilter(allTypeEntitiesFilterList);
+      // setTotalFiltersQty += allTypeEntitiesFilterList.length;
     };
 
     const onLoadOriginsFilter = () => {
@@ -138,6 +144,7 @@ const ValidationViewer = React.memo(
         allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
       });
       setAllOriginsFilter(allOriginsFilterList);
+      // setTotalFiltersQty += allOriginsFilterList.length;
     };
 
     const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
@@ -145,6 +152,13 @@ const ValidationViewer = React.memo(
         return filter.toString().toUpperCase();
       });
       setLevelErrorsFilter(levelErrorsDeselected);
+      setIsFilteredLevelErrors(isFiltered(allLevelErrorsFilter, levelErrorsDeselected));
+      if (levelErrorsDeselected.length <= 0) {
+        checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
+      } else {
+        setAreActiveFilters(true);
+      }
+
       setLoading(true);
       onLoadErrors(
         firstRow,
@@ -161,8 +175,13 @@ const ValidationViewer = React.memo(
       typeEntitiesDeselected = typeEntitiesDeselected.map(filter => {
         return filter.toString().toUpperCase();
       });
-
+      if (typeEntitiesDeselected.length <= 0) {
+        checkActiveFilters(isFilteredOrigins, isFilteredLevelErrors, false);
+      } else {
+        setAreActiveFilters(true);
+      }
       setTypeEntitiesFilter(typeEntitiesDeselected);
+      setIsFilteredTypeEntities(isFiltered(allTypeEntitiesFilter, typeEntitiesDeselected));
       setLoading(true);
       onLoadErrors(
         firstRow,
@@ -177,6 +196,14 @@ const ValidationViewer = React.memo(
 
     const onLoadErrorsWithOriginsFilter = originsDeselected => {
       setOriginsFilter(originsDeselected);
+      if (originsDeselected.length <= 0) {
+        checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
+      } else {
+        setAreActiveFilters(true);
+      }
+      console.log(originsDeselected);
+      console.log(allOriginsFilter);
+      setIsFilteredOrigins(isFiltered(allOriginsFilter, originsDeselected));
       setLoading(true);
       onLoadErrors(
         firstRow,
@@ -223,10 +250,21 @@ const ValidationViewer = React.memo(
     };
 
     const isFiltered = (originalFilter, filter) => {
-      if (filter.length < originalFilter.length) {
+      console.log('originalFilter', originalFilter);
+      console.log('filter', filter);
+      if (filter.length > 0) {
         return true;
       } else {
         return false;
+      }
+    };
+
+    const checkActiveFilters = (originsFilterParam, levelErrorsFilterParam, typeEntitiesFilterParam) => {
+      console.log('TEST', originsFilterParam, levelErrorsFilterParam, typeEntitiesFilterParam);
+      if (originsFilterParam || levelErrorsFilterParam || typeEntitiesFilterParam) {
+        setAreActiveFilters(true);
+      } else {
+        setAreActiveFilters(false);
       }
     };
 
@@ -267,6 +305,9 @@ const ValidationViewer = React.memo(
       setOriginsFilter([]);
       setTypeEntitiesFilter([]);
       setLevelErrorsFilter([]);
+      setIsFilteredOrigins(false);
+      setIsFilteredTypeEntities(false);
+      setIsFilteredLevelErrors(false);
     };
 
     const refreshData = () => {
@@ -282,13 +323,13 @@ const ValidationViewer = React.memo(
           <Toolbar className={styles.validationToolbar}>
             <div className="p-toolbar-group-left">
               <Button
-                className={`p-button-rounded p-button-secondary`}
-                // icon={'eye'}
+                className={`${styles.origin} p-button-rounded p-button-secondary`}
                 icon={'filter'}
                 label={resources.messages['origin']}
                 onClick={event => {
                   dropdownOriginsFilterRef.current.show(event);
                 }}
+                iconClasses={isFilteredOrigins ? styles.filterActive : styles.filterInactive}
               />
               <DropdownFilter
                 filters={allOriginsFilter}
@@ -301,12 +342,13 @@ const ValidationViewer = React.memo(
                 }}
               />
               <Button
-                className={`p-button-rounded p-button-secondary`}
-                icon={'warning'}
+                className={`${styles.level} p-button-rounded p-button-secondary`}
+                icon={'filter'}
                 label={resources.messages['levelError']}
                 onClick={event => {
                   dropdownLevelErrorsFilterRef.current.show(event);
                 }}
+                iconClasses={isFilteredLevelErrors ? styles.filterActive : styles.filterInactive}
               />
               <DropdownFilter
                 filters={allLevelErrorsFilter}
@@ -326,6 +368,7 @@ const ValidationViewer = React.memo(
                 onClick={event => {
                   dropdownTypeEntitiesFilterRef.current.show(event);
                 }}
+                iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
               />
               <DropdownFilter
                 filters={allTypeEntitiesFilter}
@@ -337,18 +380,19 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
-            </div>
-            <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary`}
-                disabled={false}
+                disabled={!areActiveFilters}
                 icon={'cross'}
                 label={resources.messages['clearFilters']}
                 onClick={() => {
                   clearFilters();
                   fetchData('', sortOrder, firstRow, numberRows, [], [], []);
+                  setAreActiveFilters(false);
                 }}
               />
+            </div>
+            <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary`}
                 disabled={false}
