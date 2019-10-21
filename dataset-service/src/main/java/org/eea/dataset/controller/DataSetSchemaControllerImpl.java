@@ -106,13 +106,29 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand()
   @RequestMapping(value = "/{datasetId}/tableschema/{tableSchemaId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String idTableSchema) {
     if (idTableSchema == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    dataschemaService.deleteTableSchema(datasetId, idTableSchema);
+    dataschemaService.deleteTableSchema(idTableSchema);
     datasetService.deleteTableValue(datasetId, idTableSchema);
+  }
+
+
+  @Override
+  @RequestMapping(value = "/{datasetId}/datasetschema/{schemaId}", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
+  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("schemaId") String schemaId) {
+    if (datasetId == null || schemaId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+    // not yet implemented propagation
   }
 }

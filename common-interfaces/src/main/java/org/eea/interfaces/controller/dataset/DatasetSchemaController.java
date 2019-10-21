@@ -76,4 +76,16 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String idTableSchema);
+
+
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
+  @RequestMapping(value = "/{datasetId}/datasetschema/{schemaId}", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("schemaId") String schemaId);
 }

@@ -162,7 +162,7 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void deleteTableSchemaTest() {
-    doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
+    doNothing().when(dataschemaService).deleteTableSchema(Mockito.any());
     dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
     Mockito.verify(datasetService, times(1)).deleteTableValue(Mockito.any(), Mockito.any());
   }

@@ -1,7 +1,6 @@
 package org.eea.dataset.service;
 
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.multitenancy.DatasetId;
 
 /**
  * The Interface DataschemaService.
@@ -45,7 +44,16 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    */
-  void deleteTableSchema(@DatasetId Long datasetId, String idTableSchema);
+  void deleteTableSchema(String idTableSchema);
+
+
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
+  void deleteDatasetSchema(Long datasetId, String schemaId);
 
 
 }

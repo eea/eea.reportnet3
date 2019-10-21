@@ -376,8 +376,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   @Transactional
-  public void deleteTableSchema(Long datasetId, String idTableSchema) {
+  public void deleteTableSchema(String idTableSchema) {
     schemasRepository.deleteTableSchemaById(idTableSchema);
+  }
+
+
+  @Override
+  @Transactional
+  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+    // not yet implemented
   }
 
 }
