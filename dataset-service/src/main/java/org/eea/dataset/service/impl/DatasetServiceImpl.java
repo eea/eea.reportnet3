@@ -1332,6 +1332,8 @@ public class DatasetServiceImpl implements DatasetService {
     } else {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
+  }
+
   /**
    * Delete table value.
    *
@@ -1344,7 +1346,6 @@ public class DatasetServiceImpl implements DatasetService {
     tableRepository.deleteByIdTableSchema(idTableSchema);
   }
 
-  }
 
 
 }
