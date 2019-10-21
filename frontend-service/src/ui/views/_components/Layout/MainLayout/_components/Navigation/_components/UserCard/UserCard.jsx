@@ -1,5 +1,8 @@
 import React, { useContext } from 'react';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { isUndefined } from 'lodash';
 
 import styles from './UserCard.module.css';
@@ -20,7 +23,7 @@ const UserCard = React.memo(() => {
           onClick={async e => {
             e.preventDefault();
           }}>
-          <img className={styles.avatar} alt="User Profile" src="https://image.flaticon.com/icons/svg/149/149071.svg" />
+          <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />
           <h5 className={styles.userProfile}>
             {!isUndefined(user.preferredUsername) ? user.preferredUsername : user.name}
           </h5>
