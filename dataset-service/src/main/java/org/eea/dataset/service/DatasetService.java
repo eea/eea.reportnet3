@@ -297,4 +297,7 @@ public interface DatasetService {
    */
   void deleteTableValue(@DatasetId Long datasetId, String idTableSchema);
 
+
+  void delete(@DatasetId Long datasetId);
+
 }

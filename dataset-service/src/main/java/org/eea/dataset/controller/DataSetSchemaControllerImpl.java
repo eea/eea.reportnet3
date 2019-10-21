@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
@@ -35,10 +36,15 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DatasetService datasetService;
 
+  /** The dataset metabase service. */
+  @Autowired
+  DatasetMetabaseService datasetMetabaseService;
+
   /**
    * Creates the data schema.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
@@ -85,6 +91,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
   }
 
+  /**
+   * Find data schema with no rules by dataflow.
+   *
+   * @param idFlow the id flow
+   * @return the data set schema VO
+   */
   @Override
   @HystrixCommand()
   @RequestMapping(value = "/noRules/dataflow/{id}", method = RequestMethod.GET,
@@ -118,6 +130,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
 
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
   @Override
   @RequestMapping(value = "/{datasetId}/datasetschema/{schemaId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -129,6 +147,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     dataschemaService.deleteDatasetSchema(datasetId, schemaId);
-    // not yet implemented propagation
+    datasetMetabaseService.deleteDesignDataset(datasetId);
+    datasetService.delete(datasetId);
   }
 }
