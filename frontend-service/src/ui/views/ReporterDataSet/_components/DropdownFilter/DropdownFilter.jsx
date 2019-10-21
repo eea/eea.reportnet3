@@ -1,6 +1,8 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import isUndefined from 'lodash/isUndefined';
+
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './DropdownFilter.module.css';
@@ -108,13 +110,24 @@ class DropdownFilter extends React.Component {
         };
       },
       () => {
-        this.props.showFilters(
-          this.state.fields
-            .filter(field => field.checked)
-            .map(field => {
-              return field.key;
-            })
-        );
+        if (!isUndefined(this.props.showFilters)) {
+          this.props.showFilters(
+            this.state.fields
+              .filter(field => field.checked)
+              .map(field => {
+                return field.key;
+              })
+          );
+        }
+        if (!isUndefined(this.props.showNotCheckedFilters)) {
+          this.props.showNotCheckedFilters(
+            this.state.fields
+              .filter(field => !field.checked)
+              .map(field => {
+                return field.label;
+              })
+          );
+        }
       }
     );
   }

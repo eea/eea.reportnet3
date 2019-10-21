@@ -84,6 +84,7 @@ const DataViewer = withRouter(
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [visibilityColumnIcon, setVisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
 
     const resources = useContext(ResourcesContext);
@@ -213,6 +214,12 @@ const DataViewer = withRouter(
       );
       setColumns(currentVisibleColumns);
       setVisibleColumns(currentVisibleColumns);
+
+      if (isFiltered(originalColumns, currentVisibleColumns)) {
+        setVisibleColumnIcon('eye-slash');
+      } else {
+        setVisibleColumnIcon('eye');
+      }
     };
 
     useEffect(() => {
@@ -233,6 +240,16 @@ const DataViewer = withRouter(
         // }
       }
     }, [confirmPasteVisible]);
+
+    const isFiltered = (originalFilter, filter) => {
+      console.log('originalFilter', originalFilter);
+      console.log('filter', filter);
+      if (filter.length < originalFilter.length) {
+        return true;
+      } else {
+        return false;
+      }
+    };
 
     const onCancelRowEdit = () => {
       let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
@@ -1040,7 +1057,7 @@ const DataViewer = withRouter(
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
-              icon={'eye'}
+              icon={visibilityColumnIcon}
               label={resources.messages['visibility']}
               onClick={event => {
                 dropdownFilterRef.current.show(event);
