@@ -29,27 +29,34 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
 
   const onCreateSnapshot = async () => {
     const snapshotCreated = await SnapshotService.createById(datasetId, snapshotState.description);
+
     if (snapshotCreated) {
       onLoadSnapshotList();
     }
+
     setSnapshotDialogVisible(false);
   };
 
   const onDeleteSnapshot = async () => {
     const snapshotDeleted = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
+
     if (snapshotDeleted) {
       onLoadSnapshotList();
     }
+
     setSnapshotDialogVisible(false);
   };
 
   const onLoadSnapshotList = async () => {
     try {
       setIsLoadingSnapshotListData(true);
+
       //Settimeout for avoiding the overlaping between the slidebar transition and the api call
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.all(datasetId);
+
         setSnapshotListData(snapshotsData);
+
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
@@ -59,16 +66,20 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
 
   const onReleaseSnapshot = async () => {
     const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
+
     if (snapshotReleased) {
       onLoadSnapshotList();
     }
+
     setSnapshotDialogVisible(false);
   };
 
   const onRestoreSnapshot = async () => {
     const response = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
+
     if (response) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
+
       onGrowlAlert({
         severity: 'info',
         summary: resources.messages.snapshotItemRestoreProcessSummary,
@@ -95,6 +106,7 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
     switch (type) {
       case 'create_snapshot':
         setSnapshotDialogVisible(true);
+
         return {
           ...state,
           snapShotId: '',
@@ -106,6 +118,7 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
 
       case 'delete_snapshot':
         setSnapshotDialogVisible(true);
+
         return {
           ...state,
           snapShotId: payload.id,
@@ -117,6 +130,7 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
 
       case 'release_snapshot':
         setSnapshotDialogVisible(true);
+
         return {
           ...state,
           snapShotId: payload.id,
@@ -125,8 +139,10 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
           dialogMessage: resources.messages.releaseSnapshotMessage,
           action: onReleaseSnapshot
         };
+
       case 'restore_snapshot':
         setSnapshotDialogVisible(true);
+
         return {
           ...state,
           snapShotId: payload.id,
@@ -135,16 +151,19 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
           dialogMessage: resources.messages.restoreSnapshotMessage,
           action: onRestoreSnapshot
         };
+
       case 'mark_as_restored':
         return {
           ...state,
           restored: state.snapShotId
         };
+
       case 'clear_restored':
         return {
           ...state,
           restored: undefined
         };
+
       default:
         return state;
     }
