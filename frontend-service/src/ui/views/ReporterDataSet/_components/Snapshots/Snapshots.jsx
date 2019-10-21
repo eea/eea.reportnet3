@@ -153,7 +153,7 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
   const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
 
   return (
-    <div>
+    <>
       <SnapshotContext.Provider
         value={{
           snapshotState: snapshotState,
@@ -189,7 +189,7 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, showSnapshots }) => {
           </ul>
         </ConfirmDialog>
       </SnapshotContext.Provider>
-    </div>
+    </>
   );
 };
 
