@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 
@@ -62,8 +63,9 @@ public interface DatasetSchemaService {
    *
    * @param id the id
    * @param tableSchema the table schema
+   * @throws EEAException
    */
-  void updateTableSchema(String id, TableSchemaVO tableSchema);
+  void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException;
 
 
   /**

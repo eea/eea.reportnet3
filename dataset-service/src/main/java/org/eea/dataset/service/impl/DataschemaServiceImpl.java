@@ -21,6 +21,8 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -402,9 +404,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param id the id
    * @param tableSchema the table schema
+   * @throws EEAException
    */
   @Override
-  public void updateTableSchema(String id, TableSchemaVO tableSchema) {
+  public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
     Optional<DataSetSchema> dataset = schemasRepository.findById(new ObjectId(id));
 
     if (dataset.isPresent()) {
@@ -417,7 +420,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         schemasRepository.deleteTableSchemaById(tableSchema.getIdTableSchema());
         schemasRepository.insertTableSchema(table, id);
+      } else {
+        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
       }
+    } else {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
 

@@ -62,7 +62,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @RequestMapping(value = "/{idSchema}/udpateTableSchema", method = RequestMethod.PUT)
   public void updateTableSchema(@PathVariable("idSchema") String idSchema,
       @RequestBody TableSchemaVO tableSchema) {
-    dataschemaService.updateTableSchema(idSchema, tableSchema);
+    try {
+      dataschemaService.updateTableSchema(idSchema, tableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
