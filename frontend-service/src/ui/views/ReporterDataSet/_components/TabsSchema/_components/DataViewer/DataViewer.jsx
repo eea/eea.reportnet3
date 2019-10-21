@@ -226,7 +226,7 @@ const DataViewer = withRouter(
     const showValidationFilter = filteredKeys => {
       let concatFilter = filteredKeys.join(',');
 
-      let finalFilter = concatFilter == [] ? 'ANY' : concatFilter;
+      let finalFilter = concatFilter == [] ? 'ALL' : concatFilter;
 
       setFilterLevelError(finalFilter);
     };
