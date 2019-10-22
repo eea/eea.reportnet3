@@ -37,4 +37,12 @@ public interface DatasetMetabaseService {
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
 
+
+  /**
+   * Delete design dataset.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteDesignDataset(Long datasetId);
+
 }

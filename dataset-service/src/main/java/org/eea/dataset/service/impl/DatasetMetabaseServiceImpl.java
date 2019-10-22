@@ -3,7 +3,6 @@ package org.eea.dataset.service.impl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -16,6 +15,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -104,8 +104,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
-    Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
-    return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+    DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
+    return dataSetMetabaseMapper.entityToClass(datasetMetabase);
 
+  }
+
+
+
+  @Override
+  @Transactional
+  public void deleteDesignDataset(Long datasetId) {
+    dataSetMetabaseRepository.deleteById(datasetId);
   }
 }
