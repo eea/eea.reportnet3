@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 
 import styles from './NewDatasetSchemaForm.module.css';
 
@@ -20,7 +20,7 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
     datasetSchemaName: Yup.string().required()
   });
 
-  if (!isFormReset) {
+  if (!isFormReset && !isNull(form.current)) {
     form.current.resetForm();
   }
   return (
