@@ -44,7 +44,6 @@
 		"createSnapshotTooltip": "Create snapshot",
 		"creationDate": "Creation date",
 		"dashboards": "Dashboards",
-		"dataCustodianDashboards":"Data custodian dashboards",
 		"dataflow": "Dataflow",
 		"dataflowAcceptedPendingTab": "Pending & Accepted",
 		"dataflowCompletedTab": "Completed",

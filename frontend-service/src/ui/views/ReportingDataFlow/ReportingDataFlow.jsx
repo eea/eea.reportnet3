@@ -204,9 +204,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 <BigButton
                   layout="newItem"
                   caption={resources.messages['newItem']}
-                  handleRedirect={() =>
-                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
-                  }
+                  handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/dashboards/`)}
                   model={[
                     {
                       label: resources.messages['createNewEmptyDatasetSchema'],
@@ -228,7 +226,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 layout="documents"
                 label="DO"
                 caption={resources.messages.documents}
-                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documentation-data-set/`)}
+                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documents/`)}
               />
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
@@ -328,9 +326,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 <BigButton
                   layout="dashboard"
                   caption={resources.messages.dashboards}
-                  handleRedirect={() =>
-                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
-                  }
+                  handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/dashboards/`)}
                 />
               </div>
             )}
