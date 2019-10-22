@@ -1,15 +1,16 @@
 import React, { useRef } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './BigButton.module.css';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
-import { Menu } from 'primereact/menu';
 
-export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
+export const BigButton = ({ caption, handleRedirect, isReleased, layout, model }) => {
   const newDatasetRef = useRef();
   const dataset = model ? (
     <>
