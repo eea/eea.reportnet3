@@ -5,6 +5,6 @@
     "globalStatistics": "/dataflow/{:dataflowId}/globalStatistics",
     "loadDataflowTaskPendingAccepted":  "/dataflow/pendingaccepted",
     "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
-    "newEmptyDatasetSchema": "/dataschema/createEmptyDataSetSchema?idDataFlow={:dataflowId}&nameDataSetSchema={:datasetSchemaName}",
+    "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
     "rejectDataflow":  "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
 }
