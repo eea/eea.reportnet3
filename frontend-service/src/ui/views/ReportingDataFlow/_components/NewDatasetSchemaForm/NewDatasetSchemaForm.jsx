@@ -31,6 +31,7 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         const response = await DataflowService.newEmptyDatasetSchema(dataflowId, values.datasetSchemaName);
+        console.log('response', response);
         onCreate();
         if (response === 200) {
           console.log('success');

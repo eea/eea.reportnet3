@@ -104,23 +104,17 @@ export const apiDataflow = {
   },
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
     const tokens = userStorage.get();
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(DataflowConfig.newEmptyDatasetSchema, {
-          dataflowId: dataflowId,
-          datasetSchemaName: datasetSchemaName
-        }),
-        queryString: {},
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`
-        }
-      });
-
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error adding new dataset schema: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.post({
+      url: getUrl(DataflowConfig.newEmptyDatasetSchema, {
+        dataflowId: dataflowId,
+        datasetSchemaName: datasetSchemaName
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
   },
   reject: async dataflowId => {
     const tokens = userStorage.get();
