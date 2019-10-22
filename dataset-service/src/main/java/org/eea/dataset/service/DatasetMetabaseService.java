@@ -37,4 +37,5 @@ public interface DatasetMetabaseService {
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
 
+  boolean updateDatasetName(Long datasetId, String datasetName);
 }

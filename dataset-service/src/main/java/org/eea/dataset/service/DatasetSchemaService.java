@@ -36,6 +36,4 @@ public interface DatasetSchemaService {
    * @return the data schema by id flow
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules);
-
-
 }

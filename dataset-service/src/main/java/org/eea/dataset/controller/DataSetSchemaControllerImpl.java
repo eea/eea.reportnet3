@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;

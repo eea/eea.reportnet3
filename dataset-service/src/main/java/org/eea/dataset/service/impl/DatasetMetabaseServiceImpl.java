@@ -90,9 +90,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     // create the dataset into datasets
     recordStoreControllerZull.createEmptyDataset("dataset_" + reportingData.getId(),
         idDatasetSchema);
-
-
-
   }
 
 
@@ -107,5 +104,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
     return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
 
+  }
+
+  @Override
+  public boolean updateDatasetName(Long datasetId, String datasetName) {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    if (!datasetName.isEmpty() && datasetMetabase != null) {
+      datasetMetabase.setDataSetName(datasetName);
+      dataSetMetabaseRepository.save(datasetMetabase);
+      return true;
+    }
+    return false;
   }
 }
