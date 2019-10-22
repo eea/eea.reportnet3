@@ -15,9 +15,9 @@ import com.mongodb.BasicDBObject;
  */
 public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
-  /** The mongo. */
+  /** The mongo operations. */
   @Autowired
-  MongoOperations mongo;
+  private MongoOperations mongoOperations;
 
   /**
    * Delete table schema by id.
@@ -28,7 +28,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public void deleteTableSchemaById(String idTableSchema) {
     Update update =
         new Update().pull("tableSchemas", new BasicDBObject("_id", new ObjectId(idTableSchema)));
-    mongo.updateMulti(new Query(), update, DataSetSchema.class);
+    mongoOperations.updateMulti(new Query(), update, DataSetSchema.class);
   }
 
   /**
@@ -42,7 +42,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     Update update = new Update().push("tableSchemas", table);
     Query query = new Query();
     query.addCriteria(new Criteria("_id").is(idDatasetSchema));
-    mongo.updateMulti(query, update, DataSetSchema.class);
+    mongoOperations.updateMulti(query, update, DataSetSchema.class);
   }
 
 }

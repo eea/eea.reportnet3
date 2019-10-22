@@ -15,6 +15,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -112,8 +113,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   @Override
-  @org.springframework.transaction.annotation.Transactional(
-      value = "metabaseDataSetsTransactionManager")
+  @Transactional
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteById(datasetId);
   }
