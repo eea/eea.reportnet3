@@ -53,7 +53,9 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Autowired
   private DataflowService dataflowService;
 
-  /** The statistics helper. */
+  /**
+   * The statistics helper.
+   */
   @Autowired
   private StatsHelper statisticsHelper;
 
@@ -271,6 +273,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Gets the statistics by dataflow.
    *
    * @param idDataflow the id dataflow
+   *
    * @return the statistics by dataflow
    */
   @Override
@@ -294,12 +297,13 @@ public class DataFlowControllerImpl implements DataFlowController {
    * Gets the metabase by id.
    *
    * @param id the id
+   *
    * @return the metabase by id
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTOR'))")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER')")
   public DataFlowVO getMetabaseById(@PathVariable("id") final Long id) {
 
     if (id == null) {
