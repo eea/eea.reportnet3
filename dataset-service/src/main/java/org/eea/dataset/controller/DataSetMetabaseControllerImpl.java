@@ -107,7 +107,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
   @Override
   @PutMapping(value = "/updateDatasetName")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN') AND hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = true) String datasetName) {
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
