@@ -115,6 +115,7 @@
 		"loginUserName": "User name",
 		"manageRoles": "Manage roles",
 		"newDataset": "New dataset",
+		"newDatasetSchema": "New dataset schema",
 		"newItem": "New item",
 		"no": "No",
 		"noDataInDataTable": "There is not any data to show",

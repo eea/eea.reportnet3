@@ -346,7 +346,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           <ContributorsList dataflowId={dataflowData.id} />
         </Dialog>
         <Dialog
-          header={resources.messages['newDataset']}
+          header={resources.messages['newDatasetSchema']}
           visible={newDatasetDialog}
           className={styles.dialog}
           dismissableMask={false}
