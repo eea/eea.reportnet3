@@ -80,7 +80,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         command: () => history.push(getUrl(routes.DATAFLOWS))
       },
       {
-        label: resources.messages.dataflow
+        label: resources.messages['dataflow']
       }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
@@ -122,7 +122,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const dropDownItems = [
     {
-      label: resources.messages.manageRoles,
+      label: resources.messages['manageRoles'],
       icon: 'users',
       show: hasWritePermissions,
       command: () => {
@@ -131,7 +131,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     },
 
     {
-      label: resources.messages.properties,
+      label: resources.messages['properties'],
       icon: 'settings',
       show: true,
       command: e => {
@@ -179,9 +179,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <DataflowColumn
-        subscribeButtonTitle={resources.messages.subscribeThisButton}
+        subscribeButtonTitle={resources.messages['subscribeThisButton']}
         dataflowTitle={dataflowData.name}
-        navTitle={resources.messages.dataflow}
+        navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
       />
@@ -225,7 +225,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               <BigButton
                 layout="documents"
                 label="DO"
-                caption={resources.messages.documents}
+                caption={resources.messages['documents']}
                 handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documents/`)}
               />
             </div>
@@ -288,7 +288,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       hasWritePermissions
                         ? [
                             {
-                              label: resources.messages.releaseDataCollection,
+                              label: resources.messages['releaseDataCollection'],
                               icon: 'cloudUpload',
                               command: () => showReleaseSnapshotDialog(dataset.datasetId),
                               disabled: false
@@ -325,7 +325,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               <div className={`${styles.datasetItem}`}>
                 <BigButton
                   layout="dashboard"
-                  caption={resources.messages.dashboards}
+                  caption={resources.messages['dashboards']}
                   handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/dashboards/`)}
                 />
               </div>
@@ -334,7 +334,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         </div>
 
         <Dialog
-          header={`${resources.messages.dataProviderManageContributorsDialogTitle} "${dataflowData.name}"`}
+          header={`${resources.messages['dataProviderManageContributorsDialogTitle']} "${dataflowData.name}"`}
           visible={isActiveContributorsDialog}
           onHide={() => setIsActiveContributorsDialog(false)}
           style={{ width: '50vw' }}
