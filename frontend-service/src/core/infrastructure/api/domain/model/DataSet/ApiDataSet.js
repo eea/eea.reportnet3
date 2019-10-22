@@ -123,22 +123,6 @@ export const apiDataset = {
     if (asc === -1) {
       asc = 0;
     }
-    console.log('Origin: ', originsFilter);
-    console.log('Level error: ', levelErrorsFilter);
-    console.log('Entity: ', typeEntitiesFilter);
-    console.log(
-      'ENDPOINT: ',
-      getUrl(DatasetConfig.listValidations2, {
-        datasetId: datasetId,
-        pageNum: pageNum,
-        pageSize: pageSize,
-        sortField: sortField,
-        asc: asc,
-        levelErrorsFilter: levelErrorsFilter,
-        typeEntitiesFilter: typeEntitiesFilter,
-        originsFilter: originsFilter
-      })
-    );
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/list-of-errors.json'
@@ -147,10 +131,10 @@ export const apiDataset = {
             pageNum: pageNum,
             pageSize: pageSize,
             sortField: sortField,
-            asc: asc
-            // levelErrorsFilter: levelErrorsFilter,
-            // typeEntitiesFilter: typeEntitiesFilter,
-            // originsFilter: originsFilter
+            asc: asc,
+            levelErrorsFilter: levelErrorsFilter,
+            typeEntitiesFilter: typeEntitiesFilter,
+            originsFilter: originsFilter
           }),
       queryString: {},
       headers: {

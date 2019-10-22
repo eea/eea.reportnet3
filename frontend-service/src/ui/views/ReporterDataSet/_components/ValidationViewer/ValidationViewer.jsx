@@ -2,10 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { isNull, isUndefined } from 'lodash/';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { isUndefined } from 'lodash/';
 
 import styles from './ValidationViewer.module.css';
 
@@ -80,7 +77,7 @@ const ValidationViewer = React.memo(
         onLoadFilters();
         fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
       }
-      clearFilters();
+      resetFilters();
     }, [visible]);
 
     const onChangePage = event => {
@@ -299,13 +296,15 @@ const ValidationViewer = React.memo(
 
     let totalCount = <span>Total: {totalRecords} rows</span>;
 
-    const clearFilters = () => {
+    const resetFilters = () => {
       setOriginsFilter([]);
       setTypeEntitiesFilter([]);
       setLevelErrorsFilter([]);
       setIsFilteredOrigins(false);
       setIsFilteredTypeEntities(false);
       setIsFilteredLevelErrors(false);
+      setAreActiveFilters(false);
+      onLoadFilters();
     };
 
     const refreshData = () => {
@@ -382,9 +381,9 @@ const ValidationViewer = React.memo(
                 className={`p-button-rounded p-button-secondary`}
                 disabled={!areActiveFilters}
                 icon={'cross'}
-                label={resources.messages['clearFilters']}
+                label={resources.messages['cleanFilters']}
                 onClick={() => {
-                  clearFilters();
+                  resetFilters();
                   fetchData('', sortOrder, firstRow, numberRows, [], [], []);
                   setAreActiveFilters(false);
                 }}
