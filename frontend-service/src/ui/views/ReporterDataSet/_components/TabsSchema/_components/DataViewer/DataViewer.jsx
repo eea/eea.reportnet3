@@ -227,11 +227,11 @@ const DataViewer = withRouter(
     const showValidationFilter = filteredKeys => {
       const concatFilter = filteredKeys.join(',');
 
-      const finalFilter = concatFilter == [] ? 'ALL' : concatFilter;
+      //const finalFilter = concatFilter == [] ? 'ALL' : concatFilter;
 
       setIsFilterValidationsActive(filteredKeys.length != 3);
 
-      setFilterLevelError(finalFilter);
+      setFilterLevelError(concatFilter);
     };
 
     useEffect(() => {
