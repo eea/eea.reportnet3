@@ -11,7 +11,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { DataflowService } from 'core/services/DataFlow';
 
-export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, setIsDataUpdated, setNewDatasetDialog }) => {
+export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpdateData, setNewDatasetDialog }) => {
   const form = useRef(null);
   const resources = useContext(ResourcesContext);
 
@@ -34,9 +34,9 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, setIsD
         onCreate();
         if (response === 200) {
           console.log('success');
-          setSubmitting(false);
-          setIsDataUpdated(true);
           onCreate();
+          onUpdateData();
+          setSubmitting(false);
         } else {
           console.log('error');
           setSubmitting(false);

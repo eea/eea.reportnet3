@@ -144,13 +144,17 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setNewDatasetDialog(false);
   };
 
+  const onUpdateData = () => {
+    setIsDataUpdated(true);
+  };
+
   const showContributorsDialog = () => {
     setIsActiveContributorsDialog(true);
   };
 
   const showNewDatasetDialog = () => {
-    setIsFormReset(true);
     setNewDatasetDialog(true);
+    setIsFormReset(true);
   };
 
   const showReleaseSnapshotDialog = async datasetId => {
@@ -351,7 +355,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             dataflowId={match.params.dataflowId}
             isFormReset={isFormReset}
             onCreate={onCreateDataset}
-            setIsDataUpdated={setIsDataUpdated}
+            onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
