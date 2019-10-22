@@ -16,7 +16,8 @@ import {
   faChartBar,
   faPlus,
   faArchive,
-  faBroom
+  faBroom,
+  faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -130,6 +131,8 @@ export const AwesomeIcons = icon => {
       return faArchive;
     case 'broom':
       return faBroom;
+    case 'user-profile':
+      return faUserCircle;
     default:
       return faFileAlt;
   }

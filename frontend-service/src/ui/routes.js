@@ -2,9 +2,9 @@ export const routes = {
   ACCESS_POINT: '/',
   EULOGIN: '/eulogin',
   LOGIN: '/',
-  DATA_CUSTODIAN_DASHBOARDS: '/dataflow/:dataflowId/data-custodian-dashboards',
+  DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATAFLOWS: '/dataflows',
   DATAFLOW: '/dataflow/:dataflowId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
-  DOCUMENTATION_DATASET: '/dataflow/:dataflowId/documentation-data-set/'
+  DOCUMENTS: '/dataflow/:dataflowId/documents/'
 };
