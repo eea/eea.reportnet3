@@ -413,10 +413,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
-    Optional<DataSetSchema> dataset = schemasRepository.findById(new ObjectId(id));
+    DataSetSchema dataset = schemasRepository.findById(new ObjectId(id)).orElse(null);
 
-    if (dataset.isPresent()) {
-      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset.get());
+    if (dataset != null) {
+      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset);
       if (table != null) {
         // set the attributtes of VO
         table.setNameTableSchema(tableSchema.getNameTableSchema());

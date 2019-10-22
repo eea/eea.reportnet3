@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -179,14 +180,15 @@ public class DataSetSchemaControllerImplTest {
 
   @Test
   public void updateTableSchemaTest() throws EEAException {
-    dataSchemaControllerImpl.updateTableSchema("", new TableSchemaVO());
+    dataSchemaControllerImpl.updateTableSchema("", 1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
 
-  @Test
+  @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException() throws EEAException {
-    dataSchemaControllerImpl.updateTableSchema("", new TableSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
+    doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
+        Mockito.any());
+    dataSchemaControllerImpl.updateTableSchema("", 1L, new TableSchemaVO());
   }
 
   @Test
@@ -196,10 +198,11 @@ public class DataSetSchemaControllerImplTest {
         Mockito.any());
   }
 
-  @Test
-  public void createTableSchemaTestException() {
-    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
+  @Test(expected = ResponseStatusException.class)
+  public void createTableSchemaTestException() throws EEAException {
+    doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
         Mockito.any());
+    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
+
   }
 }
