@@ -77,8 +77,10 @@ const ValidationViewer = React.memo(
 
     useEffect(() => {
       if (visible) {
+        onLoadFilters();
         fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
       }
+      clearFilters();
     }, [visible]);
 
     const onChangePage = event => {
@@ -120,7 +122,6 @@ const ValidationViewer = React.memo(
     const onLoadLevelErrorsFilter = () => {
       const allLevelErrorsFilterList = [{ label: 'Error', key: 'Error_Id' }, { label: 'Warning', key: 'Warning_Id' }];
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
-      // setTotalFiltersQty += allLevelErrorsFilterList.length;
     };
 
     const onLoadTypeEntitiesFilter = () => {
@@ -131,7 +132,6 @@ const ValidationViewer = React.memo(
         { label: 'Field', key: 'Field_Id' }
       ];
       setAllTypeEntitiesFilter(allTypeEntitiesFilterList);
-      // setTotalFiltersQty += allTypeEntitiesFilterList.length;
     };
 
     const onLoadOriginsFilter = () => {
@@ -144,7 +144,6 @@ const ValidationViewer = React.memo(
         allOriginsFilterList.push({ label: name.toString(), key: `${name.toString()}_Id` });
       });
       setAllOriginsFilter(allOriginsFilterList);
-      // setTotalFiltersQty += allOriginsFilterList.length;
     };
 
     const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
@@ -245,7 +244,6 @@ const ValidationViewer = React.memo(
       originsFilter
     ) => {
       setLoading(true);
-      onLoadFilters();
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
     };
 
