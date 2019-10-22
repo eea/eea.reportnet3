@@ -194,7 +194,7 @@ const GlobalValidationDashboard = dataflowId => {
                     .toLowerCase()}: `}</span>
                   <ColorPicker
                     className={styles.colorPicker}
-                    key={type}
+                    //key={type}
                     value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
                     onChange={e => {
                       e.preventDefault();
