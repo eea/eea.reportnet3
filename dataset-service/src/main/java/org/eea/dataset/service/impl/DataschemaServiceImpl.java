@@ -359,7 +359,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     return dataSchemaVO;
-
   }
 
   /**
@@ -376,7 +375,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("Schema retrived by idFlow {}", idFlow);
     return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
-
   }
 
   /**
