@@ -6,6 +6,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 /**
  * The Interface ValidationRepository.
  */
-public interface ValidationRepository extends PagingAndSortingRepository<Validation, Long> {
+public interface ValidationRepository
+    extends PagingAndSortingRepository<Validation, Long>, ValidationRepositoryPaginated {
 
 }

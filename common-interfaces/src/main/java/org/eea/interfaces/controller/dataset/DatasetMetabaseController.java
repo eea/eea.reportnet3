@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -46,8 +47,6 @@ public interface DatasetMetabaseController {
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
       @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
-
-
   /**
    * Find dataset name.
    *
@@ -57,4 +56,7 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset);
 
+  @PutMapping(value = "/updateDatasetName")
+  void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
+      @RequestParam(value = "datasetName", required = false) String datasetName);
 }

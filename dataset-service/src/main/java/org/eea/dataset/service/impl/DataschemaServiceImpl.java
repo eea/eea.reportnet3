@@ -3,9 +3,11 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
+import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
@@ -19,11 +21,15 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 
@@ -51,9 +57,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
 
-  /**
-   * Mapper to map dataset schemas with no rules
-   */
+  /** Mapper to map dataset schemas with no rules. */
   @Autowired
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
 
@@ -82,7 +86,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant STRING_WARNING.
    */
   private static final String STRING_WARNING =
-      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
+      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE SHORTER";
 
   /**
    * The Constant INTEGER_ERROR.
@@ -110,14 +114,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
   /**
-   * The Constant WARNING.
-   */
-  private static final String WARNING = "WARNING";
-
-  /**
    * The Constant NULL.
    */
   private static final String NULL = "id == null";
+
+  /** The mongo. */
+  @Autowired
+  private MongoOperations mongo;
+
+  /** The table mapper. */
+  @Autowired
+  private TableSchemaMapper tableMapper;
 
   /**
    * Creates the data schema.
@@ -184,7 +191,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<>();
 
-      // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
@@ -353,14 +359,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     return dataSchemaVO;
-
   }
 
   /**
    * Find the dataschema per idDataFlow.
    *
    * @param idFlow the idDataFlow to look for
-   *
+   * @param addRules the add rules
    * @return the data schema by id flow
    */
   @Override
@@ -368,9 +373,108 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
     LOG.info("Schema retrived by idFlow {}", idFlow);
-    return addRules ? dataSchemaMapper.entityToClass(dataschema)
+    return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
+  }
 
+  /**
+   * Delete table schema.
+   *
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @Transactional
+  public void deleteTableSchema(String idTableSchema) {
+    schemasRepository.deleteTableSchemaById(idTableSchema);
+  }
+
+
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
+  @Override
+  @Transactional
+  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+    schemasRepository.deleteById(new ObjectId(schemaId));
+  }
+
+
+  /**
+   * Update table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @throws EEAException
+   */
+  @Override
+  public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
+    DataSetSchema dataset = schemasRepository.findById(new ObjectId(id)).orElse(null);
+
+    if (dataset != null) {
+      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset);
+      if (table != null) {
+        // set the attributtes of VO
+        table.setNameTableSchema(tableSchema.getNameTableSchema());
+        table.setIdDataSet(new ObjectId(id));
+        table.setIdTableSchema(new ObjectId(tableSchema.getIdTableSchema()));
+
+        schemasRepository.deleteTableSchemaById(tableSchema.getIdTableSchema());
+        schemasRepository.insertTableSchema(table, id);
+      } else {
+        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      }
+    } else {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+  }
+
+
+
+  /**
+   * Gets the table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param dataSetSchema the data set schema
+   * @return the table schema
+   */
+  private TableSchema getTableSchema(String idTableSchema, DataSetSchema dataSetSchema) {
+    // Find the Id of tableSchema in MongoDB
+    TableSchema table = null;
+    List<TableSchema> tablesSchema = null;
+    if (null != dataSetSchema) {
+      tablesSchema = dataSetSchema.getTableSchemas();
+    }
+    if (null != tablesSchema) {
+      for (TableSchema tableSchema : tablesSchema) {
+        if (idTableSchema.equalsIgnoreCase(tableSchema.getIdTableSchema().toString())) {
+          table = tableSchema;
+        }
+      }
+    }
+    return table;
+  }
+
+
+  /**
+   * Creates the table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
+    if (tableSchema.getIdTableSchema() == null) {
+      tableSchema.setIdTableSchema(new ObjectId().toString());
+    }
+    TableSchema table = tableMapper.classToEntity(tableSchema);
+    LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
+    schemasRepository.insertTableSchema(table, id);
   }
 
 }
