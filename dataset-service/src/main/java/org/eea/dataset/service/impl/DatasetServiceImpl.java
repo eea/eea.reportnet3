@@ -69,6 +69,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
 import org.slf4j.Logger;
@@ -992,8 +993,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Table statistics
     stats.setTables(new ArrayList<>());
     for (List<Statistics> listStats : tablesMap.values()) {
-      TableStatisticsVO tableVO = new TableStatisticsVO();
-      Class<?> clazzTable = tableVO.getClass();
+      Class<?> clazzTable = TableStatisticsVO.class;
       Object instanceTable = clazzTable.newInstance();
       listStats.stream().forEach(s -> {
         setEntityProperty(instanceTable, s.getStatName(), s.getValue());
@@ -1317,5 +1317,50 @@ public class DatasetServiceImpl implements DatasetService {
     recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
   }
 
+  /**
+   * Save table propagation.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
+    TableValue table = new TableValue();
+    Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
+    if (dataset.isPresent()) {
+      table.setIdTableSchema(tableSchema.getIdTableSchema());
+      table.setDatasetId(dataset.get());
+      saveTable(datasetId, table);
+      LOG.info("Propagation completed");
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+  }
+
+  /**
+   * Delete table value.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @Transactional
+  public void deleteTableValue(Long datasetId, String idTableSchema) {
+    tableRepository.deleteByIdTableSchema(idTableSchema);
+  }
+
+
+
+  /**
+   * Delete.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void delete(Long datasetId) {
+    datasetRepository.deleteSchema("dataset_" + datasetId);
+  }
 
 }
