@@ -252,7 +252,7 @@ const DataViewer = withRouter(
       if (dataDeleted) {
         setFetchedData([]);
         setTotalRecords(0);
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        //  snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       }
     };
 
@@ -260,7 +260,7 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const recordDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
       if (recordDeleted) {
-        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        //  snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsRecordDeleted(true);
       }
     };
@@ -311,7 +311,7 @@ const DataViewer = withRouter(
           if (!fieldUpdated) {
             console.error('Error!');
           }
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         }
       }
     };
@@ -417,7 +417,7 @@ const DataViewer = withRouter(
             life: '3000'
           });
           onRefresh();
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } else {
           growlRef.current.show({
             severity: 'error',
@@ -461,7 +461,7 @@ const DataViewer = withRouter(
         try {
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
           setAddDialogVisible(false);
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -478,7 +478,7 @@ const DataViewer = withRouter(
           await DatasetService.updateRecordsById(datasetId, record);
           onRefresh();
           setEditDialogVisible(false);
-          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;

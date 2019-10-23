@@ -57,9 +57,9 @@ const App = () => {
             <Switch>
               <Route exact path="/" component={window.env.REACT_APP_EULOGIN ? AccessPoint : Login} />
               <Route exact path={routes.EULOGIN} component={Eulogin} />
-              <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
               <PrivateRoute exact path={routes.DASHBOARDS} component={DataCustodianDashboards} />
               <PrivateRoute exact path={routes.DATAFLOW} component={ReportingDataflow} />
+              <PrivateRoute exact path={routes.DATAFLOWS} component={DataflowTasks} />
               <PrivateRoute exact path={routes.DATASET} component={ReporterDataset} />
               <PrivateRoute exact path={routes.DOCUMENTS} component={DocumentationDataset} />
             </Switch>
