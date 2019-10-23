@@ -206,6 +206,7 @@ export const apiDataset = {
     return response.data;
   },
   tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
+    levelError = levelError.join(',');
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON

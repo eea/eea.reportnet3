@@ -73,7 +73,7 @@ const DataViewer = withRouter(
     const [initialRecordValue, setInitialRecordValue] = useState();
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
-    const [filterLevelError, setFilterLevelError] = useState('CORRECT,WARNING,ERROR');
+    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
     const [menu, setMenu] = useState();
@@ -119,9 +119,9 @@ const DataViewer = withRouter(
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
       setValidationDropdownFilter([
-        { label: 'Correct', key: 'CORRECT' },
-        { label: 'Warnings', key: 'WARNING' },
-        { label: 'Errors', key: 'ERROR' }
+        { label: resources.messages['error'], key: 'ERROR' },
+        { label: resources.messages['warning'], key: 'WARNING' },
+        { label: resources.messages['correct'], key: 'CORRECT' }
       ]);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
@@ -232,13 +232,8 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      const concatFilter = filteredKeys.join(',');
-
-      //const finalFilter = concatFilter == [] ? 'ALL' : concatFilter;
-
       setIsFilterValidationsActive(filteredKeys.length != 3);
-
-      setFilterLevelError(concatFilter);
+      setFilterLevelError(filteredKeys);
     };
 
     useEffect(() => {

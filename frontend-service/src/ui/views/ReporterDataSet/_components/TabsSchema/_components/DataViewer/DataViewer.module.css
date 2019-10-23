@@ -31,10 +31,6 @@
   flex-direction: row;
   justify-content: center;
 }
-.filterActive {
-  opacity: 1;
-  color: #5798e4;
-}
 .filterInactive {
   opacity: 0.25;
 }

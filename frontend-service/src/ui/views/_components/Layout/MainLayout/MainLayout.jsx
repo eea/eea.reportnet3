@@ -6,11 +6,12 @@ import styles from './MainLayout.module.css';
 
 import { Navigation } from './_components';
 import { Footer } from './_components';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
 const MainLayout = ({ children }) => {
-  //check userContext
+  const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   useEffect(() => {
     async function fetchData() {
@@ -33,10 +34,7 @@ const MainLayout = ({ children }) => {
       <Navigation />
       <div className={styles.disclaimer}>
         <span className="p-messages-icon pi  pi-info-circle"></span>
-        BETA VERSION FOR TESTING ONLY
-        <br />
-        The data and illustrated errors are for testing purposes only and do not reflect the actual data delivered by
-        any countries featured
+        {resources.messages['disclaimerTitle']}
       </div>
       <div className={styles.mainContent}>{children}</div>
       <Footer />
