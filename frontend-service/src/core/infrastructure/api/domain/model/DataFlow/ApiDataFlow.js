@@ -106,8 +106,8 @@ export const apiDataflow = {
     const tokens = userStorage.get();
     const response = await HTTPRequester.post({
       url: getUrl(DataflowConfig.newEmptyDatasetSchema, {
-        dataflowId: dataflowId,
-        datasetSchemaName: datasetSchemaName
+        dataflowId,
+        datasetSchemaName
       }),
       queryString: {},
       headers: {
