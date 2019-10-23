@@ -149,6 +149,9 @@
   text-align: center;
   text-transform: capitalize;
   margin: 0.5rem;
+  word-wrap: break-word;
+  max-width: 100px;
+  box-sizing: content-box;
 }
 .datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
