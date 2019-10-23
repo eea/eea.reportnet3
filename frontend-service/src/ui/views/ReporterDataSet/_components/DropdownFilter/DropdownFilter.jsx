@@ -122,7 +122,7 @@ class DropdownFilter extends React.Component {
     );
   }
 
-  menuClick(e) {
+  menuClick() {
     this.setState(state => {
       return {
         ...state,
