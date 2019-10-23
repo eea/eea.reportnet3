@@ -160,9 +160,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public List<RecordValue> findByTableValueWithOrder(String idTableSchema,
       TypeErrorEnum[] levelError, Pageable pageable, SortField... sortFields) {
-    // TODO Como alternativa se puede hacer una query sin criterios de ordenacion y paginar y luego
-    // ordenar fuera mediante codigo. Estudiar
-
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
@@ -208,38 +205,39 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     String filter = "";
-    List<TypeErrorEnum> lvl = new ArrayList<TypeErrorEnum>();
-    for (int i = 0; i < levelError.length; i++) {
-      lvl.add(levelError[i]);
+    if (null != levelError) {
+      List<TypeErrorEnum> lvl = new ArrayList<TypeErrorEnum>();
+      for (int i = 0; i < levelError.length; i++) {
+        lvl.add(levelError[i]);
+      }
+
+
+      switch (levelError.length) {
+        case 3:
+          break;
+        case 1:
+          if (lvl.contains(TypeErrorEnum.ERROR)) {
+            filter = ERROR_APPEND_QUERY;
+          } else if (lvl.contains(TypeErrorEnum.WARNING)) {
+            filter = WARNING_APPEND_QUERY;
+          } else if (lvl.contains(TypeErrorEnum.CORRECT)) {
+            filter = CORRECT_APPEND_QUERY;
+          }
+          break;
+        case 2:
+          if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.ERROR)) {
+            filter = WARNING_ERROR_APPEND_QUERY;
+          } else if (lvl.contains(TypeErrorEnum.ERROR) && lvl.contains(TypeErrorEnum.CORRECT)) {
+            filter = ERROR_CORRECT_APPEND_QUERY;
+          } else if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.CORRECT)) {
+            filter = WARNING_CORRECT_APPEND_QUERY;
+          }
+          break;
+        default:
+          List<RecordValue> emptyrecords = new ArrayList<>();
+          return emptyrecords;
+      }
     }
-
-
-    switch (levelError.length) {
-      case 3:
-        break;
-      case 1:
-        if (lvl.contains(TypeErrorEnum.ERROR)) {
-          filter = ERROR_APPEND_QUERY;
-        } else if (lvl.contains(TypeErrorEnum.WARNING)) {
-          filter = WARNING_APPEND_QUERY;
-        } else if (lvl.contains(TypeErrorEnum.CORRECT)) {
-          filter = CORRECT_APPEND_QUERY;
-        }
-        break;
-      case 2:
-        if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.ERROR)) {
-          filter = WARNING_ERROR_APPEND_QUERY;
-        } else if (lvl.contains(TypeErrorEnum.ERROR) && lvl.contains(TypeErrorEnum.CORRECT)) {
-          filter = ERROR_CORRECT_APPEND_QUERY;
-        } else if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.CORRECT)) {
-          filter = WARNING_CORRECT_APPEND_QUERY;
-        }
-        break;
-      default:
-        List<RecordValue> emptyrecords = new ArrayList<>();
-        return emptyrecords;
-    }
-
 
     Query query;
     if (null == sortFields) {
