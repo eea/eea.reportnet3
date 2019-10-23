@@ -57,13 +57,7 @@ public class ProxyMultitenantService<T> implements InvocationHandler {
     if (StringUtils.isNotBlank(datasetId)) {
       TenantResolver.setTenantName("dataset_" + datasetId);
     }
-    Object result = null;
-    try {
-      result = method.invoke(proxiedService, args);
-    } finally {
-      TenantResolver.clean();
-    }
-
-    return result;
+    
+    return method.invoke(proxiedService, args);
   }
 }

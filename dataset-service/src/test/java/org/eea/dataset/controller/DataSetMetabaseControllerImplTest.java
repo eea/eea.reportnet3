@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -89,16 +88,13 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test
   public void createEmptyDataSetTest() throws Exception {
-    doNothing().when(datasetMetabaseService).createEmptyDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(1L);
     dataSetMetabaseControllerImpl.createEmptyDataSet(TypeDatasetEnum.REPORTING, "datasetName", null,
         1L);
-
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
   }
-
-
 
   @Test
   public void findDatasetMetabaseByIdTest() throws Exception {
@@ -116,4 +112,11 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(designDatasetService, times(1)).getDesignDataSetIdByDataflowId(Mockito.any());
   }
 
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateDatasetNameTest() {
+    Mockito.when(datasetMetabaseService.updateDatasetName(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
+  }
 }

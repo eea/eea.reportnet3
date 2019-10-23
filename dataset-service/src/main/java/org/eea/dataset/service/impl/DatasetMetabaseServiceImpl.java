@@ -17,8 +17,11 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -47,6 +50,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
   /**
    * Gets the data set id by dataflow id.
@@ -78,30 +82,33 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * We use spring Transactional with this value to indicate we want to use the metabase
    * transactional manager. Otherwise the operation will be fail
    */
-  public void createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
-      String idDataSetSchema, Long idDataFlow) throws EEAException {
+  public Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName,
+      String datasetSchemaId, Long dataflowId) throws EEAException {
 
-    if (datasetType != null && datasetName != null && idDataSetSchema != null
-        && idDataFlow != null) {
+    if (datasetType != null && datasetName != null && datasetSchemaId != null
+        && dataflowId != null) {
       DataSetMetabase dataset;
 
       switch (datasetType) {
         case REPORTING:
           dataset = new ReportingDataset();
-          fillDataset(dataset, datasetName, idDataFlow);
+          fillDataset(dataset, datasetName, dataflowId);
           reportingDatasetRepository.save((ReportingDataset) dataset);
           break;
         case DESIGN:
           dataset = new DesignDataset();
-          fillDataset(dataset, datasetName, idDataFlow);
+          fillDataset(dataset, datasetName, dataflowId);
           designDatasetRepository.save((DesignDataset) dataset);
           break;
         default:
           throw new EEAException("Unsupported datasetType: " + datasetType);
       }
 
-      recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), idDataSetSchema);
+      recordStoreControllerZull.createEmptyDataset("dataset_" + dataset.getId(), datasetSchemaId);
+      return dataset.getId();
     }
+
+    throw new EEAException("createEmptyDataset: Bad arguments");
   }
 
   private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow) {
@@ -128,5 +135,22 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
     Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(idDataset);
     return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+  }
+
+  @Override
+  @Transactional
+  public void deleteDesignDataset(Long datasetId) {
+    dataSetMetabaseRepository.deleteById(datasetId);
+  }
+
+  @Override
+  public boolean updateDatasetName(Long datasetId, String datasetName) {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    if (datasetMetabase != null) {
+      datasetMetabase.setDataSetName(datasetName);
+      dataSetMetabaseRepository.save(datasetMetabase);
+      return true;
+    }
+    return false;
   }
 }

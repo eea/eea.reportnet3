@@ -1,8 +1,10 @@
 package org.eea.dataset.service;
 
+import org.eea.exception.EEAException;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 
 /**
  * The Interface DataschemaService.
@@ -18,7 +20,7 @@ public interface DatasetSchemaService {
    */
   void createDataSchema(Long datasetId, Long dataflowId);
 
-  ObjectId createEmptyDataSetSchema(Long idDataFlow, String nameDataSetSchema) throws EEAException;
+  ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName) throws EEAException;
 
 
   /**
@@ -42,4 +44,42 @@ public interface DatasetSchemaService {
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules);
 
 
+  /**
+   * Delete table schema.
+   *
+   * @param idTableSchema the id table schema
+   */
+  void deleteTableSchema(String idTableSchema);
+
+
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
+  void deleteDatasetSchema(Long datasetId, String schemaId);
+
+
+  /**
+   * Update name table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @throws EEAException the EEA exception
+   */
+  void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException;
+
+
+  /**
+   * Creates the table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @param datasetId the dataset id
+   */
+  void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
+
+
+  void createGroupAndAddUser(Long datasetId);
 }

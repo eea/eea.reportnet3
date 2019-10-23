@@ -1,4 +1,4 @@
-package org.eea.ums.configuration.utils;
+package org.eea.enums.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,7 +18,6 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
   private static final Logger LOGGER_ERROR = LoggerFactory.getLogger("error_logger");
 
   private static class StringToEnumConverter<T extends Enum> implements Converter<String, T> {
-
     private Class<T> enumType;
 
     /**
@@ -38,7 +37,6 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
         try {
           enumValue = (T) getEnumFromValueMethod.invoke(null, source);
         } catch (IllegalAccessException | InvocationTargetException e) {
-
           enumValue = (T) Enum.valueOf(this.enumType, source);
         }
       } else {
@@ -60,10 +58,15 @@ public class StringToEnumConverterFactory implements ConverterFactory<String, En
     }
   }
 
+  /**
+   * Gets the converter.
+   *
+   * @param <T> the generic type
+   * @param targetType the target type
+   * @return the converter
+   */
   @Override
   public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
     return new StringToEnumConverter(targetType);
   }
-
-
 }

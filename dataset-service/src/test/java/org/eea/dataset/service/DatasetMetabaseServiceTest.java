@@ -16,6 +16,7 @@ import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,5 +110,24 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
     datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, "datasetName",
         (new ObjectId()).toString(), 1L);
+  }
+
+  public void updateDatasetNameTest1() {
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataSetMetabaseRepository.save(Mockito.any())).thenReturn(null);
+    Assert.assertTrue(datasetMetabaseService.updateDatasetName(1L, "datasetName"));
+  }
+
+  @Test
+  public void updateDatasetNameTest2() {
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    Assert.assertFalse(datasetMetabaseService.updateDatasetName(1L, ""));
+  }
+
+  @Test
+  public void deleteDesignDatasetTest() {
+    datasetMetabaseService.deleteDesignDataset(1L);
+    Mockito.verify(dataSetMetabaseRepository, times(1)).deleteById(Mockito.anyLong());
   }
 }

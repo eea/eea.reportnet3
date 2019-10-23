@@ -27,8 +27,8 @@ public interface DatasetMetabaseService {
    * @param idDataflow the id dataflow
    * @throws EEAException the EEA exception
    */
-  void createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String idDataSetSchema,
-      Long idDataFlow) throws EEAException;
+  Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
+      Long dataflowId) throws EEAException;
 
   /**
    * Gets the dataset name.
@@ -38,4 +38,20 @@ public interface DatasetMetabaseService {
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
 
+
+  /**
+   * Delete design dataset.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteDesignDataset(Long datasetId);
+
+  /**
+   * Update dataset name.
+   *
+   * @param datasetId the dataset id
+   * @param datasetName the dataset name
+   * @return true, if successful
+   */
+  boolean updateDatasetName(Long datasetId, String datasetName);
 }

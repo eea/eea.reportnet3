@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.io.KafkaSender;
@@ -68,6 +70,7 @@ public class RecordStoreServiceImplTest {
   @Mock
   private DockerClient docker;
 
+  /** The jdbc template. */
   @Mock
   private JdbcTemplate jdbcTemplate;
 
@@ -213,6 +216,56 @@ public class RecordStoreServiceImplTest {
     recordStoreServiceImpl.createDataSetFromOther(DATASET, DATASET);
   }
 
+  /**
+   * Creates the data snapshot test.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void createDataSnapshotTest()
+      throws RecordStoreAccessException, SQLException, IOException {
+    recordStoreServiceImpl.createDataSnapshot(1L, 1L, 1L);
+  }
+
+  /**
+   * Restore data snapshot test.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void restoreDataSnapshotTest()
+      throws RecordStoreAccessException, SQLException, IOException {
+    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L);
+  }
+
+  /**
+   * Delete data snapshot test.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void deleteDataSnapshotTest()
+      throws RecordStoreAccessException, SQLException, IOException {
+    recordStoreServiceImpl.deleteDataSnapshot(1L, 1L);
+  }
+
+  /**
+   * Delete dataset test.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void deleteDatasetTest() throws RecordStoreAccessException, SQLException, IOException {
+    recordStoreServiceImpl.deleteDataset(DATASET);
+  }
 
 
 }
