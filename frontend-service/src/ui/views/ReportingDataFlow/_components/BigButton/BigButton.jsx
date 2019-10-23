@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { isUndefined } from 'lodash';
 
 import styles from './BigButton.module.css';
 
@@ -9,8 +10,20 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
+import { InputText } from 'ui/views/_components/InputText';
 
-export const BigButton = ({ caption, handleRedirect, isReleased, layout, model }) => {
+export const BigButton = ({
+  caption,
+  handleRedirect,
+  isNameEditable,
+  isReleased,
+  layout,
+  model,
+  onNameEdit,
+  onSaveName
+}) => {
+  const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
+
   const newDatasetRef = useRef();
   const dataset = model ? (
     <>
@@ -71,7 +84,24 @@ export const BigButton = ({ caption, handleRedirect, isReleased, layout, model }
           iconStyle={{ fontSize: '1.8rem' }}
         />
       </div>
-      <p className={styles.caption}>{caption}</p>
+      {!isUndefined(isNameEditable) && isNameEditable ? (
+        <InputText
+          className={`${styles.inputText}`}
+          onBlur={e => {
+            if (buttonsTitle !== '') {
+              onSaveName(e.target.value);
+              onNameEdit();
+            }
+          }}
+          onChange={e => setButtonsTitle(e.target.value)}
+          placeholder="kaixo"
+          value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+        />
+      ) : (
+        <p className={styles.caption} onDoubleClick={onNameEdit}>
+          {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+        </p>
+      )}
     </>
   ) : (
     <></>

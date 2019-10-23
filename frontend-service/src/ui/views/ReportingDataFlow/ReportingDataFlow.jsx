@@ -44,6 +44,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -144,8 +145,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setNewDatasetDialog(false);
   };
 
+  const onNameEdit = () => {
+    setIsNameEditable(isNameEditable ? false : true);
+  };
+
   const onUpdateData = () => {
     setIsDataUpdated(true);
+  };
+
+  const onSaveName = value => {
+    console.log('blurred', value);
   };
 
   const showContributorsDialog = () => {
@@ -223,7 +232,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
-                label="DO"
                 caption={resources.messages['documents']}
                 handleRedirect={() =>
                   handleRedirect(
@@ -248,6 +256,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       handleRedirect={() => {
                         handleRedirect();
                       }}
+                      isNameEditable={isNameEditable}
+                      onNameEdit={onNameEdit}
+                      onSaveName={onSaveName}
                       model={[
                         {
                           label: resources.messages['openDataset'],
@@ -287,7 +298,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 <div className={`${styles.datasetItem}`} key={dataset.datasetId}>
                   <BigButton
                     layout="dataset"
-                    label="DS"
                     caption={dataset.datasetSchemaName}
                     isReleased={dataset.isReleased}
                     handleRedirect={() => {
