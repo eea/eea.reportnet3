@@ -33,7 +33,6 @@
 }
 .filterActive {
   opacity: 1;
-  color: #5798e4;
 }
 .filterInactive {
   opacity: 0.25;
