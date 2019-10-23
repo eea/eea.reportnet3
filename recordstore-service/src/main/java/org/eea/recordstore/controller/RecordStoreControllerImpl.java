@@ -11,12 +11,14 @@ import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
@@ -137,6 +139,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
   }
@@ -158,6 +161,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       recordStoreService.restoreDataSnapshot(datasetId, idSnapshot);
     } catch (SQLException | IOException | RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
   }
@@ -179,6 +183,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       recordStoreService.deleteDataSnapshot(datasetId, idSnapshot);
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
   }

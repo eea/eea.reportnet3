@@ -11,8 +11,10 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.junit.Assert;
@@ -44,6 +46,14 @@ public class DataSetSchemaControllerImplTest {
   /** The dataset service. */
   @Mock
   private DatasetService datasetService;
+
+  /** The dataset metabase service. */
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  /** The record store controller zull. */
+  @Mock
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * Inits the mocks.
@@ -173,5 +183,41 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void deleteTableSchemaExceptionTest() {
     dataSchemaControllerImpl.deleteTableSchema(null, null);
+  }
+
+  /**
+   * Delete dataset schema exception test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteDatasetSchemaExceptionTest() {
+    dataSchemaControllerImpl.deleteDatasetSchema(null, null);
+  }
+
+  /**
+   * Delete dataset schema exception 2 test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteDatasetSchemaException2Test() {
+    dataSchemaControllerImpl.deleteDatasetSchema(null, "schema");
+  }
+
+  /**
+   * Delete dataset schema exception 3 test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteDatasetSchemaException3Test() {
+    dataSchemaControllerImpl.deleteDatasetSchema(1L, null);
+  }
+
+  /**
+   * Delete dataset schema success.
+   */
+  @Test
+  public void deleteDatasetSchemaSuccess() {
+    doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
+    doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
+    dataSchemaControllerImpl.deleteDatasetSchema(1L, "schema");
+
+    Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
 }

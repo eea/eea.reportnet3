@@ -85,12 +85,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final String GENERAL_ERROR = "ERROR";
 
   /**
-   * The Constant STRING_WARNING.
-   */
-  private static final String STRING_WARNING =
-      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE SHORTER";
-
-  /**
    * The Constant INTEGER_ERROR.
    */
   private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
