@@ -135,6 +135,23 @@ public class FileCommonUtils {
   }
 
   /**
+   * Find field schemas.
+   *
+   * @param idTablaSchema the id tabla schema
+   * @param dataSetSchema the data set schema
+   * @return the list
+   */
+  public List<FieldSchemaVO> findFieldSchemas(String idTablaSchema, DataSetSchemaVO dataSetSchema) {
+    // Find the FieldSchemas
+    TableSchemaVO recordSchemas = findTableSchema(idTablaSchema, dataSetSchema);
+    RecordSchemaVO recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
+    if (null != recordSchema) {
+      return recordSchema.getFieldSchema();
+    }
+    return null;
+  }
+
+  /**
    * Gets the data set schema.
    *
    * @param dataflowId the dataflow id

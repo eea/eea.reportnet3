@@ -12,6 +12,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -95,6 +96,20 @@ public class DatasetMetabaseServiceTest {
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.findDatasetMetabase(Mockito.anyLong());
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
+  }
+
+  @Test
+  public void updateDatasetNameTest1() {
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataSetMetabaseRepository.save(Mockito.any())).thenReturn(null);
+    Assert.assertTrue(datasetMetabaseService.updateDatasetName(1L, "datasetName"));
+  }
+
+  @Test
+  public void updateDatasetNameTest2() {
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    Assert.assertFalse(datasetMetabaseService.updateDatasetName(1L, ""));
   }
 
   @Test

@@ -71,10 +71,16 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{idSchema}/udpateTableSchema", method = RequestMethod.PUT)
+  @RequestMapping(value = "/{idSchema}/udpateTableSchema/{datasetId}", method = RequestMethod.PUT)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void updateTableSchema(@PathVariable("idSchema") String idSchema,
-      @RequestBody TableSchemaVO tableSchema) {
-    dataschemaService.updateTableSchema(idSchema, tableSchema);
+      @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema) {
+    try {
+      dataschemaService.updateTableSchema(idSchema, tableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
   }
 
   /**
@@ -86,10 +92,11 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void createTableSchema(@PathVariable("id") String id,
       @PathVariable("datasetId") Long datasetId, @RequestBody final TableSchemaVO tableSchema) {
-    dataschemaService.createTableSchema(id, tableSchema, datasetId);
     try {
+      dataschemaService.createTableSchema(id, tableSchema, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchema);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

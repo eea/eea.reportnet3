@@ -99,8 +99,9 @@ public interface DatasetSchemaController {
    * @param idSchema the id schema
    * @param tableSchema the table schema
    */
-  @RequestMapping(value = "/{idSchema}/udpateTableSchema", method = RequestMethod.PUT)
-  void updateTableSchema(String idSchema, TableSchemaVO tableSchema);
+  @RequestMapping(value = "/{idSchema}/udpateTableSchema/{datasetId}", method = RequestMethod.PUT)
+  void updateTableSchema(@PathVariable("idSchema") String idSchema,
+      @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema);
 
   /**
    * Creates the table schema.
@@ -112,6 +113,7 @@ public interface DatasetSchemaController {
   @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
   void createTableSchema(@PathVariable("id") String id, @PathVariable("datasetId") Long datasetId,
       @RequestBody final TableSchemaVO tableSchema);
+
 
 
 }

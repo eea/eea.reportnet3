@@ -15,6 +15,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class DatasetMetabaseServiceImpl.
@@ -89,9 +90,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     // create the dataset into datasets
     recordStoreControllerZull.createEmptyDataset("dataset_" + reportingData.getId(),
         idDatasetSchema);
-
-
-
   }
 
 
@@ -109,10 +107,20 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   }
 
-
-
   @Override
+  @Transactional
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteById(datasetId);
+  }
+
+  @Override
+  public boolean updateDatasetName(Long datasetId, String datasetName) {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    if (datasetMetabase != null) {
+      datasetMetabase.setDataSetName(datasetName);
+      dataSetMetabaseRepository.save(datasetMetabase);
+      return true;
+    }
+    return false;
   }
 }

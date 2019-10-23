@@ -21,6 +21,8 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -28,12 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
-import com.mongodb.BasicDBObject;
 
 /**
  * The type Dataschema service.
@@ -355,7 +353,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     return dataSchemaVO;
-
   }
 
   /**
@@ -372,7 +369,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("Schema retrived by idFlow {}", idFlow);
     return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
-
   }
 
   /**
@@ -385,7 +381,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void deleteTableSchema(String idTableSchema) {
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
-
 
   /**
    * Delete dataset schema.
@@ -405,28 +400,29 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param id the id
    * @param tableSchema the table schema
+   * @throws EEAException
    */
   @Override
-  public void updateTableSchema(String id, TableSchemaVO tableSchema) {
-    Optional<DataSetSchema> dataset = schemasRepository.findById(new ObjectId(id));
+  public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
+    DataSetSchema dataset = schemasRepository.findById(new ObjectId(id)).orElse(null);
 
-    if (dataset.isPresent()) {
-      TableSchema table = getTableSchema(tableSchema.getIdTableSchema().toString(), dataset.get());
+    if (dataset != null) {
+      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset);
       if (table != null) {
         // set the attributtes of VO
         table.setNameTableSchema(tableSchema.getNameTableSchema());
         table.setIdDataSet(new ObjectId(id));
         table.setIdTableSchema(new ObjectId(tableSchema.getIdTableSchema()));
 
-        Update updateDrop = new Update().pull("tableSchemas",
-            new BasicDBObject("_id", tableSchema.getIdTableSchema().toString()));
-        mongo.updateMulti(new Query(), updateDrop, DataSetSchema.class);
-
-        Update update = new Update().push("tableSchemas", table);
-        Query query = new Query();
-        query.addCriteria(new Criteria("_id").is(id));
-        mongo.updateMulti(query, update, DataSetSchema.class);
+        schemasRepository.deleteTableSchemaById(tableSchema.getIdTableSchema());
+        schemasRepository.insertTableSchema(table, id);
+      } else {
+        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
       }
+    } else {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
   }
 
@@ -470,10 +466,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.setIdTableSchema(new ObjectId().toString());
     }
     TableSchema table = tableMapper.classToEntity(tableSchema);
-    Update update = new Update().push("tableSchemas", table);
-    Query query = new Query();
-    query.addCriteria(new Criteria("_id").is(id));
-    mongo.updateMulti(query, update, DataSetSchema.class);
+    LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
+    schemasRepository.insertTableSchema(table, id);
   }
 
 }
