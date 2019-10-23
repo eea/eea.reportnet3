@@ -36,6 +36,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
+   *
    * @return the page
    */
   @Override
@@ -46,16 +47,14 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select v  from Validation v  where v.idRule is not null ";
     String partLevelError = "";
-    String partTypeEntities = "";
-    String partOriginsFilter = "";
     partLevelError = levelErrorFilter(levelErrorsFilter, partLevelError);
-    partTypeEntities = typeEntities(typeEntitiesFilter, partTypeEntities);
-    partOriginsFilter = originFilter(originsFilter, partOriginsFilter);
+    String partTypeEntities = typeEntities(typeEntitiesFilter);
+    String partOriginsFilter = originFilter(originsFilter);
 
     String orderPart = "";
     if (!StringUtils.isBlank(headerField)) {
       String byDescAsc = " desc";
-      if (Boolean.TRUE == asc) {
+      if (asc) {
         byDescAsc = " asc";
       }
       orderPart = "order by " + headerField + byDescAsc;
@@ -68,8 +67,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
     List<Validation> validationList = query.getResultList();
-    Page<Validation> page = new PageImpl<>(validationList);
-    return page;
+    return new PageImpl<>(validationList);
   }
 
   /**
@@ -79,6 +77,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
    * @param originsFilter the origins filter
+   *
    * @return the long
    */
   @Override
@@ -88,11 +87,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select count(v)  from Validation v  where v.idRule is not null ";
     String partLevelError = "";
-    String partTypeEntities = "";
-    String partOriginsFilter = "";
     partLevelError = levelErrorFilter(levelErrorsFilter, partLevelError);
-    partTypeEntities = typeEntities(typeEntitiesFilter, partTypeEntities);
-    partOriginsFilter = originFilter(originsFilter, partOriginsFilter);
+    String partTypeEntities = typeEntities(typeEntitiesFilter);
+    String partOriginsFilter = originFilter(originsFilter);
 
     String FINAL_QUERY = QUERY_FILTER_BASIC + partLevelError + partTypeEntities + partOriginsFilter;
 
@@ -104,42 +101,43 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Origin filter.
    *
    * @param originsFilter the origins filter
-   * @param partOriginsFilter the part origins filter
+   *
    * @return the string
    */
-  private String originFilter(String originsFilter, String partOriginsFilter) {
+  private String originFilter(String originsFilter) {
+    StringBuilder stringBuilder = new StringBuilder("");
     if (!StringUtils.isBlank(originsFilter)) {
       List<String> originsFilterList = Arrays.asList(originsFilter.split(","));
-      partOriginsFilter =
-          " and v.originName in( Select v.originName from Validation v where v.idRule is not  null ";
+      stringBuilder.append(
+          " and v.originName in( Select v.originName from Validation v where v.idRule is not  null ");
       for (int i = 0; i < originsFilterList.size(); i++) {
-        partOriginsFilter =
-            partOriginsFilter + " and v.originName  !='" + originsFilterList.get(i) + "' ";
+        stringBuilder.append(" and v.originName  !='" + originsFilterList.get(i) + "' ");
       }
-      partOriginsFilter = partOriginsFilter + ") ";
+      stringBuilder.append(") ");
     }
-    return partOriginsFilter;
+    return stringBuilder.toString();
   }
 
   /**
    * Type entities.
    *
    * @param typeEntitiesFilter the type entities filter
-   * @param partTypeEntities the part type entities
+   *
    * @return the string
    */
-  private String typeEntities(List<TypeEntityEnum> typeEntitiesFilter, String partTypeEntities) {
+  private String typeEntities(List<TypeEntityEnum> typeEntitiesFilter) {
+    StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
-      partTypeEntities =
-          "and v.typeEntity in (Select v.typeEntity from Validation v where v.idRule is not null ";
+      stringBuilder.append(
+          "and v.typeEntity in (Select v.typeEntity from Validation v where v.idRule is not null ");
       for (int i = 0; i < typeEntitiesFilter.size(); i++) {
-        partTypeEntities = partTypeEntities + " and v.typeEntity !='"
-            + typeEntitiesFilter.get(i).getValue() + "' ";
+        stringBuilder.append(" and v.typeEntity !='").append(typeEntitiesFilter.get(i).getValue())
+            .append("' ");
       }
 
-      partTypeEntities = partTypeEntities + ") ";
+      stringBuilder.append(") ");
     }
-    return partTypeEntities;
+    return stringBuilder.toString();
   }
 
   /**
@@ -147,6 +145,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @param levelErrorsFilter the level errors filter
    * @param partLevelError the part level error
+   *
    * @return the string
    */
   private String levelErrorFilter(List<TypeErrorEnum> levelErrorsFilter, String partLevelError) {
