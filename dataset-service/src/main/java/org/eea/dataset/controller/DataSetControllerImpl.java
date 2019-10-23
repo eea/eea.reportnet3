@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -90,7 +91,6 @@ public class DataSetControllerImpl implements DatasetController {
   @Autowired
   private DeleteHelper deleteHelper;
 
-
   /**
    * Gets the data tables values.
    *
@@ -110,7 +110,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields) {
+      @RequestParam(value = "fields", required = false) String fields,
+      @RequestParam(value = "levelError", required = false) TypeErrorEnum[] levelError) {
 
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -124,10 +125,10 @@ public class DataSetControllerImpl implements DatasetController {
       pageable = PageRequest.of(pageNum, pageSize);
     }
     // else pageable will be null, it will be created inside the service
-
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields);
+      result =
+          datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields, levelError);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -137,6 +138,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return result;
+
   }
 
 

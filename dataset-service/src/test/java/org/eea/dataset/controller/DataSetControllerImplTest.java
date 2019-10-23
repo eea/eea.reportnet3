@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -178,7 +179,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry1() throws Exception {
     String fields = "field_1,fields_2,fields_3";
-    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields);
+    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, errorfilter);
   }
 
   /**
@@ -191,7 +193,8 @@ public class DataSetControllerImplTest {
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
-    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields);
+    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter);
   }
 
   /**
@@ -202,8 +205,9 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
+        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null);
   }
 
   /**
@@ -213,9 +217,9 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testGetDataTablesValuesExceptionEntry4() throws Exception {
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
-        .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null);
+    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null);
   }
 
   /**
@@ -226,9 +230,10 @@ public class DataSetControllerImplTest {
   // @Test
   public void testgetDataTablesValuesExceptionEntry5() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(new TableVO());
+        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     String fields = "field_1,fields_2,fields_3";
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
+    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter);
   }
 
   /**
@@ -239,14 +244,15 @@ public class DataSetControllerImplTest {
   @Test
   public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(new TableVO());
+        Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields);
+    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING};
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
