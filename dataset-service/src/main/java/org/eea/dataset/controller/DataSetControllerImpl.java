@@ -110,7 +110,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields) {
+      @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) TypeErrorEnum[] levelError) {
 
     if (null == datasetId || null == idTableSchema) {
@@ -130,7 +130,8 @@ public class DataSetControllerImpl implements DatasetController {
 
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields);
+      result =
+          datasetService.getTableValuesById(datasetId, idTableSchema, pageable, fields, levelError);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -140,6 +141,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     return result;
+
   }
 
 
