@@ -25,25 +25,25 @@ public class DataflowConfiguration implements WebMvcConfigurer {
   /**
    * The url.
    */
-  @Value("${spring.datasource.metasource.url}")
+  @Value("${spring.datasource.url}")
   private String url;
 
   /**
    * The username.
    */
-  @Value("${spring.datasource.metasource.username}")
+  @Value("${spring.datasource.username}")
   private String username;
 
   /**
    * The password.
    */
-  @Value("${spring.datasource.metasource.password}")
+  @Value("${spring.datasource.password}")
   private String password;
 
   /**
    * The driver.
    */
-  @Value("${spring.datasource.metasource.driver-class-name}")
+  @Value("${spring.datasource.driver-class-name}")
   private String driver;
 
   /**

@@ -14,11 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -103,16 +101,5 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       LOG_ERROR.error(e.getMessage());
     }
 
-  }
-
-  @Override
-  @PutMapping(value = "/updateDatasetName")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
-  public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
-      @RequestParam(value = "datasetName", required = false) String datasetName) {
-    if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
   }
 }

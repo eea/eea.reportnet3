@@ -63,7 +63,6 @@ import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -953,20 +952,5 @@ public class DatasetServiceTest {
 
   }
 
-  @Test
-  public void deleteTableValueTest() {
-    datasetService.deleteTableValue(1L, new ObjectId().toString());
-    Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
-  }
 
-  @Test(expected = EEAException.class)
-  public void saveTablePropagationExceptionTest() throws EEAException {
-    datasetService.saveTablePropagation(1L, new TableSchemaVO());
-  }
-
-  @Test
-  public void saveTablePropagationTest() throws EEAException {
-    Mockito.when(datasetRepository.findById(1L)).thenReturn(Optional.of(datasetValue));
-    datasetService.saveTablePropagation(1L, new TableSchemaVO());
-  }
 }

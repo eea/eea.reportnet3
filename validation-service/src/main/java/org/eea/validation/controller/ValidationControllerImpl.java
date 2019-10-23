@@ -1,13 +1,10 @@
 package org.eea.validation.controller;
 
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.slf4j.Logger;
@@ -75,9 +72,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @param pageSize the page size
    * @param fields the fields
    * @param asc the asc
-   * @param levelErrorsFilter the level errors filter
-   * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   *
    * @return the failed validations by id dataset
    */
   @Override
@@ -87,12 +82,7 @@ public class ValidationControllerImpl implements ValidationController {
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc,
-      @RequestParam(value = "levelErrorsFilter",
-          required = false) List<TypeErrorEnum> levelErrorsFilter,
-      @RequestParam(value = "typeEntitiesFilter",
-          required = false) List<TypeEntityEnum> typeEntitiesFilter,
-      @RequestParam(value = "originsFilter", required = false) String originsFilter) {
+      @RequestParam(value = "asc", defaultValue = "true", required = false) Boolean asc) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -109,8 +99,7 @@ public class ValidationControllerImpl implements ValidationController {
       pageable = PageRequest.of(pageNum, pageSize);
     }
     try {
-      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc,
-          levelErrorsFilter, typeEntitiesFilter, originsFilter);
+      validations = loadValidationsHelper.getListValidations(datasetId, pageable, fields, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

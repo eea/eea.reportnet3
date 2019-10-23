@@ -270,8 +270,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     if (null != idTableSchema) {
       record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
     }
-    record.setFields(
-        createFieldsVO(values, headers, fileCommon.findFieldSchemas(idTableSchema, dataSetSchema)));
+    record.setFields(createFieldsVO(values, headers));
     record.setDatasetPartitionId(partitionId);
     records.add(record);
     return records;
@@ -286,48 +285,21 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param headers the headers
    * @return the list
    */
-  private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers,
-      List<FieldSchemaVO> headersSchema) {
+  private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers) {
     final List<FieldVO> fields = new ArrayList<>();
-    List<String> idSchema = new ArrayList<>();
     int contAux = 0;
     for (final String value : values) {
       final FieldVO field = new FieldVO();
       if (contAux < headers.size()) {
         field.setIdFieldSchema(headers.get(contAux).getId());
         field.setType(headers.get(contAux).getType());
-        field.setValue(value);
-        if (field.getIdFieldSchema() != null) {
-          fields.add(field);
-          idSchema.add(field.getIdFieldSchema());
-        }
       }
+      field.setValue(value);
+      fields.add(field);
       contAux++;
     }
-    setMissingField(headersSchema, fields, idSchema);
 
     return fields;
-  }
-
-
-  /**
-   * Sets the missing field.
-   *
-   * @param headersSchema the headers schema
-   * @param fields the fields
-   * @param idSchema the id schema
-   */
-  private void setMissingField(List<FieldSchemaVO> headersSchema, final List<FieldVO> fields,
-      List<String> idSchema) {
-    headersSchema.stream().forEach(header -> {
-      if (!idSchema.contains(header.getId())) {
-        final FieldVO field = new FieldVO();
-        field.setIdFieldSchema(header.getId());
-        field.setType(header.getType());
-        field.setValue("");
-        fields.add(field);
-      }
-    });
   }
 
 

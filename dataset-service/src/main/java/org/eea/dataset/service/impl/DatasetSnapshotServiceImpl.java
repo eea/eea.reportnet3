@@ -14,7 +14,6 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
-import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
@@ -117,9 +116,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
     criteria.add(idDataset);
-    lockService.removeLockByCriteria(criteria);
+    lockService.removeLockByCriteria("DataSetSnapshotControllerImpl.createSnapshot(..)", criteria);
 
     LOG.info("Snapshot {} data files created", snap.getId());
   }
@@ -166,9 +164,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.RESTORE_SNAPSHOT.getValue());
     criteria.add(idDataset);
-    lockService.removeLockByCriteria(criteria);
+    lockService.removeLockByCriteria("DataSetSnapshotControllerImpl.restoreSnapshot(..)", criteria);
 
     LOG.info("Snapshot {} restored", idSnapshot);
 

@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
@@ -288,32 +287,5 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void saveStatistics(@DatasetId Long datasetId) throws EEAException;
-
-
-  /**
-   * Delete table value.
-   *
-   * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
-   */
-  void deleteTableValue(@DatasetId Long datasetId, String idTableSchema);
-
-
-  /**
-   * Save table propagation.
-   *
-   * @param datasetId the dataset id
-   * @param tableSchema the table schema
-   * @throws EEAException the EEA exception
-   */
-  void saveTablePropagation(@DatasetId Long datasetId, TableSchemaVO tableSchema)
-      throws EEAException;
-
-  /**
-   * Delete.
-   *
-   * @param datasetId the dataset id
-   */
-  void delete(Long datasetId);
 
 }

@@ -4,18 +4,18 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.lock.enums.LockType;
-import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.lock.model.Lock;
 
 public interface LockService {
 
-  public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
-      Map<String, Object> lockCriteria);
+  public Lock createLock(Timestamp createDate, String createdBy, LockType lockType,
+      Map<Integer, Object> lockCriteria, String signature);
 
   public Boolean removeLock(Integer lockId);
 
-  public Boolean removeLockByCriteria(List<Object> args);
+  public Boolean removeLockByCriteria(String signature, List<Object> args);
 
-  public LockVO findLock(Integer lockId);
+  public Lock findLock(Integer lockId);
 
-  public List<LockVO> findAll();
+  public List<Lock> findAll();
 }

@@ -161,21 +161,15 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       Row recordRow = rows.next();
       RecordVO record = new RecordVO();
       List<FieldVO> fields = new ArrayList<>();
-      List<String> idSchema = new ArrayList<>();
 
       // Reads the same number of cells as headers we have
-
       for (int i = 0; i < headersSize; i++) {
         FieldVO field = new FieldVO();
         field.setIdFieldSchema(headers.get(i).getId());
         field.setType(headers.get(i).getType());
         field.setValue(dataFormatter.formatCellValue(recordRow.getCell(i)));
-        if (field.getIdFieldSchema() != null) {
-          fields.add(field);
-          idSchema.add(field.getIdFieldSchema());
-        }
+        fields.add(field);
       }
-      setMissingField(fileCommon.findFieldSchemas(idTableSchema, dataSetSchema), fields, idSchema);
 
       // Creates the record with the fields readen
       record.setFields(fields);
@@ -185,26 +179,6 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     }
 
     return records;
-  }
-
-  /**
-   * Sets the missing field.
-   *
-   * @param headersSchema the headers schema
-   * @param fields the fields
-   * @param idSchema the id schema
-   */
-  private void setMissingField(List<FieldSchemaVO> headersSchema, final List<FieldVO> fields,
-      List<String> idSchema) {
-    headersSchema.stream().forEach(header -> {
-      if (!idSchema.contains(header.getId())) {
-        final FieldVO field = new FieldVO();
-        field.setIdFieldSchema(header.getId());
-        field.setType(header.getType());
-        field.setValue("");
-        fields.add(field);
-      }
-    });
   }
 
   /**

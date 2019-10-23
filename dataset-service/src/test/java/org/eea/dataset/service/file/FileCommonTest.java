@@ -3,6 +3,7 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -210,17 +211,5 @@ public class FileCommonTest {
 
     when(recordRepository.findByTableValueIdTableSchema(Mockito.any())).thenReturn(records);
     fileCommon.getRecordValues(1L, ID);
-  }
-
-  @Test
-  public void findFieldSchemasTest() {
-    ArrayList fields = new ArrayList<>();
-    fields.add(fieldSchema);
-    assertEquals(fields, fileCommon.findFieldSchemas(ID, dataset));
-  }
-
-  @Test
-  public void findFieldSchemasNullTest() {
-    assertEquals(null, fileCommon.findFieldSchemas(ID, null));
   }
 }

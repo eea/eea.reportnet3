@@ -11,7 +11,6 @@ import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -117,10 +116,9 @@ public class FileTreatmentHelper {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.LOAD_TABLE.getValue());
     criteria.add(datasetId);
     criteria.add(idTableSchema);
-    lockService.removeLockByCriteria(criteria);
+    lockService.removeLockByCriteria("DataSetControllerImpl.loadTableData(..)", criteria);
 
     // after the dataset has been saved, an event is sent to notify it
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);

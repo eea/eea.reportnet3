@@ -24,7 +24,6 @@ public class TokenGeneratorThread implements Runnable {
   private String adminUser;
   private String adminPass;
   private Long tokenExpiration;
-  private String refreshToken;
 
 
   /**
@@ -50,39 +49,25 @@ public class TokenGeneratorThread implements Runnable {
   public void run() {
 
     log.info("Starting token generator thread");
-    TokenInfo firstToken = keycloakConnectorService.generateToken(adminUser, adminPass);
-    if (null != firstToken) {
-      manageTokenInfo(firstToken);
-    }
-
     while (!exit) {
-      TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
-      manageTokenInfo(tokenInfo);
+      TokenInfo tokenInfo = keycloakConnectorService.generateToken(adminUser, adminPass);
+      if (null != tokenInfo) {
+        String accessToken = Optional.ofNullable(tokenInfo.getAccessToken()).orElse("");
+        TokenMonitor.updateAdminToken(accessToken);
+        try {
+          Thread.sleep(this.tokenExpiration);
+        } catch (InterruptedException e) {
+          LOG_ERROR.error(
+              "Error sleeping token generator thread during {} miliseconds. Thread will finish", e);
+          stopThread();
+        }
+      } else {
+        LOG_ERROR.error(
+            "Error getting admin access token, finishing Token Generator thread ");
+        stopThread();
+      }
     }
     log.info("Exited from token generator thread");
-  }
-
-  private void manageTokenInfo(TokenInfo tokenInfo) {
-    if (null != tokenInfo) {
-      String accessToken = Optional.ofNullable(tokenInfo.getAccessToken()).orElse("");
-      this.refreshToken = Optional.ofNullable(tokenInfo.getRefreshToken()).orElse("");
-      TokenMonitor.updateAdminToken(accessToken);
-      sleepThread(this.tokenExpiration);
-    } else {
-      LOG_ERROR.error(
-          "Error getting admin access token, finishing Token Generator thread ");
-      stopThread();
-    }
-  }
-
-  private void sleepThread(Long time) {
-    try {
-      Thread.sleep(time);
-    } catch (InterruptedException e) {
-      LOG_ERROR.error(
-          "Error sleeping token generator thread during {} miliseconds. Thread will finish", e);
-      stopThread();
-    }
   }
 
   /**

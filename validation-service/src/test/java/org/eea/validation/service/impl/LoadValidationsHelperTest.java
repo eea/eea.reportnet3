@@ -49,7 +49,6 @@ public class LoadValidationsHelperTest {
   @Mock
   private ValidationServiceImpl validationService;
 
-  /** The validation repository. */
   @Mock
   private ValidationRepository validationRepository;
 
@@ -141,9 +140,7 @@ public class LoadValidationsHelperTest {
     when(validationService.getfindByIdDataSetSchema(Mockito.any(), Mockito.any()))
         .thenReturn(schema);
     Page<Validation> pageValidation = new PageImpl<>(validations);
-    when(validationRepository.findAllRecordsByFilter(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), (Mockito.any(Pageable.class)), Mockito.any(), Mockito.any()))
-            .thenReturn(pageValidation);
+    when(validationRepository.findAll(Mockito.any(Pageable.class))).thenReturn(pageValidation);
     Map<Long, ErrorsValidationVO> mapAux = new HashMap<>();
     when(validationService.getDatasetErrors(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(mapAux));
@@ -154,7 +151,7 @@ public class LoadValidationsHelperTest {
     when(validationService.getFieldErrors(Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(mapAux));
 
-    loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false, null, null, "");
+    loadValidationsHelper.getListValidations(0L, pageable, "typeEntity", false);
     Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
 
   }

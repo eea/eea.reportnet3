@@ -47,10 +47,9 @@ public class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
    *
    * @param eeaEventVO the eea event VO
    */
-  // The lock should be released during ValidationHelper.checkFinishedFalidations(..) method
-  @LockMethod(removeWhenFinish = false)
   @Override
-  public void execute(@LockCriteria(name = "eeaEventVO") EEAEventVO eeaEventVO) {
+  @LockMethod(removeWhenFinish = false)
+  public void execute(@LockCriteria EEAEventVO eeaEventVO) {
     Long datasetId = (Long) eeaEventVO.getData().get("dataset_id");
     try {
       validationHelper.executeValidation(datasetId, UUID.randomUUID().toString());

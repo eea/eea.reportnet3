@@ -1,30 +1,25 @@
-package org.eea.interfaces.vo.lock;
+package org.eea.lock.model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
 import org.eea.interfaces.lock.enums.LockType;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 /**
  * 
  * This is the Lock Model that represents lock at any level on Reportnet 3.0
  *
  */
-public class LockVO implements Serializable {
+public class Lock implements Serializable {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 6204847320615411241L;
-
-  /** The id. */
-  private Integer id;
 
   /** The create date. */
   private Timestamp createDate;
@@ -35,8 +30,11 @@ public class LockVO implements Serializable {
   /** The lock type. */
   private LockType lockType;
 
+  /** The id. */
+  private Integer id;
+
   /** The lock criteria. */
-  private Map<String, Object> lockCriteria;
+  private Map<Integer, Object> lockCriteria;
 
   /**
    * Instantiates a new lock.
@@ -47,8 +45,8 @@ public class LockVO implements Serializable {
    * @param id the id
    * @param lockCriteria the lock criteria
    */
-  public LockVO(Timestamp createDate, String createdBy, LockType lockType, Integer id,
-      Map<String, Object> lockCriteria) {
+  public Lock(Timestamp createDate, String createdBy, LockType lockType, Integer id,
+      Map<Integer, Object> lockCriteria) {
     this.createDate = createDate;
     this.createdBy = createdBy;
     this.lockType = lockType;

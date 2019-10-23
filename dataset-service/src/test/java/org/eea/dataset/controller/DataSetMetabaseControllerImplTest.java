@@ -101,18 +101,13 @@ public class DataSetMetabaseControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
+
+
   @Test
   public void findDatasetMetabaseByIdTest() throws Exception {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     dataSetMetabaseControllerImpl.findDatasetMetabaseById(Mockito.anyLong());
     Mockito.verify(datasetMetabaseService, times(1)).findDatasetMetabase(Mockito.anyLong());
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void updateDatasetNameTest() {
-    Mockito.when(datasetMetabaseService.updateDatasetName(Mockito.any(), Mockito.any()))
-        .thenReturn(false);
-    dataSetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
   }
 }
