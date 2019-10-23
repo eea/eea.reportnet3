@@ -108,8 +108,7 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void updateDatasetNameTest2() {
-    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     Assert.assertFalse(datasetMetabaseService.updateDatasetName(1L, ""));
   }
 }

@@ -116,7 +116,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Override
   public boolean updateDatasetName(Long datasetId, String datasetName) {
     DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
-    if (!datasetName.isEmpty() && datasetMetabase != null) {
+    if (datasetMetabase != null) {
       datasetMetabase.setDataSetName(datasetName);
       dataSetMetabaseRepository.save(datasetMetabase);
       return true;

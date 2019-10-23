@@ -109,7 +109,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @PutMapping(value = "/updateDatasetName")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
-      @RequestParam(value = "datasetName", required = true) String datasetName) {
+      @RequestParam(value = "datasetName", required = false) String datasetName) {
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);

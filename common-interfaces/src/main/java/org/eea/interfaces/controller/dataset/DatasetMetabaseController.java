@@ -58,5 +58,5 @@ public interface DatasetMetabaseController {
 
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
-      @RequestParam(value = "datasetName", required = true) String datasetName);
+      @RequestParam(value = "datasetName", required = false) String datasetName);
 }
