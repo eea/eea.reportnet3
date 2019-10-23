@@ -2,6 +2,7 @@ export class Dataflow {
   constructor(
     id,
     datasets,
+    designDatasets,
     description,
     name,
     deadlineDate,
@@ -14,6 +15,7 @@ export class Dataflow {
   ) {
     this.creationDate = creationDate;
     this.datasets = datasets;
+    this.designDatasets = designDatasets;
     this.deadlineDate = deadlineDate;
     this.description = description;
     this.documents = documents;

@@ -102,6 +102,20 @@ export const apiDataflow = {
     });
     return response.data;
   },
+  newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(DataflowConfig.newEmptyDatasetSchema, {
+        dataflowId,
+        datasetSchemaName
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
+  },
   reject: async dataflowId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.update({
