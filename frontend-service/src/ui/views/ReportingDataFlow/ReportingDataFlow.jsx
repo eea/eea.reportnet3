@@ -186,7 +186,15 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                   layout="addNewDataset"
                   caption={resources.messages.add}
                   handleRedirect={() =>
-                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
+                    handleRedirect(
+                      getUrl(
+                        routes.DASHBOARDS,
+                        {
+                          dataflowId: match.params.dataflowId
+                        },
+                        true
+                      )
+                    )
                   }
                   model={[
                     {
@@ -216,7 +224,17 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 layout="documents"
                 label="DO"
                 caption={resources.messages.documents}
-                handleRedirect={() => handleRedirect(`/dataflow/${match.params.dataflowId}/documentation-data-set/`)}
+                handleRedirect={() =>
+                  handleRedirect(
+                    getUrl(
+                      routes.DOCUMENTS,
+                      {
+                        dataflowId: match.params.dataflowId
+                      },
+                      true
+                    )
+                  )
+                }
               />
             </div>
             {dataflowData.datasets.map(dataset => {
@@ -228,7 +246,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     caption={dataset.datasetSchemaName}
                     isReleased={dataset.isReleased}
                     handleRedirect={() => {
-                      handleRedirect(`/dataflow/${match.params.dataflowId}/dataset/${dataset.datasetId}`);
+                      handleRedirect(
+                        getUrl(
+                          routes.DATASET,
+                          {
+                            dataflowId: match.params.dataflowId,
+                            datasetId: dataset.datasetId
+                          },
+                          true
+                        )
+                      );
                     }}
                     model={
                       hasWritePermissions
@@ -273,7 +300,15 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                   layout="dashboard"
                   caption={resources.messages.dashboards}
                   handleRedirect={() =>
-                    handleRedirect(`/dataflow/${match.params.dataflowId}/data-custodian-dashboards/`)
+                    handleRedirect(
+                      getUrl(
+                        routes.DASHBOARDS,
+                        {
+                          dataflowId: match.params.dataflowId
+                        },
+                        true
+                      )
+                    )
                   }
                 />
               </div>
