@@ -461,7 +461,7 @@ public class DatasetServiceImpl implements DatasetService {
       pageable = PageRequest.of(0, 20);
     }
 
-    if (null == fields && (levelError.length == 3 || null == levelError)) {
+    if (null == fields && (null == levelError || levelError.length == 3)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
 
