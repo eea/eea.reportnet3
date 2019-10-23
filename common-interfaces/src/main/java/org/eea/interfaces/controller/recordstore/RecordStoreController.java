@@ -98,7 +98,7 @@ public interface RecordStoreController {
   /**
    * Delete dataset.
    *
-   * @param datasetId the dataset id
+   * @param datasetSchemaName the dataset schema name
    */
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName);

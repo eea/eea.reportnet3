@@ -67,7 +67,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the data schema.
    *
+   * @param idSchema the id schema
    * @param datasetId the dataset id
+   * @param tableSchema the table schema
    */
   @Override
   @HystrixCommand
@@ -86,8 +88,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the data schema.
    *
+   * @param id the id
    * @param datasetId the dataset id
-   * @throws EEAException
+   * @param tableSchema the table schema
    */
   @Override
   @HystrixCommand

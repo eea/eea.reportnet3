@@ -45,5 +45,12 @@ public interface DatasetMetabaseService {
    */
   void deleteDesignDataset(Long datasetId);
 
+  /**
+   * Update dataset name.
+   *
+   * @param datasetId the dataset id
+   * @param datasetName the dataset name
+   * @return true, if successful
+   */
   boolean updateDatasetName(Long datasetId, String datasetName);
 }

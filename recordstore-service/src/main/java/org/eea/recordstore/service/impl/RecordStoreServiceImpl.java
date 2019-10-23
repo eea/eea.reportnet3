@@ -339,7 +339,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
-      throws SQLException, IOException, RecordStoreAccessException {}
+      throws SQLException, IOException, RecordStoreAccessException {
+    // Auto-generated method stub
+  }
 
   /**
    * Delete data snapshot.
@@ -354,6 +356,11 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
   @Override
   public void deleteDataset(String datasetSchemaName) {
     // Auto-generated method stub
