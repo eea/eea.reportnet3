@@ -1,4 +1,7 @@
 import React from 'react';
+
+import PropTypes from 'prop-types';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isUndefined from 'lodash/isUndefined';
@@ -8,6 +11,18 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import styles from './DropdownFilter.module.css';
 
 class DropdownFilter extends React.Component {
+  static defaultProps = {
+    selectAll: false,
+    showFilters: undefined,
+    showNotCheckedFilters: undefined
+  };
+
+  static propTypes = {
+    selectAll: PropTypes.bool,
+    showFilters: PropTypes.func,
+    showNotCheckedFilters: PropTypes.func
+  };
+
   constructor(props) {
     super(props);
 
