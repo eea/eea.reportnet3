@@ -11,6 +11,8 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
+import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.Validation;
@@ -63,13 +65,15 @@ public class LoadValidationsHelper {
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
-   *
+   * @param levelErrorsFilter the level errors filter
+   * @param typeEntitiesFilter the type entities filter
+   * @param originsFilter the origins filter
    * @return the list validations
-   *
    * @throws EEAException the EEA exception
    */
   public FailedValidationsDatasetVO getListValidations(@DatasetId Long datasetId, Pageable pageable,
-      String headerField, Boolean asc) throws EEAException {
+      String headerField, Boolean asc, List<TypeErrorEnum> levelErrorsFilter,
+      List<TypeEntityEnum> typeEntitiesFilter, String originsFilter) throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
     FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
@@ -79,7 +83,10 @@ public class LoadValidationsHelper {
     DataSetSchema schema = validationService.getfindByIdDataSetSchema(datasetId,
         new ObjectId(dataset.getIdDatasetSchema()));
     validation.setNameDataSetSchema(schema.getNameDataSetSchema());
-    Page<Validation> validationStream = validationRepository.findAll(pageable);
+
+    Page<Validation> validationStream = validationRepository.findAllRecordsByFilter(datasetId,
+        levelErrorsFilter, typeEntitiesFilter, originsFilter, pageable, headerField, asc);
+
     List<Validation> validations = validationStream.get().collect(Collectors.toList());
     List<Long> idValidations =
         validations.stream().map(Validation::getId).collect(Collectors.toList());
@@ -108,7 +115,8 @@ public class LoadValidationsHelper {
     validation
         .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
 
-    validation.setTotalErrors(validationRepository.count());
+    validation.setTotalErrors(validationRepository.countRecordsByFilter(datasetId,
+        levelErrorsFilter, typeEntitiesFilter, originsFilter));
     LOG.info(
         "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
         datasetId, errors.size(), pageable.getPageNumber(), pageable.getPageSize());
