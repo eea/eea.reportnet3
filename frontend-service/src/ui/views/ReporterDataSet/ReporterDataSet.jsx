@@ -83,7 +83,16 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       },
       {
         label: resources.messages['dataflow'],
-        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
+        command: () =>
+          history.push(
+            getUrl(
+              routes.DATAFLOW,
+              {
+                dataflowId: match.params.dataflowId
+              },
+              true
+            )
+          )
       },
       { label: resources.messages['dataset'] }
     ]);

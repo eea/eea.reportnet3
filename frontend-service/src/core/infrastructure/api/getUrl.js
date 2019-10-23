@@ -1,7 +1,7 @@
 import isObject from 'lodash/isObject';
 import isUndefined from 'lodash/isUndefined';
 
-export const getUrl = (url, urlParams = {}) => {
+export const getUrl = (url, urlParams = {}, isRoute = false) => {
   let cUrl = url;
   if (isObject(urlParams)) {
     const keys = Object.keys(urlParams);
@@ -16,7 +16,12 @@ export const getUrl = (url, urlParams = {}) => {
         }
         cUrl = cUrl.substr(0, min) + cUrl.substr(max);
       } else {
-        cUrl = cUrl.replace(`{:${key}}`, urlParams[key]);
+        //Routes are defined without {}, so we will check isRoute for the url replacement.
+        if (!isRoute) {
+          cUrl = cUrl.replace(`{:${key}}`, urlParams[key]);
+        } else {
+          cUrl = cUrl.replace(`:${key}`, urlParams[key]);
+        }
       }
     });
   }
