@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './BigButton.module.css';
 
@@ -24,8 +24,31 @@ export const BigButton = ({
   onSaveName
 }) => {
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
+  const [initialValue, setInitialValue] = useState();
 
   const newDatasetRef = useRef();
+
+  const onEditorKeyChange = event => {
+    if (event.key === 'Enter') {
+      if (!isEmpty(buttonsTitle)) {
+        onSaveName(event.target.value);
+        onNameEdit();
+      } else {
+        if (!isUndefined(onSaveError)) {
+          onSaveError();
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+        }
+      }
+    } else if (event.key === 'Escape') {
+      setButtonsTitle(initialValue);
+      onNameEdit();
+    }
+  };
+
+  const onEditorValueFocus = value => {
+    setInitialValue(value);
+  };
+
   const dataset = model ? (
     <>
       <div className={`${styles.bigButton} ${styles.dataset}`}>
@@ -89,7 +112,7 @@ export const BigButton = ({
         <InputText
           className={`${styles.inputText}`}
           onBlur={e => {
-            if (buttonsTitle !== '') {
+            if (!isEmpty(buttonsTitle)) {
               onSaveName(e.target.value);
               onNameEdit();
             } else {
@@ -100,6 +123,11 @@ export const BigButton = ({
             }
           }}
           onChange={e => setButtonsTitle(e.target.value)}
+          onFocus={e => {
+            e.preventDefault();
+            onEditorValueFocus(e.target.value);
+          }}
+          onKeyDown={e => onEditorKeyChange(e)}
           placeholder="this is a placeholder"
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
