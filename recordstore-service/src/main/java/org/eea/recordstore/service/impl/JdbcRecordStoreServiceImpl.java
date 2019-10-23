@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -49,12 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
+  /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "snapshot_%s-dataset_%s%s";
-  /**
-   * The dataset controller zuul.
-   */
-  @Autowired
-  private DataSetControllerZuul datasetControllerZuul;
 
   /**
    * The kafka sender helper.
@@ -476,5 +471,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Files.deleteIfExists(path4);
   }
 
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
+  @Override
+  @Transactional
+  public void deleteDataset(String datasetSchemaName) {
+    String command = "DROP SCHEMA " + datasetSchemaName;
+    jdbcTemplate.execute(command);
 
+  }
 }

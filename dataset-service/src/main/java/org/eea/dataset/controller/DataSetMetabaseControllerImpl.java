@@ -69,7 +69,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * Find dataset name.
    *
-   * @param idDataSet the id data set
+   * @param idDataset the id dataset
    * @return the list
    */
   @Override
@@ -105,6 +105,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
   }
 
+  /**
+   * Update dataset name.
+   *
+   * @param datasetId the dataset id
+   * @param datasetName the dataset name
+   */
   @Override
   @PutMapping(value = "/updateDatasetName")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")

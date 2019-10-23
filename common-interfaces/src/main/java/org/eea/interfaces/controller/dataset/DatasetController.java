@@ -49,6 +49,7 @@ public interface DatasetController {
    * @param pageNum the page num
    * @param pageSize the page size
    * @param fields the fields
+   * @param levelError the level error
    * @return the data tables values
    */
   @GetMapping(value = "TableValueDataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

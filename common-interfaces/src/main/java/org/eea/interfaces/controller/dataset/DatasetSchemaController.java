@@ -24,7 +24,6 @@ public interface DatasetSchemaController {
 
   }
 
-
   /**
    * Creates the data schema.
    *
@@ -97,6 +96,7 @@ public interface DatasetSchemaController {
    * Update table schema.
    *
    * @param idSchema the id schema
+   * @param datasetId the dataset id
    * @param tableSchema the table schema
    */
   @RequestMapping(value = "/{idSchema}/udpateTableSchema/{datasetId}", method = RequestMethod.PUT)

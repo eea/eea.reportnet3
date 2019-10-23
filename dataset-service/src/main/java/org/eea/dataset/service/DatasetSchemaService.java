@@ -62,7 +62,7 @@ public interface DatasetSchemaService {
    *
    * @param id the id
    * @param tableSchema the table schema
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException;
 

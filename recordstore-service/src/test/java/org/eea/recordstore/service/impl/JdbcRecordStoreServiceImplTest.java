@@ -1,5 +1,6 @@
 package org.eea.recordstore.service.impl;
 
+import static org.mockito.Mockito.times;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -199,5 +200,11 @@ public class JdbcRecordStoreServiceImplTest {
     file.delete();
     file = new File("./nullsnapshot_1-dataset_1_table_TableValue.snap");
     file.delete();
+  }
+
+  @Test
+  public void testDeleteDataset() throws SQLException, IOException {
+    jdbcRecordStoreService.deleteDataset("schema");
+    Mockito.verify(jdbcTemplate, times(1)).execute(Mockito.any(String.class));
   }
 }

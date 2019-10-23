@@ -5,6 +5,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -19,6 +20,10 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Autowired
   private MongoOperations mongoOperations;
 
+  /** The mongo template. */
+  @Autowired
+  private MongoTemplate mongoTemplate;
+
   /**
    * Delete table schema by id.
    *
@@ -29,6 +34,16 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     Update update =
         new Update().pull("tableSchemas", new BasicDBObject("_id", new ObjectId(idTableSchema)));
     mongoOperations.updateMulti(new Query(), update, DataSetSchema.class);
+  }
+
+  /**
+   * Delete dataset schema by id.
+   *
+   * @param idSchema the id schema
+   */
+  @Override
+  public void deleteDatasetSchemaById(String idSchema) {
+    mongoTemplate.findAndRemove(new Query(Criteria.where("_id").is(idSchema)), DataSetSchema.class);
   }
 
   /**
@@ -44,5 +59,4 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     query.addCriteria(new Criteria("_id").is(idDatasetSchema));
     mongoOperations.updateMulti(query, update, DataSetSchema.class);
   }
-
 }

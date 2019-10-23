@@ -214,7 +214,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       final String destinationDataSetName) {
     throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
 
-
   }
 
   /**
@@ -324,7 +323,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException, RecordStoreAccessException {
-
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
 
@@ -339,7 +338,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
-      throws SQLException, IOException, RecordStoreAccessException {}
+      throws SQLException, IOException, RecordStoreAccessException {
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+  }
 
   /**
    * Delete data snapshot.
@@ -350,9 +351,18 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
-
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
   }
 
 
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
+  @Override
+  public void deleteDataset(String datasetSchemaName) {
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+  }
 
 }

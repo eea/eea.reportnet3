@@ -310,11 +310,4 @@ public interface DatasetService {
   void saveTablePropagation(@DatasetId Long datasetId, TableSchemaVO tableSchema)
       throws EEAException;
 
-  /**
-   * Delete.
-   *
-   * @param datasetId the dataset id
-   */
-  void delete(Long datasetId);
-
 }

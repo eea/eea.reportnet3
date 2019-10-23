@@ -83,12 +83,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final String GENERAL_ERROR = "ERROR";
 
   /**
-   * The Constant STRING_WARNING.
-   */
-  private static final String STRING_WARNING =
-      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE SHORTER";
-
-  /**
    * The Constant INTEGER_ERROR.
    */
   private static final String INTEGER_ERROR = "ERROR!, THIS IS NOT A NUMBER";
@@ -388,7 +382,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.deleteTableSchemaById(idTableSchema);
   }
 
-
   /**
    * Delete dataset schema.
    *
@@ -398,7 +391,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   @Transactional
   public void deleteDatasetSchema(Long datasetId, String schemaId) {
-    schemasRepository.deleteById(new ObjectId(schemaId));
+    schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
 

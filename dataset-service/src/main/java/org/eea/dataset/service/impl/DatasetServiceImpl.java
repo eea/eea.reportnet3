@@ -1333,7 +1333,6 @@ public class DatasetServiceImpl implements DatasetService {
       table.setIdTableSchema(tableSchema.getIdTableSchema());
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
-      LOG.info("Propagation completed");
     } else {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -1349,18 +1348,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteTableValue(Long datasetId, String idTableSchema) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
-  }
-
-
-
-  /**
-   * Delete.
-   *
-   * @param datasetId the dataset id
-   */
-  @Override
-  public void delete(Long datasetId) {
-    datasetRepository.deleteSchema("dataset_" + datasetId);
   }
 
 }

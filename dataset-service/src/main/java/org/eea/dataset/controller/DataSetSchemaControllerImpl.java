@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   DatasetMetabaseService datasetMetabaseService;
 
   /**
+   * The record store controller zull.
+   */
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
+
+  /**
    * Creates the data schema.
    *
    * @param datasetId the dataset id
@@ -60,7 +67,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the data schema.
    *
+   * @param idSchema the id schema
    * @param datasetId the dataset id
+   * @param tableSchema the table schema
    */
   @Override
   @HystrixCommand
@@ -71,15 +80,17 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       dataschemaService.updateTableSchema(idSchema, tableSchema);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
   /**
    * Creates the data schema.
    *
+   * @param id the id
    * @param datasetId the dataset id
-   * @throws EEAException
+   * @param tableSchema the table schema
    */
   @Override
   @HystrixCommand
@@ -91,7 +102,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.createTableSchema(id, tableSchema, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchema);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
@@ -189,6 +201,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
     dataschemaService.deleteDatasetSchema(datasetId, schemaId);
     datasetMetabaseService.deleteDesignDataset(datasetId);
-    datasetService.delete(datasetId);
+    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
   }
 }

@@ -111,4 +111,10 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     Assert.assertFalse(datasetMetabaseService.updateDatasetName(1L, ""));
   }
+
+  @Test
+  public void deleteDesignDatasetTest() {
+    datasetMetabaseService.deleteDesignDataset(1L);
+    Mockito.verify(dataSetMetabaseRepository, times(1)).deleteById(Mockito.anyLong());
+  }
 }
