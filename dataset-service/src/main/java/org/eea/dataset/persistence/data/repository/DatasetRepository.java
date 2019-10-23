@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 /**
  * The Interface DatasetRepository.
  */
-public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
+public interface DatasetRepository
+    extends JpaRepository<DatasetValue, Long>, DatasetExtendedRepository {
 
 
   /**
@@ -31,11 +32,4 @@ public interface DatasetRepository extends JpaRepository<DatasetValue, Long> {
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
 
-  /**
-   * Delete schema.
-   *
-   * @param schemaName the schema name
-   */
-  @Query(nativeQuery = true, value = "DROP SCHEMA IF EXISTS :schemaName")
-  void deleteSchema(String schemaName);
 }

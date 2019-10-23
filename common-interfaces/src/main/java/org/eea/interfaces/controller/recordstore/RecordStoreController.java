@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.recordstore;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public interface RecordStoreController {
 
   /**
    * Reste data set data base. DO NOT USE IN PRODUCTION. TO BE REMOVED. ONLY FOR TEST PURPOSES
-   * 
+   *
    * @deprecated (reset db)
    */
   @Deprecated
@@ -94,5 +95,12 @@ public interface RecordStoreController {
   void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot);
 
+  /**
+   * Delete dataset.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping(value = "/dataset/{datasetSchemaName}")
+  void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName);
 
 }

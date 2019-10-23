@@ -1346,16 +1346,4 @@ public class DatasetServiceImpl implements DatasetService {
     tableRepository.deleteByIdTableSchema(idTableSchema);
   }
 
-
-
-  /**
-   * Delete.
-   *
-   * @param datasetId the dataset id
-   */
-  @Override
-  public void delete(Long datasetId) {
-    datasetRepository.deleteSchema("dataset_" + datasetId);
-  }
-
 }

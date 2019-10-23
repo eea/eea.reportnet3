@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /** The dataset metabase service. */
   @Autowired
   DatasetMetabaseService datasetMetabaseService;
+
+  /**
+   * The record store controller zull.
+   */
+  @Autowired
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * Creates the data schema.
@@ -184,6 +191,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
     dataschemaService.deleteDatasetSchema(datasetId, schemaId);
     datasetMetabaseService.deleteDesignDataset(datasetId);
-    datasetService.delete(datasetId);
+    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
   }
 }

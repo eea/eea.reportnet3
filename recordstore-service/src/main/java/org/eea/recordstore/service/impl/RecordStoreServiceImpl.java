@@ -350,9 +350,13 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
-
+    // Auto-generated method stub
   }
 
 
+  @Override
+  public void deleteDataset(String datasetSchemaName) {
+    // Auto-generated method stub
+  }
 
 }

@@ -11,6 +11,7 @@ import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -182,4 +183,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
   }
 
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/dataset/{datasetSchemaName}")
+  public void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName) {
+    recordStoreService.deleteDataset(datasetSchemaName);
+  }
 }

@@ -402,7 +402,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   @Transactional
   public void deleteDatasetSchema(Long datasetId, String schemaId) {
-    schemasRepository.deleteById(new ObjectId(schemaId));
+    schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
 

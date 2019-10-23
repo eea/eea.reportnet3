@@ -112,8 +112,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   @Override
-  @org.springframework.transaction.annotation.Transactional(
-      value = "metabaseDataSetsTransactionManager")
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteById(datasetId);
   }
