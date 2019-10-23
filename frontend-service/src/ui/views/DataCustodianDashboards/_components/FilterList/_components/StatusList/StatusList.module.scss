@@ -59,7 +59,7 @@
   &[data-status='correct'],
   &[data-status='warning'],
   &[data-status='error'] {
-    border: 1px solid var(--grey-50);
+    border: 1px solid var(--gray-50);
   }
 
   &:not(:checked) {

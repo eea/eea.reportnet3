@@ -1,15 +1,16 @@
 import React, { useRef } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './BigButton.module.css';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
-import { Menu } from 'primereact/menu';
 
-export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }) => {
+export const BigButton = ({ caption, handleRedirect, isReleased, layout, model }) => {
   const newDatasetRef = useRef();
   const dataset = model ? (
     <>
@@ -37,21 +38,6 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
   ) : (
     <></>
   );
-  const documents = (
-    <>
-      <div className={`${styles.bigButton} ${styles.documents}`}>
-        <a
-          href="#"
-          onClick={e => {
-            e.preventDefault();
-            handleRedirect();
-          }}>
-          <FontAwesomeIcon icon={AwesomeIcons('file')} />
-        </a>
-      </div>
-      <p className={styles.caption}>{caption}</p>
-    </>
-  );
   const dashboard = (
     <>
       <div className={`${styles.bigButton} ${styles.dashboard}`}>
@@ -67,9 +53,47 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
       <p className={styles.caption}>{caption}</p>
     </>
   );
-  const addNewDataset = (
+  const designDatasetSchema = model ? (
     <>
-      <div className={`${styles.bigButton} ${styles.addNewDataset}`}>
+      <div className={`${styles.bigButton} ${styles.designDatasetSchema}`}>
+        <a
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            handleRedirect();
+          }}>
+          <FontAwesomeIcon icon={AwesomeIcons('pencilRuler')} />
+        </a>
+        <DropdownButton
+          icon="caretDown"
+          model={model}
+          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+          iconStyle={{ fontSize: '1.8rem' }}
+        />
+      </div>
+      <p className={styles.caption}>{caption}</p>
+    </>
+  ) : (
+    <></>
+  );
+  const documents = (
+    <>
+      <div className={`${styles.bigButton} ${styles.documents}`}>
+        <a
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            handleRedirect();
+          }}>
+          <FontAwesomeIcon icon={AwesomeIcons('file')} />
+        </a>
+      </div>
+      <p className={styles.caption}>{caption}</p>
+    </>
+  );
+  const newItem = (
+    <>
+      <div className={`${styles.bigButton} ${styles.newItem}`}>
         <a
           href="#"
           onClick={e => {
@@ -85,9 +109,10 @@ export const BigButton = ({ layout, handleRedirect, model, caption, isReleased }
   );
   const buttons = {
     dataset,
-    documents,
     dashboard,
-    addNewDataset
+    designDatasetSchema,
+    documents,
+    newItem
   };
   return <div className={`${styles.datasetItem}`}>{buttons[layout]}</div>;
 };

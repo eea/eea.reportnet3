@@ -244,7 +244,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   const emptyWebLink = [
     { field: 'description', header: resources.messages['description'] },
     { field: 'url', header: resources.messages['url'] }
-  ].map(item => <Column field={item.field} header={item.header} />);
+  ].map(item => <Column field={item.field} header={item.header} key={item.field} />);
 
   const linkTemplate = rowData => {
     return (

@@ -213,8 +213,8 @@ const schemaById = async dataflowId => {
   return dataset;
 };
 
-const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields) => {
-  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields);
+const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
+  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
   const table = new DatasetTable();
 
   if (tableDataDTO.totalRecords > 0) {

@@ -17,6 +17,7 @@ import {
   faPlus,
   faArchive,
   faBroom,
+  faPencilRuler,
   faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -131,6 +132,8 @@ export const AwesomeIcons = icon => {
       return faArchive;
     case 'broom':
       return faBroom;
+    case 'pencilRuler':
+      return faPencilRuler;
     case 'user-profile':
       return faUserCircle;
     default:
