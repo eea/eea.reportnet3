@@ -82,6 +82,7 @@
 		"ds": "DS",
 		"edit": "Edit",
 		"editRow": "Edit row",
+		"emptyDatasetSchema": "Dataset schema must have a name",
 		"emptyDescriptionValidationError":"Please, enter a description",
 		"emptyErrorsDashboard": "There is not any validation data available",
 		"emptyFileValidationError":"Please, select a file",

@@ -20,6 +20,7 @@ export const BigButton = ({
   layout,
   model,
   onNameEdit,
+  onSaveError,
   onSaveName
 }) => {
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
@@ -91,10 +92,15 @@ export const BigButton = ({
             if (buttonsTitle !== '') {
               onSaveName(e.target.value);
               onNameEdit();
+            } else {
+              if (!isUndefined(onSaveError)) {
+                document.getElementsByClassName('p-inputtext p-component')[0].focus();
+                onSaveError();
+              }
             }
           }}
           onChange={e => setButtonsTitle(e.target.value)}
-          placeholder="kaixo"
+          placeholder="this is a placeholder"
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (

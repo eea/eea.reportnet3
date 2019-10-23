@@ -37,6 +37,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
@@ -141,8 +142,24 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     }
   ];
 
+  const errorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['ok']}
+        icon="check"
+        onClick={() => {
+          setErrorDialogVisible(false);
+        }}
+      />
+    </div>
+  );
+
   const onCreateDataset = () => {
     setNewDatasetDialog(false);
+  };
+
+  const onDatasetSchemaNameError = () => {
+    setErrorDialogVisible(true);
   };
 
   const onNameEdit = () => {
@@ -258,17 +275,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       }}
                       isNameEditable={isNameEditable}
                       onNameEdit={onNameEdit}
+                      onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
                       model={[
                         {
                           label: resources.messages['openDataset'],
-                          icon: 'openFolder',
-                          disabled: false
+                          icon: 'openFolder'
                         },
                         {
                           label: resources.messages['rename'],
-                          icon: 'pencil',
-                          disabled: true
+                          icon: 'pencil'
                         },
                         {
                           label: resources.messages['duplicate'],
@@ -392,6 +408,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}
           />
+        </Dialog>
+        <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={() => setErrorDialogVisible(false)}
+          visible={errorDialogVisible}>
+          <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
         </Dialog>
         <Dialog
           header={dataflowData.name}
