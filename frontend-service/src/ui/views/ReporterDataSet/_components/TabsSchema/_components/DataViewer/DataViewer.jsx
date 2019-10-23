@@ -15,6 +15,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
+import { DropdownFilter } from 'ui/views/ReporterDataSet/_components/DropdownFilter';
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
@@ -25,7 +26,6 @@ import { Menu } from 'primereact/menu';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import { VisibilityMenu } from './_components/VisibilityMenu';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { DatasetService } from 'core/services/DataSet';
@@ -65,6 +65,7 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
+    const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -72,6 +73,7 @@ const DataViewer = withRouter(
     const [initialRecordValue, setInitialRecordValue] = useState();
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
+    const [filterLevelError, setFilterLevelError] = useState('CORRECT,WARNING,ERROR');
     const [loading, setLoading] = useState(false);
     const [loadingFile, setLoadingFile] = useState(false);
     const [menu, setMenu] = useState();
@@ -84,7 +86,8 @@ const DataViewer = withRouter(
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
-    const [visibilityButtonMenu, setVisibilityButtonMenu] = useState([]);
+    const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
+    const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
 
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
@@ -94,7 +97,8 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let contextMenuRef = useRef();
     let divRef = useRef();
-    let visibilityMenuRef = useRef();
+    let dropdownFilterRef = useRef();
+    let filterMenuRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -106,19 +110,24 @@ const DataViewer = withRouter(
       );
 
       let colOptions = [];
-      let visibilityMenu = [];
+      let dropdownFilter = [];
       for (let colSchema of colsSchema) {
         colOptions.push({ label: colSchema.header, value: colSchema });
-        visibilityMenu.push({ label: colSchema.header, key: colSchema.field });
+        dropdownFilter.push({ label: colSchema.header, key: colSchema.field });
       }
       setColumnOptions(colOptions);
-      setVisibilityButtonMenu(visibilityMenu);
+      setVisibilityDropdownFilter(dropdownFilter);
+      setValidationDropdownFilter([
+        { label: 'Correct', key: 'CORRECT' },
+        { label: 'Warnings', key: 'WARNING' },
+        { label: 'Errors', key: 'ERROR' }
+      ]);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-      onFetchData(undefined, undefined, 0, numRows);
+      onFetchData(undefined, undefined, 0, numRows, filterLevelError);
     }, []);
 
     useEffect(() => {
@@ -157,7 +166,7 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -206,7 +215,7 @@ const DataViewer = withRouter(
       }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
-    const showColumns = columnKeys => {
+    const showFilters = columnKeys => {
       const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
       const currentVisibleColumns = originalColumns.filter(
         column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
@@ -214,6 +223,20 @@ const DataViewer = withRouter(
       setColumns(currentVisibleColumns);
       setVisibleColumns(currentVisibleColumns);
     };
+
+    const showValidationFilter = filteredKeys => {
+      const concatFilter = filteredKeys.join(',');
+
+      //const finalFilter = concatFilter == [] ? 'ALL' : concatFilter;
+
+      setIsFilterValidationsActive(filteredKeys.length != 3);
+
+      setFilterLevelError(concatFilter);
+    };
+
+    useEffect(() => {
+      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
+    }, [filterLevelError]);
 
     useEffect(() => {
       if (!isUndefined(exportTableData)) {
@@ -243,7 +266,7 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       setNumRows(event.rows);
       setFirstRow(event.first);
-      onFetchData(sortField, sortOrder, event.first, event.rows);
+      onFetchData(sortField, sortOrder, event.first, event.rows, filterLevelError);
     };
 
     const onConfirmDeleteTable = async () => {
@@ -338,10 +361,11 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows) => {
+    const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError) => {
       setLoading(true);
       try {
         let fields;
+
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
@@ -351,7 +375,8 @@ const DataViewer = withRouter(
           tableId,
           Math.floor(fRow / nRows),
           nRows,
-          fields
+          fields,
+          filterLevelError
         );
         if (!isUndefined(colsSchema)) {
           if (!isUndefined(tableData)) {
@@ -436,8 +461,9 @@ const DataViewer = withRouter(
         setConfirmPasteVisible(false);
       }
     };
+
     const onRefresh = () => {
-      onFetchData(sortField, sortOrder, firstRow, numRows);
+      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
     };
 
     const onPasteCancel = () => {
@@ -498,10 +524,11 @@ const DataViewer = withRouter(
     };
 
     const onSort = event => {
+      console.log(event.sortOrder, event.sortField);
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);
-      onFetchData(event.sortField, event.sortOrder, 0, numRows);
+      onFetchData(event.sortField, event.sortOrder, 0, numRows, filterLevelError);
     };
 
     const onUpload = () => {
@@ -1043,24 +1070,38 @@ const DataViewer = withRouter(
               icon={'eye'}
               label={resources.messages['visibility']}
               onClick={event => {
-                visibilityMenuRef.current.show(event);
+                dropdownFilterRef.current.show(event);
               }}
             />
-            <VisibilityMenu
-              columns={visibilityButtonMenu}
+            <DropdownFilter
+              filters={visibilityDropdownFilter}
               popup={true}
-              ref={visibilityMenuRef}
+              ref={dropdownFilterRef}
               id="exportTableMenu"
-              showColumns={showColumns}
+              showFilters={showFilters}
               onShow={e => {
                 getExportButtonPosition(e);
               }}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={true}
-              icon={'filter'}
+              disabled={false}
+              icon="filter"
+              iconClasses={isFilterValidationsActive ? styles.filterActive : styles.filterInactive}
               label={resources.messages['filter']}
+              onClick={event => {
+                filterMenuRef.current.show(event);
+              }}
+            />
+            <DropdownFilter
+              filters={validationDropdownFilter}
+              popup={true}
+              ref={filterMenuRef}
+              id="exportTableMenu"
+              showFilters={showValidationFilter}
+              onShow={e => {
+                getExportButtonPosition(e);
+              }}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}

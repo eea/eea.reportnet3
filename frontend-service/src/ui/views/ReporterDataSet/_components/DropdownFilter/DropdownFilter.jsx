@@ -1,11 +1,11 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import styles from './DropdownFilter.module.css';
+
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import styles from './VisibilityMenu.module.css';
-
-class VisibilityMenu extends React.Component {
+class DropdownFilter extends React.Component {
   constructor(props) {
     super(props);
 
@@ -13,7 +13,6 @@ class VisibilityMenu extends React.Component {
       style: {
         display: 'none'
       },
-      htmlElement: document.getElementsByTagName('html')[0],
       fields: [],
       menuClick: false
     };
@@ -23,9 +22,9 @@ class VisibilityMenu extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { columns } = this.props;
-    if (prevProps.columns !== columns) {
-      const fields = columns.map(column => ({
+    const { filters } = this.props;
+    if (prevProps.filters !== filters) {
+      const fields = filters.map(column => ({
         checked: true,
         label: column.label,
         key: column.key
@@ -35,6 +34,7 @@ class VisibilityMenu extends React.Component {
       });
     }
   }
+
   hide(e) {
     if (!this.state.menuClick) {
       this.setState(
@@ -92,14 +92,17 @@ class VisibilityMenu extends React.Component {
       }
     );
   }
+
   updateChecked(fieldKey) {
     const { fields } = this.state;
+
     const newFields = fields.map(field => {
       if (field.key === fieldKey) {
         field.checked = !field.checked;
       }
       return field;
     });
+
     this.setState(
       state => {
         return {
@@ -108,7 +111,7 @@ class VisibilityMenu extends React.Component {
         };
       },
       () => {
-        this.props.showColumns(
+        this.props.showFilters(
           this.state.fields
             .filter(field => field.checked)
             .map(field => {
@@ -118,6 +121,7 @@ class VisibilityMenu extends React.Component {
       }
     );
   }
+
   menuClick(e) {
     this.setState(state => {
       return {
@@ -126,11 +130,12 @@ class VisibilityMenu extends React.Component {
       };
     });
   }
+
   render() {
     const { fields } = this.state;
     return (
       <div
-        className={`${styles.visibilityMenu} p-menu-overlay-visible`}
+        className={`${styles.dropdownFilter} p-menu-overlay-visible`}
         style={this.state.style}
         onClick={e => {
           this.menuClick(e);
@@ -154,4 +159,4 @@ class VisibilityMenu extends React.Component {
   }
 }
 
-export { VisibilityMenu };
+export { DropdownFilter };
