@@ -1,1 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.eea.kafka.KafkaConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.eea.kafka.KafkaConfiguration,\
+org.eea.enums.EnumsConfiguration
