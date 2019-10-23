@@ -125,9 +125,6 @@ public class DataSetControllerImpl implements DatasetController {
       pageable = PageRequest.of(pageNum, pageSize);
     }
     // else pageable will be null, it will be created inside the service
-
-    // stringToEnumConverterFactory.getConverter(levelError);
-
     TableVO result = null;
     try {
       result =
