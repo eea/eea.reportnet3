@@ -429,6 +429,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
    * Gets the table values by id.
    *
@@ -436,19 +437,19 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param pageable the pageable
    * @param fields the fields
-   *
+   * @param levelError the level error
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      Pageable pageable, final String fields) throws EEAException {
+      Pageable pageable, final String fields, TypeErrorEnum[] levelError) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
+    SortField[] newFields = null;
 
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
@@ -460,36 +461,38 @@ public class DatasetServiceImpl implements DatasetService {
       pageable = PageRequest.of(0, 20);
     }
 
-    if (null == fields) {
+    if (null == fields && (null == levelError || levelError.length == 3)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
 
     } else {
 
-      String[] pairs = fields.split(",");
-      for (int i = 0; i < pairs.length; i++) {
-        String pair = pairs[i];
-        String[] keyValue = pair.split(":");
-        mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
-        commonShortFields.add(keyValue[0]);
+      if (null != fields) {
+
+        String[] pairs = fields.split(",");
+        for (int i = 0; i < pairs.length; i++) {
+          String pair = pairs[i];
+          String[] keyValue = pair.split(":");
+          mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
+          commonShortFields.add(keyValue[0]);
+        }
+
+        for (String nameField : commonShortFields) {
+          FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
+          SortField sortField = new SortField();
+          sortField.setFieldName(nameField);
+          sortField.setAsc((intToBoolean(mapFields.get(nameField))));
+          sortField.setTypefield(typefield.getType());
+          sortFieldsArray.add(sortField);
+        }
+        newFields = sortFieldsArray.stream().toArray(SortField[]::new);
       }
 
-      for (String nameField : commonShortFields) {
-        FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
-        SortField sortField = new SortField();
-        sortField.setFieldName(nameField);
-        sortField.setAsc((intToBoolean(mapFields.get(nameField))));
-        sortField.setTypefield(typefield.getType());
-        sortFieldsArray.add(sortField);
-      }
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable,
-          sortFieldsArray.stream().toArray(SortField[]::new));
+      records = recordRepository.findByTableValueWithOrder(idTableSchema, levelError, pageable,
+          newFields);
 
     }
 
-    if (records == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
     TableVO result = new TableVO();
     if (records.isEmpty()) {
       result.setTotalRecords(0L);
@@ -517,7 +520,7 @@ public class DatasetServiceImpl implements DatasetService {
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
           List<FieldValidationVO> validations =
-              this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
+              fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
           field.setFieldValidations(validations);
           if (null != validations && !validations.isEmpty()) {
             field.setLevelError(
@@ -528,7 +531,7 @@ public class DatasetServiceImpl implements DatasetService {
         });
 
         List<RecordValidationVO> validations =
-            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
+            recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
         record.setRecordValidations(validations);
         if (null != validations && !validations.isEmpty()) {
           record.setLevelError(
@@ -539,6 +542,7 @@ public class DatasetServiceImpl implements DatasetService {
       });
 
     }
+
 
     return result;
   }

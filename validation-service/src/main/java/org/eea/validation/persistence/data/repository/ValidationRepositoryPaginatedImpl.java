@@ -46,8 +46,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     TenantResolver.setTenantName("dataset_" + datasetId);
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select v  from Validation v  where v.idRule is not null ";
-    String partLevelError = "";
-    partLevelError = levelErrorFilter(levelErrorsFilter, partLevelError);
+    String partLevelError = levelErrorFilter(levelErrorsFilter);
     String partTypeEntities = typeEntities(typeEntitiesFilter);
     String partOriginsFilter = originFilter(originsFilter);
 
@@ -86,8 +85,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     TenantResolver.setTenantName("dataset_" + datasetId);
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select count(v)  from Validation v  where v.idRule is not null ";
-    String partLevelError = "";
-    partLevelError = levelErrorFilter(levelErrorsFilter, partLevelError);
+    String partLevelError = levelErrorFilter(levelErrorsFilter);
     String partTypeEntities = typeEntities(typeEntitiesFilter);
     String partOriginsFilter = originFilter(originsFilter);
 
@@ -144,21 +142,21 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Level error filter.
    *
    * @param levelErrorsFilter the level errors filter
-   * @param partLevelError the part level error
    *
    * @return the string
    */
-  private String levelErrorFilter(List<TypeErrorEnum> levelErrorsFilter, String partLevelError) {
+  private String levelErrorFilter(List<TypeErrorEnum> levelErrorsFilter) {
+    StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
-      partLevelError =
-          " and v.levelError in ( select v.levelError from Validation v where v.idRule is not null ";
+      stringBuilder.append(
+          " and v.levelError in ( select v.levelError from Validation v where v.idRule is not null ");
       for (int i = 0; i < levelErrorsFilter.size(); i++) {
-        partLevelError =
-            partLevelError + " and v.levelError !='" + levelErrorsFilter.get(i).getValue() + "' ";
+        stringBuilder.append(" and v.levelError !='").append(levelErrorsFilter.get(i).getValue())
+            .append("' ");
       }
-      partLevelError = partLevelError + ") ";
+      stringBuilder.append(") ");
     }
-    return partLevelError;
+    return stringBuilder.toString();
   }
 
 }
