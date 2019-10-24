@@ -16,7 +16,7 @@ import { getUrl } from 'core/infrastructure/api/getUrl';
 export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [dataflowName, setDataflowName] = useState({});
+  const [dataflowName, setDataflowName] = useState('');
 
   const home = {
     icon: config.icons['home'],
@@ -57,8 +57,8 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   }, []);
 
   const getDataflowName = async () => {
-    const dataflowName = await DataflowService.dataflowDetails(match.params.dataflowId);
-    setDataflowName(dataflowName);
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
   };
 
   const layout = children => {
@@ -74,7 +74,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
     return (
       <div className="rep-row">
         <h1>
-          {resources.messages['dataflow']}: {dataflowName.name}
+          {resources.messages['dataflow']}: {dataflowName}
         </h1>
       </div>
     );
