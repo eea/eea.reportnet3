@@ -74,8 +74,8 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
     const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
-    const [loading, setLoading] = useState(false);
-    const [loadingFile, setLoadingFile] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
     const [numRows, setNumRows] = useState(10);
@@ -345,19 +345,19 @@ const DataViewer = withRouter(
     };
 
     const onExportTableData = async fileType => {
-      setLoadingFile(true);
+      setIsLoadingFile(true);
       try {
         setExportTableDataName(createTableName(tableName, fileType));
         setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
       } catch (error) {
         console.error(error);
       } finally {
-        setLoadingFile(false);
+        setIsLoadingFile(false);
       }
     };
 
     const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         let fields;
 
@@ -393,7 +393,7 @@ const DataViewer = withRouter(
         if (tableData.totalRecords !== totalRecords) {
           setTotalRecords(tableData.totalRecords);
         }
-        setLoading(false);
+        setIsLoading(false);
       } catch (error) {
         console.error('DataViewer error: ', error);
         const errorResponse = error.response;
@@ -402,7 +402,7 @@ const DataViewer = withRouter(
           history.push(getUrl(routes.DATAFLOW, { dataflowId }));
         }
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -492,7 +492,7 @@ const DataViewer = withRouter(
             history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
-          setLoading(false);
+          setIsLoading(false);
         }
       } else {
         try {
@@ -509,7 +509,7 @@ const DataViewer = withRouter(
           }
         } finally {
           onCancelRowEdit();
-          setLoading(false);
+          setIsLoading(false);
         }
       }
     };
@@ -1039,7 +1039,7 @@ const DataViewer = withRouter(
               disabled={!hasWritePermissions}
               id="buttonExportTable"
               className={`p-button-rounded p-button-secondary`}
-              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['exportTable']}
               onClick={event => {
                 exportMenuRef.current.show(event);
@@ -1143,7 +1143,7 @@ const DataViewer = withRouter(
             footer={hasWritePermissions && !isWebFormMMR ? addRowFooter : null}
             header={header}
             lazy={true}
-            loading={loading}
+            loading={isLoading}
             onContextMenu={
               hasWritePermissions
                 ? e => {
