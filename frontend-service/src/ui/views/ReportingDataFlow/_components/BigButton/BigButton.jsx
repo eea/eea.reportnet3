@@ -21,7 +21,8 @@ export const BigButton = ({
   model,
   onNameEdit,
   onSaveError,
-  onSaveName
+  onSaveName,
+  placeholder
 }) => {
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
@@ -128,7 +129,7 @@ export const BigButton = ({
             onEditorValueFocus(e.target.value);
           }}
           onKeyDown={e => onEditorKeyChange(e)}
-          placeholder="this is a placeholder"
+          placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (

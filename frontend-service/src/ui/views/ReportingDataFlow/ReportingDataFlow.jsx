@@ -288,6 +288,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
+                      placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
                           label: resources.messages['openDataset'],
