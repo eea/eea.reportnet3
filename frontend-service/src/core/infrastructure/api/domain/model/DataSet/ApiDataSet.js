@@ -70,6 +70,20 @@ export const apiDataset = {
       return false;
     }
   },
+  deleteSchemaById: async (datasetId, datasetSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteDataSchema, {
+        datasetId,
+        datasetSchemaId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
+  },
   deleteTableDataById: async (datasetId, tableId) => {
     const tokens = userStorage.get();
     try {

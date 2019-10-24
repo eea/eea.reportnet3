@@ -166,6 +166,19 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setErrorDialogVisible(true);
   };
 
+  const onDeleteDatasetSchema = async schemaId => {
+    setDeleteDialogVisible(false);
+    try {
+      const response = await DatasetService.deleteSchemaById(23, schemaId);
+      if (response >= 200 && response <= 299) {
+        console.log('Schema:', schemaId, 'is now deleted');
+        setIsDataUpdated(isDataUpdated ? false : true);
+      }
+    } catch (error) {
+      console.error(error.response);
+    }
+  };
+
   const onNameEdit = () => {
     setIsNameEditable(isNameEditable ? false : true);
   };

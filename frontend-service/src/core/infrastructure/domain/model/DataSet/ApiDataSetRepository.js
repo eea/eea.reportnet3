@@ -49,6 +49,10 @@ const deleteRecordById = async (datasetId, recordId) => {
   return recordDeleted;
 };
 
+const deleteSchemaById = async (datasetId, datasetSchemaId) => {
+  return await apiDataset.deleteSchemaById(datasetId, datasetSchemaId);
+};
+
 const deleteTableDataById = async (datasetId, tableId) => {
   const dataDeleted = await apiDataset.deleteTableDataById(datasetId, tableId);
   return dataDeleted;
@@ -401,6 +405,7 @@ export const ApiDatasetRepository = {
   createValidation,
   deleteDataById,
   deleteRecordById,
+  deleteSchemaById,
   deleteTableDataById,
   errorsById,
   errorPositionByObjectId,

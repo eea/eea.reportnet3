@@ -5,6 +5,7 @@
     "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
     "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
     "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
+    "deleteDataSchema": "/dataschema/{:datasetId}/datasetschema/{:datasetSchemaId}",
     "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
     "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
     "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}",
