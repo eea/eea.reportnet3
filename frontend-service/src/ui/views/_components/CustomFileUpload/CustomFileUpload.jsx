@@ -116,7 +116,7 @@ export class CustomFileUpload extends Component {
       return '0 B';
     }
     let k = 1000,
-      dm = 3,
+      dm = 2,
       sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
       i = Math.floor(Math.log(bytes) / Math.log(k));
 
