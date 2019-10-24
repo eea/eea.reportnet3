@@ -95,31 +95,34 @@ class DropdownFilter extends React.Component {
 
   updateChecked(fieldKey) {
     const { fields } = this.state;
+    const { disabled } = this.props;
 
-    const newFields = fields.map(field => {
-      if (field.key === fieldKey) {
-        field.checked = !field.checked;
-      }
-      return field;
-    });
+    if (!disabled) {
+      const newFields = fields.map(field => {
+        if (field.key === fieldKey) {
+          field.checked = !field.checked;
+        }
+        return field;
+      });
 
-    this.setState(
-      state => {
-        return {
-          ...state,
-          fields: newFields
-        };
-      },
-      () => {
-        this.props.showFilters(
-          this.state.fields
-            .filter(field => field.checked)
-            .map(field => {
-              return field.key;
-            })
-        );
-      }
-    );
+      this.setState(
+        state => {
+          return {
+            ...state,
+            fields: newFields
+          };
+        },
+        () => {
+          this.props.showFilters(
+            this.state.fields
+              .filter(field => field.checked)
+              .map(field => {
+                return field.key;
+              })
+          );
+        }
+      );
+    }
   }
 
   menuClick() {

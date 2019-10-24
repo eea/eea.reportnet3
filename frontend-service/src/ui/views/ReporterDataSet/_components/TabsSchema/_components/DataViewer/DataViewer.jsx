@@ -1089,6 +1089,7 @@ const DataViewer = withRouter(
               }}
             />
             <DropdownFilter
+              disabled={isLoading}
               filters={validationDropdownFilter}
               popup={true}
               ref={filterMenuRef}
