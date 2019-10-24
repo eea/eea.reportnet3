@@ -8,7 +8,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -16,6 +19,9 @@ import org.springframework.data.domain.Pageable;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
   /**
    * The entity manager.
    */
@@ -47,7 +53,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
-
   /** The Constant SORT_COORDINATE_QUERY. */
   private final static String SORT_COORDINATE_QUERY =
       "COALESCE((select distinct case when is_double(fv.value) = true "
@@ -62,7 +67,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "then cast('01/01/1970' as java.sql.Date) " + "end from FieldValue fv "
           + "where fv.record.id = rv.id and fv.idFieldSchema = '%s')," + DEFAULT_DATE_SORT_CRITERIA
           + ") as order_criteria_%s ";
-
 
   /** The Constant WARNING_APPEND_QUERY. */
   private final static String WARNING_APPEND_QUERY =
@@ -80,7 +84,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING') )) ";
 
-
   /** The Constant ERROR_APPEND_QUERY. */
   private final static String ERROR_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
@@ -88,14 +91,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'ERROR')) ";
 
-
   /** The Constant CORRECT_APPEND_QUERY. */
   private final static String CORRECT_APPEND_QUERY =
-      "AND (EXISTS (SELECT recval FROM RecordValidation recval "
+      "AND not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError NOT IN ('ERROR','WARNING') ) "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError NOT IN ('ERROR','WARNING') )) ";
+          + "and recval.validation.levelError IN ('ERROR','WARNING')) "
+          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING')) ";
 
   /** The Constant WARNING_CORRECT_APPEND_QUERY. */
   private final static String WARNING_CORRECT_APPEND_QUERY =
@@ -104,23 +106,23 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "and recval.validation.levelError = 'WARNING' ) "
           + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'WARNING' )) "
-          + " OR " + " (EXISTS (SELECT recval FROM RecordValidation recval "
+          + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError NOT IN ('ERROR','WARNING') ) "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError NOT IN ('ERROR','WARNING') )) ";
+          + "and recval.validation.levelError IN ('ERROR','WARNING') ) "
+          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING'))) ";
 
   /** The Constant ERROR_CORRECT_APPEND_QUERY. */
   private final static String ERROR_CORRECT_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
           + "where recval.recordValue.id = rv.id " + "and recval.validation.levelError = 'ERROR' ) "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "OR not EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'ERROR' )) "
-          + " OR " + " (EXISTS (SELECT recval FROM RecordValidation recval "
+          + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError NOT IN ('ERROR','WARNING') ) "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError NOT IN ('ERROR','WARNING') )) ";
+          + "and recval.validation.levelError IN ('ERROR','WARNING') ) "
+          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING') )) ";
 
   /**
    * The Constant MASTER_QUERY.
@@ -163,7 +165,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
+    // Multisorting Query accept n fields and order asc(1)/desc(0)
     if (null != sortFields) {
+      LOG.info("Init Order");
       for (SortField field : sortFields) {
         switch (field.getTypefield()) {
           case COORDINATE_LAT:
@@ -205,7 +209,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     String filter = "";
+    // Filter Query by level Error (ERROR,WARNING,CORRECT)
     if (null != levelError) {
+      LOG.info("Init Error Filter");
       List<TypeErrorEnum> lvl = new ArrayList<TypeErrorEnum>();
       for (int i = 0; i < levelError.length; i++) {
         lvl.add(levelError[i]);
