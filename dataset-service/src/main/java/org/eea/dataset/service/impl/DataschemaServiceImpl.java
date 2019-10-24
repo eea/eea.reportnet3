@@ -22,18 +22,18 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,14 +59,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The resource management controller zull. */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
+
+  /** The data flow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /**
    * The dataschema mapper.
@@ -129,11 +136,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final String NULL = "id == null";
 
+  /**
+   * Creates the empty data set schema.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
+   * @return the object id
+   * @throws EEAException the EEA exception
+   */
   @Override
   public ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName)
       throws EEAException {
 
-    if (!dataSetMetabaseRepository.findDataFlowById(dataflowId)) {
+    if (dataFlowControllerZuul.findById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
 
@@ -151,33 +166,55 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return idDataSetSchema;
   }
 
+  /**
+   * Creates the group and add user.
+   *
+   * @param datasetId the dataset id
+   */
   @Override
   public void createGroupAndAddUser(Long datasetId) {
 
     // Create group Dataschema-X-DATA_CUSTODIAN
-    ResourceInfoVO resourceInfoVO1 = new ResourceInfoVO();
-    resourceInfoVO1.setResourceId(datasetId);
-    resourceInfoVO1.setResourceTypeEnum(ResourceTypeEnum.DATA_SCHEMA);
-    resourceInfoVO1.setSecurityRoleEnum(SecurityRoleEnum.DATA_CUSTODIAN);
-    resourceManagementControllerZull.createResource(resourceInfoVO1);
+    resourceManagementControllerZull.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
 
     // Create group Dataschema-X-DATA_PROVIDER
-    ResourceInfoVO resourceInfoVO2 = new ResourceInfoVO();
-    resourceInfoVO2.setResourceId(datasetId);
-    resourceInfoVO2.setResourceTypeEnum(ResourceTypeEnum.DATA_SCHEMA);
-    resourceInfoVO2.setSecurityRoleEnum(SecurityRoleEnum.DATA_PROVIDER);
-    resourceManagementControllerZull.createResource(resourceInfoVO2);
+    resourceManagementControllerZull.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
 
     // Add user to new group Dataschema-X-DATA_CUSTODIAN
     userManagementControllerZull.addContributorToResource(datasetId,
         ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
   }
 
-  /** The mongo. */
+
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+
+    return resourceInfoVO;
+  }
+
+  /**
+   * The mongo.
+   */
   @Autowired
   private MongoOperations mongo;
 
-  /** The table mapper. */
+  /**
+   * The table mapper.
+   */
   @Autowired
   private TableSchemaMapper tableMapper;
 
@@ -461,7 +498,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param id the id
    * @param tableSchema the table schema
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {

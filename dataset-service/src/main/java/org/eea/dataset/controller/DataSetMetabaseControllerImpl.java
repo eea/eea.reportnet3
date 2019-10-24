@@ -57,6 +57,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
 
+
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * Find data set id by dataflow id.
    *
@@ -87,6 +93,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * Creates the empty data set.
    *
+   * @param datasetType the dataset type
    * @param datasetname the datasetname
    * @param idDatasetSchema the id dataset schema
    * @param idDataflow the id dataflow
@@ -107,7 +114,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
           idDataflow);
     } catch (EEAException e) {
-      LOG.error(e.getMessage());
+      LOG_ERROR.error(e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_UNKNOW_TYPE);
     }
