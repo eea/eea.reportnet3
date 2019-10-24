@@ -1329,7 +1329,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
-    LOG.info(TenantResolver.getTenantName());
     TableValue table = new TableValue();
     Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
     if (dataset.isPresent()) {

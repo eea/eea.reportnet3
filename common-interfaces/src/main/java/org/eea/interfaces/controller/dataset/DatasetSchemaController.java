@@ -80,6 +80,16 @@ public interface DatasetSchemaController {
    */
   @RequestMapping(value = "/{datasetId}/tableschema/{tableSchemaId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow);
+
+  /**
+   * Delete table schema.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  @RequestMapping(value = "/{datasetId}/tableschema/{tableSchemaId}", method = RequestMethod.DELETE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String idTableSchema);
 

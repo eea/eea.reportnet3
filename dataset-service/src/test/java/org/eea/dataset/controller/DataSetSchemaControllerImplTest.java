@@ -51,14 +51,13 @@ public class DataSetSchemaControllerImplTest {
   @Mock
   private DatasetService datasetService;
 
-  /** The record store controller zull. */
-  @Mock
-  private RecordStoreControllerZull recordStoreControllerZull;
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  @InjectMocks
-  private DataschemaServiceImpl dataSchemaServiceImpl;
+  /** The record store controller zull. */
+  @Mock
+  private RecordStoreControllerZull recordStoreControllerZull;
 
   /**
    * Inits the mocks.

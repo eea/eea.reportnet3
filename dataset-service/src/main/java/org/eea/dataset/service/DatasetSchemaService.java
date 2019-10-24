@@ -1,6 +1,5 @@
 package org.eea.dataset.service;
 
-import org.eea.exception.EEAException;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
