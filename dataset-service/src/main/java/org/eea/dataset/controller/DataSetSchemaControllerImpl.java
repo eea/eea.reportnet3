@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,11 +43,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
   /** The dataset service. */
   @Autowired
+  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /** The dataset metabase service. */
   @Autowired
-  DatasetMetabaseService datasetMetabaseService;
+  private DatasetMetabaseService datasetMetabaseService;
 
   private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
 
