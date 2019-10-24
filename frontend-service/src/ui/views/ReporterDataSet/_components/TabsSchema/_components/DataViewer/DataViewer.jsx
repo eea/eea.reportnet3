@@ -92,13 +92,13 @@ const DataViewer = withRouter(
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
 
-    let growlRef = useRef();
-    let exportMenuRef = useRef();
-    let datatableRef = useRef();
     let contextMenuRef = useRef();
+    let datatableRef = useRef();
+    let exportMenuRef = useRef();
     let divRef = useRef();
     let dropdownFilterRef = useRef();
     let filterMenuRef = useRef();
+    let growlRef = useRef();
 
     useEffect(() => {
       setExportButtonsList(
@@ -1083,7 +1083,7 @@ const DataViewer = withRouter(
               disabled={false}
               icon="filter"
               iconClasses={isFilterValidationsActive ? styles.filterActive : styles.filterInactive}
-              label={resources.messages['filter']}
+              label={resources.messages['validationFilter']}
               onClick={event => {
                 filterMenuRef.current.show(event);
               }}
@@ -1096,6 +1096,15 @@ const DataViewer = withRouter(
               showFilters={showValidationFilter}
               onShow={e => {
                 getExportButtonPosition(e);
+              }}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon="filter"
+              label={resources.messages['filters']}
+              onClick={() => {
+                console.log('filter btn pressed');
               }}
             />
             <Button
