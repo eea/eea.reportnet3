@@ -4,7 +4,6 @@ import java.util.List;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DataSetMetabaseRepository.
@@ -21,9 +20,6 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    */
   @Query("SELECT d.dataflowId FROM DataSetMetabase d where d.id = ?1")
   Long findDataflowIdById(Long datasetId);
-
-  @Query(nativeQuery = true, value = "SELECT count(*)!=0 FROM dataflow d WHERE d.id=:idDataFlow")
-  boolean findDataFlowById(@Param("idDataFlow") Long idDataFlow);
 
   /**
    * Find by dataflow id.
