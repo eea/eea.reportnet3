@@ -41,8 +41,10 @@ export const BigButton = ({
         }
       }
     } else if (event.key === 'Escape') {
-      setButtonsTitle(initialValue);
-      onNameEdit();
+      if (!isEmpty(initialValue)) {
+        setButtonsTitle(initialValue);
+        onNameEdit();
+      }
     }
   };
 
