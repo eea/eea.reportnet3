@@ -86,6 +86,7 @@ const DataViewer = withRouter(
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
     const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
+    const [visibilityColumnIcon, setVisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
     const [visibleColumns, setVisibleColumns] = useState([]);
 
@@ -222,6 +223,12 @@ const DataViewer = withRouter(
       );
       setColumns(currentVisibleColumns);
       setVisibleColumns(currentVisibleColumns);
+
+      if (isFiltered(originalColumns, currentVisibleColumns)) {
+        setVisibleColumnIcon('eye-slash');
+      } else {
+        setVisibleColumnIcon('eye');
+      }
     };
 
     const showValidationFilter = filteredKeys => {
@@ -251,6 +258,14 @@ const DataViewer = withRouter(
         // }
       }
     }, [confirmPasteVisible]);
+
+    const isFiltered = (originalFilter, filter) => {
+      if (filter.length < originalFilter.length) {
+        return true;
+      } else {
+        return false;
+      }
+    };
 
     const onCancelRowEdit = () => {
       let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
@@ -519,7 +534,6 @@ const DataViewer = withRouter(
     };
 
     const onSort = event => {
-      console.log(event.sortOrder, event.sortField);
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);
@@ -1062,7 +1076,7 @@ const DataViewer = withRouter(
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
-              icon={'eye'}
+              icon={visibilityColumnIcon}
               label={resources.messages['visibility']}
               onClick={event => {
                 dropdownFilterRef.current.show(event);

@@ -13,6 +13,7 @@
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   font-size: 0.9rem;
   opacity: 0;
+  user-select: none;
 }
 .dropdownFilter ul {
   list-style: none;

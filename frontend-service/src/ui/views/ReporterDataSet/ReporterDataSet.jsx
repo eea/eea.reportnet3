@@ -61,6 +61,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [tableSchemaNames, setTableSchemaNames] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
@@ -184,8 +185,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
+      const tableSchemaNamesList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
+          tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
@@ -195,7 +198,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           };
         })
       );
-
+      setTableSchemaNames(tableSchemaNamesList);
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
@@ -217,7 +220,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     }
-
     setLoading(false);
   };
 
@@ -401,8 +403,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           className={styles.paginatorValidationViewer}>
           <ValidationViewer
             datasetId={datasetId}
+            datasetName={datasetTitle}
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
+            tableSchemaNames={tableSchemaNames}
           />
         </Dialog>
       </ReporterDatasetContext.Provider>
