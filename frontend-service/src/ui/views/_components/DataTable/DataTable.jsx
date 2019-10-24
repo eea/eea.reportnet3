@@ -461,7 +461,6 @@ export class DataTable extends Component {
       confirmVisible: false
     });
 
-    // console.log(dataFiltered)
     // let auxFiltered = {}
     // let auxArrayFiltered = [];
     // dataFiltered.forEach(dat => {

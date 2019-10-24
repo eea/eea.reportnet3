@@ -54,8 +54,26 @@ const deleteTableDataById = async (datasetId, tableId) => {
   return dataDeleted;
 };
 
-const errorsById = async (datasetId, pageNum, pageSize, sortField, asc) => {
-  const datasetErrorsDTO = await apiDataset.errorsById(datasetId, pageNum, pageSize, sortField, asc);
+const errorsById = async (
+  datasetId,
+  pageNum,
+  pageSize,
+  sortField,
+  asc,
+  levelErrorsFilter,
+  typeEntitiesFilter,
+  originsFilter
+) => {
+  const datasetErrorsDTO = await apiDataset.errorsById(
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  );
   const dataset = new Dataset(
     null,
     datasetErrorsDTO.idDataset,

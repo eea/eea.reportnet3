@@ -22,7 +22,6 @@ export const Button = ({
   layout = null
 }) => {
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
-
   if (layout === 'simple') {
     return (
       <button className={className} disabled={disabled} label={label} onClick={onClick} style={style} type={type}>
