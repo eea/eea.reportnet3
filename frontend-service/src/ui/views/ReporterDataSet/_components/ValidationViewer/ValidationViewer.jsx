@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { isUndefined } from 'lodash/';
+import { isUndefined } from 'lodash';
 
 import styles from './ValidationViewer.module.css';
 
