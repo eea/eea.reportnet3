@@ -145,7 +145,7 @@ class DropdownFilter extends React.Component {
         }}>
         <ul>
           {fields.map((field, i) => (
-            <li key={i}>
+            <li key={i} className={styles.selectNone}>
               <a
                 className={!field.checked ? styles.isNotChecked : ''}
                 onClick={e => {
