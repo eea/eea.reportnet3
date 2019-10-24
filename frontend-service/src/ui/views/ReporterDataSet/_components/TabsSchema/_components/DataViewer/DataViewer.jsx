@@ -260,8 +260,6 @@ const DataViewer = withRouter(
     }, [confirmPasteVisible]);
 
     const isFiltered = (originalFilter, filter) => {
-      console.log('originalFilter', originalFilter);
-      console.log('filter', filter);
       if (filter.length < originalFilter.length) {
         return true;
       } else {
@@ -536,7 +534,6 @@ const DataViewer = withRouter(
     };
 
     const onSort = event => {
-      console.log(event.sortOrder, event.sortField);
       setSortOrder(event.sortOrder);
       setSortField(event.sortField);
       setFirstRow(0);

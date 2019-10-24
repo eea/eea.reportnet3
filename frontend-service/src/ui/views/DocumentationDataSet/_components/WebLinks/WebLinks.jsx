@@ -188,7 +188,6 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   };
 
   const onDeleteWeblink = () => {
-    console.log('deleting web link', selectedRecord['id']);
     setIsConfirmDeleteVisible(false);
   };
 

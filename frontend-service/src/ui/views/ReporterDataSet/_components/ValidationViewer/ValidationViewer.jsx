@@ -201,8 +201,6 @@ const ValidationViewer = React.memo(
       } else {
         setAreActiveFilters(true);
       }
-      console.log(originsDeselected);
-      console.log(allOriginsFilter);
       setIsFilteredOrigins(isFiltered(allOriginsFilter, originsDeselected));
       setLoading(true);
       onLoadErrors(
@@ -249,8 +247,6 @@ const ValidationViewer = React.memo(
     };
 
     const isFiltered = (originalFilter, filter) => {
-      console.log('originalFilter', originalFilter);
-      console.log('filter', filter);
       if (filter.length > 0) {
         return true;
       } else {
@@ -259,7 +255,6 @@ const ValidationViewer = React.memo(
     };
 
     const checkActiveFilters = (originsFilterParam, levelErrorsFilterParam, typeEntitiesFilterParam) => {
-      console.log('TEST', originsFilterParam, levelErrorsFilterParam, typeEntitiesFilterParam);
       if (originsFilterParam || levelErrorsFilterParam || typeEntitiesFilterParam) {
         setAreActiveFilters(true);
       } else {
