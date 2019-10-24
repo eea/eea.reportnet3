@@ -26,6 +26,7 @@ import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { DatasetService } from 'core/services/DataSet';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -37,6 +38,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [datasetSchemaId, setDatasetSchemaId] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -170,8 +172,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setIsDataUpdated(true);
   };
 
-  const onSaveName = value => {
+  const onSaveName = async value => {
     console.log('blurred', value);
+
+    const response = await DatasetService.updateSchemaNameById(datasetSchemaId, value);
+    console.log('response', response);
+    if (response === 200) {
+      console.log('success');
+    } else {
+      console.log('error');
+    }
   };
 
   const showContributorsDialog = () => {
@@ -265,6 +275,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
               dataflowData.designDatasets.map(newDatasetSchema => {
+                setDatasetSchemaId(newDatasetSchema.datasetId);
                 return (
                   <div className={`${styles.datasetItem}`} key={newDatasetSchema.datasetId}>
                     <BigButton
@@ -284,7 +295,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         },
                         {
                           label: resources.messages['rename'],
-                          icon: 'pencil'
+                          icon: 'pencil',
+                          command: () => onNameEdit()
                         },
                         {
                           label: resources.messages['duplicate'],

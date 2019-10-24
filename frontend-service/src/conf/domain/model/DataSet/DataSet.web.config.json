@@ -10,6 +10,7 @@
     "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}",
     "loadDataTable": "/dataset/{:datasetId}/loadTableData/{:tableId}",
     "loadStatistics": "/dataset/loadStatistics/{:datasetId}",
+    "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
     "validateDataset": "/validation/dataset/{:datasetId}",
