@@ -76,8 +76,12 @@ const ValidationViewer = React.memo(
       if (visible) {
         onLoadFilters();
         fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
+      } else {
+        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins) {
+          resetFilters();
+          fetchData('', sortOrder, firstRow, numberRows, [], [], []);
+        }
       }
-      resetFilters();
     }, [visible]);
 
     const onChangePage = event => {
@@ -403,6 +407,7 @@ const ValidationViewer = React.memo(
         <div>
           <DataTable
             autoLayout={true}
+            className={styles.showValidationsData}
             first={firstRow}
             lazy={true}
             loading={loading}
