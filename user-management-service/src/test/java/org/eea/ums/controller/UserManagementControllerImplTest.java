@@ -2,10 +2,9 @@ package org.eea.ums.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
@@ -118,7 +117,7 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    userManagementController.getResourcesByUser(ResourceEnum.DATAFLOW);
+    userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
 
   }
 
@@ -142,20 +141,10 @@ public class UserManagementControllerImplTest {
     details.put("userId", "userId_123");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    userManagementController.getResourcesByUser(ResourceEnum.DATAFLOW,
+    userManagementController.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
         SecurityRoleEnum.DATA_PROVIDER);
 
   }
 
 
-  @Test
-  public void getGroupDetail() {
-    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
-    Mockito.when(securityProviderInterfaceService
-        .getGroupDetail(ResourceGroupEnum.DATAFLOW_PROVIDER.getGroupName(1l)))
-        .thenReturn(resourceInfoVO);
-    ResourceInfoVO result = userManagementController
-        .getResourceDetail(1L, ResourceGroupEnum.DATAFLOW_PROVIDER);
-    Assert.assertNotNull(result);
-  }
 }

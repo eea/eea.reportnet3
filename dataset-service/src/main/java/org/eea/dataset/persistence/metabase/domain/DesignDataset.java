@@ -24,9 +24,6 @@ public class DesignDataset extends DataSetMetabase {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The type. */
-  @Column(name = "TYPE")
-  private String type;
 
 
   /**

@@ -8,11 +8,10 @@ import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.lock.enums.LockSignature;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -34,22 +33,19 @@ public class FileTreatmentHelper {
    */
   private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
-  /** The kafka sender helper. */
+  /**
+   * The kafka sender helper.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
-
-  /**
-   * The table repository.
-   */
-  @Autowired
-  private TableRepository tableRepository;
-
 
   /**
    * The data set mapper.
@@ -74,6 +70,7 @@ public class FileTreatmentHelper {
    * @param fileName the file name
    * @param is the input stream
    * @param idTableSchema the id table schema
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws InterruptedException the interrupted exception
@@ -83,7 +80,6 @@ public class FileTreatmentHelper {
       String idTableSchema) throws EEAException, IOException, InterruptedException {
     LOG.info("Processing file");
     DataSetVO datasetVO = datasetService.processFile(datasetId, fileName, is, idTableSchema);
-
 
     // map the VO to the entity
     datasetVO.setId(datasetId);
@@ -147,6 +143,7 @@ public class FileTreatmentHelper {
    * Gets the list of records.
    *
    * @param allRecords the all records
+   *
    * @return the list of records
    */
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {

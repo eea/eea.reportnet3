@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;

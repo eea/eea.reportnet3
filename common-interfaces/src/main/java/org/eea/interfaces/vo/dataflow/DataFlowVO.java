@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
@@ -30,7 +31,9 @@ public class DataFlowVO implements Serializable {
   private Long id;
 
   /** The datasets. */
-  private List<ReportingDatasetVO> datasets;
+  private List<ReportingDatasetVO> reportingDatasets;
+
+  private List<DesignDatasetVO> designDatasets;
 
   /** The description. */
   private String description;
@@ -88,7 +91,8 @@ public class DataFlowVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, name, deadlineDate, status, datasets);
+    return Objects.hash(id, description, name, deadlineDate, status, reportingDatasets,
+        designDatasets);
   }
 
 }

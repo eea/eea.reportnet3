@@ -230,7 +230,7 @@
   {
     "key": "config/recordstore/spring.datasource.driverClassName",
     "value": "JHtSRUNPUkRTVE9SRV9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
-  }, 
+  },
   {
     "key": "config/recordstore/management.endpoints.web.exposure.include",
     "value": "Kg=="
@@ -517,6 +517,18 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.ums.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.resource.path",
+    "value": "L3Jlc291cmNlLyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.resource.serviceId",
+    "value": "dW1z"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.resource.stripPrefix",
     "value": "ZmFsc2U="
   },
   {
@@ -959,11 +971,11 @@
     "key": "config/indexsearch/spring.jpa.hibernate.flushMode",
     "value": "Y29tbWl0"
   },
-    {
+  {
     "key": "config/indexsearch/elasticsearch.host",
     "value": "bG9jYWxob3N0"
   },
-    {
+  {
     "key": "config/indexsearch/elasticsearch.port",
     "value": "OTIwMA=="
   },
@@ -987,5 +999,4 @@
     "key": "config/application/eea.keycloak.redirect_uri",
     "value": "JHtLRVlDTE9BS19SRURJUkVDVF9VUkk6aHR0cDovL2s4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzA0NDUvZGF0YS1mbG93LXRhc2svfQ=="
   }
-
 ]

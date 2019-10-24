@@ -70,7 +70,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTOR'))")
+  @PreAuthorize("secondLevelAuthorize(#id,'DATAFLOW_PROVIDER') OR (secondLevelAuthorize(#id,'DATAFLOW_CUSTODIAN')) OR (secondLevelAuthorize(#id,'DATAFLOW_REQUESTER'))")
   public DataFlowVO findById(@PathVariable("id") final Long id) {
 
     if (id == null) {
