@@ -1,11 +1,28 @@
 import React from 'react';
+
+import PropTypes from 'prop-types';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import styles from './DropdownFilter.module.css';
+import isUndefined from 'lodash/isUndefined';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import styles from './DropdownFilter.module.css';
+
 class DropdownFilter extends React.Component {
+  static defaultProps = {
+    selectAll: false,
+    showFilters: undefined,
+    showNotCheckedFilters: undefined
+  };
+
+  static propTypes = {
+    selectAll: PropTypes.bool,
+    showFilters: PropTypes.func,
+    showNotCheckedFilters: PropTypes.func
+  };
+
   constructor(props) {
     super(props);
 
@@ -13,6 +30,7 @@ class DropdownFilter extends React.Component {
       style: {
         display: 'none'
       },
+      htmlElement: document.getElementsByTagName('html')[0],
       fields: [],
       menuClick: false
     };
@@ -34,7 +52,6 @@ class DropdownFilter extends React.Component {
       });
     }
   }
-
   hide(e) {
     if (!this.state.menuClick) {
       this.setState(
@@ -92,17 +109,14 @@ class DropdownFilter extends React.Component {
       }
     );
   }
-
   updateChecked(fieldKey) {
     const { fields } = this.state;
-
     const newFields = fields.map(field => {
       if (field.key === fieldKey) {
         field.checked = !field.checked;
       }
       return field;
     });
-
     this.setState(
       state => {
         return {
@@ -111,18 +125,28 @@ class DropdownFilter extends React.Component {
         };
       },
       () => {
-        this.props.showFilters(
-          this.state.fields
-            .filter(field => field.checked)
-            .map(field => {
-              return field.key;
-            })
-        );
+        if (!isUndefined(this.props.showFilters)) {
+          this.props.showFilters(
+            this.state.fields
+              .filter(field => field.checked)
+              .map(field => {
+                return field.key;
+              })
+          );
+        }
+        if (!isUndefined(this.props.showNotCheckedFilters)) {
+          this.props.showNotCheckedFilters(
+            this.state.fields
+              .filter(field => !field.checked)
+              .map(field => {
+                return field.label;
+              })
+          );
+        }
       }
     );
   }
-
-  menuClick() {
+  menuClick(e) {
     this.setState(state => {
       return {
         ...state,
@@ -130,7 +154,6 @@ class DropdownFilter extends React.Component {
       };
     });
   }
-
   render() {
     const { fields } = this.state;
     return (

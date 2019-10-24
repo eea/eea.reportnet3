@@ -165,7 +165,6 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   });
 
   const onSaveRecord = async record => {
-    console.log('Saving record:', record);
     if (isNewRecord) {
       try {
         setIsAddDialogVisible(false);
@@ -188,7 +187,6 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   };
 
   const onDeleteWeblink = () => {
-    console.log('deleting web link', selectedRecord['id']);
     setIsConfirmDeleteVisible(false);
   };
 

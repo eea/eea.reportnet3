@@ -24,7 +24,6 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
   // const onEditorEnterKeyPress = event => {
   //   if (event.key === 'Enter') {
   //     const form = event.target;
-  //     console.log(form);
   //     const index = Array.prototype.indexOf.call(form, event.target);
   //     form.elements[index + 1].focus();
   //     event.preventDefault();
@@ -190,7 +189,6 @@ const WebFormData = withRouter(({ datasetId, tableSchemaId, match: { params: { d
   };
 
   const onFillWebFormRows = (minsAndMaxRowsAndColumns, dataColumns) => {
-    // console.log(minsAndMaxRowsAndColumns);
     let firstRow = parseInt(minsAndMaxRowsAndColumns.rows.firstRow);
     let lastRow = minsAndMaxRowsAndColumns.rows.lastRow;
 
