@@ -7,13 +7,19 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
+
 /**
  * The Class DataSetSchemaControllerImpl.
  */
@@ -30,19 +37,20 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataschema")
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
-  /**
-   * The dataschema service.
-   */
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
   /** The dataset service. */
   @Autowired
+  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /** The dataset metabase service. */
   @Autowired
-  DatasetMetabaseService datasetMetabaseService;
+  private DatasetMetabaseService datasetMetabaseService;
+
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
 
   /**
    * The record store controller zull.
@@ -58,7 +66,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/createDataSchema/{id}", method = RequestMethod.POST)
+  @PostMapping(value = "/createDataSchema/{id}")
   public void createDataSchema(@PathVariable("id") final Long datasetId,
       @RequestParam("idDataflow") final Long dataflowId) {
     dataschemaService.createDataSchema(datasetId, dataflowId);
@@ -82,6 +90,31 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+  }
+
+  /**
+   * Creates the empty data set schema.
+   *
+   * @param nameDataSetSchema the name data set schema
+   * @param idDataFlow the id data flow
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/createEmptyDatasetSchema")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN') AND hasRole('DATA_CUSTODIAN')")
+  public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestParam("datasetSchemaName") final String datasetSchemaName) {
+
+    try {
+      dataschemaService.createGroupAndAddUser(
+          datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, datasetSchemaName,
+              dataschemaService.createEmptyDataSetSchema(dataflowId, datasetSchemaName).toString(),
+              dataflowId));
+    } catch (EEAException e) {
+      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
   }
 
@@ -112,36 +145,27 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by id.
    *
    * @param id the id
-   *
    * @return the data set schema VO
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
-
     return dataschemaService.getDataSchemaById(id);
-
   }
-
 
   /**
    * Find data schema by dataflow.
    *
    * @param idFlow the id flow
-   *
    * @return the data set schema VO
    */
   @Override
   @HystrixCommand()
-  @RequestMapping(value = "/dataflow/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
-
     return dataschemaService.getDataSchemaByIdFlow(idFlow, true);
-
   }
 
   /**
@@ -152,13 +176,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand()
-  @RequestMapping(value = "/noRules/dataflow/{id}", method = RequestMethod.GET,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/noRules/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow) {
-
     return dataschemaService.getDataSchemaByIdFlow(idFlow, false);
-
   }
 
   /**

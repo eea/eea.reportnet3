@@ -68,7 +68,9 @@ public class FileTreatmentHelperTest {
     ArrayList<RecordValue> records = new ArrayList<>();
     TableValue table = new TableValue();
     RecordValue record = new RecordValue();
-    records.add(record);
+    for (int i = 0; i < 1001; i++) {
+      records.add(record);
+    }
     table.setRecords(records);
     tableValues.add(table);
     entityValue.setId(1L);
@@ -121,6 +123,4 @@ public class FileTreatmentHelperTest {
     Mockito.when(dataSetMapper.classToEntity(Mockito.any(DataSetVO.class))).thenReturn(null);
     fileTreatmentHelper.executeFileProcess(1L, "file", file.getInputStream(), null);
   }
-
-
 }

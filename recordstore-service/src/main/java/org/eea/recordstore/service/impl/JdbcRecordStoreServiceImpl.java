@@ -129,6 +129,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
+  @Async
   public void createEmptyDataSet(String datasetName, String idDatasetSchema)
       throws RecordStoreAccessException {
 

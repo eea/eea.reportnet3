@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -111,8 +112,6 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn(new DataSetSchemaVO());
     DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaWithNoRulesByDataflow(1l);
     Assert.assertNotNull(result);
-
-
   }
 
   /**
@@ -166,8 +165,26 @@ public class DataSetSchemaControllerImplTest {
     schema2.setTableSchemas(listaTables);
 
     assertEquals("error, not equals", schema, schema2);
+  }
 
+  @Test
+  public void createEmptyDataSetSchemaTest() throws EEAException {
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new ObjectId());
+    Mockito.when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.doNothing().when(dataschemaService).createGroupAndAddUser(Mockito.any());
+    dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
+    Mockito.verify(dataschemaService, times(1)).createGroupAndAddUser(Mockito.any());
+  }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetSchemaException() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
+        .createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new ObjectId());
+    dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
   }
 
   /**

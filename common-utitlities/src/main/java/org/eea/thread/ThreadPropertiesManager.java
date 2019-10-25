@@ -8,9 +8,9 @@ import java.util.Map;
  */
 public class ThreadPropertiesManager {
 
+
   /** The thread. */
-  protected static InheritableThreadLocal<Map<String, Object>> thread =
-      new InheritableThreadLocal<>();
+  protected static ThreadLocal<Map<String, Object>> thread = new InheritableThreadLocal<>();
 
   /**
    * Sets the variable.

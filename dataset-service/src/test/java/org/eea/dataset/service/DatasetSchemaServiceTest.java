@@ -13,6 +13,7 @@ import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -21,6 +22,8 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -53,6 +56,18 @@ public class DatasetSchemaServiceTest {
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
   /**
+   * The data flow controller zuul.
+   */
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /**
+   * The data set metabase repository.
+   */
+  @Mock
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /**
    * The data schema service impl.
    */
   @InjectMocks
@@ -70,6 +85,7 @@ public class DatasetSchemaServiceTest {
   @Mock
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
 
+  /** The table mapper. */
   @Mock
   private TableSchemaMapper tableMapper;
 
@@ -115,6 +131,9 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  /**
+   * Test create data schema integer.
+   */
   @Test
   public void testCreateDataSchemaInteger() {
 
@@ -144,6 +163,9 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  /**
+   * Test create data schema boolean.
+   */
   @Test
   public void testCreateDataSchemaBoolean() {
 
@@ -173,6 +195,9 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  /**
+   * Test create data schema coordinate lat.
+   */
   @Test
   public void testCreateDataSchemaCoordinateLat() {
 
@@ -201,6 +226,9 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Test create data schema coordinate long.
+   */
   @Test
   public void testCreateDataSchemaCoordinateLong() {
 
@@ -229,6 +257,9 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Test create data schema coordinate date.
+   */
   @Test
   public void testCreateDataSchemaCoordinateDate() {
 
@@ -290,6 +321,9 @@ public class DatasetSchemaServiceTest {
 
   }
 
+  /**
+   * Test find data schema by data flow no rules.
+   */
   @Test
   public void testFindDataSchemaByDataFlowNoRules() {
     DataSetSchema dataSetSchema = new DataSetSchema();
@@ -374,8 +408,29 @@ public class DatasetSchemaServiceTest {
     schema2.setTableSchemas(listaTables);
 
     assertEquals("Not equals", schema, schema2);
+  }
 
+  /**
+   * Creates the empty data set schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createEmptyDataSetSchemaTest() throws EEAException {
+    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
+    Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema"));
+  }
 
+  /**
+   * Creates the empty data set schema exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createEmptyDataSetSchemaException() throws EEAException {
+    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(null);
+    dataSchemaServiceImpl.createEmptyDataSetSchema(1L, "nameDataSetSchema");
   }
 
   /**
@@ -436,6 +491,11 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
   }
 
+  /**
+   * Creates the table schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createTableSchemaTest() throws EEAException {
     Mockito.when(tableMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
@@ -443,6 +503,9 @@ public class DatasetSchemaServiceTest {
   }
 
 
+  /**
+   * Delete dataset schema test.
+   */
   @Test
   public void deleteDatasetSchemaTest() {
     dataSchemaServiceImpl.deleteDatasetSchema(1L, "idTableSchema");

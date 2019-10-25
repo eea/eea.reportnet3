@@ -2,7 +2,9 @@ package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +34,8 @@ public interface DatasetMetabaseController {
    * @return the list
    */
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<ReportingDatasetVO> findDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
+  List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(
+      @PathVariable("id") final Long idDataflow);
 
 
   /**
@@ -43,7 +46,9 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    */
   @PostMapping(value = "/create")
-  void createEmptyDataSet(@RequestParam(value = "datasetName", required = true) String datasetName,
+  void createEmptyDataSet(
+      @RequestParam(value = "datasetType", required = true) final TypeDatasetEnum datasetType,
+      @RequestParam(value = "datasetName", required = true) String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema,
       @RequestParam(value = "idDataflow", required = false) Long idDataflow);
 
@@ -55,6 +60,15 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset);
+
+  /**
+   * Find design data set id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
