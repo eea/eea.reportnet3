@@ -4,23 +4,16 @@ import { Snapshot } from 'core/domain/model/Snapshot/Snapshot';
 const all = async datasetId => {
   const snapshotsDTO = await apiSnapshot.all(datasetId);
   return snapshotsDTO.map(
-    snapshotDTO =>
-      new Snapshot(
-        snapshotDTO.id,
-        snapshotDTO.creationDate,
-        snapshotDTO.description,
-        snapshotDTO.release,
-        undefined,
-        undefined,
-        undefined
-      )
+    snapshotDTO => new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
   );
 };
 
 const createById = async (datasetId, description) => {
   const isCreated = await apiSnapshot.createById(datasetId, description);
 
-  const snapshotToCreate = new Snapshot(undefined, undefined, description, undefined, isCreated, undefined, undefined);
+  const snapshotToCreate = new Snapshot();
+  snapshotToCreate.description = description;
+  snapshotToCreate.isCreated = isCreated;
 
   return snapshotToCreate;
 };
@@ -28,7 +21,9 @@ const createById = async (datasetId, description) => {
 const deleteById = async (datasetId, snapshotId) => {
   const isDeleted = await apiSnapshot.deleteById(datasetId, snapshotId);
 
-  const snapshotToDelete = new Snapshot(snapshotId, undefined, undefined, undefined, undefined, isDeleted, undefined);
+  const snapshotToDelete = new Snapshot();
+  snapshotToDelete.id = snapshotId;
+  snapshotToDelete.isDeleted = isDeleted;
 
   return snapshotToDelete;
 };
@@ -36,7 +31,9 @@ const deleteById = async (datasetId, snapshotId) => {
 const restoreById = async (dataflowId, datasetId, snapshotId) => {
   const isRestored = await apiSnapshot.restoreById(dataflowId, datasetId, snapshotId);
 
-  const snapshotToRestore = new Snapshot(snapshotId, undefined, undefined, undefined, undefined, undefined, isRestored);
+  const snapshotToRestore = new Snapshot();
+  snapshotToRestore.id = snapshotId;
+  snapshotToRestore.isRestored = isRestored;
 
   return snapshotToRestore;
 };
@@ -44,9 +41,11 @@ const restoreById = async (dataflowId, datasetId, snapshotId) => {
 const releaseById = async (dataflowId, datasetId, snapshotId) => {
   const isReleased = await apiSnapshot.releaseById(dataflowId, datasetId, snapshotId);
 
-  const snapshotToRestore = new Snapshot(snapshotId, undefined, undefined, isReleased, undefined, undefined, undefined);
+  const snapshotToRelease = new Snapshot();
+  snapshotToRelease.id = snapshotId;
+  snapshotToRelease.isReleased = isReleased;
 
-  return snapshotToRestore;
+  return snapshotToRelease;
 };
 
 export const ApiSnapshotRepository = {
