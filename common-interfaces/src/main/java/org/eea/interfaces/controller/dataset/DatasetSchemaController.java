@@ -104,7 +104,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param tableSchema the table schema
    */
-  @RequestMapping(value = "/{idSchema}/udpateTableSchema/{datasetId}", method = RequestMethod.PUT)
+  @RequestMapping(value = "/{idSchema}/updateTableSchema/{datasetId}", method = RequestMethod.PUT)
   void updateTableSchema(@PathVariable("idSchema") String idSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema);
 
