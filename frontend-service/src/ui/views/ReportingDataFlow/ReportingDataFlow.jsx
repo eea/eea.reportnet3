@@ -140,7 +140,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         showContributorsDialog();
       }
     },
-
     {
       label: resources.messages['properties'],
       icon: 'settings',
@@ -185,7 +184,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onNameEdit = () => {
-    setIsNameEditable(isNameEditable ? false : true);
+    setIsNameEditable(!isNameEditable);
   };
 
   const onUpdateData = () => {
@@ -193,12 +192,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async value => {
-    const response = await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
-    if (response === 200) {
-      console.log('success');
-    } else {
-      console.log('error');
-    }
+    await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
   };
 
   const showContributorsDialog = () => {
@@ -495,7 +489,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 <strong>
                   {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)}{' '}
                   functionality:
-                </strong>{' '}
+                </strong>
                 {hasWritePermissions ? 'read / write' : 'read'}
               </li>
               <li>
