@@ -1,26 +1,24 @@
 package org.eea.ums.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.interfaces.controller.ums.UserManagementController;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * The type User management controller.
@@ -124,7 +122,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @RequestMapping(value = "/resources_by_type", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
-      @RequestParam("resourceType") ResourceEnum resourceType) {
+      @RequestParam("resourceType") ResourceTypeEnum resourceType) {
     return getResourcesByUser().stream()
         .filter(resource -> resource.getResource().equals(resourceType))
         .collect(Collectors.toList());
@@ -158,7 +156,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @RequestMapping(value = "/resources_by_type_role", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser(
-      @RequestParam("resourceType") ResourceEnum resourceType,
+      @RequestParam("resourceType") ResourceTypeEnum resourceType,
       @RequestParam("securityRole") SecurityRoleEnum securityRole) {
     return getResourcesByUser().stream().filter(resource -> resource.getRole().equals(securityRole)
         && resource.getResource().equals(resourceType)).collect(Collectors.toList());
@@ -178,7 +176,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   /**
    * Adds the contributor to resource.
    *
-   * @param idResource the id resource
+   * @param idResource the resourceId resource
    * @param resourceGroupEnum the resource group enum
    */
   @Override
@@ -195,7 +193,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   /**
    * Test secured service.
    *
-   * @param dataflowId the dataflow id
+   * @param dataflowId the dataflow resourceId
    *
    * @return the string
    */
@@ -206,12 +204,5 @@ public class UserManagementControllerImpl implements UserManagementController {
     return "OLEEEEE";
   }
 
-  @Override
-  @HystrixCommand
-  @GetMapping("/resource/details")
-  public ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
-    return securityProviderInterfaceService
-        .getGroupDetail(resourceGroupEnum.getGroupName(idResource));
-  }
+
 }
