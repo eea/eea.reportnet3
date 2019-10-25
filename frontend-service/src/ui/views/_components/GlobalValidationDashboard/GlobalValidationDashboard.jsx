@@ -73,7 +73,9 @@ const GlobalValidationDashboard = dataflowId => {
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(dataflowId.dataflowId);
-      setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
+      if (datasetsValidationStatistics.datasetId) {
+        setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
+      }
     } catch (error) {
       onErrorLoadingDashboard(error);
     } finally {
