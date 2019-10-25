@@ -1,0 +1,25 @@
+.dialog {
+  height: auto !important;
+}
+.crudColumn {
+  text-align: center;
+}
+.editRowButton {
+  border: 1px solid #c8c8c8 !important;
+  box-shadow: 0 0 0 0em #004494 !important;
+  margin-left: 3px !important;
+}
+.delete {
+  color: var(--errors);
+  cursor: pointer;
+}
+.deleteRowButton {
+  border: 1px solid #c8c8c8 !important;
+  box-shadow: 0 0 0 0em #004494 !important;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
+}
+.webLinkEditButtons {
+  display: flex;
+  justify-content: center;
+}

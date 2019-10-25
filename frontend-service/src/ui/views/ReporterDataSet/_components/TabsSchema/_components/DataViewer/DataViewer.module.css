@@ -26,3 +26,11 @@
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
 }
+.iconTooltipWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.filterInactive {
+  opacity: 0.25;
+}

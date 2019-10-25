@@ -14,7 +14,11 @@ import {
   faTrashAlt,
   faCaretDown,
   faChartBar,
-  faArchive
+  faPlus,
+  faArchive,
+  faBroom,
+  faPencilRuler,
+  faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -118,12 +122,20 @@ export const AwesomeIcons = icon => {
       return faChartBar;
     case 'dataset':
       return faDatabase;
+    case 'plus':
+      return faPlus;
     case 'square':
       return farSquareRegular;
     case 'checkedSquare':
       return faCheckSquareRegular;
     case 'archive':
       return faArchive;
+    case 'broom':
+      return faBroom;
+    case 'pencilRuler':
+      return faPencilRuler;
+    case 'user-profile':
+      return faUserCircle;
     default:
       return faFileAlt;
   }

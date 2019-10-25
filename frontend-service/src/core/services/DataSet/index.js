@@ -15,6 +15,7 @@ import { GetStatistics } from './GetStatistics';
 import { GetWebFormData } from './GetWebFormData';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
+import { UpdateSchemaName } from './UpdateSchemaName';
 import { ValidateData } from './ValidateData';
 
 export const DatasetService = {
@@ -32,6 +33,7 @@ export const DatasetService = {
   tableDataById: GetData({ datasetRepository }),
   updateFieldById: UpdateField({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),
+  updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
   validateDataById: ValidateData({ datasetRepository }),
   webFormDataById: GetWebFormData({ datasetRepository })
 };

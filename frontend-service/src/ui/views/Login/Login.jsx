@@ -49,7 +49,7 @@ const Login = ({ history }) => {
             onSubmit={async (values, { setSubmitting }) => {
               setSubmitting(true);
               try {
-                const userObject = await UserService.login(values.userName, values.password);
+                const userObject = await UserService.oldLogin(values.userName, values.password);
                 user.onLogin(userObject);
                 history.push(getUrl(routes.DATAFLOWS));
               } catch (error) {

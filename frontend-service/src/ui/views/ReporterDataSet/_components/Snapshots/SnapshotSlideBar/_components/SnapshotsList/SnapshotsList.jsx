@@ -1,10 +1,10 @@
 import React from 'react';
 
-import styles from './SnapshotList.module.scss';
+import styles from './SnapshotsList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';
 
-export function SnapshotList({ snapshotListData }) {
+export function SnapshotsList({ snapshotListData }) {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
