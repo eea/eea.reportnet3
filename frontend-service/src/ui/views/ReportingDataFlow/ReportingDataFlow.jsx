@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './ReportingDataFlow.module.scss';
 
@@ -26,6 +26,7 @@ import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/DataFlow';
+import { DatasetService } from 'core/services/DataSet';
 import { UserService } from 'core/services/User';
 import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -37,6 +38,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
+  const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
@@ -44,6 +47,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
+  const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -94,6 +98,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
+      if (!isEmpty(dataflow.designDatasets)) {
+        const { designDatasets } = dataflow;
+        const [designDataset] = designDatasets;
+        setDesignDatasetSchemaId(designDataset.datasetId);
+      }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -129,7 +138,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         showContributorsDialog();
       }
     },
-
     {
       label: resources.messages['properties'],
       icon: 'settings',
@@ -140,12 +148,36 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     }
   ];
 
+  const errorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button
+        label={resources.messages['ok']}
+        icon="check"
+        onClick={() => {
+          setErrorDialogVisible(false);
+        }}
+      />
+    </div>
+  );
+
   const onCreateDataset = () => {
     setNewDatasetDialog(false);
   };
 
+  const onDatasetSchemaNameError = () => {
+    setErrorDialogVisible(true);
+  };
+
+  const onNameEdit = () => {
+    setIsNameEditable(!isNameEditable);
+  };
+
   const onUpdateData = () => {
     setIsDataUpdated(true);
+  };
+
+  const onSaveName = async value => {
+    await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
   };
 
   const showContributorsDialog = () => {
@@ -209,7 +241,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       label: resources.messages['createNewEmptyDatasetSchema'],
                       icon: 'add',
                       command: () => showNewDatasetDialog(),
-                      disabled: isDataUpdated
+                      disabled: isUndefined(designDatasetSchemaId) ? false : true
                     },
                     {
                       label: resources.messages['createNewDatasetFromTemplate'],
@@ -223,7 +255,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             <div className={`${styles.datasetItem}`}>
               <BigButton
                 layout="documents"
-                label="DO"
                 caption={resources.messages['documents']}
                 handleRedirect={() =>
                   handleRedirect(
@@ -248,16 +279,23 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       handleRedirect={() => {
                         handleRedirect();
                       }}
+                      isNameEditable={isNameEditable}
+                      onNameEdit={onNameEdit}
+                      onSaveError={onDatasetSchemaNameError}
+                      onSaveName={onSaveName}
+                      placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
                           label: resources.messages['openDataset'],
                           icon: 'openFolder',
-                          disabled: false
+                          command: () => {
+                            handleRedirect();
+                          }
                         },
                         {
                           label: resources.messages['rename'],
                           icon: 'pencil',
-                          disabled: true
+                          command: () => onNameEdit()
                         },
                         {
                           label: resources.messages['duplicate'],
@@ -287,7 +325,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 <div className={`${styles.datasetItem}`} key={dataset.datasetId}>
                   <BigButton
                     layout="dataset"
-                    label="DS"
                     caption={dataset.datasetSchemaName}
                     isReleased={dataset.isReleased}
                     handleRedirect={() => {
@@ -384,6 +421,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           />
         </Dialog>
         <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={() => setErrorDialogVisible(false)}
+          visible={errorDialogVisible}>
+          <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
+        </Dialog>
+        <Dialog
           header={dataflowData.name}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
@@ -421,7 +465,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                 <strong>
                   {UserService.userRole(user, `${config.permissions.DATA_FLOW}${match.params.dataflowId}`)}{' '}
                   functionality:
-                </strong>{' '}
+                </strong>
                 {hasWritePermissions ? 'read / write' : 'read'}
               </li>
               <li>
