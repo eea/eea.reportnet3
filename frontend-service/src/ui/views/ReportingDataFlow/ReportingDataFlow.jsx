@@ -169,7 +169,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onNameEdit = () => {
-    setIsNameEditable(isNameEditable ? false : true);
+    setIsNameEditable(!isNameEditable);
   };
 
   const onUpdateData = () => {
