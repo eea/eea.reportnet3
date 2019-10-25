@@ -26,9 +26,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onCreateSnapshot = async () => {
-    const snapshotCreated = await SnapshotService.createById(datasetId, snapshotState.description);
+    const snapshotToCreate = await SnapshotService.createById(datasetId, snapshotState.description);
 
-    if (snapshotCreated) {
+    if (snapshotToCreate.isCreated) {
       onLoadSnapshotList();
     }
 

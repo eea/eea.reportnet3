@@ -18,7 +18,11 @@ const all = async datasetId => {
 };
 
 const createById = async (datasetId, description) => {
-  return await apiSnapshot.createById(datasetId, description);
+  const isCreated = await apiSnapshot.createById(datasetId, description);
+
+  const snapshotToCreate = new Snapshot(undefined, undefined, description, undefined, isCreated, undefined, undefined);
+
+  return snapshotToCreate;
 };
 
 const deleteById = async (datasetId, snapshotId) => {
