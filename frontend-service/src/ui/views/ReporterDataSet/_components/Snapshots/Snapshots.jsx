@@ -26,9 +26,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onCreateSnapshot = async () => {
-    const snapshotCreated = await SnapshotService.createById(datasetId, snapshotState.description);
+    const snapshotToCreate = await SnapshotService.createById(datasetId, snapshotState.description);
 
-    if (snapshotCreated) {
+    if (snapshotToCreate.isCreated) {
       onLoadSnapshotList();
     }
 
@@ -36,9 +36,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onDeleteSnapshot = async () => {
-    const snapshotDeleted = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
+    const snapshotToDelete = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
 
-    if (snapshotDeleted) {
+    if (snapshotToDelete.isDeleted) {
       onLoadSnapshotList();
     }
 
@@ -63,9 +63,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onReleaseSnapshot = async () => {
-    const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
+    const snapshotToRelease = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
 
-    if (snapshotReleased) {
+    if (snapshotToRelease.isReleased) {
       onLoadSnapshotList();
     }
 
@@ -73,9 +73,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onRestoreSnapshot = async () => {
-    const response = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
+    const snapshotToRestore = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
 
-    if (response) {
+    if (snapshotToRestore.isRestored) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
 
       onGrowlAlert({

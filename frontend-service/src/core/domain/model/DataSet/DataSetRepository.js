@@ -10,6 +10,7 @@ export const DatasetRepository = {
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
   tableDataById: () => Promise.reject('[DatasetRepository#tableDataById] must be implemented'),
+  updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
   validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented'),
   webFormDataById: () => Promise.reject('[DatasetRepository#webFormDataById] must be implemented')
 };

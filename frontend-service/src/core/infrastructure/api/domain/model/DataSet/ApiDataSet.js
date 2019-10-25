@@ -286,6 +286,20 @@ export const apiDataset = {
       return false;
     }
   },
+  updateSchemaNameById: async (datasetId, datasetSchemaName) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDataSchemaName, {
+        datasetId,
+        datasetSchemaName
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
+  },
   validateById: async datasetId => {
     const tokens = userStorage.get();
     try {
