@@ -34,7 +34,11 @@ const deleteById = async (datasetId, snapshotId) => {
 };
 
 const restoreById = async (dataflowId, datasetId, snapshotId) => {
-  return await apiSnapshot.restoreById(dataflowId, datasetId, snapshotId);
+  const isRestored = await apiSnapshot.restoreById(dataflowId, datasetId, snapshotId);
+
+  const snapshotToRestore = new Snapshot(snapshotId, undefined, undefined, undefined, undefined, undefined, isRestored);
+
+  return snapshotToRestore;
 };
 
 const releaseById = async (dataflowId, datasetId, snapshotId) => {

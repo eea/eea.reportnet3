@@ -75,9 +75,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onRestoreSnapshot = async () => {
-    const response = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
-
-    if (response) {
+    const snapshotToRestore = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
+    console.log('snapshotToRestore.isRestored', snapshotToRestore.isRestored);
+    if (snapshotToRestore.isRestored) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
 
       onGrowlAlert({
