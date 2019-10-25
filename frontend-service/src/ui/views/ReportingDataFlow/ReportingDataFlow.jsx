@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './ReportingDataFlow.module.scss';
 
@@ -38,7 +38,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
-  const [datasetSchemaId, setDatasetSchemaId] = useState();
+  const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -98,6 +98,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     try {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
+      if (!isEmpty(dataflow.designDatasets)) {
+        const { designDatasets } = dataflow;
+        const [designDataset] = designDatasets;
+        setDesignDatasetSchemaId(designDataset.datasetId);
+      }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -173,10 +178,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async value => {
-    console.log('blurred', value);
-
-    const response = await DatasetService.updateSchemaNameById(datasetSchemaId, value);
-    console.log('response', response);
+    const response = await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
     if (response === 200) {
       console.log('success');
     } else {
@@ -245,7 +247,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       label: resources.messages['createNewEmptyDatasetSchema'],
                       icon: 'add',
                       command: () => showNewDatasetDialog(),
-                      disabled: isDataUpdated
+                      disabled: isUndefined(designDatasetSchemaId) ? false : true
                     },
                     {
                       label: resources.messages['createNewDatasetFromTemplate'],
@@ -275,7 +277,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             </div>
             {!isUndefined(dataflowData.designDatasets) ? (
               dataflowData.designDatasets.map(newDatasetSchema => {
-                setDatasetSchemaId(newDatasetSchema.datasetId);
                 return (
                   <div className={`${styles.datasetItem}`} key={newDatasetSchema.datasetId}>
                     <BigButton
@@ -292,7 +293,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       model={[
                         {
                           label: resources.messages['openDataset'],
-                          icon: 'openFolder'
+                          icon: 'openFolder',
+                          command: () => {
+                            handleRedirect();
+                          }
                         },
                         {
                           label: resources.messages['rename'],
