@@ -5,10 +5,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.eea.interfaces.lock.enums.LockType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.lock.enums.LockType;
 
 @Entity
 @Getter

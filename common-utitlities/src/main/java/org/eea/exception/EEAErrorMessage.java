@@ -26,6 +26,11 @@ public final class EEAErrorMessage {
   public static final String DATASET_NOTFOUND = "Dataset not found";
 
   /**
+   * The Constant DATASET_UNKNOW_TYPE.
+   */
+  public static final String DATASET_UNKNOW_TYPE = "Unknown Dataset type";
+
+  /**
    * The constant DATASET_INCORRECT_ID.
    */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";

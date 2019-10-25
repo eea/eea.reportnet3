@@ -12,6 +12,14 @@ public interface ExtendedSchemaRepository {
    * @param idTableSchema the id table schema
    */
   void deleteTableSchemaById(String idTableSchema);
+
+  /**
+   * Delete dataset schema by id.
+   *
+   * @param idSchema the id schema
+   */
+  void deleteDatasetSchemaById(String idSchema);
+
   /**
    * Insert table schema.
    *
