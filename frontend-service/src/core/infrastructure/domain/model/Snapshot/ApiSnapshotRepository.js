@@ -42,7 +42,11 @@ const restoreById = async (dataflowId, datasetId, snapshotId) => {
 };
 
 const releaseById = async (dataflowId, datasetId, snapshotId) => {
-  return await apiSnapshot.releaseById(dataflowId, datasetId, snapshotId);
+  const isReleased = await apiSnapshot.releaseById(dataflowId, datasetId, snapshotId);
+
+  const snapshotToRestore = new Snapshot(snapshotId, undefined, undefined, isReleased, undefined, undefined, undefined);
+
+  return snapshotToRestore;
 };
 
 export const ApiSnapshotRepository = {

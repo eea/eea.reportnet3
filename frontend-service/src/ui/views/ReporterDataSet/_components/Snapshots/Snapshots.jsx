@@ -65,9 +65,9 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onReleaseSnapshot = async () => {
-    const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
+    const snapshotToRelease = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
 
-    if (snapshotReleased) {
+    if (snapshotToRelease.isReleased) {
       onLoadSnapshotList();
     }
 
@@ -76,7 +76,7 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
 
   const onRestoreSnapshot = async () => {
     const snapshotToRestore = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
-    console.log('snapshotToRestore.isRestored', snapshotToRestore.isRestored);
+
     if (snapshotToRestore.isRestored) {
       snapshotDispatch({ type: 'mark_as_restored', payload: {} });
 
