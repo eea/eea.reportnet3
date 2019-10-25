@@ -1,14 +1,20 @@
-package org.eea.interfaces.lock.enums;
+package org.eea.interfaces.vo.lock.enums;
 
 public enum LockType {
 
-  /** The method. */
+  /**
+   * The method.
+   */
   METHOD("METHOD"),
 
-  /** The entity. */
+  /**
+   * The entity.
+   */
   ENTITY("ENTITY");
 
-  /** The value. */
+  /**
+   * The value.
+   */
   private final String value;
 
   /**
