@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useReducer, useState, useRef } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './GlobalValidationDashboard.module.css';
 
@@ -73,7 +73,7 @@ const GlobalValidationDashboard = dataflowId => {
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(dataflowId.dataflowId);
-      if (datasetsValidationStatistics.datasetId) {
+      if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
         setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
       }
     } catch (error) {
