@@ -4,7 +4,16 @@ import { Snapshot } from 'core/domain/model/Snapshot/Snapshot';
 const all = async datasetId => {
   const snapshotsDTO = await apiSnapshot.all(datasetId);
   return snapshotsDTO.map(
-    snapshotDTO => new Snapshot(snapshotDTO.id, snapshotDTO.creationDate, snapshotDTO.description, snapshotDTO.release)
+    snapshotDTO =>
+      new Snapshot(
+        snapshotDTO.id,
+        snapshotDTO.creationDate,
+        snapshotDTO.description,
+        snapshotDTO.release,
+        undefined,
+        undefined,
+        undefined
+      )
   );
 };
 
@@ -13,8 +22,11 @@ const createById = async (datasetId, description) => {
 };
 
 const deleteById = async (datasetId, snapshotId) => {
-  const dataDeleted = await apiSnapshot.deleteById(datasetId, snapshotId);
-  return dataDeleted;
+  const isDeleted = await apiSnapshot.deleteById(datasetId, snapshotId);
+
+  const snapshotToDelete = new Snapshot(snapshotId, undefined, undefined, undefined, undefined, isDeleted, undefined);
+
+  return snapshotToDelete;
 };
 
 const restoreById = async (dataflowId, datasetId, snapshotId) => {

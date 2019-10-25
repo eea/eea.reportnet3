@@ -36,9 +36,11 @@ const Snapshots = ({ datasetId, dataflowId, growlRef, isSnapshotsBarVisible, set
   };
 
   const onDeleteSnapshot = async () => {
-    const snapshotDeleted = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
+    const snapshotToDelete = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
 
-    if (snapshotDeleted) {
+    console.log('snapshotToDelete', snapshotToDelete.isDeleted);
+
+    if (snapshotToDelete.isDeleted) {
       onLoadSnapshotList();
     }
 
