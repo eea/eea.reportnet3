@@ -8,7 +8,7 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
-  dataflow.datasets = parseDatasetListDTO(dataflowDTO.datasets);
+  dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
   dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.deadlineDate = dataflowDTO.deadlineDate;
   dataflow.description = dataflowDTO.description;
