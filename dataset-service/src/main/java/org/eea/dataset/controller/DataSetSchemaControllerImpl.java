@@ -96,8 +96,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the empty data set schema.
    *
-   * @param nameDataSetSchema the name data set schema
-   * @param idDataFlow the id data flow
+   * @param datasetSchemaName the name data set schema
+   * @param dataflowId the id data flow
    */
   @Override
   @HystrixCommand
@@ -113,8 +113,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
               dataflowId));
     } catch (EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Error creating design dataset");
     }
   }
 
