@@ -1119,9 +1119,7 @@ const DataViewer = withRouter(
               disabled={true}
               icon="filter"
               label={resources.messages['filters']}
-              onClick={() => {
-                console.log('filter btn pressed');
-              }}
+              onClick={() => {}}
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
