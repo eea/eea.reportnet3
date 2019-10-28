@@ -149,9 +149,9 @@ CREATE TABLE public.lock (
 	id int4 NOT NULL,
 	create_date timestamp NULL,
 	created_by varchar NULL,
-	lock_type varchar NULL,
+	lock_type int4 NULL,
 	lock_criteria bytea NULL,
-	CONSTRAINT lock_pkey PRIMARY KEY (id),
+	CONSTRAINT lock_pkey PRIMARY KEY (id)
 );
 
 

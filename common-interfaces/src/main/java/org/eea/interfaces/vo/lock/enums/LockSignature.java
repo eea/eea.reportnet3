@@ -1,20 +1,30 @@
-package org.eea.interfaces.lock.enums;
+package org.eea.interfaces.vo.lock.enums;
 
 public enum LockSignature {
 
-  /** DataSetSnapshotControllerImpl.createSnapshot(..) */
+  /**
+   * DataSetSnapshotControllerImpl.createSnapshot(..)
+   */
   CREATE_SNAPSHOT("DataSetSnapshotControllerImpl.createSnapshot(..)"),
 
-  /** DataSetSnapshotControllerImpl.restoreSnapshot(..) */
+  /**
+   * DataSetSnapshotControllerImpl.restoreSnapshot(..)
+   */
   RESTORE_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSnapshot(..)"),
 
-  /** DataSetControllerImpl.loadTableData(..) */
+  /**
+   * DataSetControllerImpl.loadTableData(..)
+   */
   LOAD_TABLE("DataSetControllerImpl.loadTableData(..)"),
 
-  /** ExecuteValidationCommand.execute(..) */
+  /**
+   * ExecuteValidationCommand.execute(..)
+   */
   EXECUTE_VALIDATION("ExecuteValidationCommand.execute(..)");
 
-  /** The value. */
+  /**
+   * The value.
+   */
   private final String value;
 
   /**

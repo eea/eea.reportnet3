@@ -6,12 +6,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Optional;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +55,9 @@ public class DatasetMetabaseServiceTest {
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  @Mock
+  private DesignDatasetRepository designDatasetRepository;
+
 
   /**
    * Inits the mocks.
@@ -83,17 +91,43 @@ public class DatasetMetabaseServiceTest {
   @Test
   public void testCreateEmptyDataset() throws Exception {
     doNothing().when(recordStoreControllerZull).createEmptyDataset(Mockito.any(), Mockito.any());
-    datasetMetabaseService.createEmptyDataset("", "5d0c822ae1ccd34cfcd97e20", 1L);
+    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.REPORTING, "",
+        "5d0c822ae1ccd34cfcd97e20", 1L);
     Mockito.verify(recordStoreControllerZull, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
   }
 
   @Test
   public void findDatasetMetabase() throws Exception {
-
     when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.findDatasetMetabase(Mockito.anyLong());
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
+  }
+
+  @Test
+  public void createEmptyDatasetTest() throws EEAException {
+    Mockito.when(designDatasetRepository.save(Mockito.any())).thenReturn(null);
+    datasetMetabaseService.createEmptyDataset(TypeDatasetEnum.DESIGN, "datasetName",
+        (new ObjectId()).toString(), 1L);
+  }
+
+  public void updateDatasetNameTest1() {
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataSetMetabaseRepository.save(Mockito.any())).thenReturn(null);
+    Assert.assertTrue(datasetMetabaseService.updateDatasetName(1L, "datasetName"));
+  }
+
+  @Test
+  public void updateDatasetNameTest2() {
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    Assert.assertFalse(datasetMetabaseService.updateDatasetName(1L, ""));
+  }
+
+  @Test
+  public void deleteDesignDatasetTest() {
+    datasetMetabaseService.deleteDesignDataset(1L);
+    Mockito.verify(dataSetMetabaseRepository, times(1)).deleteById(Mockito.anyLong());
   }
 }

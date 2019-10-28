@@ -40,6 +40,8 @@ public class TokenGeneratorThreadTest {
     tokenInfo.setAccessToken("token");
     Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tokenInfo);
+    Mockito.when(keycloakConnectorService.refreshToken(Mockito.anyString()))
+        .thenReturn(tokenInfo);
 
     executor.submit(tokenGeneratorThread);
     executor.awaitTermination(2, TimeUnit.SECONDS);

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.controller.ums.ResourceManagementController;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -64,6 +67,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -81,17 +85,12 @@ public class ValidationServiceTest {
   @InjectMocks
   private ValidationServiceImpl validationServiceImpl;
 
-  /**
-   * The validation service impl mocke.
-   */
-  @Mock
-  private ValidationServiceImpl validationServiceImplMocke;
 
   /**
-   * The user management controller.
+   * The resource management controller
    */
   @Mock
-  private UserManagementController userManagementController;
+  private ResourceManagementControllerZull resourceManagementController;
   /**
    * The kie session.
    */
@@ -140,11 +139,6 @@ public class ValidationServiceTest {
   @Mock
   private RecordRepository recordRepository;
 
-  /**
-   * The validation record repository.
-   */
-  @Mock
-  private RecordValidationRepository validationRecordRepository;
 
   /**
    * The validation field repository.
@@ -157,13 +151,6 @@ public class ValidationServiceTest {
    */
   @Mock
   private SchemasRepository schemasRepository;
-
-  /**
-   * The dataset validation repository.
-   */
-  @Mock
-  private ValidationDatasetRepository datasetValidationRepository;
-
 
   /**
    * The table validation querys drools repository.
@@ -238,22 +225,8 @@ public class ValidationServiceTest {
    */
   private Validation validation;
 
-  /**
-   * The error.
-   */
-  private EntityErrors error;
-
-  /**
-   * The error 2.
-   */
-  private EntityErrors error2;
 
   private Map<String, List<String>> attributes;
-  /**
-   * The dataset metabase.
-   */
-  @Mock
-  private DatasetMetabaseController datasetMetabase;
 
   /**
    * The dataset repository impl.
@@ -302,40 +275,7 @@ public class ValidationServiceTest {
     dataSetVO.setId(1L);
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
-    error = new EntityErrors() {
 
-      @Override
-      public String getOrigin() {
-        return "TABLE";
-      }
-
-      @Override
-      public BigInteger getId() {
-        return BigInteger.valueOf(1L);
-      }
-
-      @Override
-      public String getError() {
-        return "ERROR";
-      }
-    };
-    error2 = new EntityErrors() {
-
-      @Override
-      public String getOrigin() {
-        return "TABLE";
-      }
-
-      @Override
-      public BigInteger getId() {
-        return BigInteger.valueOf(2L);
-      }
-
-      @Override
-      public String getError() {
-        return "WARNING";
-      }
-    };
     MockitoAnnotations.initMocks(this);
     List<DatasetValidation> datasetValidations = new ArrayList<>();
     DatasetValidation datasetValidation = new DatasetValidation();
@@ -597,7 +537,7 @@ public class ValidationServiceTest {
     doNothing().when(datasetRepository).deleteValidationTable();
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setAttributes(attributes);
-    when(userManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
+    when(resourceManagementController.getResourceDetail(1L, ResourceGroupEnum.DATASET_PROVIDER))
         .thenReturn(resourceInfoVO);
 
     validationServiceImpl.deleteAllValidation(1L);
@@ -773,9 +713,9 @@ public class ValidationServiceTest {
 
 
   /**
-   * Gets the dataset valueby id test exception.
+   * Gets the dataset valueby resourceId test exception.
    *
-   * @return the dataset valueby id test exception
+   * @return the dataset valueby resourceId test exception
    *
    * @throws EEAException the EEA exception
    */
@@ -785,9 +725,9 @@ public class ValidationServiceTest {
   }
 
   /**
-   * Gets the dataset valueby id test success.
+   * Gets the dataset valueby resourceId test success.
    *
-   * @return the dataset valueby id test success
+   * @return the dataset valueby resourceId test success
    *
    * @throws EEAException the EEA exception
    */
@@ -799,9 +739,9 @@ public class ValidationServiceTest {
   }
 
   /**
-   * Gets the find by id data set schema test exception.
+   * Gets the find by resourceId data set schema test exception.
    *
-   * @return the find by id data set schema test exception
+   * @return the find by resourceId data set schema test exception
    *
    * @throws EEAException the EEA exception
    */
@@ -811,9 +751,9 @@ public class ValidationServiceTest {
   }
 
   /**
-   * Gets the find by id data set schema test null exception.
+   * Gets the find by resourceId data set schema test null exception.
    *
-   * @return the find by id data set schema test null exception
+   * @return the find by resourceId data set schema test null exception
    *
    * @throws EEAException the EEA exception
    */
@@ -823,9 +763,9 @@ public class ValidationServiceTest {
   }
 
   /**
-   * Gets the find by id data set schema test success.
+   * Gets the find by resourceId data set schema test success.
    *
-   * @return the find by id data set schema test success
+   * @return the find by resourceId data set schema test success
    *
    * @throws EEAException the EEA exception
    */
@@ -890,6 +830,11 @@ public class ValidationServiceTest {
   }
 
 
+  /**
+   * Validate table.
+   *
+   * @throws EEAException the eea exception
+   */
   @Test
   public void validateTable() throws EEAException {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
