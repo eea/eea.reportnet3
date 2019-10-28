@@ -87,7 +87,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @RequestMapping(value = "/{idSchema}/updateTableSchema/{datasetId}", method = RequestMethod.PUT)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void updateTableSchema(@PathVariable("idSchema") String idSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema) {
     try {
