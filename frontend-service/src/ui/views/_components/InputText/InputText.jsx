@@ -15,6 +15,7 @@ export const InputText = ({
 }) => {
   return (
     <PrimeInputText
+      autoFocus
       className={className}
       disabled={disabled}
       onBlur={onBlur}
