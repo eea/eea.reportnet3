@@ -50,6 +50,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetSchemaControllerImpl.class);
 
   /**
@@ -96,8 +97,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the empty data set schema.
    *
-   * @param nameDataSetSchema the name data set schema
-   * @param idDataFlow the id data flow
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
    */
   @Override
   @HystrixCommand
@@ -208,20 +209,29 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
-   * @param schemaId the schema id
    */
   @Override
-  @RequestMapping(value = "/{datasetId}/datasetschema/{schemaId}", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/{datasetId}/datasetschema", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
-  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("schemaId") String schemaId) {
-    if (datasetId == null || schemaId == null) {
+  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId) {
+    if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
-    datasetMetabaseService.deleteDesignDataset(datasetId);
-    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+    try {
+      String schemaId = dataschemaService
+          .getDataSchemaByIdFlow(datasetService.getDataFlowIdById(datasetId), false)
+          .getIdDataSetSchema();
+      if (schemaId.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+      }
+      dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+      datasetMetabaseService.deleteDesignDataset(datasetId);
+      recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR, e);
+    }
   }
 }
