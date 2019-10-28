@@ -3,6 +3,7 @@ import { ApiUserRepository } from 'core/infrastructure/domain/model/User/ApiUser
 export const UserRepository = {
   login: () => Promise.reject('[UserRepository#login] must be implemented'),
   logout: () => Promise.reject('[UserRepository#logout] must be implemented'),
+  oldLogin: () => Promise.reject('[UserRepository#logout] must be implemented'),
   refreshToken: () => Promise.reject('[UserRepository#refreshToken] must be implemented'),
   hasPermission: () => '[UserRepository#hasPermission] must be implemented',
   userRole: () => '[UserRepository#userRole] must be implemented'

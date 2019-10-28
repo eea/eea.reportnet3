@@ -86,8 +86,9 @@ export const DataflowTasks = withRouter(({ match, history }) => {
     <div className="rep-row">
       <DataflowColumn
         navTitle={resources.messages['dataflow']}
-        components={['search']}
-        buttonTitle={resources.messages['subscribeButton']}
+        components={['search', 'createDataflow']}
+        createDataflowButtonTitle={resources.messages['createNewDataflow']}
+        subscribeButtonTitle={resources.messages['subscribeButton']}
       />
       <div className={`${styles.container} rep-col-xs-12 rep-col-md-9`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />

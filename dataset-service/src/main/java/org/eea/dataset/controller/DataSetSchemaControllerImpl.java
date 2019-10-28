@@ -29,7 +29,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
-
 /**
  * The Class DataSetSchemaControllerImpl.
  */
@@ -37,16 +36,22 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataschema")
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -82,7 +87,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{idSchema}/udpateTableSchema/{datasetId}", method = RequestMethod.PUT)
+  @RequestMapping(value = "/{idSchema}/updateTableSchema/{datasetId}", method = RequestMethod.PUT)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void updateTableSchema(@PathVariable("idSchema") String idSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema) {
@@ -97,8 +102,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Creates the empty data set schema.
    *
-   * @param dataflowId the dataflow id
-   * @param datasetSchemaName the dataset schema name
+   * @param datasetSchemaName the name data set schema
+   * @param dataflowId the id data flow
    */
   @Override
   @HystrixCommand
@@ -114,8 +119,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
               dataflowId));
     } catch (EEAException e) {
       LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Error creating design dataset");
     }
   }
 
@@ -129,7 +134,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void createTableSchema(@PathVariable("id") String id,
       @PathVariable("datasetId") Long datasetId, @RequestBody final TableSchemaVO tableSchema) {
     try {
@@ -146,6 +151,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by id.
    *
    * @param id the id
+   *
    * @return the data set schema VO
    */
   @Override
@@ -159,6 +165,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by dataflow.
    *
    * @param idFlow the id flow
+   *
    * @return the data set schema VO
    */
   @Override
@@ -173,6 +180,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema with no rules by dataflow.
    *
    * @param idFlow the id flow
+   *
    * @return the data set schema VO
    */
   @Override

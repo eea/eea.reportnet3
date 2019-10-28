@@ -35,12 +35,15 @@
   bottom: 0px;
   top: auto;
 }
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}
 .splitButtonWrapper {
   margin-left: 1rem;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  align-items: center;
+  align-items: self-start;
   flex-wrap: wrap;
 }
 .splitButtonWrapper:nth-last-of-type(2) {

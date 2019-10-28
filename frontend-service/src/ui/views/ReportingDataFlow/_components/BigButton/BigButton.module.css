@@ -1,6 +1,7 @@
 .bigButton {
   border-radius: 10px;
   font-size: 2rem;
+  max-width: fit-content;
 }
 .bigButton > a {
   padding: 2.3rem 2.7rem;
@@ -23,6 +24,25 @@
   color: var(--white);
   background-color: var(--c-blue-400);
 }
+
+.designDatasetSchema {
+  background-color: #009490;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.designDatasetSchema a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.designDatasetSchema a:hover {
+  color: var(--white);
+  background-color: #027470;
+}
+
 .documents {
   background-color: #ffba01;
   display: flex;
@@ -108,12 +128,43 @@
   background-color: var(--c-purple-300);
   color: var(--white);
 }
+.newItem {
+  background-color: var(--c-blue-300);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--white);
+}
+.newItem a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.newItem a:hover {
+  background-color: var(--c-blue-200);
+  color: var(--white);
+}
+
 .caption {
   text-align: center;
   text-transform: capitalize;
-  margin: 0.5rem;
+  margin: 0.75rem 0.5rem;
+  word-wrap: break-word;
+  max-width: 100px;
+  box-sizing: content-box;
 }
 .datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
   height: 0px !important;
+}
+
+.inputText {
+  word-wrap: break-word;
+  max-width: fit-content;
+  margin: 0.25rem !important;
+}
+
+:global .svg-inline--fa {
+  min-width: 2rem;
 }

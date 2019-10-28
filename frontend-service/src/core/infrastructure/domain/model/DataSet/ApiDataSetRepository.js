@@ -54,8 +54,26 @@ const deleteTableDataById = async (datasetId, tableId) => {
   return dataDeleted;
 };
 
-const errorsById = async (datasetId, pageNum, pageSize, sortField, asc) => {
-  const datasetErrorsDTO = await apiDataset.errorsById(datasetId, pageNum, pageSize, sortField, asc);
+const errorsById = async (
+  datasetId,
+  pageNum,
+  pageSize,
+  sortField,
+  asc,
+  levelErrorsFilter,
+  typeEntitiesFilter,
+  originsFilter
+) => {
+  const datasetErrorsDTO = await apiDataset.errorsById(
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  );
   const dataset = new Dataset(
     null,
     datasetErrorsDTO.idDataset,
@@ -195,8 +213,8 @@ const schemaById = async dataflowId => {
   return dataset;
 };
 
-const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields) => {
-  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields);
+const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
+  const tableDataDTO = await apiDataset.tableDataById(datasetId, tableSchemaId, pageNum, pageSize, fields, levelError);
   const table = new DatasetTable();
 
   if (tableDataDTO.totalRecords > 0) {
@@ -378,6 +396,10 @@ const updateRecordsById = async (datasetId, record) => {
   return recordAdded;
 };
 
+const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
+  return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
+};
+
 const validateDataById = async datasetId => {
   const dataValidation = await apiDataset.validateById(datasetId);
   return dataValidation;
@@ -407,6 +429,7 @@ export const ApiDatasetRepository = {
   tableDataById,
   updateFieldById,
   updateRecordsById,
+  updateSchemaNameById,
   validateDataById,
   webFormDataById
 };

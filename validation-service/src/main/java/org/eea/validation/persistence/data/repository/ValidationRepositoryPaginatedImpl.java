@@ -106,12 +106,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     StringBuilder stringBuilder = new StringBuilder("");
     if (!StringUtils.isBlank(originsFilter)) {
       List<String> originsFilterList = Arrays.asList(originsFilter.split(","));
-      stringBuilder.append(
-          " and v.originName in( Select v.originName from Validation v where v.idRule is not  null ");
       for (int i = 0; i < originsFilterList.size(); i++) {
         stringBuilder.append(" and v.originName  !='" + originsFilterList.get(i) + "' ");
       }
-      stringBuilder.append(") ");
     }
     return stringBuilder.toString();
   }
@@ -126,14 +123,10 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
   private String typeEntities(List<TypeEntityEnum> typeEntitiesFilter) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
-      stringBuilder.append(
-          "and v.typeEntity in (Select v.typeEntity from Validation v where v.idRule is not null ");
       for (int i = 0; i < typeEntitiesFilter.size(); i++) {
         stringBuilder.append(" and v.typeEntity !='").append(typeEntitiesFilter.get(i).getValue())
             .append("' ");
       }
-
-      stringBuilder.append(") ");
     }
     return stringBuilder.toString();
   }
@@ -148,13 +141,10 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
   private String levelErrorFilter(List<TypeErrorEnum> levelErrorsFilter) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
-      stringBuilder.append(
-          " and v.levelError in ( select v.levelError from Validation v where v.idRule is not null ");
       for (int i = 0; i < levelErrorsFilter.size(); i++) {
         stringBuilder.append(" and v.levelError !='").append(levelErrorsFilter.get(i).getValue())
             .append("' ");
       }
-      stringBuilder.append(") ");
     }
     return stringBuilder.toString();
   }
