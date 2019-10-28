@@ -448,7 +448,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           onConfirm={() => onDeleteDatasetSchema(designDatasetSchemaId)}
           onHide={() => setDeleteDialogVisible(false)}
           visible={deleteDialogVisible}>
-          {resources.messages['delete']}
+          {resources.messages['deleteDatasetSchema']}
         </ConfirmDialog>
         <Dialog
           header={dataflowData.name}
