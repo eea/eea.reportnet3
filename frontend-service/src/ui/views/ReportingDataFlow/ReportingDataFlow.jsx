@@ -277,7 +277,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
                       handleRedirect={() => {
-                        handleRedirect();
+                        handleRedirect(
+                          getUrl(
+                            routes.DATASET_SCHEMA,
+                            {
+                              dataflowId: match.params.dataflowId,
+                              datasetId: newDatasetSchema.datasetId
+                            },
+                            true
+                          )
+                        );
                       }}
                       isNameEditable={isNameEditable}
                       onNameEdit={onNameEdit}
@@ -289,7 +298,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                           label: resources.messages['openDataset'],
                           icon: 'openFolder',
                           command: () => {
-                            handleRedirect();
+                            handleRedirect(
+                              getUrl(
+                                routes.DATASET_SCHEMA,
+                                {
+                                  dataflowId: match.params.dataflowId,
+                                  datasetId: newDatasetSchema.datasetId
+                                },
+                                true
+                              )
+                            );
                           }
                         },
                         {

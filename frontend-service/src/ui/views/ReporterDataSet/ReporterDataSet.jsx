@@ -15,7 +15,7 @@ import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Growl } from 'primereact/growl';
-import { InputSwitch } from 'primereact/inputswitch';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';

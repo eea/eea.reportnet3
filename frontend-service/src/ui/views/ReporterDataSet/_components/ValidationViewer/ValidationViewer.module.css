@@ -21,3 +21,6 @@
 .showValidationsData {
   min-height: 44vh !important;
 }
+.validationCol {
+  width: 15px;
+}
