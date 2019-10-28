@@ -176,10 +176,10 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowRepository
         .findAllById(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
             .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()))
-        .forEach(a -> {
-          DataFlowVO aVO = dataflowNoContentMapper.entityToClass(a);
-          aVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
-          dataflowVOs.add(aVO);
+        .forEach(dataflow -> {
+          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+          dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
+          dataflowVOs.add(dataflowVO);
         });
 
     return dataflowVOs;
