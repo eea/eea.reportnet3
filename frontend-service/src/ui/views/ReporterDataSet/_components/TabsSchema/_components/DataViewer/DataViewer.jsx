@@ -233,11 +233,12 @@ const DataViewer = withRouter(
 
     const showValidationFilter = filteredKeys => {
       setIsFilterValidationsActive(filteredKeys.length != 3);
+      setFirstRow(0);
       setFilterLevelError(filteredKeys);
     };
 
     useEffect(() => {
-      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
+      onFetchData(sortField, sortOrder, 0, numRows, filterLevelError);
     }, [filterLevelError]);
 
     useEffect(() => {

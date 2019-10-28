@@ -79,7 +79,8 @@ const ValidationViewer = React.memo(
       } else {
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins) {
           resetFilters();
-          fetchData('', sortOrder, firstRow, numberRows, [], [], []);
+          setFirstRow(0);
+          fetchData('', sortOrder, 0, numberRows, [], [], []);
         }
       }
     }, [visible]);
@@ -159,15 +160,8 @@ const ValidationViewer = React.memo(
       } else {
         setAreActiveFilters(true);
       }
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsDeselected,
-        typeEntitiesFilter,
-        originsFilter
-      );
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsDeselected, typeEntitiesFilter, originsFilter);
+      setFirstRow(0);
     };
 
     const onLoadErrorsWithEntityFilter = typeEntitiesDeselected => {
@@ -181,15 +175,8 @@ const ValidationViewer = React.memo(
       }
       setTypeEntitiesFilter(typeEntitiesDeselected);
       setIsFilteredTypeEntities(isFiltered(allTypeEntitiesFilter, typeEntitiesDeselected));
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesDeselected,
-        originsFilter
-      );
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
+      setFirstRow(0);
     };
 
     const onLoadErrorsWithOriginsFilter = originsDeselected => {
@@ -200,15 +187,8 @@ const ValidationViewer = React.memo(
         setAreActiveFilters(true);
       }
       setIsFilteredOrigins(isFiltered(allOriginsFilter, originsDeselected));
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        originsDeselected
-      );
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsDeselected);
+      setFirstRow(0);
     };
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
@@ -381,7 +361,8 @@ const ValidationViewer = React.memo(
                 label={resources.messages['cleanFilters']}
                 onClick={() => {
                   resetFilters();
-                  fetchData('', sortOrder, firstRow, numberRows, [], [], []);
+                  fetchData('', sortOrder, 0, numberRows, [], [], []);
+                  setFirstRow(0);
                   setAreActiveFilters(false);
                 }}
               />
