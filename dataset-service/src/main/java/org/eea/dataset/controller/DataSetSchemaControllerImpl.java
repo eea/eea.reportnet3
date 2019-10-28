@@ -29,7 +29,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
-
 /**
  * The Class DataSetSchemaControllerImpl.
  */
@@ -37,16 +36,22 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/dataschema")
 public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
@@ -128,7 +133,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void createTableSchema(@PathVariable("id") String id,
       @PathVariable("datasetId") Long datasetId, @RequestBody final TableSchemaVO tableSchema) {
     try {
@@ -145,6 +150,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by id.
    *
    * @param id the id
+   *
    * @return the data set schema VO
    */
   @Override
@@ -158,6 +164,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema by dataflow.
    *
    * @param idFlow the id flow
+   *
    * @return the data set schema VO
    */
   @Override
@@ -172,6 +179,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Find data schema with no rules by dataflow.
    *
    * @param idFlow the id flow
+   *
    * @return the data set schema VO
    */
   @Override
