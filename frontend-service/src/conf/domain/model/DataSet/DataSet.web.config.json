@@ -13,6 +13,7 @@
     "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
+    "updateTableNameDesign": "/dataschema/{:datasetSchemaId}/updateTableSchema/{:datasetId}",
     "validateDataset": "/validation/dataset/{:datasetId}",
     "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
     "webFormDataViewer":"/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"

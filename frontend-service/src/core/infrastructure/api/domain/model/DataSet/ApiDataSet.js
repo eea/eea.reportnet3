@@ -27,6 +27,28 @@ export const apiDataset = {
       return false;
     }
   },
+  addTableDesign: async (datasetSchemaId, datasetId, tableSchemaName) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetSchemaId}/createTableSchema/${datasetId}`
+          : getUrl(DatasetConfig.addTableDesign, {
+              datasetSchemaId,
+              datasetId
+            }),
+        data: { nameTableSchema: tableSchemaName },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error adding table to dataset design data: ${error}`);
+      return false;
+    }
+  },
   deleteDataById: async datasetId => {
     const tokens = userStorage.get();
     try {
@@ -89,6 +111,28 @@ export const apiDataset = {
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
       console.error(`Error deleting dataset table data: ${error}`);
+      return false;
+    }
+  },
+  deleteTableDesign: async (datasetSchemaId, tableSchemaId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.delete({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetSchemaId}/tableschema/${tableSchemaId}`
+          : getUrl(DatasetConfig.deleteTableDesign, {
+              datasetSchemaId,
+              tableSchemaId
+            }),
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting dataset table design data: ${error}`);
       return false;
     }
   },
@@ -226,22 +270,6 @@ export const apiDataset = {
     });
     return response.data;
   },
-  webFormDataById: async (datasetId, tableSchemaId) => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/response_dataset_values2.json'
-        : getUrl(DatasetConfig.webFormDataViewer, {
-            datasetId: datasetId,
-            tableSchemaId: tableSchemaId
-          }),
-      queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    return response.data;
-  },
   updateFieldById: async (datasetId, datasetTableRecords) => {
     const tokens = userStorage.get();
     try {
@@ -300,6 +328,32 @@ export const apiDataset = {
     });
     return response.status;
   },
+  updateTableNameDesign: async (datasetSchemaId, tableSchemaId, tableSchemaName, datasetId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: window.env.REACT_APP_JSON
+          ? `/dataschema/${datasetSchemaId}/updateNameTableSchema`
+          : getUrl(DatasetConfig.updateTableNameDesign, {
+              datasetSchemaId,
+              datasetId
+            }),
+        data: {
+          idTableSchema: tableSchemaId,
+          nameTableSchema: tableSchemaName
+        },
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error updating dataset design name: ${error}`);
+      return false;
+    }
+  },
   validateById: async datasetId => {
     const tokens = userStorage.get();
     try {
@@ -320,5 +374,21 @@ export const apiDataset = {
       console.error(`Error calling dataset data validation: ${error}`);
       return false;
     }
+  },
+  webFormDataById: async (datasetId, tableSchemaId) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/response_dataset_values2.json'
+        : getUrl(DatasetConfig.webFormDataViewer, {
+            datasetId: datasetId,
+            tableSchemaId: tableSchemaId
+          }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
   }
 };

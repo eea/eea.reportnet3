@@ -1,0 +1,15 @@
+/* .deleteTabIcon {
+  position: 'absolute' !important;
+  top: '0' !important;
+  right: '0' !important;
+  font-size: '0.9rem';
+} */
+
+a.p_tabview_design {
+  padding: 0.571em 2em 0.571em 0.5em !important;
+}
+
+input.p_tabview_input_design {
+  min-width: 140px;
+  height: 21px;
+}
