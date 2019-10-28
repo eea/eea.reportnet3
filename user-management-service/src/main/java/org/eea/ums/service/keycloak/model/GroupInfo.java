@@ -1,13 +1,11 @@
 package org.eea.ums.service.keycloak.model;
 
+import java.util.List;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.util.List;
-import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+
 
 /**
  * The Class GroupInfo.
@@ -15,9 +13,6 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"id", "name", "path", "attributes"})
 
-@Getter
-@Setter
-@ToString
 public class GroupInfo {
 
   /**
@@ -25,6 +20,44 @@ public class GroupInfo {
    */
   @JsonProperty("id")
   private String id;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String toString() {
+    return "GroupInfo [id=" + id + ", name=" + name + ", path=" + path + ", attributes="
+        + attributes + "]";
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
+  public Map<String, List<String>> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Map<String, List<String>> attributes) {
+    this.attributes = attributes;
+  }
 
   /**
    * The name.

@@ -96,5 +96,10 @@ public interface RecordStoreService {
    */
   void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
 
-
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
+  void deleteDataset(String datasetSchemaName);
 }

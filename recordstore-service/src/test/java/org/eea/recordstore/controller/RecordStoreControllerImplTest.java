@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
-import org.eea.recordstore.service.impl.RecordStoreServiceImpl;
+import org.eea.recordstore.service.impl.JdbcRecordStoreServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class RecordStoreControllerImplTest.
@@ -27,9 +28,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class RecordStoreControllerImplTest {
 
 
-  /** The record store service impl. */
-  @InjectMocks
-  private RecordStoreServiceImpl recordStoreServiceImpl;
 
   /** The record store controller impl. */
   @InjectMocks
@@ -38,6 +36,9 @@ public class RecordStoreControllerImplTest {
   /** The record store service. */
   @Mock
   private RecordStoreService recordStoreService;
+
+  @Mock
+  private JdbcRecordStoreServiceImpl jdbcRecordStoreServiceImpl;
 
 
   /** The Constant TEST. */
@@ -52,14 +53,6 @@ public class RecordStoreControllerImplTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "containerName", "crunchy-postgres");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "ipPostgreDb", "localhost");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "userPostgreDb", "root");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "passPostgreDb", "root");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "connStringPostgre",
-        "jdbc:postgresql://localhost/datasets");
-    ReflectionTestUtils.setField(recordStoreServiceImpl, "connStringPostgre",
-        "select * from pg_namespace where nspname like 'dataset%'");
   }
 
 
@@ -170,21 +163,30 @@ public class RecordStoreControllerImplTest {
   }
 
   @Test
-  public void testCreateSnapshot() {
+  public void testCreateSnapshot() throws SQLException, IOException, RecordStoreAccessException {
     recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L);
+
+    Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
-
   @Test
-  public void testRestoreSnapshot() {
+  public void testRestoreSnapshot() throws SQLException, IOException, RecordStoreAccessException {
     recordStoreControllerImpl.restoreSnapshotData(1L, 1L);
+    Mockito.verify(recordStoreService, times(1)).restoreDataSnapshot(Mockito.any(), Mockito.any());
   }
 
   @Test
-  public void testDeleteSnapshot() {
+  public void testDeleteSnapshot() throws IOException {
     recordStoreControllerImpl.deleteSnapshotData(1L, 1L);
+
+    Mockito.verify(recordStoreService, times(1)).deleteDataSnapshot(Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void testDeleteDataset() throws IOException {
+    recordStoreControllerImpl.deleteDataset("schema");
 
-
+    Mockito.verify(recordStoreService, times(1)).deleteDataset(Mockito.any());
+  }
 }

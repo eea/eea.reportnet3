@@ -7,6 +7,8 @@ package org.eea.interfaces.vo.dataset.enums;
  */
 public enum TypeErrorEnum {
 
+  /** The correct. */
+  CORRECT("CORRECT"),
 
   /** The warning. */
   WARNING("WARNING"),

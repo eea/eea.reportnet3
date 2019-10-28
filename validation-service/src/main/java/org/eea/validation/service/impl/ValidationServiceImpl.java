@@ -16,7 +16,8 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.ResourceManagementController;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
@@ -119,7 +120,9 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private TableRepository tableRepository;
 
-  /** The field repository. */
+  /**
+   * The field repository.
+   */
   @Autowired
   private FieldRepository fieldRepository;
 
@@ -145,7 +148,7 @@ public class ValidationServiceImpl implements ValidationService {
    * The user management controller.
    */
   @Autowired
-  private UserManagementController userManagementController;
+  private ResourceManagementControllerZull resourceManagementController;
 
   /**
    * Gets the element lenght.
@@ -279,6 +282,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -402,7 +406,8 @@ public class ValidationServiceImpl implements ValidationService {
    */
   private void initVariablesToValidate(Long datasetId) {
     ResourceInfoVO resourceInfoVO =
-        userManagementController.getResourceDetail(datasetId, ResourceGroupEnum.DATASET_PROVIDER);
+        resourceManagementController
+            .getResourceDetail(datasetId, ResourceGroupEnum.DATASET_PROVIDER);
     String countryCode = "''";
     String dataCallYear = "" + new LocalDate().getYear();
     if (null != resourceInfoVO.getAttributes() && resourceInfoVO.getAttributes().size() > 0) {
@@ -593,7 +598,6 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
 
-
   /**
    * Force validations.
    *
@@ -608,6 +612,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Count records dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the integer
    */
   @Override
@@ -619,6 +624,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Count fields dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the integer
    */
   @Override
@@ -709,6 +715,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Dataset validation DC 02 B query.
    *
    * @param DC03 the dc03
+   *
    * @return the boolean
    */
   @Override
@@ -746,6 +753,7 @@ public class ValidationServiceImpl implements ValidationService {
    * Table validation query return result.
    *
    * @param QUERY the query
+   *
    * @return the boolean
    */
   @Override
@@ -761,6 +769,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param MessageError the message error
    * @param typeError the type error
    * @param originName the origin name
+   *
    * @return the boolean
    */
   @Override
