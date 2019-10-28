@@ -77,8 +77,8 @@ export const TabView = ({
   const createContent = (tab, index) => {
     const selected = isSelected(index);
     const className = classNames(tab.props.contentClassName, 'p-tabview-panel', { 'p-hidden': !selected });
-    const id = idx + '_content_' + index;
-    const ariaLabelledBy = idx + '_header_' + index;
+    const id = `${idx}_content_${index}`;
+    const ariaLabelledBy = `${idx}_header_${index}`;
 
     return (
       <div
@@ -105,8 +105,8 @@ export const TabView = ({
       'p-tabview-selected p-highlight': selected,
       'p-disabled': tab.props.disabled
     });
-    const id = idx + '_header_' + index;
-    const ariaControls = idx + '_content_' + index;
+    const id = `${idx}_header_${index}`;
+    const ariaControls = `${idx}_content_${index}`;
     return (
       <Tab
         addTab={tab.props.addTab}

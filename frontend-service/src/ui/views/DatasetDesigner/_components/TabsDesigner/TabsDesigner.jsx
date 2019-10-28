@@ -13,7 +13,7 @@ import { TabPanel } from './_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/DataSet';
 
-export const TabsDesigner = withRouter(({ match, history }) => {
+export const TabsDesigner = withRouter(({ onLoadDatasetSchemaName, match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -41,6 +41,11 @@ export const TabsDesigner = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isUndefined(datasetSchema)) {
       setTabs(datasetSchema.tables);
+      if (!isUndefined(onLoadDatasetSchemaName)) {
+        onLoadDatasetSchemaName(
+          `${datasetSchema.datasetSchemaName.charAt(0).toUpperCase()}${datasetSchema.datasetSchemaName.slice(1)}`
+        );
+      }
     }
   }, [datasetSchema]);
 
@@ -91,15 +96,15 @@ export const TabsDesigner = withRouter(({ match, history }) => {
   };
 
   const onTableAdd = (header, tabIndex, initialHeader) => {
-    if (tabs[tabIndex].newTab) {
-      addTable(header, tabIndex);
-    } else {
-      if (header !== initialHeader) {
-        if (checkDuplicates(header, tabIndex)) {
-          setErrorMessageTitle(resources.messages['duplicateTabHeader']);
-          setErrorMessage(resources.messages['duplicateTabHeaderError']);
-          setIsErrorDialogVisible(true);
-          return false;
+    if (header !== initialHeader) {
+      if (checkDuplicates(header, tabIndex)) {
+        setErrorMessageTitle(resources.messages['duplicateTabHeader']);
+        setErrorMessage(resources.messages['duplicateTabHeaderError']);
+        setIsErrorDialogVisible(true);
+        return { correct: false, tableName: header };
+      } else {
+        if (tabs[tabIndex].newTab) {
+          addTable(header, tabIndex);
         } else {
           updateTableName(tabs[tabIndex].tableSchemaId, header);
         }
@@ -108,10 +113,12 @@ export const TabsDesigner = withRouter(({ match, history }) => {
   };
 
   const onTabAddCancel = () => {
-    const inmTabs = [...tabs];
-    const newTab = tabs.filter(tab => tab.newTab === true);
-    const filteredTabs = inmTabs.filter(inmTab => inmTab.index !== newTab[0].index);
-    setTabs([...filteredTabs]);
+    if (!isErrorDialogVisible) {
+      const inmTabs = [...tabs];
+      const newTab = tabs.filter(tab => tab.newTab === true);
+      const filteredTabs = inmTabs.filter(inmTab => inmTab.index !== newTab[0].index);
+      setTabs([...filteredTabs]);
+    }
   };
 
   const onTableDelete = deletedTabIndx => {
@@ -137,25 +144,17 @@ export const TabsDesigner = withRouter(({ match, history }) => {
   };
 
   const addTable = async (header, tabIndex) => {
-    // const newHeader = checkDuplicates(header, tabIndex);
-    if (checkDuplicates(header, tabIndex)) {
-      setErrorMessageTitle(resources.messages['duplicateTabHeader']);
-      setErrorMessage(resources.messages['duplicateTabHeaderError']);
-      setIsErrorDialogVisible(true);
+    const tabledAdded = await DatasetService.addTableDesign(datasetSchema.datasetSchemaId, datasetId, header);
+    if (tabledAdded) {
+      onLoadSchema(dataflowId);
     } else {
-      const tabledAdded = await DatasetService.addTableDesign(datasetSchema.datasetSchemaId, datasetId, header);
-      if (tabledAdded) {
-        onLoadSchema(dataflowId);
-      } else {
-        console.error('');
-      }
+      console.error('');
     }
   };
 
   const checkDuplicates = (header, tabIndex) => {
     const inmTabs = [...tabs];
     const repeteadElements = inmTabs.filter(tab => header.toLowerCase() === tab.header.toLowerCase());
-    //If allready exists a tab with tabElement name, rename the tab
     return repeteadElements.length > 0 && tabIndex !== repeteadElements[0].index;
   };
 

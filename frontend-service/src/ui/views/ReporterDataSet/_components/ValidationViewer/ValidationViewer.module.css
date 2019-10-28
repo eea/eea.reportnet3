@@ -13,7 +13,6 @@
 }
 .filterActive {
   opacity: 1;
-  /* color: #5798e4 !important; */
 }
 .filterInactive {
   opacity: 0.25 !important;

@@ -14,7 +14,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-
+import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
@@ -27,6 +27,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     params: { dataflowId, datasetId }
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
+  const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
@@ -69,6 +70,10 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     ]);
   }, []);
 
+  const onLoadDatasetSchemaName = schemaName => {
+    setDatasetSchemaName(schemaName);
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -85,6 +90,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   return layout(
     <>
+      <Title title={`${resources.messages['titleDataset']}${datasetSchemaName}`} />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-right">
@@ -97,7 +103,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              // disabled={!hasWritePermissions || (Number(datasetId) === 5 || Number(datasetId) === 142)}
               disabled={true}
               icon={'validate'}
               label={resources.messages['validate']}
@@ -108,7 +113,6 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
             <Button
               className={`p-button-rounded p-button-secondary`}
-              // disabled={Number(datasetId) === 5 || Number(datasetId) === 142}
               disabled={true}
               icon={'dashboard'}
               label={resources.messages['dashboards']}
@@ -116,105 +120,15 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              // disabled={!hasWritePermissions}
               disabled={true}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() =>
-                /* 
-                onLoadSnapshotList();
-                return onSetVisible(setSnapshotIsVisible, true); */
-                null
-              }
+              onClick={() => null}
             />
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner>
-        {/* <Toolbar>
-            <div className="p-toolbar-group-left">
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={false}
-                icon={'export'}
-                label={resources.messages['upload']}
-                onClick={() => null}
-              />
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={true}
-                icon={'eye'}
-                label={resources.messages['visibility']}
-                onClick={null}
-              />
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={true}
-                icon={'filter'}
-                label={resources.messages['filter']}
-                onClick={null}
-              />
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={true}
-                icon={'import'}
-                label={resources.messages['export']}
-                onClick={null}
-              />
-            </div>
-            <div className="p-toolbar-group-right">
-              <Button
-                className={`p-button-rounded p-button-secondary`}
-                disabled={false}
-                icon={'refresh'}
-                label={resources.messages['refresh']}
-                onClick={() => null}
-              />
-            </div>
-          </Toolbar> */}
-        {
-          // <DataTable autoLayout={true} paginator={true} rowsPerPageOptions={[5, 10, 100]} rows={10}>
-          //   <Column className={styles.crudColumn} />
-          //   <Column
-          //     columnResizeMode="expand"
-          //     field="title"
-          //     filter={false}
-          //     filterMatchMode="contains"
-          //     header={resources.messages['title']}
-          //     sortable={true}
-          //   />
-          //   <Column
-          //     field="description"
-          //     filter={false}
-          //     filterMatchMode="contains"
-          //     header={resources.messages['description']}
-          //     sortable={true}
-          //   />
-          //   <Column
-          //     field="category"
-          //     filter={false}
-          //     filterMatchMode="contains"
-          //     header={resources.messages['category']}
-          //     sortable={true}
-          //   />
-          //   <Column
-          //     field="language"
-          //     filter={false}
-          //     filterMatchMode="contains"
-          //     header={resources.messages['language']}
-          //     sortable={true}
-          //   />
-          //   <Column
-          //     /*   body={actionTemplate} */
-          //     field="url"
-          //     filter={false}
-          //     filterMatchMode="contains"
-          //     header={resources.messages['file']}
-          //     style={{ textAlign: 'center', width: '8em' }}
-          //   />
-          // </DataTable>
-        }
-      </TabsDesigner>
+      <TabsDesigner onLoadDatasetSchemaName={onLoadDatasetSchemaName} />
     </>
   );
 });

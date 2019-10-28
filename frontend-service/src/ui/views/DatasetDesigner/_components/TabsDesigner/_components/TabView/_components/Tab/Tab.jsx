@@ -45,7 +45,7 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
-    setTitleHeader(header);
+    setTitleHeader(titleHeader !== '' ? titleHeader : header);
     setInitialTitleHeader(header);
   }, [onTabBlur]);
 
@@ -98,10 +98,35 @@ export const Tab = ({
         onTabAddCancel();
       } else {
         setTitleHeader(initialTitleHeader);
+        setEditingHeader(false);
       }
     }
     if (event.key === 'Enter') {
-      onTabBlur(event.target.value, index, initialTitleHeader);
+      if (titleHeader !== '') {
+        onInputBlur(event.target.value, index, initialTitleHeader);
+      } else {
+        if (!isUndefined(onTabNameError)) {
+          onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
+          setEditingHeader(true);
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+        }
+      }
+    }
+  };
+
+  const onInputBlur = (value, index, initialTitleHeader) => {
+    const correctNameChange = onTabBlur(value, index, initialTitleHeader);
+    //Check for duplicates. Undefined is also a correct value
+    if (!isUndefined(correctNameChange)) {
+      if (correctNameChange.correct) {
+        setEditingHeader(false);
+        setTitleHeader(correctNameChange.tableName);
+      } else {
+        setEditingHeader(true);
+        //Set focus on input if the name is empty
+        document.getElementsByClassName('p-inputtext p-component')[0].focus();
+      }
+    } else {
       setEditingHeader(false);
     }
   };
@@ -161,15 +186,7 @@ export const Tab = ({
             onBlur={e => {
               //Check for empty table name
               if (titleHeader !== '') {
-                const correctNameChange = onTabBlur(e.target.value, index, initialTitleHeader);
-                //Check for duplicates. Undefined is also a correct value
-                if (correctNameChange || isUndefined(correctNameChange)) {
-                  setEditingHeader(false);
-                } else {
-                  setEditingHeader(true);
-                  //Set focus on input if the name is empty
-                  document.getElementsByClassName('p-inputtext p-component')[0].focus();
-                }
+                onInputBlur(e.target.value, index, initialTitleHeader);
               } else {
                 if (!isUndefined(onTabNameError)) {
                   onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
@@ -187,7 +204,6 @@ export const Tab = ({
         )}
         {rightIcon && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
         <div
-          // className={}
           onClick={e => {
             e.preventDefault();
             if (!isUndefined(onTabDeleteClick)) {
