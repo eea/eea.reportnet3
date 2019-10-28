@@ -39,6 +39,7 @@ const DataViewer = withRouter(
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
+    tableHasErrors,
     tableId,
     tableName,
     tableSchemaColumns,
@@ -1094,10 +1095,10 @@ const DataViewer = withRouter(
               }}
             />
             <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              className={'p-button-rounded p-button-secondary'}
+              disabled={!tableHasErrors}
               icon="filter"
-              iconClasses={isFilterValidationsActive ? styles.filterActive : styles.filterInactive}
+              iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
               label={resources.messages['validationFilter']}
               onClick={event => {
                 filterMenuRef.current.show(event);

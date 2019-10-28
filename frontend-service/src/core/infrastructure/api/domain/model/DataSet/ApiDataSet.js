@@ -141,6 +141,7 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log('Response: ', response.data);
 
     return response.data;
   },
@@ -224,6 +225,7 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log('Response: ', response.data);
     return response.data;
   },
   webFormDataById: async (datasetId, tableSchemaId) => {
