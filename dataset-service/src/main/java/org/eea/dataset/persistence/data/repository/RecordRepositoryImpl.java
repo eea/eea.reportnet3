@@ -1,7 +1,9 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -68,61 +70,32 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "where fv.record.id = rv.id and fv.idFieldSchema = '%s')," + DEFAULT_DATE_SORT_CRITERIA
           + ") as order_criteria_%s ";
 
-  /** The Constant WARNING_APPEND_QUERY. */
-  private final static String WARNING_APPEND_QUERY =
+  /** The Constant CORRECT_APPEND_QUERY. */
+  private final static String CORRECT_APPEND_QUERY =
+      "AND not EXISTS (SELECT recval FROM RecordValidation recval "
+          + "where rv.id = recval.recordValue.id) "
+          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "where rv.id = fvval.fieldValue.record.id) ";
+
+  /** The Constant WARNING_ERROR_CORRECT_APPEND_QUERY. */
+  private final static String WARNING_ERROR_CORRECT_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError = 'WARNING') "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'WARNING')) ";
+          + "where rv.id = recval.recordValue.id "
+          + "and recval.validation.levelError IN ( :errorList )) "
+          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "where rv.id = fvval.fieldValue.record.id and fvval.validation.levelError IN ( :errorList ))) "
+          + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
+          + "where rv.id=recval.recordValue.id)  "
+          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "where rv.id = fvval.fieldValue.record.id)) ";
 
   /** The Constant WARNING_ERROR_APPEND_QUERY. */
   private final static String WARNING_ERROR_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError IN ('ERROR','WARNING') ) "
+          + "where rv.id = recval.recordValue.id "
+          + "and recval.validation.levelError IN ( :errorList )) "
           + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING') )) ";
-
-  /** The Constant ERROR_APPEND_QUERY. */
-  private final static String ERROR_APPEND_QUERY =
-      "AND (EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id " + "and recval.validation.levelError = 'ERROR') "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'ERROR')) ";
-
-  /** The Constant CORRECT_APPEND_QUERY. */
-  private final static String CORRECT_APPEND_QUERY =
-      "AND not EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError IN ('ERROR','WARNING')) "
-          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING')) ";
-
-  /** The Constant WARNING_CORRECT_APPEND_QUERY. */
-  private final static String WARNING_CORRECT_APPEND_QUERY =
-      "AND (EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError = 'WARNING' ) "
-          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'WARNING' )) "
-          + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError IN ('ERROR','WARNING') ) "
-          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING'))) ";
-
-  /** The Constant ERROR_CORRECT_APPEND_QUERY. */
-  private final static String ERROR_CORRECT_APPEND_QUERY =
-      "AND (EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id " + "and recval.validation.levelError = 'ERROR' ) "
-          + "OR not EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError = 'ERROR' )) "
-          + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
-          + "where recval.recordValue.id = rv.id "
-          + "and recval.validation.levelError IN ('ERROR','WARNING') ) "
-          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where fvval.fieldValue.record.id = rv.id and fvval.validation.levelError IN ('ERROR','WARNING') )) ";
+          + "where rv.id = fvval.fieldValue.record.id and fvval.validation.levelError IN ( :errorList ))) ";
 
   /**
    * The Constant MASTER_QUERY.
@@ -209,54 +182,72 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     String filter = "";
+    Boolean containsCorrect = false;
+    List<TypeErrorEnum> lvl = new ArrayList<TypeErrorEnum>();
+    List<TypeErrorEnum> errorList = new ArrayList<TypeErrorEnum>();
     // Filter Query by level Error (ERROR,WARNING,CORRECT)
     if (null != levelError) {
       LOG.info("Init Error Filter");
-      List<TypeErrorEnum> lvl = new ArrayList<TypeErrorEnum>();
       for (int i = 0; i < levelError.length; i++) {
         lvl.add(levelError[i]);
       }
-
-
-      switch (levelError.length) {
-        case 3:
-          break;
-        case 1:
-          if (lvl.contains(TypeErrorEnum.ERROR)) {
-            filter = ERROR_APPEND_QUERY;
-          } else if (lvl.contains(TypeErrorEnum.WARNING)) {
-            filter = WARNING_APPEND_QUERY;
-          } else if (lvl.contains(TypeErrorEnum.CORRECT)) {
-            filter = CORRECT_APPEND_QUERY;
-          }
-          break;
-        case 2:
-          if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.ERROR)) {
-            filter = WARNING_ERROR_APPEND_QUERY;
-          } else if (lvl.contains(TypeErrorEnum.ERROR) && lvl.contains(TypeErrorEnum.CORRECT)) {
-            filter = ERROR_CORRECT_APPEND_QUERY;
-          } else if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.CORRECT)) {
-            filter = WARNING_CORRECT_APPEND_QUERY;
-          }
-          break;
-        default:
-          List<RecordValue> emptyrecords = new ArrayList<>();
-          return emptyrecords;
+      if (lvl.size() == 3) {
+        containsCorrect = true;
+      } else {
+        switch (levelError.length) {
+          case 1:
+            if (lvl.contains(TypeErrorEnum.ERROR)) {
+              filter = WARNING_ERROR_APPEND_QUERY;
+              errorList.add(TypeErrorEnum.ERROR);
+            } else if (lvl.contains(TypeErrorEnum.WARNING)) {
+              filter = WARNING_ERROR_APPEND_QUERY;
+              errorList.add(TypeErrorEnum.WARNING);
+            } else if (lvl.contains(TypeErrorEnum.CORRECT)) {
+              filter = CORRECT_APPEND_QUERY;
+              containsCorrect = true;
+            }
+            break;
+          case 2:
+            if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.ERROR)) {
+              filter = WARNING_ERROR_APPEND_QUERY;
+              errorList.add(TypeErrorEnum.WARNING);
+              errorList.add(TypeErrorEnum.ERROR);
+            } else {
+              filter = WARNING_ERROR_CORRECT_APPEND_QUERY;
+              containsCorrect = true;
+              if (lvl.contains(TypeErrorEnum.WARNING)) {
+                errorList.add(TypeErrorEnum.WARNING);
+              } else {
+                errorList.add(TypeErrorEnum.ERROR);
+              }
+            }
+            break;
+          default:
+            List<RecordValue> emptyrecords = new ArrayList<>();
+            return emptyrecords;
+        }
       }
     }
-
     Query query;
     if (null == sortFields) {
       query = entityManager.createQuery(String.format(MASTER_QUERY_NO_ORDER + filter));
       query.setParameter("idTableSchema", idTableSchema);
+      if (containsCorrect == false || (containsCorrect = true && lvl.size() == 2)) {
+        query.setParameter("errorList", errorList);
+        query.setParameter("errorList", errorList);
+      }
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
       List<RecordValue> a = query.getResultList();
-      return a;
+      return sanitizeRecords(a);
     } else {
       query = entityManager.createQuery(String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY,
           sortQueryBuilder.toString(), directionQueryBuilder.toString().substring(1)));
       query.setParameter("idTableSchema", idTableSchema);
+      if (containsCorrect == false || (containsCorrect = true && lvl.size() == 2)) {
+        query.setParameter("errorList", errorList);
+        query.setParameter("errorList", errorList);
+      }
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
       List<Object[]> a = query.getResultList();
@@ -283,7 +274,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return query.getResultList();
+    return sanitizeRecords(query.getResultList());
   }
 
 
@@ -300,7 +291,29 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // First: Copy sortCriteria into de records variables
     List<RecordValue> records = queryResults.stream()
         .map(resultRecord -> (RecordValue) resultRecord[0]).collect(Collectors.toList());
-    return records;
+    return sanitizeRecords(records);
   }
+
+  /**
+   * Sanitize records.
+   *
+   * @param records the records
+   * @return the list
+   */
+  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
+    List<RecordValue> sanitizedRecords = new ArrayList<>();
+    Set<Long> processedRecords = new HashSet<>();
+    for (RecordValue recordValue : records) {
+      if (!processedRecords.contains(recordValue.getId())) {
+        processedRecords.add(recordValue.getId());
+        recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
+        sanitizedRecords.add(recordValue);
+      }
+
+    }
+    return sanitizedRecords;
+
+  }
+
 }
 
