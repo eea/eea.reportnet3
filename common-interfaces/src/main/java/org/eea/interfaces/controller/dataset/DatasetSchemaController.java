@@ -90,7 +90,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param schemaId the schema id
    */
-  @RequestMapping(value = "/{datasetId}/datasetschema", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/dataset/{datasetId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId);
 

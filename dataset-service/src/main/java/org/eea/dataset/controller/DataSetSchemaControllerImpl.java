@@ -219,7 +219,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param datasetId the dataset id
    */
   @Override
-  @RequestMapping(value = "/{datasetId}/datasetschema", method = RequestMethod.DELETE,
+  @RequestMapping(value = "/dataset/{datasetId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN')")
   public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId) {
