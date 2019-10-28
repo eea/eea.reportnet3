@@ -113,6 +113,7 @@ export const BigButton = ({
       </div>
       {!isUndefined(isNameEditable) && isNameEditable ? (
         <InputText
+          autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
             if (!isEmpty(buttonsTitle)) {
