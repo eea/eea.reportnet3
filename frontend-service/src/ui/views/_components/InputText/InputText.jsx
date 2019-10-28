@@ -2,6 +2,7 @@ import React from 'react';
 import { InputText as PrimeInputText } from 'primereact/inputtext';
 
 export const InputText = ({
+  autoFocus,
   className,
   disabled = false,
   onBlur,
@@ -15,7 +16,7 @@ export const InputText = ({
 }) => {
   return (
     <PrimeInputText
-      autoFocus
+      autoFocus={autoFocus}
       className={className}
       disabled={disabled}
       onBlur={onBlur}
