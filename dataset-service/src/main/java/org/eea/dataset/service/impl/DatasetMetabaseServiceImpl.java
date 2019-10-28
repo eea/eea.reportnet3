@@ -37,7 +37,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private DataSetMetabaseMapper dataSetMetabaseMapper;
 
-
   /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
@@ -50,6 +49,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
   /**
@@ -70,9 +70,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /**
    * Creates the empty dataset.
    *
+   * @param datasetType the dataset type
    * @param datasetName the dataset name
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the long
    * @throws EEAException the EEA exception
    */
   @Override
@@ -111,6 +113,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     throw new EEAException("createEmptyDataset: Bad arguments");
   }
 
+  /**
+   * Fill dataset.
+   *
+   * @param dataset the dataset
+   * @param datasetName the dataset name
+   * @param idDataFlow the id data flow
+   */
   private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow) {
 
     dataset.setDataSetName(datasetName);
@@ -137,12 +146,24 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
   }
 
+  /**
+   * Delete design dataset.
+   *
+   * @param datasetId the dataset id
+   */
   @Override
   @Transactional
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteById(datasetId);
   }
 
+  /**
+   * Update dataset name.
+   *
+   * @param datasetId the dataset id
+   * @param datasetName the dataset name
+   * @return true, if successful
+   */
   @Override
   public boolean updateDatasetName(Long datasetId, String datasetName) {
     DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
