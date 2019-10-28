@@ -1,2 +1,1 @@
-export const DeleteSchema = ({ datasetRepository }) => async (datasetId, datasetSchemaId) =>
-  datasetRepository.deleteSchemaById(datasetId, datasetSchemaId);
+export const DeleteSchema = ({ datasetRepository }) => async datasetId => datasetRepository.deleteSchemaById(datasetId);

@@ -70,12 +70,11 @@ export const apiDataset = {
       return false;
     }
   },
-  deleteSchemaById: async (datasetId, datasetSchemaId) => {
+  deleteSchemaById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.delete({
       url: getUrl(DatasetConfig.deleteDataSchema, {
-        datasetId,
-        datasetSchemaId
+        datasetId
       }),
       queryString: {},
       headers: {
