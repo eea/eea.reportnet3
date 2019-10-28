@@ -1,9 +1,11 @@
 {
     "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
+    "addTableDesign": "/dataschema/{:datasetSchemaId}/createTableSchema/{:datasetId}",
     "dataSchema":  "/dataschema/noRules/dataflow/{:dataflowId}",
     "dataViewer" : "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}",
     "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
     "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
+    "deleteTableDesign": "/dataschema/{:datasetSchemaId}/tableschema/{:tableSchemaId}",
     "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
     "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
     "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
