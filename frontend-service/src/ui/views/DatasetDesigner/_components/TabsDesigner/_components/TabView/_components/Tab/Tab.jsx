@@ -155,7 +155,6 @@ export const Tab = ({
         href={'#' + ariaControls}
         id={id}
         onMouseDownCapture={e => {
-          e.preventDefault();
           if (e.button == 1) {
             if (!isUndefined(checkEditingTabs)) {
               if (!checkEditingTabs()) {
