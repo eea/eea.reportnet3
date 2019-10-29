@@ -6,7 +6,6 @@ package org.eea.dataset.persistence.schemas.repository;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 
 /**
  * The Interface SchemasRepository.
@@ -16,14 +15,15 @@ import org.springframework.data.mongodb.repository.Query;
 public interface SchemasRepository
     extends MongoRepository<DataSetSchema, ObjectId>, ExtendedSchemaRepository {
 
+
   /**
-   * Find schema by id flow.
+   * Find by id data flow and id data set schema.
    *
    * @param idFlow the id flow
+   * @param idDataSetSchema the id data set schema
    * @return the data set schema
    */
-  @Query("{'idDataFlow': ?0}")
-  DataSetSchema findSchemaByIdFlow(Long idFlow);
+  DataSetSchema findByIdDataFlowAndIdDataSetSchema(Long idFlow, ObjectId idDataSetSchema);
 
 
   /**

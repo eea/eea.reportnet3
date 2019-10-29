@@ -1,9 +1,9 @@
 package org.eea.dataset.service.file;
 
 import java.io.IOException;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
+import org.eea.exception.EEAException;
 
 /**
  * The Class FileParseContextImpl.
@@ -30,12 +30,12 @@ public class FileExportContextImpl implements IFileExportContext {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the byte[]
-   * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Override
   public byte[] fileWriter(Long dataflowId, Long partitionId, String idTableSchema)
-      throws InvalidFileException, IOException {
+      throws IOException, EEAException {
     return writerStrategy.writeFile(dataflowId, partitionId, idTableSchema);
   }
 }

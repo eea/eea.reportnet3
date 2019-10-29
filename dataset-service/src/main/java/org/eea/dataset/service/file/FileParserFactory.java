@@ -30,19 +30,19 @@ public class FileParserFactory implements IFileParserFactory {
    * @return the i file parse contextd
    */
   @Override
-  public IFileParseContext createContext(String mimeType) {
+  public IFileParseContext createContext(String mimeType, Long datasetId) {
     FileParseContextImpl context = null;
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, fileCommon));
+        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, fileCommon, datasetId));
         break;
       case "xml":
         // Fill it with the xml strategy
         break;
       case "xls":
       case "xlsx":
-        context = new FileParseContextImpl(new ExcelReaderStrategy(fileCommon));
+        context = new FileParseContextImpl(new ExcelReaderStrategy(fileCommon, datasetId));
         break;
       default:
         break;

@@ -7,6 +7,7 @@ import java.util.Set;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -157,13 +158,14 @@ public class FileCommonUtils {
    * @param dataflowId the dataflow id
    *
    * @return the data set schema
+   * @throws EEAException
    */
-  public DataSetSchemaVO getDataSetSchema(Long dataflowId) {
+  public DataSetSchemaVO getDataSetSchema(Long dataflowId, Long datasetId) throws EEAException {
     LOG.info("Getting DataSchema from Mongo DB");
     DataSetSchemaVO dataSetSchema = null;
     // get dataset schema from mongo DB
     if (null != dataflowId) {
-      dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId, false);
+      dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId, false, datasetId);
     }
     return dataSetSchema;
   }

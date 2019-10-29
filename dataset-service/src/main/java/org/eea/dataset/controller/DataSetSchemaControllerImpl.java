@@ -172,10 +172,30 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand()
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
-  public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
-    return dataschemaService.getDataSchemaByIdFlow(idFlow, true);
+  @RequestMapping(value = "/dataflow/{id}/{datasetId}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow,
+      @PathVariable("datasetId") Long datasetId) {
+    try {
+      return dataschemaService.getDataSchemaByIdFlow(idFlow, true, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Gets the dataset schema id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset schema id
+   */
+  @Override
+  public String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId) {
+    try {
+      return dataschemaService.getDatasetSchemaId(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   /**
@@ -189,8 +209,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand()
   @GetMapping(value = "/noRules/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
-  public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow) {
-    return dataschemaService.getDataSchemaByIdFlow(idFlow, false);
+  public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow,
+      @PathVariable("datasetId") Long datasetId) {
+    try {
+      return dataschemaService.getDataSchemaByIdFlow(idFlow, false, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   /**
@@ -229,19 +254,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    try {
-      String schemaId = dataschemaService
-          .getDataSchemaByIdFlow(datasetService.getDataFlowIdById(datasetId), false)
-          .getIdDataSetSchema();
-      if (schemaId.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
-      }
-      dataschemaService.deleteDatasetSchema(datasetId, schemaId);
-      datasetMetabaseService.deleteDesignDataset(datasetId);
-      recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR, e);
+    String schemaId = getDatasetSchemaId(datasetId);
+    if (schemaId.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
     }
+    dataschemaService.deleteDatasetSchema(datasetId, schemaId);
+    datasetMetabaseService.deleteDesignDataset(datasetId);
+    recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
   }
 }

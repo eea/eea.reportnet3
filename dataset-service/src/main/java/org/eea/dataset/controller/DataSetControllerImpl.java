@@ -477,16 +477,22 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER') OR (secondLevelAuthorize(#datasetId,'DATASET_REQUESTER'))")
   public ResponseEntity exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "idTableSchema", required = false) String idTableSchema,
-      @RequestParam("mimeType") String mimeType) throws Exception {
+      @RequestParam("mimeType") String mimeType) {
     LOG.info("Init the export controller");
-    byte[] file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
+    byte[] file;
+    try {
+      file = datasetService.exportFile(datasetId, mimeType, idTableSchema);
 
-    // set file name and content type
-    String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
+      // set file name and content type
+      String filename = datasetService.getFileName(mimeType, idTableSchema, datasetId);
 
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
-    return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+
+      return new ResponseEntity(file, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
   }
 
 

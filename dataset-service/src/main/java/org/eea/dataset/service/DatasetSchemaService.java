@@ -41,15 +41,16 @@ public interface DatasetSchemaService {
   DataSetSchemaVO getDataSchemaById(String dataschemaId);
 
   /**
-   * Gets dataschema by id. If addRules is true, the whole schema including rules will be retrieved
-   * Otherwise only the schema (table, records, fields and dataset) will be retrieved
+   * Gets the data schema by id flow.
    *
    * @param idFlow the id flow
    * @param addRules the add rules
-   *
+   * @param datasetId the dataset id
    * @return the data schema by id flow
+   * @throws EEAException the EEA exception
    */
-  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules);
+  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules, Long datasetId)
+      throws EEAException;
 
 
   /**
@@ -95,4 +96,17 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    */
   void createGroupAndAddUser(Long datasetId);
+
+
+  /**
+   * Gets the dataset schema id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  String getDatasetSchemaId(Long datasetId) throws EEAException;
+
+
+
 }
