@@ -258,7 +258,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       label: resources.messages['createNewEmptyDatasetSchema'],
                       icon: 'add',
                       command: () => showNewDatasetDialog(),
-                      disabled: !isUndefined(designDatasetSchemaId) || !isEmpty(dataflowData.datasets)
+                      disabled: !isEmpty(dataflowData.designDatasets) || !isEmpty(dataflowData.datasets)
                     },
                     {
                       label: resources.messages['createNewDatasetFromTemplate'],
