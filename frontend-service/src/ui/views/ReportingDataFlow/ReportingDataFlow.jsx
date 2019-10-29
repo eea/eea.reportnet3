@@ -454,12 +454,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
           <ScrollPanel style={{ width: '100%', height: '50vh' }}>
-            <SnapshotList
-              snapshotListData={snapshotListData}
-              onLoadSnapshotList={onLoadSnapshotList}
-              dataflowId={match.params.dataflowId}
-              datasetId={datasetIdToProps}
-            />
+            {!isEmpty(snapshotListData) ? (
+              <SnapshotList
+                snapshotListData={snapshotListData}
+                onLoadSnapshotList={onLoadSnapshotList}
+                dataflowId={match.params.dataflowId}
+                datasetId={datasetIdToProps}
+              />
+            ) : (
+              <h3>{resources.messages['emptySnapshotList']}</h3>
+            )}
           </ScrollPanel>
         </Dialog>
         <Dialog
