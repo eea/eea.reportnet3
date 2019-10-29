@@ -17,6 +17,7 @@ export const TabView = ({
   children,
   className = null,
   id = null,
+  isErrorDialogVisible,
   onTabAdd,
   onTabBlur,
   onTabDragAndDrop,
@@ -239,7 +240,7 @@ export const TabView = ({
     <div id={id} className={classNamed} style={style}>
       {renderNavigator()}
       {renderContent()}
-      {renderConfirmDialog()}
+      {!isErrorDialogVisible ? renderConfirmDialog() : null}
     </div>
   );
 };

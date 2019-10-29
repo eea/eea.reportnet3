@@ -78,16 +78,18 @@ export const TabsDesigner = withRouter(({ match, history }) => {
 
   const onTabAdd = (newTabElement, onTabAddCallback) => {
     //Add a temporary Tab with an input text
-    const inmTabs = [...tabs];
-    inmTabs.push({ ...newTabElement, index: getMaxIndex([...tabs]) + 1 });
-    //Reorder tabs (actually by index, in the future by drag&drop order)
-    let reorderedTabs = inmTabs.sort((a, b) => {
-      return a.index < b.index ? -1 : a.index > b.index ? 1 : 0;
-    });
-    reorderedTabs.push(reorderedTabs.shift());
+    if (!checkEditingTabs()) {
+      const inmTabs = [...tabs];
+      inmTabs.push({ ...newTabElement, index: getMaxIndex([...tabs]) + 1 });
+      //Reorder tabs (actually by index, in the future by drag&drop order)
+      let reorderedTabs = inmTabs.sort((a, b) => {
+        return a.index < b.index ? -1 : a.index > b.index ? 1 : 0;
+      });
+      reorderedTabs.push(reorderedTabs.shift());
 
-    setScrollFn(() => onTabAddCallback);
-    setTabs(inmTabs);
+      setScrollFn(() => onTabAddCallback);
+      setTabs(inmTabs);
+    }
   };
 
   const onTableAdd = (header, tabIndex, initialHeader) => {
@@ -221,6 +223,7 @@ export const TabsDesigner = withRouter(({ match, history }) => {
     <React.Fragment>
       <TabView
         checkEditingTabs={checkEditingTabs}
+        isErrorDialogVisible={isErrorDialogVisible}
         onTabAdd={onTabAdd}
         onTabBlur={onTableAdd}
         onTabAddCancel={onTabAddCancel}
