@@ -93,6 +93,7 @@
 		"emptyLanguageValidationError":"Please, language must be selected",
 		"emptyNameValidationError": "Please, enter a name",		
 		"emptyReleasedDashboard": "There is not any released data available",
+		"emptySnapshotList": "There is not any snapshot to release",
 		"emptyTitleValidationError": "Please, enter a title",
 		"error": "Error",
 		"errorMessage": "Message",
