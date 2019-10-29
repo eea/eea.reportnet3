@@ -25,7 +25,7 @@
 .navigationTabIcons:hover {
   border: 1px solid;
   border-radius: 3px;
-  background-color: var(--custom-gray);
+  background-color: var(--c-custom-gray);
 }
 .stepBackwardIcon {
   left: -15px !important;
