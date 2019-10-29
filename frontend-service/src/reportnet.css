@@ -75,6 +75,11 @@
   --c-aquamarine: #007a86;
   --c-green: #637e22;
   --c-tile: #ba3c0d;
+  /* custom colors */
+  --c-blue-green: #009490;
+  --c-chart-correct: #99cc33;
+  --c-chart-warning: #ffcc00;
+  --c-chart-error: #cc3300;
 }
 body {
   margin: 0px;
