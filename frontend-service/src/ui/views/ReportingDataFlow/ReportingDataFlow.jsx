@@ -13,6 +13,7 @@ import { routes } from 'ui/routes';
 import { BigButton } from './_components/BigButton';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
@@ -40,6 +41,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -169,12 +171,24 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setErrorDialogVisible(true);
   };
 
+  const onDeleteDatasetSchema = async schemaId => {
+    setDeleteDialogVisible(false);
+    try {
+      const response = await DatasetService.deleteSchemaById(schemaId);
+      if (response >= 200 && response <= 299) {
+        onUpdateData();
+      }
+    } catch (error) {
+      console.error(error.response);
+    }
+  };
+
   const onNameEdit = () => {
     setIsNameEditable(!isNameEditable);
   };
 
   const onUpdateData = () => {
-    setIsDataUpdated(true);
+    setIsDataUpdated(!isDataUpdated);
   };
 
   const onSaveName = async value => {
@@ -244,7 +258,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       label: resources.messages['createNewEmptyDatasetSchema'],
                       icon: 'add',
                       command: () => showNewDatasetDialog(),
-                      disabled: isUndefined(designDatasetSchemaId) ? false : true
+                      disabled: !isEmpty(dataflowData.designDatasets) || !isEmpty(dataflowData.datasets)
                     },
                     {
                       label: resources.messages['createNewDatasetFromTemplate'],
@@ -326,7 +340,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
-                          disabled: true
+                          command: () => setDeleteDialogVisible(true)
                         },
                         {
                           label: resources.messages['properties'],
@@ -448,18 +462,31 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           visible={errorDialogVisible}>
           <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
         </Dialog>
+        <ConfirmDialog
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteDatasetSchema(designDatasetSchemaId)}
+          onHide={() => setDeleteDialogVisible(false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetSchema']}
+        </ConfirmDialog>
         <Dialog
           header={dataflowData.name}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
           <ScrollPanel style={{ width: '100%', height: '50vh' }}>
-            <SnapshotList
-              snapshotListData={snapshotListData}
-              onLoadSnapshotList={onLoadSnapshotList}
-              dataflowId={match.params.dataflowId}
-              datasetId={datasetIdToProps}
-            />
+            {!isEmpty(snapshotListData) ? (
+              <SnapshotList
+                snapshotListData={snapshotListData}
+                onLoadSnapshotList={onLoadSnapshotList}
+                dataflowId={match.params.dataflowId}
+                datasetId={datasetIdToProps}
+              />
+            ) : (
+              <h3>{resources.messages['emptySnapshotList']}</h3>
+            )}
           </ScrollPanel>
         </Dialog>
         <Dialog

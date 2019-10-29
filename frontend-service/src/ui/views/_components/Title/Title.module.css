@@ -1,6 +1,6 @@
 .Title {
-  color: #404040;
-  background-color: #ffffff;
+  color: var(--gray-110);
+  background-color: var(--white);
   display: table-cell;
   width: 100%;
 }
