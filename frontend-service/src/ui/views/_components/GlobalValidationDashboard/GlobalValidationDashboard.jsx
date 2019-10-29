@@ -187,7 +187,7 @@ const GlobalValidationDashboard = dataflowId => {
           width="100%"
           height="30%"
         />
-        <fieldset className={styles.colorPickerWrap}>
+        {/* <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           <div className={styles.fieldsetContent}>
             {Object.keys(SEVERITY_CODE).map((type, i) => {
@@ -209,7 +209,7 @@ const GlobalValidationDashboard = dataflowId => {
               );
             })}
           </div>
-        </fieldset>
+        </fieldset> */}
       </div>
     );
   } else {

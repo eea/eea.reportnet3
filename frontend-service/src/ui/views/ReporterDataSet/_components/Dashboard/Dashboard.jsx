@@ -116,6 +116,8 @@ const Dashboard = withRouter(
                 labelString: 'Percentage'
               },
               ticks: {
+                min: 0,
+                max: 100,
                 callback: (value, index, values) => `${value} %`
               }
             }
@@ -180,7 +182,7 @@ const Dashboard = withRouter(
       <React.Fragment>
         <h1>{dashboardTitle}</h1>
         {renderDashboard()}
-        {renderColorPicker()}
+        {/* {renderColorPicker()} */}
       </React.Fragment>
     );
   })
