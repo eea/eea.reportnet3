@@ -13,7 +13,7 @@ import { TabPanel } from './_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/DataSet';
 
-export const TabsDesigner = withRouter(({ onLoadDatasetSchemaName, match, history }) => {
+export const TabsDesigner = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -41,11 +41,6 @@ export const TabsDesigner = withRouter(({ onLoadDatasetSchemaName, match, histor
   useEffect(() => {
     if (!isUndefined(datasetSchema)) {
       setTabs(datasetSchema.tables);
-      if (!isUndefined(onLoadDatasetSchemaName)) {
-        onLoadDatasetSchemaName(
-          `${datasetSchema.datasetSchemaName.charAt(0).toUpperCase()}${datasetSchema.datasetSchemaName.slice(1)}`
-        );
-      }
     }
   }, [datasetSchema]);
 

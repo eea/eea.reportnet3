@@ -179,6 +179,13 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return datasetTableData;
 };
 
+const getMetaData = async datasetId => {
+  const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
+  const dataset = new Dataset();
+  dataset.datasetSchemaName = datasetTableDataDTO.dataSetName;
+  return dataset;
+};
+
 const schemaById = async dataflowId => {
   const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
   //reorder tables alphabetically
@@ -451,6 +458,7 @@ export const ApiDatasetRepository = {
   errorStatisticsById,
   exportDataById,
   exportTableDataById,
+  getMetaData,
   schemaById,
   tableDataById,
   updateFieldById,

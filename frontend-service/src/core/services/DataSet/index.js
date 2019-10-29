@@ -12,6 +12,7 @@ import { ExportTableData } from './ExportTableData';
 import { GetData } from './GetData';
 import { GetErrors } from './GetErrors';
 import { GetErrorPosition } from './GetErrorPosition';
+import { GetMetaData } from './GetMetaData';
 import { GetSchema } from './GetSchema';
 import { GetStatistics } from './GetStatistics';
 import { GetWebFormData } from './GetWebFormData';
@@ -34,6 +35,7 @@ export const DatasetService = {
   errorStatisticsById: GetStatistics({ datasetRepository }),
   exportDataById: ExportData({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
+  getMetaData: GetMetaData({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),
   tableDataById: GetData({ datasetRepository }),
   updateFieldById: UpdateField({ datasetRepository }),

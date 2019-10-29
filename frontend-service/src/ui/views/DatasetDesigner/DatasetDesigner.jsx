@@ -19,6 +19,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
+import { DatasetService } from 'core/services/DataSet';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 
@@ -68,10 +69,12 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
       },
       { label: resources.messages['datasetDesigner'] }
     ]);
+    onLoadDatasetSchemaName();
   }, []);
 
-  const onLoadDatasetSchemaName = schemaName => {
-    setDatasetSchemaName(schemaName);
+  const onLoadDatasetSchemaName = async () => {
+    const dataset = await DatasetService.getMetaData(datasetId);
+    setDatasetSchemaName(`${dataset.datasetSchemaName.charAt(0).toUpperCase()}${dataset.datasetSchemaName.slice(1)}`);
   };
 
   const layout = children => {
@@ -128,7 +131,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner onLoadDatasetSchemaName={onLoadDatasetSchemaName} />
+      <TabsDesigner />
     </>
   );
 });

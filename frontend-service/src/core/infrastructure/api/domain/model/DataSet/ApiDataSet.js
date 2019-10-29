@@ -2,6 +2,7 @@ import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
+import { async } from 'q';
 
 export const apiDataset = {
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
@@ -210,6 +211,20 @@ export const apiDataset = {
         datasetId: datasetId,
         tableSchemaId: tableSchemaId,
         fileType: fileType
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        'Content-Type': 'application/octet-stream'
+      }
+    });
+    return response.data;
+  },
+  getMetaData: async datasetId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: getUrl(DatasetConfig.datasetMetaData, {
+        datasetId
       }),
       queryString: {},
       headers: {
