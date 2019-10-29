@@ -8,12 +8,16 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
+import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -21,6 +25,13 @@ import org.springframework.data.domain.Pageable;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
+
+
+  /**
+   * The record no validation.
+   */
+  @Autowired
+  private RecordNoValidationMapper recordNoValidationMapper;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -82,7 +93,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
           + "and recval.validation.levelError IN ( :errorList )) "
-          + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
+          + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where rv.id = fvval.fieldValue.record.id and fvval.validation.levelError IN ( :errorList ))) "
           + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id=recval.recordValue.id)  "
@@ -109,6 +120,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
+  /** The Constant MASTER_QUERY_COUNT. */
+  private final static String MASTER_QUERY_COUNT =
+      "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv "
+          + "WHERE tv.idTableSchema = :idTableSchema ";
+
+
 
   /** The Constant FINAL_MASTER_QUERY. */
   private final static String FINAL_MASTER_QUERY = " order by %s";
@@ -133,11 +150,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<RecordValue> findByTableValueWithOrder(String idTableSchema,
-      TypeErrorEnum[] levelError, Pageable pageable, SortField... sortFields) {
+  public TableVO findByTableValueWithOrder(String idTableSchema, TypeErrorEnum[] levelError,
+      Pageable pageable, SortField... sortFields) {
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
+    TableVO result = new TableVO();
     // Multisorting Query accept n fields and order asc(1)/desc(0)
     if (null != sortFields) {
       LOG.info("Init Order");
@@ -223,36 +241,63 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             }
             break;
           default:
-            List<RecordValue> emptyrecords = new ArrayList<>();
-            return emptyrecords;
+            TableVO result2 = new TableVO();
+            return result2;
         }
       }
     }
+    // Total records calc.
+    if (!filter.isEmpty()) {
+      Query query2;
+      query2 = entityManager.createQuery(String.format(MASTER_QUERY_COUNT + filter));
+      query2.setParameter("idTableSchema", idTableSchema);
+      if (!filter.isEmpty()
+          && (containsCorrect == false || (containsCorrect == true && lvl.size() == 2))) {
+        query2.setParameter("errorList", errorList);
+        query2.setParameter("errorList", errorList);
+      }
+      Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
+      result.setTotalRecords(recordsCount);
+    }
     Query query;
+    // Query without order.
     if (null == sortFields) {
       query = entityManager.createQuery(String.format(MASTER_QUERY_NO_ORDER + filter));
       query.setParameter("idTableSchema", idTableSchema);
-      if (containsCorrect == false || (containsCorrect = true && lvl.size() == 2)) {
+      if (!filter.isEmpty()
+          && (containsCorrect == false || (containsCorrect == true && lvl.size() == 2))) {
         query.setParameter("errorList", errorList);
         query.setParameter("errorList", errorList);
       }
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
       List<RecordValue> a = query.getResultList();
-      return sanitizeRecords(a);
+
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
+      result.setRecords(recordVOs);
+
+      return result;
+
     } else {
+      // Query with order.
       query = entityManager.createQuery(String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY,
           sortQueryBuilder.toString(), directionQueryBuilder.toString().substring(1)));
       query.setParameter("idTableSchema", idTableSchema);
-      if (containsCorrect == false || (containsCorrect = true && lvl.size() == 2)) {
+      if (!filter.isEmpty()
+          && (containsCorrect == false || (containsCorrect == true && lvl.size() == 2))) {
         query.setParameter("errorList", errorList);
         query.setParameter("errorList", errorList);
       }
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
       List<Object[]> a = query.getResultList();
-      return this.sanitizeOrderedRecords(a, sortFields[0].getAsc());
+      List<RecordVO> recordVOs = recordNoValidationMapper
+          .entityListToClass(this.sanitizeOrderedRecords(a, sortFields[0].getAsc()));
+      result.setRecords(recordVOs);
+
+      return result;
     }
+
   }
 
 
