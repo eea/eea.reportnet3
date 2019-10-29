@@ -15,7 +15,7 @@ import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Growl } from 'primereact/growl';
-import { InputSwitch } from 'primereact/inputswitch';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
@@ -24,7 +24,7 @@ import { Snapshots } from './_components/Snapshots/index';
 
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
-import { Title } from './_components/Title';
+import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
@@ -290,7 +290,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
+      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="dataset" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

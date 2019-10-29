@@ -1,6 +1,6 @@
 .ButtonsBar {
-  margin-bottom: 0.5em;
-  padding: 0.25em;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem;
 }
 
 .Dialog {
@@ -33,10 +33,10 @@
 }
 
 .InputSwitchText {
-  font-size: 1em;
+  font-size: 1rem;
   font-weight: bold;
-  margin-block-start: 0.5em;
-  margin-block-end: 0.5em;
+  margin-block-start: 0.5rem;
+  margin-block-end: 0.5rem;
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   padding: 5px;
@@ -47,5 +47,5 @@
 }
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
-  box-shadow: 0 0 0 0em #004494 !important;
+  box-shadow: 0 0 0 0em var(--blue-120) !important;
 }

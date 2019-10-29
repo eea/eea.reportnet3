@@ -1,0 +1,40 @@
+.scrollTab {
+  overflow: scroll;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  text-overflow: unset;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.iconHidden {
+  display: none !important;
+}
+
+.scrollTab::-webkit-scrollbar {
+  display: none;
+}
+
+.navigationTabIcons {
+  cursor: pointer !important;
+  font-size: 2.25rem !important;
+  position: absolute !important;
+  margin-top: 2.5px;
+}
+.navigationTabIcons:hover {
+  border: 1px solid;
+  border-radius: 3px;
+  background-color: #c8c8c8;
+}
+.stepBackwardIcon {
+  left: -15px !important;
+}
+.stepInitIcon {
+  left: -50px !important;
+}
+.stepForwardIcon {
+  right: -15px !important;
+}
+.stepEndIcon {
+  right: -50px !important;
+}

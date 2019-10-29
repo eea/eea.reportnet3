@@ -1,0 +1,1 @@
+export { TabsDesigner } from './TabsDesigner';
