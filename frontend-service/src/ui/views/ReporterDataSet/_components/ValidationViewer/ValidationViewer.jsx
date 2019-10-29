@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { isUndefined } from 'lodash';
+import { isNull, isUndefined } from 'lodash';
 
 import styles from './ValidationViewer.module.css';
 
@@ -38,6 +38,7 @@ const ValidationViewer = React.memo(
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
 
     let dropdownLevelErrorsFilterRef = useRef();
@@ -112,6 +113,7 @@ const ValidationViewer = React.memo(
         originsFilter
       );
       setTotalRecords(datasetErrors.totalErrors);
+      setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
       setFetchedData(datasetErrors.errors);
       setLoading(false);
     };
@@ -277,7 +279,32 @@ const ValidationViewer = React.memo(
       }
     };
 
-    let totalCount = <span>Total: {totalRecords} rows</span>;
+    const totalCount = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const filteredCount = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']}{' '}
+          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}{' '}
+          {'of'} {!isUndefined(totalRecords) ? totalRecords : 0} {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const getPaginatorRecordsCount = () => {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
+        return totalCount();
+      } else {
+        return filteredCount();
+      }
+    };
 
     const resetFilters = () => {
       setOriginsFilter([]);
@@ -403,7 +430,7 @@ const ValidationViewer = React.memo(
             onPage={onChangePage}
             onSort={onSort}
             paginator={true}
-            paginatorRight={totalCount}
+            paginatorRight={getPaginatorRecordsCount()}
             resizableColumns={true}
             reorderableColumns={true}
             rows={numberRows}

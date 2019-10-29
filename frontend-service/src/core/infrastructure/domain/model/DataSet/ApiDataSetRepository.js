@@ -89,7 +89,8 @@ const errorsById = async (
     datasetErrorsDTO.idDataset,
     datasetErrorsDTO.idDatasetSchema,
     datasetErrorsDTO.nameDataSetSchema,
-    datasetErrorsDTO.totalErrors
+    datasetErrorsDTO.totalRecords,
+    datasetErrorsDTO.totalFilteredRecords
   );
 
   const errors = datasetErrorsDTO.errors.map(
@@ -110,7 +111,6 @@ const errorsById = async (
   );
 
   dataset.errors = errors;
-
   return dataset;
 };
 
@@ -241,6 +241,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   if (tableDataDTO.totalRecords > 0) {
     table.tableSchemaId = tableDataDTO.idTableSchema;
     table.totalRecords = tableDataDTO.totalRecords;
+    table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
     let field, record;
 
@@ -290,6 +291,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 
     table.records = records;
   }
+  console.log('table', table);
   return table;
 };
 

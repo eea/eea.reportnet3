@@ -86,6 +86,7 @@ const DataViewer = withRouter(
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
     const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
     const [visibilityColumnIcon, setVisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
@@ -304,6 +305,7 @@ const DataViewer = withRouter(
       if (dataDeleted) {
         setFetchedData([]);
         setTotalRecords(0);
+        setTotalFilteredRecords(0);
         //  snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       }
     };
@@ -407,6 +409,7 @@ const DataViewer = withRouter(
           fields,
           filterLevelError
         );
+
         if (!isUndefined(colsSchema)) {
           if (!isUndefined(tableData)) {
             if (!isUndefined(tableData.records)) {
@@ -427,6 +430,11 @@ const DataViewer = withRouter(
         if (tableData.totalRecords !== totalRecords) {
           setTotalRecords(tableData.totalRecords);
         }
+
+        if (tableData.totalFilteredRecords !== totalFilteredRecords) {
+          setTotalFilteredRecords(tableData.totalFilteredRecords);
+        }
+
         setIsLoading(false);
       } catch (error) {
         console.error('DataViewer error: ', error);
@@ -1050,12 +1058,42 @@ const DataViewer = withRouter(
       // }
     };
 
-    const totalCount = (
-      <span>
-        {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
-        {resources.messages['rows']}
-      </span>
-    );
+    const totalCount = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const filteredCount = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']}{' '}
+          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}{' '}
+          {'of'} {!isUndefined(totalRecords) ? totalRecords : 0} {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const getPaginatorRecordsCount = () => {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
+        return totalCount();
+      } else {
+        return filteredCount();
+      }
+    };
+
+    // const totalCount = (
+    //   <span>
+    //     {resources.messages['totalRecords']}{' '}
+    //     {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}{' '}
+    //     {'of'} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+    //     {/* {!isNull(totalFilteredRecords) ? totalFilteredRecords : totalRecords} */}
+    //     {resources.messages['rows']}
+    //   </span>
+    // );
 
     return (
       <>
@@ -1205,7 +1243,7 @@ const DataViewer = withRouter(
             // }}
             onSort={onSort}
             paginator={true}
-            paginatorRight={totalCount}
+            paginatorRight={getPaginatorRecordsCount()}
             //pasteHeader={resources.messages['pasteRecords']}
             //pastedRecords={pastedRecords}
             //recordsPreviewNumber={recordsPreviewNumber}
@@ -1221,6 +1259,7 @@ const DataViewer = withRouter(
             sortField={sortField}
             sortOrder={sortOrder}
             totalRecords={totalRecords}
+            totalFilteredRecords={totalFilteredRecords}
             value={fetchedData}
             //scrollable={true}
             //frozenWidth="100px"
