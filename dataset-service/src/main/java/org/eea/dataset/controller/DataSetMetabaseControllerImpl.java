@@ -53,10 +53,9 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   private DesignDatasetService designDatasetService;
 
   /**
-   * The Constant LOG_ERROR.
+   * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
-
 
   /**
    * The Constant LOG_ERROR.
