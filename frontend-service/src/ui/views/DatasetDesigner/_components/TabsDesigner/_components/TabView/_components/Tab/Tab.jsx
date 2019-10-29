@@ -45,7 +45,7 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
-    setTitleHeader(titleHeader !== '' ? titleHeader : header);
+    setTitleHeader(titleHeader !== '' && titleHeader === header ? titleHeader : header !== '' ? header : titleHeader);
     setInitialTitleHeader(header);
   }, [onTabBlur]);
 

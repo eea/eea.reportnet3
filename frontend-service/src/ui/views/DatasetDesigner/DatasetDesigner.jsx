@@ -90,7 +90,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <Title title={`${resources.messages['titleDataset']}${datasetSchemaName}`} />
+      <Title title={`${resources.messages['titleDataset']}${datasetSchemaName}`} icon="pencilRuler" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-right">

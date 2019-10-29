@@ -290,7 +290,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
+      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="dataset" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
