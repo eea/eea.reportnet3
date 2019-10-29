@@ -32,7 +32,6 @@ const Dashboard = withRouter(
     const chartRef = useRef();
 
     useEffect(() => {
-      console.log('colors', colors);
       setDashboardColors({
         CORRECT: colors.dashboardCorrect,
         WARNING: colors.dashboardWarning,

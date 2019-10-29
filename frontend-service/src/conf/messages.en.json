@@ -54,7 +54,7 @@
 		"dataProviderManageContributorsDialogTitle": "Manage roles for dataflow",
 		"dataset": "Dataset",
 		"datasetDesigner": "Dataset designer",
-		"datasetDesignerNoFields":  "There are no fields created for this schema",
+		"datasetDesignerNoFields":  "There are no fields created for the table schema",
         "datasetLoadingTitle": "Data loading",
         "datasetLoadingMessage": "The table ",
 		"datasetLoading": " is loading...",

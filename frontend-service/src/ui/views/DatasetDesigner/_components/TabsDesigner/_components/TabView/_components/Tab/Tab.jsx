@@ -153,7 +153,7 @@ export const Tab = ({
         aria-controls={ariaControls}
         aria-selected={selected}
         className={!addTab ? styles.p_tabview_design : null}
-        href={'#' + ariaControls}
+        // href={'#' + ariaControls}
         id={id}
         onMouseDownCapture={e => {
           if (e.button == 1) {
