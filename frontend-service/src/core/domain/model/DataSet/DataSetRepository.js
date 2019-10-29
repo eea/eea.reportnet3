@@ -3,6 +3,7 @@ import { ApiDatasetRepository } from 'core/infrastructure/domain/model/DataSet/A
 export const DatasetRepository = {
   schemaById: () => Promise.reject('[DatasetRepository#schemaById] must be implemented'),
   deleteDataById: () => Promise.reject('[DatasetRepository#deleteDataById] must be implemented'),
+  deleteSchemaById: () => Promise.reject('[DatasetRepository#deleteSchemaById] must be implemented'),
   deleteTableDataById: () => Promise.reject('[DatasetRepository#deleteTableDataById] must be implemented'),
   errorsById: () => Promise.reject('[DatasetRepository#errorsById] must be implemented'),
   errorPositionByObjectId: () => Promise.reject('[DatasetRepository#errorPositionByObjectId] must be implemented'),
