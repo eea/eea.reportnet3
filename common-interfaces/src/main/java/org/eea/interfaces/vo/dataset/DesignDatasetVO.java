@@ -10,6 +10,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+/**
+ * The Class DesignDatasetVO.
+ */
 public class DesignDatasetVO implements Serializable {
 
   /** The Constant serialVersionUID. */
