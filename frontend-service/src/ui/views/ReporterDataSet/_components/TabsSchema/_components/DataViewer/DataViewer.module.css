@@ -5,21 +5,21 @@
   display: flex;
 }
 .editRowButton {
-  border: 1px solid #c8c8c8 !important;
+  border: 1px solid var(--custom-gray) !important;
   box-shadow: 0 0 0 0em var(--blue-120) !important;
   /* color: var(--errors) !important; */
   margin-left: 3px !important;
 }
 .deleteRowButton {
-  border: 1px solid #c8c8c8 !important;
+  border: 1px solid var(--custom-gray) !important;
   box-shadow: 0 0 0 0em var(--blue-120) !important;
   color: var(--errors) !important;
   margin-left: 3px !important;
 }
 .dataViewerToolbar {
-  border-top: 1px solid #c8c8c8 !important;
-  border-left: 1px solid #c8c8c8 !important;
-  border-right: 1px solid #c8c8c8 !important;
+  border-top: 1px solid var(--gray-25) !important;
+  border-left: 1px solid var(--gray-25) !important;
+  border-right: 1px solid var(--gray-25) !important;
   border-bottom: 0px !important;
   border-top-left-radius: 3px !important;
   border-top-right-radius: 3px !important;
