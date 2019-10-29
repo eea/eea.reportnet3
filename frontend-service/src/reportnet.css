@@ -1,33 +1,33 @@
 :root {
   --blue-120: #004494;
-  --yellow-120: #ffd617;
-  --gray-110: #404040;
   --blue-110: #003776;
-  --yellow-110: #fbc11d;
-  --gray-75: #707070;
   --blue-100: #004494;
-  --yellow-100: #ffd617;
-  --gray-50: #9f9f9f;
   --blue-75: #4073af;
-  --yellow-75: #ffde39;
-  --gray-25: #cfcfcf;
   --blue-50: #7fa1c9;
-  --yellow-50: #ffe879;
-  --gray-15: #e3e3e3;
   --blue-25: #bfd0e4;
-  --yellow-25: #fff4bb;
-  --gray-10: #ebebeb;
   --blue-5: #f2f5f9;
+  --yellow-120: #ffd617;
+  --yellow-110: #fbc11d;
+  --yellow-100: #ffd617;
+  --yellow-75: #ffde39;
+  --yellow-50: #ffe879;
+  --yellow-25: #fff4bb;
   --black: #000000;
-  --white: #ffffff;
+  --gray-110: #404040;
+  --gray-75: #707070;
+  --gray-50: #9f9f9f;
+  --gray-25: #cfcfcf;
+  --gray-15: #e3e3e3;
+  --gray-10: #ebebeb;
   --gray-5: #f5f5f5;
+  --white: #ffffff;
   --informative-color: #006fb4;
   --warning-color: #f29527;
   --success-color: #467a39;
   --errors: #da2131;
 
   /* Main corporate colors */
-  --c-corporate-blue: #004b87;
+  --c-corporate-blue: #006699;
   --c-corporate-aqua-marine: #008675;
   /* Blue palette */
   --c-blue-400: #4f758b;
