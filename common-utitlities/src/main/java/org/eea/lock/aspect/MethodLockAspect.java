@@ -19,13 +19,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class MethodLockAspect.
+ */
 @Aspect
 @Component
 public class MethodLockAspect {
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
+  /**
+   * Adds the lock.
+   *
+   * @param joinPoint the join point
+   * @return the object
+   * @throws Throwable the throwable
+   */
   @Around("@annotation(org.eea.lock.annotation.LockMethod)")
   public Object addLock(ProceedingJoinPoint joinPoint) throws Throwable {
 
@@ -50,6 +61,13 @@ public class MethodLockAspect {
     return rtn;
   }
 
+  /**
+   * Gets the lock criteria.
+   *
+   * @param joinPoint the join point
+   * @return the lock criteria
+   * @throws NoSuchMethodException the no such method exception
+   */
   private Map<String, Object> getLockCriteria(ProceedingJoinPoint joinPoint)
       throws NoSuchMethodException {
 

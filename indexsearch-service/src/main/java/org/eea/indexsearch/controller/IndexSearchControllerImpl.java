@@ -11,11 +11,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The Class IndexSearchControllerImpl.
+ */
 @RestController
 @RequestMapping(value = "/index")
 public class IndexSearchControllerImpl implements IndexSearchController {
 
 
+  /** The service. */
   @Autowired
   private IndexSearchService service;
 
@@ -40,6 +44,12 @@ public class IndexSearchControllerImpl implements IndexSearchController {
   //
   // return service.findById(id);
   // }
+  /**
+   * Find all.
+   *
+   * @return the list
+   * @throws Exception the exception
+   */
   //
   @Override
   @GetMapping
@@ -65,6 +75,13 @@ public class IndexSearchControllerImpl implements IndexSearchController {
   // }
   //
   //
+  /**
+   * Delete profile document.
+   *
+   * @param id the id
+   * @return the string
+   * @throws Exception the exception
+   */
   //
   @DeleteMapping("/{id}")
   public String deleteProfileDocument(@PathVariable String id) throws Exception {
@@ -73,6 +90,11 @@ public class IndexSearchControllerImpl implements IndexSearchController {
 
   }
 
+  /**
+   * Execute macros.
+   *
+   * @throws Exception the exception
+   */
   @Override
   @GetMapping("/macros")
   public void executeMacros() throws Exception {
