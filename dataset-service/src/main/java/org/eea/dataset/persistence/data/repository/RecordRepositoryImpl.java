@@ -90,7 +90,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant WARNING_ERROR_CORRECT_APPEND_QUERY. */
   private final static String WARNING_ERROR_CORRECT_APPEND_QUERY =
-      "AND (EXISTS (SELECT recval FROM RecordValidation recval "
+      "AND ((EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
           + "and recval.validation.levelError IN ( :errorList )) "
           + "OR EXISTS (SELECT fvval FROM FieldValidation fvval "
@@ -98,7 +98,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + " OR " + " (not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id=recval.recordValue.id)  "
           + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
-          + "where rv.id = fvval.fieldValue.record.id)) ";
+          + "where rv.id = fvval.fieldValue.record.id))) ";
 
   /** The Constant WARNING_ERROR_APPEND_QUERY. */
   private final static String WARNING_ERROR_APPEND_QUERY =
