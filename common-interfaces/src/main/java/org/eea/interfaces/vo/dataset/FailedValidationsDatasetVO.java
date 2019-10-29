@@ -16,9 +16,7 @@ import lombok.ToString;
 @ToString
 public class FailedValidationsDatasetVO implements Serializable {
 
-  /**
-   * 
-   */
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 6074897632789190703L;
 
   /** The id dataset. */
@@ -34,7 +32,8 @@ public class FailedValidationsDatasetVO implements Serializable {
   private List<ErrorsValidationVO> errors;
 
   /** The total errors. */
-  private Long totalErrors;
+  private Long totalRecords;
 
-
+  /** The total filters. */
+  private Long totalFilteredRecords;
 }

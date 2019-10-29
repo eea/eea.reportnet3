@@ -257,7 +257,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter("errorList", errorList);
       }
       Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
-      result.setTotalRecords(recordsCount);
+      result.setTotalFilteredRecords(recordsCount);
     }
     Query query;
     // Query without order.
