@@ -13,6 +13,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 export const Tab = ({
   addTab,
   ariaControls,
+  checkEditingTabs,
   className,
   closeIcon,
   editable = true,
@@ -156,8 +157,12 @@ export const Tab = ({
         onMouseDownCapture={e => {
           e.preventDefault();
           if (e.button == 1) {
-            if (!isUndefined(onTabDeleteClick) && !addTab) {
-              onTabDeleteClick(index);
+            if (!isUndefined(checkEditingTabs)) {
+              if (!checkEditingTabs()) {
+                if (!isUndefined(onTabDeleteClick) && !addTab) {
+                  onTabDeleteClick(index);
+                }
+              }
             }
           }
         }}
@@ -214,8 +219,12 @@ export const Tab = ({
         <div
           onClick={e => {
             e.preventDefault();
-            if (!isUndefined(onTabDeleteClick)) {
-              onTabDeleteClick(index);
+            if (!isUndefined(checkEditingTabs)) {
+              if (!checkEditingTabs()) {
+                if (!isUndefined(onTabDeleteClick)) {
+                  onTabDeleteClick(index);
+                }
+              }
             }
           }}
           onMouseOut={e => {

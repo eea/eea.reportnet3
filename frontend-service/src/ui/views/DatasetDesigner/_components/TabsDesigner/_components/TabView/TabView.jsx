@@ -13,6 +13,7 @@ import { Tab } from './_components/Tab';
 
 export const TabView = ({
   activeIndex = 0,
+  checkEditingTabs,
   children,
   className = null,
   id = null,
@@ -111,6 +112,7 @@ export const TabView = ({
       <Tab
         addTab={tab.props.addTab}
         ariaControls={ariaControls}
+        checkEditingTabs={checkEditingTabs}
         children={tab.props.children}
         className={className}
         editable={tab.props.editable}
@@ -243,6 +245,7 @@ export const TabView = ({
 };
 TabView.propTypes = {
   activeIndex: PropTypes.number,
+  checkEditingTabs: PropTypes.func,
   className: PropTypes.string,
   id: PropTypes.string,
   onTabAdd: PropTypes.func,

@@ -153,6 +153,12 @@ export const TabsDesigner = withRouter(({ match, history }) => {
     return repeteadElements.length > 0 && tabIndex !== repeteadElements[0].index;
   };
 
+  const checkEditingTabs = () => {
+    const inmTabs = [...tabs];
+    const editingTabs = inmTabs.filter(tab => tab.newTab === true);
+    return editingTabs.length > 0;
+  };
+
   const deleteTable = async deletedTabIndx => {
     const tableDeleted = await DatasetService.deleteTableDesign(datasetId, tabs[deletedTabIndx].tableSchemaId);
     if (tableDeleted) {
@@ -214,6 +220,7 @@ export const TabsDesigner = withRouter(({ match, history }) => {
   return (
     <React.Fragment>
       <TabView
+        checkEditingTabs={checkEditingTabs}
         onTabAdd={onTabAdd}
         onTabBlur={onTableAdd}
         onTabAddCancel={onTabAddCancel}
