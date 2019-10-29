@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The type Resource management controller implementation.
+ */
 @RestController
 @RequestMapping(value = "/resource")
 public class ResourceManagementControllerImpl implements ResourceManagementController {

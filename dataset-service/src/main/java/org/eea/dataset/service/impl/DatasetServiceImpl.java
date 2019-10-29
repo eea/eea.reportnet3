@@ -450,7 +450,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
     SortField[] newFields = null;
-
+    TableVO result = new TableVO();
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     // Check if we need to put all the records without pagination
@@ -464,6 +464,8 @@ public class DatasetServiceImpl implements DatasetService {
     if (null == fields && (null == levelError || levelError.length == 3)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
+      result.setRecords(recordVOs);
 
     } else {
 
@@ -488,22 +490,20 @@ public class DatasetServiceImpl implements DatasetService {
         newFields = sortFieldsArray.stream().toArray(SortField[]::new);
       }
 
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, levelError, pageable,
+      result = recordRepository.findByTableValueWithOrder(idTableSchema, levelError, pageable,
           newFields);
 
     }
-
-    TableVO result = new TableVO();
-    if (records.isEmpty()) {
+    // Table with out values
+    if (null == result.getRecords() || result.getRecords().isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
     } else {
 
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
-      result.setRecords(recordVOs);
       result.setTotalRecords(totalRecords);
+      List<RecordVO> recordVOs = result.getRecords();
 
       LOG.info(
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",

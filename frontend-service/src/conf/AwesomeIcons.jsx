@@ -18,12 +18,25 @@ import {
   faArchive,
   faBroom,
   faPencilRuler,
-  faUserCircle
+  faUserCircle,
+  faItalic,
+  faSquareRootAlt,
+  faPercentage,
+  faDiceSix,
+  faGlobeEurope,
+  faMapMarkedAlt,
+  faLink,
+  faVectorSquare,
+  faAt,
+  faPaperclip,
+  faAlignJustify,
+  faList
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
   faSquare as farSquareRegular,
-  faCheckSquare as faCheckSquareRegular
+  faCheckSquare as faCheckSquareRegular,
+  faCalendarAlt
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -136,6 +149,32 @@ export const AwesomeIcons = icon => {
       return faPencilRuler;
     case 'user-profile':
       return faUserCircle;
+    case 'clip':
+      return faPaperclip;
+    case 'email':
+      return faAt;
+    case 'calendar':
+      return faCalendarAlt;
+    case 'formula':
+      return faSquareRootAlt;
+    case 'italic':
+      return faItalic;
+    case 'link':
+      return faLink;
+    case 'linkData':
+      return faVectorSquare;
+    case 'list':
+      return faList;
+    case 'map':
+      return faMapMarkedAlt;
+    case 'number':
+      return faDiceSix;
+    case 'percentage':
+      return faPercentage;
+    case 'text':
+      return faAlignJustify;
+    case 'url':
+      return faGlobeEurope;
     default:
       return faFileAlt;
   }

@@ -3,11 +3,11 @@ package org.eea.interfaces.vo.lock;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
+import org.eea.interfaces.vo.lock.enums.LockType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.lock.enums.LockType;
 
 @Getter
 @Setter

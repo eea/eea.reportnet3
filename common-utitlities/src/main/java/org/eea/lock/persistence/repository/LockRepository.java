@@ -9,6 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface LockRepository extends CrudRepository<Lock, Integer> {
 
+  /**
+   * Save if absent.
+   *
+   * @param id the id
+   * @param lock the lock
+   * @return true, if successful
+   */
   @Transactional
   default boolean saveIfAbsent(Integer id, Lock lock) {
 
@@ -20,6 +27,12 @@ public interface LockRepository extends CrudRepository<Lock, Integer> {
     return true;
   }
 
+  /**
+   * Delete if present.
+   *
+   * @param id the id
+   * @return true, if successful
+   */
   @Transactional
   default boolean deleteIfPresent(Integer id) {
     if (!findById(id).isPresent()) {

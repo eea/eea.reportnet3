@@ -43,30 +43,76 @@ public class ForeingKeyDrools {
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
+  /** The Constant dataValue. */
   private final static Pattern dataValue = Pattern.compile("[A-Z]{2,}[0-9_-][^-_]${2,40}");
 
+  /** The abc. */
   private static DataToQueryabc abc = new DataToQueryabc();
+
+  /** The d. */
   private static DataToQuery11 d = new DataToQuery11();
+
+  /** The d 2. */
   private static DataToQuery1par1 d2 = new DataToQuery1par1();
+
+  /** The d 3. */
   private static DataToQueryd d3 = new DataToQueryd();
+
+  /** The e. */
   private static DataToQuery12 e = new DataToQuery12();
+
+  /** The e 2. */
   private static DataToQuery12part1 e2 = new DataToQuery12part1();
+
+  /** The e 3. */
   private static DataToQuery11par1 e3 = new DataToQuery11par1();
+
+  /** The e 4. */
   private static DataToQuery2 e4 = new DataToQuery2();
+
+  /** The f. */
   private static DataToQuery21 f = new DataToQuery21();
+
+  /** The f 2. */
   private static DataToQuery2part1 f2 = new DataToQuery2part1();
+
+  /** The f 3. */
   private static DataToQuery21part1 f3 = new DataToQuery21part1();
+
+  /** The f 4. */
   private static DataToQuery22 f4 = new DataToQuery22();
+
+  /** The h. */
   private static DataToQueryh h = new DataToQueryh();
+
+  /** The h 2. */
   private static DataToQuery22part1 h2 = new DataToQuery22part1();
+
+  /** The i. */
   private static DataToQuery3 i = new DataToQuery3();
+
+  /** The i 2. */
   private static DataToQuery31 i2 = new DataToQuery31();
+
+  /** The i 3. */
   private static DataToQuery3part1 i3 = new DataToQuery3part1();
+
+  /** The i 4. */
   private static DataToQuery31part1 i4 = new DataToQuery31part1();
+
+  /** The i 5. */
   private static DataToQuery32 i5 = new DataToQuery32();
+
+  /** The lm. */
   private static DataToQuerylm lm = new DataToQuerylm();
+
+  /** The npr. */
   private static DataToQuery32part1 npr = new DataToQuery32part1();
+
+  /** The s. */
   private static DataToQuery4 s = new DataToQuery4();
+
+  /** The u. */
   private static DataToQuery41 u = new DataToQuery41();
 
 
@@ -124,6 +170,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * U.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean u(String value) {
     if (u.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
       return true;
@@ -132,6 +184,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * S.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean s(String value) {
     if (s.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
       return true;
@@ -140,6 +198,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * N.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean n(String value) {
     if (npr.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
       return true;
@@ -148,6 +212,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * L.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean l(String value) {
     if (lm.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
       return true;
@@ -156,6 +226,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * I.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean i(String value) {
     if (i.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || i2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
@@ -168,6 +244,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * H.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean h(String value) {
     if (h.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || h2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
@@ -177,6 +259,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * F.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean f(String value) {
     if (f.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || f2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
@@ -188,6 +276,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * E.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean e(String value) {
     if (e.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || e2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
@@ -199,6 +293,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * D.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean d(String value) {
     if (d.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
         || d2.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))
@@ -209,6 +309,12 @@ public class ForeingKeyDrools {
   }
 
 
+  /**
+   * A.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   private static Boolean a(String value) {
     if (abc.getListData().stream().anyMatch(datoString -> datoString.equalsIgnoreCase(value))) {
       return true;
@@ -235,6 +341,12 @@ public class ForeingKeyDrools {
     return false;
   }
 
+  /**
+   * Rule SVA.
+   *
+   * @param value the value
+   * @return the boolean
+   */
   public static Boolean ruleSVA(String value) {
 
     if ("".equalsIgnoreCase(value.trim())) {

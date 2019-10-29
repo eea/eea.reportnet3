@@ -46,6 +46,12 @@ public class TableVO implements Serializable {
    */
   private Long totalRecords;
 
+
+  /**
+   * The total records.
+   */
+  private Long totalFilteredRecords;
+
   /**
    * The validations.
    */

@@ -7,6 +7,7 @@ import { routes } from 'ui/routes';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { GlobalReleasedDashboard } from 'ui/views/_components/GlobalReleasedDashboard/';
@@ -82,7 +83,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <DataflowTitle />
+      <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
       <GlobalValidationDashboard dataflowId={match.params.dataflowId} />
       <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
     </>
