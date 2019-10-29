@@ -80,6 +80,7 @@
   --c-chart-correct: #99cc33;
   --c-chart-warning: #ffcc00;
   --c-chart-error: #cc3300;
+  --c-custom-gray: #c8c8c8;
 }
 body {
   margin: 0px;
