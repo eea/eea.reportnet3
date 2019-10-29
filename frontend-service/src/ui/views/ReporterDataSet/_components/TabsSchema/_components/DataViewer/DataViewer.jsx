@@ -19,7 +19,7 @@ import { DropdownFilter } from 'ui/views/ReporterDataSet/_components/DropdownFil
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
-import { DataTable } from 'primereact/datatable';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
@@ -40,6 +40,7 @@ const DataViewer = withRouter(
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
+    tableHasErrors,
     tableId,
     tableName,
     tableSchemaColumns,
@@ -197,6 +198,7 @@ const DataViewer = withRouter(
       });
       let editCol = (
         <Column
+          className={styles.validationCol}
           header={resources.messages['actions']}
           key="actions"
           body={row => actionTemplate(row)}
@@ -213,7 +215,7 @@ const DataViewer = withRouter(
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       }
 
-      if (visibleColumns.length > 0 && columnsArr.length != visibleColumns.length) {
+      if (visibleColumns.length > 0 && columnsArr.length !== visibleColumns.length) {
         const visibleKeys = visibleColumns.map(column => {
           return column.key;
         });
@@ -1106,10 +1108,10 @@ const DataViewer = withRouter(
             />
 
             <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              className={'p-button-rounded p-button-secondary'}
+              disabled={!tableHasErrors}
               icon="filter"
-              iconClasses={isFilterValidationsActive ? styles.filterActive : styles.filterInactive}
+              iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
               label={resources.messages['validationFilter']}
               onClick={event => {
                 filterMenuRef.current.show(event);

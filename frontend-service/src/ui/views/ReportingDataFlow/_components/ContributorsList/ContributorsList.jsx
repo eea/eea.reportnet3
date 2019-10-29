@@ -10,7 +10,7 @@ import { Button } from 'ui/views/_components/Button';
 import { DataTable } from 'ui/views/_components/DataTable';
 
 import { Column } from 'primereact/column';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 
 import { ContributorService } from 'core/services/Contributor';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
