@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 
 /**
@@ -95,4 +96,16 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    */
   void createGroupAndAddUser(Long datasetId);
+
+
+  /**
+   * Creates the field schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param fieldSchema the field schema
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchema, Long datasetId)
+      throws EEAException;
 }
