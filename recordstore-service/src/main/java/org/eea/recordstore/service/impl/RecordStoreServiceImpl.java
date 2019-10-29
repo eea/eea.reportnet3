@@ -200,7 +200,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     data.put("idDatasetSchema", idDatasetSchema);
     event.setData(data);
     kafkaSender.sendMessage(event);
-
+    LOG.info("Dataset with name {} created", datasetName);
   }
 
   /**

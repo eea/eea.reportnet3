@@ -1,11 +1,28 @@
 import React from 'react';
+
+import PropTypes from 'prop-types';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import isUndefined from 'lodash/isUndefined';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import styles from './VisibilityMenu.module.css';
+import styles from './DropdownFilter.module.css';
 
-class VisibilityMenu extends React.Component {
+class DropdownFilter extends React.Component {
+  static defaultProps = {
+    selectAll: false,
+    showFilters: undefined,
+    showNotCheckedFilters: undefined
+  };
+
+  static propTypes = {
+    selectAll: PropTypes.bool,
+    showFilters: PropTypes.func,
+    showNotCheckedFilters: PropTypes.func
+  };
+
   constructor(props) {
     super(props);
 
@@ -23,9 +40,9 @@ class VisibilityMenu extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { columns } = this.props;
-    if (prevProps.columns !== columns) {
-      const fields = columns.map(column => ({
+    const { filters } = this.props;
+    if (prevProps.filters !== filters) {
+      const fields = filters.map(column => ({
         checked: true,
         label: column.label,
         key: column.key
@@ -108,13 +125,24 @@ class VisibilityMenu extends React.Component {
         };
       },
       () => {
-        this.props.showColumns(
-          this.state.fields
-            .filter(field => field.checked)
-            .map(field => {
-              return field.key;
-            })
-        );
+        if (!isUndefined(this.props.showFilters)) {
+          this.props.showFilters(
+            this.state.fields
+              .filter(field => field.checked)
+              .map(field => {
+                return field.key;
+              })
+          );
+        }
+        if (!isUndefined(this.props.showNotCheckedFilters)) {
+          this.props.showNotCheckedFilters(
+            this.state.fields
+              .filter(field => !field.checked)
+              .map(field => {
+                return field.label;
+              })
+          );
+        }
       }
     );
   }
@@ -130,7 +158,7 @@ class VisibilityMenu extends React.Component {
     const { fields } = this.state;
     return (
       <div
-        className={`${styles.visibilityMenu} p-menu-overlay-visible`}
+        className={`${styles.dropdownFilter} p-menu-overlay-visible`}
         style={this.state.style}
         onClick={e => {
           this.menuClick(e);
@@ -154,4 +182,4 @@ class VisibilityMenu extends React.Component {
   }
 }
 
-export { VisibilityMenu };
+export { DropdownFilter };

@@ -28,7 +28,7 @@
   padding: 0.7rem 1rem 0.7rem 1rem;
 }
 .dropDownMenu ul .listItemEnabled:hover {
-  background: var(--grey-15);
+  background: var(--gray-15);
 }
 .dropDownMenu ul li a {
   color: var(--c-black-400);

@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * The enum Resource enum.
  */
-public enum ResourceEnum {
+public enum ResourceTypeEnum {
   /**
    * Dashboard resource enum.
    */
@@ -63,7 +63,7 @@ public enum ResourceEnum {
 
   private final String resource;
 
-  private ResourceEnum(String resource) {
+  private ResourceTypeEnum(String resource) {
     this.resource = resource;
   }
 
@@ -81,8 +81,9 @@ public enum ResourceEnum {
    * @return the resource enum
    */
   @JsonCreator
-  public static ResourceEnum fromValue(String value) {
-    return Arrays.stream(ResourceEnum.values()).filter(e -> e.resource.equals(value)).findFirst()
+  public static ResourceTypeEnum fromValue(String value) {
+    return Arrays.stream(ResourceTypeEnum.values()).filter(e -> e.resource.equals(value))
+        .findFirst()
         .get();
   }
 

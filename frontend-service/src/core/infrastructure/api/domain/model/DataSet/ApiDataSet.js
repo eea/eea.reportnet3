@@ -109,7 +109,16 @@ export const apiDataset = {
     });
     return response.data;
   },
-  errorsById: async (datasetId, pageNum, pageSize, sortField, asc) => {
+  errorsById: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    originsFilter
+  ) => {
     const tokens = userStorage.get();
     if (asc === -1) {
       asc = 0;
@@ -122,7 +131,10 @@ export const apiDataset = {
             pageNum: pageNum,
             pageSize: pageSize,
             sortField: sortField,
-            asc: asc
+            asc: asc,
+            levelErrorsFilter: levelErrorsFilter,
+            typeEntitiesFilter: typeEntitiesFilter,
+            originsFilter: originsFilter
           }),
       queryString: {},
       headers: {
@@ -193,7 +205,8 @@ export const apiDataset = {
     });
     return response.data;
   },
-  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields) => {
+  tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
+    levelError = levelError.join(',');
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -203,7 +216,8 @@ export const apiDataset = {
             tableSchemaId: tableSchemaId,
             pageNum: pageNum,
             pageSize: pageSize,
-            fields: fields
+            fields: fields,
+            levelError: levelError
           }),
       queryString: {},
       headers: {
@@ -271,6 +285,20 @@ export const apiDataset = {
       console.error(`Error updating dataset record data: ${error}`);
       return false;
     }
+  },
+  updateSchemaNameById: async (datasetId, datasetSchemaName) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDataSchemaName, {
+        datasetId,
+        datasetSchemaName
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
   },
   validateById: async datasetId => {
     const tokens = userStorage.get();

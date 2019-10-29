@@ -31,9 +31,9 @@ const Dashboard = withRouter(
 
     useEffect(() => {
       setDashboardColors({
-        CORRECT: '#004494',
-        WARNING: '#ffd617',
-        ERROR: '#DA2131'
+        CORRECT: '#99CC33',
+        WARNING: '#ffCC00',
+        ERROR: '#CC3300'
       });
     }, []);
 
@@ -65,19 +65,19 @@ const Dashboard = withRouter(
         datasets: [
           {
             label: 'Correct',
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : '#004494',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : '#99CC33',
             data: dataset.tableStatisticPercentages[0],
             totalData: tableStatisticValues
           },
           {
             label: 'Warning',
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : '#ffd617',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : '#ffCC00',
             data: dataset.tableStatisticPercentages[1],
             totalData: tableStatisticValues
           },
           {
             label: 'Error',
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : '#DA2131',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : '#CC3300',
             data: dataset.tableStatisticPercentages[2],
             totalData: tableStatisticValues
           }
@@ -145,7 +145,7 @@ const Dashboard = withRouter(
                           e.preventDefault();
                           onChangeColor(e.value, SEVERITY_CODE[type]);
                         }}
-                        value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
+                        value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#99CC33'}
                       />
                     </div>
                   );

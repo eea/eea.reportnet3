@@ -4,10 +4,13 @@ import moment from 'moment';
 
 import styles from './DataFlowItem.module.scss';
 
+import { routes } from 'ui/routes';
+
 import { Button } from 'ui/views/_components/Button';
 import { Icon } from 'ui/views/_components/Icon';
 import { Link } from 'react-router-dom';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { getUrl } from 'core/infrastructure/api/getUrl';
 
 import { DataflowService } from 'core/services/DataFlow';
 
@@ -48,7 +51,15 @@ export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
             : `${styles.container}`
         }>
         {listType === 'accepted' ? (
-          <Link className={styles.containerLink} to={`/dataflow/${itemContent.id}`}>
+          <Link
+            className={styles.containerLink}
+            to={getUrl(
+              routes.DATAFLOW,
+              {
+                dataflowId: itemContent.id
+              },
+              true
+            )}>
             {children}
           </Link>
         ) : (

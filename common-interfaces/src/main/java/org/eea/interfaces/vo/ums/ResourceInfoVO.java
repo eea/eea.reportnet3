@@ -1,11 +1,12 @@
 package org.eea.interfaces.vo.ums;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 
 /**
  * The type Group info vo.
@@ -16,9 +17,9 @@ import lombok.ToString;
 public class ResourceInfoVO {
 
   /**
-   * The id.
+   * The resource id.
    */
-  private String id;
+  private Long resourceId;
 
   /**
    * The name.
@@ -31,7 +32,17 @@ public class ResourceInfoVO {
   private String path;
 
   /**
+   * The Resource type enum.
+   */
+  private ResourceTypeEnum resourceTypeEnum;
+  /**
    * The Attributes.
    */
-  public Map<String, List<String>> attributes;
+  private Map<String, List<String>> attributes;
+
+
+  /**
+   * The Security role enum.
+   */
+  private SecurityRoleEnum securityRoleEnum;
 }

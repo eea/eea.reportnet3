@@ -1,6 +1,6 @@
 .infoTablePaste {
   border-style: dashed;
-  border-color: var(--gray);
+  border-color: var(--gray-75);
   opacity: 0.5;
   height: 34vh;
   display: flex;
@@ -20,6 +20,7 @@
 }
 .infoTableData {
 }
+
 .infoTableData tr td {
   padding: 0px !important;
 }

@@ -1,4 +1,4 @@
-.visibilityMenu {
+.dropdownFilter {
   position: absolute;
   cursor: pointer;
   font-size: 0.8rem;
@@ -13,21 +13,22 @@
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   font-size: 0.9rem;
   opacity: 0;
+  user-select: none;
 }
-.visibilityMenu ul {
+.dropdownFilter ul {
   list-style: none;
   padding: 0px;
 }
 
-.visibilityMenu ul li a {
+.dropdownFilter ul li a {
   color: var(--c-black-400);
 }
-.visibilityMenu ul li a:hover {
+.dropdownFilter ul li a:hover {
   color: var(--c-black-400);
   background-color: rgba(0, 0, 0, 0);
 }
 
-.visibilityMenu ul li a svg {
+.dropdownFilter ul li a svg {
   margin-right: 0.5rem;
 }
 .isNotChecked {

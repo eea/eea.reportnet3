@@ -51,10 +51,10 @@ public class StatsHelperTest {
     dataset.setId(1L);
     datasets.add(dataset);
     DataFlowVO df = new DataFlowVO();
-    df.setDatasets(datasets);
+    df.setReportingDatasets(datasets);
 
 
-    when(dataflowService.getDatasetsId(Mockito.anyLong())).thenReturn(df);
+    when(dataflowService.getReportingDatasetsId(Mockito.anyLong())).thenReturn(df);
     when(datasetController.getStatisticsById(Mockito.anyLong())).thenReturn(new StatisticsVO());
     statisticsHelper.executeStatsProcess(1L);
 

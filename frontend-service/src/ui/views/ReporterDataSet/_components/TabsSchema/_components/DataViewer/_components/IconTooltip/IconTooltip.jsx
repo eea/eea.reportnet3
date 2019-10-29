@@ -4,12 +4,13 @@ import styles from './IconTooltip.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 
-export const IconTooltip = ({ levelError, message }) => {
+export const IconTooltip = ({ levelError, message, style }) => {
   const buttonProps = {
     type: 'button',
     icon: '',
     tooltip: message,
-    className: ''
+    className: '',
+    style: style
   };
 
   switch (levelError) {

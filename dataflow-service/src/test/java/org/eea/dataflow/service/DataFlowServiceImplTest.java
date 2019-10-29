@@ -25,9 +25,10 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -153,11 +154,18 @@ public class DataFlowServiceImplTest {
     reportingDatasetVO.setId(1L);
     List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
     reportingDatasetVOs.add(reportingDatasetVO);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceEnum.class)))
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVOs.add(designDatasetVO);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findDataSetIdByDataflowId(1L)).thenReturn(reportingDatasetVOs);
-    dataFlowVO.setDatasets(reportingDatasetVOs);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
   }
 
@@ -221,13 +229,10 @@ public class DataFlowServiceImplTest {
     resource.setId(1L);
     List<ResourceAccessVO> resources = new ArrayList<>();
     resources.add(resource);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(resources);
 
     Optional<Dataflow> df2 = Optional.of(df.getDataflow());
-    when(dataflowRepository.findById(Mockito.any())).thenReturn(df2);
-
-    when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
 
     dataflowServiceImpl.getPendingAccepted(Mockito.any());
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getPendingAccepted(Mockito.any()));
@@ -379,7 +384,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void testGetDatasetsId() throws EEAException {
 
-    dataflowServiceImpl.getDatasetsId(1L);
+    dataflowServiceImpl.getReportingDatasetsId(1L);
   }
 
 
@@ -391,7 +396,7 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void testGetDatasetsIdError() throws EEAException {
 
-    dataflowServiceImpl.getDatasetsId(null);
+    dataflowServiceImpl.getReportingDatasetsId(null);
   }
 
 
@@ -399,6 +404,7 @@ public class DataFlowServiceImplTest {
    * Gets the metabase by id throws.
    *
    * @return the metabase by id throws
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -411,6 +417,7 @@ public class DataFlowServiceImplTest {
    * Gets the metabase by id.
    *
    * @return the metabase by id
+   *
    * @throws EEAException the EEA exception
    */
   @Test
