@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { isUndefined } from 'lodash';
 
+import colors from 'conf/colors.json';
+
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Paginator } from 'primereact/paginator';
 import { ScrollableView } from './_components/ScrollableView';
@@ -584,7 +586,9 @@ export class DataTable extends Component {
     if (!correctColumns) {
       return (
         <div>
-          <p style={{ fontWeight: 'bold', color: '#DA2131' }}>Warning! There are rows with a wrong number of columns</p>
+          <p style={{ fontWeight: 'bold', color: colors.errors }}>
+            Warning! There are rows with a wrong number of columns
+          </p>
           <p>Do you still want to paste this data?</p>
         </div>
       );

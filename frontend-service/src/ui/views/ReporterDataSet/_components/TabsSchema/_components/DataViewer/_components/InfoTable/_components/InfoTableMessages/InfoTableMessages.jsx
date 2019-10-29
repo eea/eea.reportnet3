@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import { isUndefined } from 'lodash';
 
+import colors from 'conf/colors.json';
+
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const InfoTableMessages = ({ data, filteredColumns, numRecords }) => {
@@ -18,9 +20,11 @@ export const InfoTableMessages = ({ data, filteredColumns, numRecords }) => {
         if (equalNumberColumns.length > 0) {
           return (
             <div>
-              <p style={{ fontWeight: 'bold', color: '#DA2131' }}>{resources.messages['pasteColumnWarningMessage']}</p>
+              <p style={{ fontWeight: 'bold', color: colors.errors }}>
+                {resources.messages['pasteColumnWarningMessage']}
+              </p>
               {numRecords > 500 ? (
-                <p style={{ fontWeight: 'bold', color: '#DA2131' }}>
+                <p style={{ fontWeight: 'bold', color: colors.errors }}>
                   {resources.messages['pasteRecordsWarningMessage']}
                 </p>
               ) : null}
