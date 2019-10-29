@@ -194,10 +194,10 @@ const schemaById = async dataflowId => {
   const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
   //reorder tables alphabetically
   datasetSchemaDTO.tableSchemas = datasetSchemaDTO.tableSchemas.sort(function(a, b) {
-    if (a.nameTableSchema < b.nameTableSchema) {
+    if (a.nameTableSchema.toUpperCase() < b.nameTableSchema.toUpperCase()) {
       return -1;
     }
-    if (a.nameTableSchema > b.nameTableSchema) {
+    if (a.nameTableSchema.toUpperCase() > b.nameTableSchema.toUpperCase()) {
       return 1;
     }
     return 0;
