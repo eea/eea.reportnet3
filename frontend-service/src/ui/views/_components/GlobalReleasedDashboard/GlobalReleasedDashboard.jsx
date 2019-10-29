@@ -4,6 +4,8 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './GlobalReleasedDashboard.module.css';
 
+import colors from 'conf/colors.json';
+
 import { Chart } from 'primereact/chart';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -64,12 +66,12 @@ export const GlobalReleasedDashboard = dataflowId => {
       datasets: [
         {
           label: resources.messages['released'],
-          backgroundColor: '#339900',
+          backgroundColor: colors.green400,
           data: releasedData.map(dataset => dataset.isReleased)
         },
         {
           label: resources.messages['unreleased'],
-          backgroundColor: '#D0D0CE',
+          backgroundColor: colors.gray25,
           data: releasedData.map(dataset => !dataset.isReleased)
         }
       ]

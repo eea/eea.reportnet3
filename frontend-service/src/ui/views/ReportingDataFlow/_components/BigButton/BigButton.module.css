@@ -26,7 +26,7 @@
 }
 
 .designDatasetSchema {
-  background-color: #009490;
+  background-color: var(--c-blue-green);
   color: var(--white);
   display: flex;
   flex-direction: column;
@@ -40,11 +40,11 @@
 }
 .designDatasetSchema a:hover {
   color: var(--white);
-  background-color: #027470;
+  background-color: var(--c-aquamarine);
 }
 
 .documents {
-  background-color: #ffba01;
+  background-color: var(--c-orange-200);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -78,7 +78,7 @@
   z-index: 1000;
   padding: 0 0.8rem;
   color: var(--c-black-400);
-  border: 1px solid #c8c8c8;
+  border: 1px solid var(--custom-gray);
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   font-size: 0.9rem;
   opacity: 0;
