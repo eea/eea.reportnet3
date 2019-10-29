@@ -46,7 +46,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   /**
    * The dataflow service.
    */
@@ -58,7 +57,6 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Autowired
   private StatsHelper statisticsHelper;
-
 
   /**
    * Find by id.

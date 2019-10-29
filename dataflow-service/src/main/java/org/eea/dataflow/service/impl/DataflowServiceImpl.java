@@ -2,7 +2,6 @@ package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
@@ -162,6 +161,7 @@ public class DataflowServiceImpl implements DataflowService {
       dfs.add(df.getDataflow());
     }
     List<DataFlowVO> dataflowVOs = dataflowNoContentMapper.entityListToClass(dfs);
+
     // Adding the user request type to the VO (pending/accepted/rejected)
     for (DataflowWithRequestType df : dataflows) {
       for (int i = 0; i < dataflowVOs.size(); i++) {
@@ -171,17 +171,17 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     }
+
     // Get user's dataflows
-    List<ResourceAccessVO> usersDataflows =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-    for (ResourceAccessVO userDataflow : usersDataflows) {
-      Optional<Dataflow> df = dataflowRepository.findById(userDataflow.getId());
-      if (df.isPresent()) {
-        DataFlowVO dfVO = dataflowNoContentMapper.entityToClass(df.get());
-        dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
-        dataflowVOs.add(dfVO);
-      }
-    }
+    dataflowRepository
+        .findAllById(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()))
+        .forEach(dataflow -> {
+          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+          dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
+          dataflowVOs.add(dataflowVO);
+        });
+
     return dataflowVOs;
   }
 

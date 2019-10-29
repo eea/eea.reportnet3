@@ -6,7 +6,7 @@ import styles from './InfoTable.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { IconTooltip } from '../IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
 
