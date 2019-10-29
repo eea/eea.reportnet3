@@ -55,12 +55,6 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * The Constant LOG_ERROR.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetMetabaseControllerImpl.class);
-
-
-  /**
-   * The Constant LOG_ERROR.
-   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**

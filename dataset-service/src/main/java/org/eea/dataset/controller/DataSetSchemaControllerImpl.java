@@ -9,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,6 +241,28 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
+    }
+  }
+
+  /**
+   * Creates the data schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param fieldSchema the field schema
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/{idTableSchema}/createFieldSchema/{datasetId}",
+      method = RequestMethod.POST)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  public void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
+      @PathVariable("datasetId") Long datasetId, @RequestBody final FieldSchemaVO fieldSchema) {
+    try {
+      dataschemaService.createFieldSchema(idTableSchema, fieldSchema, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 }
