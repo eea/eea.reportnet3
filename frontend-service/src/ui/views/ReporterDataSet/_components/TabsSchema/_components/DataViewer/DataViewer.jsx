@@ -106,6 +106,13 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
         setFilterLevelError(['ERROR', 'WARNING', 'CORRECT']);
+
+        setValidationDropdownFilter([
+          { label: resources.messages['error'], key: 'ERROR' },
+          { label: resources.messages['warning'], key: 'WARNING' },
+          { label: resources.messages['correct'], key: 'CORRECT' }
+        ]);
+        setIsFilterValidationsActive(false);
         contextReporterDataset.setIsValidationSelected(false);
       }
     }, [contextReporterDataset.isValidationSelected]);
@@ -127,6 +134,7 @@ const DataViewer = withRouter(
       }
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
+
       setValidationDropdownFilter([
         { label: resources.messages['error'], key: 'ERROR' },
         { label: resources.messages['warning'], key: 'WARNING' },
