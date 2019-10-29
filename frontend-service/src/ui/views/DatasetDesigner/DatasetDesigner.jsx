@@ -27,7 +27,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
     params: { dataflowId, datasetId }
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
-  const [datasetSchemaName, setDatasetSchemaName] = useState();
+  const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
