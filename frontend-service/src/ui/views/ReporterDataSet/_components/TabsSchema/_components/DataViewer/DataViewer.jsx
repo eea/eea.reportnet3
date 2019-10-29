@@ -23,6 +23,7 @@ import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
+import { ReporterDatasetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
@@ -47,7 +48,6 @@ const DataViewer = withRouter(
     },
     history
   }) => {
-    //const contextReporterDataset = useContext(ReporterDatasetContext);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -90,6 +90,7 @@ const DataViewer = withRouter(
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
     const [visibleColumns, setVisibleColumns] = useState([]);
 
+    const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
 
@@ -100,6 +101,13 @@ const DataViewer = withRouter(
     let dropdownFilterRef = useRef();
     let filterMenuRef = useRef();
     let growlRef = useRef();
+
+    useEffect(() => {
+      if (contextReporterDataset.isValidationSelected) {
+        setFilterLevelError(['ERROR', 'WARNING', 'CORRECT']);
+        contextReporterDataset.setIsValidationSelected(false);
+      }
+    }, [contextReporterDataset.isValidationSelected]);
 
     useEffect(() => {
       setExportButtonsList(
@@ -232,7 +240,7 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      setIsFilterValidationsActive(filteredKeys.length != 3);
+      setIsFilterValidationsActive(filteredKeys.length !== 3);
       setFirstRow(0);
       setFilterLevelError(filteredKeys);
     };
@@ -1040,7 +1048,7 @@ const DataViewer = withRouter(
     );
 
     return (
-      <div>
+      <>
         <Toolbar className={styles.dataViewerToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -1050,6 +1058,7 @@ const DataViewer = withRouter(
               label={resources.messages['import']}
               onClick={() => setImportDialogVisible(true)}
             />
+
             <Button
               disabled={!hasWritePermissions}
               id="buttonExportTable"
@@ -1067,6 +1076,7 @@ const DataViewer = withRouter(
               id="exportTableMenu"
               onShow={e => getExportButtonPosition(e)}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={!hasWritePermissions || isWebFormMMR || isUndefined(totalRecords)}
@@ -1074,6 +1084,7 @@ const DataViewer = withRouter(
               label={resources.messages['deleteTable']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
@@ -1093,6 +1104,7 @@ const DataViewer = withRouter(
                 getExportButtonPosition(e);
               }}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
@@ -1114,6 +1126,7 @@ const DataViewer = withRouter(
                 getExportButtonPosition(e);
               }}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
@@ -1121,12 +1134,14 @@ const DataViewer = withRouter(
               label={resources.messages['filters']}
               onClick={() => {}}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
               icon={'groupBy'}
               label={resources.messages['groupBy']}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
@@ -1298,7 +1313,7 @@ const DataViewer = withRouter(
           visible={editDialogVisible}>
           <div className="p-grid p-fluid">{editRecordForm}</div>
         </Dialog>
-      </div>
+      </>
     );
   }
 );

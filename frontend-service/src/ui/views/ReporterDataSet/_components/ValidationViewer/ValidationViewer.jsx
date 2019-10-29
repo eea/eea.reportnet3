@@ -150,17 +150,23 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
+      console.log('levelErrorsDeselected', levelErrorsDeselected);
       levelErrorsDeselected = levelErrorsDeselected.map(filter => {
         return filter.toString().toUpperCase();
       });
+
       setLevelErrorsFilter(levelErrorsDeselected);
+
       setIsFilteredLevelErrors(isFiltered(allLevelErrorsFilter, levelErrorsDeselected));
+
       if (levelErrorsDeselected.length <= 0) {
         checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
       } else {
         setAreActiveFilters(true);
       }
+
       onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsDeselected, typeEntitiesFilter, originsFilter);
+
       setFirstRow(0);
     };
 
@@ -180,6 +186,7 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadErrorsWithOriginsFilter = originsDeselected => {
+      console.log('originsDeselected', originsDeselected);
       setOriginsFilter(originsDeselected);
       if (originsDeselected.length <= 0) {
         checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
@@ -253,6 +260,7 @@ const ValidationViewer = React.memo(
         case 'FIELD':
         case 'RECORD':
           const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
+          contextReporterDataset.setIsValidationSelected(true);
           contextReporterDataset.onSelectValidation(
             event.data.tableSchemaId,
             datasetError.position,
@@ -287,7 +295,7 @@ const ValidationViewer = React.memo(
     };
 
     return (
-      <div>
+      <>
         {!isUndefined(buttonsList) ? (
           buttonsList
         ) : (
@@ -302,6 +310,7 @@ const ValidationViewer = React.memo(
                 }}
                 iconClasses={isFilteredOrigins ? styles.filterActive : styles.filterInactive}
               />
+
               <DropdownFilter
                 disabled={isLoading}
                 filters={allOriginsFilter}
@@ -313,6 +322,7 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
+
               <Button
                 className={`${styles.level} p-button-rounded p-button-secondary`}
                 icon={'filter'}
@@ -322,6 +332,7 @@ const ValidationViewer = React.memo(
                 }}
                 iconClasses={isFilteredLevelErrors ? styles.filterActive : styles.filterInactive}
               />
+
               <DropdownFilter
                 disabled={isLoading}
                 filters={allLevelErrorsFilter}
@@ -333,6 +344,7 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
+
               <Button
                 className={`p-button-rounded p-button-secondary`}
                 // icon={'eye'}
@@ -343,6 +355,7 @@ const ValidationViewer = React.memo(
                 }}
                 iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
               />
+
               <DropdownFilter
                 disabled={isLoading}
                 filters={allTypeEntitiesFilter}
@@ -354,6 +367,7 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
+
               <Button
                 className={`p-button-rounded p-button-secondary`}
                 disabled={!areActiveFilters}
@@ -378,7 +392,7 @@ const ValidationViewer = React.memo(
             </div>
           </Toolbar>
         )}
-        <div>
+        <>
           <DataTable
             autoLayout={true}
             className={styles.showValidationsData}
@@ -402,8 +416,8 @@ const ValidationViewer = React.memo(
             value={fetchedData}>
             {columns}
           </DataTable>
-        </div>
-      </div>
+        </>
+      </>
     );
   }
 );
