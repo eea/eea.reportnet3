@@ -2,6 +2,8 @@ import React from 'react';
 
 import { config } from 'conf';
 
-export const Icon = ({ icon, style }) => {
-  return <i className={config.icons[icon]} style={style} />;
+export const Icon = ({ className, icon, style, onClick, onMouseOver }) => {
+  return (
+    <i className={`${config.icons[icon]} ${className}`} style={style} onClick={onClick} onMouseOver={onMouseOver} />
+  );
 };
