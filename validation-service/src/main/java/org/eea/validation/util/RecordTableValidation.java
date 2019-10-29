@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class RecordTableValidation.
+ */
 @Component("recordTableValidation")
 public class RecordTableValidation {
 
@@ -15,12 +18,25 @@ public class RecordTableValidation {
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
+  /**
+   * Sets the dataset repository.
+   *
+   * @param validationService the new dataset repository
+   */
   @Autowired
   private void setDatasetRepository(ValidationService validationService) {
     RecordTableValidation.validationService = validationService;
   }
 
 
+  /**
+   * RD 03 A rule.
+   *
+   * @param idDataset the id dataset
+   * @param idSchemaGroupIdentifier the id schema group identifier
+   * @param idSchemaBathingWaterIdentifier the id schema bathing water identifier
+   * @return the boolean
+   */
   ////////////////////////// PART OF CHARACTERIZTION////////////////////////////////
   public static Boolean RD03ARule(Long idDataset, String idSchemaGroupIdentifier,
       String idSchemaBathingWaterIdentifier) {
@@ -43,6 +59,13 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 03 B rule.
+   *
+   * @param idDataset the id dataset
+   * @param datasetLegazy the dataset legazy
+   * @return the boolean
+   */
   public static Boolean RD03BRule(Long idDataset, Long datasetLegazy) {
 
     String RD03BRule = "   with characterization as( SELECT  "
@@ -73,6 +96,13 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 03 C rule.
+   *
+   * @param idDataset the id dataset
+   * @param datasetLegazy the dataset legazy
+   * @return the boolean
+   */
   public static Boolean RD03CRule(Long idDataset, Long datasetLegazy) {
 
     String RD03CRule = "with characterization as(" + " SELECT "
@@ -103,6 +133,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 B rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20BRule(Long idDataset) {
 
     String RD20BRule = "with MonitoringResult as(SELECT  season.season as season, "
@@ -166,6 +202,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 C rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20CRule(Long idDataset) {
 
     String RD20CRule = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  "
@@ -247,6 +289,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 D rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20DRule(Long idDataset) {
 
     String RD20DRule = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  "
@@ -321,6 +369,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 E rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20ERule(Long idDataset) {
 
     String RD20ERule = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  "
@@ -379,6 +433,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 F rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20FRule(Long idDataset) {
 
     String RD20FRule = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  "
@@ -449,6 +509,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 G rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20GRule(Long idDataset) {
 
     String RD20GRule = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  "
@@ -519,6 +585,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 20 H rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD20HRule(Long idDataset) {
 
     String RD20HRule = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  "
@@ -574,6 +646,12 @@ public class RecordTableValidation {
 
   }
 
+  /**
+   * RD 12 D rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD12DRule(Long idDataset) {
     String RD12D = "";
     String MessageError =
@@ -583,6 +661,12 @@ public class RecordTableValidation {
     return true;
   }
 
+  /**
+   * RD 11 E rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD11ERule(Long idDataset) {
     String RD11E = " ";
     String MessageError =
@@ -592,6 +676,12 @@ public class RecordTableValidation {
     return true;
   }
 
+  /**
+   * RD 11 F rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD11FRule(Long idDataset) {
 
     String RD11F = "";
@@ -603,6 +693,12 @@ public class RecordTableValidation {
   }
 
 
+  /**
+   * RD 17 B rule.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean RD17BRule(Long idDataset) {
 
     String RD17B = "WITH  " + "SeasonalPeriod AS (  " + "    SELECT  " + "        (select  "
