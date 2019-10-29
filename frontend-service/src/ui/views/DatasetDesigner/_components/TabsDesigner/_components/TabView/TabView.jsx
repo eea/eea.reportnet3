@@ -76,6 +76,14 @@ export const TabView = ({
     setDeleteDialogVisible(true);
   };
 
+  const onTabMouseWheel = deltaY => {
+    if (deltaY > 0) {
+      scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
+    } else {
+      scrollTo(divTabsRef.current.scrollLeft + divTabsRef.current.clientWidth * 0.75, 0);
+    }
+  };
+
   const createContent = (tab, index) => {
     const selected = isSelected(index);
     const className = classNames(tab.props.contentClassName, 'p-tabview-panel', { 'p-hidden': !selected });
@@ -133,6 +141,7 @@ export const TabView = ({
           onTabEditingHeader(false);
         }}
         onTabEditingHeader={onTabEditingHeader}
+        onTabMouseWheel={onTabMouseWheel}
         onTabNameError={onTabNameError}
         rightIcon={tab.props.rightIcon}
         selected={selected}

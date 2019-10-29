@@ -29,6 +29,7 @@ export const Tab = ({
   onTabDragAndDrop,
   onTabEditingHeader,
   onTabHeaderClick,
+  onTabMouseWheel,
   onTabNameError,
   rightIcon,
   scrollTo,
@@ -164,6 +165,9 @@ export const Tab = ({
               }
             }
           }
+        }}
+        onWheel={e => {
+          onTabMouseWheel(e.deltaY);
         }}
         onClick={e => {
           onTabHeaderClick(e);
