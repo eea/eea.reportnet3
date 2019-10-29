@@ -1,6 +1,7 @@
 package org.eea.multitenancy;
 
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEARuntimeException;
 import org.eea.thread.ThreadPropertiesManager;
 
@@ -8,13 +9,6 @@ import org.eea.thread.ThreadPropertiesManager;
  * The type Tenant resolver.
  */
 public final class TenantResolver extends ThreadPropertiesManager {
-
-
-
-  /**
-   * The Constant DEFAULT_TENANT. Bust be default
-   */
-  public static String initTenant = "dataset_1";
 
 
   /**
@@ -32,15 +26,16 @@ public final class TenantResolver extends ThreadPropertiesManager {
    * @return the tenant name
    */
   public static String getTenantName() {
-    if ("".equals(initTenant)) {// application is started already
-      if (null == thread.get() || thread.get().isEmpty()) {
-        throw new EEARuntimeException("Error, connection id is null or empty");
+    Map<String, Object> properties = thread.get();
+    String datasetName = "";
+    if (null != properties && !properties.isEmpty()) {
+      Object value = properties.get("datasetName");
+      if (null != value && StringUtils.isNotEmpty(value.toString())) {
+        datasetName = value.toString();
       }
     }
 
-    return null == thread.get() || thread.get().isEmpty() ? initTenant
-        : thread.get().get("datasetName").toString();
-
+    return datasetName;
 
   }
 

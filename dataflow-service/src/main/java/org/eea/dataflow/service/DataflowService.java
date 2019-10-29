@@ -120,7 +120,7 @@ public interface DataflowService {
    * @return the datasets id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getDatasetsId(Long id) throws EEAException;
+  DataFlowVO getReportingDatasetsId(Long idDataflow) throws EEAException;
 
 
   /**

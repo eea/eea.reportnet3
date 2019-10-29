@@ -3,8 +3,8 @@ package org.eea.lock.service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.lock.enums.LockType;
 import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockType;
 
 public interface LockService {
 

@@ -5,8 +5,8 @@ import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -89,7 +89,7 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/resources_by_type", method = RequestMethod.GET)
   List<ResourceAccessVO> getResourcesByUser(
-      @RequestParam("resourceType") ResourceEnum resourceType);
+      @RequestParam("resourceType") ResourceTypeEnum resourceType);
 
   /**
    * Gets resources by user.
@@ -111,7 +111,8 @@ public interface UserManagementController {
    * @return the resources by user
    */
   @RequestMapping(value = "/resources_by_type_role", method = RequestMethod.GET)
-  List<ResourceAccessVO> getResourcesByUser(@RequestParam("resourceType") ResourceEnum resourceType,
+  List<ResourceAccessVO> getResourcesByUser(
+      @RequestParam("resourceType") ResourceTypeEnum resourceType,
       @RequestParam("securityRole") SecurityRoleEnum securityRole);
 
   /**
@@ -132,15 +133,5 @@ public interface UserManagementController {
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
-  /**
-   * Gets resource detail.
-   *
-   * @param idResource the id resource
-   * @param resourceGroupEnum the resource group enum
-   *
-   * @return the resource detail
-   */
-  @GetMapping("/resource/details")
-  ResourceInfoVO getResourceDetail(@RequestParam("idResource") Long idResource,
-      @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
+
 }

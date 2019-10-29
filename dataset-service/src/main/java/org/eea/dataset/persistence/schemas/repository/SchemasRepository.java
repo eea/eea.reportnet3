@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.eea.dataset.persistence.schemas.repository;
 
@@ -13,7 +13,8 @@ import org.springframework.data.mongodb.repository.Query;
  *
  * @author Mario Severa
  */
-public interface SchemasRepository extends MongoRepository<DataSetSchema, ObjectId> {
+public interface SchemasRepository
+    extends MongoRepository<DataSetSchema, ObjectId>, ExtendedSchemaRepository {
 
   /**
    * Find schema by id flow.
@@ -23,8 +24,8 @@ public interface SchemasRepository extends MongoRepository<DataSetSchema, Object
    */
   @Query("{'idDataFlow': ?0}")
   DataSetSchema findSchemaByIdFlow(Long idFlow);
-  
-  
+
+
   /**
    * Find by id data set schema.
    *
@@ -32,5 +33,6 @@ public interface SchemasRepository extends MongoRepository<DataSetSchema, Object
    * @return the data set schema
    */
   DataSetSchema findByIdDataSetSchema(ObjectId idDatasetSchema);
+
 
 }

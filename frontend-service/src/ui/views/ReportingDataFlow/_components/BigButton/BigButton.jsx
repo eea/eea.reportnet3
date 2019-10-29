@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './BigButton.module.css';
 
@@ -9,9 +10,48 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
+import { InputText } from 'ui/views/_components/InputText';
 
-export const BigButton = ({ caption, handleRedirect, isReleased, layout, model }) => {
+export const BigButton = ({
+  caption,
+  handleRedirect,
+  isNameEditable,
+  isReleased,
+  layout,
+  model,
+  onNameEdit,
+  onSaveError,
+  onSaveName,
+  placeholder
+}) => {
+  const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
+  const [initialValue, setInitialValue] = useState();
+
   const newDatasetRef = useRef();
+
+  const onEditorKeyChange = event => {
+    if (event.key === 'Enter') {
+      if (!isEmpty(buttonsTitle)) {
+        onSaveName(event.target.value);
+        onNameEdit();
+      } else {
+        if (!isUndefined(onSaveError)) {
+          onSaveError();
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+        }
+      }
+    } else if (event.key === 'Escape') {
+      if (!isEmpty(initialValue)) {
+        setButtonsTitle(initialValue);
+        onNameEdit();
+      }
+    }
+  };
+
+  const onEditorValueFocus = value => {
+    setInitialValue(value);
+  };
+
   const dataset = model ? (
     <>
       <div className={`${styles.bigButton} ${styles.dataset}`}>
@@ -71,7 +111,35 @@ export const BigButton = ({ caption, handleRedirect, isReleased, layout, model }
           iconStyle={{ fontSize: '1.8rem' }}
         />
       </div>
-      <p className={styles.caption}>{caption}</p>
+      {!isUndefined(isNameEditable) && isNameEditable ? (
+        <InputText
+          autoFocus={true}
+          className={`${styles.inputText}`}
+          onBlur={e => {
+            if (!isEmpty(buttonsTitle)) {
+              onSaveName(e.target.value);
+              onNameEdit();
+            } else {
+              if (!isUndefined(onSaveError)) {
+                document.getElementsByClassName('p-inputtext p-component')[0].focus();
+                onSaveError();
+              }
+            }
+          }}
+          onChange={e => setButtonsTitle(e.target.value)}
+          onFocus={e => {
+            e.preventDefault();
+            onEditorValueFocus(e.target.value);
+          }}
+          onKeyDown={e => onEditorKeyChange(e)}
+          placeholder={placeholder}
+          value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+        />
+      ) : (
+        <p className={styles.caption} onDoubleClick={onNameEdit}>
+          {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+        </p>
+      )}
     </>
   ) : (
     <></>

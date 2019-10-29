@@ -396,6 +396,10 @@ const updateRecordsById = async (datasetId, record) => {
   return recordAdded;
 };
 
+const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
+  return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
+};
+
 const validateDataById = async datasetId => {
   const dataValidation = await apiDataset.validateById(datasetId);
   return dataValidation;
@@ -425,6 +429,7 @@ export const ApiDatasetRepository = {
   tableDataById,
   updateFieldById,
   updateRecordsById,
+  updateSchemaNameById,
   validateDataById,
   webFormDataById
 };
