@@ -438,7 +438,7 @@ const ValidationViewer = React.memo(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={totalRecords}
+            totalRecords={totalFilteredRecords}
             selectionMode="single"
             value={fetchedData}>
             {columns}

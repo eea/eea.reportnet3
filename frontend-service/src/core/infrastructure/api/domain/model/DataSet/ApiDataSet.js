@@ -282,6 +282,7 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log('Table response', response.data);
     return response.data;
   },
   updateFieldById: async (datasetId, datasetTableRecords) => {
