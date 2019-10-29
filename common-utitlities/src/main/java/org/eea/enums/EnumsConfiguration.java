@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * The Class EnumsConfiguration.
+ */
 @Configuration
 public class EnumsConfiguration implements WebMvcConfigurer {
 

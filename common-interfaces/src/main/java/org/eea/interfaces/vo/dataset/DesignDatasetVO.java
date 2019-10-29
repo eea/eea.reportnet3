@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 
-
 @Getter
 @Setter
 @ToString
@@ -25,6 +24,7 @@ public class DesignDatasetVO implements Serializable {
   /** The creation date. */
   private Date creationDate;
 
+  /** The status. */
   private String status;
 
 }

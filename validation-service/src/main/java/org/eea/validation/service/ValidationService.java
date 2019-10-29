@@ -74,6 +74,7 @@ public interface ValidationService {
    * Validate table.
    *
    * @param datasetId the dataset id
+   * @param idTable the id table
    * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
@@ -268,6 +269,12 @@ public interface ValidationService {
   Boolean datasetValidationDC03Query(String DC03);
 
 
+  /**
+   * Dataset validation DC 02 B query.
+   *
+   * @param DC03 the dc03
+   * @return the boolean
+   */
   Boolean datasetValidationDC02BQuery(String DC03);
   /// PART TABLE
 
@@ -283,15 +290,30 @@ public interface ValidationService {
   /**
    * Table validation query non return result.
    *
-   * @param QUERY the query
+   * @param queryValidate the query validate
    * @return the boolean
    */
   Boolean tableValidationQueryNonReturnResult(String queryValidate);
 
 
+  /**
+   * Table validation query return result.
+   *
+   * @param queryValidate the query validate
+   * @return the boolean
+   */
   Boolean tableValidationQueryReturnResult(String queryValidate);
 
 
+  /**
+   * Table record R ids.
+   *
+   * @param queryValidate the query validate
+   * @param MessageError the message error
+   * @param typeError the type error
+   * @param originName the origin name
+   * @return the boolean
+   */
   Boolean tableRecordRIds(String queryValidate, String MessageError, TypeErrorEnum typeError,
       String originName);
 

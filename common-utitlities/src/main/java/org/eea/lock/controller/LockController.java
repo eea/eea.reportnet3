@@ -10,23 +10,43 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The Class LockController.
+ */
 @RestController
 @RequestMapping("/lock")
 public class LockController {
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
+  /**
+   * Removes the lock.
+   *
+   * @param lockId the lock id
+   */
   @PostMapping("/remove/{lockId}")
   public void removeLock(@PathVariable("lockId") final Integer lockId) {
     lockService.removeLock(lockId);
   }
 
+  /**
+   * Find all locks.
+   *
+   * @return the list
+   */
   @GetMapping("/findAll")
   public List<LockVO> findAllLocks() {
     return lockService.findAll();
   }
 
+  /**
+   * Find one lock.
+   *
+   * @param lockId the lock id
+   * @return the lock VO
+   */
   @GetMapping("/findOne/{lockId}")
   public LockVO findOneLock(@PathVariable("lockId") final Integer lockId) {
     return lockService.findLock(lockId);

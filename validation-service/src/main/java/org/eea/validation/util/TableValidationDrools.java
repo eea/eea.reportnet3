@@ -19,6 +19,11 @@ public class TableValidationDrools {
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
+  /**
+   * Sets the dataset repository.
+   *
+   * @param validationService the new dataset repository
+   */
   @Autowired
   private void setDatasetRepository(ValidationService validationService) {
     TableValidationDrools.validationService = validationService;
@@ -42,8 +47,8 @@ public class TableValidationDrools {
    */
   public static Boolean ruleDR01AB(String idSchema, Boolean previous, Long datasetId) {
 
-//    String DR01AB = "select v.value from dataset_" + datasetId
-//        + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
+    // String DR01AB = "select v.value from dataset_" + datasetId
+    // + ".field_value v where v.id_field_schema = '" + idSchema + "' group by v.value";
 
     return true;
     // return validationService.tableValidationDR01ABQuery(DR01AB, previous);

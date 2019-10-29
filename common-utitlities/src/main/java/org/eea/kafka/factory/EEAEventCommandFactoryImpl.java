@@ -13,16 +13,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class EEAEventCommandFactoryImpl.
+ */
 @Component("EEAEventCommandFactoryImpl")
 public class EEAEventCommandFactoryImpl implements EEAEventCommandFactory {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(EEAEventCommandFactoryImpl.class);
 
+  /** The commands. */
   @Autowired(required = false)
   private Set<AbstractEEAEventHandlerCommand> commands;
 
+  /** The event handle commands. */
   private Map<EventType, AbstractEEAEventHandlerCommand> eventHandleCommands;
 
+  /**
+   * Inits the.
+   */
   @PostConstruct
   private void init() {
     eventHandleCommands = new HashMap<>();

@@ -38,8 +38,8 @@ public interface DatasetSchemaController {
   /**
    * Creates the empty data schema.
    *
-   * @param nameDataSetSchema the name data set schema
-   * @param idDataFlow the id data flow
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
    */
   @PostMapping(value = "/createEmptyDatasetSchema")
   void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
@@ -88,7 +88,6 @@ public interface DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
-   * @param schemaId the schema id
    */
   @RequestMapping(value = "/dataset/{datasetId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)

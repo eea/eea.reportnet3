@@ -11,8 +11,6 @@ public interface IndexSearchController {
   /**
    * Search by name.
    *
-   * @param name the name
-   * @return
    * @return the list
    * @throws Exception the exception
    */
