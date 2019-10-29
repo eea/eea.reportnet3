@@ -10,6 +10,7 @@ export const DatasetRepository = {
   errorStatisticsById: () => Promise.reject('[DatasetRepository#errorStatisticsById] must be implemented'),
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
+  getMetaData: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
   tableDataById: () => Promise.reject('[DatasetRepository#tableDataById] must be implemented'),
   updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
   validateDataById: () => Promise.reject('[DatasetRepository#validateDataById] must be implemented'),

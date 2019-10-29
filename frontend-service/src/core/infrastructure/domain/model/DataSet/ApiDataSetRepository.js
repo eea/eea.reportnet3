@@ -34,6 +34,11 @@ const addRecordsById = async (datasetId, tableSchemaId, records) => {
   return recordsAdded;
 };
 
+const addTableDesign = async (datasetSchemaId, datasetId, tableSchemaName) => {
+  const tableAdded = await apiDataset.addTableDesign(datasetSchemaId, datasetId, tableSchemaName);
+  return tableAdded;
+};
+
 const createValidation = (entityType, id, levelError, message) => {
   const validation = new Validation(id, levelError, entityType, new Date(Date.now()).toString(), message);
   return validation;
@@ -55,6 +60,11 @@ const deleteSchemaById = async datasetId => {
 
 const deleteTableDataById = async (datasetId, tableId) => {
   const dataDeleted = await apiDataset.deleteTableDataById(datasetId, tableId);
+  return dataDeleted;
+};
+
+const deleteTableDesign = async (datasetSchemaId, tableSchemaId) => {
+  const dataDeleted = await apiDataset.deleteTableDesign(datasetSchemaId, tableSchemaId);
   return dataDeleted;
 };
 
@@ -173,6 +183,13 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return datasetTableData;
 };
 
+const getMetaData = async datasetId => {
+  const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
+  const dataset = new Dataset();
+  dataset.datasetSchemaName = datasetTableDataDTO.dataSetName;
+  return dataset;
+};
+
 const schemaById = async dataflowId => {
   const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
   //reorder tables alphabetically
@@ -187,21 +204,25 @@ const schemaById = async dataflowId => {
   });
 
   const dataset = new Dataset();
-  dataset.datasetSchemaId = datasetSchemaDTO.idDatasetSchema;
+  dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
 
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
-    const records = [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
-      const fields = dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
-        return new DatasetTableField(
-          DataTableFieldDTO.id,
-          DataTableFieldDTO.idRecord,
-          DataTableFieldDTO.name,
-          DataTableFieldDTO.type
-        );
-      });
-      return new DatasetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
-    });
+    const records = !isNull(datasetTableDTO.recordSchema)
+      ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
+          const fields = !isNull(dataTableRecordDTO.fieldSchema)
+            ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+                return new DatasetTableField(
+                  DataTableFieldDTO.id,
+                  DataTableFieldDTO.idRecord,
+                  DataTableFieldDTO.name,
+                  DataTableFieldDTO.type
+                );
+              })
+            : null;
+          return new DatasetTableRecord(null, dataTableRecordDTO.id, dataTableRecordDTO.idRecordSchema, fields);
+        })
+      : null;
     return new DatasetTable(
       null,
       datasetTableDTO.idTableSchema,
@@ -404,6 +425,16 @@ const updateSchemaNameById = async (datasetId, datasetSchemaName) => {
   return await apiDataset.updateSchemaNameById(datasetId, datasetSchemaName);
 };
 
+const updateTableNameDesign = async (datasetSchemaId, tableSchemaId, tableSchemaName, datasetId) => {
+  const tableSchemaUpdated = await apiDataset.updateTableNameDesign(
+    datasetSchemaId,
+    tableSchemaId,
+    tableSchemaName,
+    datasetId
+  );
+  return tableSchemaUpdated;
+};
+
 const validateDataById = async datasetId => {
   const dataValidation = await apiDataset.validateById(datasetId);
   return dataValidation;
@@ -420,21 +451,25 @@ const transposeMatrix = matrix => {
 
 export const ApiDatasetRepository = {
   addRecordsById,
+  addTableDesign,
   createValidation,
   deleteDataById,
   deleteRecordById,
   deleteSchemaById,
   deleteTableDataById,
+  deleteTableDesign,
   errorsById,
   errorPositionByObjectId,
   errorStatisticsById,
   exportDataById,
   exportTableDataById,
+  getMetaData,
   schemaById,
   tableDataById,
   updateFieldById,
   updateRecordsById,
   updateSchemaNameById,
+  updateTableNameDesign,
   validateDataById,
   webFormDataById
 };

@@ -43,6 +43,7 @@ export const Dialog = ({
     <div className={styles.dialog_mask_wrapper} style={maskStyle}>
       <PrimeDialog
         className={className}
+        closeOnEscape={closeOnEscape}
         dismissableMask={dismissableMask}
         focusOnShow={focusOnShow}
         footer={footer}

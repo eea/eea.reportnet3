@@ -25,6 +25,7 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { SnapshotList } from './_components/SnapshotList';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
@@ -231,11 +232,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
       />
+
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
+              {/* <Title title={`${dataflowData.name}`} icon="archive" /> */}
             </h2>
           </div>
           <div>
@@ -291,7 +294,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
                       handleRedirect={() => {
-                        handleRedirect();
+                        handleRedirect(
+                          getUrl(
+                            routes.DATASET_SCHEMA,
+                            {
+                              dataflowId: match.params.dataflowId,
+                              datasetId: newDatasetSchema.datasetId
+                            },
+                            true
+                          )
+                        );
                       }}
                       isNameEditable={isNameEditable}
                       onNameEdit={onNameEdit}
@@ -303,7 +315,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                           label: resources.messages['openDataset'],
                           icon: 'openFolder',
                           command: () => {
-                            handleRedirect();
+                            handleRedirect(
+                              getUrl(
+                                routes.DATASET_SCHEMA,
+                                {
+                                  dataflowId: match.params.dataflowId,
+                                  datasetId: newDatasetSchema.datasetId
+                                },
+                                true
+                              )
+                            );
                           }
                         },
                         {
