@@ -13,6 +13,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabView } from 'primereact/tabview';
 import { TabPanel } from 'primereact/tabview';
+import { Title } from 'ui/views/_components/Title';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 import { WebLinks } from './_components/WebLinks';
@@ -106,23 +107,26 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
 
   if (documents) {
     return layout(
-      <TabView>
-        <TabPanel header={resources.messages['documents']}>
-          <Documents
-            onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
-            match={match}
-            documents={documents}
-            isCustodian={isCustodian}
-          />
-        </TabPanel>
-        <TabPanel header={resources.messages['webLinks']}>
-          <WebLinks
-            onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
-            webLinks={webLinks}
-            isCustodian={isCustodian}
-          />
-        </TabPanel>
-      </TabView>
+      <React.Fragment>
+        <Title title={`${resources.messages['documents']} & ${resources.messages['webLinks']}`} icon="" />
+        <TabView>
+          <TabPanel header={resources.messages['documents']}>
+            <Documents
+              onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
+              match={match}
+              documents={documents}
+              isCustodian={isCustodian}
+            />
+          </TabPanel>
+          <TabPanel header={resources.messages['webLinks']}>
+            <WebLinks
+              onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
+              webLinks={webLinks}
+              isCustodian={isCustodian}
+            />
+          </TabPanel>
+        </TabView>
+      </React.Fragment>
     );
   } else {
     return <></>;
