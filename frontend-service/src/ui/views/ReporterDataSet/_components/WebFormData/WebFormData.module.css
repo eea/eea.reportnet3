@@ -14,7 +14,7 @@
   padding: 10px;
 }
 .disabledInput {
-  background: #dddddd !important;
+  background: var(--blue-5) !important;
 }
 .webFormSpinner {
   top: 0 !important;

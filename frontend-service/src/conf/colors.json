@@ -66,5 +66,6 @@
   "c-tile": "#ba3c0d",
   "dashboardCorrect": "#99CC33",
   "dashboardWarning": "#ffCC00",
-  "dashboardError": "#CC3300"
+  "dashboardError": "#CC3300",
+  "green400":"#339900"
 }
