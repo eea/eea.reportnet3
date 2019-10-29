@@ -22,7 +22,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { ScrollPanel } from 'primereact/scrollpanel';
-import { SnapshotList } from './_components/SnapshotList';
+import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 
@@ -51,7 +51,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const [snapshotListData, setSnapshotListData] = useState([]);
+  const [snapshotsListData, setSnapshotsListData] = useState([]);
 
   let growlRef = useRef();
 
@@ -114,7 +114,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadSnapshotList = async datasetId => {
-    setSnapshotListData(await SnapshotService.all(datasetId));
+    setSnapshotsListData(await SnapshotService.all(datasetId));
   };
 
   useEffect(() => {
@@ -454,9 +454,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
           <ScrollPanel style={{ width: '100%', height: '50vh' }}>
-            {!isEmpty(snapshotListData) ? (
-              <SnapshotList
-                snapshotListData={snapshotListData}
+            {!isEmpty(snapshotsListData) ? (
+              <SnapshotsList
+                snapshotsListData={snapshotsListData}
                 onLoadSnapshotList={onLoadSnapshotList}
                 dataflowId={match.params.dataflowId}
                 datasetId={datasetIdToProps}

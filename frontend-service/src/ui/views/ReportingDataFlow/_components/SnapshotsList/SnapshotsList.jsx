@@ -1,14 +1,14 @@
 import React from 'react';
 
-import styles from './SnapshotList.module.scss';
+import styles from './SnapshotsList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';
 
-export function SnapshotList({ snapshotListData, onLoadSnapshotList, dataflowId, datasetId }) {
+export function SnapshotsList({ snapshotsListData, onLoadSnapshotList, dataflowId, datasetId }) {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
-        {snapshotListData.map(item => (
+        {snapshotsListData.map(item => (
           <div key={item.id}>
             <SnapshotItem
               itemData={item}
