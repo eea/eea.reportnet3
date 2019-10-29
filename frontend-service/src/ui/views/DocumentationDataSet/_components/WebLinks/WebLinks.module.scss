@@ -5,7 +5,7 @@
   text-align: center;
 }
 .editRowButton {
-  border: 1px solid var(--custom-gray) !important;
+  border: 1px solid var(--c-custom-gray) !important;
   box-shadow: 0 0 0 0em var(--blue-100) !important;
   margin-left: 3px !important;
 }
@@ -14,7 +14,7 @@
   cursor: pointer;
 }
 .deleteRowButton {
-  border: 1px solid var(--custom-gray) !important;
+  border: 1px solid var(--c-custom-gray) !important;
   box-shadow: 0 0 0 0em var(--blue-100) !important;
   color: var(--errors) !important;
   margin-left: 3px !important;
