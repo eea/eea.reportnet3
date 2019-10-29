@@ -153,6 +153,14 @@ export const Tab = ({
         className={!addTab ? styles.p_tabview_design : null}
         href={'#' + ariaControls}
         id={id}
+        onMouseDownCapture={e => {
+          e.preventDefault();
+          if (e.button == 1) {
+            if (!isUndefined(onTabDeleteClick) && !addTab) {
+              onTabDeleteClick(index);
+            }
+          }
+        }}
         onClick={e => {
           onTabHeaderClick(e);
           scrollTo(tabRef.current.offsetLeft - 20, 0);
