@@ -9,6 +9,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+/**
+ * The Interface FieldSchemaNoRulesMapper.
+ */
 @Mapper(componentModel = "spring")
 public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSchemaVO> {
 
@@ -18,12 +21,6 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
   @Mapping(source = "headerName", target = "name")
   FieldSchemaVO entityToClass(FieldSchema entity);
 
-  /**
-   * Class to entity.
-   *
-   * @param entity the entity
-   * @return the table schema
-   */
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
   @Mapping(source = "ruleField", target = "ruleField", ignore = true)
