@@ -241,8 +241,7 @@ export const Tab = ({
                 right: '6px',
                 fontSize: '1rem',
                 cursor: 'pointer ',
-                opacity: '0.7',
-                color: selected ? 'white' : null
+                opacity: '0.7'
               }}
             />
           ) : null}
