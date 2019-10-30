@@ -7,18 +7,8 @@ import styles from './SnapshotItem.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-import { SnapshotService } from 'core/services/Snapshot';
-
-export function SnapshotItem({ itemData, dataflowId, datasetId, onLoadSnapshotList }) {
+export function SnapshotItem({ itemData, setIsActiveReleaseSnapshotConfirmDialog, setSnapshotDataToRelease }) {
   const resources = useContext(ResourcesContext);
-
-  const onReleaseSnapshot = async snapShotId => {
-    const snapshotToRelease = await SnapshotService.releaseById(dataflowId, datasetId, snapShotId);
-
-    if (snapshotToRelease.isReleased) {
-      onLoadSnapshotList(datasetId);
-    }
-  };
 
   return (
     <li className={styles.listItem} key={itemData.id}>
@@ -38,7 +28,8 @@ export function SnapshotItem({ itemData, dataflowId, datasetId, onLoadSnapshotLi
               icon={itemData.isReleased ? 'check' : 'cloudUpload'}
               className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
               onClick={() => {
-                onReleaseSnapshot(itemData.id);
+                setIsActiveReleaseSnapshotConfirmDialog(true);
+                setSnapshotDataToRelease(itemData);
               }}
             />
           </div>

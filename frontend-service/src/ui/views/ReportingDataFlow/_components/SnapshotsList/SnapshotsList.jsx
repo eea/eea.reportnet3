@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import styles from './SnapshotsList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';
 
-export function SnapshotsList({ snapshotsListData, onLoadSnapshotList, dataflowId, datasetId }) {
+export function SnapshotsList({
+  snapshotsListData,
+  onLoadSnapshotList,
+  setIsActiveReleaseSnapshotConfirmDialog,
+  setSnapshotDataToRelease
+}) {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
@@ -13,8 +18,8 @@ export function SnapshotsList({ snapshotsListData, onLoadSnapshotList, dataflowI
             <SnapshotItem
               itemData={item}
               onLoadSnapshotList={onLoadSnapshotList}
-              dataflowId={dataflowId}
-              datasetId={datasetId}
+              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
+              setSnapshotDataToRelease={setSnapshotDataToRelease}
             />
             <hr />
           </div>

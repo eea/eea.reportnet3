@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
@@ -45,6 +46,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
+  const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
@@ -52,6 +54,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
+  const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
 
   let growlRef = useRef();
 
@@ -195,7 +198,30 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
+  const onReleaseSnapshot = async snapShotId => {
+    const snapshotToRelease = await SnapshotService.releaseById(match.params.dataflowId, datasetIdToProps, snapShotId);
 
+    if (snapshotToRelease.isReleased) {
+      onLoadSnapshotList(datasetIdToProps);
+      setIsActiveReleaseSnapshotConfirmDialog(false);
+    }
+  };
+
+  const releseModalFooter = (
+    <div>
+      <Button
+        icon="cloudUpload"
+        label={resources.messages['yes']}
+        onClick={() => onReleaseSnapshot(snapshotDataToRelease.id)}
+      />
+      <Button
+        icon="cancel"
+        className="p-button-secondary"
+        label={resources.messages['no']}
+        onClick={() => setIsActiveReleaseSnapshotConfirmDialog(false)}
+      />
+    </div>
+  );
   const layout = children => {
     return (
       <MainLayout>
@@ -427,6 +453,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           maximizable>
           <ContributorsList dataflowId={dataflowData.id} />
         </Dialog>
+
         <Dialog
           header={resources.messages['newDatasetSchema']}
           visible={newDatasetDialog}
@@ -441,6 +468,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
+
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
@@ -448,6 +476,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           visible={errorDialogVisible}>
           <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
         </Dialog>
+
         <Dialog
           header={dataflowData.name}
           visible={isActiveReleaseSnapshotDialog}
@@ -458,14 +487,15 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
               <SnapshotsList
                 snapshotsListData={snapshotsListData}
                 onLoadSnapshotList={onLoadSnapshotList}
-                dataflowId={match.params.dataflowId}
-                datasetId={datasetIdToProps}
+                setSnapshotDataToRelease={setSnapshotDataToRelease}
+                setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
               />
             ) : (
               <h3>{resources.messages['emptySnapshotList']}</h3>
             )}
           </ScrollPanel>
         </Dialog>
+
         <Dialog
           header={dataflowData.name}
           footer={
@@ -504,6 +534,23 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             </ul>
           </div>
           <div className="actions"></div>
+        </Dialog>
+
+        <Dialog
+          header={`${resources.messages['releaseSnapshotMessage']}`}
+          footer={releseModalFooter}
+          visible={isActiveReleaseSnapshotConfirmDialog}
+          onHide={() => setIsActiveReleaseSnapshotConfirmDialog(false)}>
+          <ul>
+            <li>
+              <strong>{resources.messages['creationDate']}: </strong>
+              {moment(snapshotDataToRelease.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            </li>
+            <li>
+              <strong>{resources.messages['description']}: </strong>
+              {snapshotDataToRelease.description}
+            </li>
+          </ul>
         </Dialog>
       </div>
     </div>
