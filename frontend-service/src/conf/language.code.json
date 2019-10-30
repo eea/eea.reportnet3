@@ -1,100 +1,100 @@
 {
     "languages": [
         {
-            "name": "Bulgarian",
-            "code": "bg"    
+            "code": "bg",    
+            "name": "Bulgarian"
         },
         {
-            "name": "Czech",
-            "code": "cs"    
+            "code": "cs",    
+            "name": "Czech"
         },
         {
-            "name": "Danish",
-            "code": "da"    
+            "code": "da",    
+            "name": "Danish"
         },
         {
-            "name": "German",
-            "code": "de"    
+            "code": "de",    
+            "name": "German"
         },
         {
-            "name": "Greek",
-            "code": "el"    
+            "code": "el",    
+            "name": "Greek"
         },
         {
-            "name": "English",
-            "code": "en"    
+            "code": "en",    
+            "name": "English"
         },
         {
-            "name": "Spanish",
-            "code": "es"    
+            "code": "es",    
+            "name": "Spanish"
         },
         {
-            "name": "Estonian",
-            "code": "et"    
+            "code": "et",    
+            "name": "Estonian"
         },
         {
-            "name": "Finnish",
-            "code": "fi"    
+            "code": "fi",    
+            "name": "Finnish"
         },
         {
-            "name": "French",
-            "code": "fr"    
+            "code": "fr",    
+            "name": "French"
         },
         {
-            "name": "Irish",
-            "code": "ga"    
+            "code": "ga",    
+            "name": "Irish"
         },
         {
-            "name": "Croatian",
-            "code": "hr"    
+            "code": "hr",    
+            "name": "Croatian"
         },
         {
-            "name": "Hungarian",
-            "code": "hu"    
+            "code": "hu",    
+            "name": "Hungarian"
         },
         {
-            "name": "Italian",
-            "code": "it"    
+            "code": "it",    
+            "name": "Italian"
         },
         {
-            "name": "Lithuanian",
-            "code": "lt"    
+            "code": "lt",    
+            "name": "Lithuanian"
         },
         {
-            "name": "Latvian",
-            "code": "lv"    
+            "code": "lv",    
+            "name": "Latvian"
         },
         {
-            "name": "Maltese",
-            "code": "mt"    
+            "code": "mt",    
+            "name": "Maltese"
         },
         {
-            "name": "Dutch",
-            "code": "nl"    
+            "code": "nl",    
+            "name": "Dutch"
         },
         {
-            "name": "Polish",
-            "code": "pl"    
+            "code": "pl",    
+            "name": "Polish"
         },
         {
-            "name": "Portuguese",
-            "code": "pt"    
+            "code": "pt",    
+            "name": "Portuguese"
         },
         {
-            "name": "Romanian",
-            "code": "ro"
+            "code": "ro",
+            "name": "Romanian"
         },
         {
-            "name": "Slovak",
-            "code": "sk"
+            "code": "sk",
+            "name": "Slovak"
         },
         {
-            "name": "Slovenian",
-            "code": "sl"
+            "code": "sl",
+            "name": "Slovenian"
         },
         {
-            "name": "Swedish",
-            "code": "sv"
+            "code": "sv",
+            "name": "Swedish"
         }
     ]
 }

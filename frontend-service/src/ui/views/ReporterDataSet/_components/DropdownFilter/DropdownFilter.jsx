@@ -111,12 +111,18 @@ class DropdownFilter extends React.Component {
   }
   updateChecked(fieldKey) {
     const { fields } = this.state;
+    const { disabled } = this.props;
+    if (disabled) {
+      return;
+    }
+
     const newFields = fields.map(field => {
       if (field.key === fieldKey) {
         field.checked = !field.checked;
       }
       return field;
     });
+
     this.setState(
       state => {
         return {
@@ -165,7 +171,7 @@ class DropdownFilter extends React.Component {
         }}>
         <ul>
           {fields.map((field, i) => (
-            <li key={i}>
+            <li key={i} className={styles.selectNone}>
               <a
                 className={!field.checked ? styles.isNotChecked : ''}
                 onClick={e => {
