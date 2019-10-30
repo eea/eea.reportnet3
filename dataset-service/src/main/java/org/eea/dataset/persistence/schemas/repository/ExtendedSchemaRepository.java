@@ -1,6 +1,8 @@
 package org.eea.dataset.persistence.schemas.repository;
 
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The Interface ExtendedSchemaRepository.
@@ -27,4 +29,21 @@ public interface ExtendedSchemaRepository {
    * @param idDatasetSchema the id dataset schema
    */
   void insertTableSchema(TableSchema table, String idDatasetSchema);
+
+  /**
+   * Find by id table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the data set schema
+   */
+  DataSetSchema findByIdTableSchema(String idTableSchema);
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return the update result
+   */
+  UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId);
 }

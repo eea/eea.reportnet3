@@ -178,6 +178,13 @@ public class TableValidationDrools {
     return validationService.tableValidationQueryNonReturnResult(ruleDU02A);
   }
 
+  /**
+   * Rule DU 02 B.
+   *
+   * @param datasetId the dataset id
+   * @param datasetLegazy the dataset legazy
+   * @return the boolean
+   */
   public static Boolean ruleDU02B(Long datasetId, Long datasetLegazy) {
 
     String ruleDU02B = "with vMultiple as( "
@@ -252,6 +259,13 @@ public class TableValidationDrools {
   }
 
 
+  /**
+   * Rule empty table.
+   *
+   * @param datasetId the dataset id
+   * @param idTable the id table
+   * @return the boolean
+   */
   public static Boolean ruleEmptyTable(Long datasetId, Long idTable) {
 
     String QUERY = "select count(*) from dataset_" + datasetId

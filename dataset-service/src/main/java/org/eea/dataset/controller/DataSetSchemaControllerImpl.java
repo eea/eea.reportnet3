@@ -9,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -148,7 +150,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
-
   /**
    * Find data schema by id.
    *
@@ -245,7 +246,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     datasetService.deleteTableValue(datasetId, idTableSchema);
   }
 
-
   /**
    * Delete dataset schema.
    *
@@ -267,5 +267,48 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     dataschemaService.deleteDatasetSchema(datasetId, schemaId);
     datasetMetabaseService.deleteDesignDataset(datasetId);
     recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+  }
+
+  /**
+   * Creates the data schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param fieldSchema the field schema
+   */
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/{idTableSchema}/createFieldSchema/{datasetId}",
+      method = RequestMethod.POST)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  public void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
+      @PathVariable("datasetId") Long datasetId, @RequestBody final FieldSchemaVO fieldSchema) {
+    try {
+      dataschemaService.createFieldSchema(idTableSchema, fieldSchema, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+  }
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
+  public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldSchemaId") String fieldSchemaId) {
+
+    // Delete the fieldSchema from the dataset
+    String datasetSchemaId = datasetService.deleteFieldValues(datasetId, fieldSchemaId);
+
+    // Delete the fieldSchema from the datasetSchema
+    if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.WRONG_DATASET_SCHEMA);
+    }
   }
 }

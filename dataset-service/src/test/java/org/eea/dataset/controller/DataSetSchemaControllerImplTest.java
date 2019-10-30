@@ -20,6 +20,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -314,4 +315,35 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
   }
 
+  /**
+   * Creates the field schema test exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createFieldSchemaTestException() throws EEAException {
+    doThrow(EEAException.class).when(dataschemaService).createFieldSchema(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Creates the field schema success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createFieldSchemaSuccessTest() throws EEAException {
+    dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteFieldSchemaTest() {
+    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+  }
 }

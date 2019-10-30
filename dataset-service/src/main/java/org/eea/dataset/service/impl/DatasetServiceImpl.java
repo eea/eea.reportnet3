@@ -1351,4 +1351,18 @@ public class DatasetServiceImpl implements DatasetService {
   public void deleteTableValue(Long datasetId, String idTableSchema) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
   }
+
+  /**
+   * Delete field values.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @return the datasetSchemaId
+   */
+  @Override
+  @Transactional
+  public String deleteFieldValues(Long datasetId, String fieldSchemaId) {
+    fieldRepository.deleteByFieldSchemaId(fieldSchemaId);
+    return datasetRepository.findIdDatasetSchemaById(datasetId);
+  }
 }

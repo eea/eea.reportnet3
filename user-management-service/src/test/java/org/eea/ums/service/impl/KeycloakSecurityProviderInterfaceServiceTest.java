@@ -1,5 +1,6 @@
 package org.eea.ums.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -169,5 +170,40 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Assert.assertEquals(((ResourceInfoVO) result).getResourceTypeEnum(), ResourceTypeEnum.DATAFLOW);
     Assert.assertEquals(((ResourceInfoVO) result).getSecurityRoleEnum(),
         SecurityRoleEnum.DATA_CUSTODIAN);
+  }
+
+  @Test
+  public void deleteResourceInstances() {
+    List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setName("Dataflow-1-DATA_CUSTODIAN");
+    resourceInfoVOs.add(resourceInfoVO);
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setId("idGroupInfo");
+    groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
+    groupInfos[0] = groupInfo;
+    Mockito
+        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    keycloakSecurityProviderInterfaceService.deleteResourceInstances(resourceInfoVOs);
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
+  }
+
+  @Test
+  public void deleteResourceInstancesByName() {
+    List<String> resourceNames = new ArrayList<>();
+    resourceNames.add("Dataflow-1-DATA_CUSTODIAN");
+
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setId("idGroupInfo");
+    groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
+    groupInfos[0] = groupInfo;
+    Mockito
+        .when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    keycloakSecurityProviderInterfaceService.deleteResourceInstancesByName(resourceNames);
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
   }
 }

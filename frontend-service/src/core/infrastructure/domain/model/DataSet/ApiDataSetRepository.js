@@ -54,6 +54,10 @@ const deleteRecordById = async (datasetId, recordId) => {
   return recordDeleted;
 };
 
+const deleteSchemaById = async datasetId => {
+  return await apiDataset.deleteSchemaById(datasetId);
+};
+
 const deleteTableDataById = async (datasetId, tableId) => {
   const dataDeleted = await apiDataset.deleteTableDataById(datasetId, tableId);
   return dataDeleted;
@@ -89,7 +93,8 @@ const errorsById = async (
     datasetErrorsDTO.idDataset,
     datasetErrorsDTO.idDatasetSchema,
     datasetErrorsDTO.nameDataSetSchema,
-    datasetErrorsDTO.totalErrors
+    datasetErrorsDTO.totalRecords,
+    datasetErrorsDTO.totalFilteredRecords
   );
 
   const errors = datasetErrorsDTO.errors.map(
@@ -110,7 +115,6 @@ const errorsById = async (
   );
 
   dataset.errors = errors;
-
   return dataset;
 };
 
@@ -190,10 +194,10 @@ const schemaById = async dataflowId => {
   const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
   //reorder tables alphabetically
   datasetSchemaDTO.tableSchemas = datasetSchemaDTO.tableSchemas.sort(function(a, b) {
-    if (a.nameTableSchema < b.nameTableSchema) {
+    if (a.nameTableSchema.toUpperCase() < b.nameTableSchema.toUpperCase()) {
       return -1;
     }
-    if (a.nameTableSchema > b.nameTableSchema) {
+    if (a.nameTableSchema.toUpperCase() > b.nameTableSchema.toUpperCase()) {
       return 1;
     }
     return 0;
@@ -241,6 +245,7 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
   if (tableDataDTO.totalRecords > 0) {
     table.tableSchemaId = tableDataDTO.idTableSchema;
     table.totalRecords = tableDataDTO.totalRecords;
+    table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
 
     let field, record;
 
@@ -451,6 +456,7 @@ export const ApiDatasetRepository = {
   createValidation,
   deleteDataById,
   deleteRecordById,
+  deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
   errorsById,

@@ -77,6 +77,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final String LIST_GROUPS_URL = "/auth/admin/realms/{realm}/groups";
   private static final String GROUP_DETAIL_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
   private static final String CREATE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/";
+  private static final String DELETE_USER_GROUP_URL = "/auth/admin/realms/{realm}/groups/{groupId}";
   private static final String ADD_USER_TO_USER_GROUP_URL = "/auth/admin/realms/Reportnet/users/{userId}/groups/{groupId}";
   private static final String CHECK_USER_PERMISSION = "/auth/admin/realms/{realm}/clients/{clientInterenalId}/authz/resource-server/policy/evaluate";
   private static final String GET_CLIENT_ID = "/auth/admin/realms/{realm}/clients/";
@@ -117,10 +118,6 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Override
   public String checkUserPermision(String resourceName, AccessScopeEnum... scopes) {
 
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
     uriParams.put("clientInterenalId", internalClientId);
@@ -141,8 +138,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     resource.setType(this.resourceTypes.get(resourceName));
     checkResourceInfo.setResources(resources);
 
-    HttpEntity<CheckResourcePermissionRequest> request = new HttpEntity<>(
-        checkResourceInfo, headers);
+    HttpEntity<CheckResourcePermissionRequest> request = createHttpRequest(checkResourceInfo,
+        uriParams);
     ResponseEntity<CheckResourcePermissionResult> checkResult = this.restTemplate
         .exchange(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
@@ -161,17 +158,13 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   @Override
   public GroupInfo[] getGroupsByUser(String userId) {
 
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
     uriParams.put(URI_PARAM_USER_ID, userId);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<Void> request = new HttpEntity<>(
-        null, headers);
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+
     ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate
         .exchange(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
@@ -263,16 +256,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   @Override
   public GroupInfo[] getGroups() {
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<Void> request = new HttpEntity<>(
-        null, headers);
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
     ResponseEntity<GroupInfo[]> responseEntity = this.restTemplate
         .exchange(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
@@ -286,17 +274,13 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   @Override
   public GroupInfo getGroupDetail(String groupId) {
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
     uriParams.put(URI_PARAM_GROUP_ID, groupId);
 
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<Void> request = new HttpEntity<>(
-        null, headers);
     ResponseEntity<GroupInfo> responseEntity = this.restTemplate
         .exchange(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
@@ -310,17 +294,11 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   @Override
   public void createGroupDetail(GroupInfo groupInfo) {
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<GroupInfo> request = new HttpEntity<>(
-        groupInfo, headers);
-
+    HttpEntity<GroupInfo> request = createHttpRequest(groupInfo, uriParams);
     this.restTemplate
         .postForEntity(
             uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
@@ -329,6 +307,36 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             request,
             Void.class);
 
+  }
+
+  @Override
+  public void deleteGroupDetail(String groupId) {
+    Map<String, String> uriParams = new HashMap<>();
+    uriParams.put(URI_PARAM_REALM, realmName);
+    uriParams.put(URI_PARAM_GROUP_ID, groupId);
+
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
+    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
+
+    this.restTemplate
+        .exchange(
+            uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+                .path(DELETE_USER_GROUP_URL)
+                .buildAndExpand(uriParams).toString(), HttpMethod.DELETE, request,
+            Void.class);
+
+
+  }
+
+  private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+
+    HttpHeaders headers = createBasicHeaders(headerInfo);
+
+    HttpEntity<T> request = new HttpEntity<>(
+        body, headers);
+    return request;
   }
 
   @Override

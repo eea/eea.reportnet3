@@ -16,6 +16,11 @@ public class DatasetValidations {
   @Qualifier("proxyValidationService")
   private static ValidationService validationService;
 
+  /**
+   * Sets the dataset repository.
+   *
+   * @param validationService the new dataset repository
+   */
   @Autowired
   private void setDatasetRepository(ValidationService validationService) {
     DatasetValidations.validationService = validationService;
@@ -248,6 +253,12 @@ public class DatasetValidations {
     return validationService.datasetValidationDC03Query(DC03);
   }
 
+  /**
+   * Dataset validation DC 02 B.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean datasetValidationDC02B(Long idDataset) {
     String DC02B = " WITH SeasonalPeriod as("
         + "select bathingWaterIdentifierTable.bathingWaterIdentifier as BW_IDENT,"
@@ -271,6 +282,12 @@ public class DatasetValidations {
     return validationService.datasetValidationDC03Query(DC02B);
   }
 
+  /**
+   * Rule EM 01.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean ruleEM01(Long idDataset) {
     String EM01 = "with Characterisation as( " + "SELECT      "
         + "(select v.value  as season from dataset_" + idDataset
@@ -295,6 +312,12 @@ public class DatasetValidations {
     return validationService.datasetValidationDC03Query(EM01);
   }
 
+  /**
+   * Rule EM 02.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean ruleEM02(Long idDataset) {
     String EM02 = "with SeasonalPeriod as( " + "SELECT      "
         + "(select v.value  as season from dataset_" + idDataset
@@ -319,6 +342,12 @@ public class DatasetValidations {
     return validationService.datasetValidationDC03Query(EM02);
   }
 
+  /**
+   * Rule EM 03.
+   *
+   * @param idDataset the id dataset
+   * @return the boolean
+   */
   public static Boolean ruleEM03(Long idDataset) {
     String EM03 = "with MonitoringResult as( " + "SELECT      "
         + "(select v.value  as season from dataset_" + idDataset
