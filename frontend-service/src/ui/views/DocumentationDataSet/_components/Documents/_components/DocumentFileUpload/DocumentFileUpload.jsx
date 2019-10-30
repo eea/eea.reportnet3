@@ -108,7 +108,6 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset, s
             </div>
           </fieldset>
           <fieldset>
-            <hr />
             <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
               <Button
                 className={

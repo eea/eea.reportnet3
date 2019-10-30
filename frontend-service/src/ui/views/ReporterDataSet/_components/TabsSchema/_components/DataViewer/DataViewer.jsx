@@ -128,7 +128,6 @@ const DataViewer = withRouter(
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-      onFetchData(undefined, undefined, 0, numRows, filterLevelError);
     }, []);
 
     useEffect(() => {
@@ -217,26 +216,6 @@ const DataViewer = withRouter(
       }
     }, [colsSchema, columnOptions, selectedRecord, editedRecord, initialCellValue]);
 
-    const showFilters = columnKeys => {
-      const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
-      const currentVisibleColumns = originalColumns.filter(
-        column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
-      );
-      setColumns(currentVisibleColumns);
-      setVisibleColumns(currentVisibleColumns);
-
-      if (isFiltered(originalColumns, currentVisibleColumns)) {
-        setVisibleColumnIcon('eye-slash');
-      } else {
-        setVisibleColumnIcon('eye');
-      }
-    };
-
-    const showValidationFilter = filteredKeys => {
-      setIsFilterValidationsActive(filteredKeys.length != 3);
-      setFilterLevelError(filteredKeys);
-    };
-
     useEffect(() => {
       onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
     }, [filterLevelError]);
@@ -259,14 +238,6 @@ const DataViewer = withRouter(
         // }
       }
     }, [confirmPasteVisible]);
-
-    const isFiltered = (originalFilter, filter) => {
-      if (filter.length < originalFilter.length) {
-        return true;
-      } else {
-        return false;
-      }
-    };
 
     const onCancelRowEdit = () => {
       let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
@@ -935,6 +906,14 @@ const DataViewer = withRouter(
         .indexOf(recordIdx);
     };
 
+    const isFiltered = (originalFilter, filter) => {
+      if (filter.length < originalFilter.length) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -1030,6 +1009,26 @@ const DataViewer = withRouter(
       //     'p-highlight': id === selectedRecordErrorId
       //   };
       // }
+    };
+
+    const showFilters = columnKeys => {
+      const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId'];
+      const currentVisibleColumns = originalColumns.filter(
+        column => columnKeys.includes(column.key) || mustShowColumns.includes(column.key)
+      );
+      setColumns(currentVisibleColumns);
+      setVisibleColumns(currentVisibleColumns);
+
+      if (isFiltered(originalColumns, currentVisibleColumns)) {
+        setVisibleColumnIcon('eye-slash');
+      } else {
+        setVisibleColumnIcon('eye');
+      }
+    };
+
+    const showValidationFilter = filteredKeys => {
+      setIsFilterValidationsActive(filteredKeys.length != 3);
+      setFilterLevelError(filteredKeys);
     };
 
     const totalCount = (

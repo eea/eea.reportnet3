@@ -8,6 +8,7 @@
     "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
     "deleteTableDesign": "/dataschema/{:datasetSchemaId}/tableschema/{:tableSchemaId}",
     "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
+    "deleteDataSchema": "/dataschema/dataset/{:datasetId}",
     "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
     "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
     "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
