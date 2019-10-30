@@ -1,5 +1,6 @@
 package org.eea.ums.controller;
 
+import java.util.ArrayList;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
@@ -40,5 +41,15 @@ public class ResourceManagementControllerImplTest {
   @Test
   public void createResource() {
     resourceManagementControllerImpl.createResource(new ResourceInfoVO());
+  }
+
+  @Test
+  public void deleteResource() {
+    resourceManagementControllerImpl.deleteResource(new ArrayList<>());
+  }
+
+  @Test
+  public void deleteResourceByName() {
+    resourceManagementControllerImpl.deleteResourceByName(new ArrayList<>());
   }
 }

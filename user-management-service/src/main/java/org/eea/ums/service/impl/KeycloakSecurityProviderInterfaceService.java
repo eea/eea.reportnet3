@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -179,6 +181,37 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     groupInfo.setPath("/" + groupName);
     groupInfo.setAttributes(resourceInfoVO.getAttributes());
     keycloakConnectorService.createGroupDetail(groupInfo);
+  }
+
+  @Override
+  public void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO) {
+    //Recover the resource names so they can be removed in the generic way.
+    List<String> resourceNames = resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(
+        Collectors.toList());
+    if (null != resourceNames && resourceNames.size() > 0) {
+      deleteResourceInstancesByName(resourceNames);
+
+    }
+  }
+
+  @Override
+  public void deleteResourceInstancesByName(List<String> resourceName) {
+    //Initialize the map of resouces along with empty string where later on the GroupId will be placed
+    Map<String, String> resources = resourceName.stream().collect(
+        Collectors.toMap(Function.identity(), x -> ""));
+    if (null != resources && resources.size() > 0) {
+      //Once recovered all the group names from input, get the group names from Keycloak to determine which ones must be removed
+      GroupInfo[] groups = keycloakConnectorService.getGroups();
+      if (null != groups && groups.length > 0) {
+        Arrays.asList(groups).stream()
+            .filter(groupInfo -> resources.containsKey(groupInfo.getName())).
+            forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
+        //Removing groups one by one
+        resources.values().stream()
+            .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
+      }
+
+    }
   }
 
 

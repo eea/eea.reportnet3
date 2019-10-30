@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import java.util.List;
 import org.eea.interfaces.controller.ums.ResourceManagementController;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -31,6 +32,22 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @ResponseStatus(HttpStatus.CREATED)
   public void createResource(@RequestBody ResourceInfoVO resourceInfoVO) {
     securityProviderInterfaceService.createResourceInstance(resourceInfoVO);
+  }
+
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+  @ResponseStatus(HttpStatus.OK)
+  public void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO) {
+    securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
+  }
+
+  @Override
+  @HystrixCommand
+  @RequestMapping(value = "/delete/", method = RequestMethod.DELETE)
+  @ResponseStatus(HttpStatus.OK)
+  public void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceName) {
+    securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
   }
 
   @Override
