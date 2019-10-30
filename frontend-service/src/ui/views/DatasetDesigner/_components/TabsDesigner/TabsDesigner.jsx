@@ -250,7 +250,7 @@ export const TabsDesigner = withRouter(({ match, history }) => {
                     //   table={tabs[tab.index]}
                     // />
                     <div>
-                      <h3>{resources.messages['datasetDesignerNoFields']}</h3>
+                      <h3>{`${resources.messages['datasetDesignerNoFields']} ${tab.header}`}</h3>
                     </div>
                   ) : null}
                 </TabPanel>
