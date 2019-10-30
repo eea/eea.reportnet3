@@ -295,7 +295,6 @@ const tableDataById = async (datasetId, tableSchemaId, pageNum, pageSize, fields
 
     table.records = records;
   }
-  console.log('table', table);
   return table;
 };
 

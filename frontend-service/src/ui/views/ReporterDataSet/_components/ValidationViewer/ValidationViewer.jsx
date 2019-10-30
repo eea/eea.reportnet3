@@ -152,7 +152,6 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadErrorsWithErrorLevelFilter = levelErrorsDeselected => {
-      console.log('levelErrorsDeselected', levelErrorsDeselected);
       levelErrorsDeselected = levelErrorsDeselected.map(filter => {
         return filter.toString().toUpperCase();
       });
@@ -188,7 +187,6 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadErrorsWithOriginsFilter = originsDeselected => {
-      console.log('originsDeselected', originsDeselected);
       setOriginsFilter(originsDeselected);
       if (originsDeselected.length <= 0) {
         checkActiveFilters(false, isFilteredLevelErrors, isFilteredTypeEntities);
@@ -291,9 +289,11 @@ const ValidationViewer = React.memo(
     const filteredCount = () => {
       return (
         <span>
-          {resources.messages['totalRecords']}{' '}
-          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}{' '}
-          {'of'} {!isUndefined(totalRecords) ? totalRecords : 0} {resources.messages['records'].toLowerCase()}
+          {resources.messages['filtered']}{' '}
+          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+          {' | '}
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
         </span>
       );
     };

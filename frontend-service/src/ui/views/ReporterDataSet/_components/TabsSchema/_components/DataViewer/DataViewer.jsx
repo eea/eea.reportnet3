@@ -1069,18 +1069,32 @@ const DataViewer = withRouter(
     const filteredCount = () => {
       return (
         <span>
-          {resources.messages['totalRecords']}{' '}
-          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}{' '}
-          {'of'} {!isUndefined(totalRecords) ? totalRecords : 0} {resources.messages['records'].toLowerCase()}
+          {resources.messages['filtered']}
+          {':'}{' '}
+          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+          {' | '}
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const filteredCountSameValue = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()} {'('}
+          {resources.messages['filtered'].toLowerCase()}
+          {')'}
         </span>
       );
     };
 
     const getPaginatorRecordsCount = () => {
-      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords)) {
         return totalCount();
       } else {
-        return filteredCount();
+        return totalFilteredRecords == totalRecords ? filteredCountSameValue() : filteredCount();
       }
     };
 
