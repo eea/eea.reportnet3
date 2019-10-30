@@ -6,7 +6,8 @@ import { config } from 'conf';
 
 import { DataViewer } from './_components/DataViewer';
 
-import { TabView, TabPanel } from 'primereact/tabview';
+import { TabView } from 'ui/views/DatasetDesigner/_components/TabsDesigner/_components/TabView';
+import { TabPanel } from 'ui/views/DatasetDesigner/_components/TabsDesigner/_components/TabView/_components/TabPanel';
 
 export const TabsSchema = ({
   activeIndex,
@@ -54,9 +55,9 @@ export const TabsSchema = ({
 
   return (
     <TabView
-      renderActiveOnly={false}
       activeIndex={activeIndex ? filterActiveIndex(activeIndex) : 0}
-      onTabChange={onTabChange}>
+      onTabChange={onTabChange}
+      renderActiveOnly={false}>
       {tabs}
     </TabView>
   );

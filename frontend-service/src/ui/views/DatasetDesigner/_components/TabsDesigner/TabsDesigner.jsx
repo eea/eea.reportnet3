@@ -223,6 +223,7 @@ export const TabsDesigner = withRouter(({ match, history }) => {
     <React.Fragment>
       <TabView
         checkEditingTabs={checkEditingTabs}
+        designMode={true}
         isErrorDialogVisible={isErrorDialogVisible}
         onTabAdd={onTabAdd}
         onTabBlur={onTableAdd}
