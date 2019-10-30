@@ -44,7 +44,6 @@ export const TabView = ({
   const resources = useContext(ResourcesContext);
 
   const classNamed = classNames('p-tabview p-component p-tabview-top', className);
-
   useEffect(() => {
     setTimeout(() => {
       if (ulTabsRef.current.clientWidth >= divTabsRef.current.clientWidth) {

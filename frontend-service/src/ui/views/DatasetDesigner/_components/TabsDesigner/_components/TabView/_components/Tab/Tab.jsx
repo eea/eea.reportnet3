@@ -53,6 +53,7 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
+    console.log(className);
     setMenu([
       {
         label: resources.messages['edit'],
@@ -65,7 +66,9 @@ export const Tab = ({
         label: resources.messages['delete'],
         icon: config.icons['trash'],
         command: () => {
-          console.log('Delete!');
+          if (!isUndefined(onTabDeleteClick) && !addTab) {
+            onTabDeleteClick(index);
+          }
         }
       }
     ]);
@@ -172,8 +175,11 @@ export const Tab = ({
       <li
         className={`${className} p-tabview-nav-li`}
         onContextMenu={e => {
-          //e.preventDefault();
-          if (designMode) {
+          if (designMode && !addTab) {
+            const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
+            const inmContextMenus = [...contextMenus];
+            const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
+            hideContextMenus.forEach(contextMenu => (contextMenu.style.display = 'none'));
             contextMenuRef.current.show(e);
           }
         }}
@@ -200,10 +206,6 @@ export const Tab = ({
                 }
               }
             }
-            // else if (e.button === 2) {
-            //   //e.preventDefault();
-            //   contextMenuRef.current.show(e.originalEvent);
-            // }
           }}
           onWheel={e => {
             onTabMouseWheel(e.deltaY);
