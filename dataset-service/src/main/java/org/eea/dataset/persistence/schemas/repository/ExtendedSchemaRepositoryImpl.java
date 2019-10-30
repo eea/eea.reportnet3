@@ -61,6 +61,14 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     mongoOperations.updateMulti(query, update, DataSetSchema.class);
   }
 
+  @Override
+  public DataSetSchema findByIdTableSchema(String idTableSchema) {
+    Query query = new Query();
+    query.addCriteria(Criteria.where("tableSchemas._id").is(new ObjectId(idTableSchema)));
+    query.fields().include("tableSchemas.$");
+    return mongoTemplate.findOne(query, DataSetSchema.class);
+  }
+
   /**
    * Delete field schema.
    *

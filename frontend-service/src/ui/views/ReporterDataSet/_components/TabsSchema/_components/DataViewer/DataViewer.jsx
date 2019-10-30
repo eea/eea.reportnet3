@@ -19,10 +19,11 @@ import { DropdownFilter } from 'ui/views/ReporterDataSet/_components/DropdownFil
 import { IconTooltip } from './_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'ui/views/_components/InputText';
-import { DataTable } from 'primereact/datatable';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Growl } from 'primereact/growl';
 import { Menu } from 'primereact/menu';
+import { ReporterDatasetContext } from 'ui/views/ReporterDataSet/_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Toolbar } from 'ui/views/_components/Toolbar';
@@ -39,6 +40,7 @@ const DataViewer = withRouter(
     buttonsList = undefined,
     recordPositionId,
     selectedRecordErrorId,
+    tableHasErrors,
     tableId,
     tableName,
     tableSchemaColumns,
@@ -47,14 +49,10 @@ const DataViewer = withRouter(
     },
     history
   }) => {
-    //const contextReporterDataset = useContext(ReporterDatasetContext);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
     const [columnOptions, setColumnOptions] = useState([{}]);
     const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
     const [columns, setColumns] = useState([]);
-    const [originalColumns, setOriginalColumns] = useState([]);
-    const [visibleColumns, setVisibleColumns] = useState([]);
-    const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -65,20 +63,22 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
+    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
     const [initialRecordValue, setInitialRecordValue] = useState();
+    const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
-    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
-    const [loading, setLoading] = useState(false);
-    const [loadingFile, setLoadingFile] = useState(false);
     const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
+    const [numCopiedRecords, setNumCopiedRecords] = useState();
     const [numRows, setNumRows] = useState(10);
+    const [originalColumns, setOriginalColumns] = useState([]);
     const [pastedRecords, setPastedRecords] = useState();
     const [selectedRecord, setSelectedRecord] = useState({});
     //const [selectedRecords, setSelectedRecords] = useState([]);
@@ -86,20 +86,37 @@ const DataViewer = withRouter(
     const [sortField, setSortField] = useState(undefined);
     const [sortOrder, setSortOrder] = useState(undefined);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
+    const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
     const [visibilityColumnIcon, setVisibleColumnIcon] = useState('eye');
     const [visibilityDropdownFilter, setVisibilityDropdownFilter] = useState([]);
-    const [validationDropdownFilter, setValidationDropdownFilter] = useState([]);
+    const [visibleColumns, setVisibleColumns] = useState([]);
 
+    const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
     const snapshotContext = useContext(SnapshotContext);
 
-    let growlRef = useRef();
-    let exportMenuRef = useRef();
-    let datatableRef = useRef();
     let contextMenuRef = useRef();
+    let datatableRef = useRef();
+    let exportMenuRef = useRef();
     let divRef = useRef();
     let dropdownFilterRef = useRef();
     let filterMenuRef = useRef();
+    let growlRef = useRef();
+
+    useEffect(() => {
+      if (contextReporterDataset.isValidationSelected) {
+        setFilterLevelError(['ERROR', 'WARNING', 'CORRECT']);
+
+        setValidationDropdownFilter([
+          { label: resources.messages['error'], key: 'ERROR' },
+          { label: resources.messages['warning'], key: 'WARNING' },
+          { label: resources.messages['correct'], key: 'CORRECT' }
+        ]);
+        setIsFilterValidationsActive(false);
+        contextReporterDataset.setIsValidationSelected(false);
+      }
+    }, [contextReporterDataset.isValidationSelected]);
 
     useEffect(() => {
       setExportButtonsList(
@@ -118,6 +135,7 @@ const DataViewer = withRouter(
       }
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
+
       setValidationDropdownFilter([
         { label: resources.messages['error'], key: 'ERROR' },
         { label: resources.messages['warning'], key: 'WARNING' },
@@ -128,7 +146,6 @@ const DataViewer = withRouter(
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-      onFetchData(undefined, undefined, 0, numRows, filterLevelError);
     }, []);
 
     useEffect(() => {
@@ -189,6 +206,7 @@ const DataViewer = withRouter(
       });
       let editCol = (
         <Column
+          className={styles.validationCol}
           header={resources.messages['actions']}
           key="actions"
           body={row => actionTemplate(row)}
@@ -205,7 +223,7 @@ const DataViewer = withRouter(
         hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
       }
 
-      if (visibleColumns.length > 0 && columnsArr.length != visibleColumns.length) {
+      if (visibleColumns.length > 0 && columnsArr.length !== visibleColumns.length) {
         const visibleKeys = visibleColumns.map(column => {
           return column.key;
         });
@@ -232,12 +250,13 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      setIsFilterValidationsActive(filteredKeys.length != 3);
+      setIsFilterValidationsActive(filteredKeys.length !== 3);
+      setFirstRow(0);
       setFilterLevelError(filteredKeys);
     };
 
     useEffect(() => {
-      onFetchData(sortField, sortOrder, firstRow, numRows, filterLevelError);
+      onFetchData(sortField, sortOrder, 0, numRows, filterLevelError);
     }, [filterLevelError]);
 
     useEffect(() => {
@@ -259,14 +278,6 @@ const DataViewer = withRouter(
       }
     }, [confirmPasteVisible]);
 
-    const isFiltered = (originalFilter, filter) => {
-      if (filter.length < originalFilter.length) {
-        return true;
-      } else {
-        return false;
-      }
-    };
-
     const onCancelRowEdit = () => {
       let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
       setEditDialogVisible(false);
@@ -285,6 +296,7 @@ const DataViewer = withRouter(
       if (dataDeleted) {
         setFetchedData([]);
         setTotalRecords(0);
+        setTotalFilteredRecords(0);
         //  snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       }
     };
@@ -360,19 +372,19 @@ const DataViewer = withRouter(
     };
 
     const onExportTableData = async fileType => {
-      setLoadingFile(true);
+      setIsLoadingFile(true);
       try {
         setExportTableDataName(createTableName(tableName, fileType));
         setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
       } catch (error) {
         console.error(error);
       } finally {
-        setLoadingFile(false);
+        setIsLoadingFile(false);
       }
     };
 
     const onFetchData = async (sField, sOrder, fRow, nRows, filterLevelError) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         let fields;
 
@@ -388,6 +400,7 @@ const DataViewer = withRouter(
           fields,
           filterLevelError
         );
+
         if (!isUndefined(colsSchema)) {
           if (!isUndefined(tableData)) {
             if (!isUndefined(tableData.records)) {
@@ -408,7 +421,12 @@ const DataViewer = withRouter(
         if (tableData.totalRecords !== totalRecords) {
           setTotalRecords(tableData.totalRecords);
         }
-        setLoading(false);
+
+        if (tableData.totalFilteredRecords !== totalFilteredRecords) {
+          setTotalFilteredRecords(tableData.totalFilteredRecords);
+        }
+
+        setIsLoading(false);
       } catch (error) {
         console.error('DataViewer error: ', error);
         const errorResponse = error.response;
@@ -417,7 +435,7 @@ const DataViewer = withRouter(
           history.push(getUrl(routes.DATAFLOW, { dataflowId }));
         }
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -507,7 +525,7 @@ const DataViewer = withRouter(
             history.push(getUrl(routes.DATAFLOW, { dataflowId }));
           }
         } finally {
-          setLoading(false);
+          setIsLoading(false);
         }
       } else {
         try {
@@ -524,7 +542,7 @@ const DataViewer = withRouter(
           }
         } finally {
           onCancelRowEdit();
-          setLoading(false);
+          setIsLoading(false);
         }
       }
     };
@@ -934,6 +952,14 @@ const DataViewer = withRouter(
         .indexOf(recordIdx);
     };
 
+    const isFiltered = (originalFilter, filter) => {
+      if (filter.length < originalFilter.length) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -1031,15 +1057,49 @@ const DataViewer = withRouter(
       // }
     };
 
-    const totalCount = (
-      <span>
-        {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
-        {resources.messages['rows']}
-      </span>
-    );
+    const totalCount = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const filteredCount = () => {
+      return (
+        <span>
+          {resources.messages['filtered']}
+          {':'}{' '}
+          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+          {' | '}
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const filteredCountSameValue = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()} {'('}
+          {resources.messages['filtered'].toLowerCase()}
+          {')'}
+        </span>
+      );
+    };
+
+    const getPaginatorRecordsCount = () => {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords)) {
+        return totalCount();
+      } else {
+        return totalFilteredRecords == totalRecords ? filteredCountSameValue() : filteredCount();
+      }
+    };
 
     return (
-      <div>
+      <>
         <Toolbar className={styles.dataViewerToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -1049,11 +1109,12 @@ const DataViewer = withRouter(
               label={resources.messages['import']}
               onClick={() => setImportDialogVisible(true)}
             />
+
             <Button
               disabled={!hasWritePermissions}
               id="buttonExportTable"
               className={`p-button-rounded p-button-secondary`}
-              icon={loadingFile ? 'spinnerAnimate' : 'import'}
+              icon={isLoadingFile ? 'spinnerAnimate' : 'import'}
               label={resources.messages['exportTable']}
               onClick={event => {
                 exportMenuRef.current.show(event);
@@ -1066,6 +1127,7 @@ const DataViewer = withRouter(
               id="exportTableMenu"
               onShow={e => getExportButtonPosition(e)}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={!hasWritePermissions || isWebFormMMR || isUndefined(totalRecords)}
@@ -1073,6 +1135,7 @@ const DataViewer = withRouter(
               label={resources.messages['deleteTable']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={false}
@@ -1092,17 +1155,19 @@ const DataViewer = withRouter(
                 getExportButtonPosition(e);
               }}
             />
+
             <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={false}
+              className={'p-button-rounded p-button-secondary'}
+              disabled={!tableHasErrors}
               icon="filter"
-              iconClasses={isFilterValidationsActive ? styles.filterActive : styles.filterInactive}
-              label={resources.messages['filter']}
+              iconClasses={!isFilterValidationsActive ? styles.filterInactive : ''}
+              label={resources.messages['validationFilter']}
               onClick={event => {
                 filterMenuRef.current.show(event);
               }}
             />
             <DropdownFilter
+              disabled={isLoading}
               filters={validationDropdownFilter}
               popup={true}
               ref={filterMenuRef}
@@ -1112,17 +1177,27 @@ const DataViewer = withRouter(
                 getExportButtonPosition(e);
               }}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
               icon={'groupBy'}
               label={resources.messages['groupBy']}
             />
+
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
               icon={'sort'}
               label={resources.messages['sort']}
+            />
+
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon="filter"
+              label={resources.messages['filters']}
+              onClick={() => {}}
             />
           </div>
           <div className="p-toolbar-group-right">
@@ -1148,7 +1223,7 @@ const DataViewer = withRouter(
             footer={hasWritePermissions && !isWebFormMMR ? addRowFooter : null}
             header={header}
             lazy={true}
-            loading={loading}
+            loading={isLoading}
             onContextMenu={
               hasWritePermissions
                 ? e => {
@@ -1171,7 +1246,7 @@ const DataViewer = withRouter(
             // }}
             onSort={onSort}
             paginator={true}
-            paginatorRight={totalCount}
+            paginatorRight={getPaginatorRecordsCount()}
             //pasteHeader={resources.messages['pasteRecords']}
             //pastedRecords={pastedRecords}
             //recordsPreviewNumber={recordsPreviewNumber}
@@ -1186,7 +1261,7 @@ const DataViewer = withRouter(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={totalRecords}
+            totalRecords={!isNull(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
             value={fetchedData}
             //scrollable={true}
             //frozenWidth="100px"
@@ -1289,7 +1364,7 @@ const DataViewer = withRouter(
           visible={editDialogVisible}>
           <div className="p-grid p-fluid">{editRecordForm}</div>
         </Dialog>
-      </div>
+      </>
     );
   }
 );

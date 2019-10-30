@@ -18,6 +18,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * The Class LockMetabaseConfiguration.
+ */
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
@@ -55,6 +58,11 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
   private String driver;
 
 
+  /**
+   * Lock data source.
+   *
+   * @return the data source
+   */
   @Bean
   public DataSource lockDataSource() {
     DriverManagerDataSource lockDataSource = new DriverManagerDataSource();
@@ -66,6 +74,11 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
     return lockDataSource;
   }
 
+  /**
+   * Lock entity manager factory.
+   *
+   * @return the local container entity manager factory bean
+   */
   @Bean
   @Autowired
   @Qualifier("lockEntityManagerFactory")
@@ -79,6 +92,11 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
     return lcemfb;
   }
 
+  /**
+   * Additional meta properties.
+   *
+   * @return the properties
+   */
   private Properties additionalMetaProperties() {
     Properties metaProperties = new Properties();
     metaProperties.setProperty("hibernate.hbm2ddl.auto", dll);
@@ -87,6 +105,11 @@ public class LockMetabaseConfiguration implements WebMvcConfigurer {
     return metaProperties;
   }
 
+  /**
+   * Lock transaction manager.
+   *
+   * @return the platform transaction manager
+   */
   @Bean
   @Autowired
   public PlatformTransactionManager lockTransactionManager() {

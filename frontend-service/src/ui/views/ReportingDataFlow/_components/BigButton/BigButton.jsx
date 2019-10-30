@@ -32,8 +32,7 @@ export const BigButton = ({
   const onEditorKeyChange = event => {
     if (event.key === 'Enter') {
       if (!isEmpty(buttonsTitle)) {
-        onSaveName(event.target.value);
-        onNameEdit();
+        initialValue !== event.target.value ? onSaveName(event.target.value) && onNameEdit() : onNameEdit();
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
@@ -113,11 +112,11 @@ export const BigButton = ({
       </div>
       {!isUndefined(isNameEditable) && isNameEditable ? (
         <InputText
+          autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
             if (!isEmpty(buttonsTitle)) {
-              onSaveName(e.target.value);
-              onNameEdit();
+              initialValue !== e.target.value ? onSaveName(e.target.value) && onNameEdit() : onNameEdit();
             } else {
               if (!isUndefined(onSaveError)) {
                 document.getElementsByClassName('p-inputtext p-component')[0].focus();

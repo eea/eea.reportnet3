@@ -25,9 +25,8 @@ public class TableValidationQuerysDroolsRepository {
   /**
    * Table validation DR 01 AB query.
    *
-   * @param QUERY the query
+   * @param queryValidate the query validate
    * @param previous the previous
-   *
    * @return the boolean
    */
   public Boolean tableValidationDR01ABQuery(String queryValidate, Boolean previous) {
@@ -41,9 +40,9 @@ public class TableValidationQuerysDroolsRepository {
       return false;
     }
     if (value.size() == 1 && Boolean.TRUE.equals(previous)) {
-      Integer localDateYear =
-          null != ThreadPropertiesManager.getVariable("dataCallYear") ? Integer
-              .valueOf(ThreadPropertiesManager.getVariable("dataCallYear").toString()) : 0;
+      Integer localDateYear = null != ThreadPropertiesManager.getVariable("dataCallYear")
+          ? Integer.valueOf(ThreadPropertiesManager.getVariable("dataCallYear").toString())
+          : 0;
       Integer yearSession;
       try {
         yearSession = Integer.valueOf(value.get(0));
@@ -60,8 +59,7 @@ public class TableValidationQuerysDroolsRepository {
   /**
    * Table validation query non return result.
    *
-   * @param QUERY the query
-   *
+   * @param queryValidate the query validate
    * @return the boolean
    */
   public Boolean tableValidationQueryNonReturnResult(String queryValidate) {
@@ -78,8 +76,7 @@ public class TableValidationQuerysDroolsRepository {
   /**
    * Table validation query period monitoring.
    *
-   * @param QUERY the query
-   *
+   * @param queryValidate the query validate
    * @return the list
    */
   public List<BigInteger> tableValidationQueryReturnListIds(String queryValidate) {
@@ -97,8 +94,7 @@ public class TableValidationQuerysDroolsRepository {
   /**
    * Table validation query non return result.
    *
-   * @param QUERY the query
-   *
+   * @param queryRecieve the query recieve
    * @return the boolean
    */
   public Boolean tableValidationQueryReturnResult(String queryRecieve) {

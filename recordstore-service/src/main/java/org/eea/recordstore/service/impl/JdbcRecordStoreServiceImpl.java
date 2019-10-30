@@ -48,7 +48,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
-  /** The Constant FILE_PATTERN_NAME. */
+  /**
+   * The Constant FILE_PATTERN_NAME.
+   */
   private static final String FILE_PATTERN_NAME = "snapshot_%s-dataset_%s%s";
 
   /**
@@ -480,8 +482,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   @Transactional
   public void deleteDataset(String datasetSchemaName) {
-    String command = "DROP SCHEMA " + datasetSchemaName;
-    jdbcTemplate.execute(command);
-
+    StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA ");
+    stringBuilder.append(datasetSchemaName).append(" CASCADE");
+    jdbcTemplate.execute(stringBuilder.toString());
   }
 }

@@ -5,6 +5,7 @@ export class Dataset {
     datasetSchemaId,
     datasetSchemaName,
     totalErrors,
+    totalFilteredErrors,
     tables,
     hasErrors,
     tableStatisticPercentages,
@@ -20,6 +21,7 @@ export class Dataset {
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;
     this.totalErrors = totalErrors;
+    this.totalFilteredErrors = totalFilteredErrors;
     this.hasErrors = hasErrors;
   }
 }

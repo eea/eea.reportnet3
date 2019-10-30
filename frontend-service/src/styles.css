@@ -112,10 +112,10 @@ body .p-inputtext:enabled:hover {
 body .p-inputtext:enabled:focus {
   outline: 0 none;
   outline-offset: 0;
-  -webkit-box-shadow: 0 0 0 0.2em #004494;
-  -moz-box-shadow: 0 0 0 0.2em #004494;
-  box-shadow: 0 0 0 0.2em #004494;
-  border-color: #004494;
+  -webkit-box-shadow: 0 0 0 0.1em var(--blue-120);
+  -moz-box-shadow: 0 0 0 0.1em var(--blue-120);
+  box-shadow: 0 0 0 0.1em var(--blue-120);
+  border-color: var(--blue-120);
 }
 body .p-checkbox {
   display: inline-block;
@@ -1790,7 +1790,7 @@ body .p-tabview.p-tabview-right .p-tabview-nav li a {
   display: inline-block;
   /*color: #ffffff;*/
   color: #404040;
-  padding: 0.571em 1em;
+  padding: 0.571rem 1.3rem;
   font-weight: 700;
   -moz-transition: background-color 0.2s, box-shadow 0.2s;
   -o-transition: background-color 0.2s, box-shadow 0.2s;

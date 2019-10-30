@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -39,8 +40,8 @@ public interface DatasetSchemaController {
   /**
    * Creates the empty data schema.
    *
-   * @param nameDataSetSchema the name data set schema
-   * @param idDataFlow the id data flow
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
    */
   @PostMapping(value = "/createEmptyDatasetSchema")
   void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
@@ -89,7 +90,6 @@ public interface DatasetSchemaController {
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
-   * @param schemaId the schema id
    */
   @RequestMapping(value = "/dataset/{datasetId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -118,6 +118,17 @@ public interface DatasetSchemaController {
   @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
   void createTableSchema(@PathVariable("id") String id, @PathVariable("datasetId") Long datasetId,
       @RequestBody final TableSchemaVO tableSchema);
+
+  /**
+   * Creates the field schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param fieldSchema the field schema
+   */
+  @RequestMapping(value = "/{idTableSchema}/createFieldSchema/{datasetId}",
+      method = RequestMethod.POST)
+  void createFieldSchema(String idTableSchema, Long datasetId, FieldSchemaVO fieldSchema);
 
   /**
    * Delete field schema.

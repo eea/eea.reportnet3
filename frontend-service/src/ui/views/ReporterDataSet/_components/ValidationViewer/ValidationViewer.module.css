@@ -2,9 +2,9 @@
   display: none;
 }
 .validationToolbar {
-  border-top: 1px solid #c8c8c8 !important;
-  border-left: 1px solid #c8c8c8 !important;
-  border-right: 1px solid #c8c8c8 !important;
+  border-top: 1px solid var(--c-custom-gray) !important;
+  border-left: 1px solid var(--c-custom-gray) !important;
+  border-right: 1px solid var(--c-custom-gray) !important;
   border-bottom: 0px !important;
   border-top-left-radius: 3px !important;
   border-top-right-radius: 3px !important;
@@ -13,11 +13,13 @@
 }
 .filterActive {
   opacity: 1;
-  /* color: #5798e4 !important; */
 }
 .filterInactive {
   opacity: 0.25 !important;
 }
 .showValidationsData {
   min-height: 44vh !important;
+}
+.validationCol {
+  width: 15px;
 }

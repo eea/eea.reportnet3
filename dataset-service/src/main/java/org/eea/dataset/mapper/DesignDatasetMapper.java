@@ -6,6 +6,9 @@ import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 
 
+/**
+ * The Interface DesignDatasetMapper.
+ */
 @Mapper(componentModel = "spring")
 public interface DesignDatasetMapper extends IMapper<DesignDataset, DesignDatasetVO> {
 
