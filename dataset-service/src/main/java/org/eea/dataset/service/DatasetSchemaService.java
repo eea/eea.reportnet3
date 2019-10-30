@@ -98,6 +98,7 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchema, Long datasetId)
+      throws EEAException;
 
   /**
    * Delete field schema.
