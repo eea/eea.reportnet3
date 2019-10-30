@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { isUndefined } from 'lodash';
+
 import styles from './TabsSchema.module.css';
 
 import { config } from 'conf';
@@ -10,7 +12,7 @@ import { TabView } from 'ui/views/DatasetDesigner/_components/TabsDesigner/_comp
 import { TabPanel } from 'ui/views/DatasetDesigner/_components/TabsDesigner/_components/TabView/_components/TabPanel';
 
 export const TabsSchema = ({
-  activeIndex,
+  activeIndex = 0,
   buttonsList = undefined,
   onTabChange,
   recordPositionId,
@@ -20,6 +22,10 @@ export const TabsSchema = ({
   hasWritePermissions,
   isWebFormMMR
 }) => {
+  let tableHasErrors = true;
+  if (!isUndefined(tables[activeIndex])) {
+    tableHasErrors = tables[activeIndex].hasErrors;
+  }
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
@@ -31,6 +37,7 @@ export const TabsSchema = ({
                   isWebFormMMR={isWebFormMMR}
                   buttonsList={buttonsList}
                   key={table.id}
+                  tableHasErrors={tableHasErrors}
                   tableId={table.id}
                   tableName={table.name}
                   tableSchemaColumns={
