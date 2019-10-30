@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface DatasetRepository
     extends JpaRepository<DatasetValue, Long>, DatasetExtendedRepository {
 
-
   /**
    * Remove dataset data including all data inside tables and tables themselves.
    *
@@ -30,5 +29,4 @@ public interface DatasetRepository
    */
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
-
 }

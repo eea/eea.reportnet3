@@ -72,7 +72,6 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
-import org.eea.multitenancy.TenantResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1350,5 +1349,19 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteTableValue(Long datasetId, String idTableSchema) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
+  }
+
+  /**
+   * Delete field values.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @return the datasetSchemaId
+   */
+  @Override
+  @Transactional
+  public String deleteFieldValues(Long datasetId, String fieldSchemaId) {
+    fieldRepository.deleteByFieldSchemaId(fieldSchemaId);
+    return datasetRepository.findIdDatasetSchemaById(datasetId);
   }
 }

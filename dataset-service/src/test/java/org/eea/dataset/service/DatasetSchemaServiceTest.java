@@ -23,6 +23,8 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -36,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The Class DatasetSchemaServiceTest.
@@ -88,6 +91,12 @@ public class DatasetSchemaServiceTest {
   /** The table mapper. */
   @Mock
   private TableSchemaMapper tableMapper;
+
+  @Mock
+  private ResourceManagementControllerZull resourceManagementControllerZull;
+
+  @Mock
+  private UserManagementControllerZull userManagementControllerZull;
 
   /**
    * The data set schema.
@@ -512,4 +521,21 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).deleteDatasetSchemaById(Mockito.any());
   }
 
+  @Test
+  public void deleteFieldSchemaTest() {
+    UpdateResult updateResult = UpdateResult.acknowledged(1L, 1L, null);
+    Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(updateResult);
+    Assert.assertTrue(dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId"));
+  }
+
+  @Test
+  public void createGroupAndAddUserTest() {
+    Mockito.doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
+    Mockito.doNothing().when(userManagementControllerZull).addContributorToResource(Mockito.any(),
+        Mockito.any());
+    dataSchemaServiceImpl.createGroupAndAddUser(1L);
+    Mockito.verify(userManagementControllerZull, times(1)).addContributorToResource(Mockito.any(),
+        Mockito.any());
+  }
 }

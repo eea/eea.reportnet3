@@ -314,4 +314,11 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void deleteFieldSchemaTest() {
+    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+  }
 }
