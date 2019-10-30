@@ -146,7 +146,6 @@ const DataViewer = withRouter(
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'datasetPartitionId', header: '' });
       setColsSchema(inmTableSchemaColumns);
-      onFetchData(undefined, undefined, 0, numRows, filterLevelError);
     }, []);
 
     useEffect(() => {
@@ -278,14 +277,6 @@ const DataViewer = withRouter(
         // }
       }
     }, [confirmPasteVisible]);
-
-    const isFiltered = (originalFilter, filter) => {
-      if (filter.length < originalFilter.length) {
-        return true;
-      } else {
-        return false;
-      }
-    };
 
     const onCancelRowEdit = () => {
       let updatedValue = changeRecordInTable(fetchedData, getRecordId(fetchedData, selectedRecord));
@@ -961,6 +952,14 @@ const DataViewer = withRouter(
         .indexOf(recordIdx);
     };
 
+    const isFiltered = (originalFilter, filter) => {
+      if (filter.length < originalFilter.length) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     const newRecordForm = colsSchema.map((column, i) => {
       if (addDialogVisible) {
         if (i < colsSchema.length - 2) {
@@ -1084,16 +1083,6 @@ const DataViewer = withRouter(
         return filteredCount();
       }
     };
-
-    // const totalCount = (
-    //   <span>
-    //     {resources.messages['totalRecords']}{' '}
-    //     {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}{' '}
-    //     {'of'} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
-    //     {/* {!isNull(totalFilteredRecords) ? totalFilteredRecords : totalRecords} */}
-    //     {resources.messages['rows']}
-    //   </span>
-    // );
 
     return (
       <>
