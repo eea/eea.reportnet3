@@ -7,7 +7,7 @@ import styles from './SnapshotItem.module.scss';
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
-export function SnapshotItem({ itemData, setIsActiveReleaseSnapshotConfirmDialog, setSnapshotDataToRelease }) {
+export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog, setSnapshotDataToRelease }) => {
   const resources = useContext(ResourcesContext);
 
   return (
@@ -38,4 +38,4 @@ export function SnapshotItem({ itemData, setIsActiveReleaseSnapshotConfirmDialog
       <p>{itemData.description}</p>
     </li>
   );
-}
+};

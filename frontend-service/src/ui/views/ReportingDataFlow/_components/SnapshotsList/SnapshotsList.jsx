@@ -4,12 +4,12 @@ import styles from './SnapshotsList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';
 
-export function SnapshotsList({
+export const SnapshotsList = ({
   snapshotsListData,
   onLoadSnapshotList,
   setIsActiveReleaseSnapshotConfirmDialog,
   setSnapshotDataToRelease
-}) {
+}) => {
   return (
     <div className={`${styles.listContainer}  ${styles.section}`}>
       <ul>
@@ -27,4 +27,4 @@ export function SnapshotsList({
       </ul>
     </div>
   );
-}
+};
