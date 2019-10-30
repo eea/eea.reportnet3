@@ -7,9 +7,8 @@ import styles from './TabsSchema.module.css';
 import { config } from 'conf';
 
 import { DataViewer } from './_components/DataViewer';
-
-import { TabView } from 'ui/views/DatasetDesigner/_components/TabsDesigner/_components/TabView';
-import { TabPanel } from 'ui/views/DatasetDesigner/_components/TabsDesigner/_components/TabView/_components/TabPanel';
+import { TabView } from 'ui/views/_components/TabView';
+import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 export const TabsSchema = ({
   activeIndex = 0,
