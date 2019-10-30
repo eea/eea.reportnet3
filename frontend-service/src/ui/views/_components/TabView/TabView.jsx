@@ -149,8 +149,8 @@ export const TabView = ({
         onTabMouseWheel={onTabMouseWheel}
         onTabNameError={onTabNameError}
         rightIcon={tab.props.rightIcon}
-        selected={selected}
         scrollTo={scrollTo}
+        selected={selected}
       />
     );
   };
