@@ -34,3 +34,6 @@
 .isNotChecked {
   color: var(--c-black-300) !important;
 }
+.selectNone {
+  user-select: none;
+}
