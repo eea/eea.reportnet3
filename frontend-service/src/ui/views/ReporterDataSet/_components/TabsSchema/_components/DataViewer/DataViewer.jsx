@@ -1181,14 +1181,6 @@ const DataViewer = withRouter(
             <Button
               className={`p-button-rounded p-button-secondary`}
               disabled={true}
-              icon="filter"
-              label={resources.messages['filters']}
-              onClick={() => {}}
-            />
-
-            <Button
-              className={`p-button-rounded p-button-secondary`}
-              disabled={true}
               icon={'groupBy'}
               label={resources.messages['groupBy']}
             />
@@ -1198,6 +1190,14 @@ const DataViewer = withRouter(
               disabled={true}
               icon={'sort'}
               label={resources.messages['sort']}
+            />
+
+            <Button
+              className={`p-button-rounded p-button-secondary`}
+              disabled={true}
+              icon="filter"
+              label={resources.messages['filters']}
+              onClick={() => {}}
             />
           </div>
           <div className="p-toolbar-group-right">
