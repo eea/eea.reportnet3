@@ -15,23 +15,47 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSchemaVO> {
 
+  /**
+   * Entity to class.
+   *
+   * @param entity the entity
+   * @return the field schema VO
+   */
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
   @Mapping(source = "ruleField", target = "ruleField", ignore = true)
   @Mapping(source = "headerName", target = "name")
   FieldSchemaVO entityToClass(FieldSchema entity);
 
+  /**
+   * Class to entity.
+   *
+   * @param entity the entity
+   * @return the field schema
+   */
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
   @Mapping(source = "ruleField", target = "ruleField", ignore = true)
   @Mapping(source = "name", target = "headerName")
   FieldSchema classToEntity(FieldSchemaVO entity);
 
+  /**
+   * Fill id record.
+   *
+   * @param fieldSchema the field schema
+   * @param fieldSchemaVO the field schema VO
+   */
   @AfterMapping
   default void fillIdRecord(FieldSchema fieldSchema, @MappingTarget FieldSchemaVO fieldSchemaVO) {
     fieldSchemaVO.setIdRecord(fieldSchema.getIdRecord().toString());
   }
 
+  /**
+   * Fill id record.
+   *
+   * @param fieldSchemaVO the field schema VO
+   * @param fieldSchema the field schema
+   */
   @AfterMapping
   default void fillIdRecord(FieldSchemaVO fieldSchemaVO, @MappingTarget FieldSchema fieldSchema) {
     fieldSchema.setIdRecord(new ObjectId(fieldSchemaVO.getIdRecord()));

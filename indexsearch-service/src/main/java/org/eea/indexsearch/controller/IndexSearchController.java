@@ -60,6 +60,11 @@ public interface IndexSearchController {
   // */
   // ResponseEntity<String> createProfile(Employee employee) throws Exception;
 
+  /**
+   * Execute macros.
+   *
+   * @throws Exception the exception
+   */
   void executeMacros() throws Exception;
 
 }

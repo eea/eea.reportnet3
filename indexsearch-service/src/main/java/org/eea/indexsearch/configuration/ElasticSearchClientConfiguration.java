@@ -18,17 +18,23 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 
+/**
+ * The Class ElasticSearchClientConfiguration.
+ */
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
 public class ElasticSearchClientConfiguration {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchClientConfiguration.class);
 
 
+  /** The host. */
   @Value("${elasticsearch.host}")
   private String host;
 
+  /** The port. */
   @Value("${elasticsearch.port}")
   private int port;
 
@@ -39,6 +45,11 @@ public class ElasticSearchClientConfiguration {
   // private String password;
 
 
+  /**
+   * Client.
+   *
+   * @return the rest high level client
+   */
   @Bean(destroyMethod = "close")
   public RestHighLevelClient client() {
 
