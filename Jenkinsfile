@@ -15,15 +15,6 @@ pipeline {
                 sh 'echo "Starting CI/CD Pipeline"'                
             }
         }
-        stage('Sandbox Environment set up'){
-          when{
-            branch 'sandbox'
-          }steps{
-            script{
-              env.TAG_SUFIX="_sandbox"
-            }
-          }
-        }
         stage('Compile') {
             parallel {
                 stage('Compile JAVA') {
@@ -139,7 +130,16 @@ pipeline {
                 }
             }
         }
-
+        stage('Setup sandbox docker images build'){
+            when{
+                branch 'sandbox'
+            }
+            steps{
+                script{
+                   env.TAG_SUFIX="_sandbox"
+                }
+            }
+        }
         stage('Build Docker Images') {
             when {
                 expression {
