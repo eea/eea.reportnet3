@@ -88,6 +88,13 @@ public interface KeycloakConnectorService {
   void createGroupDetail(GroupInfo groupInfo);
 
   /**
+   * Delete group detail.
+   *
+   * @param groupId the group id
+   */
+  void deleteGroupDetail(String groupId);
+
+  /**
    * Add user to group.
    *
    * @param userId the user resourceId
