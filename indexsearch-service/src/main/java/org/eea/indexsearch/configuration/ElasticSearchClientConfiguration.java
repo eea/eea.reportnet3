@@ -38,12 +38,6 @@ public class ElasticSearchClientConfiguration {
   @Value("${elasticsearch.port}")
   private int port;
 
-  // @Value("${elasticsearch.username}")
-  // private String userName;
-  //
-  // @Value("${elasticsearch.password}")
-  // private String password;
-
 
   /**
    * Client.
