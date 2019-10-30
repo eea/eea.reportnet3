@@ -603,4 +603,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Delete field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return true, if 1 and only 1 fieldSchema has been removed
+   */
+  @Override
+  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
+    return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
+        .getModifiedCount() == 1;
+  }
 }

@@ -11,7 +11,6 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
  */
 public interface DatasetSchemaService {
 
-
   /**
    * Creates the data schema.
    *
@@ -19,7 +18,6 @@ public interface DatasetSchemaService {
    * @param dataflowId the dataflow id
    */
   void createDataSchema(Long datasetId, Long dataflowId);
-
 
   /**
    * Creates the empty data set schema.
@@ -30,7 +28,6 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName) throws EEAException;
-
 
   /**
    * Gets dataschema by id.
@@ -52,14 +49,12 @@ public interface DatasetSchemaService {
    */
   DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules);
 
-
   /**
    * Delete table schema.
    *
    * @param idTableSchema the id table schema
    */
   void deleteTableSchema(String idTableSchema);
-
 
   /**
    * Delete dataset schema.
@@ -68,7 +63,6 @@ public interface DatasetSchemaService {
    * @param schemaId the schema id
    */
   void deleteDatasetSchema(Long datasetId, String schemaId);
-
 
   /**
    * Update name table schema.
@@ -79,7 +73,6 @@ public interface DatasetSchemaService {
    */
   void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException;
 
-
   /**
    * Creates the table schema.
    *
@@ -89,14 +82,12 @@ public interface DatasetSchemaService {
    */
   void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
 
-
   /**
    * Creates the group and add user.
    *
    * @param datasetId the dataset id
    */
   void createGroupAndAddUser(Long datasetId);
-
 
   /**
    * Creates the field schema.
@@ -108,4 +99,13 @@ public interface DatasetSchemaService {
    */
   void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchema, Long datasetId)
       throws EEAException;
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return true, if successful
+   */
+  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId);
 }
