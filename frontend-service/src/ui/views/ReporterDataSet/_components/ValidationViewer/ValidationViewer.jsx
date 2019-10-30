@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import { isUndefined } from 'lodash';
+import { isNull, isUndefined } from 'lodash';
 
 import styles from './ValidationViewer.module.css';
 
@@ -32,12 +32,13 @@ const ValidationViewer = React.memo(
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setLoading] = useState(false);
     const [numberRows, setNumberRows] = useState(10);
     const [originsFilter, setOriginsFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [totalFilteredRecords, setTotalFilteredRecords] = useState();
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
 
     let dropdownLevelErrorsFilterRef = useRef();
@@ -79,7 +80,8 @@ const ValidationViewer = React.memo(
       } else {
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins) {
           resetFilters();
-          fetchData('', sortOrder, firstRow, numberRows, [], [], []);
+          setFirstRow(0);
+          fetchData('', sortOrder, 0, numberRows, [], [], []);
         }
       }
     }, [visible]);
@@ -99,6 +101,7 @@ const ValidationViewer = React.memo(
       typeEntitiesFilter,
       originsFilter
     ) => {
+      setLoading(true);
       const datasetErrors = await DatasetService.errorsById(
         datasetId,
         Math.floor(firstRow / numberRows),
@@ -110,6 +113,7 @@ const ValidationViewer = React.memo(
         originsFilter
       );
       setTotalRecords(datasetErrors.totalErrors);
+      setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
       setFetchedData(datasetErrors.errors);
       setLoading(false);
     };
@@ -151,24 +155,20 @@ const ValidationViewer = React.memo(
       levelErrorsDeselected = levelErrorsDeselected.map(filter => {
         return filter.toString().toUpperCase();
       });
+
       setLevelErrorsFilter(levelErrorsDeselected);
+
       setIsFilteredLevelErrors(isFiltered(allLevelErrorsFilter, levelErrorsDeselected));
+
       if (levelErrorsDeselected.length <= 0) {
         checkActiveFilters(isFilteredOrigins, false, isFilteredTypeEntities);
       } else {
         setAreActiveFilters(true);
       }
 
-      setLoading(true);
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsDeselected,
-        typeEntitiesFilter,
-        originsFilter
-      );
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsDeselected, typeEntitiesFilter, originsFilter);
+
+      setFirstRow(0);
     };
 
     const onLoadErrorsWithEntityFilter = typeEntitiesDeselected => {
@@ -182,16 +182,8 @@ const ValidationViewer = React.memo(
       }
       setTypeEntitiesFilter(typeEntitiesDeselected);
       setIsFilteredTypeEntities(isFiltered(allTypeEntitiesFilter, typeEntitiesDeselected));
-      setLoading(true);
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesDeselected,
-        originsFilter
-      );
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesDeselected, originsFilter);
+      setFirstRow(0);
     };
 
     const onLoadErrorsWithOriginsFilter = originsDeselected => {
@@ -202,16 +194,8 @@ const ValidationViewer = React.memo(
         setAreActiveFilters(true);
       }
       setIsFilteredOrigins(isFiltered(allOriginsFilter, originsDeselected));
-      setLoading(true);
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        originsDeselected
-      );
+      onLoadErrors(0, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsDeselected);
+      setFirstRow(0);
     };
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
@@ -242,7 +226,6 @@ const ValidationViewer = React.memo(
       typeEntitiesFilter,
       originsFilter
     ) => {
-      setLoading(true);
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
     };
 
@@ -277,6 +260,7 @@ const ValidationViewer = React.memo(
         case 'FIELD':
         case 'RECORD':
           const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
+          contextReporterDataset.setIsValidationSelected(true);
           contextReporterDataset.onSelectValidation(
             event.data.tableSchemaId,
             datasetError.position,
@@ -293,7 +277,34 @@ const ValidationViewer = React.memo(
       }
     };
 
-    let totalCount = <span>Total: {totalRecords} rows</span>;
+    const totalCount = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const filteredCount = () => {
+      return (
+        <span>
+          {resources.messages['filtered']}{' '}
+          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+          {' | '}
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()}
+        </span>
+      );
+    };
+
+    const getPaginatorRecordsCount = () => {
+      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
+        return totalCount();
+      } else {
+        return filteredCount();
+      }
+    };
 
     const resetFilters = () => {
       setOriginsFilter([]);
@@ -307,12 +318,11 @@ const ValidationViewer = React.memo(
     };
 
     const refreshData = () => {
-      setLoading(true);
       onLoadErrors(firstRow, numberRows, sortField, sortOrder, levelErrorsFilter, typeEntitiesFilter, originsFilter);
     };
 
     return (
-      <div>
+      <>
         {!isUndefined(buttonsList) ? (
           buttonsList
         ) : (
@@ -327,7 +337,9 @@ const ValidationViewer = React.memo(
                 }}
                 iconClasses={isFilteredOrigins ? styles.filterActive : styles.filterInactive}
               />
+
               <DropdownFilter
+                disabled={isLoading}
                 filters={allOriginsFilter}
                 popup={true}
                 ref={dropdownOriginsFilterRef}
@@ -337,6 +349,7 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
+
               <Button
                 className={`${styles.level} p-button-rounded p-button-secondary`}
                 icon={'filter'}
@@ -346,7 +359,9 @@ const ValidationViewer = React.memo(
                 }}
                 iconClasses={isFilteredLevelErrors ? styles.filterActive : styles.filterInactive}
               />
+
               <DropdownFilter
+                disabled={isLoading}
                 filters={allLevelErrorsFilter}
                 popup={true}
                 ref={dropdownLevelErrorsFilterRef}
@@ -356,6 +371,7 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
+
               <Button
                 className={`p-button-rounded p-button-secondary`}
                 // icon={'eye'}
@@ -366,7 +382,9 @@ const ValidationViewer = React.memo(
                 }}
                 iconClasses={isFilteredTypeEntities ? styles.filterActive : styles.filterInactive}
               />
+
               <DropdownFilter
+                disabled={isLoading}
                 filters={allTypeEntitiesFilter}
                 popup={true}
                 ref={dropdownTypeEntitiesFilterRef}
@@ -376,6 +394,7 @@ const ValidationViewer = React.memo(
                   getExportButtonPosition(e);
                 }}
               />
+
               <Button
                 className={`p-button-rounded p-button-secondary`}
                 disabled={!areActiveFilters}
@@ -383,7 +402,8 @@ const ValidationViewer = React.memo(
                 label={resources.messages['cleanFilters']}
                 onClick={() => {
                   resetFilters();
-                  fetchData('', sortOrder, firstRow, numberRows, [], [], []);
+                  fetchData('', sortOrder, 0, numberRows, [], [], []);
+                  setFirstRow(0);
                   setAreActiveFilters(false);
                 }}
               />
@@ -399,18 +419,18 @@ const ValidationViewer = React.memo(
             </div>
           </Toolbar>
         )}
-        <div>
+        <>
           <DataTable
             autoLayout={true}
             className={styles.showValidationsData}
             first={firstRow}
             lazy={true}
-            loading={loading}
+            loading={isLoading}
             onRowSelect={onRowSelect}
             onPage={onChangePage}
             onSort={onSort}
             paginator={true}
-            paginatorRight={totalCount}
+            paginatorRight={getPaginatorRecordsCount()}
             resizableColumns={true}
             reorderableColumns={true}
             rows={numberRows}
@@ -418,13 +438,13 @@ const ValidationViewer = React.memo(
             sortable={true}
             sortField={sortField}
             sortOrder={sortOrder}
-            totalRecords={totalRecords}
+            totalRecords={totalFilteredRecords}
             selectionMode="single"
             value={fetchedData}>
             {columns}
           </DataTable>
-        </div>
-      </div>
+        </>
+      </>
     );
   }
 );

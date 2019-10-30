@@ -29,6 +29,7 @@ export const Tab = ({
   onTabDragAndDrop,
   onTabEditingHeader,
   onTabHeaderClick,
+  onTabMouseWheel,
   onTabNameError,
   rightIcon,
   scrollTo,
@@ -152,7 +153,7 @@ export const Tab = ({
         aria-controls={ariaControls}
         aria-selected={selected}
         className={!addTab ? styles.p_tabview_design : null}
-        href={'#' + ariaControls}
+        // href={'#' + ariaControls}
         id={id}
         onMouseDownCapture={e => {
           if (e.button == 1) {
@@ -164,6 +165,9 @@ export const Tab = ({
               }
             }
           }
+        }}
+        onWheel={e => {
+          onTabMouseWheel(e.deltaY);
         }}
         onClick={e => {
           onTabHeaderClick(e);
@@ -241,8 +245,7 @@ export const Tab = ({
                 right: '6px',
                 fontSize: '1rem',
                 cursor: 'pointer ',
-                opacity: '0.7',
-                color: selected ? 'white' : null
+                opacity: '0.7'
               }}
             />
           ) : null}

@@ -1,5 +1,8 @@
 package org.eea.interfaces.vo.lock.enums;
 
+/**
+ * The Enum LockSignature.
+ */
 public enum LockSignature {
 
   /**

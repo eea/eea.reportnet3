@@ -93,6 +93,19 @@ export const apiDataset = {
       return false;
     }
   },
+  deleteSchemaById: async datasetId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteDataSchema, {
+        datasetId
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
+  },
   deleteTableDataById: async (datasetId, tableId) => {
     const tokens = userStorage.get();
     try {
@@ -186,7 +199,6 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-
     return response.data;
   },
   exportDataById: async (datasetId, fileType) => {

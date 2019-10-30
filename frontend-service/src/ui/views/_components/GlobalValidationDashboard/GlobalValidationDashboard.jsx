@@ -4,6 +4,8 @@ import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './GlobalValidationDashboard.module.css';
 
+import colors from 'conf/colors.json';
+
 import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { FilterList } from 'ui/views/DataCustodianDashboards/_components/FilterList';
@@ -15,9 +17,9 @@ import { filterReducer } from './_components/_context/filterReducer';
 import { DataflowService } from 'core/services/DataFlow';
 
 const SEVERITY_CODE = {
-  CORRECT: 'CORRECT',
-  WARNING: 'WARNING',
-  ERROR: 'ERROR'
+  CORRECT: colors.dashboardCorrect,
+  WARNING: colors.dashboardWarning,
+  ERROR: colors.dashboardError
 };
 
 const GlobalValidationDashboard = dataflowId => {
@@ -30,9 +32,9 @@ const GlobalValidationDashboard = dataflowId => {
     data: {}
   };
   const [dashboardColors, setDashboardColors] = useState({
-    CORRECT: '#99CC33',
-    WARNING: '#ffCC00',
-    ERROR: '#CC3300'
+    CORRECT: colors.dashboardCorrect,
+    WARNING: colors.dashboardWarning,
+    ERROR: colors.dashboardError
   });
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
   const [isLoading, setLoading] = useState(true);

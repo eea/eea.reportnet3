@@ -53,12 +53,13 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
+  const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
+  const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [recordPositionId, setRecordPositionId] = useState(-1);
   const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
-  const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -364,6 +365,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       </div>
       <ReporterDatasetContext.Provider
         value={{
+          isValidationSelected: isValidationSelected,
+          setIsValidationSelected: setIsValidationSelected,
           validationsVisibleHandler: null,
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
             setActiveIndex(tableSchemaId);
@@ -384,6 +387,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       </Dialog>
       <ReporterDatasetContext.Provider
         value={{
+          isValidationSelected: isValidationSelected,
+          setIsValidationSelected: setIsValidationSelected,
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
           },

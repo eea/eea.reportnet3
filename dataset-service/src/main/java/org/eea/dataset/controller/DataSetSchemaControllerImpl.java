@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -149,7 +150,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
-
   /**
    * Find data schema by id.
    *
@@ -215,7 +215,6 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     datasetService.deleteTableValue(datasetId, idTableSchema);
   }
 
-
   /**
    * Delete dataset schema.
    *
@@ -265,6 +264,27 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+  }
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
+  public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldSchemaId") String fieldSchemaId) {
+
+    // Delete the fieldSchema from the dataset
+    String datasetSchemaId = datasetService.deleteFieldValues(datasetId, fieldSchemaId);
+
+    // Delete the fieldSchema from the datasetSchema
+    if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.WRONG_DATASET_SCHEMA);
     }
   }
 }

@@ -1125,4 +1125,11 @@ public class DatasetServiceTest {
     Mockito.when(datasetRepository.findById(1L)).thenReturn(Optional.of(datasetValue));
     datasetService.saveTablePropagation(1L, new TableSchemaVO());
   }
+
+  @Test
+  public void deleteFieldValuesTest() {
+    Mockito.doNothing().when(fieldRepository).deleteByFieldSchemaId(Mockito.any());
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn("<id>");
+    Assert.assertEquals("<id>", datasetService.deleteFieldValues(1L, "<id>"));
+  }
 }

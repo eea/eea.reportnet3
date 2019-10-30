@@ -22,7 +22,7 @@
 }
 
 .p-fileupload-content.p-fileupload-highlight {
-  border-color: #156090;
+  border-color: var(--c-corporate-blue);
 }
 
 .p-fileupload-files img {

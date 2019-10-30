@@ -94,6 +94,13 @@ public final class EEAErrorMessage {
   /** The Constant FIELD_NOTFOUND. */
   public static final String FIELD_NOT_FOUND = "Field not found";
 
+  /** The Constant FIELD_SCHEMA_ID_NOT_FOUND. */
+  public static final String FIELD_SCHEMA_ID_NOT_FOUND = "fieldSchemaId not found";
+
+  /** The Constant WRONG_DATASET_SCHEMA. */
+  public static final String WRONG_DATASET_SCHEMA =
+      "The datasetSchema associated with the dataset does not contain the passed fieldSchema";
+
   /**
    * Instantiates a new EEA error message.
    */
