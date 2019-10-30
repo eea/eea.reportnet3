@@ -172,7 +172,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand()
-  @RequestMapping(value = "/dataflow/{id}/{datasetId}", method = RequestMethod.GET,
+  @RequestMapping(value = "{datasetId}/dataflow/{id}/", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow,
       @PathVariable("datasetId") Long datasetId) {
@@ -183,6 +183,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+
   /**
    * Gets the dataset schema id.
    *
@@ -190,6 +191,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the dataset schema id
    */
   @Override
+  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDatasetSchemaId(datasetId);
@@ -207,7 +210,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand()
-  @GetMapping(value = "/noRules/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "{datasetId}/noRules/dataflow/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow,
       @PathVariable("datasetId") Long datasetId) {
@@ -217,6 +221,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
+
 
   /**
    * Delete table schema.
