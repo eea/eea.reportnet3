@@ -53,7 +53,6 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
-    console.log(className);
     setMenu([
       {
         label: resources.messages['edit'],
@@ -208,7 +207,10 @@ export const Tab = ({
             }
           }}
           onWheel={e => {
-            onTabMouseWheel(e.deltaY);
+            const hasScrollbar = window.innerWidth > document.documentElement.clientWidth;
+            if (!hasScrollbar) {
+              onTabMouseWheel(e.deltaY);
+            }
           }}
           onClick={e => {
             onTabHeaderClick(e);
