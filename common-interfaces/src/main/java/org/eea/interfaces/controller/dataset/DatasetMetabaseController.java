@@ -80,4 +80,15 @@ public interface DatasetMetabaseController {
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
+
+  /**
+   * Find reporting data set id by dataflow id and schema id.
+   *
+   * @param idDataflow the id dataflow
+   * @param schemaId the schema id
+   * @return the list
+   */
+  @GetMapping(value = "{schemaId}/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndSchemaId(
+      @PathVariable("id") Long idDataflow, @PathVariable("schemaId") String schemaId);
 }

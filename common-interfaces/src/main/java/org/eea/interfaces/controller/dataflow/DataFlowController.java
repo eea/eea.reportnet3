@@ -132,8 +132,10 @@ public interface DataFlowController {
    * @param idDataflow the id dataflow
    * @return the statistics by dataflow
    */
-  @GetMapping(value = "/{idDataflow}/globalStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow);
+  @GetMapping(value = "/{idDataflow}/globalStatistics/{dataschemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow,
+      @PathVariable("dataschemaId") String dataschemaId);
 
 
   /**

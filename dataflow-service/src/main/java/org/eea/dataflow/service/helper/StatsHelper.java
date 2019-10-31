@@ -50,13 +50,17 @@ public class StatsHelper {
    * @return the list
    * @throws EEAException the EEA exception
    */
-  public List<StatisticsVO> executeStatsProcess(final Long dataflowId) throws EEAException {
+  public List<StatisticsVO> executeStatsProcess(final Long dataflowId, String dataschemaId)
+      throws EEAException {
 
     List<StatisticsVO> statistics = new ArrayList<>();
-    DataFlowVO dfVO = dataflowService.getReportingDatasetsId(dataflowId);
+    DataFlowVO dfVO = dataflowService.getReportingDatasetsId(dataflowId, dataschemaId);
     LOG.info("Retrieving all the datasets' stats from the dataflow: {}", dataflowId);
-    dfVO.getReportingDatasets().parallelStream()
-        .forEach(d -> statistics.add(datasetController.getStatisticsById(d.getId())));
+    dfVO.getReportingDatasets().parallelStream().forEach(d -> {
+      LOG.info(d.getId().toString());
+      statistics.add(datasetController.getStatisticsById(d.getId()));
+
+    });
 
 
     return statistics;

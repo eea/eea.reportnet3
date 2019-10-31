@@ -12,6 +12,7 @@ import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -136,6 +137,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant NULL.
    */
   private static final String NULL = "id == null";
+
+  /**
+   * The data set metabase repository.
+   */
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   /**
    * Creates the empty data set schema.
