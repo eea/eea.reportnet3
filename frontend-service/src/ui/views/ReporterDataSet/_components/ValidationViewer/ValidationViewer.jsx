@@ -78,7 +78,7 @@ const ValidationViewer = React.memo(
         onLoadFilters();
         fetchData('', sortOrder, firstRow, numberRows, levelErrorsFilter, typeEntitiesFilter, originsFilter);
       } else {
-        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins) {
+        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
           resetFilters();
           setFirstRow(0);
           fetchData('', sortOrder, 0, numberRows, [], [], []);
