@@ -102,6 +102,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @RequestMapping(value = "/resources", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser() {
+    //Recover user id from Security context
     Map<String, String> details =
         (Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails();
     String userId = "";

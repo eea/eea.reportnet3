@@ -363,20 +363,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <ReporterDatasetContext.Provider
-        value={{
-          isValidationSelected: isValidationSelected,
-          setIsValidationSelected: setIsValidationSelected,
-          validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
-          }
-        }}>
-        {showWebFormInputSwitch()}
-        {isWebForm()}
-      </ReporterDatasetContext.Provider>
+      {showWebFormInputSwitch()}
+      {isWebForm()}
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}

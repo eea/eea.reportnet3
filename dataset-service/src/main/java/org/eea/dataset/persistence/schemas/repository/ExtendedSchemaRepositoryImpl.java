@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * The Class ExtendedSchemaRepositoryImpl.
@@ -66,5 +67,23 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     query.addCriteria(Criteria.where("tableSchemas._id").is(new ObjectId(idTableSchema)));
     query.fields().include("tableSchemas.$");
     return mongoTemplate.findOne(query, DataSetSchema.class);
+  }
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return the update result
+   */
+  @Override
+  public UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
+    Update update = new Update().pull("tableSchemas.$.recordSchema.fieldSchemas",
+        new BasicDBObject("_id", new ObjectId(fieldSchemaId)));
+    Query query = new Query();
+    query.addCriteria(new Criteria("_id").is(new ObjectId(datasetSchemaId)));
+    query.addCriteria(
+        new Criteria("tableSchemas.recordSchema.fieldSchemas._id").is(new ObjectId(fieldSchemaId)));
+    return mongoOperations.updateMulti(query, update, DataSetSchema.class);
   }
 }
