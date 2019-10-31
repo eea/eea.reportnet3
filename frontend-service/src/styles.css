@@ -1779,10 +1779,10 @@ body .p-tabview.p-tabview-right .p-tabview-nav {
   background: transparent;
   border: 0 none;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li a,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li a,
-body .p-tabview.p-tabview-left .p-tabview-nav li a,
-body .p-tabview.p-tabview-right .p-tabview-nav li a {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
   background-color: var(--gray-5);
   border: 1px solid #c8c8c8;
   /*border: 1px solid var(--gray-5);*/
@@ -1797,22 +1797,22 @@ body .p-tabview.p-tabview-right .p-tabview-nav li a {
   -webkit-transition: background-color 0.2s, box-shadow 0.2s;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li a .p-tabview-left-icon,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li a .p-tabview-left-icon,
-body .p-tabview.p-tabview-left .p-tabview-nav li a .p-tabview-left-icon,
-body .p-tabview.p-tabview-right .p-tabview-nav li a .p-tabview-left-icon {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon {
   margin-right: 0.5em;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li a .p-tabview-right-icon,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li a .p-tabview-right-icon,
-body .p-tabview.p-tabview-left .p-tabview-nav li a .p-tabview-right-icon,
-body .p-tabview.p-tabview-right .p-tabview-nav li a .p-tabview-right-icon {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon {
   margin-left: 0.5em;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li a:not(.p-disabled):focus,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li a:not(.p-disabled):focus,
-body .p-tabview.p-tabview-left .p-tabview-nav li a:not(.p-disabled):focus,
-body .p-tabview.p-tabview-right .p-tabview-nav li a:not(.p-disabled):focus {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus {
   outline: 0 none;
   outline-offset: 0;
   /*-webkit-box-shadow: 0 0 0 0.2em #004494;
@@ -1822,18 +1822,18 @@ body .p-tabview.p-tabview-right .p-tabview-nav li a:not(.p-disabled):focus {
   -moz-box-shadow: 0 0 0 0.2em #ffd617;
   box-shadow: 0 0 0 0.2em #ffd617;*/
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li .p-tabview-close,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li .p-tabview-close,
-body .p-tabview.p-tabview-left .p-tabview-nav li .p-tabview-close,
-body .p-tabview.p-tabview-right .p-tabview-nav li .p-tabview-close {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li .p-tabview-close,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li .p-tabview-close,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li .p-tabview-close,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li .p-tabview-close {
   color: #848484;
   margin: 0 0.5em 0 0;
   vertical-align: middle;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
-body .p-tabview.p-tabview-left .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
-body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover a {
   background-color: var(--yellow-120);
   border: 1px solid var(--blue-120);
   /*border: 2px solid var(--blue-120);
@@ -1842,54 +1842,54 @@ body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disab
   border-width: 2px 2px 1px 2px;*/
   color: #404040;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
-body .p-tabview.p-tabview-left .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
-body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover .p-tabview-close {
   color: #404040;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight a,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight a,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight a,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight a,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight a,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight a {
   background-color: #004494;
   border: 1px solid #004494;
   color: #ffffff;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight .p-tabview-close,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight .p-tabview-close,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight .p-tabview-close,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight .p-tabview-close {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close {
   color: #ffffff;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight:hover a,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight:hover a,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight:hover a,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight:hover a {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a {
   background-color: var(--yellow-120);
   border: 1px solid var(--blue-120);
   color: #404040;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight:hover a .p-tabview-left-icon,
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight:hover a .p-tabview-right-icon,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight:hover a .p-tabview-left-icon,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight:hover a .p-tabview-right-icon,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight:hover a .p-tabview-left-icon,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight:hover a .p-tabview-right-icon,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight:hover a .p-tabview-left-icon,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight:hover a .p-tabview-right-icon {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon {
   color: #404040;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-selected a,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-selected a,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-selected a,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-selected a {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-tabview-selected a {
   cursor: pointer;
 }
 body .p-tabview.p-tabview-top .p-tabview-nav {
   margin-bottom: -1px;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li a {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a {
   margin-right: 2px;
   -moz-border-radius-topleft: 3px;
   -webkit-border-top-left-radius: 3px;
@@ -1901,7 +1901,7 @@ body .p-tabview.p-tabview-top .p-tabview-nav li a {
 body .p-tabview.p-tabview-bottom .p-tabview-nav {
   margin-top: -1px;
 }
-body .p-tabview.p-tabview-bottom .p-tabview-nav li a {
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a {
   margin-right: 2px;
   -moz-border-radius-bottomleft: 3px;
   -webkit-border-bottom-left-radius: 3px;
@@ -1913,7 +1913,7 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li a {
 body .p-tabview.p-tabview-left .p-tabview-nav {
   margin-right: -px;
 }
-body .p-tabview.p-tabview-left .p-tabview-nav li a {
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a {
   margin-bottom: 2px;
   -moz-border-radius-topleft: 3px;
   -webkit-border-top-left-radius: 3px;
@@ -1925,7 +1925,7 @@ body .p-tabview.p-tabview-left .p-tabview-nav li a {
 body .p-tabview.p-tabview-right .p-tabview-nav {
   margin-right: -1px;
 }
-body .p-tabview.p-tabview-right .p-tabview-nav li a {
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
   margin-bottom: 2px;
   -moz-border-radius-topright: 3px;
   -webkit-border-top-right-radius: 3px;
@@ -1948,7 +1948,6 @@ body .p-tabview .p-tabview-panels {
 }
 
 body .p-paginator-right-content {
-  /* TODO: vertical align centered*/
   color: #ffffff;
   height: 2.286em;
   line-height: 2.286em;
@@ -3678,6 +3677,13 @@ body .p-contextmenu .p-submenu-list {
 body .p-contextmenu .p-menuitem {
   margin: 0;
 }
+body .p-contextmenu .p-menuitem{
+  width: 100%;
+}
+body .p-menuitem .p-menuitem-link{
+  width: 100%;
+}
+
 body .p-contextmenu .p-menuitem .p-menuitem-link .p-submenu-icon {
   right: 0.429em;
 }
