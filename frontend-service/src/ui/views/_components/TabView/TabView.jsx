@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import UniqueComponentId from 'ui/UniqueComponentId';
 
+import { config } from 'conf';
+
 import styles from './TabView.module.css';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -16,6 +18,7 @@ export const TabView = ({
   checkEditingTabs,
   children,
   className = null,
+  designMode,
   id = null,
   isErrorDialogVisible,
   onTabAdd,
@@ -41,7 +44,6 @@ export const TabView = ({
   const resources = useContext(ResourcesContext);
 
   const classNamed = classNames('p-tabview p-component p-tabview-top', className);
-
   useEffect(() => {
     setTimeout(() => {
       if (ulTabsRef.current.clientWidth >= divTabsRef.current.clientWidth) {
@@ -125,6 +127,7 @@ export const TabView = ({
         children={tab.props.children}
         className={className}
         editable={tab.props.editable}
+        designMode={designMode}
         header={tab.props.header}
         headerStyle={tab.props.headerStyle}
         id={id}
@@ -138,14 +141,16 @@ export const TabView = ({
         onTabDragAndDrop={onTabDragAndDrop}
         onTabHeaderClick={event => {
           onTabHeaderClick(event, tab, index);
-          onTabEditingHeader(false);
+          if (!isUndefined(onTabEditingHeader)) {
+            onTabEditingHeader(false);
+          }
         }}
         onTabEditingHeader={onTabEditingHeader}
         onTabMouseWheel={onTabMouseWheel}
         onTabNameError={onTabNameError}
         rightIcon={tab.props.rightIcon}
-        selected={selected}
         scrollTo={scrollTo}
+        selected={selected}
       />
     );
   };
