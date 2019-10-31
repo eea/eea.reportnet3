@@ -40,6 +40,7 @@ export const Tab = ({
   selected
 }) => {
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
+  const [hasErrors, setHasErrors] = useState(false);
   const [initialTitleHeader, setInitialTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
   const [menu, setMenu] = useState();
@@ -74,8 +75,13 @@ export const Tab = ({
   }, []);
 
   useEffect(() => {
-    setTitleHeader(titleHeader !== '' && titleHeader === header ? titleHeader : header !== '' ? header : titleHeader);
-    setInitialTitleHeader(header);
+    if (!editingHeader) {
+      setTitleHeader(titleHeader !== '' && titleHeader === header ? titleHeader : header !== '' ? header : titleHeader);
+      setInitialTitleHeader(header);
+    }
+    if (document.getElementsByClassName('p-inputtext p-component').length > 0) {
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    }
   }, [onTabBlur]);
 
   useEffect(() => {
@@ -127,7 +133,9 @@ export const Tab = ({
         onTabAddCancel();
       } else {
         setTitleHeader(initialTitleHeader);
-        setEditingHeader(false);
+        if (!hasErrors) {
+          setEditingHeader(false);
+        }
       }
     }
     if (event.key === 'Enter') {
@@ -137,7 +145,6 @@ export const Tab = ({
         if (!isUndefined(onTabNameError)) {
           onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
           setEditingHeader(true);
-          document.getElementsByClassName('p-inputtext p-component')[0].focus();
         }
       }
     }
@@ -152,8 +159,6 @@ export const Tab = ({
         setTitleHeader(correctNameChange.tableName);
       } else {
         setEditingHeader(true);
-        //Set focus on input if the name is empty
-        document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
     } else {
       setEditingHeader(false);
@@ -250,7 +255,7 @@ export const Tab = ({
                   if (!isUndefined(onTabNameError)) {
                     onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
                     setEditingHeader(true);
-                    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+                    setHasErrors(true);
                   }
                 }
               }}
