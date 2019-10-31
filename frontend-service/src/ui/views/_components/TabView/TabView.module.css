@@ -20,7 +20,7 @@
   cursor: pointer !important;
   font-size: 2.25rem !important;
   position: absolute !important;
-  margin-top: 2.5px;
+  margin-top: 2.25px;
 }
 .navigationTabIcons:hover {
   border: 1px solid;
@@ -28,14 +28,14 @@
   background-color: var(--c-custom-gray);
 }
 .stepBackwardIcon {
-  left: -15px !important;
+  left: -19px !important;
 }
 .stepInitIcon {
-  left: -50px !important;
+  left: -54px !important;
 }
 .stepForwardIcon {
-  right: -15px !important;
+  right: -19px !important;
 }
 .stepEndIcon {
-  right: -50px !important;
+  right: -54px !important;
 }
