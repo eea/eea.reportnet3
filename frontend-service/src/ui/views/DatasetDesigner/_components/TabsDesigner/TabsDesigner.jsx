@@ -8,8 +8,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { routes } from 'ui/routes';
-import { TabView } from './_components/TabView';
-import { TabPanel } from './_components/TabView/_components/TabPanel';
+import { TabView } from 'ui/views/_components/TabView';
+import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/DataSet';
 
@@ -63,6 +63,7 @@ export const TabsDesigner = withRouter(({ match, history }) => {
         table.addTab = false;
         table.newTab = false;
         table.index = idx;
+        table.showContextMenu = false;
         table.header = table.tableSchemaName;
       });
       //Add tab Button/Tab
@@ -223,6 +224,7 @@ export const TabsDesigner = withRouter(({ match, history }) => {
     <React.Fragment>
       <TabView
         checkEditingTabs={checkEditingTabs}
+        designMode={true}
         isErrorDialogVisible={isErrorDialogVisible}
         onTabAdd={onTabAdd}
         onTabBlur={onTableAdd}
