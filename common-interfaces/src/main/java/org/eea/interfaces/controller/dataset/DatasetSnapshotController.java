@@ -80,4 +80,28 @@ public interface DatasetSnapshotController {
       @PathVariable("idSnapshot") Long idSnapshot);
 
 
+
+  @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<SnapshotVO> getSchemaSnapshotsByIdDataset(@PathVariable("idDesignDataset") Long datasetId);
+
+
+  @PostMapping(value = "/dataschema/{idDatasetSchema}/dataset/{idDesignDataset}/create",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void createSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @RequestParam("description") String description);
+
+
+  @PostMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/restore",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void restoreSchemaSnapshot(@PathVariable("idDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot);
+
+
+  @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
+  void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot);
+
+
 }

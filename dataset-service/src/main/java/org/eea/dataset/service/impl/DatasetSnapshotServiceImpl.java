@@ -1,19 +1,33 @@
 package org.eea.dataset.service.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.SnapshotMapper;
+import org.eea.dataset.mapper.SnapshotSchemaMapper;
+import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
+import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
@@ -21,8 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -51,6 +68,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SnapshotMapper snapshotMapper;
 
+  @Autowired
+  private SnapshotSchemaRepository snapshotSchemaRepository;
+
+  @Autowired
+  private SnapshotSchemaMapper snapshotSchemaMapper;
+
+  @Autowired
+  private SchemasRepository schemaRepository;
+
+  @Autowired
+  private TableRepository tableRepository;
+
+
 
   /**
    * The record store controller zull.
@@ -61,6 +91,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  @Value("${pathSchemaSnapshot}")
+  private String pathSchemaSnapshot;
+
+  private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
 
   /**
    * The Constant LOG.
@@ -172,7 +207,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("First step of restoring snapshot completed. Previously data erased");
 
     // 2. Restore the dataset data, using the operation from recordstore
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot);
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, TypeDatasetEnum.REPORTING);
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
@@ -198,6 +233,108 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
     LOG.info("Snapshot {} released", idSnapshot);
+  }
+
+
+  @Override
+  public List<SnapshotVO> getSchemaSnapshotsByIdDataset(Long datasetId) throws EEAException {
+
+    List<SnapshotSchema> schemaSnapshots =
+        snapshotSchemaRepository.findByDesignDatasetIdOrderByCreationDateDesc(datasetId);
+
+    return snapshotSchemaMapper.entityListToClass(schemaSnapshots);
+
+  }
+
+
+  @Override
+  @Async
+  public void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description)
+      throws EEAException, IOException {
+
+    // 1. Create the snapshot in the metabase
+    SnapshotSchema snap = new SnapshotSchema();
+    snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+    snap.setDescription(description);
+    DesignDataset designDataset = new DesignDataset();
+    designDataset.setId(idDataset);
+    snap.setDesignDataset(designDataset);
+    snap.setDataSetName("snapshot schema from design dataset_" + idDataset);
+
+
+    snapshotSchemaRepository.save(snap);
+    LOG.info("Snapshot schema {} created into the metabase", snap.getId());
+
+    // 2. Create the schema file from the document in Mongo
+    DataSetSchema schema = schemaRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+    ObjectMapper objectMapper = new ObjectMapper();
+    Long idSnapshot = snap.getId();
+    String nameFile = pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset);
+    objectMapper.writeValue(new File(nameFile), schema);
+
+
+
+    // 3. Create the data file of the snapshot, calling to recordstore-service
+    // we need the partitionId. By now only consider the user root
+    Long idPartition = obtainPartition(idDataset, "root").getId();
+    recordStoreControllerZull.createSnapshotData(idDataset, idSnapshot, idPartition);
+
+    // Release the lock manually
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+    criteria.add(idDataset);
+    lockService.removeLockByCriteria(criteria);
+
+    LOG.info("Snapshot schema {} data files created", idSnapshot);
+  }
+
+
+  @Override
+  @Async
+  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
+      throws EEAException, IOException {
+
+    // 1. Restore the schema
+    String nameFile = pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset);
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    DataSetSchema schema = objectMapper.readValue(new File(nameFile), DataSetSchema.class);
+    String schemaId = schema.getIdDataSetSchema().toString();
+
+    schemaRepository.deleteDatasetSchemaById(schemaId);
+    schemaRepository.save(schema);
+    LOG.info("First step of restoring schema snapshot completed. Schema restored");
+
+    // 2. Restore the dataset data, using the operation from recordstore. First delete the dataset
+    // values implied
+    datasetService.deleteTableValues(idDataset);
+    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, TypeDatasetEnum.DESIGN);
+
+    // 3.Release the lock manually
+    List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
+    criteria.add(idDataset);
+    lockService.removeLockByCriteria(criteria);
+
+
+    LOG.info("Schema Snapshot {} totally restored", idSnapshot);
+
+  }
+
+
+  @Override
+  @Async
+  public void removeSchemaSnapshot(Long idDataset, Long idSnapshot)
+      throws EEAException, IOException {
+    // Remove from the metabase
+    snapshotSchemaRepository.deleteById(idSnapshot);
+    // Delete the file
+    String nameFile = pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset);
+    Path path1 = Paths.get(nameFile);
+    Files.deleteIfExists(path1);
+
+    LOG.info("Schema Snapshot {} removed", idSnapshot);
   }
 
 

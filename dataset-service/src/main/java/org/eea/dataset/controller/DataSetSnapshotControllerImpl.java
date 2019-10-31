@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
@@ -192,6 +193,103 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
+  }
+
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<SnapshotVO> getSchemaSnapshotsByIdDataset(
+      @PathVariable("idDesignDataset") Long datasetId) {
+
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    List<SnapshotVO> snapshots = null;
+    try {
+      snapshots = datasetSnapshotService.getSchemaSnapshotsByIdDataset(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return snapshots;
+
+  }
+
+
+  @Override
+  @LockMethod(removeWhenFinish = false)
+  @HystrixCommand
+  @PostMapping(value = "/dataschema/{idDatasetSchema}/dataset/{idDesignDataset}/create",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void createSchemaSnapshot(
+      @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @RequestParam("description") String description) {
+
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      // This method will release the lock
+      datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+  }
+
+
+  @Override
+  @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
+  @PostMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/restore",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void restoreSchemaSnapshot(
+      @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot) {
+
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      // This method will release the lock
+      datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+  }
+
+
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
+  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot) {
+
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
   }
 
 

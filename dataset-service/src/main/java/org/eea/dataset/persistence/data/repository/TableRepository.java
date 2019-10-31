@@ -83,6 +83,11 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   @Query("delete from TableValue d where d.idTableSchema=?1")
   void deleteByIdTableSchema(String idTableSchema);
 
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "truncate table field_validation, field_value, record_validation, record_value, table_validation, table_Value, dataset_validation, validation")
+  void removeTableData(Long dataSetId);
+
 
 
 }

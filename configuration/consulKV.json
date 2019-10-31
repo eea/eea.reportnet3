@@ -998,5 +998,9 @@
   {
     "key": "config/application/eea.keycloak.redirect_uri",
     "value": "JHtLRVlDTE9BS19SRURJUkVDVF9VUkk6aHR0cDovL2s4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzA0NDUvZGF0YS1mbG93LXRhc2svfQ=="
+  },
+  {
+    "key": "config/dataset/pathSchemaSnapshot",
+    "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
   }
 ]

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -283,8 +284,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy dataset_value
-      // String nameFileDatasetValue =
-      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_DatasetValue.snap";
       String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           idReportingDataset, "_table_DatasetValue.snap");
       String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_"
@@ -292,8 +291,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       printToFile(nameFileDatasetValue, copyQueryDataset, cm);
       // Copy table_value
-      // String nameFileTableValue =
-      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_TableValue.snap";
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           idReportingDataset, "_table_TableValue.snap");
 
@@ -303,8 +300,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileTableValue, copyQueryTable, cm);
 
       // Copy record_value
-      // String nameFileRecordValue =
-      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_RecordValue.snap";
       String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           idReportingDataset, "_table_RecordValue.snap");
       String copyQueryRecord =
@@ -315,8 +310,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
       // Copy field_value
-      // String nameFileFieldValue =
-      // "snapshot_" + idSnapshot + "-dataset_" + idReportingDataset + "_table_FieldValue.snap";
       String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           idReportingDataset, "_table_FieldValue.snap");
       String copyQueryField =
@@ -373,8 +366,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   @Async
-  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
-      throws SQLException, IOException {
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot,
+      TypeDatasetEnum datasetType) throws SQLException, IOException {
 
     ConnectionDataVO conexion = getConnectionDataForDataset("dataset_" + idReportingDataset);
     Connection con = null;
@@ -384,8 +377,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
-      // It is not neccesary to restore the table values
+      switch (datasetType) {
+        case DESIGN:
+          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+          // not neccesary
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              idReportingDataset, "_table_TableValue.snap");
 
+          String copyTableRecord = "COPY dataset_" + idReportingDataset
+              + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+          copyFromFile(copyTableRecord, nameFileTableValue, cm);
+          break;
+      }
       // Record value
       String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           idReportingDataset, "_table_RecordValue.snap");
@@ -401,6 +404,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String copyQueryField = "COPY dataset_" + idReportingDataset
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
     } finally {
       if (null != con) {
         con.close();

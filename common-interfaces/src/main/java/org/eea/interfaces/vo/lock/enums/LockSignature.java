@@ -23,7 +23,11 @@ public enum LockSignature {
   /**
    * ExecuteValidationCommand.execute(..)
    */
-  EXECUTE_VALIDATION("ExecuteValidationCommand.execute(..)");
+  EXECUTE_VALIDATION("ExecuteValidationCommand.execute(..)"),
+
+  CREATE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.createSchemaSnapshot(..)"),
+
+  RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)");
 
   /**
    * The value.
