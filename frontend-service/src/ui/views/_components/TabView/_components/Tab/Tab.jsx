@@ -251,6 +251,7 @@ export const Tab = ({
                 //Check for empty table name
                 if (titleHeader !== '') {
                   onInputBlur(e.target.value, index, initialTitleHeader);
+                  setHasErrors(false);
                 } else {
                   if (!isUndefined(onTabNameError)) {
                     onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
