@@ -82,7 +82,7 @@ export const Tab = ({
     if (document.getElementsByClassName('p-inputtext p-component').length > 0) {
       document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
-  }, [onTabBlur]);
+  }, [onTabBlur, hasErrors]);
 
   useEffect(() => {
     if (!isUndefined(newTab)) {
@@ -136,6 +136,7 @@ export const Tab = ({
         if (!hasErrors) {
           setEditingHeader(false);
         }
+        setHasErrors(false);
       }
     }
     if (event.key === 'Enter') {
@@ -145,6 +146,7 @@ export const Tab = ({
         if (!isUndefined(onTabNameError)) {
           onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
           setEditingHeader(true);
+          setHasErrors(true);
         }
       }
     }
@@ -157,11 +159,14 @@ export const Tab = ({
       if (correctNameChange.correct) {
         setEditingHeader(false);
         setTitleHeader(correctNameChange.tableName);
+        setHasErrors(false);
       } else {
         setEditingHeader(true);
+        setHasErrors(true);
       }
     } else {
       setEditingHeader(false);
+      setHasErrors(false);
     }
   };
 
@@ -251,7 +256,6 @@ export const Tab = ({
                 //Check for empty table name
                 if (titleHeader !== '') {
                   onInputBlur(e.target.value, index, initialTitleHeader);
-                  setHasErrors(false);
                 } else {
                   if (!isUndefined(onTabNameError)) {
                     onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
