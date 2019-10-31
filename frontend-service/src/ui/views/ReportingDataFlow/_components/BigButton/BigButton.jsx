@@ -48,6 +48,7 @@ export const BigButton = ({
   };
 
   const onEditorValueFocus = value => {
+    setButtonsTitle(value);
     setInitialValue(value);
   };
 
@@ -121,6 +122,7 @@ export const BigButton = ({
               if (!isUndefined(onSaveError)) {
                 document.getElementsByClassName('p-inputtext p-component')[0].focus();
                 onSaveError();
+                setButtonsTitle(initialValue);
               }
             }
           }}
