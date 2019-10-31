@@ -35,6 +35,7 @@ import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
+    activeIndex,
     hasWritePermissions,
     isWebFormMMR,
     buttonsList = undefined,
@@ -106,8 +107,6 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
-        setFilterLevelError(['ERROR', 'WARNING', 'CORRECT']);
-
         setValidationDropdownFilter([
           { label: resources.messages['error'], key: 'ERROR' },
           { label: resources.messages['warning'], key: 'WARNING' },
@@ -177,14 +176,19 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     useEffect(() => {
-      if (isUndefined(recordPositionId) || recordPositionId === -1) {
+      console.log(activeIndex, tableId);
+      if (isUndefined(recordPositionId) || recordPositionId === -1 || activeIndex !== tableId) {
         return;
       }
 
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, [
+        'ERROR',
+        'WARNING',
+        'CORRECT'
+      ]);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -1274,7 +1278,7 @@ const DataViewer = withRouter(
         <Dialog
           className={styles.Dialog}
           dismissableMask={false}
-          header={resources.messages['uploadDataset']}
+          header={`${resources.messages['uploadDataset']}${tableName}`}
           onHide={onHide}
           visible={importDialogVisible}>
           <CustomFileUpload

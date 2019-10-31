@@ -291,6 +291,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   return layout(
     <>
+      {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
       <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="dataset" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
@@ -381,19 +382,19 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             onSetVisible(setValidationsVisible, false);
           },
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
             setRecordPositionId(posIdRecord);
             setSelectedRecordErrorId(selectedRecordErrorId);
+            setActiveIndex(tableSchemaId);
           }
         }}>
         <Dialog
+          className={styles.paginatorValidationViewer}
           dismissableMask={true}
           header={resources.messages['titleValidations']}
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}
-          className={styles.paginatorValidationViewer}>
+          visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
             datasetName={datasetTitle}
