@@ -3,11 +3,7 @@ server:
 spring:
   application:
     name: ums
-  cache:
-    type: redis
-  redis:
-    host: 127.0.0.1
-    port: 6379
+
 eea:
   security:
     authenticatedRequest: /user/checkAccess,/user/resources*,/user/add_contributtor_to_resource,/resource/details
