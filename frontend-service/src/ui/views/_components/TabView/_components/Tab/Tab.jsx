@@ -40,6 +40,7 @@ export const Tab = ({
   selected
 }) => {
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
+  const [hasErrors, setHasErrors] = useState(false);
   const [initialTitleHeader, setInitialTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
   const [menu, setMenu] = useState();
@@ -74,9 +75,14 @@ export const Tab = ({
   }, []);
 
   useEffect(() => {
-    setTitleHeader(titleHeader !== '' && titleHeader === header ? titleHeader : header !== '' ? header : titleHeader);
-    setInitialTitleHeader(header);
-  }, [onTabBlur]);
+    if (!editingHeader) {
+      setTitleHeader(titleHeader !== '' && titleHeader === header ? titleHeader : header !== '' ? header : titleHeader);
+      setInitialTitleHeader(header);
+    }
+    if (document.getElementsByClassName('p-inputtext p-component').length > 0) {
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    }
+  }, [onTabBlur, hasErrors]);
 
   useEffect(() => {
     if (!isUndefined(newTab)) {
@@ -127,7 +133,10 @@ export const Tab = ({
         onTabAddCancel();
       } else {
         setTitleHeader(initialTitleHeader);
-        setEditingHeader(false);
+        if (!hasErrors) {
+          setEditingHeader(false);
+        }
+        setHasErrors(false);
       }
     }
     if (event.key === 'Enter') {
@@ -137,7 +146,7 @@ export const Tab = ({
         if (!isUndefined(onTabNameError)) {
           onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
           setEditingHeader(true);
-          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          setHasErrors(true);
         }
       }
     }
@@ -150,13 +159,14 @@ export const Tab = ({
       if (correctNameChange.correct) {
         setEditingHeader(false);
         setTitleHeader(correctNameChange.tableName);
+        setHasErrors(false);
       } else {
         setEditingHeader(true);
-        //Set focus on input if the name is empty
-        document.getElementsByClassName('p-inputtext p-component')[0].focus();
+        setHasErrors(true);
       }
     } else {
       setEditingHeader(false);
+      setHasErrors(false);
     }
   };
 
@@ -250,7 +260,7 @@ export const Tab = ({
                   if (!isUndefined(onTabNameError)) {
                     onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTabHeaderError']);
                     setEditingHeader(true);
-                    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+                    setHasErrors(true);
                   }
                 }
               }}
