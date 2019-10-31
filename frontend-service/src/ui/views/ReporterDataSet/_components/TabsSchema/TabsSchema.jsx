@@ -32,6 +32,7 @@ export const TabsSchema = ({
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
                 <DataViewer
+                  activeIndex={activeIndex}
                   hasWritePermissions={hasWritePermissions}
                   isWebFormMMR={isWebFormMMR}
                   buttonsList={buttonsList}
