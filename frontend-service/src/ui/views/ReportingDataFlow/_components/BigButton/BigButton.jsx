@@ -25,6 +25,7 @@ export const BigButton = ({
   placeholder
 }) => {
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
+  const [hasErrors, setHasErrors] = useState(false);
   const [initialValue, setInitialValue] = useState();
 
   const newDatasetRef = useRef();
@@ -32,22 +33,34 @@ export const BigButton = ({
   const onEditorKeyChange = event => {
     if (event.key === 'Enter') {
       if (!isEmpty(buttonsTitle)) {
-        initialValue !== event.target.value ? onSaveName(event.target.value) && onNameEdit() : onNameEdit();
+        if (initialValue !== event.target.value) {
+          onSaveName(event.target.value) && onNameEdit() && setHasErrors(false);
+        } else {
+          if (hasErrors) {
+            onNameEdit();
+          }
+          setHasErrors(false);
+        }
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          setHasErrors(false);
         }
       }
     } else if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
-        onNameEdit();
+        if (hasErrors) {
+          onNameEdit();
+        }
+        setHasErrors(true);
       }
     }
   };
 
   const onEditorValueFocus = value => {
+    setButtonsTitle(value);
     setInitialValue(value);
   };
 
@@ -116,18 +129,26 @@ export const BigButton = ({
           className={`${styles.inputText}`}
           onBlur={e => {
             if (!isEmpty(buttonsTitle)) {
-              initialValue !== e.target.value ? onSaveName(e.target.value) && onNameEdit() : onNameEdit();
+              if (initialValue !== e.target.value) {
+                onSaveName(e.target.value) && onNameEdit();
+              } else {
+                if (hasErrors) {
+                  onNameEdit();
+                }
+                setHasErrors(true);
+              }
             } else {
               if (!isUndefined(onSaveError)) {
                 document.getElementsByClassName('p-inputtext p-component')[0].focus();
                 onSaveError();
+                setHasErrors(false);
               }
             }
           }}
           onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {
             e.preventDefault();
-            onEditorValueFocus(e.target.value);
+            onEditorValueFocus(caption);
           }}
           onKeyDown={e => onEditorKeyChange(e)}
           placeholder={placeholder}

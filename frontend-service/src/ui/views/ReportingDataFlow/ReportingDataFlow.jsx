@@ -161,6 +161,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
+          if (isNameEditable) {
+            document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          }
         }}
       />
     </div>
@@ -183,6 +186,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error(error.response);
+    }
+  };
+
+  const onHideErrorDialog = () => {
+    setErrorDialogVisible(false);
+    if (isNameEditable) {
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
   };
 
@@ -486,7 +496,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
-          onHide={() => setErrorDialogVisible(false)}
+          onHide={onHideErrorDialog}
           visible={errorDialogVisible}>
           <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
         </Dialog>
