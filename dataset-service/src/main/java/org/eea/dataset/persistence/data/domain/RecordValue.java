@@ -109,7 +109,10 @@ public class RecordValue {
       return false;
     }
     final RecordValue other = (RecordValue) obj;
-    return Objects.equals(id, other.id);
+    return Objects.equals(datasetPartitionId, other.datasetPartitionId)
+        && Objects.equals(fields, other.fields) && Objects.equals(id, other.id)
+        && Objects.equals(idRecordSchema, other.idRecordSchema)
+        && Objects.equals(tableValue, other.tableValue);
   }
 
 
