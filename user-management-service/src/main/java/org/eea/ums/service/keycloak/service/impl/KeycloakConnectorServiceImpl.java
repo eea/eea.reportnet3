@@ -155,8 +155,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (null != checkResult && null != checkResult.getBody()) {
       result = checkResult.getBody();
     }
+    String permission = null != result && null != result.getStatus() ? result.getStatus() : "DENY";
 
-    return null != result && null != result.getStatus() ? result.getStatus() : "DENY";
+    return permission;
   }
 
   @Override
@@ -175,8 +176,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                 uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
                     .path(GET_GROUPS_BY_USER).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
-    Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
-        .orElse(null);
+
     return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).map(entity -> entity)
         .orElse(null);
   }
@@ -321,28 +321,16 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   }
 
-  private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
-
-    return new HttpEntity<>(body, headers);
-  }
 
   @Override
   public void addUserToGroup(String userId, String groupId) {
-    Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
-
-    HttpHeaders headers = createBasicHeaders(headerInfo);
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(URI_PARAM_REALM, realmName);
     uriParams.put(URI_PARAM_GROUP_ID, groupId);
     uriParams.put(URI_PARAM_USER_ID, userId);
-
+    HttpEntity<Void> request = createHttpRequest(null, uriParams);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<Void> request = new HttpEntity<>(null, headers);
+
     this.restTemplate.exchange(
         uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
             .path(ADD_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
@@ -450,10 +438,20 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-    if (null != headersInfo && headersInfo.size() > 0) {
+    if (null != headersInfo && !headersInfo.isEmpty()) {
       headersInfo.entrySet().forEach(entry -> headers.set(entry.getKey(), entry.getValue()));
     }
     return headers;
+  }
+
+  private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
+    Map<String, String> headerInfo = new HashMap<>();
+    headerInfo.put("Authorization", "Bearer " + TokenMonitor.getToken());
+
+    HttpHeaders headers = createBasicHeaders(headerInfo);
+
+    HttpEntity<T> request = new HttpEntity<>(body, headers);
+    return request;
   }
 
 

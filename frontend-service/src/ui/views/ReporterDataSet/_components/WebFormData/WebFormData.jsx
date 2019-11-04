@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './WebFormData.module.css';
 

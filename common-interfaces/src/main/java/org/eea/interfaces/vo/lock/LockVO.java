@@ -11,15 +11,13 @@ import lombok.ToString;
 
 
 /**
- * The Class LockVO. This is the Lock Model that represents lock at any level on Reportnet 3.0
- *
+ * The Class LockVO. This is the Lock Model that represents lock at any level on Reportnet 3.0.
  */
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 public class LockVO implements Serializable {
-
   /**
    * The Constant serialVersionUID.
    */

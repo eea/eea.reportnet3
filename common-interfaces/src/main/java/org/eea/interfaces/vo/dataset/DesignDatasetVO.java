@@ -6,13 +6,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-
-@Getter
-@Setter
-@ToString
 /**
  * The Class DesignDatasetVO.
  */
+@Getter
+@Setter
+@ToString
 public class DesignDatasetVO implements Serializable {
 
   /** The Constant serialVersionUID. */
