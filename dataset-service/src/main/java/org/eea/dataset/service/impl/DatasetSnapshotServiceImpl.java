@@ -11,7 +11,6 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -53,6 +52,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
@@ -68,17 +68,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private SnapshotMapper snapshotMapper;
 
+  /** The snapshot schema repository. */
   @Autowired
   private SnapshotSchemaRepository snapshotSchemaRepository;
 
+  /** The snapshot schema mapper. */
   @Autowired
   private SnapshotSchemaMapper snapshotSchemaMapper;
 
+  /** The schema repository. */
   @Autowired
   private SchemasRepository schemaRepository;
-
-  @Autowired
-  private TableRepository tableRepository;
 
 
 
@@ -88,13 +88,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The path schema snapshot. */
   @Value("${pathSchemaSnapshot}")
   private String pathSchemaSnapshot;
 
+  /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
 
   /**
@@ -236,6 +239,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
+  /**
+   * Gets the schema snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the schema snapshots by id dataset
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<SnapshotVO> getSchemaSnapshotsByIdDataset(Long datasetId) throws EEAException {
 
@@ -247,6 +257,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
+  /**
+   * Adds the schema snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idDatasetSchema the id dataset schema
+   * @param description the description
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Async
   public void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description)
@@ -269,7 +288,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataSetSchema schema = schemaRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
     ObjectMapper objectMapper = new ObjectMapper();
     Long idSnapshot = snap.getId();
-    String nameFile = pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset);
+    String nameFile =
+        pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     objectMapper.writeValue(new File(nameFile), schema);
 
 
@@ -289,13 +309,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
+  /**
+   * Restore schema snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Async
   public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
     // 1. Restore the schema
-    String nameFile = pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset);
+    String nameFile =
+        pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
 
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -323,6 +352,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
+  /**
+   * Removes the schema snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   @Async
   public void removeSchemaSnapshot(Long idDataset, Long idSnapshot)
@@ -330,7 +367,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Remove from the metabase
     snapshotSchemaRepository.deleteById(idSnapshot);
     // Delete the file
-    String nameFile = pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset);
+    String nameFile =
+        pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     Path path1 = Paths.get(nameFile);
     Files.deleteIfExists(path1);
 

@@ -25,8 +25,10 @@ public enum LockSignature {
    */
   EXECUTE_VALIDATION("ExecuteValidationCommand.execute(..)"),
 
+  /** The create schema snapshot. */
   CREATE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.createSchemaSnapshot(..)"),
 
+  /** The restore schema snapshot. */
   RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)");
 
   /**

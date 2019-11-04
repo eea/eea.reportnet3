@@ -328,11 +328,13 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   }
 
 
+
   /**
    * Restore data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   * @param datasetType the dataset type
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception

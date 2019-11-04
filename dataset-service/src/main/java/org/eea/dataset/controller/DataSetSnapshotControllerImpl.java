@@ -196,6 +196,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Gets the schema snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the schema snapshots by id dataset
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
@@ -219,6 +225,13 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Creates the schema snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @param description the description
+   */
   @Override
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
@@ -246,6 +259,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Restore schema snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
@@ -272,6 +291,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
 
+  /**
+   * Delete schema snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")

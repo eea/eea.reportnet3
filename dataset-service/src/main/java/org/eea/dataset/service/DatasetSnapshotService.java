@@ -39,6 +39,13 @@ public interface DatasetSnapshotService {
 
 
 
+  /**
+   * Restore snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   */
   void restoreSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
   /**
@@ -51,14 +58,46 @@ public interface DatasetSnapshotService {
   void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
 
 
+  /**
+   * Gets the schema snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the schema snapshots by id dataset
+   * @throws EEAException the EEA exception
+   */
   List<SnapshotVO> getSchemaSnapshotsByIdDataset(Long datasetId) throws EEAException;
 
+  /**
+   * Adds the schema snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idDatasetSchema the id dataset schema
+   * @param description the description
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   void addSchemaSnapshot(Long idDataset, String idDatasetSchema, String description)
       throws EEAException, IOException;
 
+  /**
+   * Restore schema snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   void restoreSchemaSnapshot(Long idDataset, Long idSnapshot) throws EEAException, IOException;
 
 
+  /**
+   * Removes the schema snapshot.
+   *
+   * @param idDataset the id dataset
+   * @param idSnapshot the id snapshot
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   void removeSchemaSnapshot(Long idDataset, Long idSnapshot) throws EEAException, IOException;
 
 

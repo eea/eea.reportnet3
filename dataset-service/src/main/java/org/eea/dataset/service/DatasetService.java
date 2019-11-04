@@ -318,5 +318,10 @@ public interface DatasetService {
    */
   String deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
 
+  /**
+   * Delete table values.
+   *
+   * @param datasetId the dataset id
+   */
   void deleteTableValues(@DatasetId Long datasetId);
 }
