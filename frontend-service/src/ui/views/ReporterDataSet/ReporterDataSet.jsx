@@ -42,11 +42,15 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [activeIndex, setActiveIndex] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [datasetTitle, setDatasetTitle] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
+  const [dataViewerOptions, setDataViewerOptions] = useState({
+    recordPositionId: -1,
+    selectedRecordErrorId: -1,
+    activeIndex: null
+  });
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
@@ -58,8 +62,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
-  const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -229,7 +231,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = tableSchemaId => {
-    setActiveIndex(tableSchemaId.index);
+    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
+    // setActiveIndex(tableSchemaId.index);
   };
 
   const showWebFormInputSwitch = () => {
@@ -252,10 +255,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     } else {
       return (
         <TabsSchema
-          activeIndex={activeIndex}
+          activeIndex={dataViewerOptions.activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={recordPositionId}
-          selectedRecordErrorId={selectedRecordErrorId}
+          recordPositionId={dataViewerOptions.recordPositionId}
+          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
           isWebFormMMR={isWebFormMMR}
@@ -364,8 +367,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      {showWebFormInputSwitch()}
-      {isWebForm()}
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -382,11 +383,15 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             onSetVisible(setValidationsVisible, false);
           },
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
-            setActiveIndex(tableSchemaId);
+            setDataViewerOptions({
+              recordPositionId: posIdRecord,
+              selectedRecordErrorId: selectedRecordErrorId,
+              activeIndex: tableSchemaId
+            });
           }
         }}>
+        {showWebFormInputSwitch()}
+        {isWebForm()}
         <Dialog
           className={styles.paginatorValidationViewer}
           dismissableMask={true}
