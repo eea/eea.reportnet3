@@ -35,7 +35,6 @@ import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
-    activeIndex,
     hasWritePermissions,
     isWebFormMMR,
     buttonsList = undefined,
@@ -176,8 +175,7 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     useEffect(() => {
-      console.log(activeIndex, tableId);
-      if (isUndefined(recordPositionId) || recordPositionId === -1 || activeIndex !== tableId) {
+      if (isUndefined(recordPositionId) || recordPositionId === -1) {
         return;
       }
 
