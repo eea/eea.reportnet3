@@ -165,7 +165,7 @@ public class FileCommonUtils {
     DataSetSchemaVO dataSetSchema = null;
     // get dataset schema from mongo DB
     if (null != dataflowId) {
-      dataSetSchema = dataSetSchemaService.getDataSchemaByIdFlow(dataflowId, false, datasetId);
+      dataSetSchema = dataSetSchemaService.getDataSchemaByDatasetId(false, datasetId);
     }
     return dataSetSchema;
   }

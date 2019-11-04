@@ -462,13 +462,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException
    */
   @Override
-  public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules, Long datasetId)
+  public DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId)
       throws EEAException {
 
     DataSetMetabase metabase = obtainDatasetMetabase(datasetId);
-    DataSetSchema dataschema = schemasRepository.findByIdDataFlowAndIdDataSetSchema(idFlow,
-        new ObjectId(metabase.getDatasetSchema()));
-    LOG.info("Schema retrived by idFlow {}", idFlow);
+    DataSetSchema dataschema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
+    LOG.info("Schema retrived by datasetId {}", datasetId);
     return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
 

@@ -384,7 +384,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void testGetDatasetsId() throws EEAException {
 
-    dataflowServiceImpl.getReportingDatasetsId(1L);
+    dataflowServiceImpl.getReportingDatasetsId(1L, "");
   }
 
 
@@ -396,7 +396,7 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void testGetDatasetsIdError() throws EEAException {
 
-    dataflowServiceImpl.getReportingDatasetsId(null);
+    dataflowServiceImpl.getReportingDatasetsId(null, null);
   }
 
 

@@ -173,12 +173,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand()
-  @RequestMapping(value = "{datasetId}/dataflow/{id}/", method = RequestMethod.GET,
+  @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow,
-      @PathVariable("datasetId") Long datasetId) {
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN','DATASCHEMA_PROVIDER')")
+  public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
-      return dataschemaService.getDataSchemaByIdFlow(idFlow, true, datasetId);
+      return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -211,13 +211,12 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand()
-  @GetMapping(value = "{datasetId}/noRules/dataflow/{id}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
-  public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow,
+  @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_PROVIDER','DATASCHEMA_CUSTODIAN','DATASCHEMA_PROVIDER')")
+  public DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(
       @PathVariable("datasetId") Long datasetId) {
     try {
-      return dataschemaService.getDataSchemaByIdFlow(idFlow, false, datasetId);
+      return dataschemaService.getDataSchemaByDatasetId(false, datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

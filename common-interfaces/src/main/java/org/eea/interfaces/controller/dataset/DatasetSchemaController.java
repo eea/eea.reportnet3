@@ -63,10 +63,9 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the data set schema VO
    */
-  @RequestMapping(value = "{datasetId}/dataflow/{id}/", method = RequestMethod.GET,
+  @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow,
-      @PathVariable("datasetId") Long datasetId);
+  DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
 
 
   /**
@@ -85,10 +84,8 @@ public interface DatasetSchemaController {
    * @param idFlow the id flow
    * @return the data set schema VO
    */
-  @GetMapping(value = "{datasetId}/noRules/dataflow/{id}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow,
-      @PathVariable("datasetId") Long datasetId);
+  @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Delete table schema.
@@ -155,4 +152,6 @@ public interface DatasetSchemaController {
   @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId);
+
+
 }

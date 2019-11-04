@@ -47,8 +47,7 @@ public interface DatasetSchemaService {
    * @return the data schema by id flow
    * @throws EEAException the EEA exception
    */
-  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules, Long datasetId)
-      throws EEAException;
+  DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId) throws EEAException;
 
   /**
    * Delete table schema.
