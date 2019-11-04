@@ -14,9 +14,9 @@ export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog
     <li className={styles.listItem} key={itemData.id}>
       <div className={styles.itemBox}>
         <div className={styles.listItemData}>
-          <h5 className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
+          <span className={itemData.isReleased ? `${styles.is_released_snapshot}` : null}>
             {moment(itemData.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-          </h5>
+          </span>
           <div className={styles.listActions}>
             <Button
               tooltip={
@@ -35,7 +35,7 @@ export const SnapshotItem = ({ itemData, setIsActiveReleaseSnapshotConfirmDialog
           </div>
         </div>
       </div>
-      <p>{itemData.description}</p>
+      <p className={styles.snapshotDescription}>{itemData.description}</p>
     </li>
   );
 };

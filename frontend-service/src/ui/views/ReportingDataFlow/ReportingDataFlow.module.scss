@@ -52,3 +52,6 @@
 .splitButtonWrapper .datasetItem {
   margin-right: 1rem;
 }
+.releaseSnapshotsDialog :global .p-dialog-content {
+  max-height: 50vh !important;
+}
