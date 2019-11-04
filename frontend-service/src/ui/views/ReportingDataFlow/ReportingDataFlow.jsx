@@ -161,6 +161,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
+          if (isNameEditable) {
+            document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          }
         }}
       />
     </div>
