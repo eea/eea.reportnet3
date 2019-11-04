@@ -34,34 +34,34 @@ export const BigButton = ({
     if (event.key === 'Enter') {
       if (!isEmpty(buttonsTitle)) {
         if (initialValue !== event.target.value) {
-          onSaveName(event.target.value) && onNameEdit() && setHasErrors(false);
+          onSaveName(event.target.value) && onNameEdit() && setHasErrors(true);
         } else {
-          if (hasErrors) {
+          if (!hasErrors) {
             onNameEdit();
           }
-          setHasErrors(false);
+          setHasErrors(true);
         }
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
-          setHasErrors(false);
+          setHasErrors(true);
         }
       }
     } else if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
-        if (hasErrors) {
+        if (!hasErrors) {
           onNameEdit();
         }
-        setHasErrors(true);
+        setHasErrors(false);
       }
     }
   };
 
   const onEditorValueFocus = value => {
     setButtonsTitle(value);
-    setInitialValue(value);
+    setInitialValue(!isUndefined(value) ? caption : value);
   };
 
   const dataset = model ? (
@@ -132,23 +132,23 @@ export const BigButton = ({
               if (initialValue !== e.target.value) {
                 onSaveName(e.target.value) && onNameEdit();
               } else {
-                if (hasErrors) {
+                if (!hasErrors) {
                   onNameEdit();
                 }
-                setHasErrors(true);
+                setHasErrors(false);
               }
             } else {
               if (!isUndefined(onSaveError)) {
                 document.getElementsByClassName('p-inputtext p-component')[0].focus();
                 onSaveError();
-                setHasErrors(false);
+                setHasErrors(true);
               }
             }
           }}
           onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {
             e.preventDefault();
-            onEditorValueFocus(caption);
+            onEditorValueFocus(e.target.value);
           }}
           onKeyDown={e => onEditorKeyChange(e)}
           placeholder={placeholder}
