@@ -239,6 +239,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.deleteDatasetSchema(datasetId, schemaId);
       datasetMetabaseService.deleteDesignDataset(datasetId);
       recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
+      dataschemaService.deleteGroup(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);

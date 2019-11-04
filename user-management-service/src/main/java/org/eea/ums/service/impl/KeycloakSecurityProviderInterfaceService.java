@@ -124,12 +124,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     ResourceInfoVO result = new ResourceInfoVO();
     if (null != groups && groups.length > 0) {
       groupId = Arrays.asList(groups).stream()
-          .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
+          .filter(groupInfo -> groupName.equalsIgnoreCase(groupInfo.getName()))
           .map(GroupInfo::getId).findFirst().orElse("");
     }
     if (StringUtils.isNotBlank(groupId)) {
       result = this.groupInfoMapper.entityToClass(keycloakConnectorService.getGroupDetail(groupId));
-      //Group name has the format <ResourceType>-<idResource>-<userRole>, for instance Dataschema-1-DATA_REQUESTER
+      // Group name has the format <ResourceType>-<idResource>-<userRole>, for instance
+      // Dataschema-1-DATA_REQUESTER
       String[] splittedGroupName = groupName.split("-");
       String resourceType = splittedGroupName[0];
       String resourceId = splittedGroupName[1];
@@ -174,8 +175,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void createResourceInstance(ResourceInfoVO resourceInfoVO) {
     GroupInfo groupInfo = new GroupInfo();
-    String groupName = ResourceGroupEnum
-        .fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
+    String groupName =
+        ResourceGroupEnum.fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
             resourceInfoVO.getSecurityRoleEnum()).getGroupName(resourceInfoVO.getResourceId());
     groupInfo.setName(groupName);
     groupInfo.setPath("/" + groupName);
@@ -183,37 +184,48 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     keycloakConnectorService.createGroupDetail(groupInfo);
   }
 
+  /**
+   * Delete resource instances.
+   *
+   * @param resourceInfoVO the resource info VO
+   */
   @Override
   public void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO) {
-    //Recover the resource names so they can be removed in the generic way.
-    List<String> resourceNames = resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(
-        Collectors.toList());
-    if (null != resourceNames && resourceNames.size() > 0) {
+    // Recover the resource names so they can be removed in the generic way.
+    List<String> resourceNames =
+        resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(Collectors.toList());
+    if (null != resourceNames && !resourceNames.isEmpty()) {
       deleteResourceInstancesByName(resourceNames);
 
     }
   }
 
+  /**
+   * Delete resource instances by name.
+   *
+   * @param resourceName the resource name
+   */
   @Override
   public void deleteResourceInstancesByName(List<String> resourceName) {
-    //Initialize the map of resouces along with empty string where later on the GroupId will be placed
-    Map<String, String> resources = resourceName.stream().collect(
-        Collectors.toMap(Function.identity(), x -> ""));
+    // Initialize the map of resouces along with empty string where later on the GroupId will be
+    // placed
+    Map<String, String> resources =
+        resourceName.stream().collect(Collectors.toMap(Function.identity(), x -> ""));
     if (null != resources && resources.size() > 0) {
-      //Once recovered all the group names from input, get the group names from Keycloak to determine which ones must be removed
+      // Once recovered all the group names from input, get the group names from Keycloak to
+      // determine which ones must be removed
       GroupInfo[] groups = keycloakConnectorService.getGroups();
       if (null != groups && groups.length > 0) {
         Arrays.asList(groups).stream()
-            .filter(groupInfo -> resources.containsKey(groupInfo.getName())).
-            forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
-        //Removing groups one by one
+            .filter(groupInfo -> resources.containsKey(groupInfo.getName()))
+            .forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
+        // Removing groups one by one
         resources.values().stream()
             .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
       }
 
     }
   }
-
 
   /**
    * Adds the user to user group.
@@ -226,7 +238,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
       String groupId = Arrays.asList(groups).stream()
-          .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
+          .filter(groupInfo -> groupName.equalsIgnoreCase(groupInfo.getName()))
           .map(GroupInfo::getId).findFirst().orElse("");
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);

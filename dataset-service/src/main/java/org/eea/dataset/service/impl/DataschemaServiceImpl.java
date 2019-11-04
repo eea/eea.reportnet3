@@ -187,6 +187,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
   }
 
+  /**
+   * Delete group and remove user.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void deleteGroup(Long datasetId) {
+    // Remove group Dataschema-X-DATA_CUSTODIAN
+    StringBuilder resourceCustodian = new StringBuilder();
+    resourceCustodian.append("Dataschema-").append(datasetId).append("-DATA_CUSTODIAN");
+    List<String> resources = new ArrayList<>();
+    StringBuilder resourceProvider = new StringBuilder();
+    // Remove group Dataschema-X-DATA_PROVIDER
+    resourceProvider.append("Dataschema-").append(datasetId).append("-DATA_PROVIDER");
+    resources.add(resourceCustodian.toString());
+    resources.add(resourceProvider.toString());
+    resourceManagementControllerZull.deleteResourceByName(resources);
+  }
+
 
   /**
    * Creates the group.

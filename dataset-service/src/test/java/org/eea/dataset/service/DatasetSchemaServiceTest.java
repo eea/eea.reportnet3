@@ -95,12 +95,15 @@ public class DatasetSchemaServiceTest {
   @Mock
   private TableSchemaMapper tableMapper;
 
+  /** The field schema no rules mapper. */
   @Mock
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
+  /** The resource management controller zull. */
   @Mock
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
+  /** The user management controller zull. */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -619,6 +622,10 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO(), 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
+
+  /**
+   * Delete field schema test.
+   */
   @Test
   public void deleteFieldSchemaTest() {
     UpdateResult updateResult = UpdateResult.acknowledged(1L, 1L, null);
@@ -627,6 +634,9 @@ public class DatasetSchemaServiceTest {
     Assert.assertTrue(dataSchemaServiceImpl.deleteFieldSchema("datasetSchemaId", "fieldSchemaId"));
   }
 
+  /**
+   * Creates the group and add user test.
+   */
   @Test
   public void createGroupAndAddUserTest() {
     Mockito.doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
@@ -635,5 +645,14 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.createGroupAndAddUser(1L);
     Mockito.verify(userManagementControllerZull, times(1)).addContributorToResource(Mockito.any(),
         Mockito.any());
+  }
+
+  /**
+   * Delete group test.
+   */
+  @Test
+  public void deleteGroupTest() {
+    dataSchemaServiceImpl.deleteGroup(1L);
+    Mockito.verify(resourceManagementControllerZull, times(1)).deleteResourceByName(Mockito.any());
   }
 }

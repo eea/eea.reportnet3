@@ -90,6 +90,13 @@ public interface DatasetSchemaService {
   void createGroupAndAddUser(Long datasetId);
 
   /**
+   * Delete group and remove user.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteGroup(Long datasetId);
+
+  /**
    * Creates the field schema.
    *
    * @param idTableSchema the id table schema
