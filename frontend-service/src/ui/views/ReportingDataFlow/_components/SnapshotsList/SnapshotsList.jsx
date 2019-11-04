@@ -21,7 +21,6 @@ export const SnapshotsList = ({
               setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
               setSnapshotDataToRelease={setSnapshotDataToRelease}
             />
-            <hr />
           </div>
         ))}
       </ul>
