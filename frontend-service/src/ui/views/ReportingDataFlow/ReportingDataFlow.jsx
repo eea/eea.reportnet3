@@ -161,6 +161,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
+          if (isNameEditable) {
+            document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          }
         }}
       />
     </div>
@@ -183,6 +186,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error(error.response);
+    }
+  };
+
+  const onHideErrorDialog = () => {
+    setErrorDialogVisible(false);
+    if (isNameEditable) {
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
   };
 
@@ -486,7 +496,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
-          onHide={() => setErrorDialogVisible(false)}
+          onHide={onHideErrorDialog}
           visible={errorDialogVisible}>
           <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
         </Dialog>
@@ -500,22 +510,24 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           {resources.messages['deleteDatasetSchema']}
         </ConfirmDialog>
         <Dialog
-          header={dataflowData.name}
+          header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
+          className={styles.releaseSnapshotsDialog}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
-          <ScrollPanel style={{ width: '100%', height: '50vh' }}>
-            {!isEmpty(snapshotsListData) ? (
-              <SnapshotsList
-                snapshotsListData={snapshotsListData}
-                onLoadSnapshotList={onLoadSnapshotList}
-                setSnapshotDataToRelease={setSnapshotDataToRelease}
-                setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
-              />
-            ) : (
-              <h3>{resources.messages['emptySnapshotList']}</h3>
-            )}
-          </ScrollPanel>
+          {/* <ScrollPanel style={{ width: '100%', height: '50vh' }}> */}
+          {!isEmpty(snapshotsListData) ? (
+            <SnapshotsList
+              className={styles.releaseList}
+              snapshotsListData={snapshotsListData}
+              onLoadSnapshotList={onLoadSnapshotList}
+              setSnapshotDataToRelease={setSnapshotDataToRelease}
+              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
+            />
+          ) : (
+            <h3>{resources.messages['emptySnapshotList']}</h3>
+          )}
+          {/* </ScrollPanel> */}
         </Dialog>
 
         <Dialog
