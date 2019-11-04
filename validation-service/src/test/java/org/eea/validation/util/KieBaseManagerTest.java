@@ -1,7 +1,6 @@
 package org.eea.validation.util;
 
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +109,8 @@ public class KieBaseManagerTest {
     // CALL SERVICES
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
-    when(schemasRepository.findSchemaByIdFlow(Mockito.any())).thenReturn(dataSchema);
-    kieBaseManager.reloadRules(1L);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSchema);
+    kieBaseManager.reloadRules(1L, "");
   }
 
 }

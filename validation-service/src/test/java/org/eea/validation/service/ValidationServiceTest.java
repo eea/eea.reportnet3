@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -21,10 +20,7 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.controller.ums.ResourceManagementController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
-import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -47,7 +43,6 @@ import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
 import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.RecordValidationRepository;
-import org.eea.validation.persistence.data.repository.RecordValidationRepository.EntityErrors;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationQuerysDroolsRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
@@ -67,7 +62,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -419,7 +413,8 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
-    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any());
+    doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any(),
+        Mockito.any());
     try {
       validationServiceImpl.loadRulesKnowledgeBase(1L);
     } catch (EEAException e) {
@@ -507,7 +502,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBase() throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
-    when(kieBaseManager.reloadRules(Mockito.any())).thenReturn(kiebase);
+    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
 
@@ -523,8 +518,8 @@ public class ValidationServiceTest {
       throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
     kieHelper.build();
-    Mockito.doThrow(new FileNotFoundException()).when(kieBaseManager)
-        .reloadRules(Mockito.anyLong());
+    Mockito.doThrow(new FileNotFoundException()).when(kieBaseManager).reloadRules(Mockito.anyLong(),
+        Mockito.any());
 
     validationServiceImpl.loadRulesKnowledgeBase(1L);
   }
