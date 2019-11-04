@@ -29,6 +29,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
+import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
 
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -44,6 +45,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const user = useContext(UserContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [dataflowName, setDataflowName] = useState('');
   const [datasetTitle, setDatasetTitle] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
   const [dataViewerOptions, setDataViewerOptions] = useState({
@@ -132,6 +134,19 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       DownloadFile(exportDatasetData, exportDatasetDataName);
     }
   }, [exportDatasetData]);
+
+  useEffect(() => {
+    try {
+      getDataflowName();
+    } catch (error) {
+      console.error(error.response);
+    }
+  }, []);
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
 
   const createFileName = (fileName, fileType) => {
     return `${fileName}.${fileType}`;
@@ -295,7 +310,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   return layout(
     <>
       {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
-      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="dataset" />
+      <Title
+        title={`${resources.messages['dataflow']}: ${dataflowName} - 
+        ${resources.messages['titleDataset']}${datasetTitle}`}
+        icon="dataset"
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

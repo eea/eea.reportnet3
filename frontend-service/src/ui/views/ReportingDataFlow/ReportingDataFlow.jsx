@@ -510,22 +510,24 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           {resources.messages['deleteDatasetSchema']}
         </ConfirmDialog>
         <Dialog
-          header={dataflowData.name}
+          header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
+          className={styles.releaseSnapshotsDialog}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
-          <ScrollPanel style={{ width: '100%', height: '50vh' }}>
-            {!isEmpty(snapshotsListData) ? (
-              <SnapshotsList
-                snapshotsListData={snapshotsListData}
-                onLoadSnapshotList={onLoadSnapshotList}
-                setSnapshotDataToRelease={setSnapshotDataToRelease}
-                setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
-              />
-            ) : (
-              <h3>{resources.messages['emptySnapshotList']}</h3>
-            )}
-          </ScrollPanel>
+          {/* <ScrollPanel style={{ width: '100%', height: '50vh' }}> */}
+          {!isEmpty(snapshotsListData) ? (
+            <SnapshotsList
+              className={styles.releaseList}
+              snapshotsListData={snapshotsListData}
+              onLoadSnapshotList={onLoadSnapshotList}
+              setSnapshotDataToRelease={setSnapshotDataToRelease}
+              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
+            />
+          ) : (
+            <h3>{resources.messages['emptySnapshotList']}</h3>
+          )}
+          {/* </ScrollPanel> */}
         </Dialog>
 
         <Dialog
