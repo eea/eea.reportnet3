@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -118,6 +117,6 @@ public class LockServiceImpl implements LockService {
    * @return the integer
    */
   private Integer generateHashCode(List<Object> args) {
-    return Objects.hash(args.hashCode());
+    return args.hashCode();
   }
 }
