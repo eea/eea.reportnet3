@@ -34,7 +34,10 @@ export const BigButton = ({
     if (event.key === 'Enter') {
       if (!isEmpty(buttonsTitle)) {
         if (initialValue !== event.target.value) {
-          onSaveName(event.target.value) && onNameEdit() && setHasErrors(true);
+          onSaveName(event.target.value);
+          onNameEdit();
+          setHasErrors(true);
+          setInitialValue(buttonsTitle);
         } else {
           if (!hasErrors) {
             onNameEdit();
@@ -48,7 +51,8 @@ export const BigButton = ({
           setHasErrors(true);
         }
       }
-    } else if (event.key === 'Escape') {
+    }
+    if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
         if (!hasErrors) {
@@ -60,8 +64,7 @@ export const BigButton = ({
   };
 
   const onEditorValueFocus = value => {
-    setButtonsTitle(value);
-    setInitialValue(!isUndefined(value) ? caption : value);
+    setInitialValue(!isEmpty(value) ? value : initialValue);
   };
 
   const dataset = model ? (
@@ -130,7 +133,10 @@ export const BigButton = ({
           onBlur={e => {
             if (!isEmpty(buttonsTitle)) {
               if (initialValue !== e.target.value) {
-                onSaveName(e.target.value) && onNameEdit();
+                onSaveName(e.target.value);
+                onNameEdit();
+                setHasErrors(true);
+                setInitialValue(buttonsTitle);
               } else {
                 if (!hasErrors) {
                   onNameEdit();
