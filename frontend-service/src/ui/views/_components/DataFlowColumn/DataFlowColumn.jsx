@@ -27,6 +27,7 @@ const DataflowColumn = withRouter(
     createDataflowButtonTitle,
     subscribeButtonTitle,
     history,
+    style,
     match
   }) => {
     const resources = useContext(ResourcesContext);
@@ -60,7 +61,7 @@ const DataflowColumn = withRouter(
     };
 
     return (
-      <div className="nav rep-col-12 rep-col-sm-3">
+      <div className="nav rep-col-12 rep-col-sm-2">
         <h2 className={styles.title}>{navTitle}</h2>
         {components.includes('search') && (
           <div className="navSection">
@@ -81,6 +82,7 @@ const DataflowColumn = withRouter(
               label={createDataflowButtonTitle}
               onClick={() => (setCreateDataflowDialogVisible(true), setIsFormReset(true))}
               disabled={true}
+              style={{ textAlign: 'left' }}
             />
           )}
 
@@ -91,6 +93,7 @@ const DataflowColumn = withRouter(
             onClick={() => {
               setVisibleHandler(setSubscribeDialogVisible, true);
             }}
+            style={style}
             disabled
           />
         </div>

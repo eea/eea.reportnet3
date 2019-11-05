@@ -25,6 +25,7 @@ export const BigButton = ({
   placeholder
 }) => {
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
+  const [hasErrors, setHasErrors] = useState(false);
   const [initialValue, setInitialValue] = useState();
 
   const newDatasetRef = useRef();
@@ -32,23 +33,38 @@ export const BigButton = ({
   const onEditorKeyChange = event => {
     if (event.key === 'Enter') {
       if (!isEmpty(buttonsTitle)) {
-        initialValue !== event.target.value ? onSaveName(event.target.value) && onNameEdit() : onNameEdit();
+        if (initialValue !== event.target.value) {
+          onSaveName(event.target.value);
+          onNameEdit();
+          setHasErrors(true);
+          setInitialValue(buttonsTitle);
+        } else {
+          if (!hasErrors) {
+            onNameEdit();
+          }
+          setHasErrors(true);
+        }
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          setHasErrors(true);
         }
       }
-    } else if (event.key === 'Escape') {
+    }
+    if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
-        onNameEdit();
+        if (!hasErrors) {
+          onNameEdit();
+        }
+        setHasErrors(false);
       }
     }
   };
 
   const onEditorValueFocus = value => {
-    setInitialValue(value);
+    setInitialValue(!isEmpty(value) ? value : initialValue);
   };
 
   const dataset = model ? (
@@ -116,11 +132,22 @@ export const BigButton = ({
           className={`${styles.inputText}`}
           onBlur={e => {
             if (!isEmpty(buttonsTitle)) {
-              initialValue !== e.target.value ? onSaveName(e.target.value) && onNameEdit() : onNameEdit();
+              if (initialValue !== e.target.value) {
+                onSaveName(e.target.value);
+                onNameEdit();
+                setHasErrors(true);
+                setInitialValue(buttonsTitle);
+              } else {
+                if (!hasErrors) {
+                  onNameEdit();
+                }
+                setHasErrors(false);
+              }
             } else {
               if (!isUndefined(onSaveError)) {
                 document.getElementsByClassName('p-inputtext p-component')[0].focus();
                 onSaveError();
+                setHasErrors(true);
               }
             }
           }}

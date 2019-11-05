@@ -106,8 +106,6 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
-        setFilterLevelError(['ERROR', 'WARNING', 'CORRECT']);
-
         setValidationDropdownFilter([
           { label: resources.messages['error'], key: 'ERROR' },
           { label: resources.messages['warning'], key: 'WARNING' },
@@ -184,7 +182,11 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, [
+        'ERROR',
+        'WARNING',
+        'CORRECT'
+      ]);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -1009,7 +1011,8 @@ const DataViewer = withRouter(
           validations.push(
             DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
           );
-        } else {
+        }
+        if (filteredFieldValidationsWithError.length > 0) {
           validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
         }
       }
@@ -1027,6 +1030,7 @@ const DataViewer = withRouter(
           ? (messageWarnings += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
           : ''
       );
+
       return errorValidations.length > 0 && warningValidations.length > 0 ? (
         <div className={styles.iconTooltipWrapper}>
           <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
@@ -1274,7 +1278,7 @@ const DataViewer = withRouter(
         <Dialog
           className={styles.Dialog}
           dismissableMask={false}
-          header={resources.messages['uploadDataset']}
+          header={`${resources.messages['uploadDataset']}${tableName}`}
           onHide={onHide}
           visible={importDialogVisible}>
           <CustomFileUpload
