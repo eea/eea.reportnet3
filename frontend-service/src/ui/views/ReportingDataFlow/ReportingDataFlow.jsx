@@ -502,7 +502,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         </Dialog>
         <ConfirmDialog
           header={resources.messages['delete'].toUpperCase()}
-          labelCancel={resources.messages['close']}
+          labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteDatasetSchema(designDatasetSchemaId)}
           onHide={() => setDeleteDialogVisible(false)}

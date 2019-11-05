@@ -1,0 +1,1 @@
+export { GlobalLoading } from './GlobalLoading';
