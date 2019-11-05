@@ -124,6 +124,7 @@
 		"grid": "Grid",
 		"import": "Import",
 		"importFromFile": "Import from file",
+		"invalidCharacter": "Invalid character",
 		"language": "Language",
 		"levelError": "Level error",
 		"loading": "Loading...",
