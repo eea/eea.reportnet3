@@ -1011,7 +1011,8 @@ const DataViewer = withRouter(
           validations.push(
             DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
           );
-        } else {
+        }
+        if (filteredFieldValidationsWithError.length > 0) {
           validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
         }
       }
@@ -1029,6 +1030,7 @@ const DataViewer = withRouter(
           ? (messageWarnings += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
           : ''
       );
+
       return errorValidations.length > 0 && warningValidations.length > 0 ? (
         <div className={styles.iconTooltipWrapper}>
           <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
