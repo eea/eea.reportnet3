@@ -267,9 +267,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
+        style={{ textAlign: 'left' }}
       />
 
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
