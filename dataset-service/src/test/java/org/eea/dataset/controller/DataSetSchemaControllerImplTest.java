@@ -91,13 +91,16 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Test find data schema by data flow.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void testFindDataSchemaByDataFlow() {
+  public void testFindDataSchemaByDataFlow() throws EEAException {
 
-    Mockito.when(dataschemaService.getDataSchemaByIdFlow(Mockito.eq(1l), Mockito.eq(Boolean.TRUE)))
+    Mockito
+        .when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDataflow(1l);
+    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
     Assert.assertNotNull(result);
 
 
@@ -105,13 +108,16 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Test find data schema with no rules by dataflow.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void testFindDataSchemaWithNoRulesByDataflow() {
+  public void testFindDataSchemaWithNoRulesByDataflow() throws EEAException {
 
-    Mockito.when(dataschemaService.getDataSchemaByIdFlow(Mockito.eq(1l), Mockito.eq(Boolean.FALSE)))
+    Mockito
+        .when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaWithNoRulesByDataflow(1l);
+    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
     Assert.assertNotNull(result);
   }
 
@@ -245,7 +251,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("");
     when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
     Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
@@ -261,7 +267,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
     doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());

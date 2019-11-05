@@ -76,10 +76,8 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    * @return the data set id by dataflow id and schema id
    */
   @Override
-  public List<ReportingDatasetVO> getDataSetIdByDataflowIdAndSchemaId(Long idDataflow,
-      String schemaId) {
-    List<ReportingDataset> datasets =
-        reportingDatasetRepository.findByDataflowIdAndDatasetSchema(idDataflow, schemaId);
+  public List<ReportingDatasetVO> getDataSetIdBySchemaId(String schemaId) {
+    List<ReportingDataset> datasets = reportingDatasetRepository.findByDatasetSchema(schemaId);
 
     List<ReportingDatasetVO> datasetsVO = reportingDatasetMapper.entityListToClass(datasets);
 

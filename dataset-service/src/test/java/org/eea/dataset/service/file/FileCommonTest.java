@@ -10,6 +10,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -163,12 +164,14 @@ public class FileCommonTest {
 
   /**
    * Test get data set schema.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void testGetDataSetSchema() {
-    when(dataSetSchemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+  public void testGetDataSetSchema() throws EEAException {
+    when(dataSetSchemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(dataset);
-    assertEquals("fail", dataset, fileCommon.getDataSetSchema(1L));
+    assertEquals("fail", dataset, fileCommon.getDataSetSchema(1L, 1L));
   }
 
 

@@ -110,7 +110,7 @@ public class KieBaseManagerTest {
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     when(datasetMetabaseController.findDatasetMetabaseById(1L)).thenReturn(dataSetMetabaseVO);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSchema);
-    kieBaseManager.reloadRules(1L, "");
+    kieBaseManager.reloadRules(1L, new ObjectId().toString());
   }
 
 }

@@ -115,12 +115,11 @@ public interface DataflowService {
   /**
    * Gets the reporting datasets id.
    *
-   * @param id the id
    * @param dataschemaId the dataschema id
    * @return the reporting datasets id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getReportingDatasetsId(Long id, String dataschemaId) throws EEAException;
+  DataFlowVO getReportingDatasetsId(String dataschemaId) throws EEAException;
 
 
   /**

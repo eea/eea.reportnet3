@@ -17,16 +17,6 @@ public interface SchemasRepository
 
 
   /**
-   * Find by id data flow and id data set schema.
-   *
-   * @param idFlow the id flow
-   * @param idDataSetSchema the id data set schema
-   * @return the data set schema
-   */
-  DataSetSchema findByIdDataFlowAndIdDataSetSchema(Long idFlow, ObjectId idDataSetSchema);
-
-
-  /**
    * Find by id data set schema.
    *
    * @param idDatasetSchema the id dataset schema

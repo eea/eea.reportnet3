@@ -334,16 +334,15 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public DataFlowVO getReportingDatasetsId(Long id, String dataschemaId) throws EEAException {
+  public DataFlowVO getReportingDatasetsId(String dataschemaId) throws EEAException {
 
-    if (id == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    if (dataschemaId == null) {
+      throw new EEAException(EEAErrorMessage.SCHEMA_ID_NONFOUND);
     }
 
     DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setId(id);
-    dataflowVO.setReportingDatasets(
-        datasetMetabaseController.findReportingDataSetIdByDataflowIdAndSchemaId(id, dataschemaId));
+    dataflowVO
+        .setReportingDatasets(datasetMetabaseController.getReportingsIdBySchemaId(dataschemaId));
 
     return dataflowVO;
   }
