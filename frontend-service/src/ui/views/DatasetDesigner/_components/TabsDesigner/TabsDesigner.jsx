@@ -254,7 +254,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
                     <div>
                       <h3>{`${resources.messages['datasetDesignerNoFields']} ${tab.header}`}</h3>
                     </div>
-                  ) : null}
+                  ) : (
+                    <h3>{`${resources.messages['datasetDesignerAddTable']}`}</h3>
+                  )}
                 </TabPanel>
               );
             })
