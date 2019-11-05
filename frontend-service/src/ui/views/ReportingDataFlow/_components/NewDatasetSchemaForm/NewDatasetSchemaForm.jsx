@@ -20,6 +20,10 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
     datasetSchemaName: Yup.string().required()
   });
 
+  if (!isNull(form.current)) {
+    document.getElementById('dataSchemaInput').focus();
+  }
+
   if (!isFormReset && !isNull(form.current)) {
     form.current.resetForm();
   }
@@ -45,7 +49,12 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
           <fieldset>
             <div
               className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
-              <Field name="datasetSchemaName" type="text" placeholder={resources.messages['createdatasetSchemaName']} />
+              <Field
+                id="dataSchemaInput"
+                name="datasetSchemaName"
+                placeholder={resources.messages['createdatasetSchemaName']}
+                type="text"
+              />
             </div>
           </fieldset>
           <fieldset>

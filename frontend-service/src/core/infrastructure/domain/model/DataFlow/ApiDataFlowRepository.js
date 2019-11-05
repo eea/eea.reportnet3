@@ -48,6 +48,7 @@ const parseDatasetDTO = datasetDTO => {
     null,
     null,
     null,
+    null,
     datasetDTO.isReleased
   );
 };
