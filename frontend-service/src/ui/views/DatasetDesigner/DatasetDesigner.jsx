@@ -131,7 +131,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner />
+      <TabsDesigner editable={true} />
     </>
   );
 });
