@@ -31,16 +31,7 @@ export const BigButton = ({
 
   const onEditorKeyChange = event => {
     if (event.key === 'Enter') {
-      if (!isEmpty(buttonsTitle)) {
-        initialValue !== event.target.value
-          ? onSaveName(event.target.value) && onNameEdit() && setInitialValue(buttonsTitle)
-          : onNameEdit();
-      } else {
-        if (!isUndefined(onSaveError)) {
-          onSaveError();
-          document.getElementsByClassName('p-inputtext p-component')[0].focus();
-        }
-      }
+      onInputSave(event.target.value);
     }
     if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
@@ -52,6 +43,17 @@ export const BigButton = ({
 
   const onEditorValueFocus = value => {
     setInitialValue(!isEmpty(value) ? value : initialValue);
+  };
+
+  const onInputSave = value => {
+    if (!isEmpty(buttonsTitle)) {
+      initialValue !== value ? onSaveName(value) && onNameEdit() && setInitialValue(buttonsTitle) : onNameEdit();
+    } else {
+      if (!isUndefined(onSaveError)) {
+        onSaveError();
+        document.getElementsByClassName('p-inputtext p-component')[0].focus();
+      }
+    }
   };
 
   const onUpdateNameValidation = value => {
@@ -124,16 +126,7 @@ export const BigButton = ({
           autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
-            if (!isEmpty(buttonsTitle)) {
-              initialValue !== e.target.value
-                ? onSaveName(e.target.value) && onNameEdit() && setInitialValue(buttonsTitle)
-                : onNameEdit();
-            } else {
-              if (!isUndefined(onSaveError)) {
-                document.getElementsByClassName('p-inputtext p-component')[0].focus();
-                onSaveError();
-              }
-            }
+            onInputSave(e.target.value);
           }}
           onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
