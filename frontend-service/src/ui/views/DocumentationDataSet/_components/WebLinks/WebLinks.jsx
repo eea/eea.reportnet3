@@ -46,13 +46,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
 
   const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['save']}
-        icon="save"
-        onClick={() => {
-          onSaveRecord(newRecord);
-        }}
-      />
+      <Button label={resources.messages['save']} icon="save" onClick={() => onSaveRecord(newRecord)} />
       <Button
         className="p-button-secondary"
         label={resources.messages['cancel']}
@@ -64,24 +58,26 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
     </div>
   );
 
-  const newRecordForm = webLinksColumns.map((column, i) => {
+  const fieldsArray = [
+    { field: 'description', header: resources.messages['description'] },
+    { field: 'url', header: resources.messages['url'] }
+  ];
+
+  const newRecordForm = fieldsArray.map(column => {
     if (isAddDialogVisible) {
-      if (i == 0 || i == 3) {
-        return;
-      }
       return (
-        <React.Fragment key={column.props.field}>
+        <React.Fragment key={column.field}>
           <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>
-              {column.props.header === 'url'
-                ? column.props.header.toUpperCase()
-                : column.props.header.charAt(0).toUpperCase() + column.props.header.slice(1)}
+            <label htmlFor={column.field}>
+              {column.field === 'url'
+                ? column.header.toUpperCase()
+                : column.header.charAt(0).toUpperCase() + column.header.slice(1)}
             </label>
           </div>
           <div className="p-col-8" style={{ padding: '.5em' }}>
             <InputText
-              id={column.props.field}
-              onChange={e => onEditAddFormInput(column.props.field, e.target.value, column.props.field)}
+              id={column.field}
+              onChange={e => onEditAddFormInput(column.field, e.target.value, column.field)}
             />
           </div>
         </React.Fragment>
@@ -167,6 +163,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   const onSaveRecord = async record => {
     if (isNewRecord) {
       try {
+        console.log('saving', record);
         setIsAddDialogVisible(false);
       } catch (error) {
         console.error('DataViewer error: ', error);
@@ -238,10 +235,9 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
     setWebLinksColumns(webLinkColArray);
   }, [webLinks]);
 
-  const emptyWebLink = [
-    { field: 'description', header: resources.messages['description'] },
-    { field: 'url', header: resources.messages['url'] }
-  ].map(item => <Column field={item.field} header={item.header} key={item.field} />);
+  const emptyWebLinkColumns = fieldsArray.map(item => (
+    <Column field={item.field} header={item.header} key={item.field} />
+  ));
 
   const linkTemplate = rowData => {
     return (
@@ -268,7 +264,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         rowsPerPageOptions={[5, 10, 100]}
         selectionMode="single"
         value={webLinks}>
-        {!isEmpty(webLinks) ? webLinksColumns : emptyWebLink}
+        {!isEmpty(webLinks) ? webLinksColumns : emptyWebLinkColumns}
       </DataTable>
 
       <Dialog
