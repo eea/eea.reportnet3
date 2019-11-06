@@ -2,7 +2,7 @@ import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isPlainObject, isEmpty, isNull } from 'lodash';
+import { isEmpty, isNull, isPlainObject, sortBy } from 'lodash';
 
 import styles from './DocumentFileUpload.module.css';
 
@@ -82,7 +82,7 @@ const DocumentFileUpload = ({ dataflowId, onUpload, onGrowlAlert, isFormReset, s
             <div className={`formField${!isEmpty(errors.lang) && touched.lang ? ' error' : ''}`}>
               <Field name="lang" component="select">
                 <option value="">{resources.messages.selectLang}</option>
-                {config.languages.map(language => (
+                {sortBy(config.languages, ['name']).map(language => (
                   <option key={language.code} value={language.code}>
                     {language.name}
                   </option>
