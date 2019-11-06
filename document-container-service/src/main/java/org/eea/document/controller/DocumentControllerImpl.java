@@ -148,6 +148,13 @@ public class DocumentControllerImpl implements DocumentController {
   }
 
 
+  /**
+   * Upload schema snapshot document.
+   *
+   * @param os the os
+   * @param designDatasetId the design dataset id
+   * @param fileName the file name
+   */
   @Override
   @HystrixCommand
   @PostMapping(value = "/upload/{designDatasetId}/snapshot")
@@ -173,6 +180,13 @@ public class DocumentControllerImpl implements DocumentController {
   }
 
 
+  /**
+   * Gets the snapshot document.
+   *
+   * @param idDesignDataset the id design dataset
+   * @param fileName the file name
+   * @return the snapshot document
+   */
   @Override
   @GetMapping(value = "/{idDesignDataset}/snapshot")
   @HystrixCommand
@@ -197,6 +211,13 @@ public class DocumentControllerImpl implements DocumentController {
   }
 
 
+  /**
+   * Delete snapshot schema document.
+   *
+   * @param idDesignDataset the id design dataset
+   * @param fileName the file name
+   * @throws Exception the exception
+   */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")

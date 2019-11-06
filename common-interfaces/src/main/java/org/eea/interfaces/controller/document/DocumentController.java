@@ -55,16 +55,37 @@ public interface DocumentController {
   void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
 
 
+  /**
+   * Upload schema snapshot document.
+   *
+   * @param os the os
+   * @param designDatasetId the design dataset id
+   * @param fileName the file name
+   */
   @PostMapping(value = "/upload/{designDatasetId}/snapshot")
   void uploadSchemaSnapshotDocument(@RequestParam("file") final byte[] os,
       @PathVariable("designDatasetId") final Long designDatasetId,
       @RequestParam("fileName") final String fileName);
 
+  /**
+   * Gets the snapshot document.
+   *
+   * @param idDesignDataset the id design dataset
+   * @param fileName the file name
+   * @return the snapshot document
+   */
   @GetMapping(value = "/{idDesignDataset}/snapshot")
   byte[] getSnapshotDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
       @RequestParam("fileName") final String fileName);
 
 
+  /**
+   * Delete snapshot schema document.
+   *
+   * @param idDesignDataset the id design dataset
+   * @param fileName the file name
+   * @throws Exception the exception
+   */
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
       @RequestParam("fileName") final String fileName) throws Exception;
