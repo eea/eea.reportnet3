@@ -20,7 +20,8 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 template "templateValidateRules"
 rule "@{ruleid}"
@@ -138,13 +139,16 @@ function boolean actualDateCompare(String dateToCompare,String moreLess){
 	return DateDroolsUtils.actualDateCompare(dateToCompare,moreLess);
 } 
 function boolean isDateYYYYMMDD( String value ){
+ SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+ Date dateDrools = null;
     try {
-        Pattern dataValue = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
-       	Matcher dataMatcher = dataValue.matcher(value);
-        return dataMatcher.find();
+      sdf.setLenient(false);
+      dateDrools = sdf.parse(value);
     } catch( Exception e ){
         return false;
     }
+    
+    return true;
 }
  
 function boolean isDate9999(String date){
