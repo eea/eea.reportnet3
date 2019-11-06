@@ -54,6 +54,12 @@ export const BigButton = ({
     setInitialValue(!isEmpty(value) ? value : initialValue);
   };
 
+  const onUpdateNameValidation = value => {
+    if (!isUndefined(value) && value.match(/^[a-zA-Z0-9-_\s]*$/)) {
+      setButtonsTitle(value);
+    }
+  };
+
   const dataset = model ? (
     <>
       <div className={`${styles.bigButton} ${styles.dataset}`}>
@@ -129,7 +135,7 @@ export const BigButton = ({
               }
             }
           }}
-          onChange={e => setButtonsTitle(e.target.value)}
+          onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
             e.preventDefault();
             onEditorValueFocus(e.target.value);
