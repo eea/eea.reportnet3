@@ -1,7 +1,12 @@
 package org.eea.document.service.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jcr.PathNotFoundException;
@@ -42,6 +47,8 @@ public class DocumentServiceImpl implements DocumentService {
 
   /** The Constant PATH_DELIMITER. */
   private static final String PATH_DELIMITER = "/";
+
+  private static final String PATH_DELIMITER_SNAPSHOT = "/snapshotSchema/";
 
   /** The oak repository utils. */
   @Autowired
@@ -187,6 +194,31 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
+  @Override
+  public InputStream readFromFile(final String fileName) throws FileNotFoundException {
+
+    File file = new File(fileName);
+    InputStream targetStream = new FileInputStream(file);
+    return targetStream;
+
+  }
+
+
+  @Override
+  public void writeToFile(final String fileName, final OutputStream content) throws IOException {
+
+    try (FileOutputStream fos = new FileOutputStream(fileName)) {
+
+      byte[] mybytes = content.toString().getBytes();
+
+      fos.write(mybytes);
+    }
+
+
+  }
+
+
+
   /**
    * Send kafka notification.
    *
@@ -217,5 +249,105 @@ public class DocumentServiceImpl implements DocumentService {
     result.put("documentId", documentId);
     kafkaSenderUtils.releaseKafkaEvent(eventType, result);
   }
+
+
+  @Override
+  @Async
+  public void uploadSchemaSnapshot(InputStream inputStream, String contentType, String filename,
+      Long designDataset) throws EEAException, IOException {
+
+    Session session = null;
+    DocumentNodeStore ns = null;
+    try {
+      if (filename == null || contentType == null
+          || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
+        throw new EEAException(EEAErrorMessage.FILE_FORMAT);
+      }
+
+      LOG.info("Adding the file...");
+      // Initialize the session
+      ns = oakRepositoryUtils.initializeNodeStore();
+      Repository repository = oakRepositoryUtils.initializeRepository(ns);
+      session = oakRepositoryUtils.initializeSession(repository);
+
+      // Add a file node with the document
+      String modifiedFilename = oakRepositoryUtils.addFileNode(session,
+          PATH_DELIMITER_SNAPSHOT + designDataset, inputStream, filename, contentType);
+      if (StringUtils.isBlank(modifiedFilename)) {
+        throw new EEAException(EEAErrorMessage.FILE_NAME);
+      }
+      LOG.info("File snapshot added...");
+
+    } catch (RepositoryException | EEAException e) {
+      LOG_ERROR.error("Error in uploadSnapshotSchema document due to", e);
+      throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
+    } finally {
+      inputStream.close();
+      oakRepositoryUtils.cleanUp(session, ns);
+    }
+
+  }
+
+
+  @Override
+  public FileResponse getSnapshotDocument(final String documentName, final Long idDesignDataset)
+      throws EEAException {
+    Session session = null;
+    FileResponse fileResponse = null;
+    DocumentNodeStore ns = null;
+    try {
+      // Initialize the session
+      ns = oakRepositoryUtils.initializeNodeStore();
+      Repository repository = oakRepositoryUtils.initializeRepository(ns);
+      session = oakRepositoryUtils.initializeSession(repository);
+
+      // retrieve the file to the controller
+      fileResponse = oakRepositoryUtils.getFileContents(session,
+          PATH_DELIMITER_SNAPSHOT + idDesignDataset, documentName);
+      LOG.info("Fething the file...");
+    } catch (IOException | RepositoryException e) {
+      LOG_ERROR.error("Error in getDocument due to", e);
+      if (e.getClass().equals(PathNotFoundException.class)) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
+      }
+      throw new EEAException(EEAErrorMessage.DOCUMENT_DOWNLOAD_ERROR, e);
+    } finally {
+      oakRepositoryUtils.cleanUp(session, ns);
+    }
+    return fileResponse;
+  }
+
+
+  @Override
+  @Modified
+  @Async
+  public void deleteSnapshotDocument(String documentName, Long designDatasetId)
+      throws EEAException {
+    Session session = null;
+    DocumentNodeStore ns = null;
+    try {
+      // Initialize the session
+      ns = oakRepositoryUtils.initializeNodeStore();
+      Repository repository = oakRepositoryUtils.initializeRepository(ns);
+      session = oakRepositoryUtils.initializeSession(repository);
+
+      // Delete a file node with the document
+      oakRepositoryUtils.deleteFileNode(session, designDatasetId.toString(), documentName);
+      LOG.info("File deleted...");
+
+      oakRepositoryUtils.deleteBlobsFromRepository(ns);
+
+
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in deleteSnapshotDocument due to", e);
+      if (e.getClass().equals(PathNotFoundException.class)) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
+      }
+      throw new EEAException(EEAErrorMessage.EXECUTION_ERROR, e);
+    } finally {
+      oakRepositoryUtils.cleanUp(session, ns);
+    }
+  }
+
 
 }

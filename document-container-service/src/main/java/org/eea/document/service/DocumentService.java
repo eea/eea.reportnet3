@@ -1,7 +1,9 @@
 package org.eea.document.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAException;
 
@@ -50,4 +52,17 @@ public interface DocumentService {
    */
   void deleteDocument(final Long documentId, final String documentName, final Long dataFlowId,
       final String language) throws EEAException;
+
+  InputStream readFromFile(final String fileName) throws FileNotFoundException;
+
+  void writeToFile(final String fileName, final OutputStream content) throws IOException;
+
+  void uploadSchemaSnapshot(final InputStream inputStream, final String contentType,
+      final String filename, final Long designDataset) throws EEAException, IOException;
+
+  FileResponse getSnapshotDocument(final String documentName, final Long idDesignDataset)
+      throws EEAException;
+
+  void deleteSnapshotDocument(final String documentName, final Long idDesignDataset)
+      throws EEAException;
 }

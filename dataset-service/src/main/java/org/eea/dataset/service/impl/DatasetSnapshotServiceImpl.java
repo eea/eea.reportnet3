@@ -1,10 +1,7 @@
 package org.eea.dataset.service.impl;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +22,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -34,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -88,14 +85,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  @Autowired
+  private DocumentControllerZuul documentControllerZuul;
+
   /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The path schema snapshot. */
-  @Value("${pathSchemaSnapshot}")
-  private String pathSchemaSnapshot;
 
   /** The Constant FILE_PATTERN_NAME. */
   private static final String FILE_PATTERN_NAME = "schemaSnapshot_%s-DesignDataset_%s";
@@ -288,10 +285,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataSetSchema schema = schemaRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
     ObjectMapper objectMapper = new ObjectMapper();
     Long idSnapshot = snap.getId();
-    String nameFile =
-        pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
-    objectMapper.writeValue(new File(nameFile), schema);
-
+    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    objectMapper.writeValue(outStream, schema);
+    documentControllerZuul.uploadSchemaSnapshotDocument(outStream.toByteArray(), idDataset,
+        nameFile);
 
 
     // 3. Create the data file of the snapshot, calling to recordstore-service
@@ -323,13 +321,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       throws EEAException, IOException {
 
     // 1. Restore the schema
-    String nameFile =
-        pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+
 
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    DataSetSchema schema = objectMapper.readValue(new File(nameFile), DataSetSchema.class);
+    byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
+    DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
     String schemaId = schema.getIdDataSetSchema().toString();
+
 
     schemaRepository.deleteDatasetSchemaById(schemaId);
     schemaRepository.save(schema);
@@ -357,20 +357,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws Exception
    */
   @Override
   @Async
-  public void removeSchemaSnapshot(Long idDataset, Long idSnapshot)
-      throws EEAException, IOException {
+  public void removeSchemaSnapshot(Long idDataset, Long idSnapshot) throws Exception {
     // Remove from the metabase
     snapshotSchemaRepository.deleteById(idSnapshot);
     // Delete the file
-    String nameFile =
-        pathSchemaSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
-    Path path1 = Paths.get(nameFile);
-    Files.deleteIfExists(path1);
+    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
 
     LOG.info("Schema Snapshot {} removed", idSnapshot);
   }

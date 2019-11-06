@@ -1,6 +1,6 @@
 package org.eea.document.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.ws.rs.Produces;
 import org.eea.document.service.DocumentService;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import feign.FeignException;
 
 /**
@@ -61,8 +62,9 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PostMapping(value = "/upload/{dataFlowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId, @RequestParam final String description,
-      @RequestParam final String language) {
+      @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam("description") final String description,
+      @RequestParam("language") final String language) {
     if (file == null || file.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
@@ -144,4 +146,75 @@ public class DocumentControllerImpl implements DocumentController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
+
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/upload/{designDatasetId}/snapshot")
+  public void uploadSchemaSnapshotDocument(@RequestParam("file") final byte[] os,
+      @PathVariable("designDatasetId") final Long designDatasetId,
+      @RequestParam("fileName") final String fileName) {
+    if (os == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+    }
+    if (designDatasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    try {
+      ByteArrayInputStream inStream = new ByteArrayInputStream(os);
+      documentService.uploadSchemaSnapshot(inStream, "json", fileName, designDatasetId);
+    } catch (EEAException | IOException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  @GetMapping(value = "/{idDesignDataset}/snapshot")
+  @HystrixCommand
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  public byte[] getSnapshotDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
+      @RequestParam("fileName") final String fileName) {
+    try {
+
+      if (idDesignDataset == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      FileResponse file = documentService.getSnapshotDocument(fileName, idDesignDataset);
+
+      ByteArrayResource resource = new ByteArrayResource(file.getBytes());
+      return resource.getByteArray();
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/{idDesignDataset}/snapshot")
+  public void deleteSnapshotSchemaDocument(
+      @PathVariable("idDesignDataset") final Long idDesignDataset,
+      @RequestParam("fileName") final String fileName) throws Exception {
+    try {
+      if (idDesignDataset == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      documentService.deleteSnapshotDocument(fileName, idDesignDataset);
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
 }

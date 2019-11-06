@@ -296,13 +296,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
+   * @throws Exception
    */
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
   // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
   public void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) {
+      @PathVariable("idSnapshot") Long idSnapshot) throws Exception {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

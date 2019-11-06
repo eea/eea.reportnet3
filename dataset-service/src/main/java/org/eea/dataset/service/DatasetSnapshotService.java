@@ -97,8 +97,10 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws Exception
    */
-  void removeSchemaSnapshot(Long idDataset, Long idSnapshot) throws EEAException, IOException;
+  void removeSchemaSnapshot(Long idDataset, Long idSnapshot)
+      throws EEAException, IOException, Exception;
 
 
 

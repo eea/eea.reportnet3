@@ -269,4 +269,141 @@ public class DocumentServiceImplTest {
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
+
+  @Test
+  public void testUploadSnapshotSuccess() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn("name-ES");
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadSchemaSnapshot(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L);
+
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testUploadSnapshotException() throws EEAException, IOException {
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadSchemaSnapshot(fileMock.getInputStream(), null, null, 1L);
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testUploadSnapshotException2Test() throws EEAException, IOException {
+    fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadSchemaSnapshot(fileMock.getInputStream(), fileMock.getContentType(),
+        "test", 1L);
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testUploadSnapshotException3() throws EEAException, RepositoryException, IOException {
+
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadSchemaSnapshot(fileMock.getInputStream(), fileMock.getContentType(),
+        "test", 1L);
+
+  }
+
+  @Test(expected = EEAException.class)
+  public void testUploadSnapshotException4Test()
+      throws EEAException, RepositoryException, IOException {
+
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadSchemaSnapshot(fileMock.getInputStream(), fileMock.getContentType(),
+        "test", 1L);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testUploadSnapshotException5Test()
+      throws EEAException, IOException, RepositoryException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn("");
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadSchemaSnapshot(fileMock.getInputStream(), fileMock.getContentType(),
+        fileMock.getOriginalFilename(), 1L);
+  }
+
+
+  @Test
+  public void testGetSnapshotSuccess() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.getFileContents(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new FileResponse());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    assertNotNull("null result", documentService.getSnapshotDocument("test", 1L));
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testGetSnapshotException() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new RepositoryException()).when(oakRepositoryUtils).getFileContents(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.getSnapshotDocument("test", 1L);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testGetSnapshotException2Test()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).getFileContents(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.getSnapshotDocument("test", 1L);
+  }
+
+
+  @Test
+  public void testDeleteSnapshotSuccessTest() throws Exception {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+
+    doNothing().when(oakRepositoryUtils).deleteFileNode(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteSnapshotDocument("filename", 1L);
+
+  }
+
+  @Test(expected = EEAException.class)
+  public void testDeleteSnapshotExceptionTest()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteSnapshotDocument("filename", 1L);
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testDeleteSnapshotException2() throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteSnapshotDocument("filename", 1L);
+  }
+
 }
