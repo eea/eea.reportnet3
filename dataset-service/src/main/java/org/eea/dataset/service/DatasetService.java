@@ -65,9 +65,8 @@ public interface DatasetService {
    * @param mongoID the mongo ID
    * @param pageable the pageable
    * @param fields the fields
-   *
+   * @param levelError the level error
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
@@ -310,4 +309,12 @@ public interface DatasetService {
   void saveTablePropagation(@DatasetId Long datasetId, TableSchemaVO tableSchema)
       throws EEAException;
 
+  /**
+   * Detele field values.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @return the string
+   */
+  String deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
 }

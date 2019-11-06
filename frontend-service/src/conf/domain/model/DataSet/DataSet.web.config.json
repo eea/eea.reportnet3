@@ -1,10 +1,14 @@
 {
     "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
+    "addTableDesign": "/dataschema/{:datasetSchemaId}/createTableSchema/{:datasetId}",
     "dataSchema":  "/dataschema/noRules/dataflow/{:dataflowId}",
+    "datasetMetaData": "/datasetmetabase/{:datasetId}",
     "dataViewer" : "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}",
     "deleteImportData": "/dataset/{:datasetId}/deleteImportData",
     "deleteImportTable": "/dataset/{:datasetId}/deleteImportTable/{:tableId}",
+    "deleteTableDesign": "/dataschema/{:datasetSchemaId}/tableschema/{:tableSchemaId}",
     "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}",
+    "deleteDataSchema": "/dataschema/dataset/{:datasetId}",
     "exportDatasetData": "/dataset/exportFile?datasetId={:datasetId}&mimeType={:fileType}",
     "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
     "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
@@ -13,6 +17,7 @@
     "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
+    "updateTableNameDesign": "/dataschema/{:datasetSchemaId}/updateTableSchema/{:datasetId}",
     "validateDataset": "/validation/dataset/{:datasetId}",
     "validationViewer": "/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}",
     "webFormDataViewer":"/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}"

@@ -8,7 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Token generator thread.
+ * The type Token generator thread. This Thread will refresh the admin token based on the frenquency
+ * passed as parameter
  */
 @Slf4j
 public class TokenGeneratorThread implements Runnable {
@@ -50,11 +51,12 @@ public class TokenGeneratorThread implements Runnable {
   public void run() {
 
     log.info("Starting token generator thread");
+    //First attemp to retrieve an admin token during ums initialization
     TokenInfo firstToken = keycloakConnectorService.generateToken(adminUser, adminPass);
     if (null != firstToken) {
       manageTokenInfo(firstToken);
     }
-
+    //from this point on the thread will be retrieving admin token (using refresh tokens) every tokenExpiration ms
     while (!exit) {
       TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
       manageTokenInfo(tokenInfo);

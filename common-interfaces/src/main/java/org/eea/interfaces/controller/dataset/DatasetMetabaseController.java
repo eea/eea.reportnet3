@@ -41,6 +41,7 @@ public interface DatasetMetabaseController {
   /**
    * Creates the empty data set.
    *
+   * @param datasetType the dataset type
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
    * @param idDataflow the id dataflow
@@ -70,6 +71,12 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") final Long idDataflow);
 
+  /**
+   * Update dataset name.
+   *
+   * @param datasetId the dataset id
+   * @param datasetName the dataset name
+   */
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);

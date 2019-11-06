@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
@@ -13,6 +14,7 @@ import { routes } from 'ui/routes';
 import { BigButton } from './_components/BigButton';
 import { BreadCrumb } from 'ui/views/_components/BreadCrumb';
 import { Button } from 'ui/views/_components/Button';
+import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { ContributorsList } from './_components/ContributorsList';
 import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
@@ -22,8 +24,9 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { ScrollPanel } from 'primereact/scrollpanel';
-import { SnapshotList } from './_components/SnapshotList';
+import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
+import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
@@ -39,18 +42,21 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
   const [isActivePropertiesDialog, setIsActivePropertiesDialog] = useState(false);
   const [isActiveReleaseSnapshotDialog, setIsActiveReleaseSnapshotDialog] = useState(false);
+  const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
-  const [snapshotListData, setSnapshotListData] = useState([]);
+  const [snapshotsListData, setSnapshotsListData] = useState([]);
+  const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
 
   let growlRef = useRef();
 
@@ -113,7 +119,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadSnapshotList = async datasetId => {
-    setSnapshotListData(await SnapshotService.all(datasetId));
+    setSnapshotsListData(await SnapshotService.all(datasetId));
   };
 
   useEffect(() => {
@@ -155,6 +161,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
+          if (isNameEditable) {
+            document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          }
         }}
       />
     </div>
@@ -168,12 +177,31 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setErrorDialogVisible(true);
   };
 
+  const onDeleteDatasetSchema = async schemaId => {
+    setDeleteDialogVisible(false);
+    try {
+      const response = await DatasetService.deleteSchemaById(schemaId);
+      if (response >= 200 && response <= 299) {
+        onUpdateData();
+      }
+    } catch (error) {
+      console.error(error.response);
+    }
+  };
+
+  const onHideErrorDialog = () => {
+    setErrorDialogVisible(false);
+    if (isNameEditable) {
+      document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    }
+  };
+
   const onNameEdit = () => {
     setIsNameEditable(!isNameEditable);
   };
 
   const onUpdateData = () => {
-    setIsDataUpdated(true);
+    setIsDataUpdated(!isDataUpdated);
   };
 
   const onSaveName = async value => {
@@ -194,7 +222,30 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
+  const onReleaseSnapshot = async snapShotId => {
+    const snapshotToRelease = await SnapshotService.releaseById(match.params.dataflowId, datasetIdToProps, snapShotId);
 
+    if (snapshotToRelease.isReleased) {
+      onLoadSnapshotList(datasetIdToProps);
+      setIsActiveReleaseSnapshotConfirmDialog(false);
+    }
+  };
+
+  const releseModalFooter = (
+    <div>
+      <Button
+        icon="cloudUpload"
+        label={resources.messages['yes']}
+        onClick={() => onReleaseSnapshot(snapshotDataToRelease.id)}
+      />
+      <Button
+        icon="cancel"
+        className="p-button-secondary"
+        label={resources.messages['no']}
+        onClick={() => setIsActiveReleaseSnapshotConfirmDialog(false)}
+      />
+    </div>
+  );
   const layout = children => {
     return (
       <MainLayout>
@@ -216,12 +267,15 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         navTitle={resources.messages['dataflow']}
         components={[]}
         entity={`${config.permissions.DATA_FLOW}${dataflowData.id}`}
+        style={{ textAlign: 'left' }}
       />
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-9`}>
+
+      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-10`}>
         <div className={styles.titleBar}>
           <div className={styles.title_wrapper}>
             <h2 className={styles.title}>
               <FontAwesomeIcon icon={AwesomeIcons('archive')} style={{ fontSize: '1.2rem' }} /> {dataflowData.name}
+              {/* <Title title={`${dataflowData.name}`} icon="archive" /> */}
             </h2>
           </div>
           <div>
@@ -241,7 +295,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       label: resources.messages['createNewEmptyDatasetSchema'],
                       icon: 'add',
                       command: () => showNewDatasetDialog(),
-                      disabled: isUndefined(designDatasetSchemaId) ? false : true
+                      disabled: !isEmpty(dataflowData.designDatasets) || !isEmpty(dataflowData.datasets)
                     },
                     {
                       label: resources.messages['createNewDatasetFromTemplate'],
@@ -277,7 +331,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
                       handleRedirect={() => {
-                        handleRedirect();
+                        handleRedirect(
+                          getUrl(
+                            routes.DATASET_SCHEMA,
+                            {
+                              dataflowId: match.params.dataflowId,
+                              datasetId: newDatasetSchema.datasetId
+                            },
+                            true
+                          )
+                        );
                       }}
                       isNameEditable={isNameEditable}
                       onNameEdit={onNameEdit}
@@ -289,7 +352,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                           label: resources.messages['openDataset'],
                           icon: 'openFolder',
                           command: () => {
-                            handleRedirect();
+                            handleRedirect(
+                              getUrl(
+                                routes.DATASET_SCHEMA,
+                                {
+                                  dataflowId: match.params.dataflowId,
+                                  datasetId: newDatasetSchema.datasetId
+                                },
+                                true
+                              )
+                            );
                           }
                         },
                         {
@@ -305,7 +377,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['delete'],
                           icon: 'trash',
-                          disabled: true
+                          command: () => setDeleteDialogVisible(true)
                         },
                         {
                           label: resources.messages['properties'],
@@ -406,6 +478,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           maximizable>
           <ContributorsList dataflowId={dataflowData.id} />
         </Dialog>
+
         <Dialog
           header={resources.messages['newDatasetSchema']}
           visible={newDatasetDialog}
@@ -420,27 +493,44 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
+
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
-          onHide={() => setErrorDialogVisible(false)}
+          onHide={onHideErrorDialog}
           visible={errorDialogVisible}>
           <div className="p-grid p-fluid">{resources.messages['emptyDatasetSchema']}</div>
         </Dialog>
+        <ConfirmDialog
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteDatasetSchema(designDatasetSchemaId)}
+          onHide={() => setDeleteDialogVisible(false)}
+          visible={deleteDialogVisible}>
+          {resources.messages['deleteDatasetSchema']}
+        </ConfirmDialog>
         <Dialog
-          header={dataflowData.name}
+          header={`${resources.messages['snapshots'].toUpperCase()} ${dataflowData.name.toUpperCase()}`}
+          className={styles.releaseSnapshotsDialog}
           visible={isActiveReleaseSnapshotDialog}
           onHide={() => setIsActiveReleaseSnapshotDialog(false)}
           style={{ width: '30vw' }}>
-          <ScrollPanel style={{ width: '100%', height: '50vh' }}>
-            <SnapshotList
-              snapshotListData={snapshotListData}
+          {/* <ScrollPanel style={{ width: '100%', height: '50vh' }}> */}
+          {!isEmpty(snapshotsListData) ? (
+            <SnapshotsList
+              className={styles.releaseList}
+              snapshotsListData={snapshotsListData}
               onLoadSnapshotList={onLoadSnapshotList}
-              dataflowId={match.params.dataflowId}
-              datasetId={datasetIdToProps}
+              setSnapshotDataToRelease={setSnapshotDataToRelease}
+              setIsActiveReleaseSnapshotConfirmDialog={setIsActiveReleaseSnapshotConfirmDialog}
             />
-          </ScrollPanel>
+          ) : (
+            <h3>{resources.messages['emptySnapshotList']}</h3>
+          )}
+          {/* </ScrollPanel> */}
         </Dialog>
+
         <Dialog
           header={dataflowData.name}
           footer={
@@ -479,6 +569,23 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             </ul>
           </div>
           <div className="actions"></div>
+        </Dialog>
+
+        <Dialog
+          header={`${resources.messages['releaseSnapshotMessage']}`}
+          footer={releseModalFooter}
+          visible={isActiveReleaseSnapshotConfirmDialog}
+          onHide={() => setIsActiveReleaseSnapshotConfirmDialog(false)}>
+          <ul>
+            <li>
+              <strong>{resources.messages['creationDate']}: </strong>
+              {moment(snapshotDataToRelease.creationDate).format('DD/MM/YYYY HH:mm:ss')}
+            </li>
+            <li>
+              <strong>{resources.messages['description']}: </strong>
+              {snapshotDataToRelease.description}
+            </li>
+          </ul>
         </Dialog>
       </div>
     </div>

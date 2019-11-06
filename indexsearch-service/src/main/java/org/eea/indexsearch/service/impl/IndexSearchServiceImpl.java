@@ -18,16 +18,27 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * The Class IndexSearchServiceImpl.
+ */
 @Service("indexSearchService")
+
+/** The Constant log. */
 @Slf4j
 public class IndexSearchServiceImpl implements IndexSearchService {
 
+  /** The Constant INDEX. */
   private static final String INDEX = "lead";
+
+  /** The Constant TYPE. */
   private static final String TYPE = "lead";
 
 
+  /** The client. */
   @Autowired
   private RestHighLevelClient client;
+
+  /** The object mapper. */
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -74,6 +85,12 @@ public class IndexSearchServiceImpl implements IndexSearchService {
   // return updateResponse.getResult().name();
   //
   // }
+  /**
+   * Find all.
+   *
+   * @return the list
+   * @throws Exception the exception
+   */
   //
   @Override
   public List<ElasticSearchData> findAll() throws Exception {
@@ -111,6 +128,13 @@ public class IndexSearchServiceImpl implements IndexSearchService {
   // return getSearchResult(searchResponse);
   //
   // }
+  /**
+   * Delete profile document.
+   *
+   * @param id the id
+   * @return the string
+   * @throws Exception the exception
+   */
   //
   @Override
   public String deleteProfileDocument(String id) throws Exception {
@@ -152,6 +176,12 @@ public class IndexSearchServiceImpl implements IndexSearchService {
   // return getSearchResult(response);
   // }
   //
+  /**
+   * Gets the search result.
+   *
+   * @param response the response
+   * @return the search result
+   */
   //
   private List<ElasticSearchData> getSearchResult(SearchResponse response) {
 
@@ -168,6 +198,13 @@ public class IndexSearchServiceImpl implements IndexSearchService {
   }
 
 
+  /**
+   * Builds the search request.
+   *
+   * @param index the index
+   * @param type the type
+   * @return the search request
+   */
   private SearchRequest buildSearchRequest(String index, String type) {
 
     SearchRequest searchRequest = new SearchRequest();
@@ -178,6 +215,9 @@ public class IndexSearchServiceImpl implements IndexSearchService {
   }
 
 
+  /**
+   * Execute macros.
+   */
   @Override
   public void executeMacros() {
 

@@ -1,33 +1,33 @@
 :root {
   --blue-120: #004494;
-  --yellow-120: #ffd617;
-  --gray-110: #404040;
   --blue-110: #003776;
-  --yellow-110: #fbc11d;
-  --gray-75: #707070;
   --blue-100: #004494;
-  --yellow-100: #ffd617;
-  --gray-50: #9f9f9f;
   --blue-75: #4073af;
-  --yellow-75: #ffde39;
-  --gray-25: #cfcfcf;
   --blue-50: #7fa1c9;
-  --yellow-50: #ffe879;
-  --gray-15: #e3e3e3;
   --blue-25: #bfd0e4;
-  --yellow-25: #fff4bb;
-  --gray-10: #ebebeb;
   --blue-5: #f2f5f9;
+  --yellow-120: #ffd617;
+  --yellow-110: #fbc11d;
+  --yellow-100: #ffd617;
+  --yellow-75: #ffde39;
+  --yellow-50: #ffe879;
+  --yellow-25: #fff4bb;
   --black: #000000;
-  --white: #ffffff;
+  --gray-110: #404040;
+  --gray-75: #707070;
+  --gray-50: #9f9f9f;
+  --gray-25: #cfcfcf;
+  --gray-15: #e3e3e3;
+  --gray-10: #ebebeb;
   --gray-5: #f5f5f5;
+  --white: #ffffff;
   --informative-color: #006fb4;
   --warning-color: #f29527;
   --success-color: #467a39;
   --errors: #da2131;
 
   /* Main corporate colors */
-  --c-corporate-blue: #004b87;
+  --c-corporate-blue: #006699;
   --c-corporate-aqua-marine: #008675;
   /* Blue palette */
   --c-blue-400: #4f758b;
@@ -75,6 +75,12 @@
   --c-aquamarine: #007a86;
   --c-green: #637e22;
   --c-tile: #ba3c0d;
+  /* custom colors */
+  --c-blue-green: #009490;
+  --c-chart-correct: #99cc33;
+  --c-chart-warning: #ffcc00;
+  --c-chart-error: #cc3300;
+  --c-custom-gray: #c8c8c8;
 }
 body {
   margin: 0px;
@@ -251,7 +257,7 @@ body {
 
 @media (min-width: 1140px) {
   .rep-container {
-    max-width: 90%;
+    max-width: 95%;
     /* width: 1140px; */
   }
 }
@@ -1765,11 +1771,11 @@ body {
 /*spinner*/
 
 .p-progress-spinner {
-  left: 50%;
-  transform: translate(-50%);
-  top: 30vh;
-  width: 75px;
-  height: 75px;
+  --spinner-width: 5rem;
+  top: calc(30vh - calc(var(--spinner-width) / 2));
+  left: calc(50% - calc(var(--spinner-width) / 2));
+  width: var(--spinner-width);
+  height: var(--spinner-width);
 }
 
 /* forms */

@@ -26,8 +26,7 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
    * Listen message.
    *
    * @param message the message
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   @KafkaListener(topics = "BROADCAST_TOPIC",

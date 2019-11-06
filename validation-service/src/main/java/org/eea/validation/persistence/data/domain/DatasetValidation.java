@@ -41,6 +41,7 @@ public class DatasetValidation {
   @JoinColumn(name = "ID_DATASET")
   private DatasetValue datasetValue;
 
+  /** The validation. */
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
   @JoinColumn(name = "ID_VALIDATION", referencedColumnName = "id")
   private Validation validation;

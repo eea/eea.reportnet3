@@ -345,4 +345,21 @@ public class KeycloakConnectorServiceImplTest {
 
 
   }
+
+  @Test
+  public void deleteGroupDetail() {
+    ResponseEntity<Void> result = new ResponseEntity<>(
+        null,
+        HttpStatus.OK);
+
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(result);
+
+    keycloakConnectorService.deleteGroupDetail("");
+
+    Mockito.verify(restTemplate, Mockito.times(1))
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+  }
 }

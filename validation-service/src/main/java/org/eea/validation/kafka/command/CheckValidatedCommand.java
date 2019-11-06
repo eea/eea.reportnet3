@@ -4,11 +4,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
+/**
+ * The Class CheckValidatedCommand.
+ */
 public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerCommand {
 
   /**
@@ -22,8 +24,7 @@ public abstract class CheckValidatedCommand extends AbstractEEAEventHandlerComma
    * Execute.
    *
    * @param eeaEventVO the eea event VO
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   @Async

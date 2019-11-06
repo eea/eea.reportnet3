@@ -115,7 +115,8 @@ public class LoadValidationsHelper {
     validation
         .setErrors(idValidations.stream().map(id -> errors.get(id)).collect(Collectors.toList()));
 
-    validation.setTotalErrors(validationRepository.countRecordsByFilter(datasetId,
+    validation.setTotalRecords(validationRepository.count());
+    validation.setTotalFilteredRecords(validationRepository.countRecordsByFilter(datasetId,
         levelErrorsFilter, typeEntitiesFilter, originsFilter));
     LOG.info(
         "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",

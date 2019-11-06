@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -54,10 +56,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public TokenVO doLogin(String username, String password, Object... extraParams) {
     TokenInfo tokenInfo = keycloakConnectorService.generateToken(username, password);
-    TokenVO tokenVO = new TokenVO();
+    TokenVO tokenVO = null;
     if (null != tokenInfo) {
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO = mapTokenToVO(tokenInfo);
     }
     return tokenVO;
   }
@@ -72,10 +73,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public TokenVO doLogin(String code) {
     TokenInfo tokenInfo = keycloakConnectorService.generateToken(code);
-    TokenVO tokenVO = new TokenVO();
+    TokenVO tokenVO = null;
     if (null != tokenInfo) {
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO = mapTokenToVO(tokenInfo);
     }
     return tokenVO;
   }
@@ -90,11 +90,17 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public TokenVO refreshToken(String refreshToken) {
     TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
-    TokenVO tokenVO = new TokenVO();
+    TokenVO tokenVO = null;
     if (null != tokenInfo) {
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO = mapTokenToVO(tokenInfo);
     }
+    return tokenVO;
+  }
+
+  private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
+    TokenVO tokenVO = new TokenVO();
+    tokenVO.setAccessToken(tokenInfo.getAccessToken());
+    tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
     return tokenVO;
   }
 
@@ -181,6 +187,37 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     keycloakConnectorService.createGroupDetail(groupInfo);
   }
 
+  @Override
+  public void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO) {
+    //Recover the resource names so they can be removed in the generic way.
+    List<String> resourceNames = resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(
+        Collectors.toList());
+    if (null != resourceNames && resourceNames.size() > 0) {
+      deleteResourceInstancesByName(resourceNames);
+
+    }
+  }
+
+  @Override
+  public void deleteResourceInstancesByName(List<String> resourceName) {
+    //Initialize the map of resouces along with empty string where later on the GroupId will be placed
+    Map<String, String> resources = resourceName.stream().collect(
+        Collectors.toMap(Function.identity(), x -> ""));
+    if (null != resources && resources.size() > 0) {
+      //Once recovered all the group names from input, get the group names from Keycloak to determine which ones must be removed
+      GroupInfo[] groups = keycloakConnectorService.getGroups();
+      if (null != groups && groups.length > 0) {
+        Arrays.asList(groups).stream()
+            .filter(groupInfo -> resources.containsKey(groupInfo.getName())).
+            forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
+        //Removing groups one by one
+        resources.values().stream()
+            .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
+      }
+
+    }
+  }
+
 
   /**
    * Adds the user to user group.
@@ -190,11 +227,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
+    //Retrieve the groups available in keycloak. Keycloak does not support queries on groups
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
+      //Retrieve the group id of the group where the user will be added
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
           .map(GroupInfo::getId).findFirst().orElse("");
+      //Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
       }

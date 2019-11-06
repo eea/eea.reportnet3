@@ -22,9 +22,11 @@ public interface DatasetMetabaseService {
   /**
    * Creates the empty dataset.
    *
+   * @param datasetType the dataset type
    * @param datasetName the dataset name
-   * @param idDatasetSchema the id dataset schema
-   * @param idDataflow the id dataflow
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the long
    * @throws EEAException the EEA exception
    */
   Long createEmptyDataset(TypeDatasetEnum datasetType, String datasetName, String datasetSchemaId,
@@ -54,4 +56,5 @@ public interface DatasetMetabaseService {
    * @return true, if successful
    */
   boolean updateDatasetName(Long datasetId, String datasetName);
+
 }
