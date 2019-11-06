@@ -1,5 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 
+import * as Yup from 'yup';
+import { Formik, Form, Field } from 'formik';
 import { isEmpty, isNull, isString, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
@@ -23,6 +25,16 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   const [newRecord, setNewRecord] = useState({ description: '', url: '' });
   const [selectedRecord, setSelectedRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
+
+  const initialValues = { description: '', url: '' };
+  const form = useRef(null);
+
+  const addWeblinkSchema = Yup.object().shape({
+    description: Yup.string().required(),
+    url: Yup.string()
+      .url()
+      .required()
+  });
 
   const onSelectRecord = val => {
     setIsNewRecord(false);
@@ -63,7 +75,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
     { field: 'url', header: resources.messages['url'] }
   ];
 
-  const newRecordForm = fieldsArray.map(column => {
+  /*   const newRecordForm = fieldsArray.map(column => {
     if (isAddDialogVisible) {
       return (
         <React.Fragment key={column.field}>
@@ -83,7 +95,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         </React.Fragment>
       );
     }
-  });
+  }); */
 
   const onEditAddFormInput = (field, value) => {
     let record = {};
@@ -271,13 +283,51 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        footer={addRowDialogFooter}
         header={resources.messages['addNewRow']}
         modal={true}
         onHide={() => setIsAddDialogVisible(false)}
         style={{ width: '50%', height: '80%' }}
         visible={isAddDialogVisible}>
-        <div className="p-grid p-fluid">{newRecordForm}</div>
+        {/*   <div className="p-grid p-fluid">{newRecordForm}</div> */}
+
+        <Formik ref={form} initialValues={initialValues} validationSchema={addWeblinkSchema} onSubmit={onSaveRecord}>
+          {({ isSubmitting, errors, touched }) => (
+            <Form>
+              <fieldset>
+                <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
+                  <Field name="description" type="text" placeholder={resources.messages['description']} />
+                </div>
+                <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
+                  <Field name="url" type="text" placeholder={resources.messages['url']} />
+                </div>
+              </fieldset>
+              <fieldset>
+                <hr />
+                <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+                  <Button
+                    className={
+                      !isEmpty(touched)
+                        ? isEmpty(errors)
+                          ? styles.primaryButton
+                          : styles.disabledButton
+                        : styles.disabledButton
+                    }
+                    label={resources.messages['add']}
+                    disabled={isSubmitting}
+                    icon="add"
+                    type={isSubmitting ? '' : 'submit'}
+                  />
+                  <Button
+                    className={`${styles.cancelButton} p-button-secondary`}
+                    label={resources.messages['cancel']}
+                    icon="cancel"
+                    onClick={() => setIsAddDialogVisible(false)}
+                  />
+                </div>
+              </fieldset>
+            </Form>
+          )}
+        </Formik>
       </Dialog>
 
       <Dialog
