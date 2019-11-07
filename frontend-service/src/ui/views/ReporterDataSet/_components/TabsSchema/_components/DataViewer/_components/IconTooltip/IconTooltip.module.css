@@ -43,10 +43,10 @@ td > .tooltip > span.tooltiptext {
 }
 
 .buttonCustom.info {
-  color: var(--blue);
+  color: var(--c-blue-400);
 }
 .buttonCustom.info:hover {
-  color: var(--blue) !important;
+  color: var(--c-blue-400) !important;
 }
 .buttonCustom.warning {
   color: var(--c-orange-300);
@@ -61,8 +61,8 @@ td > .tooltip > span.tooltiptext {
   color: var(--errors) !important;
 }
 .buttonCustom.blocker {
-  color: var(--errors);
+  color: var(--black);
 }
 .buttonCustom.blocker:hover {
-  color: var(--errors) !important;
+  color: var(--black) !important;
 }
