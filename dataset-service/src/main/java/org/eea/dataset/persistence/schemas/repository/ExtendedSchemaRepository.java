@@ -1,7 +1,9 @@
 package org.eea.dataset.persistence.schemas.repository;
 
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.exception.EEAException;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -44,6 +46,18 @@ public interface ExtendedSchemaRepository {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    * @return the update result
+   * @throws EEAException the EEA exception
    */
-  UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId);
+  UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchema the field schema
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult updateFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
+      throws EEAException;
 }

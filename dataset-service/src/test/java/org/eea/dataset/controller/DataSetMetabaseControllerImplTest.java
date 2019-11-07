@@ -112,11 +112,19 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.verify(designDatasetService, times(1)).getDesignDataSetIdByDataflowId(Mockito.any());
   }
 
-
   @Test(expected = ResponseStatusException.class)
-  public void updateDatasetNameTest() {
+  public void updateDatasetNameTest1() {
     Mockito.when(datasetMetabaseService.updateDatasetName(Mockito.any(), Mockito.any()))
         .thenReturn(false);
     dataSetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
+  }
+
+  @Test
+  public void updateDatasetNameTest2() {
+    Mockito.when(datasetMetabaseService.updateDatasetName(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
+    Mockito.verify(datasetMetabaseService, times(1)).updateDatasetName(Mockito.any(),
+        Mockito.any());
   }
 }

@@ -28,12 +28,14 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
   FieldSchema classToEntity(FieldSchemaVO entity);
 
   @AfterMapping
-  default void fillIdRecord(FieldSchema fieldSchema, @MappingTarget FieldSchemaVO fieldSchemaVO) {
+  default void fillIds(FieldSchema fieldSchema, @MappingTarget FieldSchemaVO fieldSchemaVO) {
+    fieldSchemaVO.setId(fieldSchema.getIdFieldSchema().toString());
     fieldSchemaVO.setIdRecord(fieldSchema.getIdRecord().toString());
   }
 
   @AfterMapping
-  default void fillIdRecord(FieldSchemaVO fieldSchemaVO, @MappingTarget FieldSchema fieldSchema) {
+  default void fillIds(FieldSchemaVO fieldSchemaVO, @MappingTarget FieldSchema fieldSchema) {
+    fieldSchema.setIdFieldSchema(new ObjectId(fieldSchemaVO.getId()));
     fieldSchema.setIdRecord(new ObjectId(fieldSchemaVO.getIdRecord()));
   }
 }

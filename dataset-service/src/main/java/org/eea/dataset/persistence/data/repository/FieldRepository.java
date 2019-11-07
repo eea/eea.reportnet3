@@ -56,8 +56,25 @@ public interface FieldRepository extends PagingAndSortingRepository<FieldValue, 
   @Query(nativeQuery = true, value = "update field_value set value = :value where id = :id")
   void saveValue(@Param("id") Long id, @Param("value") String value);
 
+  /**
+   * Delete by field schema id.
+   *
+   * @param fieldSchemaId the field schema id
+   */
   @Modifying
   @Query(nativeQuery = true,
       value = "delete from field_value where id_field_schema = :fieldSchemaId")
   void deleteByFieldSchemaId(@Param("fieldSchemaId") String fieldSchemaId);
+
+  /**
+   * Update field value type.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param type the type
+   */
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "update field_value set type = :type where id_field_schema = :fieldSchemaId")
+  void updateFieldValueType(@Param("fieldSchemaId") String fieldSchemaId,
+      @Param("type") String type);
 }

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -254,8 +255,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{idTableSchema}/createFieldSchema/{datasetId}",
-      method = RequestMethod.POST)
+  @PostMapping("/{idTableSchema}/createFieldSchema/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody final FieldSchemaVO fieldSchema) {
@@ -274,17 +274,52 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param fieldSchemaId the field schema id
    */
   @Override
+  @HystrixCommand
   @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
 
     // Delete the fieldSchema from the dataset
     String datasetSchemaId = datasetService.deleteFieldValues(datasetId, fieldSchemaId);
 
-    // Delete the fieldSchema from the datasetSchema
-    if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+    try {
+      // Delete the fieldSchema from the datasetSchema
+      if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.WRONG_DATASET_SCHEMA);
+      }
+    } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.WRONG_DATASET_SCHEMA);
+          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+    }
+  }
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/{datasetId}/updateFieldSchema")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestBody FieldSchemaVO fieldSchemaVO) {
+
+    try {
+      // Update the fieldSchema from the datasetSchema
+      String type = dataschemaService
+          .updateFieldSchema(datasetService.findDatasetSchemaIdById(datasetId), fieldSchemaVO);
+
+      // If the update operation succeded, scale to the dataset
+      if (type != null) {
+        datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+      }
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
   }
 }

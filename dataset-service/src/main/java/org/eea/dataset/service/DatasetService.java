@@ -317,4 +317,21 @@ public interface DatasetService {
    * @return the string
    */
   String deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
+
+  /**
+   * Update field value type.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @param type the type
+   */
+  void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, String type);
+
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  String findDatasetSchemaIdById(@DatasetId Long datasetId);
 }

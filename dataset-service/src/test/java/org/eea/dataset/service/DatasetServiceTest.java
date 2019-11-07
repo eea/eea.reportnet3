@@ -85,118 +85,174 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
+/**
+ * The Class DatasetServiceTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetServiceTest {
 
+  /** The dataset service. */
   @InjectMocks
   private DatasetServiceImpl datasetService;
 
+  /** The context. */
   @Mock
   private FileParseContextImpl context;
 
+  /** The file parser factory. */
   @Mock
   private FileParserFactory fileParserFactory;
 
+  /** The data set mapper. */
   @Mock
   private DataSetMapper dataSetMapper;
 
+  /** The table value mapper. */
   @Mock
   private TableValueMapper tableValueMapper;
 
+  /** The partition data set metabase repository. */
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The reporting dataset repository. */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
 
+  /** The dataset repository. */
   @Mock
   private DatasetRepository datasetRepository;
 
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The kafka sender. */
   @Mock
   private KafkaSender kafkaSender;
 
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
 
+  /** The record mapper. */
   @Mock
   private RecordMapper recordMapper;
 
+  /** The record no validation mapper. */
   @Mock
   private RecordNoValidationMapper recordNoValidationMapper;
 
+  /** The pageable. */
   @Mock
   private Pageable pageable;
 
+  /** The data set metabase table collection. */
   @Mock
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
+  /** The data set tables mapper. */
   @Mock
   private DataSetTablesMapper dataSetTablesMapper;
 
+  /** The field repository. */
   @Mock
   private FieldRepository fieldRepository;
 
+  /** The table no record mapper. */
   @Mock
   private TableNoRecordMapper tableNoRecordMapper;
 
+  /** The field validation repository. */
   @Mock
   private FieldValidationRepository fieldValidationRepository;
 
+  /** The record validation repository. */
   @Mock
   private RecordValidationRepository recordValidationRepository;
 
+  /** The table validation repository. */
   @Mock
   private TableValidationRepository tableValidationRepository;
 
+  /** The table validation mapper. */
   @Mock
   private TableValidationMapper tableValidationMapper;
 
+  /** The field validation mapper. */
   @Mock
   private FieldValidationMapper fieldValidationMapper;
 
+  /** The record validation mapper. */
   @Mock
   private RecordValidationMapper recordValidationMapper;
 
+  /** The validation repository. */
   @Mock
   private ValidationRepository validationRepository;
 
+  /** The dataset validation repository. */
   @Mock
   private DatasetValidationRepository datasetValidationRepository;
 
+  /** The file export factory. */
   @Mock
   private IFileExportFactory fileExportFactory;
 
+  /** The context export. */
   @Mock
   private IFileExportContext contextExport;
 
+  /** The file common. */
   @Mock
   private FileCommonUtils fileCommon;
 
+  /** The statistics repository. */
   @Mock
   private StatisticsRepository statisticsRepository;
 
+  /** The field value. */
   private FieldValue fieldValue;
+
+  /** The record value. */
   private RecordValue recordValue;
+
+  /** The record values. */
   private ArrayList<RecordValue> recordValues;
+
+  /** The table value. */
   private TableValue tableValue;
+
+  /** The table values. */
   private ArrayList<TableValue> tableValues;
+
+  /** The dataset value. */
   private DatasetValue datasetValue;
+
+  /** The data set VO. */
   private DataSetVO dataSetVO;
+
+  /** The table V os. */
   private ArrayList<TableVO> tableVOs;
+
+  /** The table VO. */
   private TableVO tableVO;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     fieldValue = new FieldValue();
@@ -228,6 +284,11 @@ public class DatasetServiceTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  /**
+   * Test process file throw exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
@@ -235,6 +296,11 @@ public class DatasetServiceTest {
     datasetService.processFile(null, "fileOriginal", fileNoExtension.getInputStream(), null);
   }
 
+  /**
+   * Test process filename null throw exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFilenameNullThrowException() throws Exception {
     final MockMultipartFile fileNoExtension =
@@ -242,6 +308,11 @@ public class DatasetServiceTest {
     datasetService.processFile(null, null, fileNoExtension.getInputStream(), null);
   }
 
+  /**
+   * Test process file bad extension throw exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileBadExtensionThrowException() throws Exception {
     final MockMultipartFile fileBadExtension =
@@ -249,6 +320,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream(), null);
   }
 
+  /**
+   * Test process file throw exception 2.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileThrowException2() throws Exception {
     final MockMultipartFile fileNoExtension =
@@ -256,6 +332,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, "fileOriginal", fileNoExtension.getInputStream(), null);
   }
 
+  /**
+   * Test process file empty dataset.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = IOException.class)
   public void testProcessFileEmptyDataset() throws Exception {
     final MockMultipartFile file =
@@ -271,6 +352,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
+  /**
+   * Test process file empty partition metabase.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabase() throws Exception {
     final MockMultipartFile file =
@@ -280,6 +366,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
+  /**
+   * Test process file empty partition metabase xml.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabaseXml() throws Exception {
     final MockMultipartFile file =
@@ -289,6 +380,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
+  /**
+   * Test process file empty partition metabase xls.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabaseXls() throws Exception {
     final MockMultipartFile file =
@@ -298,6 +394,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
+  /**
+   * Test process file empty partition metabase xlsx.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabaseXlsx() throws Exception {
     final MockMultipartFile file =
@@ -307,6 +408,11 @@ public class DatasetServiceTest {
     datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
   }
 
+  /**
+   * Test process file empty metabase.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testProcessFileEmptyMetabase() throws Exception {
     final MockMultipartFile file =
@@ -319,6 +425,11 @@ public class DatasetServiceTest {
 
 
 
+  /**
+   * Test process file success update table.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testProcessFileSuccessUpdateTable() throws Exception {
     final MockMultipartFile file =
@@ -337,12 +448,18 @@ public class DatasetServiceTest {
         datasetService.processFile(1L, "fileOriginal.csv", file.getInputStream(), ""));
   }
 
+  /**
+   * Test save all records.
+   */
   @Test
   public void testSaveAllRecords() {
     datasetService.saveAllRecords(1L, new ArrayList<>());
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
+  /**
+   * Test save table.
+   */
   @Test
   public void testSaveTable() {
     Mockito.when(datasetRepository.findById(Mockito.any()))
@@ -351,6 +468,11 @@ public class DatasetServiceTest {
     Mockito.verify(tableRepository, times(1)).saveAndFlush(Mockito.any());
   }
 
+  /**
+   * Test delete import data.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteImportData() throws Exception {
     doNothing().when(datasetRepository).removeDatasetData(Mockito.any());
@@ -358,6 +480,11 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).removeDatasetData(Mockito.any());
   }
 
+  /**
+   * Test delete data schema.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteDataSchema() throws Exception {
     doNothing().when(schemasRepository).deleteById(Mockito.any());
@@ -365,6 +492,11 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).deleteById(Mockito.any());
   }
 
+  /**
+   * Test get table values by id empty.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesByIdEmpty() throws Exception {
     TypeErrorEnum[] errorfilter = null;
@@ -373,6 +505,11 @@ public class DatasetServiceTest {
     Assert.assertEquals("wrong number of records", Long.valueOf(0), result.getTotalRecords());
   }
 
+  /**
+   * Test get table values by id.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById() throws Exception {
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
@@ -384,6 +521,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }
 
+  /**
+   * Test get table values by id 2.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById2() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
@@ -420,6 +562,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 3.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById3() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
@@ -455,6 +602,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 4.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById4() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
@@ -490,6 +642,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 5.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById5() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
@@ -524,6 +681,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 6.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById6() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
@@ -563,6 +725,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 7.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById7() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
@@ -597,6 +764,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 8.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById8() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
@@ -631,6 +803,11 @@ public class DatasetServiceTest {
         listFields, errorfilter));
   }
 
+  /**
+   * Test get table values by id 9.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableValuesById9() throws Exception {
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
@@ -678,6 +855,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test set dataschema tables.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testSetDataschemaTables() throws Exception {
     when(dataSetTablesMapper.classToEntity(Mockito.any())).thenReturn(new TableCollection());
@@ -686,6 +868,11 @@ public class DatasetServiceTest {
     Mockito.verify(dataSetMetabaseTableCollection, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Test get by id.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetById() throws Exception {
     DataSetVO datasetVOtemp = new DataSetVO();
@@ -695,6 +882,11 @@ public class DatasetServiceTest {
     assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
   }
 
+  /**
+   * Test get by id success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetByIdSuccess() throws Exception {
     when(tableRepository.findAllTables()).thenReturn(tableValues);
@@ -703,6 +895,11 @@ public class DatasetServiceTest {
     assertEquals("not equals", dataSetVO, result);
   }
 
+  /**
+   * Test get data flow id by id success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetDataFlowIdByIdSuccess() throws Exception {
     when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
@@ -710,11 +907,21 @@ public class DatasetServiceTest {
     assertNotNull("it shouldn't be null", result);
   }
 
+  /**
+   * Test update null exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void testUpdateNullException() throws Exception {
     datasetService.updateDataset(1L, null);
   }
 
+  /**
+   * Test update success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testUpdateSuccess() throws Exception {
     when(dataSetMapper.classToEntity((Mockito.any(DataSetVO.class))))
@@ -726,6 +933,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test get statistics success.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetStatisticsSuccess() throws Exception {
 
@@ -739,6 +951,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test get statistics success 2.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetStatisticsSuccess2() throws Exception {
     List<DatasetValidation> datasetValidations = new ArrayList<>();
@@ -784,6 +1001,11 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
 
+  /**
+   * Test get statistics success sanitize else.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetStatisticsSuccessSanitizeElse() throws Exception {
     List<DatasetValidation> datasetValidations = new ArrayList<>();
@@ -831,6 +1053,11 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).findById(Mockito.any());
   }
 
+  /**
+   * Test get statistics success 3.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetStatisticsSuccess3() throws Exception {
     List<DatasetValidation> datasetValidations = new ArrayList<>();
@@ -875,6 +1102,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test get table from any object id.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableFromAnyObjectId() throws Exception {
 
@@ -888,6 +1120,11 @@ public class DatasetServiceTest {
 
   }
 
+  /**
+   * Test get table from any object id 2.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableFromAnyObjectId2() throws Exception {
 
@@ -899,6 +1136,11 @@ public class DatasetServiceTest {
 
   }
 
+  /**
+   * Test get table from any object id table.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableFromAnyObjectIdTable() throws Exception {
     TableValue table = new TableValue();
@@ -919,6 +1161,11 @@ public class DatasetServiceTest {
 
   }
 
+  /**
+   * Test get table from any object id 3.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetTableFromAnyObjectId3() throws Exception {
 
@@ -932,6 +1179,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Test delete table data.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteTableData() throws Exception {
     doNothing().when(recordRepository).deleteRecordWithIdTableSchema(Mockito.any());
@@ -939,26 +1191,51 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
+  /**
+   * Update records null test.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void updateRecordsNullTest() throws Exception {
     datasetService.updateRecords(null, new ArrayList<RecordVO>());
   }
 
+  /**
+   * Update records null 2 test.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void updateRecordsNull2Test() throws Exception {
     datasetService.updateRecords(1L, null);
   }
 
+  /**
+   * Delete records null test.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void deleteRecordsNullTest() throws Exception {
     datasetService.deleteRecord(null, 1L);
   }
 
+  /**
+   * Delete records null 2 test.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = EEAException.class)
   public void deleteRecordsNull2Test() throws Exception {
     datasetService.deleteRecord(1L, null);
   }
 
+  /**
+   * Delete records test.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void deleteRecordsTest() throws Exception {
     doNothing().when(recordRepository).deleteRecordWithId(Mockito.any());
@@ -966,6 +1243,11 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(1)).deleteRecordWithId(Mockito.any());
   }
 
+  /**
+   * Update records test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateRecordsTest() throws EEAException {
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
@@ -974,6 +1256,11 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Creates the records test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createRecordsTest() throws EEAException {
     List<RecordValue> myRecords = new ArrayList<>();
@@ -1000,27 +1287,48 @@ public class DatasetServiceTest {
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
 
+  /** The thrown. */
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
+  /**
+   * Creates the records exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createRecordsExceptionTest() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.TABLE_NOT_FOUND);
     datasetService.createRecords(1L, new ArrayList<RecordVO>(), "");
   }
 
+  /**
+   * Creates the records exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createRecordsException2Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
     datasetService.createRecords(1L, new ArrayList<RecordVO>(), null);
   }
 
+  /**
+   * Creates the records exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createRecordsException3Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
     datasetService.createRecords(1L, null, "");
   }
 
+  /**
+   * Creates the records exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createRecordsException4Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.RECORD_NOTFOUND);
@@ -1028,6 +1336,12 @@ public class DatasetServiceTest {
   }
 
 
+  /**
+   * Export file test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void exportFileTest() throws EEAException, IOException {
     byte[] expectedResult = "".getBytes();
@@ -1044,6 +1358,12 @@ public class DatasetServiceTest {
     assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
   }
 
+  /**
+   * Gets the file name test.
+   *
+   * @return the file name test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getFileNameTest() throws EEAException {
     ReportingDataset dataset = new ReportingDataset();
@@ -1053,24 +1373,44 @@ public class DatasetServiceTest {
     assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
   }
 
+  /**
+   * Update field test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldTest() throws EEAException {
     datasetService.updateField(1L, new FieldVO());
     Mockito.verify(fieldRepository, times(1)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field exception 1 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldException1Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
     datasetService.updateField(null, new FieldVO());
   }
 
+  /**
+   * Update field exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldException2Test() throws EEAException {
     thrown.expectMessage(EEAErrorMessage.FIELD_NOT_FOUND);
     datasetService.updateField(1L, null);
   }
 
+  /**
+   * Test insert schema.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testInsertSchema() throws EEAException {
 
@@ -1085,18 +1425,31 @@ public class DatasetServiceTest {
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Test find table id by table schema.
+   */
   @Test
   public void testFindTableIdByTableSchema() {
     datasetService.findTableIdByTableSchema(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(tableRepository, times(1)).findIdByIdTableSchema(Mockito.any());
   }
 
+  /**
+   * Test delete record values to restore snapshot.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testDeleteRecordValuesToRestoreSnapshot() throws EEAException {
     datasetService.deleteRecordValuesToRestoreSnapshot(1L, 1L);
     Mockito.verify(recordRepository, times(1)).deleteRecordValuesToRestoreSnapshot(Mockito.any());
   }
 
+  /**
+   * Test save stats.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void testSaveStats() throws EEAException {
     DataSetSchema schema = new DataSetSchema();
@@ -1109,27 +1462,62 @@ public class DatasetServiceTest {
 
   }
 
+  /**
+   * Delete table value test.
+   */
   @Test
   public void deleteTableValueTest() {
     datasetService.deleteTableValue(1L, new ObjectId().toString());
     Mockito.verify(tableRepository, times(1)).deleteByIdTableSchema(Mockito.any());
   }
 
+  /**
+   * Save table propagation exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void saveTablePropagationExceptionTest() throws EEAException {
     datasetService.saveTablePropagation(1L, new TableSchemaVO());
   }
 
+  /**
+   * Save table propagation test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void saveTablePropagationTest() throws EEAException {
     Mockito.when(datasetRepository.findById(1L)).thenReturn(Optional.of(datasetValue));
     datasetService.saveTablePropagation(1L, new TableSchemaVO());
   }
 
+  /**
+   * Delete field values test.
+   */
   @Test
   public void deleteFieldValuesTest() {
     Mockito.doNothing().when(fieldRepository).deleteByFieldSchemaId(Mockito.any());
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn("<id>");
     Assert.assertEquals("<id>", datasetService.deleteFieldValues(1L, "<id>"));
+  }
+
+  /**
+   * Update field value type test.
+   */
+  @Test
+  public void updateFieldValueTypeTest() {
+    Mockito.doNothing().when(fieldRepository).updateFieldValueType(Mockito.any(), Mockito.any());
+    datasetService.updateFieldValueType(1L, "<id>", "TEXT");
+    Mockito.verify(fieldRepository, times(1)).updateFieldValueType(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Find dataset schema id by id test.
+   */
+  @Test
+  public void findDatasetSchemaIdByIdTest() {
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn("<id>");
+    Assert.assertEquals("<id>", datasetService.findDatasetSchemaIdById(1L));
   }
 }

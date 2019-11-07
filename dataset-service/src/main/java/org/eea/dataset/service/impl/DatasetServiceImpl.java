@@ -1364,4 +1364,28 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.deleteByFieldSchemaId(fieldSchemaId);
     return datasetRepository.findIdDatasetSchemaById(datasetId);
   }
+
+  /**
+   * Update field value type.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   * @param type the type
+   */
+  @Override
+  @Transactional
+  public void updateFieldValueType(Long datasetId, String fieldSchemaId, String type) {
+    fieldRepository.updateFieldValueType(fieldSchemaId, type);
+  }
+
+  /**
+   * Find dataset schema id by id.
+   *
+   * @param datasetId the dataset id
+   * @return the datasetSchemaId
+   */
+  @Override
+  public String findDatasetSchemaIdById(Long datasetId) {
+    return datasetRepository.findIdDatasetSchemaById(datasetId);
+  }
 }

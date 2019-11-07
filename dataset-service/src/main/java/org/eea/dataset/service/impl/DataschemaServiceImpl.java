@@ -611,8 +611,29 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return true, if 1 and only 1 fieldSchema has been removed
    */
   @Override
-  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
+  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
+      throws EEAException {
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
+  }
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return the fieldSchema type if the operation worked, null if not
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException {
+    try {
+      return (schemasRepository
+          .updateFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
+          .getModifiedCount() == 1) ? fieldSchemaVO.getType().getValue() : null;
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
   }
 }

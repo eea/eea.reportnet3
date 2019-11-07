@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -139,4 +140,14 @@ public interface DatasetSchemaController {
   @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
   public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId);
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   */
+  @PutMapping("/{datasetId}/updateFieldSchema")
+  public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestBody FieldSchemaVO fieldSchemaVO);
 }

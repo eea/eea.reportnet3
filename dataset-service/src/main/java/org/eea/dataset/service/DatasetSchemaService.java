@@ -105,7 +105,18 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
-   * @return true, if successful
+   * @return true, if 1 and only 1 fieldSchema has been removed
+   * @throws EEAException the EEA exception
    */
-  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId);
+  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return The fieldSchema type if the operation worked, null if not.
+   * @throws EEAException the EEA exception
+   */
+  String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
 }

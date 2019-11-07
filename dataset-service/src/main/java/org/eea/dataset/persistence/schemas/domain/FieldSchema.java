@@ -49,6 +49,11 @@ public class FieldSchema {
   @Field(value = "rules")
   private List<RuleField> ruleField;
 
+  public String toJSON() {
+    return "{\"_id\": {\"$oid\":\"" + idFieldSchema + "\"}, \"idRecord\": {\"$oid\":\"" + idRecord
+        + "\"}, \"typeData\": \"" + type.getValue() + "\", \"headerName\": \"" + headerName
+        + "\", \"rules\": []}";
+  }
 
   /**
    * Hash code.
@@ -81,6 +86,4 @@ public class FieldSchema {
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(ruleField, other.ruleField)
         && Objects.equals(type, other.type);
   }
-
-
 }

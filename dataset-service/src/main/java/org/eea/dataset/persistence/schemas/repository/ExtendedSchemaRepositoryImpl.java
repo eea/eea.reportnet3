@@ -1,8 +1,12 @@
 package org.eea.dataset.persistence.schemas.repository;
 
+import java.util.Arrays;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.exception.EEAException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -10,6 +14,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -24,6 +30,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   /** The mongo template. */
   @Autowired
   private MongoTemplate mongoTemplate;
+
+  @Autowired
+  private MongoDatabase mongoDatabase;
 
   /**
    * Delete table schema by id.
@@ -61,6 +70,12 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     mongoOperations.updateMulti(query, update, DataSetSchema.class);
   }
 
+  /**
+   * Find by id table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the data set schema
+   */
   @Override
   public DataSetSchema findByIdTableSchema(String idTableSchema) {
     Query query = new Query();
@@ -77,13 +92,43 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @return the update result
    */
   @Override
-  public UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
-    Update update = new Update().pull("tableSchemas.$.recordSchema.fieldSchemas",
-        new BasicDBObject("_id", new ObjectId(fieldSchemaId)));
-    Query query = new Query();
-    query.addCriteria(new Criteria("_id").is(new ObjectId(datasetSchemaId)));
-    query.addCriteria(
-        new Criteria("tableSchemas.recordSchema.fieldSchemas._id").is(new ObjectId(fieldSchemaId)));
-    return mongoOperations.updateMulti(query, update, DataSetSchema.class);
+  public UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
+      throws EEAException {
+    try {
+      Update update = new Update().pull("tableSchemas.$.recordSchema.fieldSchemas",
+          new BasicDBObject("_id", new ObjectId(fieldSchemaId)));
+      Query query = new Query();
+      query.addCriteria(new Criteria("_id").is(new ObjectId(datasetSchemaId)));
+      query.addCriteria(new Criteria("tableSchemas.recordSchema.fieldSchemas._id")
+          .is(new ObjectId(fieldSchemaId)));
+      return mongoOperations.updateMulti(query, update, DataSetSchema.class);
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchema the field schema
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UpdateResult updateFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
+      throws EEAException {
+    try {
+      return mongoDatabase.getCollection("DataSetSchema").updateMany(
+          new Document("_id", new ObjectId(datasetSchemaId))
+              .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.getIdFieldSchema()),
+          new Document("$set",
+              new Document("tableSchemas.$.recordSchema.fieldSchemas.$[fieldSchemaId]",
+                  Document.parse(fieldSchema.toJSON()))),
+          new UpdateOptions().arrayFilters(
+              Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
   }
 }
