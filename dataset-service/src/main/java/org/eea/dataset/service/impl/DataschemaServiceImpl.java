@@ -473,10 +473,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules) {
 
-    DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
+    DataSetSchema datasetSchema = schemasRepository.findSchemaByIdFlow(idFlow);
     LOG.info("Schema retrived by idFlow {}", idFlow);
-    return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
-        : noRulesDataSchemaMapper.entityToClass(dataschema);
+    return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(datasetSchema)
+        : noRulesDataSchemaMapper.entityToClass(datasetSchema);
   }
 
   /**
@@ -488,32 +488,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   @Transactional
   public void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException {
-    DataSetSchema dataset = schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    TableSchema table = getTableSchema(idTableSchema, dataset);
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(idTableSchema, datasetSchema);
     if (table == null) {
       LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
       throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
     }
-    int deletedPosition = table.getOrder();
     schemasRepository.deleteTableSchemaById(idTableSchema);
-    rearrangeTables(dataset, deletedPosition, datasetSchemaId);
-  }
-
-  /**
-   * Rearrange tables.
-   *
-   * @param dataset the dataset
-   * @param deletedPosition the deleted position
-   */
-  private void rearrangeTables(DataSetSchema dataset, int deletedPosition, String datasetSchemaId) {
-    dataset.getTableSchemas().stream().forEach(table -> {
-      int position = table.getOrder();
-      if (position > deletedPosition) {
-        table.setOrder(position - 1);
-        schemasRepository.deleteTableSchemaById(table.getIdTableSchema().toString());
-        schemasRepository.insertTableSchema(table, datasetSchemaId);
-      }
-    });
   }
 
   /**
@@ -538,10 +520,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
-    DataSetSchema dataset = schemasRepository.findById(new ObjectId(id)).orElse(null);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(id)).orElse(null);
 
-    if (dataset != null) {
-      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset);
+    if (datasetSchema != null) {
+      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), datasetSchema);
       if (table != null) {
         // set the attributtes of VO
         table.setNameTableSchema(tableSchema.getNameTableSchema());

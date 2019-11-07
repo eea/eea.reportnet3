@@ -40,10 +40,6 @@ public class TableSchema {
   @Field(value = "rules")
   private List<RuleTable> ruleTable;
 
-  /** The order. */
-  @Field(value = "order")
-  private int order;
-
   /**
    * Hash code.
    *
@@ -51,7 +47,7 @@ public class TableSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, ruleTable, order);
+    return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, ruleTable);
   }
 
   /**
@@ -73,7 +69,7 @@ public class TableSchema {
         && Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
-        && Objects.equals(ruleTable, other.ruleTable) && Objects.equals(order, other.order);
+        && Objects.equals(ruleTable, other.ruleTable);
   }
 
 

@@ -462,11 +462,9 @@ public class DatasetSchemaServiceTest {
     TableSchema table = new TableSchema();
     table.setIdTableSchema(id);
     table.setNameTableSchema("test");
-    table.setOrder(0);
     TableSchema table2 = new TableSchema();
     table2.setIdTableSchema(new ObjectId());
     table2.setNameTableSchema("test");
-    table2.setOrder(1);
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
@@ -477,10 +475,8 @@ public class DatasetSchemaServiceTest {
     TableSchemaVO tableVO = new TableSchemaVO();
     tableVO.setIdTableSchema(id.toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
-    doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    doNothing().when(schemasRepository).insertTableSchema(Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
-    Mockito.verify(schemasRepository, times(2)).deleteTableSchemaById(Mockito.any());
+    Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
   }
 
   /**
@@ -513,7 +509,6 @@ public class DatasetSchemaServiceTest {
     TableSchema table = new TableSchema();
     table.setIdTableSchema(id);
     table.setNameTableSchema("test");
-    table.setOrder(0);
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
