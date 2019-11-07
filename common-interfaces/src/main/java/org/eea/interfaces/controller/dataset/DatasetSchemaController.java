@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import java.util.List;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -138,7 +139,7 @@ public interface DatasetSchemaController {
    * @param fieldSchemaId the field schema id
    */
   @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
-  public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
+  void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId);
 
   /**

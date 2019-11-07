@@ -66,7 +66,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public void insertTableSchema(TableSchema table, String idDatasetSchema) {
     Update update = new Update().push("tableSchemas", table);
     Query query = new Query();
-    query.addCriteria(new Criteria("_id").is(idDatasetSchema));
+    query.addCriteria(new Criteria("_id").is(new ObjectId(idDatasetSchema)));
     mongoOperations.updateMulti(query, update, DataSetSchema.class);
   }
 

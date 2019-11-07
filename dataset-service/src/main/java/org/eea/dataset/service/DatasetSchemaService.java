@@ -1,10 +1,12 @@
 package org.eea.dataset.service;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 
 /**
  * The Interface DataschemaService.
@@ -52,9 +54,11 @@ public interface DatasetSchemaService {
   /**
    * Delete table schema.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
    */
-  void deleteTableSchema(String idTableSchema);
+  void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException;
 
   /**
    * Delete dataset schema.
@@ -88,6 +92,14 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    */
   void createGroupAndAddUser(Long datasetId);
+
+  /**
+   * Delete group and remove user.
+   *
+   * @param datasetId the dataset id
+   * @param role the role
+   */
+  void deleteGroup(Long datasetId, ObjectAccessRoleEnum... role);
 
   /**
    * Creates the field schema.
