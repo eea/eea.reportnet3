@@ -77,7 +77,9 @@ export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
 
       <div className={`${styles.card_component_content} `}>
         <div className={`${styles.card_component_content_date}`}>
-          <span>{moment(itemContent.deadlineDate).format('YYYY-MM-DD')}</span>
+          <span>
+            {resources.messages['deadline']}: {moment(itemContent.deadlineDate).format('YYYY-MM-DD')}
+          </span>
         </div>
         <h3 className={`${styles.card_component_content_title}`}>{itemContent.name}</h3>
 

@@ -80,7 +80,7 @@ public class EEAEventVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(eventType);
+    return Objects.hash(data, eventType.ordinal());
   }
 
   /**

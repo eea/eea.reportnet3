@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
@@ -53,8 +54,26 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot implements
         .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity)).collect(
             Collectors.toList());
 
-    return !roles.stream().filter(authorities::contains).findFirst().orElse("not_found")
+    boolean canAccess = !roles.stream().filter(authorities::contains).findFirst()
+        .orElse("not_found")
         .equals("not_found");
+    if (!canAccess) {//No authority found in the current token. Check against keycloak to finde if there were some change at User rights that wasn't be propagated to the token yet
+      List<ResourceAccessVO> resourceAccessVOS = this.userManagementControllerZull
+          .getResourcesByUser();
+      // ObjectAccessRoleEnum expression has the following formate ROLE_DATASCHEMA-1-DATA_CUSTODIAN
+      List<String> resourceRoles = resourceAccessVOS.stream()
+          .map(resourceAccessVO -> {
+            StringBuilder builder = new StringBuilder("ROLE_");
+            return builder.append(resourceAccessVO.getResource().toString()).append("-")
+                .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
+                .toString().toUpperCase();
+          }).collect(
+              Collectors.toList());
+      canAccess = !roles.stream().filter(resourceRoles::contains).findFirst()
+          .orElse("not_found")
+          .equals("not_found");
+    }
+    return canAccess;
   }
 
 

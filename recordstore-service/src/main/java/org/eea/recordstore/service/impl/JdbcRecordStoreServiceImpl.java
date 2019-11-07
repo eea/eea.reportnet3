@@ -64,18 +64,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * The user postgre db.
    */
-  @Value("${userPostgre}")
+  @Value("${spring.datasource.username}")
   private String userPostgreDb;
   /**
    * The pass postgre db.
    */
-  @Value("${passwordPostgre}")
+  @Value("${spring.datasource.password}")
   private String passPostgreDb;
 
   /**
    * The conn string postgre.
    */
-  @Value("${connStringPostgree}")
+  @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
   /**

@@ -1,41 +1,53 @@
+.headersWrapper {
+  display: flex;
+  align-items: center;
+}
+
 .scrollTab {
-  overflow-x: scroll;
+  overflow-x: auto;
   overflow-y: hidden;
   margin-bottom: -1px;
   white-space: nowrap;
   text-overflow: unset;
-  scrollbar-width: none;
   scroll-behavior: smooth;
 }
 
 .iconHidden {
   display: none !important;
 }
+.iconsWrapper {
+  display: flex;
+  position: relative;
+}
 
+.scrollTab {
+  scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  scrollbar-width: thin;
+  cursor: pointer;
+}
 .scrollTab::-webkit-scrollbar {
-  display: none;
+  width: 10px;
+  height: 10px;
+}
+
+.scrollTab::-webkit-scrollbar-track {
+  background: var(--c-custom-gray);
+}
+
+.scrollTab::-webkit-scrollbar-thumb {
+  background: var(--gray-50);
+}
+
+.scrollTab::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-75);
 }
 
 .navigationTabIcons {
+  color: var(--c-black-300);
   cursor: pointer !important;
-  font-size: 2.25rem !important;
-  position: absolute !important;
-  margin-top: 2.25px;
+  font-size: 1.75rem !important;
+  margin-top: 1.75px;
 }
 .navigationTabIcons:hover {
-  border: 1px solid;
-  border-radius: 3px;
-  background-color: var(--c-custom-gray);
-}
-.stepBackwardIcon {
-  left: -19px !important;
-}
-.stepInitIcon {
-  left: -54px !important;
-}
-.stepForwardIcon {
-  right: -19px !important;
-}
-.stepEndIcon {
-  right: -54px !important;
+  color: var(--black);
 }
