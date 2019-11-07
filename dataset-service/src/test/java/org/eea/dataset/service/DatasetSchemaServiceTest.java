@@ -581,7 +581,7 @@ public class DatasetSchemaServiceTest {
   @Test(expected = EEAException.class)
   public void createFieldSchemaException1Test() throws EEAException {
     when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(null);
-    dataSchemaServiceImpl.createFieldSchema("", new FieldSchemaVO(), 1L);
+    dataSchemaServiceImpl.createFieldSchema("", new FieldSchemaVO());
   }
 
   /**
@@ -600,7 +600,7 @@ public class DatasetSchemaServiceTest {
     TableSchemaVO tableVO = new TableSchemaVO();
     tableVO.setIdTableSchema(id.toString());
     when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(schema);
-    dataSchemaServiceImpl.createFieldSchema("", new FieldSchemaVO(), 1L);
+    dataSchemaServiceImpl.createFieldSchema("", new FieldSchemaVO());
   }
 
   /**
@@ -626,7 +626,7 @@ public class DatasetSchemaServiceTest {
     when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(schema);
     when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any())).thenReturn(new FieldSchema());
     doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO(), 1L);
+    dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO());
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
 
@@ -658,7 +658,7 @@ public class DatasetSchemaServiceTest {
     when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(schema);
     when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any())).thenReturn(new FieldSchema());
     doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO(), 1L);
+    dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO());
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
 
@@ -732,6 +732,7 @@ public class DatasetSchemaServiceTest {
 
     Assert.assertNull(dataSchemaServiceImpl.updateFieldSchema("<id>", new FieldSchemaVO()));
   }
+
   /**
    * Delete group test.
    */

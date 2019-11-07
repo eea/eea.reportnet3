@@ -363,7 +363,7 @@ public class DataSetSchemaControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createFieldSchemaTestException() throws EEAException {
     doThrow(EEAException.class).when(dataschemaService).createFieldSchema(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any());
     dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
   }
 
@@ -375,8 +375,7 @@ public class DataSetSchemaControllerImplTest {
   @Test
   public void createFieldSchemaSuccessTest() throws EEAException {
     dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any());
   }
 
   /**
