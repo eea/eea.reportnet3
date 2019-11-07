@@ -1,6 +1,8 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { isUndefined } from 'lodash';
+
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -18,6 +20,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowName, setDataflowName] = useState('');
+  const [dataSchema, setDataSchema] = useState();
 
   const home = {
     icon: config.icons['home'],
@@ -52,6 +55,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   useEffect(() => {
     try {
       getDataflowName();
+      onLoadDataSchemas();
     } catch (error) {
       console.error(error.response);
     }
@@ -60,6 +64,18 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   const getDataflowName = async () => {
     const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
     setDataflowName(dataflowData.name);
+  };
+
+  const onLoadDataSchemas = async () => {
+    try {
+      const dataflow = await DataflowService.reporting(match.params.dataflowId);
+      setDataSchema(dataflow.designDatasets);
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+    } finally {
+    }
   };
 
   const layout = children => {
@@ -84,7 +100,12 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
   return layout(
     <>
       <Title title={`${resources.messages['dataflow']}: ${dataflowName}`} icon="barChart" />
-      <GlobalValidationDashboard dataflowId={match.params.dataflowId} />
+      {!isUndefined(dataSchema) &&
+        dataSchema.map(id => (
+          <>
+            <GlobalValidationDashboard schemaId={id.datasetSchemaId} />
+          </>
+        ))}
       <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
     </>
   );

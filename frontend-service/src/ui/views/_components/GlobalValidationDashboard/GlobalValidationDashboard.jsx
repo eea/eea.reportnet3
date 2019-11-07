@@ -22,7 +22,7 @@ const SEVERITY_CODE = {
   ERROR: colors.dashboardError
 };
 
-const GlobalValidationDashboard = dataflowId => {
+const GlobalValidationDashboard = schemaId => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     reporterFilter: [],
@@ -74,7 +74,7 @@ const GlobalValidationDashboard = dataflowId => {
 
   const onLoadDashboard = async () => {
     try {
-      const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(dataflowId.dataflowId);
+      const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(schemaId);
       if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
         setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
       }
