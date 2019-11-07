@@ -117,8 +117,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito
         .when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
-    Assert.assertNotNull(result);
+    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L));
   }
 
   /**
@@ -237,25 +236,10 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDatasetSchemaException2Test() throws EEAException {
-    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
   }
 
-  /**
-   * Delete dataset schema exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void deleteDatasetSchemaException3Test() throws EEAException {
-    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
-    dataSetSchemaVO.setIdDataSetSchema("");
-    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(dataschemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
-        .thenReturn(dataSetSchemaVO);
-    dataSchemaControllerImpl.deleteDatasetSchema(1L);
-    Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
-  }
 
   /**
    * Delete dataset schema success.
@@ -266,9 +250,7 @@ public class DataSetSchemaControllerImplTest {
   public void deleteDatasetSchemaSuccessTest() throws EEAException {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
-    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(dataschemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
-        .thenReturn(dataSetSchemaVO);
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn(new ObjectId().toString());
     doNothing().when(dataschemaService).deleteDatasetSchema(Mockito.any(), Mockito.any());
     doNothing().when(datasetMetabaseService).deleteDesignDataset(Mockito.any());
     dataSchemaControllerImpl.deleteDatasetSchema(1L);

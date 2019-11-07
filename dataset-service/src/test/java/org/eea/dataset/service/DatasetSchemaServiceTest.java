@@ -307,9 +307,12 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void testFindDataSchemaById() {
-    dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73");
-    Mockito.verify(dataSchemaMapper, Mockito.times(1))
-        .entityToClass(Mockito.any(DataSetSchema.class));
+    DataSetSchema schema = new DataSetSchema();
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(dataSchemaMapper.entityToClass(schema)).thenReturn(schemaVO);
+    assertEquals("Not equals", schemaVO,
+        dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73"));
   }
 
   /**
@@ -318,7 +321,7 @@ public class DatasetSchemaServiceTest {
    * @throws EEAException
    */
   @Test
-  public void testFindDataSchemaByDataFlow() throws EEAException {
+  public void testFindDataSchemaByDatasetId() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
     dataSetSchema.setRuleDataSet(new ArrayList<>());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
@@ -363,11 +366,12 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void testFindDataSchemaNotNullById() {
+    DataSetSchemaVO dataschema = new DataSetSchemaVO();
     when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(new DataSetSchema()));
-    when(dataSchemaMapper.entityToClass((DataSetSchema) Mockito.any()))
-        .thenReturn(new DataSetSchemaVO());
-    dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73");
-    Mockito.verify(schemasRepository, Mockito.times(1)).findByIdDataSetSchema(new ObjectId());
+    when(dataSchemaMapper.entityToClass((DataSetSchema) Mockito.any())).thenReturn(dataschema);
+    assertEquals("not equals", dataschema,
+        dataSchemaServiceImpl.getDataSchemaById("5ce524fad31fc52540abae73"));
+
 
   }
 
