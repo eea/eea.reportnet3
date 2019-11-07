@@ -453,11 +453,53 @@ public class DatasetSchemaServiceTest {
 
   /**
    * Delete table schema test.
+   *
+   * @throws EEAException
    */
   @Test
-  public void deleteTableSchemaTest() {
-    dataSchemaServiceImpl.deleteTableSchema("idTableSchema");
-    Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
+  public void deleteTableSchemaTest() throws EEAException {
+    ObjectId id = new ObjectId();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(id);
+    table.setNameTableSchema("test");
+    table.setOrder(0);
+    TableSchema table2 = new TableSchema();
+    table2.setIdTableSchema(new ObjectId());
+    table2.setNameTableSchema("test");
+    table2.setOrder(1);
+    DataSetSchema schema = new DataSetSchema();
+    schema.setNameDataSetSchema("test");
+    schema.setIdDataFlow(1L);
+    List<TableSchema> listaTables = new ArrayList<>();
+    listaTables.add(table);
+    listaTables.add(table2);
+    schema.setTableSchemas(listaTables);
+    TableSchemaVO tableVO = new TableSchemaVO();
+    tableVO.setIdTableSchema(id.toString());
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
+    doNothing().when(schemasRepository).insertTableSchema(Mockito.any(), Mockito.any());
+    dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
+    Mockito.verify(schemasRepository, times(2)).deleteTableSchemaById(Mockito.any());
+  }
+
+  /**
+   * Delete table schema exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteTableSchemaExceptionTest() throws EEAException {
+    ObjectId id = new ObjectId();
+    DataSetSchema schema = new DataSetSchema();
+    schema.setNameDataSetSchema("test");
+    schema.setIdDataFlow(1L);
+    List<TableSchema> listaTables = null;
+    schema.setTableSchemas(listaTables);
+    TableSchemaVO tableVO = new TableSchemaVO();
+    tableVO.setIdTableSchema(id.toString());
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    dataSchemaServiceImpl.deleteTableSchema(id.toString(), id.toString());
   }
 
   /**
@@ -471,6 +513,7 @@ public class DatasetSchemaServiceTest {
     TableSchema table = new TableSchema();
     table.setIdTableSchema(id);
     table.setNameTableSchema("test");
+    table.setOrder(0);
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
@@ -549,14 +592,10 @@ public class DatasetSchemaServiceTest {
   @Test(expected = EEAException.class)
   public void createFieldSchemaException2Test() throws EEAException {
     ObjectId id = new ObjectId();
-    // TableSchema table = new TableSchema();
-    // table.setIdTableSchema(id);
-    // table.setNameTableSchema("test");
     DataSetSchema schema = new DataSetSchema();
     schema.setNameDataSetSchema("test");
     schema.setIdDataFlow(1L);
     List<TableSchema> listaTables = new ArrayList<>();
-    // listaTables.add(table);
     schema.setTableSchemas(listaTables);
     TableSchemaVO tableVO = new TableSchemaVO();
     tableVO.setIdTableSchema(id.toString());
@@ -654,5 +693,51 @@ public class DatasetSchemaServiceTest {
   public void deleteGroupTest() {
     dataSchemaServiceImpl.deleteGroup(1L);
     Mockito.verify(resourceManagementControllerZull, times(1)).deleteResourceByName(Mockito.any());
+  }
+
+  /**
+   * Order tables test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderTablesTest() throws EEAException {
+    ObjectId id = new ObjectId();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(id);
+    table.setNameTableSchema("test");
+    table.setOrder(0);
+    DataSetSchema schema = new DataSetSchema();
+    schema.setNameDataSetSchema("test");
+    schema.setIdDataFlow(1L);
+    List<TableSchema> listaTables = new ArrayList<>();
+    listaTables.add(table);
+    schema.setTableSchemas(listaTables);
+    TableSchemaVO tableVO = new TableSchemaVO();
+    tableVO.setIdTableSchema(id.toString());
+    tableVO.setOrder(1);
+    List<TableSchemaVO> tables = new ArrayList<>();
+    tables.add(tableVO);
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    dataSchemaServiceImpl.orderTables(id.toString(), tables);
+    Mockito.verify(schemasRepository, times(1)).deleteTableSchemaById(Mockito.any());
+    Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Order tables exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void orderTablesExceptionTest() throws EEAException {
+    ObjectId id = new ObjectId();
+    TableSchemaVO tableVO = new TableSchemaVO();
+    tableVO.setIdTableSchema(id.toString());
+    tableVO.setOrder(1);
+    List<TableSchemaVO> tables = new ArrayList<>();
+    tables.add(tableVO);
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    dataSchemaServiceImpl.orderTables(id.toString(), tables);
   }
 }

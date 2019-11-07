@@ -200,10 +200,17 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Delete table schema test.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void deleteTableSchemaTest() {
-    doNothing().when(dataschemaService).deleteTableSchema(Mockito.any());
+  public void deleteTableSchemaTest() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("schemaId");
+    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetSchemaVO);
+    doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
     Mockito.verify(datasetService, times(1)).deleteTableValue(Mockito.any(), Mockito.any());
   }
@@ -213,7 +220,41 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteTableSchemaExceptionTest() {
-    dataSchemaControllerImpl.deleteTableSchema(null, null);
+    dataSchemaControllerImpl.deleteTableSchema(null, "objectId");
+  }
+
+  /**
+   * Delete table schema exception 2 test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteTableSchemaException2Test() {
+    dataSchemaControllerImpl.deleteTableSchema(1L, null);
+  }
+
+  /**
+   * Delete table schema exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteTableSchemaException3Test() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("");
+    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetSchemaVO);
+    dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
+  }
+
+  /**
+   * Delete table schema exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteTableSchemaException4Test() throws EEAException {
+    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
+    dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
   }
 
   /**
@@ -248,7 +289,6 @@ public class DataSetSchemaControllerImplTest {
     when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
     dataSchemaControllerImpl.deleteDatasetSchema(1L);
-    Mockito.verify(recordStoreControllerZull, times(1)).deleteDataset(Mockito.any());
   }
 
   /**
@@ -339,11 +379,66 @@ public class DataSetSchemaControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Delete field schema test.
+   */
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest() {
     Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(false);
     dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+  }
+
+  /**
+   * Order table schema exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaExceptionTest() throws EEAException {
+    dataSchemaControllerImpl.orderTableSchema(null, null);
+  }
+
+  /**
+   * Order table schema exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaException2Test() throws EEAException {
+    doThrow(new EEAException()).when(datasetService).getDataFlowIdById(Mockito.any());
+    dataSchemaControllerImpl.orderTableSchema(1L, null);
+  }
+
+  /**
+   * Order table schema exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaException3Test() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("");
+    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetSchemaVO);
+    dataSchemaControllerImpl.orderTableSchema(1L, new ArrayList<>());
+  }
+
+  /**
+   * Order table schema test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderTableSchemaTest() throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    dataSetSchemaVO.setIdDataSetSchema("schemaId");
+    when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetSchemaVO);
+    dataSchemaControllerImpl.orderTableSchema(1L, new ArrayList<>());
+    Mockito.verify(dataschemaService, times(1)).orderTables(Mockito.any(), Mockito.any());
   }
 }

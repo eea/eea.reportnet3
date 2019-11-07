@@ -2,6 +2,7 @@ package org.eea.dataset.persistence.data.repository;
 
 import static org.mockito.Mockito.times;
 import java.io.IOException;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.ExtendedSchemaRepositoryImpl;
 import org.junit.Assert;
@@ -71,5 +72,13 @@ public class ExtendedSchemaRepositoryImplTest {
         extendedSchemaRepositoryImpl
             .deleteFieldSchema("5d4abe555b1c1e0001477410", "5d4abe555b1c1e0001477415")
             .getModifiedCount());
+  }
+
+  @Test
+  public void findByIdTableSchemaTest() {
+    Mockito.when(mongoTemplate.findOne(Mockito.any(), Mockito.any()))
+        .thenReturn(new DataSetSchema());
+    extendedSchemaRepositoryImpl.findByIdTableSchema("5d4abe555b1c1e0001477410");
+    Mockito.verify(mongoTemplate, times(1)).findOne(Mockito.any(), Mockito.any());
   }
 }

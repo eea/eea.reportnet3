@@ -46,4 +46,5 @@ public interface ExtendedSchemaRepository {
    * @return the update result
    */
   UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId);
+
 }

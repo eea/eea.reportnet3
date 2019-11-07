@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -11,6 +13,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,12 +210,27 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String idTableSchema) {
-    if (idTableSchema == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    try {
+      if (idTableSchema == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+      }
+      if (datasetId == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_INCORRECT_ID);
+      }
+      String schemaId = dataschemaService
+          .getDataSchemaByIdFlow(datasetService.getDataFlowIdById(datasetId), false)
+          .getIdDataSetSchema();
+      if (StringUtils.isBlank(schemaId)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+      }
+      dataschemaService.deleteTableSchema(schemaId, idTableSchema);
+      datasetService.deleteTableValue(datasetId, idTableSchema);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR, e);
     }
-    dataschemaService.deleteTableSchema(idTableSchema);
-    datasetService.deleteTableValue(datasetId, idTableSchema);
   }
 
   /**
@@ -239,7 +257,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.deleteDatasetSchema(datasetId, schemaId);
       datasetMetabaseService.deleteDesignDataset(datasetId);
       recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-      dataschemaService.deleteGroup(datasetId);
+      dataschemaService.deleteGroup(datasetId, ObjectAccessRoleEnum.DATASCHEMA_CUSTODIAN,
+          ObjectAccessRoleEnum.DATASCHEMA_PROVIDER);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);
@@ -286,6 +305,34 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.WRONG_DATASET_SCHEMA);
+    }
+  }
+
+  /**
+   * Order the tableSchemas
+   *
+   * @param datasetId the dataset id
+   * @param tables the tables
+   */
+  @Override
+  @RequestMapping(value = "/order/{datasetId}", method = RequestMethod.PUT)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  public void orderTableSchema(Long datasetId, @RequestBody List<TableSchemaVO> tables) {
+    try {
+      if (datasetId == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_INCORRECT_ID);
+      }
+      String schemaId = dataschemaService
+          .getDataSchemaByIdFlow(datasetService.getDataFlowIdById(datasetId), false)
+          .getIdDataSetSchema();
+      if (StringUtils.isBlank(schemaId)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+      }
+      dataschemaService.orderTables(schemaId, tables);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR, e);
     }
   }
 }

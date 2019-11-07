@@ -1,7 +1,10 @@
 package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
@@ -35,6 +38,7 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,18 +195,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
+   * @param role the role
    */
   @Override
-  public void deleteGroup(Long datasetId) {
-    // Remove group Dataschema-X-DATA_CUSTODIAN
-    StringBuilder resourceCustodian = new StringBuilder();
-    resourceCustodian.append("Dataschema-").append(datasetId).append("-DATA_CUSTODIAN");
+  public void deleteGroup(Long datasetId, ObjectAccessRoleEnum... roles) {
     List<String> resources = new ArrayList<>();
-    StringBuilder resourceProvider = new StringBuilder();
-    // Remove group Dataschema-X-DATA_PROVIDER
-    resourceProvider.append("Dataschema-").append(datasetId).append("-DATA_PROVIDER");
-    resources.add(resourceCustodian.toString());
-    resources.add(resourceProvider.toString());
+    // Remove groups from list
+    Arrays.asList(roles).stream().forEach(role -> resources.add(role.getAccessRole(datasetId)));
     resourceManagementControllerZull.deleteResourceByName(resources);
   }
 
@@ -486,11 +485,37 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete table schema.
    *
    * @param idTableSchema the id table schema
+   * @throws EEAException
    */
   @Override
   @Transactional
-  public void deleteTableSchema(String idTableSchema) {
+  public void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException {
+    DataSetSchema dataset = schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(idTableSchema, dataset);
+    if (table == null) {
+      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+    }
+    int deletedPosition = table.getOrder();
     schemasRepository.deleteTableSchemaById(idTableSchema);
+    rearrangeTables(dataset, deletedPosition, datasetSchemaId);
+  }
+
+  /**
+   * Rearrange tables.
+   *
+   * @param dataset the dataset
+   * @param deletedPosition the deleted position
+   */
+  private void rearrangeTables(DataSetSchema dataset, int deletedPosition, String datasetSchemaId) {
+    dataset.getTableSchemas().stream().forEach(table -> {
+      int position = table.getOrder();
+      if (position > deletedPosition) {
+        table.setOrder(position - 1);
+        schemasRepository.deleteTableSchemaById(table.getIdTableSchema().toString());
+        schemasRepository.insertTableSchema(table, datasetSchemaId);
+      }
+    });
   }
 
   /**
@@ -633,5 +658,32 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
+  }
+
+  /**
+   * Order tables.
+   *
+   * @param schemaId the schema id
+   * @param tables the tables
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void orderTables(String schemaId, List<TableSchemaVO> tables) throws EEAException {
+    DataSetSchema dataset = schemasRepository.findById(new ObjectId(schemaId)).orElse(null);
+    if (dataset != null) {
+      Map<String, Integer> orders = new HashMap<>();
+      tables.stream().forEach(table -> orders.put(table.getIdTableSchema(), table.getOrder()));
+      dataset.getTableSchemas().stream().forEach(table -> {
+        int newPosition = orders.get(table.getIdTableSchema().toString());
+        if (newPosition != table.getOrder()) {
+          table.setOrder(newPosition);
+          schemasRepository.deleteTableSchemaById(table.getIdTableSchema().toString());
+          schemasRepository.insertTableSchema(table, schemaId);
+        }
+      });
+    } else {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
   }
 }
