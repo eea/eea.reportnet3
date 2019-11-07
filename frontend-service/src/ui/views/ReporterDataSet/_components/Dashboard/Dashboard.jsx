@@ -5,6 +5,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './Dashboard.module.css';
 
+import colors from 'conf/colors.json';
+
 import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
@@ -31,9 +33,9 @@ const Dashboard = withRouter(
 
     useEffect(() => {
       setDashboardColors({
-        CORRECT: '#004494',
-        WARNING: '#ffd617',
-        ERROR: '#DA2131'
+        CORRECT: colors.dashboardCorrect,
+        WARNING: colors.dashboardWarning,
+        ERROR: colors.dashboardError
       });
     }, []);
 
@@ -65,19 +67,19 @@ const Dashboard = withRouter(
         datasets: [
           {
             label: 'Correct',
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : '#004494',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.CORRECT : colors.dashboardCorrect,
             data: dataset.tableStatisticPercentages[0],
             totalData: tableStatisticValues
           },
           {
             label: 'Warning',
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : '#ffd617',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : colors.dashboardWarning,
             data: dataset.tableStatisticPercentages[1],
             totalData: tableStatisticValues
           },
           {
             label: 'Error',
-            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : '#DA2131',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : colors.dashboardError,
             data: dataset.tableStatisticPercentages[2],
             totalData: tableStatisticValues
           }
@@ -113,6 +115,8 @@ const Dashboard = withRouter(
                 labelString: 'Percentage'
               },
               ticks: {
+                min: 0,
+                max: 100,
                 callback: (value, index, values) => `${value} %`
               }
             }
@@ -145,7 +149,7 @@ const Dashboard = withRouter(
                           e.preventDefault();
                           onChangeColor(e.value, SEVERITY_CODE[type]);
                         }}
-                        value={!isUndefined(dashboardColors) ? dashboardColors[type] : '#004494'}
+                        value={!isUndefined(dashboardColors) ? dashboardColors[type] : colors.dashboardCorrect}
                       />
                     </div>
                   );
@@ -177,7 +181,7 @@ const Dashboard = withRouter(
       <React.Fragment>
         <h1>{dashboardTitle}</h1>
         {renderDashboard()}
-        {renderColorPicker()}
+        {/* {renderColorPicker()} */}
       </React.Fragment>
     );
   })

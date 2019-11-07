@@ -14,6 +14,18 @@ export const apiUser = {
     });
     return tokens.data;
   },
+  oldLogin: async (userName, password) => {
+    const tokens = await HTTPRequester.post({
+      url: window.env.REACT_APP_JSON
+        ? ''
+        : getUrl(UserConfig.oldLogin, {
+            userName,
+            password
+          }),
+      queryString: {}
+    });
+    return tokens.data;
+  },
   logout: async refreshToken => {
     const response = await HTTPRequester.post({
       url: window.env.REACT_APP_JSON

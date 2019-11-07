@@ -2,8 +2,6 @@ import { DataflowConfig } from 'conf/domain/model/DataFlow';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import dataCustodianDashboards from './response_GlobalStatsDataflow.json';
-import metadataJson from './metadata.json';
 
 export const apiDataflow = {
   accept: async dataflowId => {
@@ -67,8 +65,6 @@ export const apiDataflow = {
       }
     });
     return response.data;
-    // const hardcodedDashboardTest = dataCustodianDashboards;
-    // return hardcodedDashboardTest;
   },
   datasetsReleasedStatus: async dataflowId => {
     const tokens = userStorage.get();
@@ -105,6 +101,20 @@ export const apiDataflow = {
       }
     });
     return response.data;
+  },
+  newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.post({
+      url: getUrl(DataflowConfig.newEmptyDatasetSchema, {
+        dataflowId,
+        datasetSchemaName
+      }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.status;
   },
   reject: async dataflowId => {
     const tokens = userStorage.get();

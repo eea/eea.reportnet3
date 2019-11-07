@@ -8,7 +8,8 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 const parseDataflowDTO = dataflowDTO => {
   const dataflow = new Dataflow();
   dataflow.creationDate = dataflowDTO.creationDate;
-  dataflow.datasets = parseDatasetListDTO(dataflowDTO.datasets);
+  dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
+  dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
   dataflow.deadlineDate = dataflowDTO.deadlineDate;
   dataflow.description = dataflowDTO.description;
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
@@ -42,6 +43,7 @@ const parseDatasetDTO = datasetDTO => {
     datasetDTO.id,
     null,
     datasetDTO.dataSetName,
+    null,
     null,
     null,
     null,
@@ -223,6 +225,11 @@ const dataflowDetails = async dataflowId => {
   return dataflowDetails;
 };
 
+const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
+  const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
+  return newEmptyDatasetSchemaResponse;
+};
+
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
@@ -259,6 +266,7 @@ export const ApiDataflowRepository = {
   dataflowDetails,
   datasetsValidationStatistics,
   datasetsReleasedStatus,
+  newEmptyDatasetSchema,
   pending,
   reject,
   reporting

@@ -1,6 +1,7 @@
 .bigButton {
   border-radius: 10px;
   font-size: 2rem;
+  max-width: fit-content;
 }
 .bigButton > a {
   padding: 2.3rem 2.7rem;
@@ -23,8 +24,27 @@
   color: var(--white);
   background-color: var(--c-blue-400);
 }
+
+.designDatasetSchema {
+  background-color: var(--c-blue-green);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.designDatasetSchema a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.designDatasetSchema a:hover {
+  color: var(--white);
+  background-color: var(--c-aquamarine);
+}
+
 .documents {
-  background-color: #ffba01;
+  background-color: var(--c-orange-200);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -58,7 +78,7 @@
   z-index: 1000;
   padding: 0 0.8rem;
   color: var(--c-black-400);
-  border: 1px solid #c8c8c8;
+  border: 1px solid var(--c-custom-gray);
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   font-size: 0.9rem;
   opacity: 0;
@@ -108,12 +128,42 @@
   background-color: var(--c-purple-300);
   color: var(--white);
 }
+.newItem {
+  background-color: var(--c-blue-300);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--white);
+}
+.newItem a {
+  color: var(--white);
+  border-radius: 10px;
+}
+.newItem a:hover {
+  background-color: var(--c-blue-200);
+  color: var(--white);
+}
+
 .caption {
   text-align: center;
-  text-transform: capitalize;
-  margin: 0.5rem;
+  margin: 0.75rem 0.5rem;
+  word-wrap: break-word;
+  max-width: 100px;
+  box-sizing: content-box;
 }
 .datasetItem :global .p-button.p-button-icon-only .p-button-text {
   padding: 0px !important;
   height: 0px !important;
+}
+
+.inputText {
+  word-wrap: break-word;
+  max-width: fit-content;
+  margin: 0.25rem !important;
+}
+
+:global .svg-inline--fa {
+  min-width: 2rem;
 }

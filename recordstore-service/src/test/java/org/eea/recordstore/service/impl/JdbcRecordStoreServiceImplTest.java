@@ -1,5 +1,7 @@
 package org.eea.recordstore.service.impl;
 
+import static org.mockito.Mockito.times;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -11,6 +13,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -138,7 +141,6 @@ public class JdbcRecordStoreServiceImplTest {
 
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
-
     /*
      * Mockito.when( DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
      * Mockito.anyString())) .thenReturn(conexion);
@@ -176,7 +178,6 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
 
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L);
-
     Mockito.verify(kafkaSender, Mockito.times(2))
         .releaseDatasetKafkaEvent(Mockito.any(EventType.class), Mockito.anyLong());
   }
@@ -189,5 +190,21 @@ public class JdbcRecordStoreServiceImplTest {
 
   }
 
+  @After
+  public void afterTests() {
+    File file = new File("./nullsnapshot_1-dataset_1_table_DatasetValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1-dataset_1_table_FieldValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1-dataset_1_table_RecordValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1-dataset_1_table_TableValue.snap");
+    file.delete();
+  }
 
+  @Test
+  public void testDeleteDataset() throws SQLException, IOException {
+    jdbcRecordStoreService.deleteDataset("schema");
+    Mockito.verify(jdbcTemplate, times(1)).execute(Mockito.any(String.class));
+  }
 }

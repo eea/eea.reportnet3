@@ -32,7 +32,7 @@ public interface KeycloakConnectorService {
   /**
    * Gets groups by user.
    *
-   * @param userId the user id
+   * @param userId the user resourceId
    *
    * @return the groups by user
    */
@@ -73,17 +73,32 @@ public interface KeycloakConnectorService {
   /**
    * Gets group detail.
    *
-   * @param groupId the group id
+   * @param groupId the group resourceId
    *
    * @return the group detail
    */
   GroupInfo getGroupDetail(String groupId);
 
+
+  /**
+   * Create group detail.
+   *
+   * @param groupInfo the group info
+   */
+  void createGroupDetail(GroupInfo groupInfo);
+
+  /**
+   * Delete group detail.
+   *
+   * @param groupId the group id
+   */
+  void deleteGroupDetail(String groupId);
+
   /**
    * Add user to group.
    *
-   * @param userId the user id
-   * @param groupId the group id
+   * @param userId the user resourceId
+   * @param groupId the group resourceId
    */
   void addUserToGroup(String userId, String groupId);
 }

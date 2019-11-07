@@ -2,25 +2,29 @@ import React from 'react';
 import { InputText as PrimeInputText } from 'primereact/inputtext';
 
 export const InputText = ({
-  type,
-  value,
+  autoFocus,
+  className,
+  disabled = false,
   onBlur,
   onChange,
   onFocus,
-  onKeyDown,
   onInput,
-  className,
-  disabled = false
+  onKeyDown,
+  placeholder,
+  type,
+  value
 }) => {
   return (
     <PrimeInputText
+      autoFocus={autoFocus}
       className={className}
       disabled={disabled}
       onBlur={onBlur}
       onChange={onChange}
       onFocus={onFocus}
-      onKeyDown={onKeyDown}
       onInput={onInput}
+      onKeyDown={onKeyDown}
+      placeholder={placeholder}
       type={type}
       value={value}
     />

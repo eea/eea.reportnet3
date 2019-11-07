@@ -11,7 +11,7 @@
   z-index: 1000;
   padding: 0 0.8rem;
   color: var(--c-black-400);
-  border: 1px solid #c8c8c8;
+  border: 1px solid var(--c-custom-gray);
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   font-size: 0.9rem;
   opacity: 0;
@@ -28,7 +28,7 @@
   padding: 0.7rem 1rem 0.7rem 1rem;
 }
 .dropDownMenu ul .listItemEnabled:hover {
-  background: var(--grey-15);
+  background: var(--gray-15);
 }
 .dropDownMenu ul li a {
   color: var(--c-black-400);

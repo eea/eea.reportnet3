@@ -1,8 +1,10 @@
 import React, { useEffect, useContext, useReducer, useState, useRef } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 
 import styles from './GlobalValidationDashboard.module.css';
+
+import colors from 'conf/colors.json';
 
 import { Chart } from 'primereact/chart';
 import { ColorPicker } from 'ui/views/_components/ColorPicker';
@@ -15,9 +17,9 @@ import { filterReducer } from './_components/_context/filterReducer';
 import { DataflowService } from 'core/services/DataFlow';
 
 const SEVERITY_CODE = {
-  CORRECT: 'CORRECT',
-  WARNING: 'WARNING',
-  ERROR: 'ERROR'
+  CORRECT: colors.dashboardCorrect,
+  WARNING: colors.dashboardWarning,
+  ERROR: colors.dashboardError
 };
 
 const GlobalValidationDashboard = dataflowId => {
@@ -30,9 +32,9 @@ const GlobalValidationDashboard = dataflowId => {
     data: {}
   };
   const [dashboardColors, setDashboardColors] = useState({
-    CORRECT: '#99CC33',
-    WARNING: '#ffCC00',
-    ERROR: '#CC3300'
+    CORRECT: colors.dashboardCorrect,
+    WARNING: colors.dashboardWarning,
+    ERROR: colors.dashboardError
   });
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
   const [isLoading, setLoading] = useState(true);
@@ -73,7 +75,9 @@ const GlobalValidationDashboard = dataflowId => {
   const onLoadDashboard = async () => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(dataflowId.dataflowId);
-      setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
+      if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
+        setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
+      }
     } catch (error) {
       onErrorLoadingDashboard(error);
     } finally {
@@ -183,7 +187,7 @@ const GlobalValidationDashboard = dataflowId => {
           width="100%"
           height="30%"
         />
-        <fieldset className={styles.colorPickerWrap}>
+        {/* <fieldset className={styles.colorPickerWrap}>
           <legend>{resources.messages['chooseChartColor']}</legend>
           <div className={styles.fieldsetContent}>
             {Object.keys(SEVERITY_CODE).map((type, i) => {
@@ -194,7 +198,7 @@ const GlobalValidationDashboard = dataflowId => {
                     .toLowerCase()}: `}</span>
                   <ColorPicker
                     className={styles.colorPicker}
-                    key={type}
+                    //key={type}
                     value={!isUndefined(dashboardColors) ? dashboardColors[type] : ''}
                     onChange={e => {
                       e.preventDefault();
@@ -205,7 +209,7 @@ const GlobalValidationDashboard = dataflowId => {
               );
             })}
           </div>
-        </fieldset>
+        </fieldset> */}
       </div>
     );
   } else {

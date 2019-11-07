@@ -14,6 +14,7 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
@@ -29,18 +30,24 @@ import org.springframework.stereotype.Service;
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
-  /** The partition data set metabase repository. */
+  /**
+   * The partition data set metabase repository.
+   */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
   @Autowired
   private LockService lockService;
 
-  /** The snapshot repository. */
+  /**
+   * The snapshot repository.
+   */
   @Autowired
   private SnapshotRepository snapshotRepository;
 
-  /** The snapshot mapper. */
+  /**
+   * The snapshot mapper.
+   */
   @Autowired
   private SnapshotMapper snapshotMapper;
 
@@ -67,12 +74,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
-
   /**
    * Gets the snapshots by id dataset.
    *
    * @param datasetId the dataset id
+   *
    * @return the snapshots by id dataset
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -90,6 +98,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param description the description
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -116,8 +125,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
     criteria.add(idDataset);
-    lockService.removeLockByCriteria("DataSetSnapshotControllerImpl.createSnapshot(..)", criteria);
+    lockService.removeLockByCriteria(criteria);
 
     LOG.info("Snapshot {} data files created", snap.getId());
   }
@@ -127,6 +137,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws EEAException the EEA exception
    */
 
@@ -147,6 +158,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -164,8 +176,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Release the lock manually
     List<Object> criteria = new ArrayList<>();
+    criteria.add(LockSignature.RESTORE_SNAPSHOT.getValue());
     criteria.add(idDataset);
-    lockService.removeLockByCriteria("DataSetSnapshotControllerImpl.restoreSnapshot(..)", criteria);
+    lockService.removeLockByCriteria(criteria);
 
     LOG.info("Snapshot {} restored", idSnapshot);
 
@@ -177,6 +190,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -187,13 +201,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
 
-
   /**
    * Obtain partition.
    *
    * @param datasetId the dataset id
    * @param user the user
+   *
    * @return the partition data set metabase
+   *
    * @throws EEAException the EEA exception
    */
   private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)

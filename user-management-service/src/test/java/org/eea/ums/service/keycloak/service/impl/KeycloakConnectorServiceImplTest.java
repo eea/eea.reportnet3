@@ -326,4 +326,40 @@ public class KeycloakConnectorServiceImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void createGroupDetail() {
+    GroupInfo groupInfo = new GroupInfo();
+    ResponseEntity<Void> result = new ResponseEntity<>(
+        null,
+        HttpStatus.OK);
+
+    Mockito.when(restTemplate
+        .postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(result);
+
+    keycloakConnectorService.createGroupDetail(groupInfo);
+
+    Mockito.verify(restTemplate, Mockito.times(1)).postForEntity(Mockito.anyString(),
+        Mockito.any(HttpEntity.class), Mockito.any(Class.class));
+
+
+  }
+
+  @Test
+  public void deleteGroupDetail() {
+    ResponseEntity<Void> result = new ResponseEntity<>(
+        null,
+        HttpStatus.OK);
+
+    Mockito.when(restTemplate
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class))).thenReturn(result);
+
+    keycloakConnectorService.deleteGroupDetail("");
+
+    Mockito.verify(restTemplate, Mockito.times(1))
+        .exchange(Mockito.anyString(), Mockito.any(HttpMethod.class), Mockito.any(HttpEntity.class),
+            Mockito.any(Class.class));
+  }
 }

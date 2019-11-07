@@ -69,6 +69,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.enums.TypeErrorEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TableCollectionVO;
 import org.eea.multitenancy.DatasetId;
 import org.slf4j.Logger;
@@ -221,10 +222,11 @@ public class DatasetServiceImpl implements DatasetService {
   private RecordValidationMapper recordValidationMapper;
 
 
-  /** The statistics repository. */
+  /**
+   * The statistics repository.
+   */
   @Autowired
   private StatisticsRepository statisticsRepository;
-
 
 
   /**
@@ -234,7 +236,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   *
    * @return the data set VO
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -435,6 +439,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param pageable the pageable
    * @param fields the fields
+   * @param levelError the level error
    *
    * @return the table values by id
    *
@@ -443,12 +448,13 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public TableVO getTableValuesById(final Long datasetId, final String idTableSchema,
-      Pageable pageable, final String fields) throws EEAException {
+      Pageable pageable, final String fields, TypeErrorEnum[] levelError) throws EEAException {
     List<String> commonShortFields = new ArrayList<>();
     Map<String, Integer> mapFields = new HashMap<>();
     List<SortField> sortFieldsArray = new ArrayList<>();
     List<RecordValue> records = null;
-
+    SortField[] newFields = null;
+    TableVO result = new TableVO();
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
 
     // Check if we need to put all the records without pagination
@@ -459,47 +465,49 @@ public class DatasetServiceImpl implements DatasetService {
       pageable = PageRequest.of(0, 20);
     }
 
-    if (null == fields) {
+    if (null == fields && (null == levelError || levelError.length == 3)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
+      result.setRecords(recordVOs);
 
     } else {
 
-      String[] pairs = fields.split(",");
-      for (int i = 0; i < pairs.length; i++) {
-        String pair = pairs[i];
-        String[] keyValue = pair.split(":");
-        mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
-        commonShortFields.add(keyValue[0]);
+      if (null != fields) {
+
+        String[] pairs = fields.split(",");
+        for (int i = 0; i < pairs.length; i++) {
+          String pair = pairs[i];
+          String[] keyValue = pair.split(":");
+          mapFields.put(keyValue[0], Integer.valueOf(keyValue[1]));
+          commonShortFields.add(keyValue[0]);
+        }
+
+        for (String nameField : commonShortFields) {
+          FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
+          SortField sortField = new SortField();
+          sortField.setFieldName(nameField);
+          sortField.setAsc((intToBoolean(mapFields.get(nameField))));
+          sortField.setTypefield(typefield.getType());
+          sortFieldsArray.add(sortField);
+        }
+        newFields = sortFieldsArray.stream().toArray(SortField[]::new);
       }
 
-      for (String nameField : commonShortFields) {
-        FieldValue typefield = fieldRepository.findFirstTypeByIdFieldSchema(nameField);
-        SortField sortField = new SortField();
-        sortField.setFieldName(nameField);
-        sortField.setAsc((intToBoolean(mapFields.get(nameField))));
-        sortField.setTypefield(typefield.getType());
-        sortFieldsArray.add(sortField);
-      }
-      records = recordRepository.findByTableValueWithOrder(idTableSchema, pageable,
-          sortFieldsArray.stream().toArray(SortField[]::new));
+      result = recordRepository.findByTableValueWithOrder(idTableSchema, levelError, pageable,
+          newFields);
 
     }
-
-    if (records == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    TableVO result = new TableVO();
-    if (records.isEmpty()) {
+    // Table with out values
+    if (null == result.getRecords() || result.getRecords().isEmpty()) {
       result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
     } else {
 
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
-      result.setRecords(recordVOs);
       result.setTotalRecords(totalRecords);
+      List<RecordVO> recordVOs = result.getRecords();
 
       LOG.info(
           "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
@@ -516,7 +524,7 @@ public class DatasetServiceImpl implements DatasetService {
       recordVOs.stream().forEach(record -> {
         record.getFields().stream().forEach(field -> {
           List<FieldValidationVO> validations =
-              this.fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
+              fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
           field.setFieldValidations(validations);
           if (null != validations && !validations.isEmpty()) {
             field.setLevelError(
@@ -527,7 +535,7 @@ public class DatasetServiceImpl implements DatasetService {
         });
 
         List<RecordValidationVO> validations =
-            this.recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
+            recordValidationMapper.entityListToClass(recordValidations.get(record.getId()));
         record.setRecordValidations(validations);
         if (null != validations && !validations.isEmpty()) {
           record.setLevelError(
@@ -740,14 +748,7 @@ public class DatasetServiceImpl implements DatasetService {
       validationLink.setPosition(Long.valueOf(recordPosition));
       validationLink.setIdRecord(record.getId());
 
-      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
-          new ObjectId(record.getTableValue().getDatasetId().getIdDatasetSchema()));
-      for (TableSchema tableSchema : schema.getTableSchemas()) {
-        if (validationLink.getIdTableSchema().equals(tableSchema.getIdTableSchema().toString())) {
-          validationLink.setNameTableSchema(tableSchema.getNameTableSchema());
-          break;
-        }
-      }
+
     }
 
     LOG.info(
@@ -758,18 +759,17 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-
   /**
    * Process table stats.
    *
    * @param tableValue the table value
    * @param datasetId the dataset id
    * @param mapIdNameDatasetSchema the map id name dataset schema
+   *
    * @return the list
    */
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
-
 
     Set<Long> recordIdsFromRecordWithValidationError =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
@@ -799,7 +799,6 @@ public class DatasetServiceImpl implements DatasetService {
 
     Long totalRecordsWithErrors = Long.valueOf(idsErrors.size());
     Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
-
 
     TableStatisticsVO tableStats = new TableStatisticsVO();
     tableStats.setIdTableSchema(tableValue.getIdTableSchema());
@@ -853,7 +852,6 @@ public class DatasetServiceImpl implements DatasetService {
     stats.add(statsTotalRecordsWithWarnings);
     stats.add(statsTableErrors);
 
-
     return stats;
 
   }
@@ -865,6 +863,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idTableSchema the id table schema
    * @param statName the stat name
    * @param value the value
+   *
    * @return the statistics
    */
   private Statistics fillStat(String idTableSchema, String statName, String value) {
@@ -882,6 +881,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Save statistics.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -899,7 +899,6 @@ public class DatasetServiceImpl implements DatasetService {
 
       DataSetSchema schema =
           schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-
 
       Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
       for (TableSchema tableSchema : schema.getTableSchemas()) {
@@ -925,7 +924,6 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
 
-
       Statistics statsIdDatasetSchema =
           fillStat(null, "idDataSetSchema", dataset.getIdDatasetSchema());
       statsList.add(statsIdDatasetSchema);
@@ -938,8 +936,8 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(statsDatasetErrors);
 
       statisticsRepository.deleteAll();
+      statisticsRepository.flush();
       statisticsRepository.saveAll(statsList);
-
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
     } else {
@@ -953,7 +951,9 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the statistics.
    *
    * @param datasetId the dataset id
+   *
    * @return the statistics
+   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -972,7 +972,6 @@ public class DatasetServiceImpl implements DatasetService {
     List<Statistics> statisticsDataset = statistics.stream()
         .filter(s -> StringUtils.isBlank(s.getIdTableSchema())).collect(Collectors.toList());
 
-
     Map<String, List<Statistics>> tablesMap = statisticsTables.stream()
         .collect(Collectors.groupingBy(Statistics::getIdTableSchema, Collectors.toList()));
 
@@ -984,20 +983,16 @@ public class DatasetServiceImpl implements DatasetService {
     });
     stats = (StatisticsVO) instance;
 
-
     // Table statistics
     stats.setTables(new ArrayList<>());
     for (List<Statistics> listStats : tablesMap.values()) {
-      TableStatisticsVO tableVO = new TableStatisticsVO();
-      Class<?> clazzTable = tableVO.getClass();
+      Class<?> clazzTable = TableStatisticsVO.class;
       Object instanceTable = clazzTable.newInstance();
       listStats.stream().forEach(s -> {
         setEntityProperty(instanceTable, s.getStatName(), s.getValue());
       });
       stats.getTables().add((TableStatisticsVO) instanceTable);
     }
-
-
 
     // Check if there are empty tables
     DataSetSchema schema =
@@ -1030,6 +1025,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param object the object
    * @param fieldName the field name
    * @param fieldValue the field value
+   *
    * @return the boolean
    */
   public static Boolean setEntityProperty(Object object, String fieldName, String fieldValue) {
@@ -1056,7 +1052,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return false;
   }
-
 
 
   /**
@@ -1292,6 +1287,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   *
    * @return the long
    */
   @Override
@@ -1304,6 +1300,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idPartition the id partition
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1313,5 +1310,52 @@ public class DatasetServiceImpl implements DatasetService {
     recordRepository.deleteRecordValuesToRestoreSnapshot(idPartition);
   }
 
+  /**
+   * Save table propagation.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void saveTablePropagation(Long datasetId, TableSchemaVO tableSchema) throws EEAException {
+    TableValue table = new TableValue();
+    Optional<DatasetValue> dataset = datasetRepository.findById(datasetId);
+    if (dataset.isPresent()) {
+      table.setIdTableSchema(tableSchema.getIdTableSchema());
+      table.setDatasetId(dataset.get());
+      saveTable(datasetId, table);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+  }
 
+  /**
+   * Delete table value.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @Transactional
+  public void deleteTableValue(Long datasetId, String idTableSchema) {
+    tableRepository.deleteByIdTableSchema(idTableSchema);
+  }
+
+  /**
+   * Delete field values.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   *
+   * @return the datasetSchemaId
+   */
+  @Override
+  @Transactional
+  public String deleteFieldValues(Long datasetId, String fieldSchemaId) {
+    fieldRepository.deleteByFieldSchemaId(fieldSchemaId);
+    return datasetRepository.findIdDatasetSchemaById(datasetId);
+  }
 }

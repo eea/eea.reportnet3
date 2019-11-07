@@ -1,0 +1,53 @@
+.headersWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.scrollTab {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  text-overflow: unset;
+  scroll-behavior: smooth;
+}
+
+.iconHidden {
+  display: none !important;
+}
+.iconsWrapper {
+  display: flex;
+  position: relative;
+}
+
+.scrollTab {
+  scrollbar-color: var(--gray-75) var(--c-custom-gray);
+  scrollbar-width: thin;
+  cursor: pointer;
+}
+.scrollTab::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scrollTab::-webkit-scrollbar-track {
+  background: var(--c-custom-gray);
+}
+
+.scrollTab::-webkit-scrollbar-thumb {
+  background: var(--gray-50);
+}
+
+.scrollTab::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-75);
+}
+
+.navigationTabIcons {
+  color: var(--c-black-300);
+  cursor: pointer !important;
+  font-size: 1.75rem !important;
+  margin-top: 1.75px;
+}
+.navigationTabIcons:hover {
+  color: var(--black);
+}

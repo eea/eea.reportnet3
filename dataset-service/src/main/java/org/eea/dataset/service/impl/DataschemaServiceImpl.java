@@ -3,9 +3,12 @@ package org.eea.dataset.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
+import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
@@ -19,8 +22,19 @@ import org.eea.dataset.persistence.schemas.domain.rule.RuleRecord;
 import org.eea.dataset.persistence.schemas.domain.rule.RuleTable;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,17 +59,31 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private DataSetMetabaseTableRepository dataSetMetabaseTableCollection;
 
+  /** The resource management controller zull. */
+  @Autowired
+  private ResourceManagementControllerZull resourceManagementControllerZull;
+
+  /** The user management controller zull. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  /** The data flow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /**
    * The dataschema mapper.
    */
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
 
-  /**
-   * Mapper to map dataset schemas with no rules
-   */
+  /** Mapper to map dataset schemas with no rules. */
   @Autowired
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
+
+  /** The field schema no rules mapper. */
+  @Autowired
+  private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
   /**
    * The Constant LOG.
@@ -77,12 +105,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant GENERAL_ERROR.
    */
   private static final String GENERAL_ERROR = "ERROR";
-
-  /**
-   * The Constant STRING_WARNING.
-   */
-  private static final String STRING_WARNING =
-      "WARNING!, THIS TEXT IS LONGER THAN 30 CHARACTERES SHOULD BE MORE SHORT";
 
   /**
    * The Constant INTEGER_ERROR.
@@ -110,14 +132,85 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private static final String DATE_ERROR = "ERROR!, THIS IS NOT A DATE";
 
   /**
-   * The Constant WARNING.
-   */
-  private static final String WARNING = "WARNING";
-
-  /**
    * The Constant NULL.
    */
   private static final String NULL = "id == null";
+
+  /**
+   * Creates the empty data set schema.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
+   * @return the object id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public ObjectId createEmptyDataSetSchema(Long dataflowId, String datasetSchemaName)
+      throws EEAException {
+
+    if (dataFlowControllerZuul.findById(dataflowId) == null) {
+      throw new EEAException("DataFlow with id " + dataflowId + " not found");
+    }
+
+    DataSetSchema dataSetSchema = new DataSetSchema();
+    ObjectId idDataSetSchema = new ObjectId();
+
+    dataSetSchema.setNameDataSetSchema(datasetSchemaName);
+    dataSetSchema.setIdDataFlow(dataflowId);
+    dataSetSchema.setIdDataSetSchema(idDataSetSchema);
+    dataSetSchema.setRuleDataSet(new ArrayList<RuleDataSet>());
+    dataSetSchema.setTableSchemas(new ArrayList<TableSchema>());
+
+    schemasRepository.save(dataSetSchema);
+
+    return idDataSetSchema;
+  }
+
+  /**
+   * Creates the group and add user.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createGroupAndAddUser(Long datasetId) {
+
+    // Create group Dataschema-X-DATA_CUSTODIAN
+    resourceManagementControllerZull.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_CUSTODIAN));
+
+    // Create group Dataschema-X-DATA_PROVIDER
+    resourceManagementControllerZull.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_PROVIDER));
+
+    // Add user to new group Dataschema-X-DATA_CUSTODIAN
+    userManagementControllerZull.addContributorToResource(datasetId,
+        ResourceGroupEnum.DATASCHEMA_CUSTODIAN);
+  }
+
+
+  /**
+   * Creates the group.
+   *
+   * @param datasetId the dataset id
+   * @param type the type
+   * @param role the role
+   * @return the resource info VO
+   */
+  private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
+
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(datasetId);
+    resourceInfoVO.setResourceTypeEnum(type);
+    resourceInfoVO.setSecurityRoleEnum(role);
+
+    return resourceInfoVO;
+  }
+
+  /**
+   * The table mapper.
+   */
+  @Autowired
+  private TableSchemaMapper tableMapper;
 
   /**
    * Creates the data schema.
@@ -184,7 +277,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Create Records in the Schema
       List<RuleRecord> ruleRecordList = new ArrayList<>();
 
-      // }
       // Create fields in the Schema
       List<FieldSchema> fieldSchemas = new ArrayList<>();
       int headersSize = table.getTableHeadersCollections().size();
@@ -353,14 +445,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     return dataSchemaVO;
-
   }
 
   /**
    * Find the dataschema per idDataFlow.
    *
    * @param idFlow the idDataFlow to look for
-   *
+   * @param addRules the add rules
    * @return the data schema by id flow
    */
   @Override
@@ -368,9 +459,160 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
     LOG.info("Schema retrived by idFlow {}", idFlow);
-    return addRules ? dataSchemaMapper.entityToClass(dataschema)
+    return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
-
   }
 
+  /**
+   * Delete table schema.
+   *
+   * @param idTableSchema the id table schema
+   */
+  @Override
+  @Transactional
+  public void deleteTableSchema(String idTableSchema) {
+    schemasRepository.deleteTableSchemaById(idTableSchema);
+  }
+
+  /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   * @param schemaId the schema id
+   */
+  @Override
+  @Transactional
+  public void deleteDatasetSchema(Long datasetId, String schemaId) {
+    schemasRepository.deleteDatasetSchemaById(schemaId);
+  }
+
+
+  /**
+   * Update table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
+    DataSetSchema dataset = schemasRepository.findById(new ObjectId(id)).orElse(null);
+
+    if (dataset != null) {
+      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), dataset);
+      if (table != null) {
+        // set the attributtes of VO
+        table.setNameTableSchema(tableSchema.getNameTableSchema());
+        table.setIdDataSet(new ObjectId(id));
+        table.setIdTableSchema(new ObjectId(tableSchema.getIdTableSchema()));
+
+        schemasRepository.deleteTableSchemaById(tableSchema.getIdTableSchema());
+        schemasRepository.insertTableSchema(table, id);
+      } else {
+        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      }
+    } else {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+  }
+
+
+
+  /**
+   * Gets the table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param dataSetSchema the data set schema
+   * @return the table schema
+   */
+  private TableSchema getTableSchema(String idTableSchema, DataSetSchema dataSetSchema) {
+    // Find the Id of tableSchema in MongoDB
+    return dataSetSchema.getTableSchemas() == null ? null
+        : dataSetSchema.getTableSchemas().stream()
+            .filter(
+                tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(idTableSchema)))
+            .findAny().orElse(null);
+  }
+
+  /**
+   * Creates the table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
+    if (tableSchema.getIdTableSchema() == null) {
+      tableSchema.setIdTableSchema(new ObjectId().toString());
+    }
+    TableSchema table = tableMapper.classToEntity(tableSchema);
+    LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
+    schemasRepository.insertTableSchema(table, id);
+  }
+
+  /**
+   * Creates the field schema.
+   *
+   * @param idTableSchema the id table schema
+   * @param fieldSchemaVO the field schema VO
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchemaVO, Long datasetId)
+      throws EEAException {
+    // insert a new id for the field
+    fieldSchemaVO.setId(new ObjectId().toString());
+    DataSetSchema dataset = schemasRepository.findByIdTableSchema(idTableSchema);
+    if (dataset != null) {
+      // search for the table to insert the field
+      TableSchema table = getTableSchema(idTableSchema, dataset);
+      if (table != null) {
+        if (table.getRecordSchema() == null) {
+          // initialize the record as it's the first record we have in the table
+          RecordSchema recordSchema = new RecordSchema();
+          recordSchema.setIdTableSchema(new ObjectId(idTableSchema));
+          recordSchema.setIdRecordSchema(new ObjectId());
+          List<FieldSchema> fieldSchemas = new ArrayList<>();
+          fieldSchemaVO.setIdRecord(recordSchema.getIdRecordSchema().toString());
+          fieldSchemas.add(fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO));
+          recordSchema.setFieldSchema(fieldSchemas);
+          table.setRecordSchema(recordSchema);
+        } else {
+          // insert the field in the record
+          RecordSchema recordSchema = table.getRecordSchema();
+          fieldSchemaVO.setIdRecord(recordSchema.getIdRecordSchema().toString());
+          List<FieldSchema> fieldSchemas = table.getRecordSchema().getFieldSchema();
+          fieldSchemas.add(fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO));
+          table.getRecordSchema().setFieldSchema(fieldSchemas);
+        }
+        // delete old table document
+        schemasRepository.deleteTableSchemaById(idTableSchema);
+        // insert the new table document with the field
+        schemasRepository.insertTableSchema(table, dataset.getIdDataSetSchema().toString());
+      } else {
+        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      }
+    } else {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+  }
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return true, if 1 and only 1 fieldSchema has been removed
+   */
+  @Override
+  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
+    return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
+        .getModifiedCount() == 1;
+  }
 }

@@ -35,11 +35,20 @@ public enum ObjectAccessRoleEnum {
   /**
    * Dataset custodian object access role enum.
    */
-  DATASET_CUSTODIAN("ROLE_DATASET-%s-DATA_CUSTODIAN");
+  DATASET_CUSTODIAN("ROLE_DATASET-%s-DATA_CUSTODIAN"),
+
+  /** The dataschema custodian. */
+  DATASCHEMA_CUSTODIAN("ROLE_DATASCHEMA-%s-DATA_CUSTODIAN");
 
 
+  /** The expression. */
   private String expression;
 
+  /**
+   * Instantiates a new object access role enum.
+   *
+   * @param expression the expression
+   */
   private ObjectAccessRoleEnum(String expression) {
     this.expression = expression;
   }

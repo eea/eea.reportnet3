@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
-import moment from 'moment';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
 
@@ -15,23 +15,24 @@ import { Dashboard } from './_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Growl } from 'primereact/growl';
-import { InputSwitch } from 'primereact/inputswitch';
+import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
+import { Snapshots } from './_components/Snapshots/index';
+
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
-import { Title } from './_components/Title';
+import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
+import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
-import { SnapshotService } from 'core/services/Snapshot';
+
 import { UserContext } from 'ui/views/_components/_context/UserContext';
-import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
@@ -42,28 +43,30 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [activeIndex, setActiveIndex] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [dataflowName, setDataflowName] = useState('');
   const [datasetTitle, setDatasetTitle] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
+  const [dataViewerOptions, setDataViewerOptions] = useState({
+    recordPositionId: -1,
+    selectedRecordErrorId: -1,
+    activeIndex: null
+  });
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
-  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
+  const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
+  const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
-  const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
-  const [snapshotDialogVisible, setSnapshotDialogVisible] = useState(false);
-  const [snapshotIsVisible, setSnapshotIsVisible] = useState(false);
-  const [snapshotListData, setSnapshotListData] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [tableSchemaNames, setTableSchemaNames] = useState([]);
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
@@ -71,22 +74,12 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   let exportMenuRef = useRef();
 
+  let growlRef = useRef();
+
   const home = {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
   };
-
-  useEffect(() => {
-    if (!isUndefined(user.roles)) {
-      setHasWritePermissions(
-        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
-      );
-    }
-  }, [user]);
-
-  useEffect(() => {
-    onLoadDatasetSchema();
-  }, [isDataDeleted]);
 
   useEffect(() => {
     setBreadCrumbItems([
@@ -96,11 +89,32 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       },
       {
         label: resources.messages['dataflow'],
-        command: () => history.push(`/dataflow/${match.params.dataflowId}`)
+        command: () =>
+          history.push(
+            getUrl(
+              routes.DATAFLOW,
+              {
+                dataflowId: match.params.dataflowId
+              },
+              true
+            )
+          )
       },
       { label: resources.messages['dataset'] }
     ]);
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(user.contextRoles)) {
+      setHasWritePermissions(
+        UserService.hasPermission(user, [config.permissions.PROVIDER], `${config.permissions.DATASET}${datasetId}`)
+      );
+    }
+  }, [user]);
+
+  useEffect(() => {
+    onLoadDatasetSchema();
+  }, [isDataDeleted]);
 
   useEffect(() => {
     let exportOptions = config.exportTypes;
@@ -121,6 +135,42 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   }, [exportDatasetData]);
 
+  useEffect(() => {
+    try {
+      getDataflowName();
+    } catch (error) {
+      console.error(error.response);
+    }
+  }, []);
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
+
+  const createFileName = (fileName, fileType) => {
+    return `${fileName}.${fileType}`;
+  };
+
+  const checkIsWebFormMMR = datasetName => {
+    const mmrDatasetName = 'MMR_TEST';
+    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
+      setIsInputSwitchChecked(true);
+      setIsWebFormMMR(true);
+    } else {
+      setIsWebFormMMR(false);
+    }
+  };
+
+  const getPosition = button => {
+    const buttonTopPosition = button.top;
+    const buttonLeftPosition = button.left;
+
+    const exportDatasetMenu = document.getElementById('exportDataSetMenu');
+    exportDatasetMenu.style.top = buttonTopPosition;
+    exportDatasetMenu.style.left = buttonLeftPosition;
+  };
+
   const onConfirmDelete = async () => {
     setDeleteDialogVisible(false);
     const dataDeleted = await DatasetService.deleteDataById(datasetId);
@@ -132,22 +182,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onConfirmValidate = async () => {
     setValidateDialogVisible(false);
     await DatasetService.validateDataById(datasetId);
-  };
-
-  const onCreateSnapshot = async () => {
-    const snapshotCreated = await SnapshotService.createById(datasetId, snapshotState.description);
-    if (snapshotCreated) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
-  const onDeleteSnapshot = async () => {
-    const snapshotDeleted = await SnapshotService.deleteById(datasetId, snapshotState.snapShotId);
-    if (snapshotDeleted) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
   };
 
   const onExportData = async fileType => {
@@ -162,29 +196,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   };
 
-  const onReleaseSnapshot = async () => {
-    const snapshotReleased = await SnapshotService.releaseById(dataflowId, datasetId, snapshotState.snapShotId);
-    if (snapshotReleased) {
-      onLoadSnapshotList();
-    }
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
-  const onRestoreSnapshot = async () => {
-    const response = await SnapshotService.restoreById(dataflowId, datasetId, snapshotState.snapShotId);
-    if (response) {
-      snapshotDispatch({ type: 'mark_as_restored', payload: {} });
-      onGrowlAlert({
-        severity: 'info',
-        summary: resources.messages.snapshotItemRestoreProcessSummary,
-        detail: resources.messages.snapshotItemRestoreProcessDetail,
-        life: '5000'
-      });
-    }
-
-    onSetVisible(setSnapshotDialogVisible, false);
-  };
-
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(dataflowId);
@@ -192,8 +203,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
+      const tableSchemaNamesList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
+          tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
@@ -203,7 +216,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           };
         })
       );
-
+      setTableSchemaNames(tableSchemaNamesList);
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
@@ -225,22 +238,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     }
-
     setLoading(false);
-  };
-
-  const onLoadSnapshotList = async () => {
-    try {
-      setIsLoadingSnapshotListData(true);
-      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
-      setTimeout(async () => {
-        const snapshotsData = await SnapshotService.all(datasetId);
-        setSnapshotListData(snapshotsData);
-        setIsLoadingSnapshotListData(false);
-      }, 500);
-    } catch (error) {
-      setIsLoadingSnapshotListData(false);
-    }
   };
 
   const onSetVisible = (fnUseState, visible) => {
@@ -248,98 +246,41 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = tableSchemaId => {
-    setActiveIndex(tableSchemaId.index);
+    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
+    // setActiveIndex(tableSchemaId.index);
   };
 
-  const createFileName = (fileName, fileType) => {
-    return `${fileName}.${fileType}`;
-  };
-
-  const onGrowlAlert = message => {
-    growlRef.current.show(message);
-  };
-
-  let growlRef = useRef();
-
-  const snapshotInitialState = {
-    apiCall: '',
-    createdAt: '',
-    description: '',
-    dialogMessage: '',
-    dataflowId,
-    datasetId,
-    snapShotId: '',
-    action: () => {}
-  };
-
-  const snapshotReducer = (state, { type, payload }) => {
-    switch (type) {
-      case 'create_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: '',
-          creationDate: Date.now(),
-          description: payload.description,
-          dialogMessage: resources.messages.createSnapshotMessage,
-          action: onCreateSnapshot
-        };
-
-      case 'delete_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: payload.id,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogMessage: resources.messages.deleteSnapshotMessage,
-          action: onDeleteSnapshot
-        };
-
-      case 'release_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: payload.id,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogMessage: resources.messages.releaseSnapshotMessage,
-          action: onReleaseSnapshot
-        };
-      case 'restore_snapshot':
-        onSetVisible(setSnapshotDialogVisible, true);
-        return {
-          ...state,
-          snapShotId: payload.id,
-          creationDate: payload.creationDate,
-          description: payload.description,
-          dialogMessage: resources.messages.restoreSnapshotMessage,
-          action: onRestoreSnapshot
-        };
-      case 'mark_as_restored':
-        return {
-          ...state,
-          restored: state.snapShotId
-        };
-      case 'clear_restored':
-        return {
-          ...state,
-          restored: undefined
-        };
-      default:
-        return state;
+  const showWebFormInputSwitch = () => {
+    if (isWebFormMMR) {
+      return (
+        <div className={styles.InputSwitchContainer}>
+          <div className={styles.InputSwitchDiv}>
+            <span className={styles.InputSwitchText}>{resources.messages['grid']}</span>
+            {WebFormInputSwitch}
+            <span className={styles.InputSwitchText}>{resources.messages['webForm']}</span>
+          </div>
+        </div>
+      );
     }
   };
 
-  const [snapshotState, snapshotDispatch] = useReducer(snapshotReducer, snapshotInitialState);
-
-  const getPosition = button => {
-    const buttonTopPosition = button.top;
-    const buttonLeftPosition = button.left;
-
-    const exportDatasetMenu = document.getElementById('exportDataSetMenu');
-    exportDatasetMenu.style.top = buttonTopPosition;
-    exportDatasetMenu.style.left = buttonLeftPosition;
+  const isWebForm = () => {
+    if (isInputSwitchChecked) {
+      return <WebFormData datasetId={datasetId} tableSchemaId={tableSchemaId} />;
+    } else {
+      return (
+        <TabsSchema
+          activeIndex={dataViewerOptions.activeIndex}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          recordPositionId={dataViewerOptions.recordPositionId}
+          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+          isWebFormMMR={isWebFormMMR}
+          hasWritePermissions={hasWritePermissions}
+        />
+      );
+    }
   };
 
   const layout = children => {
@@ -362,62 +303,18 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     />
   );
 
-  const showWebFormInputSwitch = () => {
-    if (isWebFormMMR) {
-      return (
-        <div className={styles.InputSwitchContainer}>
-          <div className={styles.InputSwitchDiv}>
-            <span className={styles.InputSwitchText}>{resources.messages['grid']}</span>
-            {WebFormInputSwitch}
-            <span className={styles.InputSwitchText}>{resources.messages['webForm']}</span>
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const checkIsWebFormMMR = datasetName => {
-    const mmrDatasetName = 'MMR_TEST';
-    if (datasetName.toString().toLowerCase() === mmrDatasetName.toString().toLowerCase()) {
-      setIsInputSwitchChecked(true);
-      setIsWebFormMMR(true);
-    } else {
-      setIsWebFormMMR(false);
-    }
-  };
-
-  const isWebForm = () => {
-    if (isInputSwitchChecked) {
-      return <WebFormData datasetId={datasetId} tableSchemaId={tableSchemaId} />;
-    } else {
-      return (
-        <SnapshotContext.Provider
-          value={{
-            snapshotState: snapshotState,
-            snapshotDispatch: snapshotDispatch
-          }}>
-          <TabsSchema
-            activeIndex={activeIndex}
-            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-            recordPositionId={recordPositionId}
-            selectedRecordErrorId={selectedRecordErrorId}
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            isWebFormMMR={isWebFormMMR}
-            hasWritePermissions={hasWritePermissions}
-          />
-        </SnapshotContext.Provider>
-      );
-    }
-  };
-
   if (loading) {
     return layout(<Spinner />);
   }
 
   return layout(
-    <div>
-      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} />
+    <>
+      {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
+      <Title
+        title={`${resources.messages['dataflow']}: ${dataflowName} - 
+        ${resources.messages['titleDataset']}${datasetTitle}`}
+        icon="dataset"
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -484,26 +381,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
               disabled={!hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => {
-                onSetVisible(setSnapshotIsVisible, true);
-                onLoadSnapshotList();
-              }}
+              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
           </div>
         </Toolbar>
       </div>
-      <ReporterDatasetContext.Provider
-        value={{
-          validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
-          }
-        }}>
-        {showWebFormInputSwitch()}
-        {isWebForm()}
-      </ReporterDatasetContext.Provider>
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -514,27 +396,35 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       </Dialog>
       <ReporterDatasetContext.Provider
         value={{
+          isValidationSelected: isValidationSelected,
+          setIsValidationSelected: setIsValidationSelected,
           onValidationsVisible: () => {
             onSetVisible(setValidationsVisible, false);
           },
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
+            setDataViewerOptions({
+              recordPositionId: posIdRecord,
+              selectedRecordErrorId: selectedRecordErrorId,
+              activeIndex: tableSchemaId
+            });
           }
         }}>
+        {showWebFormInputSwitch()}
+        {isWebForm()}
         <Dialog
+          className={styles.paginatorValidationViewer}
           dismissableMask={true}
           header={resources.messages['titleValidations']}
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}
-          className={styles.paginatorValidationViewer}>
+          visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
+            datasetName={datasetTitle}
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
+            tableSchemaNames={tableSchemaNames}
           />
         </Dialog>
       </ReporterDatasetContext.Provider>
@@ -558,41 +448,13 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         visible={validateDialogVisible}>
         {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
-
-      <SnapshotContext.Provider
-        value={{
-          snapshotState: snapshotState,
-          snapshotDispatch: snapshotDispatch
-        }}>
-        <SnapshotSlideBar
-          isVisible={snapshotIsVisible}
-          isLoadingSnapshotListData={isLoadingSnapshotListData}
-          setIsVisible={setSnapshotIsVisible}
-          setSnapshotDialogVisible={setSnapshotDialogVisible}
-          snapshotListData={snapshotListData}
-        />
-        <ConfirmDialog
-          className={styles.snapshotDialog}
-          header={snapshotState.dialogMessage}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
-          maximizable={false}
-          onConfirm={snapshotState.action}
-          onHide={() => onSetVisible(setSnapshotDialogVisible, false)}
-          showHeader={false}
-          visible={snapshotDialogVisible}>
-          <ul>
-            <li>
-              <strong>{resources.messages.creationDate}: </strong>
-              {moment(snapshotState.creationDate).format('DD/MM/YYYY HH:mm:ss')}
-            </li>
-            <li>
-              <strong>{resources.messages.description}: </strong>
-              {snapshotState.description}
-            </li>
-          </ul>
-        </ConfirmDialog>
-      </SnapshotContext.Provider>
-    </div>
+      <Snapshots
+        datasetId={datasetId}
+        dataflowId={dataflowId}
+        growlRef={growlRef}
+        isSnapshotsBarVisible={isSnapshotsBarVisible}
+        setIsSnapshotsBarVisible={setIsSnapshotsBarVisible}
+      />
+    </>
   );
 });

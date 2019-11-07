@@ -1,0 +1,16 @@
+.crudColumn {
+  text-align: center;
+}
+.delete {
+  color: var(--errors);
+  cursor: pointer;
+}
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--c-corporate-blue);
+}
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}

@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -49,12 +48,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
-  private static final String FILE_PATTERN_NAME = "snapshot_%s-dataset_%s%s";
   /**
-   * The dataset controller zuul.
+   * The Constant FILE_PATTERN_NAME.
    */
-  @Autowired
-  private DataSetControllerZuul datasetControllerZuul;
+  private static final String FILE_PATTERN_NAME = "snapshot_%s-dataset_%s%s";
 
   /**
    * The kafka sender helper.
@@ -66,18 +63,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * The user postgre db.
    */
-  @Value("${userPostgre}")
+  @Value("${spring.datasource.username}")
   private String userPostgreDb;
   /**
    * The pass postgre db.
    */
-  @Value("${passwordPostgre}")
+  @Value("${spring.datasource.password}")
   private String passPostgreDb;
 
   /**
    * The conn string postgre.
    */
-  @Value("${connStringPostgree}")
+  @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
   /**
@@ -134,6 +131,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
+  @Async
   public void createEmptyDataSet(String datasetName, String idDatasetSchema)
       throws RecordStoreAccessException {
 
@@ -476,5 +474,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Files.deleteIfExists(path4);
   }
 
-
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
+  @Override
+  @Transactional
+  public void deleteDataset(String datasetSchemaName) {
+    StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA ");
+    stringBuilder.append(datasetSchemaName).append(" CASCADE");
+    jdbcTemplate.execute(stringBuilder.toString());
+  }
 }

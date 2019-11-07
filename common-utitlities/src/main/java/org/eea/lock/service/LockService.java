@@ -3,19 +3,54 @@ package org.eea.lock.service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import org.eea.interfaces.lock.enums.LockType;
-import org.eea.lock.model.Lock;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockType;
 
+/**
+ * The Interface LockService.
+ */
 public interface LockService {
 
-  public Lock createLock(Timestamp createDate, String createdBy, LockType lockType,
-      Map<Integer, Object> lockCriteria, String signature);
+  /**
+   * Creates the lock.
+   *
+   * @param createDate the create date
+   * @param createdBy the created by
+   * @param lockType the lock type
+   * @param lockCriteria the lock criteria
+   * @return the lock VO
+   */
+  public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
+      Map<String, Object> lockCriteria);
 
+  /**
+   * Removes the lock.
+   *
+   * @param lockId the lock id
+   * @return the boolean
+   */
   public Boolean removeLock(Integer lockId);
 
-  public Boolean removeLockByCriteria(String signature, List<Object> args);
+  /**
+   * Removes the lock by criteria.
+   *
+   * @param args the args
+   * @return the boolean
+   */
+  public Boolean removeLockByCriteria(List<Object> args);
 
-  public Lock findLock(Integer lockId);
+  /**
+   * Find lock.
+   *
+   * @param lockId the lock id
+   * @return the lock VO
+   */
+  public LockVO findLock(Integer lockId);
 
-  public List<Lock> findAll();
+  /**
+   * Find all.
+   *
+   * @return the list
+   */
+  public List<LockVO> findAll();
 }

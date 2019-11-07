@@ -14,12 +14,29 @@ import {
   faTrashAlt,
   faCaretDown,
   faChartBar,
-  faArchive
+  faPlus,
+  faArchive,
+  faBroom,
+  faPencilRuler,
+  faUserCircle,
+  faItalic,
+  faSquareRootAlt,
+  faPercentage,
+  faDiceSix,
+  faGlobeEurope,
+  faMapMarkedAlt,
+  faLink,
+  faVectorSquare,
+  faAt,
+  faPaperclip,
+  faAlignJustify,
+  faList
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
   faSquare as farSquareRegular,
-  faCheckSquare as faCheckSquareRegular
+  faCheckSquare as faCheckSquareRegular,
+  faCalendarAlt
 } from '@fortawesome/free-regular-svg-icons';
 
 export const AwesomeIcons = icon => {
@@ -118,12 +135,46 @@ export const AwesomeIcons = icon => {
       return faChartBar;
     case 'dataset':
       return faDatabase;
+    case 'plus':
+      return faPlus;
     case 'square':
       return farSquareRegular;
     case 'checkedSquare':
       return faCheckSquareRegular;
     case 'archive':
       return faArchive;
+    case 'broom':
+      return faBroom;
+    case 'pencilRuler':
+      return faPencilRuler;
+    case 'user-profile':
+      return faUserCircle;
+    case 'clip':
+      return faPaperclip;
+    case 'email':
+      return faAt;
+    case 'calendar':
+      return faCalendarAlt;
+    case 'formula':
+      return faSquareRootAlt;
+    case 'italic':
+      return faItalic;
+    case 'link':
+      return faLink;
+    case 'linkData':
+      return faVectorSquare;
+    case 'list':
+      return faList;
+    case 'map':
+      return faMapMarkedAlt;
+    case 'number':
+      return faDiceSix;
+    case 'percentage':
+      return faPercentage;
+    case 'text':
+      return faAlignJustify;
+    case 'url':
+      return faGlobeEurope;
     default:
       return faFileAlt;
   }

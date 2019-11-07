@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.ums.mapper.GroupInfoMapper;
 import org.eea.ums.service.SecurityProviderInterfaceService;
@@ -29,11 +32,15 @@ import org.springframework.stereotype.Service;
 public class KeycloakSecurityProviderInterfaceService implements SecurityProviderInterfaceService {
 
 
-  /** The keycloak connector service. */
+  /**
+   * The keycloak connector service.
+   */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
 
-  /** The group info mapper. */
+  /**
+   * The group info mapper.
+   */
   @Autowired
   private GroupInfoMapper groupInfoMapper;
 
@@ -43,15 +50,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @param username the username
    * @param password the password
    * @param extraParams the extra params
+   *
    * @return the token VO
    */
   @Override
   public TokenVO doLogin(String username, String password, Object... extraParams) {
     TokenInfo tokenInfo = keycloakConnectorService.generateToken(username, password);
-    TokenVO tokenVO = new TokenVO();
+    TokenVO tokenVO = null;
     if (null != tokenInfo) {
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO = mapTokenToVO(tokenInfo);
     }
     return tokenVO;
   }
@@ -60,15 +67,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Do login.
    *
    * @param code the code
+   *
    * @return the token VO
    */
   @Override
   public TokenVO doLogin(String code) {
     TokenInfo tokenInfo = keycloakConnectorService.generateToken(code);
-    TokenVO tokenVO = new TokenVO();
+    TokenVO tokenVO = null;
     if (null != tokenInfo) {
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO = mapTokenToVO(tokenInfo);
     }
     return tokenVO;
   }
@@ -77,16 +84,23 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Refresh token.
    *
    * @param refreshToken the refresh token
+   *
    * @return the token VO
    */
   @Override
   public TokenVO refreshToken(String refreshToken) {
     TokenInfo tokenInfo = keycloakConnectorService.refreshToken(refreshToken);
-    TokenVO tokenVO = new TokenVO();
+    TokenVO tokenVO = null;
     if (null != tokenInfo) {
-      tokenVO.setAccessToken(tokenInfo.getAccessToken());
-      tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
+      tokenVO = mapTokenToVO(tokenInfo);
     }
+    return tokenVO;
+  }
+
+  private TokenVO mapTokenToVO(TokenInfo tokenInfo) {
+    TokenVO tokenVO = new TokenVO();
+    tokenVO.setAccessToken(tokenInfo.getAccessToken());
+    tokenVO.setRefreshToken(tokenInfo.getRefreshToken());
     return tokenVO;
   }
 
@@ -104,10 +118,11 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * Gets the group detail.
    *
    * @param groupName the group name
+   *
    * @return the group detail
    */
   @Override
-  public ResourceInfoVO getGroupDetail(String groupName) {
+  public ResourceInfoVO getResourceDetails(String groupName) {
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     String groupId = "";
     ResourceInfoVO result = new ResourceInfoVO();
@@ -118,6 +133,14 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     }
     if (StringUtils.isNotBlank(groupId)) {
       result = this.groupInfoMapper.entityToClass(keycloakConnectorService.getGroupDetail(groupId));
+      //Group name has the format <ResourceType>-<idResource>-<userRole>, for instance Dataschema-1-DATA_REQUESTER
+      String[] splittedGroupName = groupName.split("-");
+      String resourceType = splittedGroupName[0];
+      String resourceId = splittedGroupName[1];
+      String role = splittedGroupName[2];
+      result.setResourceTypeEnum(ResourceTypeEnum.fromValue(resourceType));
+      result.setSecurityRoleEnum(SecurityRoleEnum.fromValue(role));
+      result.setResourceId(Long.valueOf(resourceId));
     }
     return result;
   }
@@ -127,6 +150,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    *
    * @param resource the resource
    * @param scopes the scopes
+   *
    * @return the boolean
    */
   @Override
@@ -137,7 +161,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Gets the users.
    *
-   * @param userId the user id
+   * @param userId the user resourceId
+   *
    * @return the users
    */
   @Override
@@ -148,28 +173,68 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Creates the resource instance.
    *
-   * @param userGroupName the user group name
-   * @param attributes the attributes
+   * @param resourceInfoVO the resource info vo
    */
   @Override
-  public void createResourceInstance(String userGroupName, Map<String, String> attributes) {
-    throw new UnsupportedOperationException("Method Not implemented yet");
+  public void createResourceInstance(ResourceInfoVO resourceInfoVO) {
+    GroupInfo groupInfo = new GroupInfo();
+    String groupName = ResourceGroupEnum
+        .fromResourceTypeAndSecurityRole(resourceInfoVO.getResourceTypeEnum(),
+            resourceInfoVO.getSecurityRoleEnum()).getGroupName(resourceInfoVO.getResourceId());
+    groupInfo.setName(groupName);
+    groupInfo.setPath("/" + groupName);
+    groupInfo.setAttributes(resourceInfoVO.getAttributes());
+    keycloakConnectorService.createGroupDetail(groupInfo);
+  }
+
+  @Override
+  public void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO) {
+    //Recover the resource names so they can be removed in the generic way.
+    List<String> resourceNames = resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(
+        Collectors.toList());
+    if (null != resourceNames && resourceNames.size() > 0) {
+      deleteResourceInstancesByName(resourceNames);
+
+    }
+  }
+
+  @Override
+  public void deleteResourceInstancesByName(List<String> resourceName) {
+    //Initialize the map of resouces along with empty string where later on the GroupId will be placed
+    Map<String, String> resources = resourceName.stream().collect(
+        Collectors.toMap(Function.identity(), x -> ""));
+    if (null != resources && resources.size() > 0) {
+      //Once recovered all the group names from input, get the group names from Keycloak to determine which ones must be removed
+      GroupInfo[] groups = keycloakConnectorService.getGroups();
+      if (null != groups && groups.length > 0) {
+        Arrays.asList(groups).stream()
+            .filter(groupInfo -> resources.containsKey(groupInfo.getName())).
+            forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
+        //Removing groups one by one
+        resources.values().stream()
+            .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
+      }
+
+    }
   }
 
 
   /**
    * Adds the user to user group.
    *
-   * @param userId the user id
+   * @param userId the user resourceId
    * @param groupName the group name
    */
   @Override
   public void addUserToUserGroup(String userId, String groupName) {
+    //Retrieve the groups available in keycloak. Keycloak does not support queries on groups
     GroupInfo[] groups = keycloakConnectorService.getGroups();
     if (null != groups && groups.length > 0) {
+      //Retrieve the group id of the group where the user will be added
       String groupId = Arrays.asList(groups).stream()
           .filter(groupInfo -> groupName.toUpperCase().equals(groupInfo.getName().toUpperCase()))
           .map(GroupInfo::getId).findFirst().orElse("");
+      //Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
       }
@@ -180,8 +245,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Removes the user from user group.
    *
-   * @param userId the user id
-   * @param groupId the group id
+   * @param userId the user resourceId
+   * @param groupId the group resourceId
    */
   @Override
   public void removeUserFromUserGroup(String userId, String groupId) {
@@ -191,7 +256,8 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Gets the resources by user.
    *
-   * @param userId the user id
+   * @param userId the user resourceId
+   *
    * @return the resources by user
    */
   @Override
@@ -205,7 +271,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
           String name = group.getName();
           String[] splittedName = name.split("-");
           ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
-          resourceAccessVO.setResource(ResourceEnum.fromValue(splittedName[0]));
+          resourceAccessVO.setResource(ResourceTypeEnum.fromValue(splittedName[0]));
           resourceAccessVO.setId(Long.valueOf(splittedName[1]));
           resourceAccessVO.setRole(SecurityRoleEnum.fromValue(splittedName[2]));
           result.add(resourceAccessVO);

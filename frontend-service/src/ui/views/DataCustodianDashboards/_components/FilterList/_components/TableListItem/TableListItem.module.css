@@ -1,7 +1,7 @@
 .listItem {
   display: flex;
-  color: #404040;
-  background-color: #ffffff;
+  color: var(--gray-110);
+  background-color: var(--white);
   padding: 5px;
   margin: 0;
   align-items: center;
@@ -37,7 +37,7 @@
   left: 0;
   width: 1rem;
   height: 1rem;
-  border: 2px solid var(--grey-50);
+  border: 2px solid var(--gray-50);
   z-index: 1;
   transition: all 0.3s ease-in-out;
 }

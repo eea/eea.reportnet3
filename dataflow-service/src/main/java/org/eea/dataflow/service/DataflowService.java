@@ -116,11 +116,11 @@ public interface DataflowService {
   /**
    * Gets the datasets id.
    *
-   * @param id the id
+   * @param idDataflow the id dataflow
    * @return the datasets id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getDatasetsId(Long id) throws EEAException;
+  DataFlowVO getReportingDatasetsId(Long idDataflow) throws EEAException;
 
 
   /**

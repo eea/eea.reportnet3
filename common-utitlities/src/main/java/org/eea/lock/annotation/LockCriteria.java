@@ -17,4 +17,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface LockCriteria {
 
+  /**
+   * Name.
+   *
+   * @return the string
+   */
+  public String name();
 }

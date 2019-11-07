@@ -80,7 +80,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
     <div onPaste={onPaste} ref={divRef}>
       <Dialog
         className={className}
-        focusOnShow={false}
+        focusOnShow={true}
         footer={footer}
         header={header}
         maximizable={maximizable}

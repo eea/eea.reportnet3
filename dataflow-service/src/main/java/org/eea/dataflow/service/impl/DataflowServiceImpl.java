@@ -2,7 +2,6 @@ package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataflowMapper;
@@ -23,8 +22,8 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
-import org.eea.interfaces.vo.ums.enums.ResourceEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +79,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+
   /**
    * The Constant LOG.
    */
@@ -105,12 +105,20 @@ public class DataflowServiceImpl implements DataflowService {
     Dataflow result = dataflowRepository.findById(id).orElse(null);
     // filter datasets showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
-        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATASET);
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
+    // add to the filter the design datasets (data schemas) too
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id).stream()
-        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    dataflowVO.setReportingDatasets(
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    // Add the design datasets
+    dataflowVO
+        .setDesignDatasets(datasetMetabaseController.findDesignDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
@@ -153,6 +161,7 @@ public class DataflowServiceImpl implements DataflowService {
       dfs.add(df.getDataflow());
     }
     List<DataFlowVO> dataflowVOs = dataflowNoContentMapper.entityListToClass(dfs);
+
     // Adding the user request type to the VO (pending/accepted/rejected)
     for (DataflowWithRequestType df : dataflows) {
       for (int i = 0; i < dataflowVOs.size(); i++) {
@@ -162,17 +171,17 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     }
+
     // Get user's dataflows
-    List<ResourceAccessVO> usersDataflows =
-        userManagementControllerZull.getResourcesByUser(ResourceEnum.DATAFLOW);
-    for (ResourceAccessVO userDataflow : usersDataflows) {
-      Optional<Dataflow> df = dataflowRepository.findById(userDataflow.getId());
-      if (df.isPresent()) {
-        DataFlowVO dfVO = dataflowNoContentMapper.entityToClass(df.get());
-        dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
-        dataflowVOs.add(dfVO);
-      }
-    }
+    dataflowRepository
+        .findAllById(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()))
+        .forEach(dataflow -> {
+          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+          dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
+          dataflowVOs.add(dataflowVO);
+        });
+
     return dataflowVOs;
   }
 
@@ -318,12 +327,14 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the datasets id.
    *
    * @param id the id
+   *
    * @return the datasets id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public DataFlowVO getDatasetsId(Long id) throws EEAException {
+  public DataFlowVO getReportingDatasetsId(Long id) throws EEAException {
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -331,8 +342,8 @@ public class DataflowServiceImpl implements DataflowService {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setId(id);
-    dataflowVO.setDatasets(datasetMetabaseController.findDataSetIdByDataflowId(id));
-
+    dataflowVO
+        .setReportingDatasets(datasetMetabaseController.findReportingDataSetIdByDataflowId(id));
 
     return dataflowVO;
   }
@@ -342,7 +353,9 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the metabase by id.
    *
    * @param id the id
+   *
    * @return the metabase by id
+   *
    * @throws EEAException the EEA exception
    */
   @Override

@@ -17,22 +17,22 @@ public interface SecurityProviderInterfaceService {
 
 
   /**
-   * Do login string.
+   * Do login token vo.
    *
    * @param username the username
    * @param password the password
    * @param extraParams the extra params
    *
-   * @return the string
+   * @return the token vo
    */
   TokenVO doLogin(String username, String password, Object... extraParams);
 
   /**
-   * Do login string based on cas code.
+   * Do login token vo.
    *
    * @param code the code
    *
-   * @return the string
+   * @return the token vo
    */
   TokenVO doLogin(String code);
 
@@ -46,7 +46,6 @@ public interface SecurityProviderInterfaceService {
    */
   Boolean checkAccessPermission(String resource, AccessScopeEnum... scopes);
 
-
   /**
    * Gets users.
    *
@@ -56,14 +55,27 @@ public interface SecurityProviderInterfaceService {
    */
   List<UserVO> getUsers(@Nullable String userId);
 
-
   /**
    * Create resource instance.
    *
-   * @param userGroupName the user group name
-   * @param attributes the attributes
+   * @param resourceInfoVO the resource info vo
    */
-  void createResourceInstance(String userGroupName, Map<String, String> attributes);
+  void createResourceInstance(ResourceInfoVO resourceInfoVO);
+
+  /**
+   * Delete resource instances.
+   *
+   * @param resourceInfoVO the resource info vo
+   */
+  void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO);
+
+  /**
+   * Delete resource instances by name.
+   *
+   * @param resourceName the resource name
+   */
+  void deleteResourceInstancesByName(List<String> resourceName);
+
 
   /**
    * Add user to user group.
@@ -90,6 +102,7 @@ public interface SecurityProviderInterfaceService {
    */
   List<ResourceAccessVO> getResourcesByUser(String userId);
 
+
   /**
    * Refresh token token vo.
    *
@@ -106,12 +119,13 @@ public interface SecurityProviderInterfaceService {
    */
   void doLogout(String refreshToken);
 
+
   /**
-   * Gets group detail.
+   * Gets resource details.
    *
    * @param groupId the group id
    *
-   * @return the group detail
+   * @return the resource details
    */
-  ResourceInfoVO getGroupDetail(String groupId);
+  ResourceInfoVO getResourceDetails(String groupId);
 }

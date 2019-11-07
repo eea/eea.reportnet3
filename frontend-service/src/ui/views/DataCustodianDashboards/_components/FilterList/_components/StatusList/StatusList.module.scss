@@ -18,7 +18,7 @@
     align-items: center;
     justify-content: flex-start;
     color: #676767;
-    background-color: #ffffff;
+    background-color: var(--white);
     padding: 4px;
     margin: 0.5rem;
     cursor: pointer;
@@ -59,7 +59,7 @@
   &[data-status='correct'],
   &[data-status='warning'],
   &[data-status='error'] {
-    border: 1px solid var(--grey-50);
+    border: 1px solid var(--gray-50);
   }
 
   &:not(:checked) {
