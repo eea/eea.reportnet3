@@ -23,7 +23,7 @@ public interface RecordExtendedQueriesRepository {
    * @param sortFields the sort fields
    * @return the list
    */
-  TableVO findByTableValueWithOrder(String idTableSchema, TypeErrorEnum[] levelError,
+  TableVO findByTableValueWithOrder(String idTableSchema, List<TypeErrorEnum> levelErrorList,
       Pageable pageable, SortField... sortFields);
 
 

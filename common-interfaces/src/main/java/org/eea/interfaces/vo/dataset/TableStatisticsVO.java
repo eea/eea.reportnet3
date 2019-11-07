@@ -12,6 +12,12 @@ import lombok.ToString;
  */
 @Setter
 @Getter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class TableStatisticsVO implements Serializable {
 
@@ -34,11 +40,17 @@ public class TableStatisticsVO implements Serializable {
   /** The total records. */
   private Long totalRecords;
 
+  /** The total records with blockers. */
+  private Long totalRecordsWithBlockers;
+
   /** The total records with errors. */
   private Long totalRecordsWithErrors;
 
   /** The total records with warnings. */
   private Long totalRecordsWithWarnings;
+
+  /** The total records with Infos. */
+  private Long totalRecordsWithInfos;
 
 
 

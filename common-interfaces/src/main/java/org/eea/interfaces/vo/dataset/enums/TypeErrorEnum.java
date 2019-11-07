@@ -14,8 +14,11 @@ public enum TypeErrorEnum {
   WARNING("WARNING"),
 
   /** The error. */
-  ERROR("ERROR");
+  ERROR("ERROR"),
 
+  INFO("INFO"),
+
+  BLOCKER("BLOCKER");
 
   /** The value. */
   private final String value;
