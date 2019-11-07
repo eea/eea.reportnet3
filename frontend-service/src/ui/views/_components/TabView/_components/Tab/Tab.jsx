@@ -18,7 +18,7 @@ export const Tab = ({
   checkEditingTabs,
   className,
   closeIcon,
-  editable = true,
+  editable = false,
   designMode = false,
   header,
   headerStyle,
@@ -201,7 +201,9 @@ export const Tab = ({
           // draggable={!addTab ? true : false}
           aria-controls={ariaControls}
           aria-selected={selected}
-          className={!addTab ? styles.p_tabview_design : null}
+          className={
+            editable ? styles.p_tabview_design : addTab ? styles.p_tabview_design_add : styles.p_tabview_noDesign
+          }
           // href={'#' + ariaControls}
           id={id}
           onMouseDownCapture={e => {
@@ -224,7 +226,7 @@ export const Tab = ({
           }}
           onClick={e => {
             onTabHeaderClick(e);
-            scrollTo(tabRef.current.offsetLeft - 20, 0);
+            scrollTo(tabRef.current.offsetLeft - 80, 0);
             // console.log(tabRef);
             // console.log(
             //   tabRef.current.clientWidth,

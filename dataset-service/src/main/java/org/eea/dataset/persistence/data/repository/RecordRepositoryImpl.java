@@ -26,14 +26,15 @@ import org.springframework.data.domain.Pageable;
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
 
-
   /**
    * The record no validation.
    */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
   /**
    * The entity manager.
@@ -46,10 +47,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   private static final String DEFAULT_STRING_SORT_CRITERIA = "' '";
 
-  /** The Constant DEFAULT_NUMERIC_SORT_CRITERIA. */
+  /**
+   * The Constant DEFAULT_NUMERIC_SORT_CRITERIA.
+   */
   private static final String DEFAULT_NUMERIC_SORT_CRITERIA = "0";
 
-  /** The Constant DEFAULT_DATE_SORT_CRITERIA. */
+  /**
+   * The Constant DEFAULT_DATE_SORT_CRITERIA.
+   */
   private static final String DEFAULT_DATE_SORT_CRITERIA = "cast('01/01/1970' as java.sql.Date)";
 
   /**
@@ -59,21 +64,27 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "COALESCE(( select distinct fv.value from FieldValue fv where fv.record.id=rv.id and fv.idFieldSchema ='%s' ), "
           + DEFAULT_STRING_SORT_CRITERIA + ") as order_criteria_%s";
 
-  /** The Constant SORT_NUMERIC_QUERY. */
+  /**
+   * The Constant SORT_NUMERIC_QUERY.
+   */
   private final static String SORT_NUMERIC_QUERY =
       "COALESCE((select distinct case when is_numeric(fv.value) = true "
           + "then CAST(fv.value as java.math.BigDecimal) when is_numeric( fv.value)=false "
           + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
-  /** The Constant SORT_COORDINATE_QUERY. */
+  /**
+   * The Constant SORT_COORDINATE_QUERY.
+   */
   private final static String SORT_COORDINATE_QUERY =
       "COALESCE((select distinct case when is_double(fv.value) = true "
           + "then CAST(fv.value as java.lang.Double) when is_double( fv.value)=false "
           + "then 0 end from FieldValue fv where fv.record.id = rv.id and fv.idFieldSchema = '%s'),"
           + DEFAULT_NUMERIC_SORT_CRITERIA + ") as order_criteria_%s ";
 
-  /** The Constant SORT_DATE_QUERY. */
+  /**
+   * The Constant SORT_DATE_QUERY.
+   */
   private final static String SORT_DATE_QUERY =
       "COALESCE((select distinct case when is_date(fv.value) = true "
           + "then CAST(fv.value as java.sql.Date) " + "when is_date( fv.value)=false "
@@ -81,14 +92,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "where fv.record.id = rv.id and fv.idFieldSchema = '%s')," + DEFAULT_DATE_SORT_CRITERIA
           + ") as order_criteria_%s ";
 
-  /** The Constant CORRECT_APPEND_QUERY. */
+  /**
+   * The Constant CORRECT_APPEND_QUERY.
+   */
   private final static String CORRECT_APPEND_QUERY =
       "AND not EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id) "
           + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where rv.id = fvval.fieldValue.record.id) ";
 
-  /** The Constant WARNING_ERROR_CORRECT_APPEND_QUERY. */
+  /**
+   * The Constant WARNING_ERROR_CORRECT_APPEND_QUERY.
+   */
   private final static String WARNING_ERROR_CORRECT_APPEND_QUERY =
       "AND ((EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
@@ -100,7 +115,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "AND not EXISTS (SELECT fvval FROM FieldValidation fvval "
           + "where rv.id = fvval.fieldValue.record.id))) ";
 
-  /** The Constant WARNING_ERROR_APPEND_QUERY. */
+  /**
+   * The Constant WARNING_ERROR_APPEND_QUERY.
+   */
   private final static String WARNING_ERROR_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
@@ -115,19 +132,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "SELECT rv %s from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
-  /** The Constant MASTER_QUERY_NO_ORDER. */
+  /**
+   * The Constant MASTER_QUERY_NO_ORDER.
+   */
   private final static String MASTER_QUERY_NO_ORDER =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
-  /** The Constant MASTER_QUERY_COUNT. */
+  /**
+   * The Constant MASTER_QUERY_COUNT.
+   */
   private final static String MASTER_QUERY_COUNT =
       "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv "
           + "WHERE tv.idTableSchema = :idTableSchema ";
 
 
-
-  /** The Constant FINAL_MASTER_QUERY. */
+  /**
+   * The Constant FINAL_MASTER_QUERY.
+   */
   private final static String FINAL_MASTER_QUERY = " order by %s";
 
   /**
@@ -138,7 +160,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           + "WHERE tv.idTableSchema = :idTableSchema";
 
 
-
   /**
    * Find by table value with order.
    *
@@ -146,9 +167,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param levelError the level error
    * @param pageable the pageable
    * @param sortFields the sort fields
+   *
    * @return the list
    */
-  @SuppressWarnings("unchecked")
   @Override
   public TableVO findByTableValueWithOrder(String idTableSchema, TypeErrorEnum[] levelError,
       Pageable pageable, SortField... sortFields) {
@@ -201,8 +222,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     String filter = "";
     Boolean containsCorrect = false;
-    List<TypeErrorEnum> lvl = new ArrayList<TypeErrorEnum>();
-    List<TypeErrorEnum> errorList = new ArrayList<TypeErrorEnum>();
+    List<TypeErrorEnum> lvl = new ArrayList<>();
+    List<TypeErrorEnum> errorList = new ArrayList<>();
     // Filter Query by level Error (ERROR,WARNING,CORRECT)
     if (null != levelError) {
       LOG.info("Init Error Filter");
@@ -301,16 +322,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
 
-
   /**
    * Find by table value no order. Allows null pageable and in that case all de records will be
    * retrieved
    *
    * @param idTableSchema the id table schema
    * @param pageable the pageable
+   *
    * @return the list
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable) {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
@@ -319,7 +339,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return sanitizeRecords(query.getResultList());
+    return query.getResultList();
   }
 
 
@@ -343,6 +363,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Sanitize records.
    *
    * @param records the records
+   *
    * @return the list
    */
   private List<RecordValue> sanitizeRecords(List<RecordValue> records) {

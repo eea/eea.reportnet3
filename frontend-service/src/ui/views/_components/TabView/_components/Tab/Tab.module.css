@@ -2,6 +2,14 @@ a.p_tabview_design {
   padding: 0.571rem 2rem 0.571rem 0.5rem !important;
 }
 
+a.p_tabview_noDesign {
+  padding: 0.571rem 0.5rem 0.571rem 0.5rem !important;
+}
+
+a.p_tabview_design_add {
+  padding: 0.571rem 1.3rem;
+}
+
 input.p_tabview_input_design {
   min-width: 140px;
   height: 21px;
