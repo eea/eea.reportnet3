@@ -64,6 +64,7 @@ const DataViewer = withRouter(
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
     const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
+    // const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -135,9 +136,11 @@ const DataViewer = withRouter(
       setVisibilityDropdownFilter(dropdownFilter);
 
       setValidationDropdownFilter([
+        { label: resources.messages['blocker'], key: 'BLOCKER' },
         { label: resources.messages['error'], key: 'ERROR' },
         { label: resources.messages['warning'], key: 'WARNING' },
-        { label: resources.messages['correct'], key: 'CORRECT' }
+        { label: resources.messages['correct'], key: 'CORRECT' },
+        { label: resources.messages['info'], key: 'INFO' }
       ]);
 
       const inmTableSchemaColumns = [...tableSchemaColumns];

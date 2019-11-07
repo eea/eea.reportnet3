@@ -18,7 +18,15 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { DatasetService } from 'core/services/DataSet';
 
 const ValidationViewer = React.memo(
-  ({ visible, datasetId, datasetName, buttonsList = undefined, hasWritePermissions, tableSchemaNames }) => {
+  ({
+    visible,
+    datasetId,
+    datasetName,
+    buttonsList = undefined,
+    hasWritePermissions,
+    tableSchemaNames,
+    levelErrorFilters
+  }) => {
     const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
     const [allLevelErrorsFilter, setAllLevelErrorsFilter] = useState([]);
@@ -125,7 +133,17 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadLevelErrorsFilter = () => {
-      const allLevelErrorsFilterList = [{ label: 'Error', key: 'Error_Id' }, { label: 'Warning', key: 'Warning_Id' }];
+      // const allLevelErrorsFilterList = [];
+      // levelErrorFilters.map(filter => {
+      //   allLevelErrorsFilterList.push({ label: filter.toString(), key: `${filter.toString()}_Id` });
+      // });
+
+      const allLevelErrorsFilterList = [
+        { label: 'Blocker', key: 'Blocker_Id' },
+        { label: 'Error', key: 'Error_Id' },
+        { label: 'Warning', key: 'Warning_Id' },
+        { label: 'Info', key: 'Info_Id' }
+      ];
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
     };
 
