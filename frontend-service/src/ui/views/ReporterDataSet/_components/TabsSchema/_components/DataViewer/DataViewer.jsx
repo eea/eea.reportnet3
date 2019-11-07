@@ -851,7 +851,13 @@ const DataViewer = withRouter(
       let levelError = '';
       let lvlFlag = 0;
       validations.forEach(validation => {
-        if (validation.levelError === 'WARNING') {
+        if (validation.levelError === 'INFO') {
+          const xNum = 1;
+          if (xNum > lvlFlag) {
+            lvlFlag = xNum;
+            levelError = 'INFO';
+          }
+        } else if (validation.levelError === 'WARNING') {
           const wNum = 1;
           if (wNum > lvlFlag) {
             lvlFlag = wNum;
@@ -997,30 +1003,64 @@ const DataViewer = withRouter(
 
       let messageErrors = '';
       let messageWarnings = '';
+
       let hasFieldErrors = false;
+
       const recordsWithFieldValidations = recordData.dataRow.filter(
         row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
       );
+
       hasFieldErrors = recordsWithFieldValidations.length > 0;
 
       const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
 
       if (hasFieldErrors) {
+        const filteredFieldValidationsWithBlocker = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'BLOCKER'
+        );
+
         const filteredFieldValidationsWithError = filteredFieldValidations.filter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'ERROR'
         );
+
+        const filteredFieldValidationsWithWarning = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'WARNING'
+        );
+
+        const filteredFieldValidationsWithInfo = filteredFieldValidations.filter(
+          filteredFieldValidation => filteredFieldValidation.levelError === 'INFO'
+        );
+
         //There are warnings in fields
-        if (filteredFieldValidations.length - filteredFieldValidationsWithError.length > 0) {
+        // if (filteredFieldValidations.length - filteredFieldValidationsWithError.length > 0) {
+        //   validations.push(
+        //     DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
+        //   );
+        // }
+
+        if (filteredFieldValidationsWithBlocker.length > 0) {
+          validations.push(DatasetService.createValidation('RECORD', 0, 'BLOCKER', resources.messages['recordErrors']));
+        }
+
+        if (filteredFieldValidationsWithError.length > 0) {
+          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+        }
+
+        if (filteredFieldValidationsWithWarning.length > 0) {
           validations.push(
             DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
           );
         }
-        if (filteredFieldValidationsWithError.length > 0) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+
+        if (filteredFieldValidationsWithInfo.length > 0) {
+          validations.push(DatasetService.createValidation('RECORD', 0, 'INFO', resources.messages['recordErrors']));
         }
       }
+
+      const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
       const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
       const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
+      const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
 
       errorValidations.forEach(validation =>
         validation.message
@@ -1034,10 +1074,15 @@ const DataViewer = withRouter(
           : ''
       );
 
-      return errorValidations.length > 0 && warningValidations.length > 0 ? (
+      return blockerValidations.length > 0 &&
+        errorValidations.length > 0 &&
+        warningValidations.length > 0 &&
+        infoValidations.length > 0 ? (
         <div className={styles.iconTooltipWrapper}>
+          <IconTooltip levelError="INFO" message={messageWarnings} style={{ width: '1.5em' }} />
           <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
           <IconTooltip levelError="ERROR" message={messageErrors} style={{ width: '1.5em' }} />
+          <IconTooltip levelError="BLOCKER" message={messageErrors} style={{ width: '1.5em' }} />
         </div>
       ) : errorValidations.length > 0 ? (
         <IconTooltip levelError="ERROR" message={messageErrors} />

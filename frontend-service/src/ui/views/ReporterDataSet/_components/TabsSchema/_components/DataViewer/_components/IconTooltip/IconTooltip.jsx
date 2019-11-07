@@ -14,6 +14,10 @@ export const IconTooltip = ({ levelError, message, style }) => {
   };
 
   switch (levelError) {
+    case 'INFO':
+      buttonProps.icon = 'warning';
+      buttonProps.className = `${styles.buttonCustom} ${styles.info}`;
+      break;
     case 'WARNING':
       buttonProps.icon = 'warning';
       buttonProps.className = `${styles.buttonCustom} ${styles.warning}`;

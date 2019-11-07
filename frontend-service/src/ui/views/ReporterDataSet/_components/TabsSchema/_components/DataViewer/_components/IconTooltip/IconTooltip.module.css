@@ -42,6 +42,12 @@ td > .tooltip > span.tooltiptext {
   justify-self: flex-end !important;
 }
 
+.buttonCustom.info {
+  color: var(--blue);
+}
+.buttonCustom.info:hover {
+  color: var(--blue) !important;
+}
 .buttonCustom.warning {
   color: var(--c-orange-300);
 }
