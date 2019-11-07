@@ -29,6 +29,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
+import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
 
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -42,11 +43,16 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   } = match;
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [activeIndex, setActiveIndex] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [dataflowName, setDataflowName] = useState('');
   const [datasetTitle, setDatasetTitle] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
+  const [dataViewerOptions, setDataViewerOptions] = useState({
+    recordPositionId: -1,
+    selectedRecordErrorId: -1,
+    activeIndex: null
+  });
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
@@ -58,8 +64,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
-  const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -130,6 +134,19 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       DownloadFile(exportDatasetData, exportDatasetDataName);
     }
   }, [exportDatasetData]);
+
+  useEffect(() => {
+    try {
+      getDataflowName();
+    } catch (error) {
+      console.error(error.response);
+    }
+  }, []);
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
 
   const createFileName = (fileName, fileType) => {
     return `${fileName}.${fileType}`;
@@ -229,7 +246,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = tableSchemaId => {
-    setActiveIndex(tableSchemaId.index);
+    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
+    // setActiveIndex(tableSchemaId.index);
   };
 
   const showWebFormInputSwitch = () => {
@@ -252,10 +270,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     } else {
       return (
         <TabsSchema
-          activeIndex={activeIndex}
+          activeIndex={dataViewerOptions.activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={recordPositionId}
-          selectedRecordErrorId={selectedRecordErrorId}
+          recordPositionId={dataViewerOptions.recordPositionId}
+          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
           isWebFormMMR={isWebFormMMR}
@@ -291,7 +309,12 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   return layout(
     <>
-      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="dataset" />
+      {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
+      <Title
+        title={`${resources.messages['dataflow']}: ${dataflowName} - 
+        ${resources.messages['titleDataset']}${datasetTitle}`}
+        icon="dataset"
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -363,20 +386,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <ReporterDatasetContext.Provider
-        value={{
-          isValidationSelected: isValidationSelected,
-          setIsValidationSelected: setIsValidationSelected,
-          validationsVisibleHandler: null,
-          onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
-          }
-        }}>
-        {showWebFormInputSwitch()}
-        {isWebForm()}
-      </ReporterDatasetContext.Provider>
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -393,19 +402,23 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             onSetVisible(setValidationsVisible, false);
           },
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
+            setDataViewerOptions({
+              recordPositionId: posIdRecord,
+              selectedRecordErrorId: selectedRecordErrorId,
+              activeIndex: tableSchemaId
+            });
           }
         }}>
+        {showWebFormInputSwitch()}
+        {isWebForm()}
         <Dialog
+          className={styles.paginatorValidationViewer}
           dismissableMask={true}
           header={resources.messages['titleValidations']}
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}
-          className={styles.paginatorValidationViewer}>
+          visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
             datasetName={datasetTitle}

@@ -102,6 +102,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @RequestMapping(value = "/resources", method = RequestMethod.GET)
   public List<ResourceAccessVO> getResourcesByUser() {
+    //Recover user id from Security context
     Map<String, String> details =
         (Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails();
     String userId = "";
@@ -199,7 +200,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @RequestMapping(value = "/test-security", method = RequestMethod.GET)
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTOR','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_REQUESTER','DATAFLOW_PROVIDER') AND checkPermission('Dataflow','READ')")
   public String testSecuredService(@RequestParam("dataflowId") Long dataflowId) {
     return "OLEEEEE";
   }

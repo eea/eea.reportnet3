@@ -43,7 +43,12 @@ public interface ResourceManagementController {
   void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO);
 
 
-  @RequestMapping(value = "/delete/", method = RequestMethod.DELETE)
+  /**
+   * Delete resource by name.
+   *
+   * @param resourceNames the resource names
+   */
+  @RequestMapping(value = "/delete_by_name", method = RequestMethod.DELETE)
   @ResponseStatus(HttpStatus.OK)
   void deleteResourceByName(@RequestParam("resourceNames") List<String> resourceNames);
 

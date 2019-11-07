@@ -74,7 +74,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchemaName = async () => {
     const dataset = await DatasetService.getMetaData(datasetId);
-    setDatasetSchemaName(`${dataset.datasetSchemaName.charAt(0).toUpperCase()}${dataset.datasetSchemaName.slice(1)}`);
+    setDatasetSchemaName(dataset.datasetSchemaName);
   };
 
   const layout = children => {
@@ -131,7 +131,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner />
+      <TabsDesigner editable={true} />
     </>
   );
 });

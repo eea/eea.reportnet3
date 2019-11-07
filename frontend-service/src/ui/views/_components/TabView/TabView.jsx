@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import UniqueComponentId from 'ui/UniqueComponentId';
 
+import { config } from 'conf';
+
 import styles from './TabView.module.css';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -16,6 +18,7 @@ export const TabView = ({
   checkEditingTabs,
   children,
   className = null,
+  designMode,
   id = null,
   isErrorDialogVisible,
   onTabAdd,
@@ -41,10 +44,9 @@ export const TabView = ({
   const resources = useContext(ResourcesContext);
 
   const classNamed = classNames('p-tabview p-component p-tabview-top', className);
-
   useEffect(() => {
     setTimeout(() => {
-      if (ulTabsRef.current.clientWidth >= divTabsRef.current.clientWidth) {
+      if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
         setIsNavigationHidden(false);
       }
     }, 100);
@@ -125,6 +127,7 @@ export const TabView = ({
         children={tab.props.children}
         className={className}
         editable={tab.props.editable}
+        designMode={designMode}
         header={tab.props.header}
         headerStyle={tab.props.headerStyle}
         id={id}
@@ -138,14 +141,16 @@ export const TabView = ({
         onTabDragAndDrop={onTabDragAndDrop}
         onTabHeaderClick={event => {
           onTabHeaderClick(event, tab, index);
-          onTabEditingHeader(false);
+          if (!isUndefined(onTabEditingHeader)) {
+            onTabEditingHeader(false);
+          }
         }}
         onTabEditingHeader={onTabEditingHeader}
         onTabMouseWheel={onTabMouseWheel}
         onTabNameError={onTabNameError}
         rightIcon={tab.props.rightIcon}
-        selected={selected}
         scrollTo={scrollTo}
+        selected={selected}
       />
     );
   };
@@ -159,41 +164,38 @@ export const TabView = ({
   const renderNavigator = () => {
     const headers = renderTabHeaders();
     return (
-      <div className={styles.scrollTab} ref={divTabsRef}>
+      <div className={styles.headersWrapper}>
         <Icon
-          className={`${styles.stepInitIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'stepBackward'}
           onClick={() => {
             scrollTo(0, 0);
           }}
         />
         <Icon
-          className={`${styles.stepBackwardIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'caretLeft'}
           onClick={e => {
             scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
-        <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
-          {headers}
-        </ul>
+        <div className={styles.scrollTab} ref={divTabsRef}>
+          {/* <div className={styles.iconsWrapper}> */}
+
+          {/* </div> */}
+          <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
+            {headers}
+          </ul>
+        </div>
         <Icon
-          className={`${styles.stepForwardIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'caretRight'}
           onClick={() => {
             scrollTo(divTabsRef.current.scrollLeft + divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
         <Icon
-          className={`${styles.stepEndIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'stepForward'}
           onClick={() => {
             scrollTo(ulTabsRef.current.clientWidth + 100, 0);
@@ -233,7 +235,7 @@ export const TabView = ({
     divTabsRef.current.scrollTo(xCoordinate, yCoordinate);
     //Await for scroll
     setTimeout(() => {
-      if (ulTabsRef.current.clientWidth >= divTabsRef.current.clientWidth) {
+      if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
         if (isNavigationHidden) {
           setIsNavigationHidden(false);
         }
