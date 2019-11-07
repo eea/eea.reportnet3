@@ -2,9 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
@@ -606,7 +604,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchemaVO, Long datasetId)
+  public void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
     // insert a new id for the field
     fieldSchemaVO.setId(new ObjectId().toString());
@@ -622,6 +620,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           recordSchema.setIdRecordSchema(new ObjectId());
           List<FieldSchema> fieldSchemas = new ArrayList<>();
           fieldSchemaVO.setIdRecord(recordSchema.getIdRecordSchema().toString());
+          fieldSchemaVO.setId(new ObjectId().toString());
           fieldSchemas.add(fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO));
           recordSchema.setFieldSchema(fieldSchemas);
           table.setRecordSchema(recordSchema);
@@ -629,6 +628,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           // insert the field in the record
           RecordSchema recordSchema = table.getRecordSchema();
           fieldSchemaVO.setIdRecord(recordSchema.getIdRecordSchema().toString());
+          fieldSchemaVO.setId(new ObjectId().toString());
           List<FieldSchema> fieldSchemas = table.getRecordSchema().getFieldSchema();
           fieldSchemas.add(fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO));
           table.getRecordSchema().setFieldSchema(fieldSchemas);

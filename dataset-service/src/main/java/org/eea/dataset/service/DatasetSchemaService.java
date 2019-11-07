@@ -1,6 +1,5 @@
 package org.eea.dataset.service;
 
-import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -109,8 +108,7 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchema, Long datasetId)
-      throws EEAException;
+  void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchema) throws EEAException;
 
   /**
    * Delete field schema.

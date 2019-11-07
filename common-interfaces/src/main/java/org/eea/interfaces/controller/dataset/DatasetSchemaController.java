@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.List;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -130,7 +129,8 @@ public interface DatasetSchemaController {
    */
   @RequestMapping(value = "/{idTableSchema}/createFieldSchema/{datasetId}",
       method = RequestMethod.POST)
-  void createFieldSchema(String idTableSchema, Long datasetId, FieldSchemaVO fieldSchema);
+  void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
+      @PathVariable("datasetId") Long datasetId, @RequestBody FieldSchemaVO fieldSchema);
 
   /**
    * Delete field schema.
@@ -149,6 +149,6 @@ public interface DatasetSchemaController {
    * @param fieldSchemaVO the field schema VO
    */
   @PutMapping("/{datasetId}/updateFieldSchema")
-  public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
+  void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
 }

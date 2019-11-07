@@ -1,6 +1,5 @@
 package org.eea.dataset.controller;
 
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -280,7 +279,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody final FieldSchemaVO fieldSchema) {
     try {
-      dataschemaService.createFieldSchema(idTableSchema, fieldSchema, datasetId);
+      dataschemaService.createFieldSchema(idTableSchema, fieldSchema);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -343,31 +342,4 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
-  /**
-   * Order the tableSchemas
-   *
-   * @param datasetId the dataset id
-   * @param tables the tables
-   */
-  @Override
-  @RequestMapping(value = "/order/{datasetId}", method = RequestMethod.PUT)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void orderTableSchema(Long datasetId, @RequestBody List<TableSchemaVO> tables) {
-    try {
-      if (datasetId == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.DATASET_INCORRECT_ID);
-      }
-      String schemaId = dataschemaService
-          .getDataSchemaByIdFlow(datasetService.getDataFlowIdById(datasetId), false)
-          .getIdDataSetSchema();
-      if (StringUtils.isBlank(schemaId)) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
-      }
-      dataschemaService.orderTables(schemaId, tables);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR, e);
-    }
-  }
 }
