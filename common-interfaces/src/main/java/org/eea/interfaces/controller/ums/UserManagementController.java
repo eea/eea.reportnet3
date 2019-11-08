@@ -140,6 +140,6 @@ public interface UserManagementController {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
-  void createUsers(@RequestParam("File") MultipartFile file) throws IOException;
+  void createUsers(@RequestParam("file") MultipartFile file) throws IOException;
 
 }

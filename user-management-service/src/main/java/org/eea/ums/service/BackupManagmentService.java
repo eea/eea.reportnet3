@@ -14,6 +14,6 @@ public interface BackupManagmentService {
    * @param is the is
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void readAndSafeUsers(InputStream is) throws IOException;
+  public void readAndSaveUsers(InputStream is) throws IOException;
 
 }

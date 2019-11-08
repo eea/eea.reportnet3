@@ -144,7 +144,7 @@ public class BackupManagmentServiceImplTest {
     when(keycloakConnectorService.getUsers()).thenReturn(allUsers);
     when(keycloakConnectorService.getRoles()).thenReturn(allRoles);
 
-    backupManagmentControlerServiceImpl.readExcelDatatoKeyCloack(fileIn);
+    backupManagmentControlerServiceImpl.readAndSaveUsers(fileIn);
     Mockito.verify(keycloakConnectorService, times(1)).addUser(Mockito.any());
 
   }

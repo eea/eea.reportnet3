@@ -52,7 +52,7 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public void readAndSafeUsers(InputStream is) throws IOException {
+  public void readAndSaveUsers(InputStream is) throws IOException {
 
     GroupInfo[] allGroups;
     UserRepresentation[] allUsers;

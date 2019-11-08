@@ -227,9 +227,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
-  public void createUsers(@RequestParam("File") MultipartFile file) throws IOException {
+  public void createUsers(@RequestParam("file") MultipartFile file) throws IOException {
     InputStream is = file.getInputStream();
-    backupManagmentControlerService.readAndSafeUsers(is);
+    backupManagmentControlerService.readAndSaveUsers(is);
 
   }
 
