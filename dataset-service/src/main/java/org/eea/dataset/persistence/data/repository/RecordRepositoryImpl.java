@@ -104,7 +104,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * The Constant WARNING_ERROR_CORRECT_APPEND_QUERY.
    */
-  private final static String WARNING_ERROR_CORRECT_APPEND_QUERY =
+  private final static String WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY =
       "AND ((EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
           + "and recval.validation.levelError IN ( :errorList )) "
@@ -118,7 +118,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * The Constant WARNING_ERROR_APPEND_QUERY.
    */
-  private final static String WARNING_ERROR_APPEND_QUERY =
+  private final static String WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY =
       "AND (EXISTS (SELECT recval FROM RecordValidation recval "
           + "where rv.id = recval.recordValue.id "
           + "and recval.validation.levelError IN ( :errorList )) "
@@ -164,14 +164,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Find by table value with order.
    *
    * @param idTableSchema the id table schema
-   * @param levelError the level error
+   * @param levelErrorList the level error list
    * @param pageable the pageable
    * @param sortFields the sort fields
-   *
    * @return the list
    */
   @Override
-  public TableVO findByTableValueWithOrder(String idTableSchema, TypeErrorEnum[] levelError,
+  public TableVO findByTableValueWithOrder(String idTableSchema, List<TypeErrorEnum> levelErrorList,
       Pageable pageable, SortField... sortFields) {
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
@@ -222,48 +221,37 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     String filter = "";
     Boolean containsCorrect = false;
-    List<TypeErrorEnum> lvl = new ArrayList<>();
     List<TypeErrorEnum> errorList = new ArrayList<>();
     // Filter Query by level Error (ERROR,WARNING,CORRECT)
-    if (null != levelError) {
-      LOG.info("Init Error Filter");
-      for (int i = 0; i < levelError.length; i++) {
-        lvl.add(levelError[i]);
-      }
-      if (lvl.size() == 3) {
+    if (null != levelErrorList) {
+      if (levelErrorList.size() == 5) {
         containsCorrect = true;
       } else {
-        switch (levelError.length) {
+        switch (levelErrorList.size()) {
+          case 0:
+            TableVO result2 = new TableVO();
+            return result2;
           case 1:
-            if (lvl.contains(TypeErrorEnum.ERROR)) {
-              filter = WARNING_ERROR_APPEND_QUERY;
-              errorList.add(TypeErrorEnum.ERROR);
-            } else if (lvl.contains(TypeErrorEnum.WARNING)) {
-              filter = WARNING_ERROR_APPEND_QUERY;
-              errorList.add(TypeErrorEnum.WARNING);
-            } else if (lvl.contains(TypeErrorEnum.CORRECT)) {
+            if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
               filter = CORRECT_APPEND_QUERY;
               containsCorrect = true;
-            }
-            break;
-          case 2:
-            if (lvl.contains(TypeErrorEnum.WARNING) && lvl.contains(TypeErrorEnum.ERROR)) {
-              filter = WARNING_ERROR_APPEND_QUERY;
-              errorList.add(TypeErrorEnum.WARNING);
-              errorList.add(TypeErrorEnum.ERROR);
             } else {
-              filter = WARNING_ERROR_CORRECT_APPEND_QUERY;
-              containsCorrect = true;
-              if (lvl.contains(TypeErrorEnum.WARNING)) {
-                errorList.add(TypeErrorEnum.WARNING);
-              } else {
-                errorList.add(TypeErrorEnum.ERROR);
-              }
+              filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+              errorList.add(levelErrorList.get(0));
             }
             break;
           default:
-            TableVO result2 = new TableVO();
-            return result2;
+            if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
+              filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
+              containsCorrect = true;
+            } else {
+              filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+            }
+            for (int i = 0; i < levelErrorList.size(); i++) {
+              if (!levelErrorList.get(i).equals(TypeErrorEnum.CORRECT)) {
+                errorList.add(levelErrorList.get(i));
+              }
+            }
         }
       }
     }
@@ -273,7 +261,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query2 = entityManager.createQuery(String.format(MASTER_QUERY_COUNT + filter));
       query2.setParameter("idTableSchema", idTableSchema);
       if (!filter.isEmpty()
-          && (containsCorrect == false || (containsCorrect == true && lvl.size() == 2))) {
+          && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
         query2.setParameter("errorList", errorList);
         query2.setParameter("errorList", errorList);
       }
@@ -286,7 +274,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query = entityManager.createQuery(String.format(MASTER_QUERY_NO_ORDER + filter));
       query.setParameter("idTableSchema", idTableSchema);
       if (!filter.isEmpty()
-          && (containsCorrect == false || (containsCorrect == true && lvl.size() == 2))) {
+          && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
         query.setParameter("errorList", errorList);
         query.setParameter("errorList", errorList);
       }
@@ -305,7 +293,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           sortQueryBuilder.toString(), directionQueryBuilder.toString().substring(1)));
       query.setParameter("idTableSchema", idTableSchema);
       if (!filter.isEmpty()
-          && (containsCorrect == false || (containsCorrect == true && lvl.size() == 2))) {
+          && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
         query.setParameter("errorList", errorList);
         query.setParameter("errorList", errorList);
       }

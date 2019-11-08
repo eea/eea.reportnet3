@@ -14,7 +14,7 @@ fi
 if [ -z "${KEYCLOAK:-}" ]; then
     KEYCLOAK_JSON=undefined
 else
-    KEYCLOAK_JSON=$(jq -n --arg keycloak $KEYCLOAK_JSON '$keycloak')
+    KEYCLOAK_JSON=$(jq -n --arg keycloak $KEYCLOAK '$keycloak')
 fi
  
 cat <<EOF
