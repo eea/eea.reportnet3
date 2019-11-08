@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * The Class BackupManagmentControlerServiceImpl.
  */
-@Service("backupManagmentControlerService")
+@Service("backupManagmentService")
 public class BackupManagmentServiceImpl implements BackupManagmentService {
 
 
