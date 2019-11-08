@@ -266,23 +266,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Creates the data schema.
+   * Creates the field schema.
    *
-   * @param idTableSchema the id table schema
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @param fieldSchema the field schema
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{idTableSchema}/createFieldSchema/{datasetId}")
+  @PostMapping("/{datasetId}/createFieldSchema/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
-      @PathVariable("datasetId") Long datasetId, @RequestBody final FieldSchemaVO fieldSchema) {
+  public void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
-      dataschemaService.createFieldSchema(idTableSchema, fieldSchema);
+      if (!dataschemaService.createFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
+          tableSchemaId, fieldSchemaVO)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+      }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
     }
   }
 
@@ -305,12 +308,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       // Delete the fieldSchema from the datasetSchema
       if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.WRONG_DATASET_SCHEMA);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
     }
   }
 

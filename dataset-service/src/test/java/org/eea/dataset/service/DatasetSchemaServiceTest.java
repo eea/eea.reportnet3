@@ -2,7 +2,6 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -558,7 +557,6 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), new TableSchemaVO(), 1L);
   }
 
-
   /**
    * Delete dataset schema test.
    */
@@ -566,95 +564,6 @@ public class DatasetSchemaServiceTest {
   public void deleteDatasetSchemaTest() {
     dataSchemaServiceImpl.deleteDatasetSchema(1L, "idTableSchema");
     Mockito.verify(schemasRepository, times(1)).deleteDatasetSchemaById(Mockito.any());
-  }
-
-  /**
-   * Creates the field schema exception 1 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void createFieldSchemaException1Test() throws EEAException {
-    when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(null);
-    dataSchemaServiceImpl.createFieldSchema("", new FieldSchemaVO());
-  }
-
-  /**
-   * Creates the field schema exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void createFieldSchemaException2Test() throws EEAException {
-    ObjectId id = new ObjectId();
-    DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
-    schema.setIdDataFlow(1L);
-    List<TableSchema> listaTables = new ArrayList<>();
-    schema.setTableSchemas(listaTables);
-    TableSchemaVO tableVO = new TableSchemaVO();
-    tableVO.setIdTableSchema(id.toString());
-    when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(schema);
-    dataSchemaServiceImpl.createFieldSchema("", new FieldSchemaVO());
-  }
-
-  /**
-   * Creates the field schema new field success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createFieldSchemaNewFieldSuccessTest() throws EEAException {
-    ObjectId id = new ObjectId();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(id);
-    table.setNameTableSchema("test");
-    DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
-    schema.setIdDataFlow(1L);
-    List<TableSchema> listaTables = new ArrayList<>();
-    listaTables.add(table);
-    schema.setTableSchemas(listaTables);
-    schema.setIdDataSetSchema(new ObjectId());
-    TableSchemaVO tableVO = new TableSchemaVO();
-    tableVO.setIdTableSchema(id.toString());
-    when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(schema);
-    when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any())).thenReturn(new FieldSchema());
-    doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO());
-    Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Creates the field schema success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createFieldSchemaSuccessTest() throws EEAException {
-    ObjectId id = new ObjectId();
-    RecordSchema recordSchema = new RecordSchema();
-    recordSchema.setIdRecordSchema(new ObjectId());
-    recordSchema.setNameSchema("nameRecord");
-    recordSchema.setFieldSchema(new ArrayList<>());
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(id);
-    table.setNameTableSchema("test");
-    table.setRecordSchema(recordSchema);
-    DataSetSchema schema = new DataSetSchema();
-    schema.setNameDataSetSchema("test");
-    schema.setIdDataFlow(1L);
-    List<TableSchema> listaTables = new ArrayList<>();
-    listaTables.add(table);
-    schema.setTableSchemas(listaTables);
-    schema.setIdDataSetSchema(new ObjectId());
-    TableSchemaVO tableVO = new TableSchemaVO();
-    tableVO.setIdTableSchema(id.toString());
-    when(schemasRepository.findByIdTableSchema(Mockito.any())).thenReturn(schema);
-    when(fieldSchemaNoRulesMapper.classToEntity(Mockito.any())).thenReturn(new FieldSchema());
-    doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    dataSchemaServiceImpl.createFieldSchema(id.toString(), new FieldSchemaVO());
-    Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
 
   /**

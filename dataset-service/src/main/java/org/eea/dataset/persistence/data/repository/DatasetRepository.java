@@ -29,6 +29,4 @@ public interface DatasetRepository
    */
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
-
-
 }

@@ -10,6 +10,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
@@ -72,6 +73,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private TableRepository tableRepository;
 
   /**
    * The dataschema mapper.
@@ -569,10 +573,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) {
-    if (tableSchema.getIdTableSchema() == null) {
-      tableSchema.setIdTableSchema(new ObjectId().toString());
-    }
+    ObjectId tableSchemaId = new ObjectId();
+    tableSchema.setIdTableSchema(tableSchemaId.toString());
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId());
+    recordSchema.setIdTableSchema(tableSchemaId);
     TableSchema table = tableMapper.classToEntity(tableSchema);
+    table.setRecordSchema(recordSchema);
     LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
     schemasRepository.insertTableSchema(table, id);
   }
@@ -580,52 +587,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Creates the field schema.
    *
-   * @param idTableSchema the id table schema
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
    * @param fieldSchemaVO the field schema VO
-   * @param datasetId the dataset id
+   * @return true, if successful
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchemaVO)
-      throws EEAException {
-    // insert a new id for the field
+  public boolean createFieldSchema(String datasetSchemaId, String tableSchemaId,
+      FieldSchemaVO fieldSchemaVO) throws EEAException {
     fieldSchemaVO.setId(new ObjectId().toString());
-    DataSetSchema dataset = schemasRepository.findByIdTableSchema(idTableSchema);
-    if (dataset != null) {
-      // search for the table to insert the field
-      TableSchema table = getTableSchema(idTableSchema, dataset);
-      if (table != null) {
-        if (table.getRecordSchema() == null) {
-          // initialize the record as it's the first record we have in the table
-          RecordSchema recordSchema = new RecordSchema();
-          recordSchema.setIdTableSchema(new ObjectId(idTableSchema));
-          recordSchema.setIdRecordSchema(new ObjectId());
-          List<FieldSchema> fieldSchemas = new ArrayList<>();
-          fieldSchemaVO.setIdRecord(recordSchema.getIdRecordSchema().toString());
-          fieldSchemaVO.setId(new ObjectId().toString());
-          fieldSchemas.add(fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO));
-          recordSchema.setFieldSchema(fieldSchemas);
-          table.setRecordSchema(recordSchema);
-        } else {
-          // insert the field in the record
-          RecordSchema recordSchema = table.getRecordSchema();
-          fieldSchemaVO.setIdRecord(recordSchema.getIdRecordSchema().toString());
-          fieldSchemaVO.setId(new ObjectId().toString());
-          List<FieldSchema> fieldSchemas = table.getRecordSchema().getFieldSchema();
-          fieldSchemas.add(fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO));
-          table.getRecordSchema().setFieldSchema(fieldSchemas);
-        }
-        // delete old table document
-        schemasRepository.deleteTableSchemaById(idTableSchema);
-        // insert the new table document with the field
-        schemasRepository.insertTableSchema(table, dataset.getIdDataSetSchema().toString());
-      } else {
-        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
-      }
-    } else {
-      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    try {
+      return schemasRepository.createFieldSchema(datasetSchemaId, tableSchemaId,
+          fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO)).getModifiedCount() == 1;
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
     }
   }
 

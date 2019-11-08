@@ -83,6 +83,12 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   @Query("delete from TableValue d where d.idTableSchema=?1")
   void deleteByIdTableSchema(String idTableSchema);
 
-
-
+  /**
+   * Exists table schema id.
+   *
+   * @param tableSchemaId the table schema id
+   * @return true, if exists.
+   */
+  @Query("select count(tv)>0 from TableValue tv where tv.idTableSchema=?1")
+  Boolean existsByTableSchemaId(String tableSchemaId);
 }

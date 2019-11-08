@@ -344,55 +344,6 @@ public class DataSetSchemaControllerImplTest {
   }
 
   /**
-   * Creates the table schema test exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createTableSchemaTestException() throws EEAException {
-    doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
-        Mockito.any());
-    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
-  }
-
-  /**
-   * Creates the field schema test exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createFieldSchemaTestException() throws EEAException {
-    doThrow(EEAException.class).when(dataschemaService).createFieldSchema(Mockito.any(),
-        Mockito.any());
-    dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
-  }
-
-  /**
-   * Creates the field schema success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createFieldSchemaSuccessTest() throws EEAException {
-    dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Delete field schema test 1.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void deleteFieldSchemaTest1() throws EEAException {
-    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
-    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(true);
-    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
-    Mockito.verify(datasetService, times(1)).deleteFieldValues(Mockito.any(), Mockito.any());
-  }
-
-  /**
    * Delete field schema test 2.
    *
    * @throws EEAException the EEA exception
