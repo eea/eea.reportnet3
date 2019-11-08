@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -148,28 +149,29 @@ public class DocumentControllerImpl implements DocumentController {
   }
 
 
+
   /**
    * Upload schema snapshot document.
    *
-   * @param os the os
+   * @param file the file
    * @param designDatasetId the design dataset id
    * @param fileName the file name
    */
   @Override
   @HystrixCommand
   @PostMapping(value = "/upload/{designDatasetId}/snapshot")
-  public void uploadSchemaSnapshotDocument(@RequestParam("file") final byte[] os,
+  public void uploadSchemaSnapshotDocument(@RequestBody final byte[] file,
       @PathVariable("designDatasetId") final Long designDatasetId,
       @RequestParam("fileName") final String fileName) {
-    if (os == null) {
+    if (file == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
     }
     if (designDatasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      ByteArrayInputStream inStream = new ByteArrayInputStream(os);
+      ByteArrayInputStream inStream = new ByteArrayInputStream(file);
       documentService.uploadSchemaSnapshot(inStream, "json", fileName, designDatasetId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
