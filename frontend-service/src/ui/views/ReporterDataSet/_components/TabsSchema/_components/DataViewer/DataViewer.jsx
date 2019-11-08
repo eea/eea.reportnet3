@@ -994,12 +994,8 @@ const DataViewer = withRouter(
       return value && value.length > 0;
     };
 
-    const getRecordValidationByErrorAndMessage = (validation, levelError, message) => {
-      if (!isEmpty(validation)) {
-        return DatasetService.createValidation('RECORD', 0, levelError, message);
-      } else {
-        return [];
-      }
+    const getRecordValidationByErrorAndMessage = (levelError, message) => {
+      return DatasetService.createValidation('RECORD', 0, levelError, message);
     };
 
     //Template for Record validation
@@ -1036,35 +1032,10 @@ const DataViewer = withRouter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'INFO'
         );
 
-        validations.push(
-          getRecordValidationByErrorAndMessage(
-            filteredFieldValidationsWithBlocker,
-            'BLOCKER',
-            resources.messages['recordBlockers']
-          )
-        );
-
-        validations.push(
-          getRecordValidationByErrorAndMessage(
-            filteredFieldValidationsWithError,
-            'ERROR',
-            resources.messages['recordErrors']
-          )
-        );
-        validations.push(
-          getRecordValidationByErrorAndMessage(
-            filteredFieldValidationsWithWarning,
-            'WARNING',
-            resources.messages['recordWarnings']
-          )
-        );
-        validations.push(
-          getRecordValidationByErrorAndMessage(
-            filteredFieldValidationsWithInfo,
-            'INFO',
-            resources.messages['recordInfos']
-          )
-        );
+        validations.push(getRecordValidationByErrorAndMessage('BLOCKER', resources.messages['recordBlockers']));
+        validations.push(getRecordValidationByErrorAndMessage('ERROR', resources.messages['recordErrors']));
+        validations.push(getRecordValidationByErrorAndMessage('WARNING', resources.messages['recordWarnings']));
+        validations.push(getRecordValidationByErrorAndMessage('INFO', resources.messages['recordInfos']));
 
         // if (!isEmpty(filteredFieldValidationsWithBlocker)) {
         //   validations.push(DatasetService.createValidation('RECORD', 0, 'BLOCKER', resources.messages['recordErrors']));
