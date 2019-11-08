@@ -2,13 +2,20 @@ package org.eea.dataflow.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import org.eea.dataflow.mapper.DataflowWebLinkMapper;
+import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.service.DataflowWebLinkService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,11 +28,47 @@ public class DataFlowWebLinkControllerImplTest {
   @Mock
   private DataflowWebLinkService dataflowWebLinkService;
 
+  private WeblinkVO weblinkVO;
+
+  private Weblink weblink;
+  private Weblink weblinkBad;
+
+  private Dataflow dataflow;
+
+  @Before
+  public void initMocks() {
+    weblinkVO = new WeblinkVO();
+    weblinkVO.setUrl("http://www.javadesdecero.es/");
+    weblinkVO.setDescription("test");
+
+    dataflow = new Dataflow();
+    dataflow.setId(1L);
+
+    weblink = new Weblink();
+    weblink.setId(1L);
+    weblink.setDataflow(dataflow);
+    weblink.setUrl("http://www.javadesdecero.es/");
+    weblink.setDescription("test");
+
+
+    weblinkBad = new Weblink();
+    weblinkBad.setDataflow(dataflow);
+    weblinkBad.setUrl("javadesdecero.es");
+    weblinkBad.setDescription("test");
+
+    MockitoAnnotations.initMocks(this);
+  }
+
+  @Mock
+  private DataflowWebLinkMapper dataflowWebLinkMapper;
+
   @Test(expected = ResponseStatusException.class)
   public void getLinkException() throws EEAException {
     doThrow(new EEAException()).when(dataflowWebLinkService).getWebLink(Mockito.anyLong());
     dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
   }
+
+
 
   @Test
   public void getLink() {
@@ -39,7 +82,8 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void saveLinkThrowsMalformedURLException() throws EEAException {
-    dataFlowWebLinkControllerImpl.saveLink(1L, "javadesdecero.es", "hola");
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
+    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
   }
 
   /**
@@ -49,21 +93,8 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void saveLinkThrowsURISyntaxException() throws EEAException {
-    dataFlowWebLinkControllerImpl.saveLink(1L, "http://finance.yahoo.com/q/h?s=^IXIC", "hola");
-  }
-
-  /**
-   * Save link throws response status exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void saveLinkThrowsResponseStatusException() throws EEAException {
-
-    doThrow(new EEAException()).when(dataflowWebLinkService).saveWebLink(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataFlowWebLinkControllerImpl.saveLink(1L, "https://www.javadesdecero.es", "hola");
-
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
+    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
   }
 
   /**
@@ -73,9 +104,10 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test
   public void saveLink() throws EEAException {
-    dataFlowWebLinkControllerImpl.saveLink(1L, "https://www.javadesdecero.es", "hola");
-    Mockito.verify(dataflowWebLinkService, times(1)).saveWebLink(1L, "https://www.javadesdecero.es",
-        "hola");
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
+    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+    Mockito.verify(dataflowWebLinkService, times(1)).saveWebLink(weblink.getDataflow().getId(),
+        weblink.getUrl(), weblink.getDescription());
   }
 
   /**
@@ -109,7 +141,8 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateLinkThrowsMalformedURLException() throws EEAException {
-    dataFlowWebLinkControllerImpl.updateLink(1L, "javadesdecero.es", "hola");
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
+    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
   }
 
   /**
@@ -119,21 +152,8 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateLinkThrowsURISyntaxException() throws EEAException {
-    dataFlowWebLinkControllerImpl.updateLink(1L, "http://finance.yahoo.com/q/h?s=^IXIC", "hola");
-  }
-
-  /**
-   * update link throws response status exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateLinkThrowsResponseStatusException() throws EEAException {
-
-    doThrow(new EEAException()).when(dataflowWebLinkService).updateWebLink(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataFlowWebLinkControllerImpl.updateLink(1L, "https://www.javadesdecero.es", "hola");
-
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
+    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
   }
 
   /**
@@ -143,8 +163,10 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test
   public void updateLink() throws EEAException {
-    dataFlowWebLinkControllerImpl.updateLink(1L, "https://www.javadesdecero.es", "hola");
-    Mockito.verify(dataflowWebLinkService, times(1)).updateWebLink(1L, "hola",
-        "https://www.javadesdecero.es");
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
+    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+
+    Mockito.verify(dataflowWebLinkService, times(1)).updateWebLink(weblink.getId(),
+        weblink.getUrl(), weblink.getDescription());
   }
 }
