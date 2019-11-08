@@ -10,11 +10,18 @@ if [ -z "${EULOGIN:-}" ]; then
 else
     EULOGIN_JSON=$(jq -n --arg eulogin $EULOGIN '$eulogin')
 fi
+
+if [ -z "${KEYCLOAK:-}" ]; then
+    KEYCLOAK_JSON=undefined
+else
+    KEYCLOAK_JSON=$(jq -n --arg eulogin KEYCLOAK_JSON '$keycloak')
+fi
  
 cat <<EOF
 window.env = {
 	  REACT_APP_BACKEND: $BACKEND_JSON,
-	  EULOGIN_URL: $EULOGIN_JSON
+	  EULOGIN_URL: $EULOGIN_JSON,
+	  REACT_APP_EULOGIN: $KEYCLOAK_JSON
 };
 
 EOF
