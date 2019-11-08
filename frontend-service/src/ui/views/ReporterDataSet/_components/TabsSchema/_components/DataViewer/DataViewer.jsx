@@ -63,8 +63,8 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    // const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
-    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']);
+    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
+    // const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -1001,9 +1001,6 @@ const DataViewer = withRouter(
         validations = [...recordData.recordValidations];
       }
 
-      let messageErrors = '';
-      let messageWarnings = '';
-
       let hasFieldErrors = false;
 
       const recordsWithFieldValidations = recordData.dataRow.filter(
@@ -1062,6 +1059,17 @@ const DataViewer = withRouter(
       const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
       const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
 
+      let messageBlockers = '';
+      let messageErrors = '';
+      let messageWarnings = '';
+      let messageInfos = '';
+
+      blockerValidations.forEach(validation =>
+        validation.message
+          ? (messageBlockers += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
+          : ''
+      );
+
       errorValidations.forEach(validation =>
         validation.message
           ? (messageErrors += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
@@ -1074,21 +1082,48 @@ const DataViewer = withRouter(
           : ''
       );
 
-      return blockerValidations.length > 0 &&
-        errorValidations.length > 0 &&
-        warningValidations.length > 0 &&
-        infoValidations.length > 0 ? (
-        <div className={styles.iconTooltipWrapper}>
-          <IconTooltip levelError="INFO" message={messageWarnings} style={{ width: '1.5em' }} />
-          <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
-          <IconTooltip levelError="ERROR" message={messageErrors} style={{ width: '1.5em' }} />
-          <IconTooltip levelError="BLOCKER" message={messageErrors} style={{ width: '1.5em' }} />
-        </div>
-      ) : errorValidations.length > 0 ? (
-        <IconTooltip levelError="ERROR" message={messageErrors} />
-      ) : warningValidations.length > 0 ? (
-        <IconTooltip levelError="WARNING" message={messageWarnings} />
-      ) : null;
+      infoValidations.forEach(validation =>
+        validation.message
+          ? (messageInfos += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
+          : ''
+      );
+
+      let validationsGroup = {};
+      validationsGroup.blockers = blockerValidations;
+      validationsGroup.errors = errorValidations;
+      validationsGroup.warnings = warningValidations;
+      validationsGroup.infos = infoValidations;
+
+      validationsGroup.messageBlockers = messageBlockers;
+      validationsGroup.messageErrors = messageErrors;
+      validationsGroup.messageWarnings = messageWarnings;
+      validationsGroup.messageInfos = messageInfos;
+
+      let iconValidaionsCell = getIconsValidationsErrors(validationsGroup);
+      return iconValidaionsCell;
+    };
+
+    const addIconLevelError = (validation, levelError, message) => {
+      let icon = [];
+      if (!isEmpty(validation)) {
+        icon.push(<IconTooltip levelError={levelError} message={message} style={{ width: '1.5em' }} />);
+      }
+      return icon;
+    };
+
+    const getIconsValidationsErrors = validations => {
+      let icons = [];
+      if (isNull(validations)) {
+        return icons;
+      }
+
+      let blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
+      let errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
+      let warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
+      let infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
+
+      icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
+      return <div className={styles.iconTooltipWrapper}>{icons}</div>;
     };
 
     const rowClassName = rowData => {
