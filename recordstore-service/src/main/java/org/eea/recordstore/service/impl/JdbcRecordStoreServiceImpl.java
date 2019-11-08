@@ -406,6 +406,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
       copyFromFile(copyQueryField, nameFileFieldValue, cm);
 
+    } catch (Exception e) {
+      if (null != con) {
+        con.rollback();
+      }
     } finally {
       if (null != con) {
         con.close();

@@ -98,6 +98,9 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private DocumentControllerZuul documentControllerZuul;
 
+  @Mock
+  private DatasetSchemaService schemaService;
+
 
   /**
    * Inits the mocks.
@@ -231,12 +234,14 @@ public class DatasetSnapshotServiceTest {
   public void testRestoreSchemaSnapshots() throws Exception {
 
 
-    doNothing().when(schemaRepository).deleteDatasetSchemaById(Mockito.any());
-    when(schemaRepository.save(Mockito.any())).thenReturn(new DataSetSchema());
-    doNothing().when(datasetService).deleteTableValues(Mockito.any());
+    // doNothing().when(schemaRepository).deleteDatasetSchemaById(Mockito.any());
+    // when(schemaRepository.save(Mockito.any())).thenReturn(new DataSetSchema());
+    doNothing().when(datasetService).deleteAllTableValues(Mockito.any());
+    doNothing().when(schemaService).replaceSchema(Mockito.any(), Mockito.any());
 
     doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any());
+
     DataSetSchema schema = new DataSetSchema();
     schema.setIdDataSetSchema(new ObjectId("5ce524fad31fc52540abae73"));
     ObjectMapper objectMapper = new ObjectMapper();
@@ -246,7 +251,7 @@ public class DatasetSnapshotServiceTest {
 
 
     datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
-    Mockito.verify(datasetService, times(1)).deleteTableValues(Mockito.any());
+    Mockito.verify(datasetService, times(1)).deleteAllTableValues(Mockito.any());
   }
 
   @After

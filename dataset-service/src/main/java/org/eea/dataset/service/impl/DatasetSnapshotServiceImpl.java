@@ -18,6 +18,7 @@ import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
@@ -85,6 +86,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
@@ -92,6 +94,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
+
+  /** The schema service. */
+  @Autowired
+  private DatasetSchemaService schemaService;
+
+  /** The transaction manager. */
+  // @Autowired
+  // private PlatformTransactionManager transactionManager;
 
 
   /** The Constant FILE_PATTERN_NAME. */
@@ -320,36 +330,55 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
       throws EEAException, IOException {
 
-    // 1. Restore the schema
-    String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+    // TransactionDefinition def = new DefaultTransactionDefinition();
+    // TransactionStatus status = transactionManager.getTransaction(def);
+
+    try {
+      // 1. Get the schema document to mapper it to DataSchema class
+      String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
+      DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
+      String schemaId = schema.getIdDataSetSchema().toString();
+      LOG.info("Schema class recovered");
+      // 2. Delete the dataset values
+      datasetService.deleteAllTableValues(idDataset);
+      LOG.info("Previous values from the dataset erased");
+      // 3. Replace the schema: delete the older and save the new we have already recovered on step
+      schemaService.replaceSchema(schemaId, schema);
+      LOG.info("DataSetSchema replaced");
+      // 4. Restore the dataset data, using the operation from recordstore. First delete the dataset
+      // values implied
+      recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, TypeDatasetEnum.DESIGN);
+      // transactionManager.commit(status);
+
+      LOG.info("Schema Snapshot {} totally restored", idSnapshot);
+    }
+    /*
+     * } catch (Exception e) { // transactionManager.rollback(status); }
+     */ finally {
+      // Remove the lock
+      List<Object> criteria = new ArrayList<>();
+      criteria.add(LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
+      criteria.add(idDataset);
+      lockService.removeLockByCriteria(criteria);
+    }
 
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    byte[] content = documentControllerZuul.getSnapshotDocument(idDataset, nameFile);
-    DataSetSchema schema = objectMapper.readValue(content, DataSetSchema.class);
-    String schemaId = schema.getIdDataSetSchema().toString();
-
-
-    schemaRepository.deleteDatasetSchemaById(schemaId);
-    schemaRepository.save(schema);
-    LOG.info("First step of restoring schema snapshot completed. Schema restored");
-
-    // 2. Restore the dataset data, using the operation from recordstore. First delete the dataset
-    // values implied
-    datasetService.deleteTableValues(idDataset);
-    recordStoreControllerZull.restoreSnapshotData(idDataset, idSnapshot, TypeDatasetEnum.DESIGN);
-
-    // 3.Release the lock manually
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
-    criteria.add(idDataset);
-    lockService.removeLockByCriteria(criteria);
-
-
-    LOG.info("Schema Snapshot {} totally restored", idSnapshot);
 
   }
+
+  /**
+   * Sets the transaction manager.
+   *
+   * @param transactionManager the new transaction manager
+   */
+  /*
+   * public void setTransactionManager(PlatformTransactionManager transactionManager) {
+   * this.transactionManager = transactionManager; }
+   */
 
 
   /**
@@ -357,7 +386,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   * @throws Exception
+   * @throws Exception the exception
    */
   @Override
   @Async
@@ -367,6 +396,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Delete the file
     String nameFile = String.format(FILE_PATTERN_NAME, idSnapshot, idDataset) + ".snap";
     documentControllerZuul.deleteSnapshotSchemaDocument(idDataset, nameFile);
+
+    // Delete the file values
+    recordStoreControllerZull.deleteSnapshotData(idDataset, idSnapshot);
 
     LOG.info("Schema Snapshot {} removed", idSnapshot);
   }

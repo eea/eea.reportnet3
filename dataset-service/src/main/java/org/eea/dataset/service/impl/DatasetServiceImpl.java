@@ -1366,7 +1366,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void deleteTableValues(Long datasetId) {
+  public void deleteAllTableValues(Long datasetId) {
     tableRepository.removeTableData(datasetId);
   }
 
