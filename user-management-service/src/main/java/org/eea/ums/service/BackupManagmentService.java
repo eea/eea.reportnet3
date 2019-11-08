@@ -9,11 +9,11 @@ import java.io.InputStream;
 public interface BackupManagmentService {
 
   /**
-   * Read excel data to key cloack.
+   * Read and safe users.
    *
-   * @param is the read excel users
+   * @param is the is
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void readExcelDatatoKeyCloack(InputStream is) throws IOException;
+  public void readAndSafeUsers(InputStream is) throws IOException;
 
 }

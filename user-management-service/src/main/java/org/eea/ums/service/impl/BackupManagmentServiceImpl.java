@@ -44,14 +44,15 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
 
+
   /**
-   * Read excel datato key cloack.
+   * Read and safe users.
    *
-   * @param fileIn the read excel users
+   * @param is the is
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public void readExcelDatatoKeyCloack(InputStream is) throws IOException {
+  public void readAndSafeUsers(InputStream is) throws IOException {
 
     GroupInfo[] allGroups;
     UserRepresentation[] allUsers;

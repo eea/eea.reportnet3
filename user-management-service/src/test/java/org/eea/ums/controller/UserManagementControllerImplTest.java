@@ -163,7 +163,7 @@ public class UserManagementControllerImplTest {
         "hello".getBytes(StandardCharsets.UTF_8));
 
     userManagementController.createUsers(file);
-    Mockito.verify(backupManagmentService, times(1)).readExcelDatatoKeyCloack(Mockito.any());
+    Mockito.verify(backupManagmentService, times(1)).readAndSafeUsers(Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)

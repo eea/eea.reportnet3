@@ -229,7 +229,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
   public void createUsers(@RequestParam("File") MultipartFile file) throws IOException {
     InputStream is = file.getInputStream();
-    backupManagmentControlerService.readExcelDatatoKeyCloack(is);
+    backupManagmentControlerService.readAndSafeUsers(is);
 
   }
 
