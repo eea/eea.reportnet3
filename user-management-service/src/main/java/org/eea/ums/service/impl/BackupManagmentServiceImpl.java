@@ -120,7 +120,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
       try {
         String json = mapper2.writeValueAsString(roles);
-        System.out.println("ResultingJSONstring = " + json);
         keycloakConnectorService.addRole(json, usersMap.get(user.getUsername()));
         LOG.info("Finish save Roles");
       } catch (JsonProcessingException e) {
@@ -164,7 +163,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
       LOG.info("Try to save User");
       try {
         String json = mapper.writeValueAsString(newUser);
-        System.out.println("ResultingJSONstring = " + json);
         keycloakConnectorService.addUser(json);
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("User not saved");
