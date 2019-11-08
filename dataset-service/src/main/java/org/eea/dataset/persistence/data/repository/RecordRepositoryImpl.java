@@ -205,6 +205,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               errorList.add(levelErrorList.get(i));
             }
           }
+          break;
       }
     }
     // we put that to not do this because if you not check any filter the table must me empty
