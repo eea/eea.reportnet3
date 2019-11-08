@@ -58,7 +58,7 @@ const App = () => {
           <LoadingProvider>
             <Router>
               <Switch>
-                <Route exact path="/" component={window.env.REACT_APP_EULOGIN ? AccessPoint : Login} />
+                <Route exact path="/" component={window.env.REACT_APP_EULOGIN === "true" ? AccessPoint : Login} />
                 <Route exact path={routes.EULOGIN} component={Eulogin} />
                 <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
                 <PrivateRoute exact path={routes.DASHBOARDS} component={DataCustodianDashboards} />
