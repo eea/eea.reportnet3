@@ -103,7 +103,7 @@ export const DataCustodianDashboards = withRouter(({ match, history }) => {
       {!isUndefined(dataSchema) &&
         dataSchema.map(id => (
           <>
-            <GlobalValidationDashboard schemaId={id.datasetSchemaId} />
+            <GlobalValidationDashboard datasetSchemaId={id.datasetSchemaId} />
           </>
         ))}
       <GlobalReleasedDashboard dataflowId={match.params.dataflowId} />
