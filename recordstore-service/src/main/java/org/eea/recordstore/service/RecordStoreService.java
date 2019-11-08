@@ -3,6 +3,7 @@ package org.eea.recordstore.service;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 
@@ -75,16 +76,18 @@ public interface RecordStoreService {
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
       throws SQLException, IOException, RecordStoreAccessException;
 
+
   /**
    * Restore data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
+   * @param typeDataset the type dataset
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
-  void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot)
+  void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, TypeDatasetEnum typeDataset)
       throws SQLException, IOException, RecordStoreAccessException;
 
   /**

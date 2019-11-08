@@ -7,19 +7,27 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Optional;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
+import org.eea.dataset.mapper.SnapshotSchemaMapper;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
 import org.eea.lock.service.LockService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class DatasetSnapshotServiceTest.
@@ -58,6 +67,10 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private SnapshotMapper snapshotMapper;
 
+  /** The snapshot schema mapper. */
+  @Mock
+  private SnapshotSchemaMapper snapshotSchemaMapper;
+
   /** The record store controller zull. */
   @Mock
   private RecordStoreControllerZull recordStoreControllerZull;
@@ -73,6 +86,21 @@ public class DatasetSnapshotServiceTest {
   /** The dataset service. */
   @Mock
   private DatasetService datasetService;
+
+  /** The snapshot schema repository. */
+  @Mock
+  private SnapshotSchemaRepository snapshotSchemaRepository;
+
+  /** The schema repository. */
+  @Mock
+  private SchemasRepository schemaRepository;
+
+  @Mock
+  private DocumentControllerZuul documentControllerZuul;
+
+  @Mock
+  private DatasetSchemaService schemaService;
+
 
   /**
    * Inits the mocks.
@@ -165,4 +193,72 @@ public class DatasetSnapshotServiceTest {
     datasetSnapshotService.releaseSnapshot(1L, 1L);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
+
+
+  @Test
+  public void testGetSchemaSnapshots() throws Exception {
+
+    when(snapshotSchemaMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetSnapshotService.getSchemaSnapshotsByIdDataset(Mockito.anyLong());
+    assertEquals("failed assertion", new ArrayList<>(),
+        datasetSnapshotService.getSchemaSnapshotsByIdDataset(Mockito.anyLong()));
+
+  }
+
+  @Test
+  public void testAddSchemaSnapshots() throws Exception {
+
+    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
+        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    doNothing().when(recordStoreControllerZull).createSnapshotData(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
+    datasetSnapshotService.addSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
+    Mockito.verify(snapshotSchemaRepository, times(1)).save(Mockito.any());
+
+  }
+
+  @Test
+  public void testDeleteSchemaSnapshots() throws Exception {
+
+    doNothing().when(documentControllerZuul).deleteSnapshotSchemaDocument(Mockito.any(),
+        Mockito.any());
+    datasetSnapshotService.removeSchemaSnapshot(1L, 1L);
+    Mockito.verify(snapshotSchemaRepository, times(1)).deleteById(Mockito.anyLong());
+
+  }
+
+  @Test
+  public void testRestoreSchemaSnapshots() throws Exception {
+
+
+    // doNothing().when(schemaRepository).deleteDatasetSchemaById(Mockito.any());
+    // when(schemaRepository.save(Mockito.any())).thenReturn(new DataSetSchema());
+    doNothing().when(datasetService).deleteAllTableValues(Mockito.any());
+    doNothing().when(schemaService).replaceSchema(Mockito.any(), Mockito.any());
+
+    doNothing().when(recordStoreControllerZull).restoreSnapshotData(Mockito.any(), Mockito.any(),
+        Mockito.any());
+
+    DataSetSchema schema = new DataSetSchema();
+    schema.setIdDataSetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
+        .thenReturn(objectMapper.writeValueAsBytes(schema));
+
+
+    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
+    Mockito.verify(datasetService, times(1)).deleteAllTableValues(Mockito.any());
+  }
+
+  @After
+  public void afterTests() {
+    File file = new File("./nullschemaSnapshot_null-DesignDataset_1.snap");
+    file.delete();
+  }
+
+
 }

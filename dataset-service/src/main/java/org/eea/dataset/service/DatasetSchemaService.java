@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -108,4 +109,12 @@ public interface DatasetSchemaService {
    * @return true, if successful
    */
   boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId);
+
+  /**
+   * Replace schema.
+   *
+   * @param idSchema the id schema
+   * @param schema the schema
+   */
+  void replaceSchema(String idSchema, DataSetSchema schema);
 }
