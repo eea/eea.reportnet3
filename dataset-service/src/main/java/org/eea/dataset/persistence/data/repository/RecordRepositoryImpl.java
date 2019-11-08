@@ -176,6 +176,105 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
     TableVO result = new TableVO();
+    createSorterQuery(sortQueryBuilder, directionQueryBuilder, criteriaNumber, sortFields);
+    String filter = "";
+    Boolean containsCorrect = false;
+    List<TypeErrorEnum> errorList = new ArrayList<>();
+    // Filter Query by level Error if we havent lv error we do other things
+    if (!levelErrorList.isEmpty()) {
+
+      switch (levelErrorList.size()) {
+        case 1:
+          if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
+            filter = CORRECT_APPEND_QUERY;
+            containsCorrect = true;
+          } else {
+            filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+            errorList.add(levelErrorList.get(0));
+          }
+          break;
+        default:
+          if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
+            filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
+            containsCorrect = true;
+          } else {
+            filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
+          }
+          for (int i = 0; i < levelErrorList.size(); i++) {
+            if (!levelErrorList.get(i).equals(TypeErrorEnum.CORRECT)) {
+              errorList.add(levelErrorList.get(i));
+            }
+          }
+          break;
+      }
+    }
+    // we put that condition because we wont to do any query if the filter is empty and return a new
+    // result object
+    if (levelErrorList.size() != 0) {
+      // Total records calc.
+      if (!filter.isEmpty()) {
+        Query query2;
+        query2 = entityManager.createQuery(String.format(MASTER_QUERY_COUNT + filter));
+        query2.setParameter("idTableSchema", idTableSchema);
+        if (!filter.isEmpty()
+            && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
+          query2.setParameter("errorList", errorList);
+          query2.setParameter("errorList", errorList);
+        }
+        Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
+        result.setTotalFilteredRecords(recordsCount);
+      }
+
+      Query query;
+      // Query without order.
+      if (null == sortFields) {
+        query = entityManager.createQuery(String.format(MASTER_QUERY_NO_ORDER + filter));
+        query.setParameter("idTableSchema", idTableSchema);
+        if (!filter.isEmpty()
+            && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
+          query.setParameter("errorList", errorList);
+          query.setParameter("errorList", errorList);
+        }
+        query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+        query.setMaxResults(pageable.getPageSize());
+        List<RecordValue> a = query.getResultList();
+
+        List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
+        result.setRecords(recordVOs);
+      } else {
+        // Query with order.
+        query = entityManager.createQuery(String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY,
+            sortQueryBuilder.toString(), directionQueryBuilder.toString().substring(1)));
+        query.setParameter("idTableSchema", idTableSchema);
+        if (!filter.isEmpty()
+            && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
+          query.setParameter("errorList", errorList);
+          query.setParameter("errorList", errorList);
+        }
+        query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+        query.setMaxResults(pageable.getPageSize());
+        List<Object[]> a = query.getResultList();
+        List<RecordVO> recordVOs = recordNoValidationMapper
+            .entityListToClass(this.sanitizeOrderedRecords(a, sortFields[0].getAsc()));
+        result.setRecords(recordVOs);
+
+      }
+    }
+    return result;
+
+  }
+
+
+  /**
+   * Creates the sorter query.
+   *
+   * @param sortQueryBuilder the sort query builder
+   * @param directionQueryBuilder the direction query builder
+   * @param criteriaNumber the criteria number
+   * @param sortFields the sort fields
+   */
+  private void createSorterQuery(StringBuilder sortQueryBuilder,
+      StringBuilder directionQueryBuilder, int criteriaNumber, SortField... sortFields) {
     // Multisorting Query accept n fields and order asc(1)/desc(0)
     if (null != sortFields) {
       LOG.info("Init Order");
@@ -219,94 +318,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
     }
-    String filter = "";
-    Boolean containsCorrect = false;
-    List<TypeErrorEnum> errorList = new ArrayList<>();
-    // Filter Query by level Error (ERROR,WARNING,CORRECT)
-    if (null != levelErrorList) {
-      if (levelErrorList.size() == 5) {
-        containsCorrect = true;
-      } else {
-        switch (levelErrorList.size()) {
-          case 0:
-            TableVO result2 = new TableVO();
-            return result2;
-          case 1:
-            if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
-              filter = CORRECT_APPEND_QUERY;
-              containsCorrect = true;
-            } else {
-              filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-              errorList.add(levelErrorList.get(0));
-            }
-            break;
-          default:
-            if (levelErrorList.contains(TypeErrorEnum.CORRECT)) {
-              filter = WARNING_ERROR_INFO_BLOCKER_CORRECT_APPEND_QUERY;
-              containsCorrect = true;
-            } else {
-              filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
-            }
-            for (int i = 0; i < levelErrorList.size(); i++) {
-              if (!levelErrorList.get(i).equals(TypeErrorEnum.CORRECT)) {
-                errorList.add(levelErrorList.get(i));
-              }
-            }
-        }
-      }
-    }
-    // Total records calc.
-    if (!filter.isEmpty()) {
-      Query query2;
-      query2 = entityManager.createQuery(String.format(MASTER_QUERY_COUNT + filter));
-      query2.setParameter("idTableSchema", idTableSchema);
-      if (!filter.isEmpty()
-          && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
-        query2.setParameter("errorList", errorList);
-        query2.setParameter("errorList", errorList);
-      }
-      Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
-      result.setTotalFilteredRecords(recordsCount);
-    }
-    Query query;
-    // Query without order.
-    if (null == sortFields) {
-      query = entityManager.createQuery(String.format(MASTER_QUERY_NO_ORDER + filter));
-      query.setParameter("idTableSchema", idTableSchema);
-      if (!filter.isEmpty()
-          && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
-        query.setParameter("errorList", errorList);
-        query.setParameter("errorList", errorList);
-      }
-      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-      query.setMaxResults(pageable.getPageSize());
-      List<RecordValue> a = query.getResultList();
-
-      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
-      result.setRecords(recordVOs);
-
-      return result;
-
-    } else {
-      // Query with order.
-      query = entityManager.createQuery(String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY,
-          sortQueryBuilder.toString(), directionQueryBuilder.toString().substring(1)));
-      query.setParameter("idTableSchema", idTableSchema);
-      if (!filter.isEmpty()
-          && (containsCorrect == false || (containsCorrect == true && errorList.size() > 0))) {
-        query.setParameter("errorList", errorList);
-        query.setParameter("errorList", errorList);
-      }
-      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-      query.setMaxResults(pageable.getPageSize());
-      List<Object[]> a = query.getResultList();
-      List<RecordVO> recordVOs = recordNoValidationMapper
-          .entityListToClass(this.sanitizeOrderedRecords(a, sortFields[0].getAsc()));
-      result.setRecords(recordVOs);
-
-      return result;
-    }
-
   }
 
 
