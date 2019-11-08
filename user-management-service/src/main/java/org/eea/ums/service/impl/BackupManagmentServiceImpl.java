@@ -111,7 +111,7 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
         LOG.info("Finish save group: " + group);
       });
 
-      ObjectMapper mapper2 = new ObjectMapper();
+      ObjectMapper roleMapper = new ObjectMapper();
       List<RoleRepresentation> roles = new ArrayList<>();
       RoleRepresentation newRole = new RoleRepresentation();
       newRole.setId(rolesMap.get(ROLE));
@@ -119,7 +119,7 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
       roles.add(newRole);
 
       try {
-        String json = mapper2.writeValueAsString(roles);
+        String json = roleMapper.writeValueAsString(roles);
         keycloakConnectorService.addRole(json, usersMap.get(user.getUsername()));
         LOG.info("Finish save Roles");
       } catch (JsonProcessingException e) {
@@ -134,6 +134,16 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
 
 
+  /**
+   * Generate user list.
+   *
+   * @param is the is
+   * @param credentials the credentials
+   * @param access the access
+   * @param realmRoles the realm roles
+   * @return the list
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private List<UserRepresentation> generateUserList(InputStream is,
       List<CredentialRepresentation> credentials, Map<String, Boolean> access,
       List<String> realmRoles) throws IOException {
@@ -143,8 +153,6 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
     for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
       UserRepresentation newUser = new UserRepresentation();
-      ObjectMapper mapper = new ObjectMapper();
-
       XSSFRow row = worksheet.getRow(i);
       // ID can't be created
       newUser.setUsername(row.getCell(0).getStringCellValue());
@@ -160,19 +168,30 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
       List<String> groupsList = Arrays.asList(groups.split(","));
       newUser.setGroups(groupsList);
       newUsers.add(newUser);
-      LOG.info("Try to save User");
-      try {
-        String json = mapper.writeValueAsString(newUser);
-        keycloakConnectorService.addUser(json);
-      } catch (JsonProcessingException e) {
-        LOG_ERROR.error("User not saved");
-        e.printStackTrace();
-      }
-      LOG.info("User saved");
+      createUserOnebyOne(newUser);
 
     }
     workbook.close();
     return newUsers;
+  }
+
+  /**
+   * Creates the user oneby one.
+   *
+   * @param newUser the new user
+   */
+  private void createUserOnebyOne(UserRepresentation newUser) {
+    ObjectMapper userMapper = new ObjectMapper();
+    LOG.info("Try to save User");
+    try {
+      String json = userMapper.writeValueAsString(newUser);
+      keycloakConnectorService.addUser(json);
+    } catch (JsonProcessingException e) {
+      LOG_ERROR.error("User not saved");
+      e.printStackTrace();
+    }
+    LOG.info("User saved");
+
   }
 
 }
