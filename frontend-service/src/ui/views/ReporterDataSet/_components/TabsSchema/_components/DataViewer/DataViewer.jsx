@@ -994,6 +994,14 @@ const DataViewer = withRouter(
       return value && value.length > 0;
     };
 
+    const getRecordValidationByErrorAndMessage = (validation, levelError, message) => {
+      if (!isEmpty(validation)) {
+        return DatasetService.createValidation('RECORD', 0, levelError, message);
+      } else {
+        return [];
+      }
+    };
+
     //Template for Record validation
     const validationsTemplate = recordData => {
       let validations = [];
@@ -1007,7 +1015,7 @@ const DataViewer = withRouter(
         row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
       );
 
-      hasFieldErrors = recordsWithFieldValidations.length > 0;
+      hasFieldErrors = !isEmpty(recordsWithFieldValidations);
 
       const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
 
@@ -1028,30 +1036,60 @@ const DataViewer = withRouter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'INFO'
         );
 
+        validations.push(
+          getRecordValidationByErrorAndMessage(
+            filteredFieldValidationsWithBlocker,
+            'BLOCKER',
+            resources.messages['recordBlockers']
+          )
+        );
+
+        validations.push(
+          getRecordValidationByErrorAndMessage(
+            filteredFieldValidationsWithError,
+            'ERROR',
+            resources.messages['recordErrors']
+          )
+        );
+        validations.push(
+          getRecordValidationByErrorAndMessage(
+            filteredFieldValidationsWithWarning,
+            'WARNING',
+            resources.messages['recordWarnings']
+          )
+        );
+        validations.push(
+          getRecordValidationByErrorAndMessage(
+            filteredFieldValidationsWithInfo,
+            'INFO',
+            resources.messages['recordInfos']
+          )
+        );
+
+        // if (!isEmpty(filteredFieldValidationsWithBlocker)) {
+        //   validations.push(DatasetService.createValidation('RECORD', 0, 'BLOCKER', resources.messages['recordErrors']));
+        // }
+
+        // if (!isEmpty(filteredFieldValidationsWithError)) {
+        //   validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
+        // }
+
+        // if (!isEmpty(filteredFieldValidationsWithWarning)) {
+        //   validations.push(
+        //     DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
+        //   );
+        // }
+
+        // if (!isEmpty(filteredFieldValidationsWithInfo)) {
+        //   validations.push(DatasetService.createValidation('RECORD', 0, 'INFO', resources.messages['recordErrors']));
+        // }
+
         //There are warnings in fields
         // if (filteredFieldValidations.length - filteredFieldValidationsWithError.length > 0) {
         //   validations.push(
         //     DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
         //   );
         // }
-
-        if (filteredFieldValidationsWithBlocker.length > 0) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'BLOCKER', resources.messages['recordErrors']));
-        }
-
-        if (filteredFieldValidationsWithError.length > 0) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
-        }
-
-        if (filteredFieldValidationsWithWarning.length > 0) {
-          validations.push(
-            DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
-          );
-        }
-
-        if (filteredFieldValidationsWithInfo.length > 0) {
-          validations.push(DatasetService.createValidation('RECORD', 0, 'INFO', resources.messages['recordErrors']));
-        }
       }
 
       const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
