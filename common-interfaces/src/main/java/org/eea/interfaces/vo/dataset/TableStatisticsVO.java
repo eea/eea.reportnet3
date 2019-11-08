@@ -18,6 +18,18 @@ import lombok.ToString;
  *
  * @return the java.lang. string
  */
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class TableStatisticsVO implements Serializable {
 

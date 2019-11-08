@@ -164,10 +164,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Find by table value with order.
    *
    * @param idTableSchema the id table schema
-   * @param levelError the level error
+   * @param levelErrorList the level error list
    * @param pageable the pageable
    * @param sortFields the sort fields
-   *
    * @return the list
    */
   @Override

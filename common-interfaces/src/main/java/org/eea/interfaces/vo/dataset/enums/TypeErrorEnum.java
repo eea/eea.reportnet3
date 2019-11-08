@@ -16,8 +16,10 @@ public enum TypeErrorEnum {
   /** The error. */
   ERROR("ERROR"),
 
+  /** The info. */
   INFO("INFO"),
 
+  /** The blocker. */
   BLOCKER("BLOCKER");
 
   /** The value. */
