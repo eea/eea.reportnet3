@@ -49,7 +49,6 @@ public class DateDroolsUtils {
     return true;
   }
 
-
   /**
    * Actual date compare.
    *
@@ -61,6 +60,7 @@ public class DateDroolsUtils {
     final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date dateDrools = null;
     try {
+      sdf.setLenient(false);
       dateDrools = sdf.parse(dateToCompare);
     } catch (ParseException e) {
       return true;
