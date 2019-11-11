@@ -646,4 +646,40 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(resourceManagementControllerZull, times(1)).deleteResourceByName(Mockito.any());
   }
 
+  /**
+   * Creates the field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createFieldSchemaTest1() throws EEAException {
+    Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Assert.assertTrue(dataSchemaServiceImpl.createFieldSchema("<id>", "<id>", new FieldSchemaVO()));
+  }
+
+  /**
+   * Creates the field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createFieldSchemaTest2() throws EEAException {
+    Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+    Assert
+        .assertFalse(dataSchemaServiceImpl.createFieldSchema("<id>", "<id>", new FieldSchemaVO()));
+  }
+
+  /**
+   * Creates the field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createFieldSchemaTest3() throws EEAException {
+    Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(IllegalArgumentException.class);
+    dataSchemaServiceImpl.createFieldSchema("<id>", "<id>", new FieldSchemaVO());
+  }
 }

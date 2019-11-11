@@ -334,13 +334,46 @@ public class DataSetSchemaControllerImplTest {
   }
 
   /**
-   * Creates the table schema test.
+   * Creates the table schema test 1.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void createTableSchemaTest() {
+  public void createTableSchemaTest1() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.doNothing().when(datasetService).saveTablePropagation(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
+  }
+
+  /**
+   * Creates the table schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createTableSchemaTest2() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
+        Mockito.any());
+    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
+  }
+
+  /**
+   * Delete field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test()
+  public void deleteFieldSchemaTest1() throws EEAException {
+    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+    Mockito.verify(dataschemaService, times(1)).deleteFieldSchema(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -354,6 +387,7 @@ public class DataSetSchemaControllerImplTest {
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(false);
     dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+    Mockito.verify(dataschemaService, times(1)).deleteFieldSchema(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -409,4 +443,38 @@ public class DataSetSchemaControllerImplTest {
         .thenThrow(EEAException.class);
     dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
   }
+
+  @Test
+  public void createFieldSchemaTest1() throws EEAException {
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.createFieldSchema(1L, "<id>", new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createFieldSchemaTest2() throws EEAException {
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.createFieldSchema(1L, "<id>", new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createFieldSchemaTest3() throws EEAException {
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    dataSchemaControllerImpl.createFieldSchema(1L, "<id>", new FieldSchemaVO());
+  }
+
+  // try {
+  // if (!dataschemaService.createFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
+  // tableSchemaId, fieldSchemaVO)) {
+  // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+  // }
+  // } catch (EEAException e) {
+  // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
+  // }
 }
