@@ -14,6 +14,7 @@ import { InputText } from 'ui/views/_components/InputText';
 
 export const BigButton = ({
   caption,
+  designDatasetSchemas,
   handleRedirect,
   index,
   isNameEditable,
@@ -24,11 +25,22 @@ export const BigButton = ({
   onSaveError,
   onSaveName,
   placeholder
+  // schemaId,
+  // schemaName
 }) => {
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
+  // const [focusedValue, setFocusedValue] = useState();
 
   const newDatasetRef = useRef();
+
+  const checkDuplicates = (header, index) => {
+    console.log('header', header);
+    console.log('index', index);
+    const inmTitles = [...designDatasetSchemas];
+    const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
+    return repeat.length > 0 && index !== repeat[0].index;
+  };
 
   const onEditorKeyChange = (event, index) => {
     if (event.key === 'Enter') {
@@ -42,13 +54,21 @@ export const BigButton = ({
     }
   };
 
-  const onEditorValueFocus = value => {
+  const onEditorValueFocus = (value, index) => {
     setInitialValue(!isEmpty(value) ? value : initialValue);
+    // setFocusedValue(value);
   };
 
   const onInputSave = (value, index) => {
     if (!isEmpty(buttonsTitle)) {
-      initialValue !== value ? onSaveName(value, index) && onNameEdit() && setInitialValue(buttonsTitle) : onNameEdit();
+      if (checkDuplicates(value, index)) {
+        console.log('name is already taken');
+        onSaveError();
+      } else {
+        initialValue !== value
+          ? onSaveName(value, index) && onNameEdit() && setInitialValue(buttonsTitle)
+          : onNameEdit();
+      }
     } else {
       if (!isUndefined(onSaveError)) {
         onSaveError();
@@ -133,7 +153,7 @@ export const BigButton = ({
           onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
             e.preventDefault();
-            onEditorValueFocus(e.target.value);
+            onEditorValueFocus(e.target.value, index);
           }}
           onKeyDown={e => onEditorKeyChange(e, index)}
           placeholder={placeholder}
