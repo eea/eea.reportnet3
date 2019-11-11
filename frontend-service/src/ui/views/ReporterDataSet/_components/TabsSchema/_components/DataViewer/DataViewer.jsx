@@ -63,8 +63,7 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'WARNING', 'ERROR']);
-    // const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']);
+    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -858,19 +857,19 @@ const DataViewer = withRouter(
             levelError = 'INFO';
           }
         } else if (validation.levelError === 'WARNING') {
-          const wNum = 1;
+          const wNum = 2;
           if (wNum > lvlFlag) {
             lvlFlag = wNum;
             levelError = 'WARNING';
           }
         } else if (validation.levelError === 'ERROR') {
-          const eNum = 2;
+          const eNum = 3;
           if (eNum > lvlFlag) {
             lvlFlag = eNum;
             levelError = 'ERROR';
           }
         } else if (validation.levelError === 'BLOCKER') {
-          const bNum = 2;
+          const bNum = 4;
           if (bNum > lvlFlag) {
             lvlFlag = bNum;
             levelError = 'BLOCKER';
@@ -1019,48 +1018,30 @@ const DataViewer = withRouter(
         const filteredFieldValidationsWithBlocker = filteredFieldValidations.filter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'BLOCKER'
         );
+        if (!isEmpty(filteredFieldValidationsWithBlocker)) {
+          validations.push(getRecordValidationByErrorAndMessage('BLOCKER', resources.messages['recordBlockers']));
+        }
 
         const filteredFieldValidationsWithError = filteredFieldValidations.filter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'ERROR'
         );
+        if (!isEmpty(filteredFieldValidationsWithError)) {
+          validations.push(getRecordValidationByErrorAndMessage('ERROR', resources.messages['recordErrors']));
+        }
 
         const filteredFieldValidationsWithWarning = filteredFieldValidations.filter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'WARNING'
         );
+        if (!isEmpty(filteredFieldValidationsWithWarning)) {
+          validations.push(getRecordValidationByErrorAndMessage('WARNING', resources.messages['recordWarnings']));
+        }
 
         const filteredFieldValidationsWithInfo = filteredFieldValidations.filter(
           filteredFieldValidation => filteredFieldValidation.levelError === 'INFO'
         );
-
-        validations.push(getRecordValidationByErrorAndMessage('BLOCKER', resources.messages['recordBlockers']));
-        validations.push(getRecordValidationByErrorAndMessage('ERROR', resources.messages['recordErrors']));
-        validations.push(getRecordValidationByErrorAndMessage('WARNING', resources.messages['recordWarnings']));
-        validations.push(getRecordValidationByErrorAndMessage('INFO', resources.messages['recordInfos']));
-
-        // if (!isEmpty(filteredFieldValidationsWithBlocker)) {
-        //   validations.push(DatasetService.createValidation('RECORD', 0, 'BLOCKER', resources.messages['recordErrors']));
-        // }
-
-        // if (!isEmpty(filteredFieldValidationsWithError)) {
-        //   validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
-        // }
-
-        // if (!isEmpty(filteredFieldValidationsWithWarning)) {
-        //   validations.push(
-        //     DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
-        //   );
-        // }
-
-        // if (!isEmpty(filteredFieldValidationsWithInfo)) {
-        //   validations.push(DatasetService.createValidation('RECORD', 0, 'INFO', resources.messages['recordErrors']));
-        // }
-
-        //There are warnings in fields
-        // if (filteredFieldValidations.length - filteredFieldValidationsWithError.length > 0) {
-        //   validations.push(
-        //     DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
-        //   );
-        // }
+        if (!isEmpty(filteredFieldValidationsWithInfo)) {
+          validations.push(getRecordValidationByErrorAndMessage('INFO', resources.messages['recordInfos']));
+        }
       }
 
       const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
