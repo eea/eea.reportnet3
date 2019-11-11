@@ -14,10 +14,13 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 
-const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoadingSnapshotListData }) => {
+const SnapshotSlideBar = ({ snapshotListData, isLoadingSnapshotListData, isReleaseVisible }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
   const form = useRef(null);
+
+  const isVisible = snapshotContext.isSnapshotsBarVisible;
+  const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
 
   useEffect(() => {
     const bodySelector = document.querySelector('body');
@@ -84,7 +87,7 @@ const SnapshotSlideBar = ({ isVisible, setIsVisible, snapshotListData, isLoading
         {isLoadingSnapshotListData ? (
           <Spinner />
         ) : snapshotListData.length > 0 ? (
-          <SnapshotsList snapshotListData={snapshotListData} />
+          <SnapshotsList snapshotListData={snapshotListData} isReleaseVisible={isReleaseVisible} />
         ) : (
           <h3>{resources.messages.snapshotsDontExist}</h3>
         )}
