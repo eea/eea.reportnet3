@@ -20,8 +20,8 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { Snapshots } from './_components/Snapshots/index';
-
+import { Snapshots } from 'ui/views/_components/Snapshots';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -36,6 +36,8 @@ import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
+
+import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
 
 export const ReporterDataset = withRouter(({ match, history }) => {
   const {
@@ -59,7 +61,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
-  const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
+
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -134,6 +136,17 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       DownloadFile(exportDatasetData, exportDatasetDataName);
     }
   }, [exportDatasetData]);
+
+  const {
+    isLoadingSnapshotListData,
+    isSnapshotsBarVisible,
+    setIsSnapshotsBarVisible,
+    isSnapshotDialogVisible,
+    setIsSnapshotDialogVisible,
+    snapshotDispatch,
+    snapshotListData,
+    snapshotState
+  } = useReporterDataset(datasetId, dataflowId, growlRef);
 
   useEffect(() => {
     try {
@@ -308,7 +321,14 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <>
+    <SnapshotContext.Provider
+      value={{
+        snapshotState: snapshotState,
+        snapshotDispatch: snapshotDispatch,
+        isSnapshotsBarVisible: isSnapshotsBarVisible,
+
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+      }}>
       {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
       <Title
         title={`${resources.messages['dataflow']}: ${dataflowName} - 
@@ -449,12 +469,12 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
       <Snapshots
-        datasetId={datasetId}
-        dataflowId={dataflowId}
-        growlRef={growlRef}
-        isSnapshotsBarVisible={isSnapshotsBarVisible}
-        setIsSnapshotsBarVisible={setIsSnapshotsBarVisible}
+        snapshotListData={snapshotListData}
+        isLoadingSnapshotListData={isLoadingSnapshotListData}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
+        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        isReleaseVisible={true}
       />
-    </>
+    </SnapshotContext.Provider>
   );
 });
