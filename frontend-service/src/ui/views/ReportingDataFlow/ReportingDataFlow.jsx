@@ -46,6 +46,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   // const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [duplicateSchemaName, setDuplicateSchemaName] = useState(false);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -108,9 +109,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
       if (!isEmpty(dataflow.designDatasets)) {
-        const { designDatasets } = dataflow;
-        const [designDataset] = designDatasets;
-        setDesignDatasetSchemaId(designDataset.datasetId);
+        // const { designDatasets } = dataflow;
+        // const [designDataset] = designDatasets;
+        // setDesignDatasetSchemaId(designDataset.datasetId);
 
         // setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
         dataflow.designDatasets.forEach((schema, idx) => {
@@ -184,6 +185,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
+          setDuplicateSchemaName(false);
           if (isNameEditable) {
             document.getElementsByClassName('p-inputtext p-component')[0].focus();
           }
@@ -212,8 +214,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onDuplicateName = () => {
+    setDuplicateSchemaName(true);
+  };
+
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
+    setDuplicateSchemaName(false);
     if (isNameEditable) {
       document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
@@ -368,6 +375,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       }}
                       index={activeIndex}
                       isNameEditable={isNameEditable}
+                      onNameDuplicate={onDuplicateName}
                       onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
@@ -520,7 +528,13 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
-
+        <Dialog
+          footer={errorDialogFooter}
+          header={resources.messages['error'].toUpperCase()}
+          onHide={onHideErrorDialog}
+          visible={duplicateSchemaName}>
+          <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
+        </Dialog>
         <Dialog
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}

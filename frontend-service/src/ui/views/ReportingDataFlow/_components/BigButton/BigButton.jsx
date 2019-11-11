@@ -21,6 +21,7 @@ export const BigButton = ({
   isReleased,
   layout,
   model,
+  onNameDuplicate,
   onNameEdit,
   onSaveError,
   onSaveName,
@@ -63,7 +64,7 @@ export const BigButton = ({
     if (!isEmpty(buttonsTitle)) {
       if (checkDuplicates(value, index)) {
         console.log('name is already taken');
-        onSaveError();
+        onNameDuplicate();
       } else {
         initialValue !== value
           ? onSaveName(value, index) && onNameEdit() && setInitialValue(buttonsTitle)

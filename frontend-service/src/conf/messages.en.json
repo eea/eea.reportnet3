@@ -91,6 +91,7 @@
 		"documentUploadingGrowlErrorDetail": "Error",
 		"documentUploadingGrowlErrorSummary": "Document upload",
 		"duplicate": "Duplicate",
+		"duplicateSchemaError": "The schema name already exists. Please, choose another one",
 		"duplicateTabHeader": "Duplicate table name",
 		"duplicateTabHeaderError": "The table name already exists in the schema. Please, select another one",
 		"ds": "DS",
