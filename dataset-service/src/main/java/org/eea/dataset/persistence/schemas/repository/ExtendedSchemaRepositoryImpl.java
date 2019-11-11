@@ -134,9 +134,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     try {
       return mongoOperations.updateMulti(
           new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId)))
-              .addCriteria(new Criteria("tableSchemas._id").is(new ObjectId(tableSchemaId)))
-              .addCriteria(
-                  new Criteria("tableSchemas.recordSchema._id").is(fieldSchema.getIdRecord())),
+              .addCriteria(new Criteria("tableSchemas._id").is(new ObjectId(tableSchemaId))),
           new Update().push("tableSchemas.$.recordSchema.fieldSchemas", fieldSchema),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {

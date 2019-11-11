@@ -37,7 +37,6 @@ import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
-import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,10 +203,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param role the role
    */
   @Override
-  public void deleteGroup(Long datasetId, ObjectAccessRoleEnum... roles) {
+  public void deleteGroup(Long datasetId, ResourceGroupEnum... roles) {
     List<String> resources = new ArrayList<>();
     // Remove groups from list
-    Arrays.asList(roles).stream().forEach(role -> resources.add(role.getAccessRole(datasetId)));
+    Arrays.asList(roles).stream().forEach(role -> resources.add(role.getGroupName(datasetId)));
     resourceManagementControllerZull.deleteResourceByName(resources);
   }
 
