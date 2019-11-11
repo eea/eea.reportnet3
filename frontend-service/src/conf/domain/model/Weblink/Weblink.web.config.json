@@ -1,0 +1,4 @@
+{
+    "create": "/webLink?idDataflow={:dataflowId}",
+    "all": "/document/{:documentId}"    
+}

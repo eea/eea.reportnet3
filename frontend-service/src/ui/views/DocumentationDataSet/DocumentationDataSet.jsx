@@ -123,6 +123,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
               onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
               webLinks={webLinks}
               isCustodian={isCustodian}
+              dataflowId={match.params.dataflowId}
             />
           </TabPanel>
         </TabView>

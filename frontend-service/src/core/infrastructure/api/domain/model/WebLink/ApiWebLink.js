@@ -1,4 +1,5 @@
 import { DataflowConfig } from 'conf/domain/model/DataFlow';
+import { WeblinkConfig } from 'conf/domain/model/Weblink';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
@@ -18,5 +19,41 @@ export const apiWebLink = {
       }
     });
     return response.data.weblinks;
+  },
+  /*   all: async dataflowId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/list-of-documents.json'
+        : getUrl(WeblinkConfig.all, {
+            dataflowId: dataflowId
+          }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data.weblinks;
+  }, */
+  create: async (dataflowId, weblinkToCreate) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: getUrl(WeblinkConfig.create, {
+          dataflowId
+        }),
+        data: {
+          description: weblinkToCreate.description,
+          url: weblinkToCreate.url
+        },
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error creating the weblink: ${error}`);
+      return false;
+    }
   }
 };

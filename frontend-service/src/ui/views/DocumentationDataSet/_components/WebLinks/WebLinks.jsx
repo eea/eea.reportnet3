@@ -13,8 +13,10 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { WebLinkService } from 'core/services/WebLink';
+import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-export const WebLinks = ({ webLinks, isCustodian }) => {
+export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
   const [editedRecord, setEditedRecord] = useState({});
@@ -56,7 +58,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
     </div>
   );
 
-  const addRowDialogFooter = (
+  /*  const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button label={resources.messages['save']} icon="save" onClick={() => onSaveRecord(newRecord)} />
       <Button
@@ -68,12 +70,7 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
         }}
       />
     </div>
-  );
-
-  const fieldsArray = [
-    { field: 'description', header: resources.messages['description'] },
-    { field: 'url', header: resources.messages['url'] }
-  ];
+  ); */
 
   /*   const newRecordForm = fieldsArray.map(column => {
     if (isAddDialogVisible) {
@@ -96,6 +93,11 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
       );
     }
   }); */
+
+  const fieldsArray = [
+    { field: 'description', header: resources.messages['description'] },
+    { field: 'url', header: resources.messages['url'] }
+  ];
 
   const onEditAddFormInput = (field, value) => {
     let record = {};
@@ -175,22 +177,23 @@ export const WebLinks = ({ webLinks, isCustodian }) => {
   const onSaveRecord = async record => {
     if (isNewRecord) {
       try {
-        console.log('saving', record);
+        await WebLinkService.create(dataflowId, record);
+
         setIsAddDialogVisible(false);
       } catch (error) {
-        console.error('DataViewer error: ', error);
+        console.error('Error on save new Weblink: ', error);
+
         const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-      } finally {
+
+        console.error('errorResponse: ', errorResponse);
       }
     } else {
       try {
         setIsEditDialogVisible(false);
       } catch (error) {
-        console.error('DataViewer error: ', error);
+        console.error('Error on update new Weblink: ', error);
         const errorResponse = error.response;
-        console.error('DataViewer errorResponse: ', errorResponse);
-      } finally {
+        console.error('errorResponse: ', errorResponse);
       }
     }
   };

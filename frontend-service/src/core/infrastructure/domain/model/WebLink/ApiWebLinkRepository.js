@@ -6,6 +6,13 @@ const all = async dataflowId => {
   return webLinksDTO.map(webLinkDTO => new WebLink(webLinkDTO.id, webLinkDTO.description, webLinkDTO.url));
 };
 
+const create = async (dataflowId, weblinkToCreate) => {
+  const isCreated = await apiWebLink.create(dataflowId, weblinkToCreate);
+  weblinkToCreate.isCreated = isCreated;
+  return weblinkToCreate;
+};
+
 export const ApiWebLinkRepository = {
-  all
+  all,
+  create
 };
