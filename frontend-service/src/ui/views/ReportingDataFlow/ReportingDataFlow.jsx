@@ -38,9 +38,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
+  const [activeIndex, setActiveIndex] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -108,6 +110,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         const { designDatasets } = dataflow;
         const [designDataset] = designDatasets;
         setDesignDatasetSchemaId(designDataset.datasetId);
+
+        // setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
+        dataflow.designDatasets.forEach((schema, idx) => {
+          setActiveIndex(idx);
+          schema.index = idx;
+        });
+        setDesignDatasetSchemas(dataflow.designDatasets);
+        // setActiveIndex(dataflow.designDatasets.map(index => index.index));
       }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -177,10 +187,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setErrorDialogVisible(true);
   };
 
-  const onDeleteDatasetSchema = async schemaId => {
+  const onDeleteDatasetSchema = async (schemaId, index = 0) => {
     setDeleteDialogVisible(false);
     try {
-      const response = await DatasetService.deleteSchemaById(schemaId);
+      const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
         onUpdateData();
       }
@@ -204,7 +214,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setIsDataUpdated(!isDataUpdated);
   };
 
-  const onSaveName = async value => {
+  const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
   };
 
@@ -341,6 +351,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                           )
                         );
                       }}
+                      index={activeIndex}
                       isNameEditable={isNameEditable}
                       onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}

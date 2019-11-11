@@ -15,6 +15,7 @@ import { InputText } from 'ui/views/_components/InputText';
 export const BigButton = ({
   caption,
   handleRedirect,
+  index,
   isNameEditable,
   isReleased,
   layout,
@@ -29,9 +30,9 @@ export const BigButton = ({
 
   const newDatasetRef = useRef();
 
-  const onEditorKeyChange = event => {
+  const onEditorKeyChange = (event, index) => {
     if (event.key === 'Enter') {
-      onInputSave(event.target.value);
+      onInputSave(event.target.value, index);
     }
     if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
@@ -45,9 +46,9 @@ export const BigButton = ({
     setInitialValue(!isEmpty(value) ? value : initialValue);
   };
 
-  const onInputSave = value => {
+  const onInputSave = (value, index) => {
     if (!isEmpty(buttonsTitle)) {
-      initialValue !== value ? onSaveName(value) && onNameEdit() && setInitialValue(buttonsTitle) : onNameEdit();
+      initialValue !== value ? onSaveName(value, index) && onNameEdit() && setInitialValue(buttonsTitle) : onNameEdit();
     } else {
       if (!isUndefined(onSaveError)) {
         onSaveError();
@@ -123,17 +124,18 @@ export const BigButton = ({
       </div>
       {!isUndefined(isNameEditable) && isNameEditable ? (
         <InputText
+          key={index}
           autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
-            onInputSave(e.target.value);
+            onInputSave(e.target.value, index);
           }}
           onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
             e.preventDefault();
             onEditorValueFocus(e.target.value);
           }}
-          onKeyDown={e => onEditorKeyChange(e)}
+          onKeyDown={e => onEditorKeyChange(e, index)}
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
