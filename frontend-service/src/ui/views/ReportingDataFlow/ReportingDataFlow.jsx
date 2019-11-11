@@ -45,10 +45,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
+  const [designDatasetNames, setDesignDatasetNames] = useState();
   // const [datasetSchemaName, setDatasetSchemaName] = useState();
-  const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
+  // const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [duplicateSchemaName, setDuplicateSchemaName] = useState(false);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [isActiveContributorsDialog, setIsActiveContributorsDialog] = useState(false);
@@ -57,6 +57,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isActiveReleaseSnapshotConfirmDialog, setIsActiveReleaseSnapshotConfirmDialog] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
+  const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
   const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -117,6 +118,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         // setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
         dataflow.designDatasets.forEach((schema, idx) => {
+          setDesignDatasetNames(schema.datasetSchemaName);
           setActiveIndex(idx);
           schema.index = idx;
         });
@@ -187,7 +189,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         icon="check"
         onClick={() => {
           setErrorDialogVisible(false);
-          setDuplicateSchemaName(false);
+          setIsDuplicated(false);
           if (isNameEditable) {
             document.getElementsByClassName('p-inputtext p-component')[0].focus();
           }
@@ -220,12 +222,12 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onDuplicateName = () => {
-    setDuplicateSchemaName(true);
+    setIsDuplicated(true);
   };
 
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
-    setDuplicateSchemaName(false);
+    setIsDuplicated(false);
     if (isNameEditable) {
       document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
@@ -530,6 +532,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             isFormReset={isFormReset}
             onCreate={onCreateDataset}
             onUpdateData={onUpdateData}
+            schemaNames={designDatasetNames}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
@@ -537,7 +540,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           footer={errorDialogFooter}
           header={resources.messages['error'].toUpperCase()}
           onHide={onHideErrorDialog}
-          visible={duplicateSchemaName}>
+          visible={isDuplicated}>
           <div className="p-grid p-fluid">{resources.messages['duplicateSchemaError']}</div>
         </Dialog>
         <Dialog

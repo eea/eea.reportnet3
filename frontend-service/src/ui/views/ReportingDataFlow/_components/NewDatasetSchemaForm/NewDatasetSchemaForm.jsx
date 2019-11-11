@@ -12,7 +12,14 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 import { DataflowService } from 'core/services/DataFlow';
 
-export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpdateData, setNewDatasetDialog }) => {
+export const NewDatasetSchemaForm = ({
+  dataflowId,
+  schemaNames,
+  isFormReset,
+  onCreate,
+  onUpdateData,
+  setNewDatasetDialog
+}) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
 
@@ -23,6 +30,9 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
     datasetSchemaName: Yup.string()
       .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .required(resources.messages['emptyDatasetSchema'])
+      .test('', resources.messages['duplicateSchemaError'], value => {
+        return value.toLowerCase() !== schemaNames.toLowerCase();
+      })
   });
 
   if (!isNull(form.current)) {
