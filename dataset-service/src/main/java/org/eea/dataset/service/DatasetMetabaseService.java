@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 
 /**
@@ -56,5 +57,18 @@ public interface DatasetMetabaseService {
    * @return true, if successful
    */
   boolean updateDatasetName(Long datasetId, String datasetName);
+
+
+  /**
+   * Gets the statistics.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics
+   * @throws EEAException the EEA exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
+  StatisticsVO getStatistics(Long datasetId)
+      throws EEAException, InstantiationException, IllegalAccessException;
 
 }

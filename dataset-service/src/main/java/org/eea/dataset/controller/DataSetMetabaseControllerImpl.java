@@ -11,6 +11,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,6 +152,29 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
     return designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
 
+  }
+
+
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the statistics by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
+
+    StatisticsVO statistics = null;
+    try {
+      statistics = datasetMetabaseService.getStatistics(datasetId);
+    } catch (EEAException | InstantiationException | IllegalAccessException e) {
+      LOG_ERROR.error("Error getting statistics. Error message: {}", e.getMessage(), e);
+    }
+
+    return statistics;
   }
 
 }

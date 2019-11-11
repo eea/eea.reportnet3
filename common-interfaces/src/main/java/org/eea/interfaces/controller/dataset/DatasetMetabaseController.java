@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -80,4 +81,15 @@ public interface DatasetMetabaseController {
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
+
+
+  /**
+   * Gets the statistics by id.
+   *
+   * @param datasetId the dataset id
+   * @return the statistics by id
+   */
+  @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
+
 }

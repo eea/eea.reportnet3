@@ -1,4 +1,4 @@
-package org.eea.dataset.persistence.data.domain;
+package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.Objects;
 import javax.persistence.Column;
@@ -24,11 +24,14 @@ public class Statistics {
 
   /** The id. */
   @Id
-  @SequenceGenerator(name = "statistics_sequence_generator", sequenceName = "statistics_sequence",
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "statistics_id_seq")
+  @SequenceGenerator(name = "statistics_id_seq", sequenceName = "statistics_id_seq",
       allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "statistics_sequence_generator")
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
+
+  @Column(name = "ID_DATASET")
+  private Long idDataset;
 
   /** The stat name. */
   @Column(name = "STAT_NAME")

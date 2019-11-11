@@ -13,7 +13,7 @@
     "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&idTableSchema={:tableSchemaId}&mimeType={:fileType}",
     "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fields={:sortField}&pageNum={:pageNum}&pageSize={:pageSize}&levelErrorsFilter={:levelErrorsFilter}&typeEntitiesFilter={:typeEntitiesFilter}&originsFilter={:originsFilter}",
     "loadDataTable": "/dataset/{:datasetId}/loadTableData/{:tableId}",
-    "loadStatistics": "/dataset/loadStatistics/{:datasetId}",
+    "loadStatistics": "/datasetmetabase/{:datasetId}/loadStatistics",
     "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
     "updateTableDataField": "/dataset/{:datasetId}/updateField",
     "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord",
