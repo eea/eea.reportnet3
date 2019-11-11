@@ -70,11 +70,11 @@ public interface DatasetSchemaService {
   /**
    * Update name table schema.
    *
-   * @param id the id
+   * @param datasetSchemaid the dataset schemaid
    * @param tableSchema the table schema
    * @throws EEAException the EEA exception
    */
-  void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException;
+  void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchema) throws EEAException;
 
   /**
    * Creates the table schema.

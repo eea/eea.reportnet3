@@ -87,6 +87,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
+
+  /** The table schema mapper. */
+  @Autowired
+  private TableSchemaMapper tableSchemaMapper;
+
   /**
    * The Constant LOG.
    */
@@ -221,12 +226,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     return resourceInfoVO;
   }
-
-  /**
-   * The table mapper.
-   */
-  @Autowired
-  private TableSchemaMapper tableMapper;
 
   /**
    * Creates the data schema.
@@ -510,39 +509,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
 
-
   /**
    * Update table schema.
    *
-   * @param id the id
+   * @param datasetSchemaid the dataset schemaid
    * @param tableSchema the table schema
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateTableSchema(String id, TableSchemaVO tableSchema) throws EEAException {
-    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(id)).orElse(null);
-
-    if (datasetSchema != null) {
-      TableSchema table = getTableSchema(tableSchema.getIdTableSchema(), datasetSchema);
-      if (table != null) {
-        // set the attributtes of VO
-        table.setNameTableSchema(tableSchema.getNameTableSchema());
-        table.setIdDataSet(new ObjectId(id));
-        table.setIdTableSchema(new ObjectId(tableSchema.getIdTableSchema()));
-
-        schemasRepository.deleteTableSchemaById(tableSchema.getIdTableSchema());
-        schemasRepository.insertTableSchema(table, id);
-      } else {
+  public void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchemaVO)
+      throws EEAException {
+    try {
+      if (schemasRepository
+          .updateTableSchema(datasetSchemaid, tableSchemaMapper.classToEntity(tableSchemaVO))
+          .getModifiedCount() == 0) {
         LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
         throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
       }
-    } else {
-      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
     }
   }
-
-
 
   /**
    * Gets the table schema.
@@ -572,7 +559,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (tableSchema.getIdTableSchema() == null) {
       tableSchema.setIdTableSchema(new ObjectId().toString());
     }
-    TableSchema table = tableMapper.classToEntity(tableSchema);
+    TableSchema table = tableSchemaMapper.classToEntity(tableSchema);
     LOG.info("Creating table schema with id {}", tableSchema.getIdTableSchema());
     schemasRepository.insertTableSchema(table, id);
   }

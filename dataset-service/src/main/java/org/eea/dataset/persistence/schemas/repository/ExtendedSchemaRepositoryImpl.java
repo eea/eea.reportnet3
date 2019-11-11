@@ -31,6 +31,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   @Autowired
   private MongoTemplate mongoTemplate;
 
+  /** The mongo database. */
   @Autowired
   private MongoDatabase mongoDatabase;
 
@@ -127,6 +128,30 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
                   Document.parse(fieldSchema.toJSON()))),
           new UpdateOptions().arrayFilters(
               Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
+   * Update table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchema the table schema
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UpdateResult updateTableSchema(String datasetSchemaId, TableSchema tableSchema)
+      throws EEAException {
+    try {
+      return mongoDatabase.getCollection("DataSetSchema").updateOne(
+          new Document("_id", new ObjectId(datasetSchemaId)).append("tableSchemas._id",
+              tableSchema.getIdTableSchema()),
+          new Document("$set",
+              new Document("tableSchemas.$[tableSchemaId]", Document.parse(tableSchema.toJSON()))),
+          new UpdateOptions().arrayFilters(
+              Arrays.asList(new Document("tableSchemaId._id", tableSchema.getIdTableSchema()))));
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }

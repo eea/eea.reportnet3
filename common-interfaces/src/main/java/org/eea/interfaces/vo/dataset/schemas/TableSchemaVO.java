@@ -30,9 +30,6 @@ public class TableSchemaVO {
   /** The rule table. */
   private List<RuleTableVO> ruleTable;
 
-  /** The order. */
-  private int order;
-
   /**
    * Hash code.
    *
@@ -40,7 +37,7 @@ public class TableSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idTableSchema, nameTableSchema, recordSchema, ruleTable, order);
+    return Objects.hash(idTableSchema, nameTableSchema, recordSchema, ruleTable);
   }
 
   /**
@@ -61,7 +58,7 @@ public class TableSchemaVO {
     return Objects.equals(idTableSchema, other.idTableSchema)
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
-        && Objects.equals(ruleTable, other.ruleTable) && Objects.equals(order, other.order);
+        && Objects.equals(ruleTable, other.ruleTable);
   }
 
 }

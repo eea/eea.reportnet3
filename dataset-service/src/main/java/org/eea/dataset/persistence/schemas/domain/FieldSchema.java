@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.eea.dataset.persistence.schemas.domain;
 
@@ -49,6 +49,11 @@ public class FieldSchema {
   @Field(value = "rules")
   private List<RuleField> ruleField;
 
+  /**
+   * To JSON.
+   *
+   * @return the string
+   */
   public String toJSON() {
     return "{\"_id\": {\"$oid\":\"" + idFieldSchema + "\"}, \"idRecord\": {\"$oid\":\"" + idRecord
         + "\"}, \"typeData\": \"" + type.getValue() + "\", \"headerName\": \"" + headerName

@@ -60,4 +60,15 @@ public interface ExtendedSchemaRepository {
    */
   UpdateResult updateFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
       throws EEAException;
+
+  /**
+   * Update table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchema the table schema
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult updateTableSchema(String datasetSchemaId, TableSchema tableSchema)
+      throws EEAException;
 }

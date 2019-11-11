@@ -46,6 +46,5 @@ public interface TableSchemaMapper extends IMapper<TableSchema, TableSchemaVO> {
   @Mapping(source = "idFieldSchema", target = "id")
   FieldSchemaVO entityToClass(FieldSchema model);
 
-
 }
 
