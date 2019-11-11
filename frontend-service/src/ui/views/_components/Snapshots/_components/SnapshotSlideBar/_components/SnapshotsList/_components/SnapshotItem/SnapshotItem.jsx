@@ -8,7 +8,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 
-export function SnapshotItem({ itemData }) {
+export function SnapshotItem({ itemData, isReleaseVisible }) {
   const snapshotContext = useContext(SnapshotContext);
 
   const resources = useContext(ResourcesContext);
@@ -33,26 +33,30 @@ export function SnapshotItem({ itemData }) {
                 });
               }}
             />
-            <Button
-              tooltip={
-                itemData.isReleased
-                  ? resources.messages.releasedSnapshotTooltip
-                  : resources.messages.releaseSnapshotTooltip
-              }
-              tooltipOptions={{ position: 'top' }}
-              icon={itemData.isReleased ? 'check' : 'cloudUpload'}
-              className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
-              onClick={() =>
-                snapshotContext.snapshotDispatch(
+            {isReleaseVisible ? (
+              <Button
+                tooltip={
                   itemData.isReleased
-                    ? {}
-                    : {
-                        type: 'release_snapshot',
-                        payload: { ...itemData }
-                      }
-                )
-              }
-            />
+                    ? resources.messages.releasedSnapshotTooltip
+                    : resources.messages.releaseSnapshotTooltip
+                }
+                tooltipOptions={{ position: 'top' }}
+                icon={itemData.isReleased ? 'check' : 'cloudUpload'}
+                className={`${styles.btn} rp-btn ${itemData.isReleased ? 'success' : `default`}`}
+                onClick={() =>
+                  snapshotContext.snapshotDispatch(
+                    itemData.isReleased
+                      ? {}
+                      : {
+                          type: 'release_snapshot',
+                          payload: { ...itemData }
+                        }
+                  )
+                }
+              />
+            ) : (
+              <></>
+            )}
             <Button
               tooltip={resources.messages.deleteSnapshotTooltip}
               tooltipOptions={{ position: 'left' }}
