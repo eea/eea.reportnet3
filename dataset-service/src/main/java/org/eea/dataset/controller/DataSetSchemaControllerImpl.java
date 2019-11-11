@@ -12,7 +12,7 @@ import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,8 +257,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.deleteDatasetSchema(datasetId, schemaId);
       datasetMetabaseService.deleteDesignDataset(datasetId);
       recordStoreControllerZull.deleteDataset("dataset_" + datasetId);
-      dataschemaService.deleteGroup(datasetId, ObjectAccessRoleEnum.DATASCHEMA_CUSTODIAN,
-          ObjectAccessRoleEnum.DATASCHEMA_PROVIDER);
+      dataschemaService.deleteGroup(datasetId, ResourceGroupEnum.DATASCHEMA_CUSTODIAN,
+          ResourceGroupEnum.DATASCHEMA_PROVIDER);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR, e);

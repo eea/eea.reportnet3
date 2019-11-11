@@ -5,7 +5,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 
 /**
  * The Interface DataschemaService.
@@ -98,7 +98,7 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    * @param role the role
    */
-  void deleteGroup(Long datasetId, ObjectAccessRoleEnum... role);
+  void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
   /**
    * Creates the field schema.
