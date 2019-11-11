@@ -29,7 +29,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  * The Class DataFlowWebLinkControllerImpl.
  */
 @RestController
-@RequestMapping(value = "/webLink")
+@RequestMapping(value = "/weblink")
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
