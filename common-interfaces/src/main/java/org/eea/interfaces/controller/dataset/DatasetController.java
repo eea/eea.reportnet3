@@ -8,7 +8,6 @@ import javax.ws.rs.Produces;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -136,16 +135,6 @@ public interface DatasetController {
    */
   @RequestMapping(value = "{id}/dataflow", method = RequestMethod.GET)
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
-
-
-  /**
-   * Gets the statistics by id.
-   *
-   * @param datasetId the dataset id
-   * @return the statistics by id
-   */
-  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
 
   /**
    * Insert records.

@@ -5,13 +5,17 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
@@ -57,6 +61,9 @@ public class DatasetMetabaseServiceTest {
 
   @Mock
   private DesignDatasetRepository designDatasetRepository;
+
+  @Mock
+  private StatisticsRepository statisticsRepository;
 
 
   /**
@@ -131,4 +138,56 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.deleteDesignDataset(1L);
     Mockito.verify(dataSetMetabaseRepository, times(1)).deleteById(Mockito.anyLong());
   }
+
+
+  @Test
+  public void testGetStatisticsSuccess() throws Exception {
+
+    datasetMetabaseService.getStatistics(1L);
+    Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDataset(Mockito.any());
+  }
+
+
+
+  @Test
+  public void testGetStatisticsSuccess2() throws Exception {
+
+    List<Statistics> stats = new ArrayList<>();
+    Statistics stat = new Statistics();
+    ReportingDataset dataset = new ReportingDataset();
+    dataset.setId(1L);
+    stat.setDataset(dataset);
+    stat.setStatName("test");
+    stat.setValue("0");
+    stat.setIdTableSchema("idTableSchema");
+    stats.add(stat);
+    when(statisticsRepository.findStatisticsByIdDataset(Mockito.any())).thenReturn(stats);
+    datasetMetabaseService.getStatistics(1L);
+    Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDataset(Mockito.any());
+  }
+
+
+  @Test
+  public void testGlobalStatisticsSuccess() throws Exception {
+
+    List<Statistics> stats = new ArrayList<>();
+    Statistics stat = new Statistics();
+    ReportingDataset dataset = new ReportingDataset();
+    dataset.setId(1L);
+    stat.setDataset(dataset);
+    stat.setStatName("test");
+    stat.setValue("0");
+    stat.setIdTableSchema("idTableSchema");
+    stats.add(stat);
+    List<ReportingDataset> datasets = new ArrayList<>();
+    dataset.setId(1L);
+    datasets.add(dataset);
+    when(reportingDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(datasets);
+    when(statisticsRepository.findStatisticsByIdDatasets(Mockito.any())).thenReturn(stats);
+
+
+    datasetMetabaseService.getGlobalStatistics(1L);
+    Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDatasets(Mockito.any());
+  }
+
 }

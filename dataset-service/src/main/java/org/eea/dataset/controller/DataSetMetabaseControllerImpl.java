@@ -177,4 +177,31 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return statistics;
   }
 
+
+  /**
+   * Gets the statistics by dataflow.
+   *
+   * @param idDataflow the id dataflow
+   *
+   * @return the statistics by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataflow/{idDataflow}/globalStatistics",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow) {
+
+    List<StatisticsVO> statistics = null;
+
+    try {
+      statistics = datasetMetabaseService.getGlobalStatistics(idDataflow);
+    } catch (EEAException | InstantiationException | IllegalAccessException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return statistics;
+  }
+
+
 }

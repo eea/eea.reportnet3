@@ -205,54 +205,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public StatisticsVO getStatistics(final Long datasetId)
       throws EEAException, InstantiationException, IllegalAccessException {
 
-    // DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-    StatisticsVO stats = new StatisticsVO();
-
     List<Statistics> statistics = statisticsRepository.findStatisticsByIdDataset(datasetId);
-    List<Statistics> statisticsTables = statistics.stream()
-        .filter(s -> StringUtils.isNotBlank(s.getIdTableSchema())).collect(Collectors.toList());
-    List<Statistics> statisticsDataset = statistics.stream()
-        .filter(s -> StringUtils.isBlank(s.getIdTableSchema())).collect(Collectors.toList());
 
-    Map<String, List<Statistics>> tablesMap = statisticsTables.stream()
-        .collect(Collectors.groupingBy(Statistics::getIdTableSchema, Collectors.toList()));
-
-    // Dataset level stats
-    Class<?> clazzStats = stats.getClass();
-    Object instance = clazzStats.newInstance();
-    statisticsDataset.stream().forEach(s -> {
-      setEntityProperty(instance, s.getStatName(), s.getValue());
-    });
-    stats = (StatisticsVO) instance;
-
-    // Table statistics
-    stats.setTables(new ArrayList<>());
-    for (List<Statistics> listStats : tablesMap.values()) {
-      Class<?> clazzTable = TableStatisticsVO.class;
-      Object instanceTable = clazzTable.newInstance();
-      listStats.stream().forEach(s -> {
-        setEntityProperty(instanceTable, s.getStatName(), s.getValue());
-      });
-      stats.getTables().add((TableStatisticsVO) instanceTable);
-    }
-
-    // Check if there are empty tables
-    /*
-     * DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new
-     * ObjectId(dataset.getIdDatasetSchema())); List<String> listIdsDataSetSchema = new
-     * ArrayList<>(); Map<String, String> mapIdNameDatasetSchema = new HashMap<>(); for (TableSchema
-     * tableSchema : schema.getTableSchemas()) {
-     * listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
-     * mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-     * tableSchema.getNameTableSchema()); } List<String> listIdDataSetSchema = new ArrayList<>();
-     * List<TableValue> allTableValues = dataset.getTableValues(); for (TableValue tableValue :
-     * allTableValues) { listIdDataSetSchema.add(tableValue.getIdTableSchema()); }
-     * listIdsDataSetSchema.removeAll(listIdDataSetSchema); for (String idTableSchem :
-     * listIdsDataSetSchema) { stats.getTables() .add(new TableStatisticsVO(idTableSchem,
-     * mapIdNameDatasetSchema.get(idTableSchem))); }
-     */
-
-    return stats;
+    return processStatistics(statistics);
   }
 
 
@@ -288,6 +243,74 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       }
     }
     return false;
+  }
+
+
+  private StatisticsVO processStatistics(List<Statistics> statistics)
+      throws InstantiationException, IllegalAccessException {
+
+    StatisticsVO stats = new StatisticsVO();
+
+    List<Statistics> statisticsTables = statistics.stream()
+        .filter(s -> StringUtils.isNotBlank(s.getIdTableSchema())).collect(Collectors.toList());
+    List<Statistics> statisticsDataset = statistics.stream()
+        .filter(s -> StringUtils.isBlank(s.getIdTableSchema())).collect(Collectors.toList());
+
+    Map<String, List<Statistics>> tablesMap = statisticsTables.stream()
+        .collect(Collectors.groupingBy(Statistics::getIdTableSchema, Collectors.toList()));
+
+    // Dataset level stats
+    Class<?> clazzStats = stats.getClass();
+    Object instance = clazzStats.newInstance();
+    statisticsDataset.stream().forEach(s -> {
+      setEntityProperty(instance, s.getStatName(), s.getValue());
+    });
+    stats = (StatisticsVO) instance;
+
+    // Table statistics
+    stats.setTables(new ArrayList<>());
+    for (List<Statistics> listStats : tablesMap.values()) {
+      Class<?> clazzTable = TableStatisticsVO.class;
+      Object instanceTable = clazzTable.newInstance();
+      listStats.stream().forEach(s -> {
+        setEntityProperty(instanceTable, s.getStatName(), s.getValue());
+      });
+      stats.getTables().add((TableStatisticsVO) instanceTable);
+    }
+
+    return stats;
+
+
+  }
+
+
+
+  @Override
+  public List<StatisticsVO> getGlobalStatistics(Long dataflowId)
+      throws InstantiationException, IllegalAccessException {
+
+    List<StatisticsVO> statistics = new ArrayList<>();
+
+    List<ReportingDataset> datasets = reportingDatasetRepository.findByDataflowId(dataflowId);
+    List<Long> datasetsId = new ArrayList<>();
+    datasets.stream().forEach(d -> datasetsId.add(d.getId()));
+    List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasets(datasetsId);
+
+    Map<ReportingDataset, List<Statistics>> statsMap =
+        stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));
+
+    statsMap.values().stream().forEach(s -> {
+
+      try {
+        statistics.add(processStatistics(s));
+      } catch (InstantiationException | IllegalAccessException e) {
+
+      }
+
+    });
+
+
+    return statistics;
   }
 
 }

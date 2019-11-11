@@ -55,8 +55,10 @@ public class StatsHelper {
     List<StatisticsVO> statistics = new ArrayList<>();
     DataFlowVO dfVO = dataflowService.getReportingDatasetsId(dataflowId);
     LOG.info("Retrieving all the datasets' stats from the dataflow: {}", dataflowId);
-    dfVO.getReportingDatasets().parallelStream()
-        .forEach(d -> statistics.add(datasetController.getStatisticsById(d.getId())));
+    /*
+     * dfVO.getReportingDatasets().parallelStream() .forEach(d ->
+     * statistics.add(datasetController.getStatisticsById(d.getId())));
+     */
 
 
     return statistics;

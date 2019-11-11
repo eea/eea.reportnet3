@@ -71,4 +71,7 @@ public interface DatasetMetabaseService {
   StatisticsVO getStatistics(Long datasetId)
       throws EEAException, InstantiationException, IllegalAccessException;
 
+  List<StatisticsVO> getGlobalStatistics(Long dataflowId)
+      throws EEAException, InstantiationException, IllegalAccessException;
+
 }

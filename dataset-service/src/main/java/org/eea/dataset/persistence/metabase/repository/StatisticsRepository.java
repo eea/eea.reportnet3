@@ -14,22 +14,22 @@ import org.springframework.data.repository.query.Param;
  */
 public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
 
-  /**
-   * Find all statistics.
-   *
-   * @return the list
-   */
-  /*
-   * @Query("SELECT s from Statistics s") List<Statistics> findAllStatistics();
-   */
 
-  @Query("SELECT s from Statistics s WHERE s.idDataset = :idDataset")
+
+  @Query("SELECT s from Statistics s WHERE s.dataset.id = :idDataset")
   List<Statistics> findStatisticsByIdDataset(@Param("idDataset") Long idDataset);
 
+
+  @Query("SELECT s from Statistics s WHERE s.dataset.id in(:ids)")
+  List<Statistics> findStatisticsByIdDatasets(@Param("ids") List<Long> ids);
 
   @Modifying
   @Transactional
   @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset")
   void deleteStatsByIdDataset(@Param("idDataset") Long idDataset);
+
+  @Query("SELECT s from Statistics s WHERE s.dataset.datasetSchema=:idDatasetSchema")
+  List<Statistics> findStatisticsByIdDatasetSchema(
+      @Param("idDatasetSchema") String idDatasetSchema);
 
 }

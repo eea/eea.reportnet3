@@ -1,11 +1,14 @@
 package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -30,9 +33,6 @@ public class Statistics {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  @Column(name = "ID_DATASET")
-  private Long idDataset;
-
   /** The stat name. */
   @Column(name = "STAT_NAME")
   private String statName;
@@ -44,6 +44,11 @@ public class Statistics {
   /** The value. */
   @Column(name = "VALUE")
   private String value;
+
+
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
+  @JoinColumn(name = "ID_DATASET", referencedColumnName = "id")
+  private ReportingDataset dataset;
 
 
   /**

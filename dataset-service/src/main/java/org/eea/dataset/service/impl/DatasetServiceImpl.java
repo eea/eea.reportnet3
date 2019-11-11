@@ -2,7 +2,6 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,7 +62,6 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
@@ -883,7 +881,9 @@ public class DatasetServiceImpl implements DatasetService {
     Statistics statsTableErrors = new Statistics();
     statsTableErrors.setIdTableSchema(tableValue.getIdTableSchema());
     statsTableErrors.setStatName("tableErrors");
-    statsTableErrors.setIdDataset(datasetId);
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(datasetId);
+    statsTableErrors.setDataset(reporting);
     if (tableValue.getTableValidations() != null && tableValue.getTableValidations().size() > 0) {
       statsTableErrors.setValue("true");
     } else {
@@ -917,7 +917,9 @@ public class DatasetServiceImpl implements DatasetService {
   private Statistics fillStat(Long idDataset, String idTableSchema, String statName, String value) {
 
     Statistics stat = new Statistics();
-    stat.setIdDataset(idDataset);
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(idDataset);
+    stat.setDataset(reporting);
     stat.setIdTableSchema(idTableSchema);
     stat.setStatName(statName);
     stat.setValue(value);
@@ -995,100 +997,6 @@ public class DatasetServiceImpl implements DatasetService {
       LOG_ERROR.error("No dataset found to save statistics. DatasetId:{}", datasetId);
     }
 
-  }
-
-
-  /**
-   * Gets the statistics.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the statistics
-   *
-   * @throws EEAException the EEA exception
-   * @throws InstantiationException the instantiation exception
-   * @throws IllegalAccessException the illegal access exception
-   */
-  @Override
-  @Transactional
-  public StatisticsVO getStatistics(final Long datasetId)
-      throws EEAException, InstantiationException, IllegalAccessException {
-
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
-    StatisticsVO stats = new StatisticsVO();
-
-    /*
-     * List<Statistics> statistics = statisticsRepository.findAllStatistics(); List<Statistics>
-     * statisticsTables = statistics.stream() .filter(s ->
-     * StringUtils.isNotBlank(s.getIdTableSchema())).collect(Collectors.toList()); List<Statistics>
-     * statisticsDataset = statistics.stream() .filter(s ->
-     * StringUtils.isBlank(s.getIdTableSchema())).collect(Collectors.toList());
-     * 
-     * Map<String, List<Statistics>> tablesMap = statisticsTables.stream()
-     * .collect(Collectors.groupingBy(Statistics::getIdTableSchema, Collectors.toList()));
-     * 
-     * // Dataset level stats Class<?> clazzStats = stats.getClass(); Object instance =
-     * clazzStats.newInstance(); statisticsDataset.stream().forEach(s -> {
-     * setEntityProperty(instance, s.getStatName(), s.getValue()); }); stats = (StatisticsVO)
-     * instance;
-     * 
-     * // Table statistics stats.setTables(new ArrayList<>()); for (List<Statistics> listStats :
-     * tablesMap.values()) { Class<?> clazzTable = TableStatisticsVO.class; Object instanceTable =
-     * clazzTable.newInstance(); listStats.stream().forEach(s -> { setEntityProperty(instanceTable,
-     * s.getStatName(), s.getValue()); }); stats.getTables().add((TableStatisticsVO) instanceTable);
-     * }
-     * 
-     * // Check if there are empty tables DataSetSchema schema =
-     * schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-     * List<String> listIdsDataSetSchema = new ArrayList<>(); Map<String, String>
-     * mapIdNameDatasetSchema = new HashMap<>(); for (TableSchema tableSchema :
-     * schema.getTableSchemas()) {
-     * listIdsDataSetSchema.add(tableSchema.getIdTableSchema().toString());
-     * mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-     * tableSchema.getNameTableSchema()); } List<String> listIdDataSetSchema = new ArrayList<>();
-     * List<TableValue> allTableValues = dataset.getTableValues(); for (TableValue tableValue :
-     * allTableValues) { listIdDataSetSchema.add(tableValue.getIdTableSchema()); }
-     * listIdsDataSetSchema.removeAll(listIdDataSetSchema); for (String idTableSchem :
-     * listIdsDataSetSchema) { stats.getTables() .add(new TableStatisticsVO(idTableSchem,
-     * mapIdNameDatasetSchema.get(idTableSchem))); }
-     */
-
-    return stats;
-  }
-
-
-  /**
-   * Sets the entity property.
-   *
-   * @param object the object
-   * @param fieldName the field name
-   * @param fieldValue the field value
-   *
-   * @return the boolean
-   */
-  public static Boolean setEntityProperty(Object object, String fieldName, String fieldValue) {
-    Class<?> clazz = object.getClass();
-    while (clazz != null) {
-      try {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-
-        if (field.getType().equals(Long.class)) {
-          field.set(object, Long.valueOf(fieldValue));
-        } else if (field.getType().equals(Boolean.class)) {
-          field.set(object, Boolean.valueOf(fieldValue));
-        } else {
-          field.set(object, fieldValue);
-        }
-
-        return true;
-      } catch (NoSuchFieldException e) {
-        clazz = clazz.getSuperclass();
-      } catch (Exception e) {
-        throw new IllegalStateException(e);
-      }
-    }
-    return false;
   }
 
 

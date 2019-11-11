@@ -8,7 +8,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +54,7 @@ public class StatsHelperTest {
 
 
     when(dataflowService.getReportingDatasetsId(Mockito.anyLong())).thenReturn(df);
-    when(datasetController.getStatisticsById(Mockito.anyLong())).thenReturn(new StatisticsVO());
+    // when(datasetController.getStatisticsById(Mockito.anyLong())).thenReturn(new StatisticsVO());
     statisticsHelper.executeStatsProcess(1L);
 
   }
