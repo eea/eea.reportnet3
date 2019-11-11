@@ -89,6 +89,7 @@ public final class EEAErrorMessage {
   /** The Constant DATE_FORMAT_INCORRECT. */
   public static final String DATE_FORMAT_INCORRECT = "Format date is incorrect";
 
+  /** The Constant DATE_AFTER_INCORRECT. */
   public static final String DATE_AFTER_INCORRECT = "The date has to be later than today's date";
 
   /** The Constant FIELD_NOTFOUND. */
@@ -98,8 +99,7 @@ public final class EEAErrorMessage {
   public static final String FIELD_SCHEMA_ID_NOT_FOUND = "fieldSchemaId not found";
 
   /** The Constant WRONG_DATASET_SCHEMA. */
-  public static final String WRONG_DATASET_SCHEMA =
-      "The datasetSchema associated with the dataset does not contain the passed fieldSchema";
+  public static final String INVALID_OBJECTID = "A given ObjectId is not valid";
 
   /**
    * Instantiates a new EEA error message.

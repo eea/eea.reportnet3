@@ -103,12 +103,14 @@ public interface DatasetSchemaService {
   /**
    * Creates the field schema.
    *
-   * @param idTableSchema the id table schema
-   * @param fieldSchema the field schema
-   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  void createFieldSchema(String idTableSchema, FieldSchemaVO fieldSchema) throws EEAException;
+  boolean createFieldSchema(String datasetSchemaId, String tableSchemaId,
+      FieldSchemaVO fieldSchemaVO) throws EEAException;
 
   /**
    * Delete field schema.

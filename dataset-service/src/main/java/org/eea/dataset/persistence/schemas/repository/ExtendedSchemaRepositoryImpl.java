@@ -72,20 +72,6 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   }
 
   /**
-   * Find by id table schema.
-   *
-   * @param idTableSchema the id table schema
-   * @return the data set schema
-   */
-  @Override
-  public DataSetSchema findByIdTableSchema(String idTableSchema) {
-    Query query = new Query();
-    query.addCriteria(Criteria.where("tableSchemas._id").is(new ObjectId(idTableSchema)));
-    query.fields().include("tableSchemas.$");
-    return mongoTemplate.findOne(query, DataSetSchema.class);
-  }
-
-  /**
    * Delete field schema.
    *
    * @param datasetSchemaId the dataset schema id
@@ -96,13 +82,13 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public UpdateResult deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
       throws EEAException {
     try {
-      Update update = new Update().pull("tableSchemas.$.recordSchema.fieldSchemas",
-          new BasicDBObject("_id", new ObjectId(fieldSchemaId)));
-      Query query = new Query();
-      query.addCriteria(new Criteria("_id").is(new ObjectId(datasetSchemaId)));
-      query.addCriteria(new Criteria("tableSchemas.recordSchema.fieldSchemas._id")
-          .is(new ObjectId(fieldSchemaId)));
-      return mongoOperations.updateMulti(query, update, DataSetSchema.class);
+      return mongoOperations.updateMulti(
+          new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId)))
+              .addCriteria(new Criteria("tableSchemas.recordSchema.fieldSchemas._id")
+                  .is(new ObjectId(fieldSchemaId))),
+          new Update().pull("tableSchemas.$.recordSchema.fieldSchemas",
+              new BasicDBObject("_id", new ObjectId(fieldSchemaId))),
+          DataSetSchema.class);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
@@ -128,6 +114,31 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
                   Document.parse(fieldSchema.toJSON()))),
           new UpdateOptions().arrayFilters(
               Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
+   * Creates the field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param fieldSchema the field schema
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UpdateResult createFieldSchema(String datasetSchemaId, String tableSchemaId,
+      FieldSchema fieldSchema) throws EEAException {
+    try {
+      return mongoOperations.updateMulti(
+          new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId)))
+              .addCriteria(new Criteria("tableSchemas._id").is(new ObjectId(tableSchemaId)))
+              .addCriteria(
+                  new Criteria("tableSchemas.recordSchema._id").is(fieldSchema.getIdRecord())),
+          new Update().push("tableSchemas.$.recordSchema.fieldSchemas", fieldSchema),
+          DataSetSchema.class);
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }

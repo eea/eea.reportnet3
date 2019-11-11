@@ -1,6 +1,5 @@
 package org.eea.dataset.persistence.schemas.repository;
 
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
@@ -33,14 +32,6 @@ public interface ExtendedSchemaRepository {
   void insertTableSchema(TableSchema table, String idDatasetSchema);
 
   /**
-   * Find by id table schema.
-   *
-   * @param idTableSchema the id table schema
-   * @return the data set schema
-   */
-  DataSetSchema findByIdTableSchema(String idTableSchema);
-
-  /**
    * Delete field schema.
    *
    * @param datasetSchemaId the dataset schema id
@@ -60,6 +51,18 @@ public interface ExtendedSchemaRepository {
    */
   UpdateResult updateFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
       throws EEAException;
+
+  /**
+   * Creates the field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @param fieldSchema the field schema
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult createFieldSchema(String datasetSchemaId, String tableSchemaId,
+      FieldSchema fieldSchema) throws EEAException;
 
   /**
    * Update table schema.

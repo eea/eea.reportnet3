@@ -123,14 +123,14 @@ public interface DatasetSchemaController {
   /**
    * Creates the field schema.
    *
-   * @param idTableSchema the id table schema
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @param fieldSchema the field schema
    */
-  @RequestMapping(value = "/{idTableSchema}/createFieldSchema/{datasetId}",
-      method = RequestMethod.POST)
-  void createFieldSchema(@PathVariable("idTableSchema") String idTableSchema,
-      @PathVariable("datasetId") Long datasetId, @RequestBody FieldSchemaVO fieldSchema);
+  @PostMapping("/{datasetId}/createFieldSchema/{tableSchemaId}")
+  void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaVO,
+      @RequestBody final FieldSchemaVO fieldSchemaVO);
 
   /**
    * Delete field schema.
