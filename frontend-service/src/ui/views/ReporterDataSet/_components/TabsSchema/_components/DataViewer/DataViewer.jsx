@@ -220,7 +220,13 @@ const DataViewer = withRouter(
       );
 
       let validationCol = (
-        <Column body={validationsTemplate} field="validations" header="" key="recordValidation" sortable={false} />
+        <Column
+          body={validationsTemplate}
+          field="validations"
+          header={resources.messages['validations']}
+          key="recordValidation"
+          sortable={false}
+        />
       );
 
       if (!isWebFormMMR) {
@@ -727,15 +733,37 @@ const DataViewer = withRouter(
       return `${tableName}.${fileType}`;
     };
 
+    const getLevelErrorString = levelError => {
+      if (levelError.toString().toUpperCase() === 'BLOCKER') {
+        return 'Blocker';
+      } else if (levelError.toString().toUpperCase() === 'ERROR') {
+        return 'Error';
+      } else if (levelError.toString().toUpperCase() === 'WARNING') {
+        return 'Warning';
+      } else if (levelError.toString().toUpperCase() === 'INFO') {
+        return 'Info';
+      } else return '';
+    };
+
     //Template for Field validation
     const dataTemplate = (rowData, column) => {
       let field = rowData.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
       if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
         const validations = [...field.fieldValidations];
         let message = [];
-        validations.forEach(validation =>
-          validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
-        );
+        console.log(validations);
+
+        // message.push
+
+        validations.forEach(validation => {
+          let error = getLevelErrorString(validation.levelError);
+          console.log(validation.message);
+          message += '- ' + error + ': ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
+        });
+        // validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
+        // );
+
+        console.log('2', validations);
         const levelError = getLevelError(validations);
 
         return (
@@ -849,33 +877,37 @@ const DataViewer = withRouter(
     const getLevelError = validations => {
       let levelError = '';
       let lvlFlag = 0;
-      validations.forEach(validation => {
-        if (validation.levelError === 'INFO') {
-          const xNum = 1;
-          if (xNum > lvlFlag) {
-            lvlFlag = xNum;
-            levelError = 'INFO';
+      if (validations.length > 1) {
+        return 'MULTI';
+      } else {
+        validations.forEach(validation => {
+          if (validation.levelError === 'INFO') {
+            const xNum = 1;
+            if (xNum > lvlFlag) {
+              lvlFlag = xNum;
+              levelError = 'INFO';
+            }
+          } else if (validation.levelError === 'WARNING') {
+            const wNum = 2;
+            if (wNum > lvlFlag) {
+              lvlFlag = wNum;
+              levelError = 'WARNING';
+            }
+          } else if (validation.levelError === 'ERROR') {
+            const eNum = 3;
+            if (eNum > lvlFlag) {
+              lvlFlag = eNum;
+              levelError = 'ERROR';
+            }
+          } else if (validation.levelError === 'BLOCKER') {
+            const bNum = 4;
+            if (bNum > lvlFlag) {
+              lvlFlag = bNum;
+              levelError = 'BLOCKER';
+            }
           }
-        } else if (validation.levelError === 'WARNING') {
-          const wNum = 2;
-          if (wNum > lvlFlag) {
-            lvlFlag = wNum;
-            levelError = 'WARNING';
-          }
-        } else if (validation.levelError === 'ERROR') {
-          const eNum = 3;
-          if (eNum > lvlFlag) {
-            lvlFlag = eNum;
-            levelError = 'ERROR';
-          }
-        } else if (validation.levelError === 'BLOCKER') {
-          const bNum = 4;
-          if (bNum > lvlFlag) {
-            lvlFlag = bNum;
-            levelError = 'BLOCKER';
-          }
-        }
-      });
+        });
+      }
       return levelError;
     };
 
