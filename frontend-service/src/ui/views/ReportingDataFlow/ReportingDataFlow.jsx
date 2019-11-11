@@ -228,7 +228,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async (value, index) => {
-    await DatasetService.updateSchemaNameById(designDatasetSchemaId, value);
+    await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, value);
     // setDatasetSchemaName(value);
   };
 
