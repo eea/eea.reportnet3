@@ -20,6 +20,7 @@ import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
 import { DataflowColumn } from 'ui/views/_components/DataFlowColumn';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -35,6 +36,7 @@ import { SnapshotService } from 'core/services/Snapshot';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 
 export const ReportingDataflow = withRouter(({ history, match }) => {
+  const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
@@ -204,6 +206,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
+    showLoading();
     try {
       const response = await DatasetService.deleteSchemaById(designDatasetSchemas[index].datasetId);
       if (response >= 200 && response <= 299) {
@@ -211,6 +214,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error(error.response);
+    } finally {
+      hideLoading();
     }
   };
 
