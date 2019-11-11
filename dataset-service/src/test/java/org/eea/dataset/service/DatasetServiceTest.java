@@ -264,7 +264,7 @@ public class DatasetServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(reportingDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new ReportingDataset()));
-    when(fileParserFactory.createContext("csv", Mockito.any())).thenReturn(context);
+    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
 
@@ -328,7 +328,7 @@ public class DatasetServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(reportingDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new ReportingDataset()));
-    when(fileParserFactory.createContext("csv", Mockito.any())).thenReturn(context);
+    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))

@@ -12,6 +12,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -324,17 +325,15 @@ public class DatasetSchemaServiceTest {
   public void testFindDataSchemaByDatasetId() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
     dataSetSchema.setRuleDataSet(new ArrayList<>());
+    DataSetMetabase metabase = new DataSetMetabase();
+    metabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(metabase));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     DataSetSchemaVO value = new DataSetSchemaVO();
     value.setRuleDataSet(new ArrayList<>());
     Mockito.doReturn(value).when(dataSchemaMapper).entityToClass(Mockito.any(DataSetSchema.class));
-    DataSetSchemaVO result = dataSchemaServiceImpl.getDataSchemaByDatasetId(true, 1L);
-    Assert.assertNotNull(result);
-    Assert.assertNotNull(result.getRuleDataSet());
-    Mockito.verify(dataSchemaMapper, Mockito.times(1))
-        .entityToClass(Mockito.any(DataSetSchema.class));
-    Mockito.verify(noRulesDataSchemaMapper, Mockito.times(0))
-        .entityToClass(Mockito.any(DataSetSchema.class));
+    assertEquals(value, dataSchemaServiceImpl.getDataSchemaByDatasetId(true, 1L));
 
   }
 
@@ -347,6 +346,10 @@ public class DatasetSchemaServiceTest {
   public void testFindDataSchemaByDataFlowNoRules() throws EEAException {
     DataSetSchema dataSetSchema = new DataSetSchema();
     dataSetSchema.setRuleDataSet(new ArrayList<>());
+    DataSetMetabase metabase = new DataSetMetabase();
+    metabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(metabase));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     DataSetSchemaVO value = new DataSetSchemaVO();
     Mockito.doReturn(value).when(noRulesDataSchemaMapper)
