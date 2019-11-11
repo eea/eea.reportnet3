@@ -36,10 +36,11 @@ export const BigButton = ({
   const newDatasetRef = useRef();
 
   const checkDuplicates = (header, index) => {
-    console.log('header', header);
-    console.log('index', index);
     const inmTitles = [...designDatasetSchemas];
+    console.log('inmTitles', inmTitles);
     const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
+    console.log('repeat', repeat);
+    console.log('boolean', repeat.length > 0 && index !== repeat[0].index);
     return repeat.length > 0 && index !== repeat[0].index;
   };
 

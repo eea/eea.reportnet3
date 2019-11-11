@@ -14,10 +14,10 @@ import { DataflowService } from 'core/services/DataFlow';
 
 export const NewDatasetSchemaForm = ({
   dataflowId,
-  schemaNames,
   isFormReset,
   onCreate,
   onUpdateData,
+  schema,
   setNewDatasetDialog
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -31,7 +31,9 @@ export const NewDatasetSchemaForm = ({
       .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .required(resources.messages['emptyDatasetSchema'])
       .test('', resources.messages['duplicateSchemaError'], value => {
-        return value.toLowerCase() !== schemaNames.toLowerCase();
+        const inmTitles = [...schema];
+        const isRepeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() !== value.toLowerCase());
+        return isRepeat.length > 0;
       })
   });
 

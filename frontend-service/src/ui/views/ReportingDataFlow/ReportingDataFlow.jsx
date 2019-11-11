@@ -45,7 +45,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
-  const [designDatasetNames, setDesignDatasetNames] = useState();
+  // const [designDatasetNames, setDesignDatasetNames] = useState();
   // const [datasetSchemaName, setDatasetSchemaName] = useState();
   // const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -118,7 +118,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
         // setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
         dataflow.designDatasets.forEach((schema, idx) => {
-          setDesignDatasetNames(schema.datasetSchemaName);
+          // setDesignDatasetNames(schema.datasetSchemaName);
           setActiveIndex(idx);
           schema.index = idx;
         });
@@ -144,7 +144,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   //   }
   // }, [dataflowData]);
 
-  console.log('activeIndex', activeIndex);
+  // console.log('activeIndex', activeIndex);
 
   const onLoadSnapshotList = async datasetId => {
     setSnapshotsListData(await SnapshotService.all(datasetId));
@@ -532,7 +532,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             isFormReset={isFormReset}
             onCreate={onCreateDataset}
             onUpdateData={onUpdateData}
-            schemaNames={designDatasetNames}
+            schema={designDatasetSchemas}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
