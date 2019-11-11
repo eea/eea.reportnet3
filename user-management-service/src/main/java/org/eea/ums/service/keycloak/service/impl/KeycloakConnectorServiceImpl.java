@@ -21,6 +21,8 @@ import org.eea.ums.service.keycloak.model.TokenInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -101,7 +104,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
   private static final String ADD_ROLE_TO_USER =
       "/auth/admin/realms/{realm}/users/{userId}/role-mappings/realm";
-
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Inits the keycloak context.
@@ -174,6 +177,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Gets the groups by user.
    *
    * @param userId the user id
+   *
    * @return the groups by user
    */
   @Override
@@ -245,6 +249,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Refresh token.
    *
    * @param refreshToken the refresh token
+   *
    * @return the token info
    */
   @Override
@@ -307,6 +312,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Gets the group detail.
    *
    * @param groupId the group id
+   *
    * @return the group detail
    */
   @Override
@@ -405,7 +411,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -445,7 +451,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -474,6 +480,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Retrieve token from keycloak.
    *
    * @param map the map
+   *
    * @return the token info
    */
   private TokenInfo retrieveTokenFromKeycloak(MultiValueMap<String, String> map) {
@@ -485,18 +492,24 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-
-    ResponseEntity<TokenInfo> tokenInfo =
-        this.restTemplate
-            .postForEntity(
-                uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-                    .path(GENERATE_TOKEN_URL).buildAndExpand(uriParams).toString(),
-                request, TokenInfo.class);
-
     TokenInfo responseBody = null;
-    if (null != tokenInfo && null != tokenInfo.getBody()) {
-      responseBody = tokenInfo.getBody();
+    try {
+      ResponseEntity<TokenInfo> tokenInfo =
+          this.restTemplate
+              .postForEntity(
+                  uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
+                      .path(GENERATE_TOKEN_URL).buildAndExpand(uriParams).toString(),
+                  request, TokenInfo.class);
+      if (null != tokenInfo && null != tokenInfo.getBody()) {
+        responseBody = tokenInfo.getBody();
+      }
+    } catch (RestClientException e) {
+      LOG_ERROR
+          .error(
+              "Error retrieving token from Keycloak host {} due to reason {} with following values {}",
+              keycloakHost, e.getMessage(), map, e);
     }
+
     return responseBody;
   }
 
@@ -504,6 +517,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Gets the reportnet client info.
    *
    * @param adminToken the admin token
+   *
    * @return the reportnet client info
    */
   private ClientInfo getReportnetClientInfo(String adminToken) {
@@ -539,6 +553,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Gets the resource info.
    *
    * @param adminToken the admin token
+   *
    * @return the resource info
    */
   private List<ResourceInfo> getResourceInfo(String adminToken) {
@@ -588,6 +603,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * Creates the basic headers.
    *
    * @param headersInfo the headers info
+   *
    * @return the http headers
    */
   private HttpHeaders createBasicHeaders(Map<String, String> headersInfo) {
@@ -606,6 +622,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * @param <T> the generic type
    * @param body the body
    * @param uriParams the uri params
+   *
    * @return the http entity
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams) {
@@ -624,6 +641,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    * @param <T> the generic type
    * @param body the body
    * @param uriParams the uri params
+   *
    * @return the http entity
    */
   private <T> HttpEntity<T> createHttpRequestPOST(T body, Map<String, String> uriParams) {
