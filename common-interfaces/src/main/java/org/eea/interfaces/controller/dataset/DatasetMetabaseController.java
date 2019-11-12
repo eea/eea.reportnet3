@@ -83,8 +83,9 @@ public interface DatasetMetabaseController {
       @RequestParam(value = "datasetName", required = false) String datasetName);
 
 
+
   /**
-   * <<<<<<< HEAD Gets the statistics by id.
+   * Gets the statistics by id.
    *
    * @param datasetId the dataset id
    * @return the statistics by id

@@ -165,7 +165,7 @@ CREATE TABLE public."snapshot_schema" (
 
 CREATE TABLE public."statistics" (
 	id bigserial NOT NULL,
-	id_dataset bigserial NULL,
+	id_dataset int8 NULL,
 	id_table_schema text NULL,
 	stat_name text NULL,
 	value text NULL,
