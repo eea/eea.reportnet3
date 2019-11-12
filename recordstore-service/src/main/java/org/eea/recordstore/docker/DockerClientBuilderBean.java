@@ -12,11 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * The Class DockerClientBuilderBean.
  */
-@Configuration
-@Component
-@ComponentScan("org.eea.recordstore.docker")
-@Getter
-@Setter
+
 public class DockerClientBuilderBean {
 
   /**

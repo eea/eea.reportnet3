@@ -80,4 +80,54 @@ public interface DatasetSnapshotController {
       @PathVariable("idSnapshot") Long idSnapshot);
 
 
+
+  /**
+   * Gets the schema snapshots by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the schema snapshots by id dataset
+   */
+  @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<SnapshotVO> getSchemaSnapshotsByIdDataset(@PathVariable("idDesignDataset") Long datasetId);
+
+
+  /**
+   * Creates the schema snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @param description the description
+   */
+  @PostMapping(value = "/dataschema/{idDatasetSchema}/dataset/{idDesignDataset}/create",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void createSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @RequestParam("description") String description);
+
+
+  /**
+   * Restore schema snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
+  @PostMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/restore",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  void restoreSchemaSnapshot(@PathVariable("idDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot);
+
+
+  /**
+   * Delete schema snapshot.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @throws Exception
+   */
+  @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
+  void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot) throws Exception;
+
+
 }

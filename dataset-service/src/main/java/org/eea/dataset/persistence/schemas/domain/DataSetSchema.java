@@ -35,7 +35,7 @@ public class DataSetSchema {
 
   /** The idDataFlow. */
   @Field(value = "idDataFlow")
-  @Indexed(unique = true)
+  @Indexed(unique = false)
   private Long idDataFlow;
 
   /** The table schemas. */

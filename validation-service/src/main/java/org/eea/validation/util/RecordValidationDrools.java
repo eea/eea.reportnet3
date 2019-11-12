@@ -55,6 +55,7 @@ public class RecordValidationDrools {
     String startDate = "";
     String periodeType = "";
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    sdf.setLenient(false);
     for (FieldValue fieldData : recordValue.getFields()) {
 
       if (fieldData.getIdFieldSchema().equalsIgnoreCase(idFieldSchemaPeriodeType)) {
@@ -107,6 +108,7 @@ public class RecordValidationDrools {
   public static Boolean startDateGoodDatesOrder(RecordValue recordValue,
       String idFieldShemaStartDate, String idFieldSchemaEnddate) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    sdf.setLenient(false);
     String endDate = "";
     String startDate = "";
     for (FieldValue fieldData : recordValue.getFields()) {
@@ -122,6 +124,7 @@ public class RecordValidationDrools {
       Date dateInit;
       Date dateend;
       try {
+
         dateInit = sdf.parse(startDate);
         dateend = sdf.parse(endDate);
       } catch (ParseException e) {
@@ -186,6 +189,7 @@ public class RecordValidationDrools {
   public static Boolean sameYearValidation(RecordValue recordValue, String idFieldShemaDate,
       String idFieldSchemaSeason) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    sdf.setLenient(false);
     String date = "";
     String season = "";
     for (FieldValue fieldData : recordValue.getFields()) {
@@ -232,6 +236,7 @@ public class RecordValidationDrools {
   public static Boolean bathingSeasonDurationValidation(RecordValue recordValue,
       String idFieldSchemaPeriodeType, String idFieldShemaStartDate, String idFieldSchemaEnddate) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    sdf.setLenient(false);
     String endDate = "";
     String startDate = "";
     String periodeType = "";
@@ -341,6 +346,7 @@ public class RecordValidationDrools {
   public static Boolean sameYearValidatioMonitoring(RecordValue recordValue,
       String idFieldShemaDate, String idFieldSchemaSeason) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    sdf.setLenient(false);
     String season = "";
     String date = "";
     for (FieldValue fieldData : recordValue.getFields()) {

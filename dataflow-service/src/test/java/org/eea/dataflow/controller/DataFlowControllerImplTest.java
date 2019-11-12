@@ -382,7 +382,7 @@ public class DataFlowControllerImplTest {
 
     List<StatisticsVO> stats = new ArrayList<>();
     when(statisticsHelper.executeStatsProcess(Mockito.any())).thenReturn(stats);
-    dataFlowControllerImpl.getStatisticsByDataflow(1L);
+    dataFlowControllerImpl.getGlobalStatistics("");
 
   }
 
@@ -395,7 +395,7 @@ public class DataFlowControllerImplTest {
   public void testGlobalStatisticsError() throws EEAException {
 
     doThrow(new EEAException()).when(statisticsHelper).executeStatsProcess(Mockito.any());
-    dataFlowControllerImpl.getStatisticsByDataflow(1L);
+    dataFlowControllerImpl.getGlobalStatistics("");
 
   }
 

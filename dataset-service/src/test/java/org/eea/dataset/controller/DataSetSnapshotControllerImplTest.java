@@ -212,4 +212,101 @@ public class DataSetSnapshotControllerImplTest {
         Mockito.any());
     dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
   }
+
+
+  @Test
+  public void testGetSchemaSnapshots() throws Exception {
+    when(datasetSnapshotService.getSchemaSnapshotsByIdDataset(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    dataSetSnapshotControllerImpl.getSchemaSnapshotsByIdDataset(Mockito.anyLong());
+    Mockito.verify(datasetSnapshotService, times(1)).getSchemaSnapshotsByIdDataset(Mockito.any());
+  }
+
+
+  @Test
+  public void testAddSchemaSnapshots() throws Exception {
+
+    dataSetSnapshotControllerImpl.createSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
+    Mockito.verify(datasetSnapshotService, times(1)).addSchemaSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+
+  @Test
+  public void testRestoreSchemaSnapshots() throws Exception {
+
+    dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).restoreSchemaSnapshot(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void testDeleteSchemaSnapshots() throws Exception {
+
+    dataSetSnapshotControllerImpl.deleteSchemaSnapshot(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).removeSchemaSnapshot(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetSchemaSnapshotsException() throws Exception {
+
+    dataSetSnapshotControllerImpl.getSchemaSnapshotsByIdDataset(null);
+  }
+
+
+  @Test
+  public void testGetSchemaSnapshotsException2() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService)
+        .getSchemaSnapshotsByIdDataset(Mockito.any());
+    dataSetSnapshotControllerImpl.getSchemaSnapshotsByIdDataset(1L);
+    Mockito.verify(datasetSnapshotService, times(1)).getSchemaSnapshotsByIdDataset(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteSchemaSnapshotsException() throws Exception {
+
+    dataSetSnapshotControllerImpl.deleteSchemaSnapshot(null, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteSchemaSnapshotsException2() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService).removeSchemaSnapshot(Mockito.any(),
+        Mockito.any());
+    dataSetSnapshotControllerImpl.deleteSchemaSnapshot(1L, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testAddSchemaSnapshotsException() throws Exception {
+
+    dataSetSnapshotControllerImpl.createSchemaSnapshot(null, "5db99d0bb67ca68cb8fa7053", "test");
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testAddSchemaSnapshotsException2() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService).addSchemaSnapshot(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    dataSetSnapshotControllerImpl.createSchemaSnapshot(1L, "5db99d0bb67ca68cb8fa7053", "test");
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testRestoreSchemaSnapshotsException() throws Exception {
+
+    dataSetSnapshotControllerImpl.restoreSchemaSnapshot(null, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testRestoreSchemaSnapshotsException2() throws Exception {
+
+    doThrow(new EEAException()).when(datasetSnapshotService).restoreSchemaSnapshot(Mockito.any(),
+        Mockito.any());
+    dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
+
+  }
+
+
 }

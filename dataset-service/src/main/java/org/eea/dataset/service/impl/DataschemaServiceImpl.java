@@ -9,8 +9,10 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.TableCollection;
 import org.eea.dataset.persistence.metabase.domain.TableHeadersCollection;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseTableRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -135,6 +137,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * The Constant NULL.
    */
   private static final String NULL = "id == null";
+
+  /**
+   * The data set metabase repository.
+   */
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   /**
    * Creates the empty data set schema.
@@ -448,20 +456,55 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Find the dataschema per idDataFlow.
-   *
+   * Find the dataschema per idDataFlow
+   * 
    * @param idFlow the idDataFlow to look for
-   * @param addRules the add rules
-   * @return the data schema by id flow
+   * @throws EEAException
    */
   @Override
-  public DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules) {
+  public DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId)
+      throws EEAException {
 
-    DataSetSchema dataschema = schemasRepository.findSchemaByIdFlow(idFlow);
-    LOG.info("Schema retrived by idFlow {}", idFlow);
+    DataSetMetabase metabase = obtainDatasetMetabase(datasetId);
+    DataSetSchema dataschema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
+    LOG.info("Schema retrived by datasetId {}", datasetId);
     return Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
         : noRulesDataSchemaMapper.entityToClass(dataschema);
+
   }
+
+
+  /**
+   * Gets the dataset schema id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String getDatasetSchemaId(Long datasetId) throws EEAException {
+    return obtainDatasetMetabase(datasetId).getDatasetSchema();
+  }
+
+  /**
+   * Obtain dataset metabase.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the data set metabase
+   *
+   * @throws EEAException the EEA exception
+   */
+  private DataSetMetabase obtainDatasetMetabase(final Long datasetId) throws EEAException {
+    final DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    if (datasetMetabase == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    return datasetMetabase;
+  }
+
 
   /**
    * Delete table schema.
@@ -614,5 +657,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) {
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
+  }
+
+  /**
+   * Replace schema.
+   *
+   * @param idSchema the id schema
+   * @param schema the schema
+   */
+  @Override
+  public void replaceSchema(String idSchema, DataSetSchema schema) {
+    schemasRepository.deleteDatasetSchemaById(idSchema);
+    schemasRepository.save(schema);
   }
 }

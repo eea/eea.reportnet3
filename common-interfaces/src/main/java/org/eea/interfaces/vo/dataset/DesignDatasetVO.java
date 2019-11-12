@@ -29,4 +29,7 @@ public class DesignDatasetVO implements Serializable {
   /** The status. */
   private String status;
 
+  /** The dataset schema. */
+  private String datasetSchema;
+
 }

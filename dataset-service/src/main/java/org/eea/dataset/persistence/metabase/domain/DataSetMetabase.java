@@ -67,6 +67,10 @@ public class DataSetMetabase {
   @Column(name = "STATUS")
   private String status;
 
+  /** The dataset schema. */
+  @Column(name = "DATASET_SCHEMA")
+  private String datasetSchema;
+
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;

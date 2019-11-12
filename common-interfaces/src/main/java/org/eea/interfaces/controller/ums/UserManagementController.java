@@ -1,18 +1,18 @@
 package org.eea.interfaces.controller.ums;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
-import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface User management controller.
@@ -133,5 +133,13 @@ public interface UserManagementController {
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
 
+  /**
+   * Sets the users.
+   *
+   * @param file the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
+  void createUsers(@RequestParam("file") MultipartFile file) throws IOException;
 
 }
