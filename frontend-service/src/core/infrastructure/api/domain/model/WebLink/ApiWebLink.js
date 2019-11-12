@@ -90,8 +90,8 @@ export const apiWebLink = {
           Authorization: `Bearer ${tokens.accessToken}`
         },
         data: {
-          id: weblinkToEdit.id,
           description: weblinkToEdit.description,
+          id: weblinkToEdit.id,
           url: weblinkToEdit.url
         }
       });

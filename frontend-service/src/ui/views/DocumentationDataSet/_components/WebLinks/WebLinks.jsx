@@ -115,7 +115,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
 
   const changeRecordValue = (field, value) => {
     if (!isUndefined(value) && !isNull(value) && isString(value)) {
-      if (field == 'url') {
+      if (field === 'url') {
         value = value
           .replace(`\r`, '')
           .replace(`\n`, '')
@@ -179,6 +179,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
   const onSaveRecord = async record => {
     if (isNewRecord) {
       try {
+        console.log('new record on try', record);
         await WebLinkService.create(dataflowId, record);
 
         setIsAddDialogVisible(false);
