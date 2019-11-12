@@ -86,6 +86,20 @@ public class KeycloakConnectorServiceImplTest {
   }
 
   @Test
+  public void generateAdminToken() {
+    TokenInfo body = new TokenInfo();
+    body.setAccessToken("JWT");
+    ResponseEntity<TokenInfo> result = new ResponseEntity<>(body, HttpStatus.OK);
+    Mockito.when(restTemplate.postForEntity(Mockito.anyString(), Mockito.any(HttpEntity.class),
+        Mockito.any(Class.class))).thenReturn(result);
+
+    TokenInfo token = keycloakConnectorService.generateAdminToken("user1", "1234");
+    Assert.assertNotNull(result);
+    Assert.assertEquals("JWT", token.getAccessToken());
+
+  }
+
+  @Test
   public void generateTokenByCode() {
     TokenInfo body = new TokenInfo();
     body.setAccessToken("JWT");
@@ -117,7 +131,7 @@ public class KeycloakConnectorServiceImplTest {
   public void getReportnetClientInfo() {
     ClientInfo info = new ClientInfo();
     info.setClientId("reportnet");
-    ClientInfo[] body = new ClientInfo[] {info};
+    ClientInfo[] body = new ClientInfo[]{info};
 
     ResponseEntity<ClientInfo[]> clientInfoResult = new ResponseEntity<>(body, HttpStatus.OK);
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
@@ -131,7 +145,7 @@ public class KeycloakConnectorServiceImplTest {
   @Test
   public void getResourceInfo() {
 
-    String[] bodyResourceSet = new String[] {"resource1"};
+    String[] bodyResourceSet = new String[]{"resource1"};
 
     ResponseEntity<String[]> resourceSetInfo = new ResponseEntity<>(bodyResourceSet, HttpStatus.OK);
 
@@ -171,7 +185,7 @@ public class KeycloakConnectorServiceImplTest {
     groupInfo.setId("1");
     groupInfo.setName("Dataflow-1-DATA_PROVIDER");
     groupInfo.setPath("/path");
-    GroupInfo[] groupInfos = new GroupInfo[] {groupInfo};
+    GroupInfo[] groupInfos = new GroupInfo[]{groupInfo};
 
     ResponseEntity<GroupInfo[]> responseGroupInfos =
         new ResponseEntity<>(groupInfos, HttpStatus.OK);
