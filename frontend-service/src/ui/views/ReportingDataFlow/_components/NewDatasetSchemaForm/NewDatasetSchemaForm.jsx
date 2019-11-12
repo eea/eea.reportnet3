@@ -31,9 +31,13 @@ export const NewDatasetSchemaForm = ({
       .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .required(resources.messages['emptyDatasetSchema'])
       .test('', resources.messages['duplicateSchemaError'], value => {
-        const inmTitles = [...schema];
-        const isRepeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() !== value.toLowerCase());
-        return isRepeat.length > 0;
+        if (!isEmpty(schema)) {
+          const inmTitles = [...schema];
+          const isRepeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() !== value.toLowerCase());
+          return isRepeat.length > 0;
+        } else {
+          return true;
+        }
       })
   });
 
