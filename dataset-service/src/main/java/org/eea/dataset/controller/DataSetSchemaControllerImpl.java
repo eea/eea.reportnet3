@@ -343,4 +343,26 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+  @Override
+  @HystrixCommand
+  @PutMapping("/{idDatasetSchema}/order/{position}/{datasetId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  public void orderSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @PathVariable("position") int newPosition, @RequestBody Object schema) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      // Update the fieldSchema from the datasetSchema
+      Boolean updated = dataschemaService.order(idDatasetSchema, schema, newPosition);
+      if (Boolean.FALSE.equals(updated)) {
+        throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
+      }
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_ID_NONFOUND);
+    }
+  }
+
 }

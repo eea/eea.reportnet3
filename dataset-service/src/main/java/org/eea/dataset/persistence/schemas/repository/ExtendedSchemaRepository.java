@@ -74,4 +74,28 @@ public interface ExtendedSchemaRepository {
    */
   UpdateResult updateTableSchema(String datasetSchemaId, TableSchema tableSchema)
       throws EEAException;
+
+  /**
+   * Insert field in position.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param fieldSchema the field schema
+   * @param position the position
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult insertFieldInPosition(String idDatasetSchema, FieldSchema fieldSchema, int position)
+      throws EEAException;
+
+  /**
+   * Insert table in position.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param tableSchema the table schema
+   * @param position the position
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  UpdateResult insertTableInPosition(String idDatasetSchema, TableSchema tableSchema, int position)
+      throws EEAException;
 }

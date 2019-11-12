@@ -626,4 +626,36 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throw new EEAException(e.getMessage());
     }
   }
+
+  /**
+   * Order.
+   *
+   * @param schema the schema
+   * @param newPosition the new position
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Boolean order(String idDatasetSchema, Object schema, int newPosition) throws EEAException {
+    try {
+      // seleccionar que servicio de update llamar
+      if (schema.getClass().equals(TableSchemaVO.class)) {
+        schemasRepository.deleteTableSchemaById(((TableSchemaVO) schema).getIdTableSchema());
+        return schemasRepository
+            .insertTableInPosition(idDatasetSchema,
+                tableSchemaMapper.classToEntity((TableSchemaVO) schema), newPosition)
+            .getModifiedCount() == 1;
+      } else if (schema.getClass().equals(FieldSchemaVO.class)) {
+        schemasRepository.deleteFieldSchema(idDatasetSchema, ((FieldSchemaVO) schema).getId());
+        return schemasRepository
+            .insertFieldInPosition(idDatasetSchema,
+                fieldSchemaNoRulesMapper.classToEntity((FieldSchemaVO) schema), newPosition)
+            .getModifiedCount() == 1;
+      } else {
+        throw new IllegalArgumentException();
+      }
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
+  }
 }

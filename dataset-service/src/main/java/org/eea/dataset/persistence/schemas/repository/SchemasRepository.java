@@ -33,5 +33,4 @@ public interface SchemasRepository
    * @return the data set schema
    */
   DataSetSchema findByIdDataSetSchema(ObjectId idDatasetSchema);
-
 }

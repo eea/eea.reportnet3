@@ -151,4 +151,16 @@ public interface DatasetSchemaController {
   @PutMapping("/{datasetId}/updateFieldSchema")
   void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO);
+
+  /**
+   * Order schema.
+   *
+   * @param datasetId the dataset id
+   * @param newPosition the new position
+   * @param schema the schema
+   */
+  @PutMapping("/{idDatasetSchema}/order/{position}/{datasetId}")
+  void orderSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @PathVariable("position") int newPosition, @RequestBody Object schema);
 }

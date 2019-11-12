@@ -131,4 +131,13 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
+
+  /**
+   * Order.
+   *
+   * @param schema the schema
+   * @param newPosition the new position
+   * @return the boolean
+   */
+  Boolean order(String idDatasetSchema, Object schema, int newPosition) throws EEAException;
 }

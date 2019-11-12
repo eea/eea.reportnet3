@@ -165,4 +165,58 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
       throw new EEAException(e.getMessage());
     }
   }
+
+  /**
+   * Insert table in position.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param classToEntity the class to entity
+   * @param newPosition the new position
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UpdateResult insertTableInPosition(String idDatasetSchema, TableSchema tableSchema,
+      int position) throws EEAException {
+    try {
+      return mongoDatabase.getCollection("DataSetSchema").updateOne(
+          new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas._id",
+              tableSchema.getIdTableSchema()),
+          new Document("$push",
+              new Document("tableSchemas.$[tableSchemaId]",
+                  new Document("$each", Document.parse(tableSchema.toJSON()))).append("$position",
+                      position)),
+          new UpdateOptions().arrayFilters(
+              Arrays.asList(new Document("tableSchemaId._id", tableSchema.getIdTableSchema()))));
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
+   * Insert field in position.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @param field the field
+   * @param position the position
+   * @return the update result
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public UpdateResult insertFieldInPosition(String idDatasetSchema, FieldSchema fieldSchema,
+      int position) throws EEAException {
+    try {
+      return mongoDatabase.getCollection("DataSetSchema").updateMany(
+          new Document("_id", new ObjectId(idDatasetSchema))
+              .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.getIdFieldSchema()),
+          new Document("$push",
+              new Document("tableSchemas.$.recordSchema.fieldSchemas.$[fieldSchemaId]",
+                  new Document("$each", Document.parse(fieldSchema.toJSON()))).append("$position",
+                      position)),
+          new UpdateOptions().arrayFilters(
+              Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
+  }
 }
