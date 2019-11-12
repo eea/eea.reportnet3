@@ -276,13 +276,14 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{idDataflow}/globalStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/globalStatistics/{dataschemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow) {
+  public List<StatisticsVO> getGlobalStatistics(@PathVariable("dataschemaId") String dataschemaId) {
 
     List<StatisticsVO> statistics = null;
     try {
-      statistics = statisticsHelper.executeStatsProcess(idDataflow);
+      statistics = statisticsHelper.executeStatsProcess(dataschemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

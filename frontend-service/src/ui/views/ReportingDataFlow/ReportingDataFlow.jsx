@@ -222,8 +222,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     onLoadSnapshotList(datasetId);
     setIsActiveReleaseSnapshotDialog(true);
   };
-  const onReleaseSnapshot = async snapShotId => {
-    const snapshotToRelease = await SnapshotService.releaseById(match.params.dataflowId, datasetIdToProps, snapShotId);
+  const onReleaseSnapshot = async snapshotId => {
+    const snapshotToRelease = await SnapshotService.releaseById(match.params.dataflowId, datasetIdToProps, snapshotId);
 
     if (snapshotToRelease.isReleased) {
       onLoadSnapshotList(datasetIdToProps);

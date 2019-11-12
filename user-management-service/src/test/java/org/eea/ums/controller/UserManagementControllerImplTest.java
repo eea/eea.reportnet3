@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
 import static org.mockito.Mockito.times;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ public class UserManagementControllerImplTest {
 
 
   @Mock
-  BackupManagmentService backupManagmentService;
+  private BackupManagmentService backupManagmentService;
 
   @Before
   public void setUp() throws Exception {
@@ -49,8 +50,9 @@ public class UserManagementControllerImplTest {
   public void generateTokenTest() {
     TokenVO tokenVO = new TokenVO();
     tokenVO.setAccessToken("token");
-    Mockito.when(securityProviderInterfaceService.doLogin(Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(tokenVO);
+    Mockito.doReturn(tokenVO).when(securityProviderInterfaceService)
+        .doLogin(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean());
+
     TokenVO result = userManagementController.generateToken("", "");
     Assert.assertNotNull(result);
     Assert.assertEquals("token", result.getAccessToken());
@@ -80,8 +82,8 @@ public class UserManagementControllerImplTest {
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
-        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn(true);
-    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
+        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn(true);
+    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         userManagementController.checkResourceAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);

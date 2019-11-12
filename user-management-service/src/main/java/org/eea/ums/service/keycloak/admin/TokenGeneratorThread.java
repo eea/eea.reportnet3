@@ -51,7 +51,7 @@ public class TokenGeneratorThread implements Runnable {
 
     log.info("Starting token generator thread");
     //First attemp to retrieve an admin token during ums initialization
-    TokenInfo firstToken = keycloakConnectorService.generateToken(adminUser, adminPass);
+    TokenInfo firstToken = keycloakConnectorService.generateAdminToken(adminUser, adminPass);
     if (null != firstToken) {
       manageTokenInfo(firstToken);
     }

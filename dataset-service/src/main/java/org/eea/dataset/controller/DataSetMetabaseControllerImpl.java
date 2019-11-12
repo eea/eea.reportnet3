@@ -77,6 +77,21 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
   /**
+   * Find data set id by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetVO> getReportingsIdBySchemaId(
+      @PathVariable("schemaId") String schemaId) {
+    return reportingDatasetService.getDataSetIdBySchemaId(schemaId);
+  }
+
+  /**
    * Find dataset name.
    *
    * @param idDataset the id dataset

@@ -22,6 +22,7 @@ CREATE TABLE public.dataset (
 	status varchar(255) NULL,
 	url_connection varchar(255) NULL,
 	visibility varchar(255) NULL,
+	dataset_schema varchar(255) NULL,
 	CONSTRAINT dataset_pkey PRIMARY KEY (id)
 );
 

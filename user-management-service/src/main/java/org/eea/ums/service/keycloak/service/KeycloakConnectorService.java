@@ -31,6 +31,17 @@ public interface KeycloakConnectorService {
    */
   TokenInfo generateToken(String username, String password);
 
+
+  /**
+   * Generate admin token token info.
+   *
+   * @param username the username
+   * @param password the password
+   *
+   * @return the token info
+   */
+  TokenInfo generateAdminToken(String username, String password);
+
   /**
    * Gets groups by user.
    *
@@ -122,6 +133,7 @@ public interface KeycloakConnectorService {
    * Gets the role.
    *
    * @param userId the user id
+   *
    * @return the role
    */
   RoleRepresentation[] getRoles();
