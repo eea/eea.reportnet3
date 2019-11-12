@@ -55,10 +55,10 @@ export const apiDataflow = {
     });
     return response.data;
   },
-  datasetsValidationStatistics: async dataflowId => {
+  datasetsValidationStatistics: async datasetSchemaId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.globalStatistics, { dataflowId: dataflowId }),
+      url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId }),
       queryString: {},
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`
