@@ -40,14 +40,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  const [activeIndex, setActiveIndex] = useState();
+  const [allIndexValues, setAllIndexValues] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   // const [designDatasetNames, setDesignDatasetNames] = useState();
   // const [datasetSchemaName, setDatasetSchemaName] = useState();
-  // const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
+  const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
@@ -64,6 +64,8 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
+
+  console.log('designDatasetSchemaId', designDatasetSchemaId);
 
   let growlRef = useRef();
 
@@ -116,14 +118,14 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         // const [designDataset] = designDatasets;
         // setDesignDatasetSchemaId(designDataset.datasetId);
 
-        // setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
+        setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
         dataflow.designDatasets.forEach((schema, idx) => {
-          // setDesignDatasetNames(schema.datasetSchemaName);
-          setActiveIndex(idx);
+          // setDesignDatasetSchemaId(schema.datasetId);
+          setAllIndexValues(idx);
           schema.index = idx;
         });
         setDesignDatasetSchemas(dataflow.designDatasets);
-        // setActiveIndex(dataflow.designDatasets.map(index => index.index));
+        // setAllIndexValues(dataflow.designDatasets.map(index => index.index));
         // setDatasetSchemaName(designDataset.datasetSchemaName);
       }
     } catch (error) {
@@ -144,10 +146,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   //   }
   // }, [dataflowData]);
 
-  // console.log('activeIndex', activeIndex);
+  // console.log('allIndexValues', allIndexValues);
 
   const onLoadSnapshotList = async datasetId => {
     setSnapshotsListData(await SnapshotService.all(datasetId));
+  };
+
+  const onSelectIndex = index => {
+    const allValues = [...designDatasetSchemas];
+    const isRepeated = allValues.filter(title => title.index === index);
+    return isRepeated[0].index;
   };
 
   useEffect(() => {
@@ -242,6 +250,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async (value, index) => {
+    // await DatasetService.updateSchemaNameById(id, value);
     await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, value);
     // setDatasetSchemaName(value);
   };
@@ -380,15 +389,16 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                           )
                         );
                       }}
-                      index={activeIndex}
+                      index={newDatasetSchema.index}
                       isNameEditable={isNameEditable}
                       onNameDuplicate={onDuplicateName}
                       onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
+                      onSelectIndex={onSelectIndex}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       // schemaName={datasetSchemaName}
-                      // schemaId={designDatasetSchemaId}
+                      schemaId={designDatasetSchemaId}
                       model={[
                         {
                           label: resources.messages['openDataset'],
@@ -554,7 +564,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteDatasetSchema(activeIndex)}
+          onConfirm={() => onDeleteDatasetSchema(allIndexValues)}
           onHide={() => setDeleteDialogVisible(false)}
           visible={deleteDialogVisible}>
           {resources.messages['deleteDatasetSchema']}

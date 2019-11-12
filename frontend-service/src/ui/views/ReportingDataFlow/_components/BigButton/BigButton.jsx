@@ -17,48 +17,60 @@ export const BigButton = ({
   designDatasetSchemas,
   handleRedirect,
   index,
-  isNameEditable,
+  // isNameEditable,
   isReleased,
   layout,
   model,
   onNameDuplicate,
-  onNameEdit,
+  // onNameEdit,
   onSaveError,
   onSaveName,
+  onSelectIndex,
   placeholder
-  // schemaId,
+  // schemaId
   // schemaName
 }) => {
+  // const [buttonsIds, setButtonsIds] = useState();
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
   // const [focusedValue, setFocusedValue] = useState();
 
+  const [isEditEnabled, setIsEditEnabled] = useState(false);
+
+  // console.log('schemaId', schemaId);
+
+  // console.log('index', index);
+
   const newDatasetRef = useRef();
 
   const checkDuplicates = (header, index) => {
+    console.log('index of check: ', index);
     const inmTitles = [...designDatasetSchemas];
-    console.log('inmTitles', inmTitles);
     const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
-    console.log('repeat', repeat);
-    console.log('boolean', repeat.length > 0 && index !== repeat[0].index);
     return repeat.length > 0 && index !== repeat[0].index;
   };
 
   const onEditorKeyChange = (event, index) => {
+    console.log('testing index: ', index);
     if (event.key === 'Enter') {
-      onInputSave(event.target.value, index);
+      onInputSave(event.target.value, onSelectIndex(index));
     }
     if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
-        onNameEdit();
+        setIsEditEnabled(false);
       }
     }
   };
 
+  // console.log('buttonsIds', buttonsIds);
+
   const onEditorValueFocus = (value, index) => {
     setInitialValue(!isEmpty(value) ? value : initialValue);
-    // setFocusedValue(value);
+    // const allValues = [...designDatasetSchemas];
+    // const focusedValue = allValues.filter(title => title.datasetSchemaName.toLowerCase() === value.toLowerCase());
+    // setFocusedValue(focusedValue[0].datasetId);
+    // setButtonsIds(onSelectIndex(index));
   };
 
   const onInputSave = (value, index) => {
@@ -68,8 +80,8 @@ export const BigButton = ({
         onNameDuplicate();
       } else {
         initialValue !== value
-          ? onSaveName(value, index) && onNameEdit() && setInitialValue(buttonsTitle)
-          : onNameEdit();
+          ? onSaveName(value, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle)
+          : setIsEditEnabled(false);
       }
     } else {
       if (!isUndefined(onSaveError)) {
@@ -83,6 +95,10 @@ export const BigButton = ({
     if (!isUndefined(value) && value.match(/^[a-zA-Z0-9-_\s]*$/)) {
       setButtonsTitle(value);
     }
+  };
+
+  const doubleClick = () => {
+    setIsEditEnabled(true);
   };
 
   const dataset = model ? (
@@ -144,13 +160,13 @@ export const BigButton = ({
           iconStyle={{ fontSize: '1.8rem' }}
         />
       </div>
-      {!isUndefined(isNameEditable) && isNameEditable ? (
+      {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText
           key={index}
           autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
-            onInputSave(e.target.value, index);
+            onInputSave(e.target.value, onSelectIndex(index));
           }}
           onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
@@ -162,7 +178,7 @@ export const BigButton = ({
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <p className={styles.caption} onDoubleClick={onNameEdit}>
+        <p className={styles.caption} onDoubleClick={doubleClick}>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}
