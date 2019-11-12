@@ -14,9 +14,8 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { WebLinkService } from 'core/services/WebLink';
-import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
+export const WebLinks = ({ webLinks, isCustodian, dataflowId, onLoadDocumentsAndWebLinks }) => {
   const resources = useContext(ResourcesContext);
 
   const [editedRecord, setEditedRecord] = useState({});
@@ -104,7 +103,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
     if (!isNewRecord) {
       value = changeRecordValue(field, value);
       record = { ...editedRecord, [field]: value };
-      console.log('record', record);
+
       setEditedRecord(record);
     } else {
       value = changeRecordValue(field, value);
@@ -179,8 +178,11 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
   const onSaveRecord = async record => {
     if (isNewRecord) {
       try {
-        console.log('new record on try', record);
-        await WebLinkService.create(dataflowId, record);
+        const newWeblink = await WebLinkService.create(dataflowId, record);
+
+        if (newWeblink.isCreated) {
+          onLoadDocumentsAndWebLinks();
+        }
 
         setIsAddDialogVisible(false);
       } catch (error) {
@@ -192,7 +194,12 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
       }
     } else {
       try {
-        await WebLinkService.update(dataflowId, record);
+        const weblinkToEdit = await WebLinkService.update(dataflowId, record);
+
+        if (weblinkToEdit.isEdited) {
+          onLoadDocumentsAndWebLinks();
+        }
+
         setIsEditDialogVisible(false);
       } catch (error) {
         console.error('Error on update new Weblink: ', error);
@@ -203,8 +210,12 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
   };
 
   const onDeleteWeblink = async () => {
-    console.log('selectedRecord', selectedRecord);
-    await WebLinkService.deleteWeblink(selectedRecord);
+    const weblinkToDelete = await WebLinkService.deleteWeblink(selectedRecord);
+
+    if (weblinkToDelete.isDeleted) {
+      onLoadDocumentsAndWebLinks();
+    }
+
     setIsConfirmDeleteVisible(false);
   };
 
