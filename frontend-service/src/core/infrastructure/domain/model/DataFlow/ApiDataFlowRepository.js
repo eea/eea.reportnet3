@@ -43,7 +43,7 @@ const parseDatasetDTO = datasetDTO => {
   return new Dataset(
     null,
     datasetDTO.id,
-    null,
+    datasetDTO.datasetSchema,
     datasetDTO.dataSetName,
     null,
     null,
@@ -133,8 +133,8 @@ const completed = async () => {
   return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetsValidationStatistics = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId);
+const datasetsValidationStatistics = async datasetSchemaId => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
   datasetsDashboardsDataDTO.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;

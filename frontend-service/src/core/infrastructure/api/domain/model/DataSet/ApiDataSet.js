@@ -246,13 +246,13 @@ export const apiDataset = {
     });
     return response.data;
   },
-  schemaById: async dataflowId => {
+  schemaById: async datasetId => {
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
         ? '/jsons/datosDataSchema2.json'
         : getUrl(DatasetConfig.dataSchema, {
-            dataflowId: dataflowId
+            datasetId
           }),
       queryString: {},
       headers: {
