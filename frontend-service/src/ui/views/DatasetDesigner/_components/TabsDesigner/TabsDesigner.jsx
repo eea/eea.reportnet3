@@ -54,9 +54,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     setIsEditing(editing);
   };
 
-  const onLoadSchema = async dataflowId => {
+  const onLoadSchema = async datasetId => {
     try {
-      const datasetSchemaDTO = await DatasetService.schemaById(dataflowId);
+      const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
       const inmDatasetSchema = { ...datasetSchemaDTO };
       inmDatasetSchema.tables.forEach((table, idx) => {
         table.editable = editable;
