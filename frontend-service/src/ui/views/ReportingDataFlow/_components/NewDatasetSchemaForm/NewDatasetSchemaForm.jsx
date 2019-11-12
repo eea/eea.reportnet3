@@ -21,8 +21,8 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
-      .matches(/^[a-zA-Z0-9-]+$/, resources.messages['invalidCharacter'])
-      .required()
+      .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
+      .required(resources.messages['emptyDatasetSchema'])
   });
 
   if (!isNull(form.current)) {

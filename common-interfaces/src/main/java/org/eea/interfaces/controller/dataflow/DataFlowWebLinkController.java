@@ -36,7 +36,7 @@ public interface DataFlowWebLinkController {
    *
    * @param weblinkVO the weblink VO
    */
-  @PutMapping
+  @PostMapping
   void saveLink(@RequestParam(value = "idDataFlow") Long idDataflow,
       @RequestBody WeblinkVO weblinkVO);
 
@@ -53,7 +53,7 @@ public interface DataFlowWebLinkController {
    *
    * @param weblinkVO the weblink VO
    */
-  @PostMapping
+  @PutMapping
   void updateLink(@RequestBody WeblinkVO weblinkVO);
 
 

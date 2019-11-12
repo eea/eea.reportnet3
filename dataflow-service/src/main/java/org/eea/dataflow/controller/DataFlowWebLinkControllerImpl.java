@@ -29,7 +29,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  * The Class DataFlowWebLinkControllerImpl.
  */
 @RestController
-@RequestMapping(value = "/webLink")
+@RequestMapping(value = "/weblink")
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
@@ -75,7 +75,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @PutMapping
+  @PostMapping
   public void saveLink(Long dataflowId, WeblinkVO weblinkVO) {
 
 
@@ -125,7 +125,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @PostMapping
+  @PutMapping
   public void updateLink(WeblinkVO weblinkVO) {
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
@@ -141,8 +141,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     }
 
     try {
-      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getUrl(),
-          weblink.getDescription());
+      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getDescription(),
+          weblink.getUrl());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);

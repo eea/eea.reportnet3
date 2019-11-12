@@ -291,7 +291,8 @@ const ValidationViewer = React.memo(
     const filteredCount = () => {
       return (
         <span>
-          {resources.messages['filtered']}{' '}
+          {resources.messages['filtered']}
+          {':'}{' '}
           {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
           {' | '}
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
@@ -300,9 +301,20 @@ const ValidationViewer = React.memo(
       );
     };
 
+    const filteredCountSameValue = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()} {'('}
+          {resources.messages['filtered'].toLowerCase()}
+          {')'}
+        </span>
+      );
+    };
+
     const getPaginatorRecordsCount = () => {
       if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return totalCount();
+        return areActiveFilters ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();
       }

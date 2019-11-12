@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -79,11 +80,13 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @return the byte[]
+   * @throws EEAException
    */
   @Override
-  public byte[] writeFile(Long dataflowId, Long datasetId, String idTableSchema) {
+  public byte[] writeFile(Long dataflowId, Long datasetId, String idTableSchema)
+      throws EEAException {
 
-    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist

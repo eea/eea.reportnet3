@@ -1,5 +1,7 @@
 import { isNull, isUndefined } from 'lodash';
 
+import moment from 'moment';
+
 import { apiDataflow } from 'core/infrastructure/api/domain/model/DataFlow';
 import { Dataflow } from 'core/domain/model/DataFlow/DataFlow';
 import { Dataset } from 'core/domain/model/DataSet/DataSet';
@@ -10,7 +12,7 @@ const parseDataflowDTO = dataflowDTO => {
   dataflow.creationDate = dataflowDTO.creationDate;
   dataflow.datasets = parseDatasetListDTO(dataflowDTO.reportingDatasets);
   dataflow.designDatasets = parseDatasetListDTO(dataflowDTO.designDatasets);
-  dataflow.deadlineDate = dataflowDTO.deadlineDate;
+  dataflow.deadlineDate = moment(dataflowDTO.deadlineDate).format('YYYY-MM-DD');
   dataflow.description = dataflowDTO.description;
   dataflow.documents = parseDocumentListDTO(dataflowDTO.documents);
   dataflow.id = dataflowDTO.id;
@@ -41,7 +43,7 @@ const parseDatasetDTO = datasetDTO => {
   return new Dataset(
     null,
     datasetDTO.id,
-    null,
+    datasetDTO.datasetSchema,
     datasetDTO.dataSetName,
     null,
     null,
@@ -99,9 +101,17 @@ const parseWebLinkDTO = webLinkDTO => {
 };
 
 const parseDataflowDTOs = dataflowDTOs => {
-  return dataflowDTOs.map(dataflowDTO => {
+  let dataflows = dataflowDTOs.map(dataflowDTO => {
     return parseDataflowDTO(dataflowDTO);
   });
+
+  dataflows.sort((a, b) => {
+    let deadline_1 = a.deadlineDate;
+    let deadline_2 = b.deadlineDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+
+  return dataflows;
 };
 
 const all = async () => {
@@ -123,8 +133,8 @@ const completed = async () => {
   return parseDataflowDTOs(completedDataflowsDTO);
 };
 
-const datasetsValidationStatistics = async dataflowId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId);
+const datasetsValidationStatistics = async datasetSchemaId => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
   datasetsDashboardsDataDTO.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -237,7 +247,13 @@ const pending = async () => {
 
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
-  return parseDataflowDTO(reportingDataflowDTO);
+  const dataflow = parseDataflowDTO(reportingDataflowDTO);
+  dataflow.datasets.sort((a, b) => {
+    let datasetName_A = a.datasetSchemaName;
+    let datasetName_B = b.datasetSchemaName;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
+  return dataflow;
 };
 
 const accept = async dataflowId => {

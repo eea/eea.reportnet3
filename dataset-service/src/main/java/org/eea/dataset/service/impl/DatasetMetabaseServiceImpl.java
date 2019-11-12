@@ -113,12 +113,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       switch (datasetType) {
         case REPORTING:
           dataset = new ReportingDataset();
-          fillDataset(dataset, datasetName, dataflowId);
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           reportingDatasetRepository.save((ReportingDataset) dataset);
           break;
         case DESIGN:
           dataset = new DesignDataset();
-          fillDataset(dataset, datasetName, dataflowId);
+          fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
           designDatasetRepository.save((DesignDataset) dataset);
           break;
         default:
@@ -139,11 +139,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetName the dataset name
    * @param idDataFlow the id data flow
    */
-  private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow) {
+  private void fillDataset(DataSetMetabase dataset, String datasetName, Long idDataFlow,
+      String datasetSchemaId) {
 
     dataset.setDataSetName(datasetName);
     dataset.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
     dataset.setDataflowId(idDataFlow);
+    dataset.setDatasetSchema(datasetSchemaId);
 
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     partition.setUsername("root");

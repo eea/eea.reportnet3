@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
@@ -52,15 +53,16 @@ public class KieBaseManager {
    * Reload rules.
    *
    * @param datasetId the dataset id
+   * @param datasetSchema
    *
    * @return the kie base
    *
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long datasetId) throws FileNotFoundException {
+  public KieBase reloadRules(Long datasetId, String datasetSchema) throws FileNotFoundException {
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    DataSetSchema schema = schemasRepository.findSchemaByIdFlow(dataSetMetabaseVO.getDataflowId());
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchema));
 
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     if (schema.getRuleDataSet() != null) {

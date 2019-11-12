@@ -38,8 +38,10 @@ public enum ObjectAccessRoleEnum {
   DATASET_CUSTODIAN("ROLE_DATASET-%s-DATA_CUSTODIAN"),
 
   /** The dataschema custodian. */
-  DATASCHEMA_CUSTODIAN("ROLE_DATASCHEMA-%s-DATA_CUSTODIAN");
+  DATASCHEMA_CUSTODIAN("ROLE_DATASCHEMA-%s-DATA_CUSTODIAN"),
 
+  /** The dataschema provider. */
+  DATASCHEMA_PROVIDER("ROLE_DATASCHEMA-%s-DATA_PROVIDER");
 
   /** The expression. */
   private String expression;

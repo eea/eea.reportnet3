@@ -259,7 +259,7 @@ public class DatasetServiceImpl implements DatasetService {
       final ReportingDataset reportingDataset = obtainReportingDataset(datasetId);
 
       // create the right file parser for the file type
-      final IFileParseContext context = fileParserFactory.createContext(mimeType);
+      final IFileParseContext context = fileParserFactory.createContext(mimeType, datasetId);
       final DataSetVO datasetVO =
           context.parse(is, reportingDataset.getDataflowId(), partition.getId(), idTableSchema);
 
@@ -1171,7 +1171,8 @@ public class DatasetServiceImpl implements DatasetService {
   public String getFileName(String mimeType, String idTableSchema, Long datasetId)
       throws EEAException {
     final DataSetMetabase datasetMetabase = obtainReportingDataset(datasetId);
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(datasetMetabase.getDataflowId());
+    DataSetSchemaVO dataSetSchema =
+        fileCommon.getDataSetSchema(datasetMetabase.getDataflowId(), datasetId);
     return null == fileCommon.getFieldSchemas(idTableSchema, dataSetSchema)
         ? datasetMetabase.getDataSetName() + "." + mimeType
         : fileCommon.getTableName(idTableSchema, dataSetSchema) + "." + mimeType;

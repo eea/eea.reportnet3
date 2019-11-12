@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -84,13 +85,13 @@ public class CSVReaderStrategyTest {
 
   /**
    * Test parse file.
-   *
-   * @throws InvalidFileException the invalid file exception
+   * 
+   * @throws EEAException
    */
   @Test
-  public void testParseFile() throws InvalidFileException {
+  public void testParseFile() throws EEAException {
 
-    when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
     DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "");
@@ -101,16 +102,16 @@ public class CSVReaderStrategyTest {
   /**
    * Test parse exception.
    *
-   * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException
    */
   @Test(expected = InvalidFileException.class)
-  public void testParseException() throws InvalidFileException, IOException {
+  public void testParseException() throws IOException, EEAException {
     String csv = "\n TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataSet);
+    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, 1L, null, null);
   }
 

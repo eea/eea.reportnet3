@@ -1,7 +1,7 @@
 {
     "addNewRecord": "/dataset/{:datasetId}/table/{:tableSchemaId}/record",
     "addTableDesign": "/dataschema/{:datasetSchemaId}/createTableSchema/{:datasetId}",
-    "dataSchema":  "/dataschema/noRules/dataflow/{:dataflowId}",
+    "dataSchema":  "/dataschema/datasetId/{:datasetId}",
     "datasetMetaData": "/datasetmetabase/{:datasetId}",
     "dataViewer" : "/dataset/TableValueDataset/{:datasetId}?idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}",
     "deleteImportData": "/dataset/{:datasetId}/deleteImportData",

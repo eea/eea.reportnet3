@@ -190,8 +190,8 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
-const schemaById = async dataflowId => {
-  const datasetSchemaDTO = await apiDataset.schemaById(dataflowId);
+const schemaById = async datasetId => {
+  const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   //reorder tables alphabetically
   // datasetSchemaDTO.tableSchemas = datasetSchemaDTO.tableSchemas.sort(function(a, b) {
   //   if (a.nameTableSchema.toUpperCase() < b.nameTableSchema.toUpperCase()) {

@@ -84,7 +84,7 @@ public interface DatasetMetabaseController {
 
 
   /**
-   * Gets the statistics by id.
+   * <<<<<<< HEAD Gets the statistics by id.
    *
    * @param datasetId the dataset id
    * @return the statistics by id
@@ -104,6 +104,16 @@ public interface DatasetMetabaseController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId);
+
+
+  /**
+   * Gets the reportings id by schema id.
+   *
+   * @param schemaId the schema id
+   * @return the reportings id by schema id
+   */
+  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
 
 
 }
