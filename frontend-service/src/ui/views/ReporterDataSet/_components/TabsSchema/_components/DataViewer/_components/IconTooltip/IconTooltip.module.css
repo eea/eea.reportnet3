@@ -67,17 +67,9 @@ td > .tooltip > span.tooltiptext {
   color: var(--black) !important;
 }
 .buttonCustom.multi {
-  background: #ff3232;
-  background: -moz-linear-gradient(-45deg, #ff3232 0%, #ff3030 50%, #282fff 51%, #005dff 100%);
-  background: -webkit-linear-gradient(-45deg, #ff3232 0%, #ff3030 50%, #282fff 51%, #005dff 100%);
-  background: linear-gradient(135deg, #ff3232 0%, #ff3030 50%, #282fff 51%, #005dff 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff3232', endColorstr='#005dff',GradientType=1 );
+  color: var(--c-lilac-400) !important;
 }
 
 .buttonCustom.multi:hover {
-  background: #ff3232;
-  background: -moz-linear-gradient(-45deg, #ff3232 0%, #ff3030 50%, #282fff 51%, #005dff 100%);
-  background: -webkit-linear-gradient(-45deg, #ff3232 0%, #ff3030 50%, #282fff 51%, #005dff 100%);
-  background: linear-gradient(135deg, #ff3232 0%, #ff3030 50%, #282fff 51%, #005dff 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff3232', endColorstr='#005dff',GradientType=1 );
+  color: var(--c-lilac-400) !important;
 }

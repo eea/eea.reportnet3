@@ -107,8 +107,10 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
         setValidationDropdownFilter([
+          { label: resources.messages['blocker'], key: 'BLOCKER' },
           { label: resources.messages['error'], key: 'ERROR' },
           { label: resources.messages['warning'], key: 'WARNING' },
+          { label: resources.messages['info'], key: 'INFO' },
           { label: resources.messages['correct'], key: 'CORRECT' }
         ]);
         setIsFilterValidationsActive(false);
@@ -185,8 +187,10 @@ const DataViewer = withRouter(
       setSortField(undefined);
       setSortOrder(undefined);
       onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, [
+        'BLOCKER',
         'ERROR',
         'WARNING',
+        'INFO',
         'CORRECT'
       ]);
     }, [recordPositionId]);
@@ -218,7 +222,6 @@ const DataViewer = withRouter(
           style={{ width: '100px', height: '45px' }}
         />
       );
-
       let validationCol = (
         <Column
           body={validationsTemplate}
@@ -260,7 +263,8 @@ const DataViewer = withRouter(
     };
 
     const showValidationFilter = filteredKeys => {
-      setIsFilterValidationsActive(filteredKeys.length !== 3);
+      // length of errors in data schema rules of validation
+      setIsFilterValidationsActive(filteredKeys.length !== 5);
       setFirstRow(0);
       setFilterLevelError(filteredKeys);
     };
@@ -751,19 +755,18 @@ const DataViewer = withRouter(
       if (field !== null && field && field.fieldValidations !== null && !isUndefined(field.fieldValidations)) {
         const validations = [...field.fieldValidations];
         let message = [];
-        console.log(validations);
 
-        // message.push
+        validations.sort((a, b) => {
+          let levelError = a.levelError;
+          let levelError2 = b.levelError;
+          return levelError < levelError2 ? -1 : levelError > levelError2 ? 1 : 0;
+        });
 
         validations.forEach(validation => {
           let error = getLevelErrorString(validation.levelError);
-          console.log(validation.message);
           message += '- ' + error + ': ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n';
         });
-        // validation.message ? (message += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n') : ''
-        // );
 
-        console.log('2', validations);
         const levelError = getLevelError(validations);
 
         return (
