@@ -72,6 +72,18 @@
             <exclude>
               org.eea.*.persistence.**
             </exclude>
+            <exclude>
+              org.eea.swagger.*
+            </exclude>
+            <exclude>
+              org.eea.enums.**
+            </exclude>
+            <exclude>
+              org.eea.exception.*
+            </exclude>
+            <exclude>
+              org.eea.kafka.domain.*
+            </exclude>
           </excludes>
         </configuration>
         <executions>
@@ -127,7 +139,7 @@
         </sonar.projectKey>
         <sonar.projectName>${project.artifactId}:${sonar.jenkins.branch}</sonar.projectName>
         <sonar.coverage.exclusions>
-          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**
+          **/org/eea/**/configuration/**,**/org/eea/**/service/vo/**,**/org/eea/interfaces/**,**/org/eea/**/mapper/**,**/org/eea/**/persistence/**,**/org/eea/swagger/**,**/org/eea/enums/**,**/org/eea/exception/**,**/org/eea/kafka/domain/**
         </sonar.coverage.exclusions>
       </properties>
       <build>
