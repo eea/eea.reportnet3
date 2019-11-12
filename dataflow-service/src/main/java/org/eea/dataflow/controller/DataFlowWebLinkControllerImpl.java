@@ -75,7 +75,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @PutMapping
+  @PostMapping
   public void saveLink(Long dataflowId, WeblinkVO weblinkVO) {
 
 
@@ -125,7 +125,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @PostMapping
+  @PutMapping
   public void updateLink(WeblinkVO weblinkVO) {
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
