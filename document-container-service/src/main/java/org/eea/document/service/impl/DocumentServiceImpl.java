@@ -46,6 +46,9 @@ public class DocumentServiceImpl implements DocumentService {
   /** The Constant PATH_DELIMITER_SNAPSHOT. */
   private static final String PATH_DELIMITER_SNAPSHOT = "/snapshotSchema/";
 
+  /** The Constant PATH_DELIMITER_SNAPSHOT_DELETE. */
+  private static final String PATH_DELIMITER_SNAPSHOT_DELETE = "snapshotSchema/";
+
   /** The oak repository utils. */
   @Autowired
   private OakRepositoryUtils oakRepositoryUtils;
@@ -328,7 +331,8 @@ public class DocumentServiceImpl implements DocumentService {
       session = oakRepositoryUtils.initializeSession(repository);
 
       // Delete a file node with the document
-      oakRepositoryUtils.deleteFileNode(session, designDatasetId.toString(), documentName);
+      oakRepositoryUtils.deleteFileNode(session,
+          PATH_DELIMITER_SNAPSHOT_DELETE + designDatasetId.toString(), documentName);
       LOG.info("File deleted...");
 
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
