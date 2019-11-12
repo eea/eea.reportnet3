@@ -67,6 +67,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * Gets the data set id by dataflow id.
    *
    * @param idFlow the id flow
@@ -201,12 +206,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @throws IllegalAccessException the illegal access exception
    */
   @Override
-  @Transactional
   public StatisticsVO getStatistics(final Long datasetId)
       throws EEAException, InstantiationException, IllegalAccessException {
 
     List<Statistics> statistics = statisticsRepository.findStatisticsByIdDataset(datasetId);
-
     return processStatistics(statistics);
   }
 
@@ -298,12 +301,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param dataschemaId the dataschema id
    * @return the global statistics
+   * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
   @Override
   public List<StatisticsVO> getGlobalStatistics(String dataschemaId)
-      throws InstantiationException, IllegalAccessException {
+      throws EEAException, InstantiationException, IllegalAccessException {
 
     List<StatisticsVO> statistics = new ArrayList<>();
 
@@ -313,15 +317,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));
 
     statsMap.values().stream().forEach(s -> {
-
       try {
         statistics.add(processStatistics(s));
       } catch (InstantiationException | IllegalAccessException e) {
-
+        LOG_ERROR.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
       }
-
     });
-
 
     return statistics;
   }

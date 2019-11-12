@@ -198,7 +198,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     try {
       statistics = datasetMetabaseService.getGlobalStatistics(dataschemaId);
     } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
     }
 
     return statistics;
