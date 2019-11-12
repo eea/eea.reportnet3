@@ -1,4 +1,7 @@
-{
-    "create": "/webLink?idDataflow={:dataflowId}",
-    "all": "/document/{:documentId}"    
+{   
+    "all": "/document/{:documentId}",
+    "create": "/weblink?idDataflow={:dataflowId}",
+    "delete":"/weblink?{:weblinkId}",
+    "update":"/weblink?idDataflow={:dataflowId}"
+
 }

@@ -12,7 +12,21 @@ const create = async (dataflowId, weblinkToCreate) => {
   return weblinkToCreate;
 };
 
+const deleteWeblink = async weblinkToDelete => {
+  const isDeleted = await apiWebLink.deleteWeblink(weblinkToDelete);
+  weblinkToDelete.isDeleted = isDeleted;
+  return weblinkToDelete;
+};
+
+const update = async (dataflowId, weblinkToUpdate) => {
+  const isUpdated = await apiWebLink.update(dataflowId, weblinkToUpdate);
+  weblinkToUpdate.isUpdated = isUpdated;
+  return weblinkToUpdate;
+};
+
 export const ApiWebLinkRepository = {
   all,
-  create
+  create,
+  deleteWeblink,
+  update
 };

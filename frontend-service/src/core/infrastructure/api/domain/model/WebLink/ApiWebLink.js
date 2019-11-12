@@ -38,6 +38,7 @@ export const apiWebLink = {
   create: async (dataflowId, weblinkToCreate) => {
     const tokens = userStorage.get();
     try {
+      console.log('in try', weblinkToCreate);
       const response = await HTTPRequester.post({
         url: getUrl(WeblinkConfig.create, {
           dataflowId
@@ -53,6 +54,50 @@ export const apiWebLink = {
       return response.status >= 200 && response.status <= 299;
     } catch (error) {
       console.error(`Error creating the weblink: ${error}`);
+      return false;
+    }
+  },
+
+  deleteWeblink: async weblinkToDelete => {
+    const tokens = userStorage.get();
+    try {
+      console.log('in try', weblinkToDelete);
+      const response = await HTTPRequester.delete({
+        url: getUrl(WeblinkConfig.delete, {
+          weblinkId: weblinkToDelete.id
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting the weblink: ${error}`);
+      return false;
+    }
+  },
+
+  update: async (dataflowId, weblinkToEdit) => {
+    const tokens = userStorage.get();
+    try {
+      console.log('in try', weblinkToEdit);
+      const response = await HTTPRequester.update({
+        url: getUrl(WeblinkConfig.update, {
+          dataflowId
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        },
+        data: {
+          id: weblinkToEdit.id,
+          description: weblinkToEdit.description,
+          url: weblinkToEdit.url
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error editing the weblink: ${error}`);
       return false;
     }
   }

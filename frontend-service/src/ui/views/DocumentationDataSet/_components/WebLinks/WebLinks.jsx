@@ -104,6 +104,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
     if (!isNewRecord) {
       value = changeRecordValue(field, value);
       record = { ...editedRecord, [field]: value };
+      console.log('record', record);
       setEditedRecord(record);
     } else {
       value = changeRecordValue(field, value);
@@ -132,6 +133,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
         onClick={() => {
           try {
             onSaveRecord(editedRecord);
+            setIsEditDialogVisible(false);
           } catch (error) {
             console.error(error);
           }
@@ -148,7 +150,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
 
   const editRecordForm = webLinksColumns.map((column, i) => {
     if (isEditDialogVisible) {
-      if (i == 0) {
+      if (i === 0) {
         return;
       }
       return (
@@ -189,6 +191,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
       }
     } else {
       try {
+        await WebLinkService.update(dataflowId, record);
         setIsEditDialogVisible(false);
       } catch (error) {
         console.error('Error on update new Weblink: ', error);
@@ -198,7 +201,9 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
     }
   };
 
-  const onDeleteWeblink = () => {
+  const onDeleteWeblink = async () => {
+    console.log('selectedRecord', selectedRecord);
+    await WebLinkService.deleteWeblink(selectedRecord);
     setIsConfirmDeleteVisible(false);
   };
 
@@ -291,8 +296,6 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
         onHide={() => setIsAddDialogVisible(false)}
         style={{ width: '50%', height: '80%' }}
         visible={isAddDialogVisible}>
-        {/*   <div className="p-grid p-fluid">{newRecordForm}</div> */}
-
         <Formik ref={form} initialValues={initialValues} validationSchema={addWeblinkSchema} onSubmit={onSaveRecord}>
           {({ isSubmitting, errors, touched }) => (
             <Form>
@@ -351,7 +354,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId }) => {
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         maximizable={false}
-        onConfirm={() => onDeleteWeblink()}
+        onConfirm={e => onDeleteWeblink(e)}
         onHide={onHideDeleteDialog}
         visible={isConfirmDeleteVisible}>
         {resources.messages['deleteWebLink']}
