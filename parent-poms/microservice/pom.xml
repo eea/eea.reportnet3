@@ -223,9 +223,7 @@
             <exclude>
               org.eea.*.service.vo
             </exclude>
-            <exclude>
-              org.eea.interfaces.*
-            </exclude>
+
             <exclude>
               org.eea.*.mapper
             </exclude>

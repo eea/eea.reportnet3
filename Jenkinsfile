@@ -119,7 +119,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'develop1' 
+                branch 'develop'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'eea-github', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
