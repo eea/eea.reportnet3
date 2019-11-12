@@ -34,3 +34,6 @@
 .filterInactive {
   opacity: 0.5;
 }
+.validationCol {
+  width: 15px;
+}
