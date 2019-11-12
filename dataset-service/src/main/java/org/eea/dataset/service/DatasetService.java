@@ -310,13 +310,12 @@ public interface DatasetService {
       throws EEAException;
 
   /**
-   * Detele field values.
+   * Delete field values.
    *
    * @param datasetId the dataset id
    * @param fieldSchemaId the field schema id
-   * @return the string
    */
-  String deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
+  void deleteFieldValues(@DatasetId Long datasetId, String fieldSchemaId);
 
   /**
    * Update field value type.

@@ -367,12 +367,12 @@ public class DataSetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test()
+  @Test
   public void deleteFieldSchemaTest1() throws EEAException {
-    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(true);
-    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+    Mockito.doNothing().when(datasetService).deleteFieldValues(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.deleteFieldSchema("<id>", 1L, "<id>");
     Mockito.verify(dataschemaService, times(1)).deleteFieldSchema(Mockito.any(), Mockito.any());
   }
 
@@ -383,11 +383,9 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest2() throws EEAException {
-    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(false);
-    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
-    Mockito.verify(dataschemaService, times(1)).deleteFieldSchema(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.deleteFieldSchema("<id>", 1L, "<id>");
   }
 
   /**
@@ -397,10 +395,9 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest3() throws EEAException {
-    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+    dataSchemaControllerImpl.deleteFieldSchema("<id>", 1L, "<id>");
   }
 
   /**
@@ -410,13 +407,12 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
-    Mockito.when(datasetService.findDatasetSchemaIdById(Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn("type");
     Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
         Mockito.any());
-    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
-    Mockito.verify(datasetService, times(1)).findDatasetSchemaIdById(Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema("<id>", 1L, new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).updateFieldSchema(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -426,55 +422,61 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest2() throws EEAException {
-    Mockito.when(datasetService.findDatasetSchemaIdById(Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
-    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
-    Mockito.verify(datasetService, times(1)).findDatasetSchemaIdById(Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema("<id>", 1L, new FieldSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).updateFieldSchema(Mockito.any(), Mockito.any());
   }
 
   /**
    * Update field schema test 3.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
   public void updateFieldSchemaTest3() throws EEAException {
-    Mockito.when(datasetService.findDatasetSchemaIdById(Mockito.any())).thenReturn("<id>");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+    dataSchemaControllerImpl.updateFieldSchema("<id>", 1L, new FieldSchemaVO());
   }
 
+  /**
+   * Creates the field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createFieldSchemaTest1() throws EEAException {
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
-    dataSchemaControllerImpl.createFieldSchema(1L, "<id>", new FieldSchemaVO());
+    dataSchemaControllerImpl.createFieldSchema("<id>", 1L, "<id>", new FieldSchemaVO());
     Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
+  /**
+   * Creates the field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createFieldSchemaTest2() throws EEAException {
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(false);
-    dataSchemaControllerImpl.createFieldSchema(1L, "<id>", new FieldSchemaVO());
+    dataSchemaControllerImpl.createFieldSchema("<id>", 1L, "<id>", new FieldSchemaVO());
     Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
+  /**
+   * Creates the field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createFieldSchemaTest3() throws EEAException {
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    dataSchemaControllerImpl.createFieldSchema(1L, "<id>", new FieldSchemaVO());
+    dataSchemaControllerImpl.createFieldSchema("<id>", 1L, "<id>", new FieldSchemaVO());
   }
-
-  // try {
-  // if (!dataschemaService.createFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
-  // tableSchemaId, fieldSchemaVO)) {
-  // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
-  // }
-  // } catch (EEAException e) {
-  // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
-  // }
 }

@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -94,7 +93,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{idSchema}/updateTableSchema/{datasetId}", method = RequestMethod.PUT)
+  @PutMapping("/{idSchema}/updateTableSchema/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void updateTableSchema(@PathVariable("idSchema") String idSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema) {
@@ -140,7 +139,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
+  @PostMapping("/{id}/createTableSchema/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void createTableSchema(@PathVariable("id") String id,
       @PathVariable("datasetId") Long datasetId, @RequestBody final TableSchemaVO tableSchema) {
@@ -175,7 +174,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand()
+  @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow) {
@@ -190,7 +189,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @return the data set schema VO
    */
   @Override
-  @HystrixCommand()
+  @HystrixCommand
   @GetMapping(value = "/noRules/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idFlow,'DATAFLOW_PROVIDER') OR secondLevelAuthorize(#idFlow,'DATAFLOW_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow) {
@@ -204,8 +203,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param idTableSchema the id table schema
    */
   @Override
-  @HystrixCommand()
-  @RequestMapping(value = "/{datasetId}/tableschema/{tableSchemaId}", method = RequestMethod.DELETE,
+  @HystrixCommand
+  @DeleteMapping(value = "/{datasetId}/tableschema/{tableSchemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
@@ -239,8 +238,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * @param datasetId the dataset id
    */
   @Override
-  @RequestMapping(value = "/dataset/{datasetId}", method = RequestMethod.DELETE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
   public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId) {
     if (datasetId == null) {
@@ -274,14 +272,14 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{datasetId}/createFieldSchema/{tableSchemaId}")
+  @PostMapping("/{datasetSchemaId}/createFieldSchema/{datasetId}/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+  public void createFieldSchema(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
-      if (!dataschemaService.createFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
-          tableSchemaId, fieldSchemaVO)) {
+      if (!dataschemaService.createFieldSchema(datasetSchemaId, tableSchemaId, fieldSchemaVO)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
     } catch (EEAException e) {
@@ -292,24 +290,24 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   /**
    * Delete field schema.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param datasetId the dataset id
    * @param fieldSchemaId the field schema id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
+  @DeleteMapping("/{datasetSchemaId}/deleteFieldSchema/{datasetId}/{fieldSchemaId}")
+  public void deleteFieldSchema(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
-
-    // Delete the fieldSchema from the dataset
-    String datasetSchemaId = datasetService.deleteFieldValues(datasetId, fieldSchemaId);
-
     try {
       // Delete the fieldSchema from the datasetSchema
       if (!dataschemaService.deleteFieldSchema(datasetSchemaId, fieldSchemaId)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
+      // Delete the fieldSchema from the dataset
+      datasetService.deleteFieldValues(datasetId, fieldSchemaId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
     }
@@ -323,16 +321,13 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PutMapping("/{datasetId}/updateFieldSchema")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody FieldSchemaVO fieldSchemaVO) {
-
+  @PutMapping("/{datasetSchemaId}/updateFieldSchema/{datasetId}")
+  public void updateFieldSchema(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("datasetId") Long datasetId, @RequestBody FieldSchemaVO fieldSchemaVO) {
     try {
       // Update the fieldSchema from the datasetSchema
-      String type = dataschemaService
-          .updateFieldSchema(datasetService.findDatasetSchemaIdById(datasetId), fieldSchemaVO);
-
+      String type = dataschemaService.updateFieldSchema(datasetSchemaId, fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
@@ -361,7 +356,8 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_ID_NONFOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.DATASETSCHEMAID_NOT_FOUND);
     }
   }
 

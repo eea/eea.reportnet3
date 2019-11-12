@@ -1354,9 +1354,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public String deleteFieldValues(Long datasetId, String fieldSchemaId) {
+  public void deleteFieldValues(Long datasetId, String fieldSchemaId) {
     fieldRepository.deleteByFieldSchemaId(fieldSchemaId);
-    return datasetRepository.findIdDatasetSchemaById(datasetId);
   }
 
   /**

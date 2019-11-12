@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -81,22 +79,18 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    */
-  @RequestMapping(value = "/{datasetId}/tableschema/{tableSchemaId}", method = RequestMethod.DELETE,
+  @DeleteMapping(value = "/{datasetId}/tableschema/{tableSchemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String idTableSchema);
-
 
   /**
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
    */
-  @RequestMapping(value = "/dataset/{datasetId}", method = RequestMethod.DELETE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId);
-
-
 
   /**
    * Update table schema.
@@ -105,7 +99,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param tableSchema the table schema
    */
-  @RequestMapping(value = "/{idSchema}/updateTableSchema/{datasetId}", method = RequestMethod.PUT)
+  @PutMapping("/{idSchema}/updateTableSchema/{datasetId}")
   void updateTableSchema(@PathVariable("idSchema") String idSchema,
       @PathVariable("datasetId") Long datasetId, @RequestBody TableSchemaVO tableSchema);
 
@@ -116,7 +110,7 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @param tableSchema the table schema
    */
-  @RequestMapping(value = "/{id}/createTableSchema/{datasetId}", method = RequestMethod.POST)
+  @PostMapping("/{id}/createTableSchema/{datasetId}")
   void createTableSchema(@PathVariable("id") String id, @PathVariable("datasetId") Long datasetId,
       @RequestBody final TableSchemaVO tableSchema);
 
@@ -124,40 +118,44 @@ public interface DatasetSchemaController {
    * Creates the field schema.
    *
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
-   * @param fieldSchema the field schema
+   * @param tableSchemaVO the table schema VO
+   * @param fieldSchemaVO the field schema VO
    */
-  @PostMapping("/{datasetId}/createFieldSchema/{tableSchemaId}")
-  void createFieldSchema(@PathVariable("datasetId") Long datasetId,
+  @PostMapping("/{datasetSchemaId}/createFieldSchema/{datasetId}/{tableSchemaId}")
+  void createFieldSchema(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaVO,
       @RequestBody final FieldSchemaVO fieldSchemaVO);
 
   /**
    * Delete field schema.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param datasetId the dataset id
    * @param fieldSchemaId the field schema id
    */
-  @DeleteMapping("/{datasetId}/deleteFieldSchema/{fieldSchemaId}")
-  void deleteFieldSchema(@PathVariable("datasetId") Long datasetId,
+  @DeleteMapping("/{datasetSchemaId}/deleteFieldSchema/{datasetId}/{fieldSchemaId}")
+  void deleteFieldSchema(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") String fieldSchemaId);
 
   /**
    * Update field schema.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param datasetId the dataset id
    * @param fieldSchemaVO the field schema VO
    */
-  @PutMapping("/{datasetId}/updateFieldSchema")
-  void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody FieldSchemaVO fieldSchemaVO);
+  @PutMapping("/{datasetSchemaId}/updateFieldSchema/{datasetId}")
+  void updateFieldSchema(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("datasetId") Long datasetId, @RequestBody FieldSchemaVO fieldSchemaVO);
 
   /**
    * Order schema.
-   *
+   * 
    * @param datasetId the dataset id
-   * @param newPosition the new position
    * @param schema the schema
+   * @param newPosition the new position
    */
   @PutMapping("/{idDatasetSchema}/order/{position}/{datasetId}")
   void orderSchema(@PathVariable("datasetId") Long datasetId,
