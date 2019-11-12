@@ -38,7 +38,6 @@ export const apiWebLink = {
   create: async (dataflowId, weblinkToCreate) => {
     const tokens = userStorage.get();
     try {
-      console.log('in try', weblinkToCreate);
       const response = await HTTPRequester.post({
         url: getUrl(WeblinkConfig.create, {
           dataflowId
@@ -61,7 +60,6 @@ export const apiWebLink = {
   deleteWeblink: async weblinkToDelete => {
     const tokens = userStorage.get();
     try {
-      console.log('in try', weblinkToDelete);
       const response = await HTTPRequester.delete({
         url: getUrl(WeblinkConfig.delete, {
           weblinkId: weblinkToDelete.id
@@ -81,7 +79,6 @@ export const apiWebLink = {
   update: async (dataflowId, weblinkToEdit) => {
     const tokens = userStorage.get();
     try {
-      console.log('in try', weblinkToEdit);
       const response = await HTTPRequester.update({
         url: getUrl(WeblinkConfig.update, {
           dataflowId

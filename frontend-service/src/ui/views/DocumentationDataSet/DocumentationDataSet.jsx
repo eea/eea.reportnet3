@@ -81,7 +81,6 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   const onLoadDocumentsAndWebLinks = async () => {
     setIsLoading(true);
     try {
-      setWebLinks(await WebLinkService.all(`${match.params.dataflowId}`));
       setDocuments(await DocumentService.all(`${match.params.dataflowId}`));
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -119,12 +118,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             />
           </TabPanel>
           <TabPanel header={resources.messages['webLinks']}>
-            <WebLinks
-              onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
-              webLinks={webLinks}
-              isCustodian={isCustodian}
-              dataflowId={match.params.dataflowId}
-            />
+            <WebLinks isCustodian={isCustodian} dataflowId={match.params.dataflowId} />
           </TabPanel>
         </TabView>
       </React.Fragment>

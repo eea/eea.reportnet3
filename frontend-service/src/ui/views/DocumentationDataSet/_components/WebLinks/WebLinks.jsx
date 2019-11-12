@@ -15,7 +15,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { WebLinkService } from 'core/services/WebLink';
 
-export const WebLinks = ({ webLinks, isCustodian, dataflowId, onLoadDocumentsAndWebLinks }) => {
+export const WebLinks = ({ isCustodian, dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
   const [editedRecord, setEditedRecord] = useState({});
@@ -26,6 +26,8 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId, onLoadDocumentsAnd
   const [newRecord, setNewRecord] = useState({ description: '', url: '' });
   const [selectedRecord, setSelectedRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
+  const [webLinks, setWebLinks] = useState();
+  const [reload, setReload] = useState(false);
 
   const initialValues = { description: '', url: '' };
   const form = useRef(null);
@@ -36,6 +38,23 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId, onLoadDocumentsAnd
       .url()
       .required()
   });
+
+  const onLoadWebLinks = async () => {
+    // setIsLoading(true);
+    try {
+      setWebLinks(await WebLinkService.all(dataflowId));
+    } catch (error) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        console.log('error', error.response);
+      }
+    } finally {
+      //setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    onLoadWebLinks();
+  }, [reload]);
 
   const onSelectRecord = val => {
     setIsNewRecord(false);
@@ -181,23 +200,19 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId, onLoadDocumentsAnd
         const newWeblink = await WebLinkService.create(dataflowId, record);
 
         if (newWeblink.isCreated) {
-          onLoadDocumentsAndWebLinks();
+          setReload(!reload);
         }
 
         setIsAddDialogVisible(false);
       } catch (error) {
         console.error('Error on save new Weblink: ', error);
-
-        const errorResponse = error.response;
-
-        console.error('errorResponse: ', errorResponse);
       }
     } else {
       try {
         const weblinkToEdit = await WebLinkService.update(dataflowId, record);
 
-        if (weblinkToEdit.isEdited) {
-          onLoadDocumentsAndWebLinks();
+        if (weblinkToEdit.isUpdated) {
+          setReload(!reload);
         }
 
         setIsEditDialogVisible(false);
@@ -213,7 +228,7 @@ export const WebLinks = ({ webLinks, isCustodian, dataflowId, onLoadDocumentsAnd
     const weblinkToDelete = await WebLinkService.deleteWeblink(selectedRecord);
 
     if (weblinkToDelete.isDeleted) {
-      onLoadDocumentsAndWebLinks();
+      setReload(!reload);
     }
 
     setIsConfirmDeleteVisible(false);
