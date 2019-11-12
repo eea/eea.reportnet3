@@ -340,18 +340,41 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
 
   @Override
   @HystrixCommand
-  @PutMapping("/{idDatasetSchema}/order/{position}/{datasetId}")
+  @PutMapping("/{idDatasetSchema}/orderTable/{position}/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
-  public void orderSchema(@PathVariable("datasetId") Long datasetId,
+  public void orderTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("idDatasetSchema") String idDatasetSchema,
-      @PathVariable("position") int newPosition, @RequestBody Object schema) {
+      @PathVariable("position") int newPosition, @RequestBody TableSchemaVO tableSchema) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
       // Update the fieldSchema from the datasetSchema
-      Boolean updated = dataschemaService.order(idDatasetSchema, schema, newPosition);
+      Boolean updated = dataschemaService.order(idDatasetSchema, tableSchema, newPosition);
+      if (Boolean.FALSE.equals(updated)) {
+        throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
+      }
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.DATASETSCHEMAID_NOT_FOUND);
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @PutMapping("/{idDatasetSchema}/orderField/{position}/{datasetId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN')")
+  public void orderFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @PathVariable("position") int newPosition, @RequestBody FieldSchemaVO fieldSchema) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      // Update the fieldSchema from the datasetSchema
+      Boolean updated = dataschemaService.order(idDatasetSchema, fieldSchema, newPosition);
       if (Boolean.FALSE.equals(updated)) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }

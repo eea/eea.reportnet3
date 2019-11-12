@@ -117,6 +117,7 @@ public interface DatasetSchemaController {
   /**
    * Creates the field schema.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
    * @param fieldSchemaVO the field schema VO
@@ -151,14 +152,28 @@ public interface DatasetSchemaController {
       @PathVariable("datasetId") Long datasetId, @RequestBody FieldSchemaVO fieldSchemaVO);
 
   /**
-   * Order schema.
-   * 
+   * Order table schema.
+   *
    * @param datasetId the dataset id
-   * @param schema the schema
+   * @param idDatasetSchema the id dataset schema
    * @param newPosition the new position
+   * @param tableSchema the table schema
    */
-  @PutMapping("/{idDatasetSchema}/order/{position}/{datasetId}")
-  void orderSchema(@PathVariable("datasetId") Long datasetId,
+  @PutMapping("/{idDatasetSchema}/orderTable/{position}/{datasetId}")
+  void orderTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("idDatasetSchema") String idDatasetSchema,
-      @PathVariable("position") int newPosition, @RequestBody Object schema);
+      @PathVariable("position") int newPosition, @RequestBody TableSchemaVO tableSchema);
+
+  /**
+   * Order field schema.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @param newPosition the new position
+   * @param fieldSchema the field schema
+   */
+  @PutMapping("/{idDatasetSchema}/orderTable/{position}/{datasetId}")
+  void orderFieldSchema(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @PathVariable("position") int newPosition, @RequestBody FieldSchemaVO fieldSchema);
 }
