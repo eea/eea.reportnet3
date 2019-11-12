@@ -378,8 +378,8 @@ public class DatasetServiceTest {
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    TypeErrorEnum[] errorfilter =
-        new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING, TypeErrorEnum.CORRECT};
+    TypeErrorEnum[] errorfilter = new TypeErrorEnum[] {TypeErrorEnum.ERROR, TypeErrorEnum.WARNING,
+        TypeErrorEnum.CORRECT, TypeErrorEnum.BLOCKER, TypeErrorEnum.INFO};
     datasetService.getTableValuesById(1L, "mongoId", pageable, null, errorfilter);
     Mockito.verify(recordNoValidationMapper, times(1)).entityListToClass(Mockito.any());
   }

@@ -658,4 +658,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
   }
+
+  /**
+   * Replace schema.
+   *
+   * @param idSchema the id schema
+   * @param schema the schema
+   */
+  @Override
+  public void replaceSchema(String idSchema, DataSetSchema schema) {
+    schemasRepository.deleteDatasetSchemaById(idSchema);
+    schemasRepository.save(schema);
+  }
 }

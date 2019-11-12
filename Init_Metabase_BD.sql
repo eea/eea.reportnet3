@@ -1,4 +1,4 @@
-RDROP SCHEMA public cascade;
+DROP SCHEMA public cascade;
 CREATE SCHEMA public;
 commit;
 
@@ -155,6 +155,14 @@ CREATE TABLE public.lock (
 	CONSTRAINT lock_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE public."snapshot_schema" (
+	id bigserial NOT null,
+	"description" varchar(255) NULL,
+	DESIGN_DATASET_ID int8 null,
+	CONSTRAINT snapshot_schema_pkey PRIMARY KEY (id),
+	CONSTRAINT snapshot_schema_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)
+);
+
 
 --GRANTS
 
@@ -198,19 +206,13 @@ ALTER TABLE public.dataflow_user_request OWNER TO testuser;
 GRANT ALL ON TABLE public.dataflow_user_request TO testuser;
 ALTER TABLE public.lock OWNER TO testuser;
 GRANT ALL ON TABLE public.lock TO testuser;
+ALTER TABLE public.snapshot_schema OWNER TO testuser;
+GRANT ALL ON TABLE public.snapshot_schema TO testuser;
 
 --INDEXES--
 CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);
 CREATE INDEX INDX_REPORTING_DS_ID ON SNAPSHOT (reporting_dataset_id);
 
--- SEQUENCES
 
-/*CREATE SEQUENCE public.hibernate_sequence
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;*/
 
 COMMIT;
