@@ -59,7 +59,7 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
 
   useEffect(() => {
     const getDatasetSchemaId = async () => {
-      const dataset = await DatasetService.schemaById(dataflowId);
+      const dataset = await DatasetService.schemaById(datasetId);
 
       setDatasetSchemaId(dataset.datasetSchemaId);
     };
