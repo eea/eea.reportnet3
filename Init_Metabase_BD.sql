@@ -162,6 +162,17 @@ CREATE TABLE public."snapshot_schema" (
 	CONSTRAINT snapshot_schema_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)
 );
 
+CREATE TABLE public."statistics" (
+	id bigserial NOT NULL,
+	id_dataset bigserial NULL,
+	id_table_schema text NULL,
+	stat_name text NULL,
+	value text NULL,
+	CONSTRAINT statistics_pkey PRIMARY KEY (id)
+);
+
+
+
 
 --GRANTS
 
@@ -207,10 +218,14 @@ ALTER TABLE public.lock OWNER TO testuser;
 GRANT ALL ON TABLE public.lock TO testuser;
 ALTER TABLE public.snapshot_schema OWNER TO testuser;
 GRANT ALL ON TABLE public.snapshot_schema TO testuser;
+ALTER TABLE public.statistics OWNER TO testuser;
+GRANT ALL ON TABLE public.statistics TO testuser;
 
 --INDEXES--
 CREATE INDEX INDX_ISRELEASED ON SNAPSHOT (release);
 CREATE INDEX INDX_REPORTING_DS_ID ON SNAPSHOT (reporting_dataset_id);
+
+CREATE INDEX statistics_id_dataset_idx ON public.statistics (id_dataset);
 
 
 
