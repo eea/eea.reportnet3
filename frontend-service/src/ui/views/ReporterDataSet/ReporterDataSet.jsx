@@ -66,6 +66,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
+  const [levelErrorFilters, setLevelErrorFilters] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -216,6 +217,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
+      // setLevelErrorFilters(dataset????);
       const tableSchemaNamesList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
@@ -445,6 +447,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
             tableSchemaNames={tableSchemaNames}
+            // levelErrorFilters={levelErrorFilters}
           />
         </Dialog>
       </ReporterDatasetContext.Provider>

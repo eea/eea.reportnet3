@@ -15,8 +15,10 @@ import { DatasetService } from 'core/services/DataSet';
 
 const SEVERITY_CODE = {
   CORRECT: 1,
-  WARNING: 2,
-  ERROR: 3
+  INFO: 2,
+  WARNING: 3,
+  ERROR: 4,
+  BLOCKER: 5
 };
 
 const Dashboard = withRouter(
@@ -34,8 +36,10 @@ const Dashboard = withRouter(
     useEffect(() => {
       setDashboardColors({
         CORRECT: colors.dashboardCorrect,
+        INFO: colors.dashboardInfo,
         WARNING: colors.dashboardWarning,
-        ERROR: colors.dashboardError
+        ERROR: colors.dashboardError,
+        BLOCKER: colors.dashboardBlocker
       });
     }, []);
 
@@ -72,15 +76,27 @@ const Dashboard = withRouter(
             totalData: tableStatisticValues
           },
           {
+            label: 'Info',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.INFO : colors.dashboardInfo,
+            data: dataset.tableStatisticPercentages[1],
+            totalData: tableStatisticValues
+          },
+          {
             label: 'Warning',
             backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.WARNING : colors.dashboardWarning,
-            data: dataset.tableStatisticPercentages[1],
+            data: dataset.tableStatisticPercentages[2],
             totalData: tableStatisticValues
           },
           {
             label: 'Error',
             backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.ERROR : colors.dashboardError,
-            data: dataset.tableStatisticPercentages[2],
+            data: dataset.tableStatisticPercentages[3],
+            totalData: tableStatisticValues
+          },
+          {
+            label: 'Blocker',
+            backgroundColor: !isUndefined(dashboardColors) ? dashboardColors.BLOCKER : colors.dashboardBlocker,
+            data: dataset.tableStatisticPercentages[4],
             totalData: tableStatisticValues
           }
         ]
