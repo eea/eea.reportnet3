@@ -1890,7 +1890,7 @@ body .p-tabview.p-tabview-top .p-tabview-nav {
   margin-bottom: -1px;
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a {
-  margin-right: 2px;
+
   -moz-border-radius-topleft: 3px;
   -webkit-border-top-left-radius: 3px;
   border-top-left-radius: 3px;
@@ -1898,11 +1898,24 @@ body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a {
   -webkit-border-top-right-radius: 3px;
   border-top-right-radius: 3px;
 }
+
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(:last-child) a {
+  margin-right: 2px;
+}
+
+.p-tabview .p-tabview-nav li { 
+  list-style: none; 
+  float: left; 
+  position: relative; 
+  margin: 0 0 1px 0;  
+  padding: 0; 
+  white-space: nowrap; 
+}
+
 body .p-tabview.p-tabview-bottom .p-tabview-nav {
   margin-top: -1px;
 }
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a {
-  margin-right: 2px;
   -moz-border-radius-bottomleft: 3px;
   -webkit-border-bottom-left-radius: 3px;
   border-bottom-left-radius: 3px;
@@ -1910,11 +1923,15 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a {
   -webkit-border-bottom-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a {
+  margin-right: 2px; 
+}
+
+
 body .p-tabview.p-tabview-left .p-tabview-nav {
-  margin-right: -px;
+  margin-right: -1px;
 }
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a {
-  margin-bottom: 2px;
   -moz-border-radius-topleft: 3px;
   -webkit-border-top-left-radius: 3px;
   border-top-left-radius: 3px;
@@ -1922,11 +1939,14 @@ body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a {
   -webkit-border-bottom-left-radius: 3px;
   border-bottom-left-radius: 3px;
 }
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(:last-child) a {
+  margin-bottom: 2px;
+}
+
 body .p-tabview.p-tabview-right .p-tabview-nav {
   margin-right: -1px;
 }
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
-  margin-bottom: 2px;
   -moz-border-radius-topright: 3px;
   -webkit-border-top-right-radius: 3px;
   border-top-right-radius: 3px;
@@ -1934,6 +1954,11 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
   -webkit-border-bottom-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(:last-child) a {
+  margin-bottom: 2px;
+}
+
+
 body .p-tabview .p-tabview-panels {
   background-color: #ffffff;
   padding: 0.571em 1em;

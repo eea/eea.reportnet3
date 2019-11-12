@@ -309,7 +309,7 @@ export const Tab = ({
           ) : null}
         </a>
       </li>
-      <ContextMenu model={menu} ref={contextMenuRef} />
+      {designMode ? <ContextMenu model={menu} ref={contextMenuRef} /> : null}
     </React.Fragment>
   );
 };
