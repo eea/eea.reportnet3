@@ -264,7 +264,7 @@ public class DatasetServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(reportingDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new ReportingDataset()));
-    when(fileParserFactory.createContext("csv")).thenReturn(context);
+    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
 
@@ -328,7 +328,7 @@ public class DatasetServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(reportingDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(new ReportingDataset()));
-    when(fileParserFactory.createContext("csv")).thenReturn(context);
+    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
     final DataSetVO dataSetVO = new DataSetVO();
     dataSetVO.setId(1L);
     when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -1032,7 +1032,6 @@ public class DatasetServiceTest {
   public void exportFileTest() throws EEAException, IOException {
     byte[] expectedResult = "".getBytes();
     ReportingDataset dataset = new ReportingDataset();
-    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     dataset.setDataflowId(1L);
     // partition.setId(1L);
     // when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
@@ -1048,7 +1047,8 @@ public class DatasetServiceTest {
   public void getFileNameTest() throws EEAException {
     ReportingDataset dataset = new ReportingDataset();
     when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(new DataSetSchemaVO());
+    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new DataSetSchemaVO());
     when(fileCommon.getTableName(Mockito.any(), Mockito.any())).thenReturn("test");
     assertEquals("not equals", "test.csv", datasetService.getFileName("csv", "test", 1L));
   }

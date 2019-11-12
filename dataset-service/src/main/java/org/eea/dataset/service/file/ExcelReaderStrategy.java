@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -32,6 +33,9 @@ public class ExcelReaderStrategy implements ReaderStrategy {
   /** The file common. */
   private FileCommonUtils fileCommon;
 
+  /** The dataset id. */
+  private Long datasetId;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
@@ -40,8 +44,9 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @param fileCommon the file common
    */
-  public ExcelReaderStrategy(final FileCommonUtils fileCommon) {
+  public ExcelReaderStrategy(final FileCommonUtils fileCommon, Long datasetId) {
     this.fileCommon = fileCommon;
+    this.datasetId = datasetId;
   }
 
   /**
@@ -52,13 +57,13 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException
    */
   @Override
   public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
-      String idTableSchema) throws InvalidFileException {
+      String idTableSchema) throws EEAException {
 
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
 
     try (Workbook workbook = WorkbookFactory.create(inputStream)) {
 
