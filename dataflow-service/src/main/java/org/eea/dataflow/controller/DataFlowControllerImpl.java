@@ -6,14 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
-import org.eea.dataflow.service.helper.StatsHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +50,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Autowired
   private DataflowService dataflowService;
 
-  /**
-   * The statistics helper.
-   */
-  @Autowired
-  private StatsHelper statisticsHelper;
+
 
   /**
    * Find by id.
@@ -267,28 +261,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     dataflowService.createDataFlow(dataFlowVO);
   }
 
-  /**
-   * Gets the statistics by dataflow.
-   *
-   * @param idDataflow the id dataflow
-   *
-   * @return the statistics by dataflow
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/{idDataflow}/globalStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow) {
-
-    List<StatisticsVO> statistics = null;
-    try {
-      statistics = statisticsHelper.executeStatsProcess(idDataflow);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-
-    return statistics;
-  }
 
 
   /**

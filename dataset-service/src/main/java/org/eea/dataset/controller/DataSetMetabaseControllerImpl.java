@@ -178,24 +178,25 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
 
+
   /**
-   * Gets the statistics by dataflow.
+   * Gets the global statistics by dataschema id.
    *
-   * @param idDataflow the id dataflow
-   *
-   * @return the statistics by dataflow
+   * @param dataschemaId the dataschema id
+   * @return the global statistics by dataschema id
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{idDataflow}/globalStatistics",
+  @GetMapping(value = "/globalStatistics/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("hasRole('DATA_CUSTODIAN')")
-  public List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow) {
+  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
+      @PathVariable("dataschemaId") String dataschemaId) {
 
     List<StatisticsVO> statistics = null;
 
     try {
-      statistics = datasetMetabaseService.getGlobalStatistics(idDataflow);
+      statistics = datasetMetabaseService.getGlobalStatistics(dataschemaId);
     } catch (EEAException | InstantiationException | IllegalAccessException e) {
       LOG_ERROR.error(e.getMessage());
     }

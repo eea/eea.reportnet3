@@ -154,7 +154,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void testGlobalStatistics() throws Exception {
     when(datasetMetabaseService.getGlobalStatistics(Mockito.any())).thenReturn(new ArrayList<>());
-    dataSetMetabaseControllerImpl.getStatisticsByDataflow(1L);
+    dataSetMetabaseControllerImpl.getGlobalStatisticsByDataschemaId("5ce524fad31fc52540abae73");
 
     Mockito.verify(datasetMetabaseService, times(1)).getGlobalStatistics(Mockito.any());
   }
@@ -162,7 +162,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void testGlobalStatisticsException() throws Exception {
     doThrow(new EEAException()).when(datasetMetabaseService).getGlobalStatistics(Mockito.any());
-    dataSetMetabaseControllerImpl.getStatisticsByDataflow(null);
+    dataSetMetabaseControllerImpl.getGlobalStatisticsByDataschemaId(null);
 
     Mockito.verify(datasetMetabaseService, times(1)).getGlobalStatistics(Mockito.any());
   }

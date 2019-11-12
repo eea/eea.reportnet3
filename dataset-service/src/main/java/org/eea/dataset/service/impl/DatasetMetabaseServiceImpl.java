@@ -58,6 +58,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private RecordStoreControllerZull recordStoreControllerZull;
 
+  /** The statistics repository. */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
@@ -189,13 +190,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+
   /**
    * Gets the statistics.
    *
    * @param datasetId the dataset id
-   *
    * @return the statistics
-   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -246,6 +246,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   }
 
 
+  /**
+   * Process statistics.
+   *
+   * @param statistics the statistics
+   * @return the statistics VO
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
   private StatisticsVO processStatistics(List<Statistics> statistics)
       throws InstantiationException, IllegalAccessException {
 
@@ -285,16 +293,21 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
 
+  /**
+   * Gets the global statistics.
+   *
+   * @param dataschemaId the dataschema id
+   * @return the global statistics
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
   @Override
-  public List<StatisticsVO> getGlobalStatistics(Long dataflowId)
+  public List<StatisticsVO> getGlobalStatistics(String dataschemaId)
       throws InstantiationException, IllegalAccessException {
 
     List<StatisticsVO> statistics = new ArrayList<>();
 
-    List<ReportingDataset> datasets = reportingDatasetRepository.findByDataflowId(dataflowId);
-    List<Long> datasetsId = new ArrayList<>();
-    datasets.stream().forEach(d -> datasetsId.add(d.getId()));
-    List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasets(datasetsId);
+    List<Statistics> stats = statisticsRepository.findStatisticsByIdDatasetSchema(dataschemaId);
 
     Map<ReportingDataset, List<Statistics>> statsMap =
         stats.stream().collect(Collectors.groupingBy(Statistics::getDataset, Collectors.toList()));

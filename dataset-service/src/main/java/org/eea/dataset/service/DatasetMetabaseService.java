@@ -59,6 +59,7 @@ public interface DatasetMetabaseService {
   boolean updateDatasetName(Long datasetId, String datasetName);
 
 
+
   /**
    * Gets the statistics.
    *
@@ -71,7 +72,16 @@ public interface DatasetMetabaseService {
   StatisticsVO getStatistics(Long datasetId)
       throws EEAException, InstantiationException, IllegalAccessException;
 
-  List<StatisticsVO> getGlobalStatistics(Long dataflowId)
+  /**
+   * Gets the global statistics.
+   *
+   * @param idDataschema the id dataschema
+   * @return the global statistics
+   * @throws EEAException the EEA exception
+   * @throws InstantiationException the instantiation exception
+   * @throws IllegalAccessException the illegal access exception
+   */
+  List<StatisticsVO> getGlobalStatistics(String idDataschema)
       throws EEAException, InstantiationException, IllegalAccessException;
 
 }

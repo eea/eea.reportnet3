@@ -1,7 +1,6 @@
 package org.eea.dataset.persistence.metabase.domain;
 
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -46,7 +45,8 @@ public class Statistics {
   private String value;
 
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = false)
+  /** The dataset. */
+  @OneToOne(orphanRemoval = false)
   @JoinColumn(name = "ID_DATASET", referencedColumnName = "id")
   private ReportingDataset dataset;
 

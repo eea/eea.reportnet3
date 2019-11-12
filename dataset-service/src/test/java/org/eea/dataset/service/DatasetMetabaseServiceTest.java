@@ -179,15 +179,12 @@ public class DatasetMetabaseServiceTest {
     stat.setValue("0");
     stat.setIdTableSchema("idTableSchema");
     stats.add(stat);
-    List<ReportingDataset> datasets = new ArrayList<>();
-    dataset.setId(1L);
-    datasets.add(dataset);
-    when(reportingDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(datasets);
-    when(statisticsRepository.findStatisticsByIdDatasets(Mockito.any())).thenReturn(stats);
+
+    when(statisticsRepository.findStatisticsByIdDatasetSchema(Mockito.any())).thenReturn(stats);
 
 
-    datasetMetabaseService.getGlobalStatistics(1L);
-    Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDatasets(Mockito.any());
+    datasetMetabaseService.getGlobalStatistics("5ce524fad31fc52540abae73");
+    Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDatasetSchema(Mockito.any());
   }
 
 }

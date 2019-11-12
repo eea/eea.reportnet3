@@ -93,15 +93,17 @@ public interface DatasetMetabaseController {
   StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
 
 
+
   /**
-   * Gets the statistics by dataflow.
+   * Gets the global statistics by dataschema id.
    *
-   * @param idDataflow the id dataflow
-   * @return the statistics by dataflow
+   * @param dataschemaId the dataschema id
+   * @return the global statistics by dataschema id
    */
-  @GetMapping(value = "/dataflow/{idDataflow}/globalStatistics",
+  @GetMapping(value = "/globalStatistics/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow);
+  List<StatisticsVO> getGlobalStatisticsByDataschemaId(
+      @PathVariable("dataschemaId") String dataschemaId);
 
 
 }
