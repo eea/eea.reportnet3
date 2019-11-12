@@ -14,7 +14,6 @@ import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -331,28 +330,6 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
-
-  /**
-   * Gets the statistics by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the statistics by id
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "loadStatistics/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId) {
-
-    StatisticsVO statistics = null;
-    try {
-      statistics = datasetService.getStatistics(datasetId);
-    } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error("Error getting statistics. Error message: {}", e.getMessage(), e);
-    }
-
-    return statistics;
-  }
 
 
   /**
