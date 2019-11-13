@@ -91,7 +91,7 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Test find data schema by data flow.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -108,7 +108,7 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Test find data schema with no rules by dataflow.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -213,7 +213,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("schemaId");
     when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
     doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
@@ -246,7 +246,7 @@ public class DataSetSchemaControllerImplTest {
     DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
     dataSetSchemaVO.setIdDataSetSchema("");
     when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    when(dataschemaService.getDataSchemaByIdFlow(Mockito.any(), Mockito.any()))
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
     dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
   }
@@ -324,7 +324,7 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Creates the table schema test 1.
-   * 
+   *
    * @throws EEAException
    */
   @Test
