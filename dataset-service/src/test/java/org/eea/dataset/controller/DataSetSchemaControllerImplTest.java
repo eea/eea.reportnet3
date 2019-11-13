@@ -90,9 +90,39 @@ public class DataSetSchemaControllerImplTest {
   }
 
   /**
+   * Test find data schema by id exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testFindDataSchemaByIdException() throws EEAException {
+
+    Mockito.doThrow(EEAException.class).when(dataschemaService).getDatasetSchemaId(Mockito.any());
+
+    assertNotNull("failed", dataSchemaControllerImpl.getDatasetSchemaId(1L));
+
+  }
+
+  /**
+   * Find data schema by dataset id exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void findDataSchemaByDatasetIdException() throws EEAException {
+
+    Mockito.doThrow(EEAException.class).when(dataschemaService)
+        .getDataSchemaByDatasetId(Mockito.any(), Mockito.any());
+
+    assertNotNull("failed", dataSchemaControllerImpl.findDataSchemaByDatasetId(1L));
+
+  }
+
+
+  /**
    * Test find data schema by data flow.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testFindDataSchemaByDataFlow() throws EEAException {
@@ -108,8 +138,8 @@ public class DataSetSchemaControllerImplTest {
 
   /**
    * Test find data schema with no rules by dataflow.
-   * 
-   * @throws EEAException
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testFindDataSchemaWithNoRulesByDataflow() throws EEAException {
@@ -117,6 +147,20 @@ public class DataSetSchemaControllerImplTest {
     Mockito
         .when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
+    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L));
+  }
+
+
+  /**
+   * Test find data schema with no rules by dataflow exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testFindDataSchemaWithNoRulesByDataflowException() throws EEAException {
+
+    Mockito.doThrow(EEAException.class).when(dataschemaService)
+        .getDataSchemaByDatasetId(Mockito.any(), Mockito.any());
     Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L));
   }
 
@@ -327,6 +371,9 @@ public class DataSetSchemaControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Delete field schema test.
+   */
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest() {
     Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");

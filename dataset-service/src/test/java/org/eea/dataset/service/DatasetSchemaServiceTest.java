@@ -644,4 +644,13 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(userManagementControllerZull, times(1)).addContributorToResource(Mockito.any(),
         Mockito.any());
   }
+
+  @Test
+  public void testReplaceSchema() {
+    DataSetSchema schema = new DataSetSchema();
+    Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
+    when(schemasRepository.save(Mockito.any())).thenReturn(schema);
+
+    dataSchemaServiceImpl.replaceSchema("1L", schema);
+  }
 }
