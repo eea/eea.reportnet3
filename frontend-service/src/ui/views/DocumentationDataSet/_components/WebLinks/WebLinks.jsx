@@ -53,10 +53,8 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   }, [reload]);
 
   const onSelectRecord = val => {
-    setTimeout(() => {
-      setIsNewRecord(false);
-      setSelectedRecord(val);
-    }, 0);
+    setIsNewRecord(false);
+    setSelectedRecord(val);
     console.log('on selected record val', val, selectedRecord);
   };
 
@@ -159,9 +157,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const onAddOrEditInputChange = e => {
     console.log('isNewRecord', isNewRecord);
     if (isNewRecord) {
-      return setNewRecord({ ...newRecord, [e.target.name]: e.target.value });
+      setNewRecord({ ...newRecord, [e.target.name]: e.target.value });
     } else {
-      return setSelectedRecord({ ...selectedRecord, [e.target.name]: e.target.value });
+      setSelectedRecord({ ...selectedRecord, [e.target.name]: e.target.value });
     }
   };
 
@@ -233,7 +231,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           ref={form}
           initialValues={isNewRecord ? newRecord : selectedRecord}
           validationSchema={addWeblinkSchema}
-          onSubmit={onSaveRecord}>
+          onSubmit={() => {
+            onSaveRecord(isNewRecord ? newRecord : selectedRecord);
+          }}>
           {({ isSubmitting, errors, touched }) => (
             <Form>
               {console.log(
