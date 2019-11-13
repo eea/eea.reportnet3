@@ -747,4 +747,13 @@ public class DatasetSchemaServiceTest {
   public void orderExceptionTest() throws EEAException {
     dataSchemaServiceImpl.order("<id>", new RecordSchemaVO(), 1);
   }
+
+  @Test
+  public void testReplaceSchema() {
+    DataSetSchema schema = new DataSetSchema();
+    Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
+    when(schemasRepository.save(Mockito.any())).thenReturn(schema);
+
+    dataSchemaServiceImpl.replaceSchema("1L", schema);
+  }
 }

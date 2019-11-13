@@ -1370,4 +1370,10 @@ public class DatasetServiceTest {
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn("<id>");
     Assert.assertEquals("<id>", datasetService.findDatasetSchemaIdById(1L));
   }
+
+  @Test
+  public void testdeleteAllTableValues() {
+    datasetService.deleteAllTableValues(1L);
+    Mockito.verify(tableRepository, times(1)).removeTableData(Mockito.any());
+  }
 }
