@@ -507,8 +507,62 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createFieldSchemaTest3() throws EEAException {
-    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
+    doThrow(new EEAException()).when(dataschemaService).createFieldSchema(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataSchemaControllerImpl.createFieldSchema("<id>", 1L, "<id>", new FieldSchemaVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaException1Test() throws EEAException {
+    dataSchemaControllerImpl.orderTableSchema(null, "", 1, new TableSchemaVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaException2Test() throws EEAException {
+    TableSchemaVO tableSchema = new TableSchemaVO();
+    doThrow(new EEAException()).when(dataschemaService).order("<id>", tableSchema, 1);
+    dataSchemaControllerImpl.orderTableSchema(1L, "<id>", 1, tableSchema);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaException3Test() throws EEAException {
+    TableSchemaVO tableSchema = new TableSchemaVO();
+    Mockito.when(dataschemaService.order("<id>", tableSchema, 1)).thenReturn(Boolean.FALSE);
+    dataSchemaControllerImpl.orderTableSchema(1L, "<id>", 1, tableSchema);
+  }
+
+  @Test
+  public void orderTableSchemaSuccessTest() throws EEAException {
+    TableSchemaVO tableSchema = new TableSchemaVO();
+    Mockito.when(dataschemaService.order("<id>", tableSchema, 1)).thenReturn(Boolean.TRUE);
+    dataSchemaControllerImpl.orderTableSchema(1L, "<id>", 1, tableSchema);
+    Mockito.verify(dataschemaService, times(1)).order("<id>", tableSchema, 1);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void orderFieldSchemaException1Test() throws EEAException {
+    dataSchemaControllerImpl.orderFieldSchema(null, "", 1, new FieldSchemaVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void orderFieldSchemaException2Test() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    doThrow(new EEAException()).when(dataschemaService).order("<id>", fieldSchemaVO, 1);
+    dataSchemaControllerImpl.orderFieldSchema(1L, "<id>", 1, fieldSchemaVO);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void orderFieldSchemaException3Test() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    Mockito.when(dataschemaService.order("<id>", fieldSchemaVO, 1)).thenReturn(Boolean.FALSE);
+    dataSchemaControllerImpl.orderFieldSchema(1L, "<id>", 1, fieldSchemaVO);
+  }
+
+  @Test
+  public void orderFieldSchemaSuccessTest() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    Mockito.when(dataschemaService.order("<id>", fieldSchemaVO, 1)).thenReturn(Boolean.TRUE);
+    dataSchemaControllerImpl.orderFieldSchema(1L, "<id>", 1, fieldSchemaVO);
+    Mockito.verify(dataschemaService, times(1)).order("<id>", fieldSchemaVO, 1);
   }
 }
