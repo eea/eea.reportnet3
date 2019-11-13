@@ -30,28 +30,34 @@ export const BigButton = ({
   const [initialValue, setInitialValue] = useState();
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
+  // console.log('buttonsTitle', buttonsTitle);
+
   const newDatasetRef = useRef();
 
   if (isEditEnabled && document.getElementsByClassName('p-inputtext p-component').length > 0) {
     document.getElementsByClassName('p-inputtext p-component')[0].focus();
   }
 
-  const checkDuplicates = (header, index) => {
+  const checkDuplicates = (header, idx) => {
     const inmTitles = [...designDatasetSchemas];
     const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
-    return repeat.length > 0 && index !== repeat[0].index;
+    return repeat.length > 0 && idx !== repeat[0].index;
+    // const isRepeated = header.toLowerCase() === buttonsTitle;
+    // console.log('idx', idx);
+    // console.log('isRepeated', isRepeated && idx !== onSelectIndex(index));
   };
 
   const onEditorKeyChange = (event, index) => {
+    console.log('index', index);
     if (event.key === 'Enter') {
-      // if (buttonsTitle !== '') {
-      onInputSave(event.target.value, index);
-      // } else {
-      //   if (!isUndefined(onSaveError)) {
-      //     onSaveError();
-      //     document.getElementsByClassName('p-inputtext p-component')[0].focus();
-      //   }
-      // }
+      if (buttonsTitle !== '') {
+        onInputSave(event.target.value, onSelectIndex(index));
+      } else {
+        if (!isUndefined(onSaveError)) {
+          onSaveError();
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+        }
+      }
     }
     if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
@@ -71,11 +77,19 @@ export const BigButton = ({
 
   const onInputSave = (value, index) => {
     const changeTitle = onUpdateName(value, index);
+    console.log('changeTitle', changeTitle);
     if (!isUndefined(changeTitle)) {
-      setInitialValue(changeTitle.schemaName);
-      if (!isUndefined(onNameDuplicate)) {
-        onNameDuplicate();
-        document.getElementsByClassName('p-inputtext p-component')[0].focus();
+      setInitialValue(changeTitle.originalSchemaName);
+      if (changeTitle.correct) {
+        setIsEditEnabled(false);
+        setInitialValue(changeTitle.originalSchemaName);
+      } else {
+        if (!isUndefined(onNameDuplicate)) {
+          onNameDuplicate();
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
+        }
+        setIsEditEnabled(true);
+        setButtonsTitle(changeTitle.originalSchemaName);
       }
     }
   };
@@ -84,7 +98,7 @@ export const BigButton = ({
     if (!isEmpty(buttonsTitle)) {
       if (initialValue !== title) {
         if (checkDuplicates(title, index)) {
-          return { correct: false, schemaName: title };
+          return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
           onSaveName(title, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
         }
@@ -177,7 +191,7 @@ export const BigButton = ({
             e.preventDefault();
             onEditorValueFocus(e.target.value);
           }}
-          onKeyDown={e => onEditorKeyChange(e, onSelectIndex(index))}
+          onKeyDown={e => onEditorKeyChange(e, index)}
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />

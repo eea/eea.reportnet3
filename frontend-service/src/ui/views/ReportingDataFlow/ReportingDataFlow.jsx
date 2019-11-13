@@ -154,9 +154,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSelectIndex = index => {
-    const allValues = [...designDatasetSchemas];
-    const isRepeated = allValues.filter(title => title.index === index);
-    return isRepeated[0].index;
+    // const allValues = [...designDatasetSchemas];
+    // const isRepeated = allValues.filter(title => title.index === index);
+    // return isRepeated[0].index;
+    return index;
   };
 
   useEffect(() => {
@@ -199,9 +200,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         onClick={() => {
           setErrorDialogVisible(false);
           setIsDuplicated(false);
-          if (isNameEditable) {
-            document.getElementsByClassName('p-inputtext p-component')[0].focus();
-          }
+          // if (isNameEditable) {
+          //   document.getElementsByClassName('p-inputtext p-component')[0].focus();
+          // }
         }}
       />
     </div>
@@ -235,8 +236,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setDeleteDialogVisible(true);
   };
 
-  // console.log('777', deleteSchemaIndex);
-
   const onDuplicateName = () => {
     setIsDuplicated(true);
   };
@@ -244,9 +243,9 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
     setIsDuplicated(false);
-    if (isNameEditable) {
-      document.getElementsByClassName('p-inputtext p-component')[0].focus();
-    }
+    // if (isNameEditable) {
+    //   document.getElementsByClassName('p-inputtext p-component')[0].focus();
+    // }
   };
 
   const onNameEdit = () => {
@@ -398,10 +397,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         );
                       }}
                       index={newDatasetSchema.index}
-                      // isNameEditable={isNameEditable}
+                      isNameEditable={isNameEditable}
                       // getDeleteSchemaIndex={getDeleteSchemaIndex}
                       onNameDuplicate={onDuplicateName}
-                      // onNameEdit={onNameEdit}
+                      onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
                       onSelectIndex={onSelectIndex}
@@ -428,7 +427,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         {
                           label: resources.messages['rename'],
                           icon: 'pencil',
-                          command: () => true
+                          command: () => setIsNameEditable(!isNameEditable)
                         },
                         {
                           label: resources.messages['duplicate'],
