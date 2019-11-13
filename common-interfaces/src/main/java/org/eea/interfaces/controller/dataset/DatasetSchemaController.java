@@ -56,13 +56,25 @@ public interface DatasetSchemaController {
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
 
   /**
-   * Find data schema by dataflow.
+   * Find data schema by datasetId.
    *
-   * @param idFlow the id flow
+   * @param datasetId the dataset id
    * @return the data set schema VO
    */
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaByDataflow(@PathVariable("id") Long idFlow);
+  @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
+
+
+  /**
+   * Gets the dataset schema id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset schema id
+   */
+  @RequestMapping(value = "/getDataSchema/{datasetId}", method = RequestMethod.GET,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Find data schema with no rules by dataflow.
@@ -70,8 +82,8 @@ public interface DatasetSchemaController {
    * @param idFlow the id flow
    * @return the data set schema VO
    */
-  @GetMapping(value = "/noRules/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findDataSchemaWithNoRulesByDataflow(@PathVariable("id") Long idFlow);
+  @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Delete table schema.

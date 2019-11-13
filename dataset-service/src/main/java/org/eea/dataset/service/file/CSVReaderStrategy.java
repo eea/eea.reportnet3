@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -47,6 +48,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private char delimiter;
 
+  /** The dataset id. */
+  private Long datasetId;
+
   /**
    * The parse common.
    */
@@ -59,9 +63,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param delimiter the delimiter
    * @param fileCommon the parse common
    */
-  public CSVReaderStrategy(final char delimiter, final FileCommonUtils fileCommon) {
+  public CSVReaderStrategy(final char delimiter, final FileCommonUtils fileCommon, Long datasetId) {
     this.delimiter = delimiter;
     this.fileCommon = fileCommon;
+    this.datasetId = datasetId;
   }
 
 
@@ -73,11 +78,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException
    */
   @Override
   public DataSetVO parseFile(final InputStream inputStream, final Long dataflowId,
-      final Long partitionId, final String idTableSchema) throws InvalidFileException {
+      final Long partitionId, final String idTableSchema) throws EEAException {
     LOG.info("starting csv file reading");
     return readLines(inputStream, dataflowId, partitionId, idTableSchema);
   }
@@ -91,10 +96,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException
    */
   private DataSetVO readLines(final InputStream inputStream, final Long dataflowId,
-      final Long partitionId, final String idTableSchema) throws InvalidFileException {
+      final Long partitionId, final String idTableSchema) throws EEAException {
     LOG.info("Processing entries at method readLines");
     // Init variables
     String[] line;
@@ -103,7 +108,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     final DataSetVO dataset = new DataSetVO();
 
     // Get DataSetSchema
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
 
     try (Reader buf =
         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {

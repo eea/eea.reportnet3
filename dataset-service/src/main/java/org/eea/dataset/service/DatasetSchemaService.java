@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -40,15 +41,14 @@ public interface DatasetSchemaService {
   DataSetSchemaVO getDataSchemaById(String dataschemaId);
 
   /**
-   * Gets dataschema by id. If addRules is true, the whole schema including rules will be retrieved
-   * Otherwise only the schema (table, records, fields and dataset) will be retrieved
-   *
-   * @param idFlow the id flow
+   * Gets the data schema by id dataset.
+
    * @param addRules the add rules
-   *
+   * @param datasetId the dataset id
    * @return the data schema by id flow
+   * @throws EEAException the EEA exception
    */
-  DataSetSchemaVO getDataSchemaByIdFlow(Long idFlow, Boolean addRules);
+  DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId) throws EEAException;
 
   /**
    * Delete table schema.
@@ -140,4 +140,22 @@ public interface DatasetSchemaService {
    * @return the boolean
    */
   Boolean order(String idDatasetSchema, Object schema, int newPosition) throws EEAException;
+
+ /**
+   * Replace schema.
+   *
+   * @param idSchema the id schema
+   * @param schema the schema
+   */
+  void replaceSchema(String idSchema, DataSetSchema schema);
+
+
+  /**
+   * Gets the dataset schema id.
+   *
+   * @param datasetId the dataset id
+   * @return the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  String getDatasetSchemaId(Long datasetId) throws EEAException;
 }

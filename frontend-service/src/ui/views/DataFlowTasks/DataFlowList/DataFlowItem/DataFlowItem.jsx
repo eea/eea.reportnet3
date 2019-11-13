@@ -1,7 +1,5 @@
 import React, { useContext } from 'react';
 
-import moment from 'moment';
-
 import styles from './DataFlowItem.module.scss';
 
 import { routes } from 'ui/routes';
@@ -78,7 +76,7 @@ export const DataflowItem = ({ itemContent, listType, dataFetch }) => {
       <div className={`${styles.card_component_content} `}>
         <div className={`${styles.card_component_content_date}`}>
           <span>
-            {resources.messages['deadline']}: {moment(itemContent.deadlineDate).format('YYYY-MM-DD')}
+            {resources.messages['deadline']}: {itemContent.deadlineDate}
           </span>
         </div>
         <h3 className={`${styles.card_component_content_title}`}>{itemContent.name}</h3>

@@ -9,7 +9,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.TypeEntityEnum;
@@ -136,18 +135,6 @@ public interface DatasetService {
    */
   Long getDataFlowIdById(@DatasetId Long datasetId) throws EEAException;
 
-
-  /**
-   * Gets the statistics.
-   *
-   * @param datasetId the dataset id
-   * @return the statistics
-   * @throws EEAException the EEA exception
-   * @throws InstantiationException the instantiation exception
-   * @throws IllegalAccessException the illegal access exception
-   */
-  StatisticsVO getStatistics(@DatasetId Long datasetId)
-      throws EEAException, InstantiationException, IllegalAccessException;
 
   /**
    * Update record.
@@ -333,4 +320,11 @@ public interface DatasetService {
    * @return the string
    */
   String findDatasetSchemaIdById(@DatasetId Long datasetId);
+
+  /**
+   * Delete table values.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteAllTableValues(@DatasetId Long datasetId);
 }

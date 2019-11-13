@@ -1,7 +1,14 @@
 {
-    "createSnapshot": "/snapshot/dataset/{:datasetId}/create?description={:description}",
-    "deleteSnapshotById": "/snapshot/{:snapshotId}/dataset/{:datasetId}/delete",        
-    "loadSnapshotsList": "/snapshot/dataset/{:datasetId}/listSnapshots",        
-    "releaseSnapshot": "/snapshot/{:snapshotId}/dataset/{:datasetId}/release",
-    "restoreSnapshot": "/snapshot/{:snapshotId}/dataset/{:datasetId}/restore"
+    "createSnapshotDesigner": "/snapshot/dataschema/{:datasetSchemaId}/dataset/{:datasetId}/create?description={:description}", 
+    "deleteSnapshotByIdDesigner": "/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/delete",
+    "loadSnapshotsListDesigner": "/snapshot/dataschema/{:datasetSchemaId}/listSnapshots ",  
+    "releaseSnapshotDesigner": "/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/release",
+    "restoreSnapshotDesigner": "/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore",
+
+    "createSnapshotReporter": "/snapshot/dataset/{:datasetId}/create?description={:description}",
+    "deleteSnapshotByIdReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/delete",        
+    "loadSnapshotsListReporter": "/snapshot/dataset/{:datasetId}/listSnapshots",        
+    "releaseSnapshotReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/release",
+    "restoreSnapshotReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/restore"
+                       
 }

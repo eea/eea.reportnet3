@@ -33,7 +33,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextCsv() {
-    assertNotNull("is null", fileParserFactory.createContext("csv"));
+    assertNotNull("is null", fileParserFactory.createContext("csv", 1L));
   }
 
   /**
@@ -41,7 +41,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXls() {
-    assertNotNull("is null", fileParserFactory.createContext("xls"));
+    assertNotNull("is null", fileParserFactory.createContext("xls", 1L));
   }
 
   /**
@@ -49,7 +49,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXlsx() {
-    assertNotNull("is null", fileParserFactory.createContext("xlsx"));
+    assertNotNull("is null", fileParserFactory.createContext("xlsx", 1L));
   }
 
   /**
@@ -57,7 +57,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContextXml() {
-    assertNull("is null", fileParserFactory.createContext("xml"));
+    assertNull("is null", fileParserFactory.createContext("xml", 1L));
   }
 
   /**
@@ -65,7 +65,7 @@ public class FileParserFactoryTest {
    */
   @Test
   public void testCreateContext() {
-    assertNull("is null", fileParserFactory.createContext("xx"));
+    assertNull("is null", fileParserFactory.createContext("xx", 1L));
   }
 
 }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -31,8 +33,9 @@ public interface DocumentController {
    * @param language the language
    */
   @PostMapping(value = "/upload/{dataFlowId}")
-  void uploadDocument(final MultipartFile file, final Long dataFlowId, final String description,
-      final String language);
+  void uploadDocument(final MultipartFile file, @PathVariable("dataFlowId") final Long dataFlowId,
+      @RequestParam("description") final String description,
+      @RequestParam("language") final String language);
 
   /**
    * Download document .
@@ -51,5 +54,43 @@ public interface DocumentController {
    */
   @DeleteMapping(value = "/{documentId}")
   void deleteDocument(@PathVariable("documentId") final Long documentId) throws Exception;
+
+
+
+  /**
+   * Upload schema snapshot document.
+   *
+   * @param file the file
+   * @param designDatasetId the design dataset id
+   * @param fileName the file name
+   */
+  @PostMapping(value = "/upload/{designDatasetId}/snapshot")
+  void uploadSchemaSnapshotDocument(@RequestBody final byte[] file,
+      @PathVariable("designDatasetId") final Long designDatasetId,
+      @RequestParam("fileName") final String fileName);
+
+  /**
+   * Gets the snapshot document.
+   *
+   * @param idDesignDataset the id design dataset
+   * @param fileName the file name
+   * @return the snapshot document
+   */
+  @GetMapping(value = "/{idDesignDataset}/snapshot")
+  byte[] getSnapshotDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
+      @RequestParam("fileName") final String fileName);
+
+
+  /**
+   * Delete snapshot schema document.
+   *
+   * @param idDesignDataset the id design dataset
+   * @param fileName the file name
+   * @throws Exception the exception
+   */
+  @DeleteMapping(value = "/{idDesignDataset}/snapshot")
+  void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") final Long idDesignDataset,
+      @RequestParam("fileName") final String fileName) throws Exception;
+
 
 }

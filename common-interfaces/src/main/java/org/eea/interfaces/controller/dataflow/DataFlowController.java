@@ -5,7 +5,6 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -124,16 +123,6 @@ public interface DataFlowController {
    */
   @PostMapping(value = "/createDataFlow", produces = MediaType.APPLICATION_JSON_VALUE)
   void createDataFlow(@RequestBody DataFlowVO dataFlowVO);
-
-
-  /**
-   * Gets the statistics by dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @return the statistics by dataflow
-   */
-  @GetMapping(value = "/{idDataflow}/globalStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<StatisticsVO> getStatisticsByDataflow(@PathVariable("idDataflow") Long idDataflow);
 
 
   /**

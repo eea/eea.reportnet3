@@ -1,14 +1,131 @@
-import { SnapshotConfig } from 'conf/domain/model/Snapshot';
+import { SnapshotConfig } from 'conf/domain/model/Snapshot/index';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
 export const apiSnapshot = {
-  createById: async (datasetId, description) => {
+  allDesigner: async datasetSchemaId => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.get({
+        url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, {
+          datasetSchemaId: datasetSchemaId
+        }),
+        queryString: {},
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error getting the snapshots: ${error}`);
+      return false;
+    }
+  },
+  createByIdDesigner: async (datasetId, datasetSchemaId, description) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
-        url: getUrl(SnapshotConfig.createSnapshot, {
+        url: getUrl(SnapshotConfig.createSnapshotDesigner, {
+          datasetId: datasetId,
+          datasetSchemaId: datasetSchemaId,
+          description: description
+        }),
+        data: {
+          description: description
+        },
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error creating the snapshot: ${error}`);
+      return false;
+    }
+  },
+  deleteByIdDesigner: async (datasetSchemaId, snapshotId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.delete({
+        url: getUrl(SnapshotConfig.deleteSnapshotByIdDesigner, {
+          datasetSchemaId: datasetSchemaId,
+          snapshotId: snapshotId
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        }
+      });
+
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error deleting snapshot data: ${error}`);
+      return false;
+    }
+  },
+  restoreByIdDesigner: async (datasetSchemaId, snapshotId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: getUrl(SnapshotConfig.restoreSnapshotDesigner, {
+          datasetSchemaId: datasetSchemaId,
+          snapshotId: snapshotId
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        },
+        data: {
+          snapshotId
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error restoring the snapshot: ${error}`);
+      return false;
+    }
+  },
+  releaseByIdDesigner: async (datasetSchemaId, snapshotId) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.update({
+        url: getUrl(SnapshotConfig.releaseSnapshotDesigner, {
+          datasetSchemaId: datasetSchemaId,
+          snapshotId: snapshotId
+        }),
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`
+        },
+        data: {
+          snapshotId
+        }
+      });
+      return response.status >= 200 && response.status <= 299;
+    } catch (error) {
+      console.error(`Error releasing the snapshot: ${error}`);
+      return false;
+    }
+  },
+
+  allReporter: async datasetId => {
+    const tokens = userStorage.get();
+    const response = await HTTPRequester.get({
+      url: window.env.REACT_APP_JSON
+        ? '/jsons/snapshots.json'
+        : getUrl(SnapshotConfig.loadSnapshotsListReporter, {
+            datasetId: datasetId
+          }),
+      queryString: {},
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`
+      }
+    });
+    return response.data;
+  },
+  createByIdReporter: async (datasetId, description) => {
+    const tokens = userStorage.get();
+    try {
+      const response = await HTTPRequester.post({
+        url: getUrl(SnapshotConfig.createSnapshotReporter, {
           datasetId,
           description: description
         }),
@@ -25,11 +142,11 @@ export const apiSnapshot = {
       return false;
     }
   },
-  deleteById: async (datasetId, snapshotId) => {
+  deleteByIdReporter: async (datasetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.delete({
-        url: getUrl(SnapshotConfig.deleteSnapshotById, {
+        url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, {
           datasetId,
           snapshotId: snapshotId
         }),
@@ -44,11 +161,11 @@ export const apiSnapshot = {
       return false;
     }
   },
-  restoreById: async (dataflowId, datasetId, snapshotId) => {
+  restoreByIdReporter: async (dataflowId, datasetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.post({
-        url: getUrl(SnapshotConfig.restoreSnapshot, {
+        url: getUrl(SnapshotConfig.restoreSnapshotReporter, {
           dataflowId,
           datasetId,
           snapshotId
@@ -66,11 +183,11 @@ export const apiSnapshot = {
       return false;
     }
   },
-  releaseById: async (dataflowId, datasetId, snapshotId) => {
+  releaseByIdReporter: async (dataflowId, datasetId, snapshotId) => {
     const tokens = userStorage.get();
     try {
       const response = await HTTPRequester.update({
-        url: getUrl(SnapshotConfig.releaseSnapshot, {
+        url: getUrl(SnapshotConfig.releaseSnapshotReporter, {
           dataflowId,
           datasetId,
           snapshotId
@@ -87,20 +204,5 @@ export const apiSnapshot = {
       console.error(`Error releasing the snapshot: ${error}`);
       return false;
     }
-  },
-  all: async datasetId => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/snapshots.json'
-        : getUrl(SnapshotConfig.loadSnapshotsList, {
-            datasetId: datasetId
-          }),
-      queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    return response.data;
   }
 };

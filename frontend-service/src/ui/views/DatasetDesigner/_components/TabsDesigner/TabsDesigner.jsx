@@ -35,7 +35,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   }, [scrollFn, tabs, isEditing]);
 
   useEffect(() => {
-    onLoadSchema(dataflowId);
+    onLoadSchema(datasetId);
   }, []);
 
   useEffect(() => {
@@ -54,9 +54,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
     setIsEditing(editing);
   };
 
-  const onLoadSchema = async dataflowId => {
+  const onLoadSchema = async datasetId => {
     try {
-      const datasetSchemaDTO = await DatasetService.schemaById(dataflowId);
+      const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
       const inmDatasetSchema = { ...datasetSchemaDTO };
       inmDatasetSchema.tables.forEach((table, idx) => {
         table.editable = editable;
@@ -144,7 +144,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const addTable = async (header, tabIndex) => {
     const tabledAdded = await DatasetService.addTableDesign(datasetSchema.datasetSchemaId, datasetId, header);
     if (tabledAdded) {
-      onLoadSchema(dataflowId);
+      onLoadSchema(datasetId);
     } else {
       console.error('');
     }
@@ -165,7 +165,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const deleteTable = async deletedTabIndx => {
     const tableDeleted = await DatasetService.deleteTableDesign(datasetId, tabs[deletedTabIndx].tableSchemaId);
     if (tableDeleted) {
-      onLoadSchema(dataflowId);
+      onLoadSchema(datasetId);
     } else {
       console.error('');
     }
@@ -204,7 +204,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
       datasetId
     );
     if (tableUpdated) {
-      onLoadSchema(dataflowId);
+      onLoadSchema(datasetId);
     }
   };
 
@@ -254,7 +254,9 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
                     <div>
                       <h3>{`${resources.messages['datasetDesignerNoFields']} ${tab.header}`}</h3>
                     </div>
-                  ) : null}
+                  ) : (
+                    <h3>{`${resources.messages['datasetDesignerAddTable']}`}</h3>
+                  )}
                 </TabPanel>
               );
             })

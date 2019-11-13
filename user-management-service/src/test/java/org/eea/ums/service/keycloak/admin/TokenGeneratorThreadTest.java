@@ -38,7 +38,8 @@ public class TokenGeneratorThreadTest {
   public void run() throws InterruptedException {
     TokenInfo tokenInfo = new TokenInfo();
     tokenInfo.setAccessToken("token");
-    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
+    Mockito
+        .when(keycloakConnectorService.generateAdminToken(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(tokenInfo);
     Mockito.when(keycloakConnectorService.refreshToken(Mockito.anyString()))
         .thenReturn(tokenInfo);

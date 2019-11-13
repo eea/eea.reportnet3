@@ -48,6 +48,29 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   }
 
   @Test
+  public void doAdminLogin() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
+    Mockito
+        .when(keycloakConnectorService.generateAdminToken(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234", true);
+    Assert.assertNotNull(token);
+    Assert.assertEquals("token", token.getAccessToken());
+  }
+
+  @Test
+  public void doNotAdminLogin() {
+    TokenInfo tokenInfo = new TokenInfo();
+    tokenInfo.setAccessToken("token");
+    Mockito.when(keycloakConnectorService.generateToken(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(tokenInfo);
+    TokenVO token = keycloakSecurityProviderInterfaceService.doLogin("user1", "1234", false);
+    Assert.assertNotNull(token);
+    Assert.assertEquals("token", token.getAccessToken());
+  }
+
+  @Test
   public void doLoginByCode() {
     TokenInfo tokenInfo = new TokenInfo();
     tokenInfo.setAccessToken("token");

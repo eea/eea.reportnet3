@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -81,7 +82,7 @@ public class JdbcRecordStoreServiceImplTest {
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
-    Mockito.verify(jdbcTemplate, Mockito.times(93)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(91)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -177,7 +178,7 @@ public class JdbcRecordStoreServiceImplTest {
 
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
 
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, TypeDatasetEnum.DESIGN);
     Mockito.verify(kafkaSender, Mockito.times(2))
         .releaseDatasetKafkaEvent(Mockito.any(EventType.class), Mockito.anyLong());
   }

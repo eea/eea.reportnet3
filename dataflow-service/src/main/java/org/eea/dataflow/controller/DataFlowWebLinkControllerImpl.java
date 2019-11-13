@@ -1,9 +1,10 @@
 package org.eea.dataflow.controller;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import org.eea.dataflow.mapper.DataflowWebLinkMapper;
+import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.service.DataflowWebLinkService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -21,13 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
 /**
  * The Class DataFlowWebLinkControllerImpl.
  */
 @RestController
-@RequestMapping(value = "/webLink")
+@RequestMapping(value = "/weblink")
 public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
@@ -41,6 +43,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Autowired
   private DataflowWebLinkService dataflowWebLinkService;
+
+  @Autowired
+  private DataflowWebLinkMapper dataflowWebLinkMapper;
 
 
   /**
@@ -65,17 +70,19 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   /**
    * Save link.
    *
-   * @param idDataflow the id dataflow
-   * @param url the url
-   * @param description the description
+   * @param dataflowId the dataflow id
+   * @param weblinkVO the weblink VO
    */
   @Override
   @HystrixCommand
-  @PutMapping
-  public void saveLink(Long idDataflow, String url, String description) {
+  @PostMapping
+  public void saveLink(Long dataflowId, WeblinkVO weblinkVO) {
+
+
+    Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
     try {
-      new URL(url).toURI();
+      new URL(weblink.getUrl()).toURI();
     } catch (MalformedURLException exception) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.URL_FORMAT_INCORRECT);
@@ -85,7 +92,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     }
 
     try {
-      dataflowWebLinkService.saveWebLink(idDataflow, url, description);
+      dataflowWebLinkService.saveWebLink(dataflowId, weblink.getUrl(), weblink.getDescription());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
@@ -114,18 +121,17 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   /**
    * Update link.
    *
-   * @param idLink the id link
-   * @param url the url
-   * @param description the description
+   * @param weblinkVO the weblink VO
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "{idLink}")
-  public void updateLink(@RequestParam(value = "idLink") Long idLink,
-      @RequestParam(value = "url") String url,
-      @RequestParam(value = "description") String description) {
+  @PutMapping
+  public void updateLink(WeblinkVO weblinkVO) {
+
+    Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
+
     try {
-      new URL(url).toURI();
+      new URL(weblink.getUrl()).toURI();
     } catch (MalformedURLException exception) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.URL_FORMAT_INCORRECT);
@@ -135,7 +141,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
     }
 
     try {
-      dataflowWebLinkService.updateWebLink(idLink, description, url);
+      dataflowWebLinkService.updateWebLink(weblink.getId(), weblink.getDescription(),
+          weblink.getUrl());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.USER_REQUEST_NOTFOUND);
