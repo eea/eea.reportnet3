@@ -321,7 +321,7 @@ public class DatasetSchemaServiceTest {
   /**
    * Test find data schema by data flow.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testFindDataSchemaByDatasetId() throws EEAException {
@@ -342,7 +342,7 @@ public class DatasetSchemaServiceTest {
   /**
    * Test find data schema by data flow no rules.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testFindDataSchemaByDataFlowNoRules() throws EEAException {
@@ -460,7 +460,7 @@ public class DatasetSchemaServiceTest {
   /**
    * Delete table schema test.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void deleteTableSchemaTest() throws EEAException {
@@ -634,6 +634,11 @@ public class DatasetSchemaServiceTest {
     Assert.assertEquals("TEXT", dataSchemaServiceImpl.updateFieldSchema("<id>", fieldSchemaVO));
   }
 
+  /**
+   * Update field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldSchemaTest2() throws EEAException {
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
@@ -642,6 +647,11 @@ public class DatasetSchemaServiceTest {
     Assert.assertNull(dataSchemaServiceImpl.updateFieldSchema("<id>", new FieldSchemaVO()));
   }
 
+  /**
+   * Update field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void updateFieldSchemaTest3() throws EEAException {
     Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
@@ -697,18 +707,6 @@ public class DatasetSchemaServiceTest {
   }
 
   /**
-   * Test replace schema.
-   */
-  @Test
-  public void testReplaceSchema() {
-    DataSetSchema schema = new DataSetSchema();
-    Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
-    when(schemasRepository.save(Mockito.any())).thenReturn(schema);
-
-    dataSchemaServiceImpl.replaceSchema("1L", schema);
-  }
-
-  /**
    * Order test.
    *
    * @throws EEAException the EEA exception
@@ -748,6 +746,9 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.order("<id>", new RecordSchemaVO(), 1);
   }
 
+  /**
+   * Test replace schema.
+   */
   @Test
   public void testReplaceSchema() {
     DataSetSchema schema = new DataSetSchema();

@@ -142,7 +142,7 @@ public class DataSetSchemaControllerImplTest {
   /**
    * Test find data schema with no rules by dataflow.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void findDataSchemaWithNoRulesByDatasetIdTest() throws EEAException {
@@ -368,7 +368,7 @@ public class DataSetSchemaControllerImplTest {
   /**
    * Creates the table schema test 1.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void createTableSchemaTest1() throws EEAException {
@@ -512,11 +512,21 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.createFieldSchema("<id>", 1L, "<id>", new FieldSchemaVO());
   }
 
+  /**
+   * Order table schema exception 1 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void orderTableSchemaException1Test() throws EEAException {
     dataSchemaControllerImpl.orderTableSchema(null, "", 1, new TableSchemaVO());
   }
 
+  /**
+   * Order table schema exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void orderTableSchemaException2Test() throws EEAException {
     TableSchemaVO tableSchema = new TableSchemaVO();
@@ -524,6 +534,11 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.orderTableSchema(1L, "<id>", 1, tableSchema);
   }
 
+  /**
+   * Order table schema exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void orderTableSchemaException3Test() throws EEAException {
     TableSchemaVO tableSchema = new TableSchemaVO();
@@ -531,6 +546,11 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.orderTableSchema(1L, "<id>", 1, tableSchema);
   }
 
+  /**
+   * Order table schema success test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void orderTableSchemaSuccessTest() throws EEAException {
     TableSchemaVO tableSchema = new TableSchemaVO();
@@ -539,11 +559,21 @@ public class DataSetSchemaControllerImplTest {
     Mockito.verify(dataschemaService, times(1)).order("<id>", tableSchema, 1);
   }
 
+  /**
+   * Order field schema exception 1 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void orderFieldSchemaException1Test() throws EEAException {
     dataSchemaControllerImpl.orderFieldSchema(null, "", 1, new FieldSchemaVO());
   }
 
+  /**
+   * Order field schema exception 2 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void orderFieldSchemaException2Test() throws EEAException {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -551,6 +581,11 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.orderFieldSchema(1L, "<id>", 1, fieldSchemaVO);
   }
 
+  /**
+   * Order field schema exception 3 test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void orderFieldSchemaException3Test() throws EEAException {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -558,6 +593,11 @@ public class DataSetSchemaControllerImplTest {
     dataSchemaControllerImpl.orderFieldSchema(1L, "<id>", 1, fieldSchemaVO);
   }
 
+  /**
+   * Order field schema success test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void orderFieldSchemaSuccessTest() throws EEAException {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
