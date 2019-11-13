@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -19,22 +19,20 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [isNewRecord, setIsNewRecord] = useState(false);
-  const [newRecord, setNewRecord] = useState({ id: undefined, description: '', url: '' });
+  //const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
   const [reload, setReload] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
   const [webLinks, setWebLinks] = useState();
 
   const form = useRef(null);
-
-  const initialValues = { description: '', url: '' };
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
       // .url()
       .required()
   });
+
+  let weblinkItem = { id: undefined, description: '', url: '' };
 
   const onLoadWebLinks = async () => {
     // setIsLoading(true);
@@ -53,16 +51,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     onLoadWebLinks();
   }, [reload]);
 
-  const onSelectRecord = val => {
-    setIsNewRecord(false);
-    setSelectedRecord(val);
-    console.log('on selected record val', val, selectedRecord);
-  };
-
   const onHideAddEditDialog = () => {
     form.current.resetForm();
+    weblinkItem = { id: undefined, description: '', url: '' };
     setIsAddEditDialogVisible(false);
-    setIsNewRecord(false);
   };
 
   const addRowFooter = (
@@ -72,7 +64,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         label={resources.messages['add']}
         icon="add"
         onClick={() => {
-          setIsNewRecord(true);
           setIsAddEditDialogVisible(true);
         }}
       />
@@ -86,11 +77,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onSaveRecord = async e => {
     console.log('e', e);
-
-    if (isNewRecord) {
+    console.log('weblinkItem', weblinkItem);
+    if (isUndefined(weblinkItem.id)) {
       try {
-        console.log('onSaveRecord isNewRecord', isNewRecord);
-
+        console.log('on create', weblinkItem);
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
@@ -103,10 +93,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       }
     } else {
       try {
-        console.log('onSaveRecord when update. isNewRecord ', isNewRecord);
+        weblinkItem = { ...weblinkItem, e };
+        console.log('on update', weblinkItem);
 
-        const editedRecord = { ...selectedRecord, e };
-        const weblinkToEdit = await WebLinkService.update(dataflowId, editedRecord);
+        const weblinkToEdit = await WebLinkService.update(dataflowId, weblinkItem);
 
         if (weblinkToEdit.isUpdated) {
           setReload(!reload);
@@ -122,7 +112,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   };
 
   const onDeleteWeblink = async () => {
-    const weblinkToDelete = await WebLinkService.deleteWeblink(selectedRecord);
+    const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
 
     if (weblinkToDelete.isDeleted) {
       setReload(!reload);
@@ -157,15 +147,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const webLinkEditionColumn = (
     <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} style={{ width: '5em' }} />
   );
-
-  const onAddOrEditInputChange = e => {
-    console.log('isNewRecord', isNewRecord);
-    if (isNewRecord) {
-      setNewRecord({ ...newRecord, [e.target.name]: e.target.value });
-    } else {
-      setSelectedRecord({ ...selectedRecord, [e.target.name]: e.target.value });
-    }
-  };
 
   useEffect(() => {
     let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
@@ -208,11 +189,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         autoLayout={true}
         editable={true}
         footer={isCustodian ? addRowFooter : null}
-        onContextMenuSelectionChange={() => {
-          onSelectRecord(webLinks);
-        }}
         onRowSelect={e => {
-          onSelectRecord(Object.assign({}, e.data));
+          weblinkItem = Object.assign({}, e.data);
+          console.log('onWeblink select', weblinkItem);
         }}
         paginator={true}
         rows={10}
@@ -226,44 +205,32 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        header={isNewRecord ? resources.messages['addNewRow'] : resources.messages['editRow']}
+        header={isUndefined(weblinkItem.id) ? resources.messages['addNewRow'] : resources.messages['editRow']}
         modal={true}
         onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
         visible={isAddEditDialogVisible}>
         <Formik
           ref={form}
-          initialValues={initialValues}
+          initialValues={weblinkItem}
           validationSchema={addWeblinkSchema}
           onSubmit={e => {
-            onSaveRecord(e, isNewRecord ? newRecord : selectedRecord);
+            onSaveRecord(e);
           }}>
           {({ isSubmitting, errors, touched }) => (
             <Form>
-              {console.log(
-                'isNewRecord ? newRecord : selectedRecord',
-                isNewRecord,
-                isNewRecord ? newRecord : selectedRecord
-              )}
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
                     name="description"
                     type="text"
-                    // onChange={e => onAddOrEditInputChange(e)}
                     placeholder={resources.messages['description']}
-                    // value={isNewRecord ? initialValues.description : selectedRecord.description}
+                    value={weblinkItem.description}
                   />
                   <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                  <Field
-                    name="url"
-                    type="text"
-                    // onChange={e => onAddOrEditInputChange(e)}
-                    placeholder={resources.messages['url']}
-                    // value={isNewRecord ? initialValues.url : selectedRecord.url}
-                  />
+                  <Field name="url" type="text" placeholder={resources.messages['url']} value={weblinkItem.url} />
                   <ErrorMessage name="url" component="div" />
                 </div>
               </fieldset>
@@ -278,9 +245,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                           : styles.disabledButton
                         : styles.disabledButton
                     }
-                    label={isNewRecord ? resources.messages['add'] : resources.messages['edit']}
+                    label={isUndefined(weblinkItem.id) ? resources.messages['add'] : resources.messages['edit']}
                     disabled={isSubmitting}
-                    icon={isNewRecord ? 'add' : 'edit'}
+                    icon={isUndefined(weblinkItem.id) ? 'add' : 'edit'}
                     type={isSubmitting ? '' : 'submit'}
                   />
                   <Button
