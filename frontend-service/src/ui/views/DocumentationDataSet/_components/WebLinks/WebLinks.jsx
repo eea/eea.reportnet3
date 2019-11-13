@@ -19,7 +19,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  //const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
+  const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
   const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
   const [webLinks, setWebLinks] = useState();
@@ -31,8 +31,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       // .url()
       .required()
   });
-
-  let weblinkItem = { id: undefined, description: '', url: '' };
 
   const onLoadWebLinks = async () => {
     // setIsLoading(true);
@@ -53,7 +51,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onHideAddEditDialog = () => {
     form.current.resetForm();
-    weblinkItem = { id: undefined, description: '', url: '' };
+    setWeblinkItem({ id: undefined, description: '', url: '' });
     setIsAddEditDialogVisible(false);
   };
 
@@ -93,7 +91,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       }
     } else {
       try {
-        weblinkItem = { ...weblinkItem, e };
+        setWeblinkItem({ ...weblinkItem, e });
         console.log('on update', weblinkItem);
 
         const weblinkToEdit = await WebLinkService.update(dataflowId, weblinkItem);
@@ -190,7 +188,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         editable={true}
         footer={isCustodian ? addRowFooter : null}
         onRowSelect={e => {
-          weblinkItem = Object.assign({}, e.data);
+          setWeblinkItem(Object.assign({}, e.data));
           console.log('onWeblink select', weblinkItem);
         }}
         paginator={true}
@@ -217,7 +215,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           onSubmit={e => {
             onSaveRecord(e);
           }}>
-          {({ isSubmitting, errors, touched }) => (
+          {({ isSubmitting, errors, touched, values }) => (
             <Form>
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
@@ -225,12 +223,12 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                     name="description"
                     type="text"
                     placeholder={resources.messages['description']}
-                    value={weblinkItem.description}
+                    value={values.description}
                   />
                   <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                  <Field name="url" type="text" placeholder={resources.messages['url']} value={weblinkItem.url} />
+                  <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
                   <ErrorMessage name="url" component="div" />
                 </div>
               </fieldset>
