@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
-import { isEmpty, isNull, isString, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import styles from './WebLinks.module.scss';
 
@@ -21,10 +21,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [newRecord, setNewRecord] = useState({ id: undefined, description: '', url: '' });
+  const [reload, setReload] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
   const [webLinks, setWebLinks] = useState();
-  const [reload, setReload] = useState(false);
 
   const form = useRef(null);
 
@@ -156,6 +156,15 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} style={{ width: '5em' }} />
   );
 
+  const onAddOrEditInputChange = e => {
+    console.log('isNewRecord', isNewRecord);
+    if (isNewRecord) {
+      return setNewRecord({ ...newRecord, [e.target.name]: e.target.value });
+    } else {
+      return setSelectedRecord({ ...selectedRecord, [e.target.name]: e.target.value });
+    }
+  };
+
   useEffect(() => {
     let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
     let webLinkColArray = webLinkKeys
@@ -227,14 +236,18 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           onSubmit={onSaveRecord}>
           {({ isSubmitting, errors, touched }) => (
             <Form>
-              {console.log('isNewRecord ? newRecord : selectedRecord', isNewRecord ? newRecord : selectedRecord)}
+              {console.log(
+                'isNewRecord ? newRecord : selectedRecord',
+                isNewRecord,
+                isNewRecord ? newRecord : selectedRecord
+              )}
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
                     name="description"
                     type="text"
-                    onChange={e => setSelectedRecord(e.target.value)}
-                    value={isNewRecord ? '' : selectedRecord.description}
+                    onChange={e => onAddOrEditInputChange(e)}
+                    value={isNewRecord ? newRecord.description : selectedRecord.description}
                     placeholder={resources.messages['description']}
                   />
                 </div>
@@ -242,7 +255,8 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                   <Field
                     name="url"
                     type="text"
-                    value={isNewRecord ? '' : selectedRecord.url}
+                    onChange={e => onAddOrEditInputChange(e)}
+                    value={isNewRecord ? newRecord.url : selectedRecord.url}
                     placeholder={resources.messages['url']}
                   />
                 </div>
