@@ -379,7 +379,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASETSCHEMAID_NOT_FOUND);
     }
   }

@@ -183,11 +183,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas._id",
               tableSchema.getIdTableSchema()),
           new Document("$push",
-              new Document("tableSchemas.$[tableSchemaId]",
-                  new Document("$each", Document.parse(tableSchema.toJSON()))).append("$position",
-                      position)),
-          new UpdateOptions().arrayFilters(
-              Arrays.asList(new Document("tableSchemaId._id", tableSchema.getIdTableSchema()))));
+              new Document("tableSchemas",
+                  new Document("$each", Arrays.asList(Document.parse(tableSchema.toJSON())))
+                      .append("$position", position))));
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
@@ -210,11 +208,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new Document("_id", new ObjectId(idDatasetSchema))
               .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.getIdFieldSchema()),
           new Document("$push",
-              new Document("tableSchemas.$.recordSchema.fieldSchemas.$[fieldSchemaId]",
-                  new Document("$each", Document.parse(fieldSchema.toJSON()))).append("$position",
-                      position)),
-          new UpdateOptions().arrayFilters(
-              Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
+              new Document("tableSchemas.$.recordSchema.fieldSchemas",
+                  new Document("$each", Arrays.asList(Document.parse(fieldSchema.toJSON())))
+                      .append("$position", position))));
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }

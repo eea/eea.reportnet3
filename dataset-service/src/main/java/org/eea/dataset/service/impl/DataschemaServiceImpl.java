@@ -640,7 +640,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     try {
       // seleccionar que servicio de update llamar
       if (schema.getClass().equals(TableSchemaVO.class)) {
-        schemasRepository.deleteTableSchemaById(((TableSchemaVO) schema).getIdTableSchema());
+        // schemasRepository.deleteTableSchemaById(((TableSchemaVO) schema).getIdTableSchema());
         return schemasRepository
             .insertTableInPosition(idDatasetSchema,
                 tableSchemaMapper.classToEntity((TableSchemaVO) schema), newPosition)
