@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty } from 'lodash';
 
 import styles from './WebLinks.module.scss';
@@ -28,10 +28,11 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const form = useRef(null);
 
+  const initialValues = { description: '', url: '' };
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
-      .url()
+      // .url()
       .required()
   });
 
@@ -83,12 +84,14 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     { field: 'url', header: resources.messages['url'] }
   ];
 
-  const onSaveRecord = async record => {
+  const onSaveRecord = async e => {
+    console.log('e', e);
+
     if (isNewRecord) {
       try {
         console.log('onSaveRecord isNewRecord', isNewRecord);
-        console.log('record', record);
-        const newWeblink = await WebLinkService.create(dataflowId, record);
+
+        const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
           setReload(!reload);
@@ -100,9 +103,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       }
     } else {
       try {
-        console.log('onSaveRecord isNewRecord', isNewRecord);
-        console.log('record', record);
-        const weblinkToEdit = await WebLinkService.update(dataflowId, record);
+        console.log('onSaveRecord when update. isNewRecord ', isNewRecord);
+
+        const editedRecord = { ...selectedRecord, e };
+        const weblinkToEdit = await WebLinkService.update(dataflowId, editedRecord);
 
         if (weblinkToEdit.isUpdated) {
           setReload(!reload);
@@ -229,10 +233,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         visible={isAddEditDialogVisible}>
         <Formik
           ref={form}
-          initialValues={isNewRecord ? newRecord : selectedRecord}
+          initialValues={initialValues}
           validationSchema={addWeblinkSchema}
-          onSubmit={() => {
-            onSaveRecord(isNewRecord ? newRecord : selectedRecord);
+          onSubmit={e => {
+            onSaveRecord(e, isNewRecord ? newRecord : selectedRecord);
           }}>
           {({ isSubmitting, errors, touched }) => (
             <Form>
@@ -246,19 +250,21 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                   <Field
                     name="description"
                     type="text"
-                    onChange={e => onAddOrEditInputChange(e)}
-                    value={isNewRecord ? newRecord.description : selectedRecord.description}
+                    // onChange={e => onAddOrEditInputChange(e)}
                     placeholder={resources.messages['description']}
+                    // value={isNewRecord ? initialValues.description : selectedRecord.description}
                   />
+                  <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
                   <Field
                     name="url"
                     type="text"
-                    onChange={e => onAddOrEditInputChange(e)}
-                    value={isNewRecord ? newRecord.url : selectedRecord.url}
+                    // onChange={e => onAddOrEditInputChange(e)}
                     placeholder={resources.messages['url']}
+                    // value={isNewRecord ? initialValues.url : selectedRecord.url}
                   />
+                  <ErrorMessage name="url" component="div" />
                 </div>
               </fieldset>
               <fieldset>
