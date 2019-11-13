@@ -399,7 +399,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       index={newDatasetSchema.index}
                       isNameEditable={isNameEditable}
                       // getDeleteSchemaIndex={getDeleteSchemaIndex}
-                      onNameDuplicate={onDuplicateName}
+                      onDuplicateName={onDuplicateName}
                       onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}

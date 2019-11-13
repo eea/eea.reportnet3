@@ -20,7 +20,7 @@ export const BigButton = ({
   isReleased,
   layout,
   model,
-  onNameDuplicate,
+  onDuplicateName,
   onSaveError,
   onSaveName,
   onSelectIndex,
@@ -29,8 +29,6 @@ export const BigButton = ({
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
   const [isEditEnabled, setIsEditEnabled] = useState(false);
-
-  // console.log('buttonsTitle', buttonsTitle);
 
   const newDatasetRef = useRef();
 
@@ -48,7 +46,6 @@ export const BigButton = ({
   };
 
   const onEditorKeyChange = (event, index) => {
-    console.log('index', index);
     if (event.key === 'Enter') {
       if (buttonsTitle !== '') {
         onInputSave(event.target.value, onSelectIndex(index));
@@ -83,13 +80,6 @@ export const BigButton = ({
       if (changeTitle.correct) {
         setIsEditEnabled(false);
         setInitialValue(changeTitle.originalSchemaName);
-      } else {
-        if (!isUndefined(onNameDuplicate)) {
-          onNameDuplicate();
-          document.getElementsByClassName('p-inputtext p-component')[0].focus();
-        }
-        setIsEditEnabled(true);
-        setButtonsTitle(changeTitle.originalSchemaName);
       }
     }
   };
@@ -98,6 +88,8 @@ export const BigButton = ({
     if (!isEmpty(buttonsTitle)) {
       if (initialValue !== title) {
         if (checkDuplicates(title, index)) {
+          onDuplicateName();
+          document.getElementsByClassName('p-inputtext p-component')[0].focus();
           return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
           onSaveName(title, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
