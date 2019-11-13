@@ -11,25 +11,21 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 import { WebLinkService } from 'core/services/WebLink';
 
 export const WebLinks = ({ isCustodian, dataflowId }) => {
   const resources = useContext(ResourcesContext);
 
-  const [editedRecord, setEditedRecord] = useState({});
-  const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
+  const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
-  const [newRecord, setNewRecord] = useState({ description: '', url: '' });
+  const [newRecord, setNewRecord] = useState({ id: undefined, description: '', url: '' });
   const [selectedRecord, setSelectedRecord] = useState({});
   const [webLinksColumns, setWebLinksColumns] = useState([]);
   const [webLinks, setWebLinks] = useState();
   const [reload, setReload] = useState(false);
 
-  const initialValues = { description: '', url: '' };
   const form = useRef(null);
 
   const addWeblinkSchema = Yup.object().shape({
@@ -57,9 +53,17 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   }, [reload]);
 
   const onSelectRecord = val => {
+    setTimeout(() => {
+      setIsNewRecord(false);
+      setSelectedRecord(val);
+    }, 0);
+    console.log('on selected record val', val, selectedRecord);
+  };
+
+  const onHideAddEditDialog = () => {
+    form.current.resetForm();
+    setIsAddEditDialogVisible(false);
     setIsNewRecord(false);
-    setSelectedRecord({ ...val });
-    setEditedRecord({ ...val });
   };
 
   const addRowFooter = (
@@ -70,152 +74,43 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         icon="add"
         onClick={() => {
           setIsNewRecord(true);
-          setIsAddDialogVisible(true);
+          setIsAddEditDialogVisible(true);
         }}
       />
     </div>
   );
-
-  /*  const addRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['save']} icon="save" onClick={() => onSaveRecord(newRecord)} />
-      <Button
-        className="p-button-secondary"
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => {
-          setIsAddDialogVisible(false);
-        }}
-      />
-    </div>
-  ); */
-
-  /*   const newRecordForm = fieldsArray.map(column => {
-    if (isAddDialogVisible) {
-      return (
-        <React.Fragment key={column.field}>
-          <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.field}>
-              {column.field === 'url'
-                ? column.header.toUpperCase()
-                : column.header.charAt(0).toUpperCase() + column.header.slice(1)}
-            </label>
-          </div>
-          <div className="p-col-8" style={{ padding: '.5em' }}>
-            <InputText
-              id={column.field}
-              onChange={e => onEditAddFormInput(column.field, e.target.value, column.field)}
-            />
-          </div>
-        </React.Fragment>
-      );
-    }
-  }); */
 
   const fieldsArray = [
     { field: 'description', header: resources.messages['description'] },
     { field: 'url', header: resources.messages['url'] }
   ];
 
-  const onEditAddFormInput = (field, value) => {
-    let record = {};
-    if (!isNewRecord) {
-      value = changeRecordValue(field, value);
-      record = { ...editedRecord, [field]: value };
-
-      setEditedRecord(record);
-    } else {
-      value = changeRecordValue(field, value);
-      record = { ...newRecord, [field]: value };
-      setNewRecord(record);
-    }
-  };
-
-  const changeRecordValue = (field, value) => {
-    if (!isUndefined(value) && !isNull(value) && isString(value)) {
-      if (field === 'url') {
-        value = value
-          .replace(`\r`, '')
-          .replace(`\n`, '')
-          .replace(/\s/g, '');
-      }
-    }
-    return value;
-  };
-
-  const editRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['save']}
-        icon="save"
-        onClick={() => {
-          try {
-            onSaveRecord(editedRecord);
-            setIsEditDialogVisible(false);
-          } catch (error) {
-            console.error(error);
-          }
-        }}
-      />
-      <Button
-        className="p-button-secondary"
-        label={resources.messages['cancel']}
-        icon="cancel"
-        onClick={() => setIsEditDialogVisible(false)}
-      />
-    </div>
-  );
-
-  const editRecordForm = webLinksColumns.map((column, i) => {
-    if (isEditDialogVisible) {
-      if (i === 0) {
-        return;
-      }
-      return (
-        <React.Fragment key={column.props.field}>
-          <div className="p-col-4" style={{ padding: '.75em' }}>
-            <label htmlFor={column.props.field}>
-              {column.props.header === 'url'
-                ? column.props.header.toUpperCase()
-                : column.props.header.charAt(0).toUpperCase() + column.props.header.slice(1)}
-            </label>
-          </div>
-          <div className="p-col-8" style={{ padding: '.5em' }}>
-            <InputText
-              id={column.props.field}
-              value={editedRecord[column.props.field]}
-              onChange={e => {
-                return onEditAddFormInput(column.props.field, e.target.value, column.props.field);
-              }}
-            />
-          </div>
-        </React.Fragment>
-      );
-    }
-  });
-
   const onSaveRecord = async record => {
     if (isNewRecord) {
       try {
+        console.log('onSaveRecord isNewRecord', isNewRecord);
+        console.log('record', record);
         const newWeblink = await WebLinkService.create(dataflowId, record);
 
         if (newWeblink.isCreated) {
           setReload(!reload);
         }
 
-        setIsAddDialogVisible(false);
+        onHideAddEditDialog();
       } catch (error) {
         console.error('Error on save new Weblink: ', error);
       }
     } else {
       try {
+        console.log('onSaveRecord isNewRecord', isNewRecord);
+        console.log('record', record);
         const weblinkToEdit = await WebLinkService.update(dataflowId, record);
 
         if (weblinkToEdit.isUpdated) {
           setReload(!reload);
         }
 
-        setIsEditDialogVisible(false);
+        onHideAddEditDialog();
       } catch (error) {
         console.error('Error on update new Weblink: ', error);
         const errorResponse = error.response;
@@ -245,7 +140,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={() => setIsEditDialogVisible(true)}
+          onClick={() => setIsAddEditDialogVisible(true)}
         />
         <Button
           type="button"
@@ -257,7 +152,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     );
   };
 
-  const webLinkEditionColumn = <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} />;
+  const webLinkEditionColumn = (
+    <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} style={{ width: '5em' }} />
+  );
 
   useEffect(() => {
     let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
@@ -304,7 +201,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           onSelectRecord(webLinks);
         }}
         onRowSelect={e => {
-          return onSelectRecord(Object.assign({}, e.data));
+          onSelectRecord(Object.assign({}, e.data));
         }}
         paginator={true}
         rows={10}
@@ -318,14 +215,19 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         className={styles.dialog}
         blockScroll={false}
         contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        header={resources.messages['addNewRow']}
+        header={isNewRecord ? resources.messages['addNewRow'] : resources.messages['editRow']}
         modal={true}
-        onHide={() => setIsAddDialogVisible(false)}
+        onHide={() => onHideAddEditDialog()}
         style={{ width: '50%', height: '80%' }}
-        visible={isAddDialogVisible}>
-        <Formik ref={form} initialValues={initialValues} validationSchema={addWeblinkSchema} onSubmit={onSaveRecord}>
+        visible={isAddEditDialogVisible}>
+        <Formik
+          ref={form}
+          initialValues={isNewRecord ? newRecord : selectedRecord}
+          validationSchema={addWeblinkSchema}
+          onSubmit={onSaveRecord}>
           {({ isSubmitting, errors, touched }) => (
             <Form>
+              {console.log('isNewRecord ? newRecord : selectedRecord', isNewRecord ? newRecord : selectedRecord)}
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field name="description" type="text" placeholder={resources.messages['description']} />
@@ -345,35 +247,22 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                           : styles.disabledButton
                         : styles.disabledButton
                     }
-                    label={resources.messages['add']}
+                    label={isNewRecord ? resources.messages['add'] : resources.messages['edit']}
                     disabled={isSubmitting}
-                    icon="add"
+                    icon={isNewRecord ? 'add' : 'edit'}
                     type={isSubmitting ? '' : 'submit'}
                   />
                   <Button
                     className={`${styles.cancelButton} p-button-secondary`}
                     label={resources.messages['cancel']}
                     icon="cancel"
-                    onClick={() => setIsAddDialogVisible(false)}
+                    onClick={() => onHideAddEditDialog()}
                   />
                 </div>
               </fieldset>
             </Form>
           )}
         </Formik>
-      </Dialog>
-
-      <Dialog
-        className={styles.dialog}
-        blockScroll={false}
-        contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
-        footer={editRowDialogFooter}
-        header={resources.messages['editRow']}
-        modal={true}
-        onHide={() => setIsEditDialogVisible(false)}
-        style={{ width: '50%', height: '80%' }}
-        visible={isEditDialogVisible}>
-        <div className="p-grid p-fluid">{editRecordForm}</div>
       </Dialog>
 
       <ConfirmDialog
