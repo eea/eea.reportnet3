@@ -150,9 +150,14 @@ const errorStatisticsById = async datasetId => {
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
-        (datasetTableDTO.totalRecordsWithErrors + datasetTableDTO.totalRecordsWithWarnings),
+        (datasetTableDTO.totalRecordsWithBlockers +
+          datasetTableDTO.totalRecordsWithErrors +
+          datasetTableDTO.totalRecordsWithWarnings +
+          datasetTableDTO.totalRecordsWithInfos),
+      datasetTableDTO.totalRecordsWithInfos,
       datasetTableDTO.totalRecordsWithWarnings,
-      datasetTableDTO.totalRecordsWithErrors
+      datasetTableDTO.totalRecordsWithErrors,
+      datasetTableDTO.totalRecordsWithBlockers
     ]);
 
     return new DatasetTable(

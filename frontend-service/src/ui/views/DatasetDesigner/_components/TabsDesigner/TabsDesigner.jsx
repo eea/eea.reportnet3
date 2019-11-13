@@ -35,7 +35,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   }, [scrollFn, tabs, isEditing]);
 
   useEffect(() => {
-    onLoadSchema(dataflowId);
+    onLoadSchema(datasetId);
   }, []);
 
   useEffect(() => {
@@ -144,7 +144,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const addTable = async (header, tabIndex) => {
     const tabledAdded = await DatasetService.addTableDesign(datasetSchema.datasetSchemaId, datasetId, header);
     if (tabledAdded) {
-      onLoadSchema(dataflowId);
+      onLoadSchema(datasetId);
     } else {
       console.error('');
     }
@@ -165,7 +165,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
   const deleteTable = async deletedTabIndx => {
     const tableDeleted = await DatasetService.deleteTableDesign(datasetId, tabs[deletedTabIndx].tableSchemaId);
     if (tableDeleted) {
-      onLoadSchema(dataflowId);
+      onLoadSchema(datasetId);
     } else {
       console.error('');
     }
@@ -204,7 +204,7 @@ export const TabsDesigner = withRouter(({ editable = false, match, history }) =>
       datasetId
     );
     if (tableUpdated) {
-      onLoadSchema(dataflowId);
+      onLoadSchema(datasetId);
     }
   };
 
