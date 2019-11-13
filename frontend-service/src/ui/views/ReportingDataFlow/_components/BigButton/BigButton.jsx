@@ -17,43 +17,41 @@ export const BigButton = ({
   designDatasetSchemas,
   handleRedirect,
   index,
-  // isNameEditable,
   isReleased,
   layout,
   model,
   onNameDuplicate,
-  // onNameEdit,
   onSaveError,
   onSaveName,
   onSelectIndex,
   placeholder
-  // schemaId
-  // schemaName
 }) => {
-  // const [buttonsIds, setButtonsIds] = useState();
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
-  // const [focusedValue, setFocusedValue] = useState();
-
   const [isEditEnabled, setIsEditEnabled] = useState(false);
-
-  // console.log('schemaId', schemaId);
-
-  // console.log('index', index);
 
   const newDatasetRef = useRef();
 
+  if (isEditEnabled && document.getElementsByClassName('p-inputtext p-component').length > 0) {
+    document.getElementsByClassName('p-inputtext p-component')[0].focus();
+  }
+
   const checkDuplicates = (header, index) => {
-    console.log('index of check: ', index);
     const inmTitles = [...designDatasetSchemas];
     const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
     return repeat.length > 0 && index !== repeat[0].index;
   };
 
   const onEditorKeyChange = (event, index) => {
-    console.log('testing index: ', index);
     if (event.key === 'Enter') {
-      onInputSave(event.target.value, onSelectIndex(index));
+      // if (buttonsTitle !== '') {
+      onInputSave(event.target.value, index);
+      // } else {
+      //   if (!isUndefined(onSaveError)) {
+      //     onSaveError();
+      //     document.getElementsByClassName('p-inputtext p-component')[0].focus();
+      //   }
+      // }
     }
     if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
@@ -63,25 +61,35 @@ export const BigButton = ({
     }
   };
 
-  // console.log('buttonsIds', buttonsIds);
-
-  const onEditorValueFocus = (value, index) => {
+  const onEditorValueFocus = value => {
     setInitialValue(!isEmpty(value) ? value : initialValue);
-    // const allValues = [...designDatasetSchemas];
-    // const focusedValue = allValues.filter(title => title.datasetSchemaName.toLowerCase() === value.toLowerCase());
-    // setFocusedValue(focusedValue[0].datasetId);
-    // setButtonsIds(onSelectIndex(index));
+  };
+
+  const onEnableSchemaNameEdit = () => {
+    setIsEditEnabled(true);
   };
 
   const onInputSave = (value, index) => {
-    if (!isEmpty(buttonsTitle)) {
-      if (checkDuplicates(value, index)) {
-        console.log('name is already taken');
+    const changeTitle = onUpdateName(value, index);
+    if (!isUndefined(changeTitle)) {
+      setInitialValue(changeTitle.schemaName);
+      if (!isUndefined(onNameDuplicate)) {
         onNameDuplicate();
+        document.getElementsByClassName('p-inputtext p-component')[0].focus();
+      }
+    }
+  };
+
+  const onUpdateName = (title, index) => {
+    if (!isEmpty(buttonsTitle)) {
+      if (initialValue !== title) {
+        if (checkDuplicates(title, index)) {
+          return { correct: false, schemaName: title };
+        } else {
+          onSaveName(title, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
+        }
       } else {
-        initialValue !== value
-          ? onSaveName(value, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle)
-          : setIsEditEnabled(false);
+        setIsEditEnabled(false);
       }
     } else {
       if (!isUndefined(onSaveError)) {
@@ -95,10 +103,6 @@ export const BigButton = ({
     if (!isUndefined(value) && value.match(/^[a-zA-Z0-9-_\s]*$/)) {
       setButtonsTitle(value);
     }
-  };
-
-  const doubleClick = () => {
-    setIsEditEnabled(true);
   };
 
   const dataset = model ? (
@@ -171,14 +175,14 @@ export const BigButton = ({
           onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
             e.preventDefault();
-            onEditorValueFocus(e.target.value, index);
+            onEditorValueFocus(e.target.value);
           }}
-          onKeyDown={e => onEditorKeyChange(e, index)}
+          onKeyDown={e => onEditorKeyChange(e, onSelectIndex(index))}
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <p className={styles.caption} onDoubleClick={doubleClick}>
+        <p className={styles.caption} onDoubleClick={onEnableSchemaNameEdit}>
           {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         </p>
       )}

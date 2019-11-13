@@ -28,13 +28,13 @@ export const NewDatasetSchemaForm = ({
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
-      .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .required(resources.messages['emptyDatasetSchema'])
+      .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .test('', resources.messages['duplicateSchemaError'], value => {
         if (!isEmpty(schema)) {
           const inmTitles = [...schema];
           const isRepeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() !== value.toLowerCase());
-          return isRepeat.length > 0;
+          return isRepeat.length === inmTitles.length;
         } else {
           return true;
         }
