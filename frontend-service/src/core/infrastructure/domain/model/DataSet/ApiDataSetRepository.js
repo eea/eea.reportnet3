@@ -195,6 +195,90 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
+const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
+  var myObject = [datasetSchemaDTO];
+  var finalResults = [];
+  var result = findObjects(myObject, 'rule', finalResults);
+  let levelErrorsRepeated = [];
+  let mapLevelErrorsRepeated = finalResults.map(function(value) {
+    if (!isUndefined(value.thenCondition)) {
+      levelErrorsRepeated.push(value.thenCondition[1]);
+    }
+  });
+  let levelErrors = [...new Set(levelErrorsRepeated)];
+  return levelErrors;
+};
+
+function findObjects(obj, targetProp, finalResults) {
+  function getObject(theObject) {
+    let result = null;
+    if (theObject instanceof Array) {
+      for (let i = 0; i < theObject.length; i++) {
+        getObject(theObject[i]);
+      }
+    } else {
+      for (let prop in theObject) {
+        if (theObject.hasOwnProperty(prop)) {
+          if (prop.includes(targetProp) && prop !== 'ruleId') {
+            // console.log(prop, theObject);
+            finalResults.push(theObject);
+          }
+          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+            getObject(theObject[prop]);
+          }
+        }
+      }
+    }
+  }
+  getObject(obj);
+}
+
+function findObjects2(obj, targetProp, finalResults) {
+  function getObject(theObject) {
+    let result = null;
+    if (theObject instanceof Array) {
+      for (let i = 0; i < theObject.length; i++) {
+        getObject(theObject[i]);
+      }
+    } else {
+      for (let prop in theObject) {
+        if (theObject.hasOwnProperty(prop)) {
+          if (prop.includes(targetProp) && prop !== 'ruleId') {
+            // console.log(theObject);
+            if (!isUndefined(theObject.thenCondition)) {
+              finalResults.push(theObject);
+            } else {
+              if (!isUndefined(theObject.ruleField)) {
+                theObject.ruleField.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleRecord)) {
+                theObject.ruleRecord.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleTable)) {
+                theObject.ruleTable.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleDataSet)) {
+                theObject.ruleDataSet.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else {
+                // console.log(theObject);
+              }
+            }
+          }
+          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+            getObject(theObject[prop]);
+          }
+        }
+      }
+    }
+  }
+  getObject(obj);
+}
+
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   //reorder tables alphabetically
@@ -211,6 +295,7 @@ const schemaById = async datasetId => {
   const dataset = new Dataset();
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
+  dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
 
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
@@ -240,6 +325,7 @@ const schemaById = async datasetId => {
   });
 
   dataset.tables = tables;
+
   return dataset;
 };
 

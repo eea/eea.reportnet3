@@ -13,6 +13,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
+  levelErrorTypes,
   onTabChange,
   recordPositionId,
   selectedRecordErrorId,
@@ -22,7 +23,7 @@ export const TabsSchema = ({
   isWebFormMMR
 }) => {
   let tableHasErrors = true;
-  if (!isUndefined(tables[activeIndex])) {
+  if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
     tableHasErrors = tables[activeIndex].hasErrors;
   }
   let tabs =
@@ -32,9 +33,10 @@ export const TabsSchema = ({
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.TabsSchema}>
                 <DataViewer
+                  buttonsList={buttonsList}
+                  levelErrorTypes={levelErrorTypes}
                   hasWritePermissions={hasWritePermissions}
                   isWebFormMMR={isWebFormMMR}
-                  buttonsList={buttonsList}
                   key={table.id}
                   tableHasErrors={tableHasErrors}
                   tableId={table.id}

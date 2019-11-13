@@ -56,6 +56,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     activeIndex: null
   });
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
@@ -213,11 +214,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
-      // setLevelErrorFilters(dataset????);
       const tableSchemaNamesList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
@@ -293,6 +294,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           tableSchemaColumns={tableSchemaColumns}
           isWebFormMMR={isWebFormMMR}
           hasWritePermissions={hasWritePermissions}
+          levelErrorTypes={levelErrorTypes}
         />
       );
     }
@@ -447,7 +449,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
             tableSchemaNames={tableSchemaNames}
-            // levelErrorFilters={levelErrorFilters}
+            levelErrorTypes={levelErrorTypes}
           />
         </Dialog>
       </ReporterDatasetContext.Provider>
