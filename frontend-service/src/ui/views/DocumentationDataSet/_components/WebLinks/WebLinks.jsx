@@ -19,7 +19,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
-  const [weblinkItem, setWeblinkItem] = useState({ id: undefined, description: '', url: '' });
+  const [weblinkItem, setWeblinkItem] = useState({});
   const [reload, setReload] = useState(false);
   const [webLinksColumns, setWebLinksColumns] = useState([]);
   const [webLinks, setWebLinks] = useState();
@@ -28,7 +28,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   const addWeblinkSchema = Yup.object().shape({
     description: Yup.string().required(),
     url: Yup.string()
-      // .url()
+      .url()
       .required()
   });
 
@@ -47,11 +47,11 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   useEffect(() => {
     onLoadWebLinks();
+    setWeblinkItem({ id: undefined, description: '', url: '' });
   }, [reload]);
 
   const onHideAddEditDialog = () => {
     form.current.resetForm();
-    setWeblinkItem({ id: undefined, description: '', url: '' });
     setIsAddEditDialogVisible(false);
   };
 
@@ -75,10 +75,12 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
 
   const onSaveRecord = async e => {
     console.log('e', e);
-    console.log('weblinkItem', weblinkItem);
+
     if (isUndefined(weblinkItem.id)) {
+      setWeblinkItem(e);
+
       try {
-        console.log('on create', weblinkItem);
+        console.log('on create', e);
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
@@ -91,10 +93,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
       }
     } else {
       try {
-        setWeblinkItem({ ...weblinkItem, e });
+        setWeblinkItem(e);
         console.log('on update', weblinkItem);
 
-        const weblinkToEdit = await WebLinkService.update(dataflowId, weblinkItem);
+        const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
         if (weblinkToEdit.isUpdated) {
           setReload(!reload);
@@ -130,7 +132,9 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           type="button"
           icon="edit"
           className={`${`p-button-rounded p-button-secondary ${styles.editRowButton}`}`}
-          onClick={() => setIsAddEditDialogVisible(true)}
+          onClick={e => {
+            setIsAddEditDialogVisible(true);
+          }}
         />
         <Button
           type="button"
@@ -189,7 +193,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         footer={isCustodian ? addRowFooter : null}
         onRowSelect={e => {
           setWeblinkItem(Object.assign({}, e.data));
-          console.log('onWeblink select', weblinkItem);
         }}
         paginator={true}
         rows={10}
@@ -217,6 +220,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           }}>
           {({ isSubmitting, errors, touched, values }) => (
             <Form>
+              {console.log('values', values)}
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
