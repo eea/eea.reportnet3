@@ -230,10 +230,21 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
               {console.log('isNewRecord ? newRecord : selectedRecord', isNewRecord ? newRecord : selectedRecord)}
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
-                  <Field name="description" type="text" placeholder={resources.messages['description']} />
+                  <Field
+                    name="description"
+                    type="text"
+                    onChange={e => setSelectedRecord(e.target.value)}
+                    value={isNewRecord ? '' : selectedRecord.description}
+                    placeholder={resources.messages['description']}
+                  />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                  <Field name="url" type="text" placeholder={resources.messages['url']} />
+                  <Field
+                    name="url"
+                    type="text"
+                    value={isNewRecord ? '' : selectedRecord.url}
+                    placeholder={resources.messages['url']}
+                  />
                 </div>
               </fieldset>
               <fieldset>
