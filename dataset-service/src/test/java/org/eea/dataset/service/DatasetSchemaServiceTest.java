@@ -643,7 +643,8 @@ public class DatasetSchemaServiceTest {
     UpdateResult updateResult = UpdateResult.acknowledged(1L, 1L, null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(updateResult);
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
     dataSchemaServiceImpl.updateTableSchema(id.toString(), tableVO);
     Mockito.verify(schemasRepository, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
@@ -658,7 +659,8 @@ public class DatasetSchemaServiceTest {
     UpdateResult updateResult = UpdateResult.acknowledged(1L, 0L, null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(updateResult);
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
     dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
   }
 
@@ -671,7 +673,8 @@ public class DatasetSchemaServiceTest {
   public void updateTableSchemaExceptionTest() throws EEAException {
     Mockito.doThrow(new IllegalArgumentException()).when(schemasRepository)
         .updateTableSchema(Mockito.any(), Mockito.any());
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
     dataSchemaServiceImpl.updateTableSchema(new ObjectId().toString(), new TableSchemaVO());
   }
 
@@ -682,7 +685,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void createTableSchemaTest() throws EEAException {
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
     dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), new TableSchemaVO(), 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
   }
@@ -721,7 +725,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void orderTableSchemaTest1() throws EEAException {
     Mockito.doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
     Mockito
         .when(
             schemasRepository.insertTableInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
@@ -737,7 +742,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void orderTableSchemaTest2() throws EEAException {
     Mockito.doNothing().when(schemasRepository).deleteTableSchemaById(Mockito.any());
-    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any())).thenReturn(new TableSchema());
+    Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
+        .thenReturn(new TableSchema());
     Mockito
         .when(
             schemasRepository.insertTableInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))

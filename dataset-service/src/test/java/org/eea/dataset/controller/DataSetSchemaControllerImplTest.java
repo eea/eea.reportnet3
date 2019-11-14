@@ -428,4 +428,23 @@ public class DataSetSchemaControllerImplTest {
         .thenReturn(false);
     dataSchemaControllerImpl.orderFieldSchema(1L, new FieldSchemaVO(), 1);
   }
+
+  @Test
+  public void createTableSchemaTest1() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.doNothing().when(datasetService).saveTablePropagation(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+    Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createTableSchemaTest2() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
+        Mockito.any());
+    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+  }
 }
