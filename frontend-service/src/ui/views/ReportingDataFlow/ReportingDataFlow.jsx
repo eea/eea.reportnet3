@@ -40,14 +40,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
 
-  // const [allIndexValues, setAllIndexValues] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
-  // const [designDatasetNames, setDesignDatasetNames] = useState();
-  // const [datasetSchemaName, setDatasetSchemaName] = useState();
-  // const [designDatasetSchemaId, setDesignDatasetSchemaId] = useState();
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -60,13 +56,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDuplicated, setIsDuplicated] = useState(false);
   const [isFormReset, setIsFormReset] = useState(true);
-  const [isNameEditable, setIsNameEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [snapshotsListData, setSnapshotsListData] = useState([]);
   const [snapshotDataToRelease, setSnapshotDataToRelease] = useState('');
-
-  // console.log('designDatasetSchemaId', designDatasetSchemaId);
 
   let growlRef = useRef();
 
@@ -115,19 +108,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       const dataflow = await DataflowService.reporting(match.params.dataflowId);
       setDataflowData(dataflow);
       if (!isEmpty(dataflow.designDatasets)) {
-        // const { designDatasets } = dataflow;
-        // const [designDataset] = designDatasets;
-        // setDesignDatasetSchemaId(designDataset.datasetId);
-
-        // setDesignDatasetSchemaId(dataflow.designDatasets.map(id => id.datasetId));
         dataflow.designDatasets.forEach((schema, idx) => {
-          // setDesignDatasetSchemaId(schema.datasetId);
-          // setAllIndexValues(idx);
           schema.index = idx;
         });
         setDesignDatasetSchemas(dataflow.designDatasets);
-        // setAllIndexValues(dataflow.designDatasets.map(index => index.index));
-        // setDatasetSchemaName(designDataset.datasetSchemaName);
       }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -137,26 +121,12 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
       setLoading(false);
     }
   };
-  // console.log('DatasetSchemaName', datasetSchemaName);
-
-  // useEffect(() => {
-  //   if (!isUndefined(dataflowData)) {
-  //     if (!isEmpty(dataflowData.designDatasets)) {
-  //       setDatasetSchemaName(dataflowData.designDatasets);
-  //     }
-  //   }
-  // }, [dataflowData]);
-
-  // console.log('allIndexValues', allIndexValues);
 
   const onLoadSnapshotList = async datasetId => {
     setSnapshotsListData(await SnapshotService.all(datasetId));
   };
 
   const onSelectIndex = index => {
-    // const allValues = [...designDatasetSchemas];
-    // const isRepeated = allValues.filter(title => title.index === index);
-    // return isRepeated[0].index;
     return index;
   };
 
@@ -200,9 +170,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
         onClick={() => {
           setErrorDialogVisible(false);
           setIsDuplicated(false);
-          // if (isNameEditable) {
-          //   document.getElementsByClassName('p-inputtext p-component')[0].focus();
-          // }
         }}
       />
     </div>
@@ -243,13 +210,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const onHideErrorDialog = () => {
     setErrorDialogVisible(false);
     setIsDuplicated(false);
-    // if (isNameEditable) {
-    //   document.getElementsByClassName('p-inputtext p-component')[0].focus();
-    // }
-  };
-
-  const onNameEdit = () => {
-    setIsNameEditable(!isNameEditable);
   };
 
   const onUpdateData = () => {
@@ -257,9 +217,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async (value, index) => {
-    // await DatasetService.updateSchemaNameById(id, value);
     await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, value);
-    // setDatasetSchemaName(value);
   };
 
   const showContributorsDialog = () => {
@@ -397,16 +355,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         );
                       }}
                       index={newDatasetSchema.index}
-                      isNameEditable={isNameEditable}
-                      // getDeleteSchemaIndex={getDeleteSchemaIndex}
                       onDuplicateName={onDuplicateName}
-                      onNameEdit={onNameEdit}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
                       onSelectIndex={onSelectIndex}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
-                      // schemaName={datasetSchemaName}
-                      // schemaId={designDatasetSchemaId}
                       model={[
                         {
                           label: resources.messages['openDataset'],
@@ -426,8 +379,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                         },
                         {
                           label: resources.messages['rename'],
-                          icon: 'pencil',
-                          command: () => setIsNameEditable(!isNameEditable)
+                          icon: 'pencil'
                         },
                         {
                           label: resources.messages['duplicate'],

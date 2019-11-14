@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isEmpty, isUndefined } from 'lodash';
@@ -11,6 +11,7 @@ import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
+import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 export const BigButton = ({
   caption,
@@ -26,6 +27,8 @@ export const BigButton = ({
   onSelectIndex,
   placeholder
 }) => {
+  const resources = useContext(ResourcesContext);
+
   const [buttonsTitle, setButtonsTitle] = useState(!isUndefined(caption) ? caption : '');
   const [initialValue, setInitialValue] = useState();
   const [isEditEnabled, setIsEditEnabled] = useState(false);
@@ -40,9 +43,6 @@ export const BigButton = ({
     const inmTitles = [...designDatasetSchemas];
     const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
     return repeat.length > 0 && idx !== repeat[0].index;
-    // const isRepeated = header.toLowerCase() === buttonsTitle;
-    // console.log('idx', idx);
-    // console.log('isRepeated', isRepeated && idx !== onSelectIndex(index));
   };
 
   const onEditorKeyChange = (event, index) => {
@@ -72,9 +72,17 @@ export const BigButton = ({
     setIsEditEnabled(true);
   };
 
+  const designModel =
+    !isUndefined(model) &&
+    model.map(button => {
+      if (button.label === resources.messages['rename']) {
+        button.command = onEnableSchemaNameEdit;
+      }
+      return button;
+    });
+
   const onInputSave = (value, index) => {
     const changeTitle = onUpdateName(value, index);
-    console.log('changeTitle', changeTitle);
     if (!isUndefined(changeTitle)) {
       setInitialValue(changeTitle.originalSchemaName);
       if (changeTitle.correct) {
@@ -152,7 +160,7 @@ export const BigButton = ({
       <p className={styles.caption}>{caption}</p>
     </>
   );
-  const designDatasetSchema = model ? (
+  const designDatasetSchema = designModel ? (
     <>
       <div className={`${styles.bigButton} ${styles.designDatasetSchema}`}>
         <a
@@ -165,7 +173,7 @@ export const BigButton = ({
         </a>
         <DropdownButton
           icon="caretDown"
-          model={model}
+          model={designModel}
           buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
           iconStyle={{ fontSize: '1.8rem' }}
         />
