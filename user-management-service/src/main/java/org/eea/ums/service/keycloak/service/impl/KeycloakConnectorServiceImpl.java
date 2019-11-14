@@ -117,7 +117,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     TokenInfo tokenInfo = this.generateToken(adminUser, adminPass);
 
     String adminToken =
-        Optional.ofNullable(tokenInfo).map(info -> info.getAccessToken()).orElse("");
+        Optional.ofNullable(tokenInfo).map(TokenInfo::getAccessToken).orElse("");
     this.internalClientId = getReportnetClientInfo(adminToken).getId();
     List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
@@ -324,7 +324,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
         .map(entity -> (GroupInfo[]) entity).orElse(null);
   }
 
@@ -351,7 +351,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
                     .path(GROUP_DETAIL_URL).buildAndExpand(uriParams).toString(),
                 HttpMethod.GET, request, GroupInfo.class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
         .map(entity -> (GroupInfo) entity).orElse(null);
   }
 
@@ -492,7 +492,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, RoleRepresentation[].class);
 
-    return Optional.ofNullable(responseEntity).map(entity -> entity.getBody())
+    return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody)
         .map(entity -> (RoleRepresentation[]) entity).orElse(null);
   }
 
@@ -600,7 +600,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       String[] resourcesetBody = resourceSet.getBody();
       if (null != resourcesetBody) {
         List<String> resources = Arrays.asList(resourcesetBody);
-        if (null != resources && resources.size() > 0) {
+        if (null != resources && !resources.isEmpty()) {
           resources.forEach(resourceSetId -> {
 
             Map<String, String> uriRequestParam = new HashMap<>();

@@ -98,6 +98,19 @@ public class DataFlowWebLinkControllerImplTest {
   }
 
   /**
+   * Save link throws EEA exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void saveLinkThrowsEEAException() throws EEAException {
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
+    doThrow(EEAException.class).when(dataflowWebLinkService).saveWebLink(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+  }
+
+  /**
    * Save link.
    *
    * @throws EEAException the EEA exception
@@ -153,6 +166,20 @@ public class DataFlowWebLinkControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void updateLinkThrowsURISyntaxException() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
+    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+  }
+
+
+  /**
+   * Update link throws EEA exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateLinkThrowsEEAException() throws EEAException {
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
+    doThrow(EEAException.class).when(dataflowWebLinkService).updateWebLink(Mockito.any(),
+        Mockito.any(), Mockito.any());
     dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
   }
 

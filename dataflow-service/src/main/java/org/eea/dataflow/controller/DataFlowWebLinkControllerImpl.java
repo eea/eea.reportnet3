@@ -83,10 +83,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     try {
       new URL(weblink.getUrl()).toURI();
-    } catch (MalformedURLException exception) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
-    } catch (URISyntaxException e) {
+    } catch (MalformedURLException | URISyntaxException exception) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.URL_FORMAT_INCORRECT);
     }
@@ -132,10 +129,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
 
     try {
       new URL(weblink.getUrl()).toURI();
-    } catch (MalformedURLException exception) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.URL_FORMAT_INCORRECT);
-    } catch (URISyntaxException e) {
+    } catch (MalformedURLException | URISyntaxException exception) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.URL_FORMAT_INCORRECT);
     }

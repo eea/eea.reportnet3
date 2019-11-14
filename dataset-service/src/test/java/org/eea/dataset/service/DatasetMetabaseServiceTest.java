@@ -19,6 +19,7 @@ import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZull;
+import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.TypeDatasetEnum;
 import org.junit.Assert;
 import org.junit.Before;
@@ -185,6 +186,22 @@ public class DatasetMetabaseServiceTest {
 
     datasetMetabaseService.getGlobalStatistics("5ce524fad31fc52540abae73");
     Mockito.verify(statisticsRepository, times(1)).findStatisticsByIdDatasetSchema(Mockito.any());
+  }
+
+  @Test
+  public void testSetEntityProperty() throws InstantiationException, IllegalAccessException {
+    StatisticsVO stats = new StatisticsVO();
+    Class<?> clazzStats = stats.getClass();
+    Object instance = clazzStats.newInstance();
+    datasetMetabaseService.setEntityProperty(instance, "idDataSetSchema", "0sdferf");
+  }
+
+  @Test
+  public void testSetEntityProperty2() throws InstantiationException, IllegalAccessException {
+    StatisticsVO stats = new StatisticsVO();
+    Class<?> clazzStats = stats.getClass();
+    Object instance = clazzStats.newInstance();
+    datasetMetabaseService.setEntityProperty(instance, "datasetErrors", "false");
   }
 
 }

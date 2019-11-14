@@ -61,7 +61,7 @@
         <configuration>
           <excludes>
             <exclude>
-              org.eea.interfaces.*
+              org.eea.interfaces.**
             </exclude>
             <exclude>
               org.eea.**.mapper

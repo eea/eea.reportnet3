@@ -43,6 +43,7 @@ public enum ObjectAccessRoleEnum {
   /** The dataschema provider. */
   DATASCHEMA_PROVIDER("ROLE_DATASCHEMA-%s-DATA_PROVIDER");
 
+
   /** The expression. */
   private String expression;
 
