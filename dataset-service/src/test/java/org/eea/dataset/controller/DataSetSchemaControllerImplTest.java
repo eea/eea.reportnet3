@@ -90,50 +90,53 @@ public class DataSetSchemaControllerImplTest {
   }
 
   /**
-   * Test find data schema by id exception.
+   * Gets the dataset schema id test.
    *
+   * @return the dataset schema id test
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
-  public void testFindDataSchemaByIdException() throws EEAException {
-
-    Mockito.doThrow(EEAException.class).when(dataschemaService).getDatasetSchemaId(Mockito.any());
-
-    assertNotNull("failed", dataSchemaControllerImpl.getDatasetSchemaId(1L));
-
+  @Test
+  public void getDatasetSchemaIdTest() throws EEAException {
+    when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("result");
+    String result = dataSchemaControllerImpl.getDatasetSchemaId(1L);
+    Assert.assertNotNull(result);
   }
 
   /**
-   * Find data schema by dataset id exception.
+   * Gets the dataset schema id exception test.
    *
+   * @return the dataset schema id exception test
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void findDataSchemaByDatasetIdException() throws EEAException {
-
-    Mockito.doThrow(EEAException.class).when(dataschemaService)
-        .getDataSchemaByDatasetId(Mockito.any(), Mockito.any());
-
-    assertNotNull("failed", dataSchemaControllerImpl.findDataSchemaByDatasetId(1L));
-
+  public void getDatasetSchemaIdExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataschemaService).getDatasetSchemaId(Mockito.any());
+    dataSchemaControllerImpl.getDatasetSchemaId(1L);
   }
 
-
   /**
-   * Test find data schema by data flow.
+   * Find data schema by dataset id test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testFindDataSchemaByDataFlow() throws EEAException {
-
-    Mockito
-        .when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
+  public void findDataSchemaByDatasetIdTest() throws EEAException {
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
     DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
     Assert.assertNotNull(result);
+  }
 
-
+  /**
+   * Find data schema by dataset id exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void findDataSchemaByDatasetIdExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataschemaService)
+        .getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any());
+    dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
   }
 
   /**
@@ -142,26 +145,23 @@ public class DataSetSchemaControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testFindDataSchemaWithNoRulesByDataflow() throws EEAException {
+  public void findDataSchemaWithNoRulesByDatasetIdTest() throws EEAException {
 
-    Mockito
-        .when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any()))
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
     Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L));
   }
 
-
   /**
-   * Test find data schema with no rules by dataflow exception.
+   * Find data schema with no rules by dataset id exception test.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void testFindDataSchemaWithNoRulesByDataflowException() throws EEAException {
-
-    Mockito.doThrow(EEAException.class).when(dataschemaService)
-        .getDataSchemaByDatasetId(Mockito.any(), Mockito.any());
-    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L));
+  public void findDataSchemaWithNoRulesByDatasetIdExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataschemaService)
+        .getDataSchemaByDatasetId(Mockito.eq(Boolean.FALSE), Mockito.any());
+    dataSchemaControllerImpl.findDataSchemaWithNoRulesByDatasetId(1L);
   }
 
   /**
@@ -248,24 +248,6 @@ public class DataSetSchemaControllerImplTest {
   }
 
   /**
-   * Delete table schema test.
-   */
-  @Test
-  public void deleteTableSchemaTest() {
-    doNothing().when(dataschemaService).deleteTableSchema(Mockito.any());
-    dataSchemaControllerImpl.deleteTableSchema(1L, "objectId");
-    Mockito.verify(datasetService, times(1)).deleteTableValue(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Delete table schema exception test.
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void deleteTableSchemaExceptionTest() {
-    dataSchemaControllerImpl.deleteTableSchema(null, null);
-  }
-
-  /**
    * Delete dataset schema exception test.
    */
   @Test(expected = ResponseStatusException.class)
@@ -309,7 +291,8 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
-    dataSchemaControllerImpl.updateTableSchema("", 1L, new TableSchemaVO());
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
 
@@ -320,65 +303,233 @@ public class DataSetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
         Mockito.any());
-    dataSchemaControllerImpl.updateTableSchema("", 1L, new TableSchemaVO());
+    dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
   }
 
   /**
-   * Creates the table schema test.
+   * Delete table schema test 1.
+   *
+   * @throws EEAException the EEA exception
    */
   @Test
-  public void createTableSchemaTest() {
-    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
+  public void deleteTableSchemaTest1() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(datasetService).deleteTableValue(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.deleteTableSchema(1L, "");
+  }
+
+  /**
+   * Delete table schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteTableSchemaTest2() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(dataschemaService).deleteTableSchema(Mockito.any(),
+        Mockito.any());
+    dataSchemaControllerImpl.deleteTableSchema(1L, "");
+  }
+
+  /**
+   * Order table schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderTableSchemaTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.orderTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.orderTableSchema(1L, new TableSchemaVO(), 1);
+  }
+
+  /**
+   * Order table schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaTest2() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.orderTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.orderTableSchema(1L, new TableSchemaVO(), 1);
+  }
+
+  /**
+   * Creates the field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createFieldSchemaTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Creates the field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createFieldSchemaTest2() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Creates the field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createFieldSchemaTest3() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Update field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldSchemaTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any())).thenReturn("");
+    Mockito.doNothing().when(datasetService).updateFieldValueType(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Update field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateFieldSchemaTest2() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(null);
+    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Update field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateFieldSchemaTest3() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+  }
+
+  /**
+   * Delete field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteFieldSchemaTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    Mockito.doNothing().when(datasetService).deleteFieldValues(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.deleteFieldSchema(1L, "");
+  }
+
+  /**
+   * Delete field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteFieldSchemaTest2() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.deleteFieldSchema(1L, "");
+  }
+
+  /**
+   * Delete field schema test 3.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteFieldSchemaTest3() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    dataSchemaControllerImpl.deleteFieldSchema(1L, "");
+  }
+
+  /**
+   * Order field schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void orderFieldSchemaTest1() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.orderFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(true);
+    dataSchemaControllerImpl.orderFieldSchema(1L, new FieldSchemaVO(), 1);
+  }
+
+  /**
+   * Order field schema test 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void orderFieldSchemaTest2() throws EEAException {
+    Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    Mockito.when(dataschemaService.orderFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(false);
+    dataSchemaControllerImpl.orderFieldSchema(1L, new FieldSchemaVO(), 1);
+  }
+
+  /**
+   * Creates the table schema test 1.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createTableSchemaTest1() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    Mockito.doNothing().when(datasetService).saveTablePropagation(Mockito.any(), Mockito.any());
+    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).createTableSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
   /**
-   * Creates the table schema test exception.
+   * Creates the table schema test 2.
    *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void createTableSchemaTestException() throws EEAException {
-    doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
+  public void createTableSchemaTest2() throws EEAException {
+    Mockito.doNothing().when(dataschemaService).createTableSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
-    dataSchemaControllerImpl.createTableSchema("", 1L, new TableSchemaVO());
-  }
-
-  /**
-   * Creates the field schema test exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void createFieldSchemaTestException() throws EEAException {
-    doThrow(EEAException.class).when(dataschemaService).createFieldSchema(Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
-  }
-
-  /**
-   * Creates the field schema success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void createFieldSchemaSuccessTest() throws EEAException {
-    dataSchemaControllerImpl.createFieldSchema("", 1L, new FieldSchemaVO());
-    Mockito.verify(dataschemaService, times(1)).createFieldSchema(Mockito.any(), Mockito.any(),
+    Mockito.doThrow(EEAException.class).when(datasetService).saveTablePropagation(Mockito.any(),
         Mockito.any());
-  }
-
-  /**
-   * Delete field schema test.
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void deleteFieldSchemaTest() {
-    Mockito.when(datasetService.deleteFieldValues(Mockito.any(), Mockito.any())).thenReturn("<id>");
-    Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(false);
-    dataSchemaControllerImpl.deleteFieldSchema(1L, "<id>");
+    dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
   }
 }

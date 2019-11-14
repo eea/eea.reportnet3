@@ -73,11 +73,6 @@ public class EEAEventVO implements Serializable {
     return eventType == that.eventType;
   }
 
-  /**
-   * Hash code.
-   *
-   * @return the int
-   */
   @Override
   public int hashCode() {
     return Objects.hash(data, eventType.ordinal());

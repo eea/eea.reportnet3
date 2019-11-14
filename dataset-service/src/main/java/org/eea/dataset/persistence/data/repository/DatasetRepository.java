@@ -25,7 +25,7 @@ public interface DatasetRepository
    * Find id dataset schema by id.
    *
    * @param datasetId the dataset id
-   * @return the string
+   * @return the datasetSchemaId
    */
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);

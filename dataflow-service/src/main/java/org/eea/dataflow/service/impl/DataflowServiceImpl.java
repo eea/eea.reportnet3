@@ -337,7 +337,7 @@ public class DataflowServiceImpl implements DataflowService {
   public DataFlowVO getReportingDatasetsId(String dataschemaId) throws EEAException {
 
     if (dataschemaId == null) {
-      throw new EEAException(EEAErrorMessage.SCHEMA_ID_NONFOUND);
+      throw new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
 
     DataFlowVO dataflowVO = new DataFlowVO();

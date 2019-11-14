@@ -93,6 +93,4 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
       value = "truncate table field_validation, field_value, record_validation, record_value, table_validation, table_Value, dataset_validation, validation")
   void removeTableData(Long dataSetId);
 
-
-
 }

@@ -132,7 +132,6 @@ public interface UserManagementController {
   @RequestMapping(value = "/add_contributtor_to_resource", method = RequestMethod.PUT)
   void addContributorToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum);
-
   /**
    * Sets the users.
    *
@@ -141,5 +140,4 @@ public interface UserManagementController {
    */
   @RequestMapping(value = "/createUsers", method = RequestMethod.POST)
   void createUsers(@RequestParam("file") MultipartFile file) throws IOException;
-
 }
