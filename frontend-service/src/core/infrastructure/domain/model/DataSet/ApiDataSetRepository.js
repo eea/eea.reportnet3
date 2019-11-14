@@ -132,7 +132,6 @@ const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
 
 const errorStatisticsById = async datasetId => {
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
-  console.log(datasetTablesDTO);
   datasetTablesDTO.tables = datasetTablesDTO.tables.sort(function(a, b) {
     if (a.nameTableSchema < b.nameTableSchema) {
       return -1;
@@ -167,7 +166,6 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.nameTableSchema
     );
   });
-  console.log('dataaaaa', tableStatisticValues);
   //Transpose value matrix to fit Chart data structure
   let transposedValues = transposeMatrix(tableStatisticValues);
 
@@ -264,7 +262,6 @@ function findObjects(obj, targetProp, finalResults) {
       for (let prop in theObject) {
         if (theObject.hasOwnProperty(prop)) {
           if (prop.includes(targetProp) && prop !== 'ruleId') {
-            // console.log(prop, theObject);
             finalResults.push(theObject);
           }
           if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
@@ -288,7 +285,6 @@ function findObjects2(obj, targetProp, finalResults) {
       for (let prop in theObject) {
         if (theObject.hasOwnProperty(prop)) {
           if (prop.includes(targetProp) && prop !== 'ruleId') {
-            // console.log(theObject);
             if (!isUndefined(theObject.thenCondition)) {
               finalResults.push(theObject);
             } else {
@@ -308,8 +304,6 @@ function findObjects2(obj, targetProp, finalResults) {
                 theObject.ruleDataSet.map(function(value, i) {
                   finalResults.push(value);
                 });
-              } else {
-                // console.log(theObject);
               }
             }
           }
