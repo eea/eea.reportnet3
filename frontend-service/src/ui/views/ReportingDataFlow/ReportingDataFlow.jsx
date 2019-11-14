@@ -43,6 +43,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dataflowData, setDataflowData] = useState(undefined);
   const [datasetIdToProps, setDatasetIdToProps] = useState();
+  const [datasetSchemaNames, setDatasetSchemaNames] = useState();
   const [designDatasetSchemas, setDesignDatasetSchemas] = useState([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
@@ -112,6 +113,11 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
           schema.index = idx;
         });
         setDesignDatasetSchemas(dataflow.designDatasets);
+        const datasetSchemaInfo = [];
+        dataflow.designDatasets.map(schema => {
+          datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
+        });
+        setDatasetSchemaNames(datasetSchemaInfo);
       }
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
@@ -214,6 +220,10 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
 
   const onSaveName = async (value, index) => {
     await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
+    const titles = [...datasetSchemaNames];
+    const indexFind = titles.findIndex(e => e.schemaIndex === index);
+    titles[indexFind].schemaName = value;
+    setDatasetSchemaNames(titles);
   };
 
   const showContributorsDialog = () => {
@@ -337,6 +347,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                     <BigButton
                       layout="designDatasetSchema"
                       caption={newDatasetSchema.datasetSchemaName}
+                      datasetSchemaNames={datasetSchemaNames}
                       designDatasetSchemas={designDatasetSchemas}
                       handleRedirect={() => {
                         handleRedirect(

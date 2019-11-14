@@ -1,7 +1,7 @@
 import React, { useRef, useState, useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, uniqBy } from 'lodash';
 
 import styles from './BigButton.module.css';
 
@@ -15,7 +15,7 @@ import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext
 
 export const BigButton = ({
   caption,
-  designDatasetSchemas,
+  datasetSchemaNames,
   handleRedirect,
   index,
   isReleased,
@@ -39,9 +39,9 @@ export const BigButton = ({
   }
 
   const checkDuplicates = (header, idx) => {
-    const inmTitles = [...designDatasetSchemas];
-    const repeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() === header.toLowerCase());
-    return repeat.length > 0 && idx !== repeat[0].index;
+    const inmTitles = [...datasetSchemaNames];
+    const repeat = inmTitles.filter(title => title.schemaName.toLowerCase() === header.toLowerCase());
+    return repeat.length > 0 && idx !== repeat[0].schemaIndex;
   };
 
   const onEditorKeyChange = (event, index) => {
@@ -206,7 +206,7 @@ export const BigButton = ({
             e.preventDefault();
             handleRedirect();
           }}>
-          <FontAwesomeIcon icon={AwesomeIcons('file')} />
+          <FontAwesomeIcon icon={AwesomeIcons('info')} />
         </a>
       </div>
       <p className={styles.caption}>{caption}</p>
