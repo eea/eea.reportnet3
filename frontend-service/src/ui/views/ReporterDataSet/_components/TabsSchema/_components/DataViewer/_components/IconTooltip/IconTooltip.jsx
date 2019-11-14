@@ -14,6 +14,10 @@ export const IconTooltip = ({ levelError, message, style }) => {
   };
 
   switch (levelError) {
+    case 'INFO':
+      buttonProps.icon = 'warning';
+      buttonProps.className = `${styles.buttonCustom} ${styles.info}`;
+      break;
     case 'WARNING':
       buttonProps.icon = 'warning';
       buttonProps.className = `${styles.buttonCustom} ${styles.warning}`;
@@ -23,8 +27,12 @@ export const IconTooltip = ({ levelError, message, style }) => {
       buttonProps.className = `${styles.buttonCustom} ${styles.error}`;
       break;
     case 'BLOCKER':
-      buttonProps.icon = 'banned';
+      buttonProps.icon = 'warning';
       buttonProps.className = `${styles.buttonCustom} ${styles.blocker}`;
+      break;
+    case 'MULTI':
+      buttonProps.icon = 'warning';
+      buttonProps.className = `${styles.buttonCustom} ${styles.multi}`;
       break;
     case '':
       buttonProps.icon = '';
