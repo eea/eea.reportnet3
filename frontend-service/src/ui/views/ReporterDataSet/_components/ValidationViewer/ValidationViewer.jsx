@@ -23,9 +23,9 @@ const ValidationViewer = React.memo(
     datasetId,
     datasetName,
     buttonsList = undefined,
+    levelErrorTypes,
     hasWritePermissions,
-    tableSchemaNames,
-    levelErrorFilters
+    tableSchemaNames
   }) => {
     const contextReporterDataset = useContext(ReporterDatasetContext);
     const resources = useContext(ResourcesContext);
@@ -133,17 +133,17 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadLevelErrorsFilter = () => {
-      // const allLevelErrorsFilterList = [];
-      // levelErrorFilters.map(filter => {
-      //   allLevelErrorsFilterList.push({ label: filter.toString(), key: `${filter.toString()}_Id` });
-      // });
-
-      const allLevelErrorsFilterList = [
-        { label: 'Blocker', key: 'Blocker_Id' },
-        { label: 'Error', key: 'Error_Id' },
-        { label: 'Warning', key: 'Warning_Id' },
-        { label: 'Info', key: 'Info_Id' }
-      ];
+      const allLevelErrorsFilterList = [];
+      levelErrorTypes.map(filter => {
+        allLevelErrorsFilterList.push({
+          label:
+            filter
+              .toString()
+              .charAt(0)
+              .toUpperCase() + filter.slice(1).toLowerCase(),
+          key: `${filter.toString()}_Id`
+        });
+      });
       setAllLevelErrorsFilter(allLevelErrorsFilterList);
     };
 
@@ -332,7 +332,7 @@ const ValidationViewer = React.memo(
 
     const getPaginatorRecordsCount = () => {
       if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return areActiveFilters ? filteredCountSameValue() : totalCount();
+        return areActiveFilters && totalFilteredRecords !== 0 ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();
       }

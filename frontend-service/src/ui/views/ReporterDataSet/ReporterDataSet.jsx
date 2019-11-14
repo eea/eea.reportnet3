@@ -61,12 +61,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
-
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
+  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
-  const [levelErrorFilters, setLevelErrorFilters] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -213,11 +212,11 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
       checkIsWebFormMMR(datasetStatistics.datasetSchemaName);
-      // setLevelErrorFilters(dataset????);
       const tableSchemaNamesList = [];
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
@@ -293,6 +292,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           tableSchemaColumns={tableSchemaColumns}
           isWebFormMMR={isWebFormMMR}
           hasWritePermissions={hasWritePermissions}
+          levelErrorTypes={levelErrorTypes}
         />
       );
     }
@@ -414,7 +414,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         onHide={() => onSetVisible(setDashDialogVisible, false)}
         style={{ width: '70vw' }}
         visible={dashDialogVisible}>
-        <Dashboard refresh={dashDialogVisible} />
+        <Dashboard refresh={dashDialogVisible} levelErrorTypes={levelErrorTypes} />
       </Dialog>
       <ReporterDatasetContext.Provider
         value={{
@@ -447,7 +447,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             visible={validationsVisible}
             hasWritePermissions={hasWritePermissions}
             tableSchemaNames={tableSchemaNames}
-            // levelErrorFilters={levelErrorFilters}
+            levelErrorTypes={levelErrorTypes}
           />
         </Dialog>
       </ReporterDatasetContext.Provider>
