@@ -2,7 +2,6 @@ package org.eea.dataset.io.kafka.commands;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,28 +113,6 @@ public class CreateConnectionCommandTest {
 
     createConnectionCommand.execute(eeaEventVO);
     Mockito.verifyNoMoreInteractions(datasetService);
-
-  }
-
-  /**
-   * Test execute create connection 4.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testExecuteCreateConnection4() throws EEAException {
-
-    eeaEventVO = new EEAEventVO();
-    eeaEventVO.setEventType(EventType.CONNECTION_CREATED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", "dataset_1");
-    data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
-    eeaEventVO.setData(data);
-
-    doThrow(EEAException.class).when(datasetService).saveStatistics(Mockito.any());
-
-    createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).insertSchema(Mockito.any(), Mockito.any());
 
   }
 
