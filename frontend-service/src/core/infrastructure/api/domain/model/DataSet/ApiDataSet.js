@@ -2,7 +2,6 @@ import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { async } from 'q';
 
 export const apiDataset = {
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
@@ -199,6 +198,7 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+    console.log(response.data);
     return response.data;
   },
   exportDataById: async (datasetId, fileType) => {
@@ -296,6 +296,9 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
+    console.log(response.data);
+
     return response.data;
   },
   updateFieldById: async (datasetId, datasetTableRecords) => {

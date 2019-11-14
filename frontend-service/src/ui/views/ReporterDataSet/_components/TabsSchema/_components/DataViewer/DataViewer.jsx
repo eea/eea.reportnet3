@@ -1209,13 +1209,11 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => {
       if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
-        if (totalFilteredRecords == totalRecords) {
-          return !isFilterValidationsActive && totalRecords !== 0 ? totalCount() : filteredCountSameValue();
+        if (totalFilteredRecords == 0) {
+          return totalCount();
         } else {
-          return totalFilteredRecords == totalRecords ? filteredCountSameValue() : filteredCount();
+          return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
         }
-      } else {
-        return filteredCount();
       }
     };
 
