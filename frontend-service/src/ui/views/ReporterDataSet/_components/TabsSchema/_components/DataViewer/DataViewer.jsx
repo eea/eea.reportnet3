@@ -40,7 +40,7 @@ const DataViewer = withRouter(
     hasWritePermissions,
     isWebFormMMR,
     levelErrorTypes,
-    allLevelErrors = levelErrorTypes.concat(correctLevelError),
+    allLevelErrors = correctLevelError.concat(levelErrorTypes),
     recordPositionId,
     selectedRecordErrorId,
     tableHasErrors,
@@ -886,7 +886,13 @@ const DataViewer = withRouter(
     const getLevelError = validations => {
       let levelError = '';
       let lvlFlag = 0;
-      if (validations.length > 1) {
+      let errors = [];
+      validations.map(validation => {
+        errors.push(validation.levelError);
+      });
+      let differentErrors = [...new Set(errors)];
+
+      if (differentErrors.length > 1) {
         return 'MULTI';
       } else {
         validations.forEach(validation => {

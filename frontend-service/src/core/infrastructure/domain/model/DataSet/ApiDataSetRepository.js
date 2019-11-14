@@ -132,6 +132,7 @@ const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
 
 const errorStatisticsById = async datasetId => {
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
+  console.log(datasetTablesDTO);
   datasetTablesDTO.tables = datasetTablesDTO.tables.sort(function(a, b) {
     if (a.nameTableSchema < b.nameTableSchema) {
       return -1;
@@ -166,7 +167,7 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.nameTableSchema
     );
   });
-
+  console.log('dataaaaa', tableStatisticValues);
   //Transpose value matrix to fit Chart data structure
   let transposedValues = transposeMatrix(tableStatisticValues);
 
@@ -206,6 +207,49 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
     }
   });
   let levelErrors = [...new Set(levelErrorsRepeated)];
+  levelErrors = orderLevelErrors(levelErrors);
+  return levelErrors;
+};
+
+const orderLevelErrors = levelErrors => {
+  const INFO = 1;
+  const WARNING = 2;
+  const ERROR = 3;
+  const BLOCKER = 4;
+
+  levelErrors.sort((a, b) => {
+    let level1 = 0;
+    let level2 = 0;
+    switch (a) {
+      case 'INFO':
+        level1 = INFO;
+        break;
+      case 'WARNING':
+        level1 = WARNING;
+        break;
+      case 'ERROR':
+        level1 = ERROR;
+        break;
+      case 'BLOCKER':
+        level1 = BLOCKER;
+        break;
+    }
+    switch (b) {
+      case 'INFO':
+        level2 = INFO;
+        break;
+      case 'WARNING':
+        level2 = WARNING;
+        break;
+      case 'ERROR':
+        level2 = ERROR;
+        break;
+      case 'BLOCKER':
+        level2 = BLOCKER;
+        break;
+    }
+    return level1 < level2 ? -1 : level1 > level2 ? 1 : 0;
+  });
   return levelErrors;
 };
 

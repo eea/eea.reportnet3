@@ -30,7 +30,7 @@ const Dashboard = withRouter(
       },
       correctLevelError = ['CORRECT'],
       levelErrorTypes,
-      allLevelErrorTypes = levelErrorTypes.concat(correctLevelError)
+      allLevelErrorTypes = correctLevelError.concat(levelErrorTypes)
     }) => {
       const [dashboardColors, setDashboardColors] = useState();
       const [dashboardData, setDashboardData] = useState({});
