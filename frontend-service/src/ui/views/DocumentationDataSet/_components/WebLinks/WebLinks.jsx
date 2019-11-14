@@ -212,6 +212,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         style={{ width: '50%', height: '80%' }}
         visible={isAddEditDialogVisible}>
         <Formik
+          enableReinitialize
           ref={form}
           initialValues={weblinkItem}
           validationSchema={addWeblinkSchema}
@@ -220,7 +221,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
           }}>
           {({ isSubmitting, errors, touched, values }) => (
             <Form>
-              {console.log('values', values)}
               <fieldset>
                 <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}>
                   <Field
