@@ -499,15 +499,13 @@ public class DatasetServiceImpl implements DatasetService {
           pageable, newFields);
 
     }
+
     // Table with out values
     if (null == result.getRecords() || result.getRecords().isEmpty()) {
-      result.setTotalRecords(totalRecords);
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
     } else {
-
-      result.setTotalRecords(totalRecords);
       List<RecordVO> recordVOs = result.getRecords();
 
       LOG.info(
@@ -547,7 +545,7 @@ public class DatasetServiceImpl implements DatasetService {
       });
 
     }
-
+    result.setTotalRecords(totalRecords);
     return result;
   }
 
