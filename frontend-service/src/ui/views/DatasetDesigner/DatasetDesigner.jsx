@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { isUndefined } from 'lodash';
@@ -12,13 +12,17 @@ import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
+import { Snapshots } from 'ui/views/_components/Snapshots';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import { useDatasetDesigner } from 'ui/views/_components/Snapshots/_hooks/useDatasetDesigner';
 
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
+import { Title } from 'ui/views/_components/Title';
+
 import { DatasetService } from 'core/services/DataSet';
 import { UserContext } from 'ui/views/_components/_context/UserContext';
 import { UserService } from 'core/services/User';
@@ -29,16 +33,38 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   } = match;
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [datasetSchemaId, setDatasetSchemaId] = useState('');
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
   let growlRef = useRef();
+
+  const {
+    isLoadingSnapshotListData,
+    isSnapshotsBarVisible,
+    setIsSnapshotsBarVisible,
+    isSnapshotDialogVisible,
+    setIsSnapshotDialogVisible,
+    snapshotDispatch,
+    snapshotListData,
+    snapshotState
+  } = useDatasetDesigner(datasetId, datasetSchemaId, growlRef);
+
   const home = {
     icon: config.icons['home'],
     command: () => history.push(getUrl(routes.DATAFLOWS))
   };
+
+  useEffect(() => {
+    const getDatasetSchemaId = async () => {
+      const dataset = await DatasetService.schemaById(dataflowId);
+
+      setDatasetSchemaId(dataset.datasetSchemaId);
+    };
+    getDatasetSchemaId();
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(user.contextRoles)) {
@@ -92,7 +118,13 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <>
+    <SnapshotContext.Provider
+      value={{
+        snapshotState: snapshotState,
+        snapshotDispatch: snapshotDispatch,
+        isSnapshotsBarVisible: isSnapshotsBarVisible,
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+      }}>
       <Title title={`${resources.messages['titleDataset']}${datasetSchemaName}`} icon="pencilRuler" />
       <div className={styles.ButtonsBar}>
         <Toolbar>
@@ -123,15 +155,21 @@ export const DatasetDesigner = withRouter(({ match, history }) => {
             />
             <Button
               className={`p-button-rounded p-button-secondary`}
-              disabled={true}
+              disabled={hasWritePermissions}
               icon={'camera'}
               label={resources.messages['snapshots']}
-              onClick={() => null}
+              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
           </div>
         </Toolbar>
       </div>
-      <TabsDesigner />
-    </>
+      <TabsDesigner editable={true} />
+      <Snapshots
+        isLoadingSnapshotListData={isLoadingSnapshotListData}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
+        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        snapshotListData={snapshotListData}
+      />
+    </SnapshotContext.Provider>
   );
 });

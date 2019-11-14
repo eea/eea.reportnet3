@@ -84,20 +84,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   @Value("${spring.jpa.properties.hibernate.order_inserts}")
   private String orderInserts;
 
-  /**
-   * The max pool size.
-   */
-  @Value("${spring.datasource.hikari.maximum-pool-size}")
-  private int maxPoolSize;
-
-  @Value("${spring.datasource.hikari.minimumIdle}")
-  private Integer minimumIdle;
-
-  @Value("${spring.datasource.hikari.idleTimeout}")
-  private Integer iddleTimeout;
-
-  @Value("${spring.datasource.hikari.maxLifetime}")
-  private Integer maxLifetime;
 
   /**
    * The record store controller zull.

@@ -20,8 +20,8 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
 import { ReporterDatasetContext } from './_components/_context/ReporterDataSetContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
-import { Snapshots } from './_components/Snapshots/index';
-
+import { Snapshots } from 'ui/views/_components/Snapshots';
+import { SnapshotContext } from 'ui/views/_components/_context/SnapshotContext';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from './_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -29,6 +29,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from './_components/ValidationViewer';
 import { WebFormData } from './_components/WebFormData/WebFormData';
 
+import { DataflowService } from 'core/services/DataFlow';
 import { DatasetService } from 'core/services/DataSet';
 
 import { UserContext } from 'ui/views/_components/_context/UserContext';
@@ -36,30 +37,35 @@ import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { routes } from 'ui/routes';
 
+import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useReporterDataset';
+
 export const ReporterDataset = withRouter(({ match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
   const resources = useContext(ResourcesContext);
   const user = useContext(UserContext);
-  const [activeIndex, setActiveIndex] = useState();
   const [breadCrumbItems, setBreadCrumbItems] = useState([]);
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [dataflowName, setDataflowName] = useState('');
   const [datasetTitle, setDatasetTitle] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
+  const [dataViewerOptions, setDataViewerOptions] = useState({
+    recordPositionId: -1,
+    selectedRecordErrorId: -1,
+    activeIndex: null
+  });
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
-  const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
+
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
-  const [recordPositionId, setRecordPositionId] = useState(-1);
-  const [selectedRecordErrorId, setSelectedRecordErrorId] = useState(-1);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
   const [tableSchemaNames, setTableSchemaNames] = useState([]);
@@ -131,6 +137,30 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     }
   }, [exportDatasetData]);
 
+  const {
+    isLoadingSnapshotListData,
+    isSnapshotsBarVisible,
+    setIsSnapshotsBarVisible,
+    isSnapshotDialogVisible,
+    setIsSnapshotDialogVisible,
+    snapshotDispatch,
+    snapshotListData,
+    snapshotState
+  } = useReporterDataset(datasetId, dataflowId, growlRef);
+
+  useEffect(() => {
+    try {
+      getDataflowName();
+    } catch (error) {
+      console.error(error.response);
+    }
+  }, []);
+
+  const getDataflowName = async () => {
+    const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
+    setDataflowName(dataflowData.name);
+  };
+
   const createFileName = (fileName, fileType) => {
     return `${fileName}.${fileType}`;
   };
@@ -181,7 +211,7 @@ export const ReporterDataset = withRouter(({ match, history }) => {
 
   const onLoadDatasetSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(dataflowId);
+      const datasetSchema = await DatasetService.schemaById(datasetId);
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId);
       setTableSchemaId(datasetSchema.tables[0].tableSchemaId);
       setDatasetTitle(datasetStatistics.datasetSchemaName);
@@ -229,7 +259,8 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   };
 
   const onTabChange = tableSchemaId => {
-    setActiveIndex(tableSchemaId.index);
+    setDataViewerOptions({ ...dataViewerOptions, activeIndex: tableSchemaId.index });
+    // setActiveIndex(tableSchemaId.index);
   };
 
   const showWebFormInputSwitch = () => {
@@ -252,10 +283,10 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     } else {
       return (
         <TabsSchema
-          activeIndex={activeIndex}
+          activeIndex={dataViewerOptions.activeIndex}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={recordPositionId}
-          selectedRecordErrorId={selectedRecordErrorId}
+          recordPositionId={dataViewerOptions.recordPositionId}
+          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
           tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
           isWebFormMMR={isWebFormMMR}
@@ -290,8 +321,20 @@ export const ReporterDataset = withRouter(({ match, history }) => {
   }
 
   return layout(
-    <>
-      <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="dataset" />
+    <SnapshotContext.Provider
+      value={{
+        snapshotState: snapshotState,
+        snapshotDispatch: snapshotDispatch,
+        isSnapshotsBarVisible: isSnapshotsBarVisible,
+
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible
+      }}>
+      {/* <Title title={`${resources.messages['titleDataset']}${datasetTitle}`} icon="archive" /> */}
+      <Title
+        title={`${resources.messages['dataflow']}: ${dataflowName} - 
+        ${resources.messages['titleDataset']}${datasetTitle}`}
+        icon="dataset"
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -363,8 +406,6 @@ export const ReporterDataset = withRouter(({ match, history }) => {
           </div>
         </Toolbar>
       </div>
-      {showWebFormInputSwitch()}
-      {isWebForm()}
       <Dialog
         dismissableMask={true}
         header={resources.messages['titleDashboard']}
@@ -381,19 +422,23 @@ export const ReporterDataset = withRouter(({ match, history }) => {
             onSetVisible(setValidationsVisible, false);
           },
           onSelectValidation: (tableSchemaId, posIdRecord, selectedRecordErrorId) => {
-            setActiveIndex(tableSchemaId);
-            setRecordPositionId(posIdRecord);
-            setSelectedRecordErrorId(selectedRecordErrorId);
+            setDataViewerOptions({
+              recordPositionId: posIdRecord,
+              selectedRecordErrorId: selectedRecordErrorId,
+              activeIndex: tableSchemaId
+            });
           }
         }}>
+        {showWebFormInputSwitch()}
+        {isWebForm()}
         <Dialog
+          className={styles.paginatorValidationViewer}
           dismissableMask={true}
           header={resources.messages['titleValidations']}
           maximizable
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '80%' }}
-          visible={validationsVisible}
-          className={styles.paginatorValidationViewer}>
+          visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
             datasetName={datasetTitle}
@@ -424,12 +469,12 @@ export const ReporterDataset = withRouter(({ match, history }) => {
         {resources.messages['validateDatasetConfirm']}
       </ConfirmDialog>
       <Snapshots
-        datasetId={datasetId}
-        dataflowId={dataflowId}
-        growlRef={growlRef}
-        isSnapshotsBarVisible={isSnapshotsBarVisible}
-        setIsSnapshotsBarVisible={setIsSnapshotsBarVisible}
+        snapshotListData={snapshotListData}
+        isLoadingSnapshotListData={isLoadingSnapshotListData}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
+        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        isReleaseVisible={true}
       />
-    </>
+    </SnapshotContext.Provider>
   );
 });

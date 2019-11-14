@@ -13,7 +13,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/DataSet';
 
-export const TabsDesigner = withRouter(({ match, history }) => {
+export const TabsDesigner = withRouter(({ editable = false, match, history }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -54,12 +54,12 @@ export const TabsDesigner = withRouter(({ match, history }) => {
     setIsEditing(editing);
   };
 
-  const onLoadSchema = async dataflowId => {
+  const onLoadSchema = async datasetId => {
     try {
-      const datasetSchemaDTO = await DatasetService.schemaById(dataflowId);
+      const datasetSchemaDTO = await DatasetService.schemaById(datasetId);
       const inmDatasetSchema = { ...datasetSchemaDTO };
       inmDatasetSchema.tables.forEach((table, idx) => {
-        table.editable = true;
+        table.editable = editable;
         table.addTab = false;
         table.newTab = false;
         table.index = idx;
@@ -254,7 +254,9 @@ export const TabsDesigner = withRouter(({ match, history }) => {
                     <div>
                       <h3>{`${resources.messages['datasetDesignerNoFields']} ${tab.header}`}</h3>
                     </div>
-                  ) : null}
+                  ) : (
+                    <h3>{`${resources.messages['datasetDesignerAddTable']}`}</h3>
+                  )}
                 </TabPanel>
               );
             })

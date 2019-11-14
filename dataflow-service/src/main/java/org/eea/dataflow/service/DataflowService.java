@@ -112,15 +112,14 @@ public interface DataflowService {
    */
   void createDataFlow(DataFlowVO dataflowVO);
 
-
   /**
-   * Gets the datasets id.
+   * Gets the reporting datasets id.
    *
-   * @param idDataflow the id dataflow
-   * @return the datasets id
+   * @param dataschemaId the dataschema id
+   * @return the reporting datasets id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getReportingDatasetsId(Long idDataflow) throws EEAException;
+  DataFlowVO getReportingDatasetsId(String dataschemaId) throws EEAException;
 
 
   /**
@@ -131,5 +130,6 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   DataFlowVO getMetabaseById(Long id) throws EEAException;
+
 
 }

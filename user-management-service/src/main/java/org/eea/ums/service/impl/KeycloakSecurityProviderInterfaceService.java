@@ -55,7 +55,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public TokenVO doLogin(String username, String password, Object... extraParams) {
-    TokenInfo tokenInfo = keycloakConnectorService.generateToken(username, password);
+    TokenInfo tokenInfo = null;
+    Boolean isAdminToken = null != extraParams && extraParams.length > 0 && null != extraParams[0]
+        && extraParams[0] instanceof Boolean ? (Boolean) extraParams[0] : Boolean.FALSE;
+    if (isAdminToken) {
+      tokenInfo = keycloakConnectorService.generateAdminToken(username, password);
+    } else {
+      tokenInfo = keycloakConnectorService.generateToken(username, password);
+    }
+
     TokenVO tokenVO = null;
     if (null != tokenInfo) {
       tokenVO = mapTokenToVO(tokenInfo);

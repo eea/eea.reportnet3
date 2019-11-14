@@ -106,8 +106,6 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
-        setFilterLevelError(['ERROR', 'WARNING', 'CORRECT']);
-
         setValidationDropdownFilter([
           { label: resources.messages['error'], key: 'ERROR' },
           { label: resources.messages['warning'], key: 'WARNING' },
@@ -184,7 +182,11 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, [
+        'ERROR',
+        'WARNING',
+        'CORRECT'
+      ]);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -216,7 +218,14 @@ const DataViewer = withRouter(
       );
 
       let validationCol = (
-        <Column body={validationsTemplate} field="validations" header="" key="recordValidation" sortable={false} />
+        <Column
+          className={styles.validationCol}
+          body={validationsTemplate}
+          field="validations"
+          header=""
+          key="recordValidation"
+          sortable={false}
+        />
       );
 
       if (!isWebFormMMR) {
@@ -297,7 +306,7 @@ const DataViewer = withRouter(
         setFetchedData([]);
         setTotalRecords(0);
         setTotalFilteredRecords(0);
-        //  snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
       }
     };
 
@@ -305,7 +314,7 @@ const DataViewer = withRouter(
       setDeleteDialogVisible(false);
       const recordDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId);
       if (recordDeleted) {
-        //  snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+        snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         setIsRecordDeleted(true);
       }
     };
@@ -356,7 +365,7 @@ const DataViewer = withRouter(
           if (!fieldUpdated) {
             console.error('Error!');
           }
-          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         }
       }
     };
@@ -470,7 +479,7 @@ const DataViewer = withRouter(
             life: '3000'
           });
           onRefresh();
-          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } else {
           growlRef.current.show({
             severity: 'error',
@@ -515,7 +524,7 @@ const DataViewer = withRouter(
         try {
           await DatasetService.addRecordsById(datasetId, tableId, [record]);
           setAddDialogVisible(false);
-          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
           onRefresh();
         } catch (error) {
           console.error('DataViewer error: ', error);
@@ -532,7 +541,7 @@ const DataViewer = withRouter(
           await DatasetService.updateRecordsById(datasetId, record);
           onRefresh();
           setEditDialogVisible(false);
-          // snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
+          snapshotContext.snapshotDispatch({ type: 'clear_restored', payload: {} });
         } catch (error) {
           console.error('DataViewer error: ', error);
           const errorResponse = error.response;
@@ -1009,7 +1018,8 @@ const DataViewer = withRouter(
           validations.push(
             DatasetService.createValidation('RECORD', 0, 'WARNING', resources.messages['recordWarnings'])
           );
-        } else {
+        }
+        if (filteredFieldValidationsWithError.length > 0) {
           validations.push(DatasetService.createValidation('RECORD', 0, 'ERROR', resources.messages['recordErrors']));
         }
       }
@@ -1027,6 +1037,7 @@ const DataViewer = withRouter(
           ? (messageWarnings += '- ' + capitalizeFirstLetterAndToLowerCase(validation.message) + '\n')
           : ''
       );
+
       return errorValidations.length > 0 && warningValidations.length > 0 ? (
         <div className={styles.iconTooltipWrapper}>
           <IconTooltip levelError="WARNING" message={messageWarnings} style={{ width: '1.5em' }} />
@@ -1099,7 +1110,7 @@ const DataViewer = withRouter(
     };
 
     return (
-      <>
+      <SnapshotContext.Provider>
         <Toolbar className={styles.dataViewerToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -1274,7 +1285,7 @@ const DataViewer = withRouter(
         <Dialog
           className={styles.Dialog}
           dismissableMask={false}
-          header={resources.messages['uploadDataset']}
+          header={`${resources.messages['uploadDataset']}${tableName}`}
           onHide={onHide}
           visible={importDialogVisible}>
           <CustomFileUpload
@@ -1364,7 +1375,7 @@ const DataViewer = withRouter(
           visible={editDialogVisible}>
           <div className="p-grid p-fluid">{editRecordForm}</div>
         </Dialog>
-      </>
+      </SnapshotContext.Provider>
     );
   }
 );

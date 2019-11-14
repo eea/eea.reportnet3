@@ -46,7 +46,7 @@ export const TabView = ({
   const classNamed = classNames('p-tabview p-component p-tabview-top', className);
   useEffect(() => {
     setTimeout(() => {
-      if (ulTabsRef.current.clientWidth >= divTabsRef.current.clientWidth) {
+      if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
         setIsNavigationHidden(false);
       }
     }, 100);
@@ -164,41 +164,38 @@ export const TabView = ({
   const renderNavigator = () => {
     const headers = renderTabHeaders();
     return (
-      <div className={styles.scrollTab} ref={divTabsRef}>
+      <div className={styles.headersWrapper}>
         <Icon
-          className={`${styles.stepInitIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'stepBackward'}
           onClick={() => {
             scrollTo(0, 0);
           }}
         />
         <Icon
-          className={`${styles.stepBackwardIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'caretLeft'}
           onClick={e => {
             scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
-        <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
-          {headers}
-        </ul>
+        <div className={styles.scrollTab} ref={divTabsRef}>
+          {/* <div className={styles.iconsWrapper}> */}
+
+          {/* </div> */}
+          <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
+            {headers}
+          </ul>
+        </div>
         <Icon
-          className={`${styles.stepForwardIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'caretRight'}
           onClick={() => {
             scrollTo(divTabsRef.current.scrollLeft + divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
         <Icon
-          className={`${styles.stepEndIcon} ${styles.navigationTabIcons} ${
-            isNavigationHidden ? styles.iconHidden : null
-          }`}
+          className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
           icon={'stepForward'}
           onClick={() => {
             scrollTo(ulTabsRef.current.clientWidth + 100, 0);
@@ -238,7 +235,7 @@ export const TabView = ({
     divTabsRef.current.scrollTo(xCoordinate, yCoordinate);
     //Await for scroll
     setTimeout(() => {
-      if (ulTabsRef.current.clientWidth >= divTabsRef.current.clientWidth) {
+      if (ulTabsRef.current.clientWidth > divTabsRef.current.clientWidth) {
         if (isNavigationHidden) {
           setIsNavigationHidden(false);
         }

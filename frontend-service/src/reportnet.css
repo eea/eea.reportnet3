@@ -257,7 +257,7 @@ body {
 
 @media (min-width: 1140px) {
   .rep-container {
-    max-width: 90%;
+    max-width: 95%;
     /* width: 1140px; */
   }
 }
@@ -1771,11 +1771,11 @@ body {
 /*spinner*/
 
 .p-progress-spinner {
-  left: 50%;
-  transform: translate(-50%);
-  top: 30vh;
-  width: 75px;
-  height: 75px;
+  --spinner-width: 5rem;
+  top: calc(30vh - calc(var(--spinner-width) / 2));
+  left: calc(50% - calc(var(--spinner-width) / 2));
+  width: var(--spinner-width);
+  height: var(--spinner-width);
 }
 
 /* forms */

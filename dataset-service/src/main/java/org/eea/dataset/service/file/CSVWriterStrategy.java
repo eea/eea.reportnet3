@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -72,12 +73,14 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @return the data set VO
+   * @throws EEAException
    */
   @Override
-  public byte[] writeFile(final Long dataflowId, final Long datasetId, final String idTableSchema) {
+  public byte[] writeFile(final Long dataflowId, final Long datasetId, final String idTableSchema)
+      throws EEAException {
     LOG.info("starting csv file writter");
 
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
 
     // Init the writer
     StringWriter writer = new StringWriter();

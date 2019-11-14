@@ -1,24 +1,33 @@
 import React, { useContext, useRef } from 'react';
 
 import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isNull } from 'lodash';
 
 import styles from './NewDatasetSchemaForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
+import { LoadingContext } from 'ui/views/_components/_context/LoadingContext';
 import { ResourcesContext } from 'ui/views/_components/_context/ResourcesContext';
 
 import { DataflowService } from 'core/services/DataFlow';
 
 export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpdateData, setNewDatasetDialog }) => {
-  const form = useRef(null);
+  const { showLoading, hideLoading } = useContext(LoadingContext);
   const resources = useContext(ResourcesContext);
+
+  const form = useRef(null);
 
   const initialValues = { datasetSchemaName: '' };
   const newDatasetValidationSchema = Yup.object().shape({
-    datasetSchemaName: Yup.string().required()
+    datasetSchemaName: Yup.string()
+      .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
+      .required(resources.messages['emptyDatasetSchema'])
   });
+
+  if (!isNull(form.current)) {
+    document.getElementById('dataSchemaInput').focus();
+  }
 
   if (!isFormReset && !isNull(form.current)) {
     form.current.resetForm();
@@ -30,22 +39,30 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
       validationSchema={newDatasetValidationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
+        showLoading();
         const response = await DataflowService.newEmptyDatasetSchema(dataflowId, values.datasetSchemaName);
         onCreate();
         if (response === 200) {
           onCreate();
           onUpdateData();
           setSubmitting(false);
+          hideLoading();
         } else {
           setSubmitting(false);
         }
       }}>
-      {({ errors, touched }) => (
+      {({ errors, isSubmitting, touched }) => (
         <Form>
           <fieldset>
             <div
               className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
-              <Field name="datasetSchemaName" type="text" placeholder={resources.messages['createdatasetSchemaName']} />
+              <Field
+                id="dataSchemaInput"
+                name="datasetSchemaName"
+                placeholder={resources.messages['createdatasetSchemaName']}
+                type="text"
+              />
+              <ErrorMessage className="error" name="datasetSchemaName" component="div" />
             </div>
           </fieldset>
           <fieldset>
@@ -58,6 +75,7 @@ export const NewDatasetSchemaForm = ({ dataflowId, isFormReset, onCreate, onUpda
                       : styles.disabledButton
                     : styles.disabledButton
                 }
+                disabled={isSubmitting}
                 label={resources.messages['create']}
                 icon="add"
                 type="submit"

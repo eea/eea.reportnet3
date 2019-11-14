@@ -11,7 +11,8 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <properties>
-    <sonar.moduleKey>org.eea:reportnet:user-management-service:${sonar.jenkins.branch}</sonar.moduleKey>
+    <sonar.moduleKey>org.eea:reportnet:user-management-service:${sonar.jenkins.branch}
+    </sonar.moduleKey>
   </properties>
 
   <groupId>org.eea</groupId>
@@ -22,10 +23,22 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    
+      <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>3.17</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>3.17</version>
     </dependency>
   </dependencies>
   <distributionManagement>

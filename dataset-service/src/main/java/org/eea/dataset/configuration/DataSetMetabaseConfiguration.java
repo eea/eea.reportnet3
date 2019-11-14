@@ -88,7 +88,6 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    * @return the local container entity manager factory bean
    */
   @Bean
-  @Autowired
   @Qualifier("metadataSetsEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean metadataSetsEntityManagerFactory() {
     LocalContainerEntityManagerFactoryBean metadataSetsEM =

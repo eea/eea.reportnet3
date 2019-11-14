@@ -80,4 +80,15 @@ public interface DatasetMetabaseController {
   @PutMapping(value = "/updateDatasetName")
   void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName);
+
+
+  /**
+   * Gets the reportings id by schema id.
+   *
+   * @param schemaId the schema id
+   * @return the reportings id by schema id
+   */
+  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
+
 }

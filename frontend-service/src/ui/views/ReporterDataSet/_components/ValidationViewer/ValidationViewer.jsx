@@ -32,7 +32,7 @@ const ValidationViewer = React.memo(
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
-    const [isLoading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [numberRows, setNumberRows] = useState(10);
     const [originsFilter, setOriginsFilter] = useState([]);
     const [sortField, setSortField] = useState('');
@@ -101,7 +101,7 @@ const ValidationViewer = React.memo(
       typeEntitiesFilter,
       originsFilter
     ) => {
-      setLoading(true);
+      setIsLoading(true);
       const datasetErrors = await DatasetService.errorsById(
         datasetId,
         Math.floor(firstRow / numberRows),
@@ -115,7 +115,7 @@ const ValidationViewer = React.memo(
       setTotalRecords(datasetErrors.totalErrors);
       setTotalFilteredRecords(datasetErrors.totalFilteredErrors);
       setFetchedData(datasetErrors.errors);
-      setLoading(false);
+      setIsLoading(false);
     };
 
     const onLoadFilters = async () => {
@@ -199,7 +199,9 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
+      setIsLoading(true);
       const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
+      setIsLoading(false);
       return errorPosition;
     };
 
@@ -289,7 +291,8 @@ const ValidationViewer = React.memo(
     const filteredCount = () => {
       return (
         <span>
-          {resources.messages['filtered']}{' '}
+          {resources.messages['filtered']}
+          {':'}{' '}
           {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
           {' | '}
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
@@ -298,9 +301,20 @@ const ValidationViewer = React.memo(
       );
     };
 
+    const filteredCountSameValue = () => {
+      return (
+        <span>
+          {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
+          {resources.messages['records'].toLowerCase()} {'('}
+          {resources.messages['filtered'].toLowerCase()}
+          {')'}
+        </span>
+      );
+    };
+
     const getPaginatorRecordsCount = () => {
       if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords) || totalFilteredRecords == totalRecords) {
-        return totalCount();
+        return areActiveFilters ? filteredCountSameValue() : totalCount();
       } else {
         return filteredCount();
       }

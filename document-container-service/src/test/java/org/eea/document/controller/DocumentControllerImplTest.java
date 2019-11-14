@@ -255,4 +255,117 @@ public class DocumentControllerImplTest {
     Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
   }
+
+
+  @Test
+  public void testUploadSnapshotSuccess() throws EEAException, IOException {
+    doNothing().when(documentService).uploadSchemaSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), 1L, "desc.json");
+    Mockito.verify(documentService, times(1)).uploadSchemaSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadSnapshotException() throws EEAException {
+
+    documentController.uploadSchemaSnapshotDocument(null, 1L, "desc");
+
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadSnapshotException2() throws EEAException, IOException {
+
+    documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), null, "desc");
+  }
+
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadSnapshotException3() throws EEAException, IOException {
+    doThrow(new EEAException()).when(documentService).uploadSchemaSnapshot(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), 1L, "desc");
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadSnapshotException4() throws EEAException, IOException {
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
+        .uploadSchemaSnapshot(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.uploadSchemaSnapshotDocument(fileMock.getBytes(), 1L, "desc");
+  }
+
+
+  @Test
+  public void testGetSnapshotSuccess() throws EEAException, IOException {
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+
+    when(documentService.getSnapshotDocument(Mockito.any(), Mockito.any())).thenReturn(content);
+    documentController.getSnapshotDocument(1L, "test");
+    Mockito.verify(documentService, times(1)).getSnapshotDocument(Mockito.any(), Mockito.any());
+  }
+
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetSnapshotExceptionNull() throws EEAException {
+
+    documentController.getSnapshotDocument(null, "test");
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetSnapshotException() throws EEAException {
+
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
+        .getSnapshotDocument(Mockito.any(), Mockito.any());
+    documentController.getSnapshotDocument(1L, "test");
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetSnapshotException2() throws EEAException {
+
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
+        .getSnapshotDocument(Mockito.any(), Mockito.any());
+    documentController.getSnapshotDocument(1L, "test");
+  }
+
+
+  @Test
+  public void testDeleteSnapshotSuccess() throws Exception {
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    doNothing().when(documentService).deleteSnapshotDocument(Mockito.any(), Mockito.any());
+    documentController.deleteSnapshotSchemaDocument(1L, "test");
+    Mockito.verify(documentService, times(1)).deleteSnapshotDocument(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteSnapshotExceptionNull() throws Exception {
+
+    documentController.deleteSnapshotSchemaDocument(null, "test");
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void tetsDeleteSnapshotException() throws Exception {
+
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
+        .deleteSnapshotDocument(Mockito.any(), Mockito.any());
+    documentController.deleteSnapshotSchemaDocument(1L, "test");
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteSnapshotException2() throws Exception {
+
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
+        .deleteSnapshotDocument(Mockito.any(), Mockito.any());
+    documentController.deleteSnapshotSchemaDocument(1L, "test");
+  }
+
 }

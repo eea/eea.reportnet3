@@ -3,6 +3,8 @@ package org.eea.ums.service.keycloak.service;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.model.TokenInfo;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 
 /**
  * The interface Keycloak connector service.
@@ -28,6 +30,17 @@ public interface KeycloakConnectorService {
    * @return the string
    */
   TokenInfo generateToken(String username, String password);
+
+
+  /**
+   * Generate admin token token info.
+   *
+   * @param username the username
+   * @param password the password
+   *
+   * @return the token info
+   */
+  TokenInfo generateAdminToken(String username, String password);
 
   /**
    * Gets groups by user.
@@ -101,4 +114,35 @@ public interface KeycloakConnectorService {
    * @param groupId the group resourceId
    */
   void addUserToGroup(String userId, String groupId);
+
+  /**
+   * Adds the user.
+   *
+   * @param body the body
+   */
+  void addUser(String body);
+
+  /**
+   * Gets the users.
+   *
+   * @return the users
+   */
+  UserRepresentation[] getUsers();
+
+  /**
+   * Gets the role.
+   *
+   * @param userId the user id
+   *
+   * @return the role
+   */
+  RoleRepresentation[] getRoles();
+
+  /**
+   * Adds the role.
+   *
+   * @param body the body
+   * @param userId the user id
+   */
+  void addRole(String body, String userId);
 }

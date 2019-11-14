@@ -32,14 +32,17 @@ export const BigButton = ({
   const onEditorKeyChange = event => {
     if (event.key === 'Enter') {
       if (!isEmpty(buttonsTitle)) {
-        initialValue !== event.target.value ? onSaveName(event.target.value) && onNameEdit() : onNameEdit();
+        initialValue !== event.target.value
+          ? onSaveName(event.target.value) && onNameEdit() && setInitialValue(buttonsTitle)
+          : onNameEdit();
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
         }
       }
-    } else if (event.key === 'Escape') {
+    }
+    if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
         onNameEdit();
@@ -48,7 +51,13 @@ export const BigButton = ({
   };
 
   const onEditorValueFocus = value => {
-    setInitialValue(value);
+    setInitialValue(!isEmpty(value) ? value : initialValue);
+  };
+
+  const onUpdateNameValidation = value => {
+    if (!isUndefined(value) && value.match(/^[a-zA-Z0-9-_\s]*$/)) {
+      setButtonsTitle(value);
+    }
   };
 
   const dataset = model ? (
@@ -116,7 +125,9 @@ export const BigButton = ({
           className={`${styles.inputText}`}
           onBlur={e => {
             if (!isEmpty(buttonsTitle)) {
-              initialValue !== e.target.value ? onSaveName(e.target.value) && onNameEdit() : onNameEdit();
+              initialValue !== e.target.value
+                ? onSaveName(e.target.value) && onNameEdit() && setInitialValue(buttonsTitle)
+                : onNameEdit();
             } else {
               if (!isUndefined(onSaveError)) {
                 document.getElementsByClassName('p-inputtext p-component')[0].focus();
@@ -124,7 +135,7 @@ export const BigButton = ({
               }
             }
           }}
-          onChange={e => setButtonsTitle(e.target.value)}
+          onChange={e => onUpdateNameValidation(e.target.value)}
           onFocus={e => {
             e.preventDefault();
             onEditorValueFocus(e.target.value);

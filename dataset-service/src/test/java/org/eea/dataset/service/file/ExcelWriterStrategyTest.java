@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.TypeData;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -38,7 +39,7 @@ public class ExcelWriterStrategyTest {
   }
 
   @Test
-  public void writeFileXLS() {
+  public void writeFileXLS() throws EEAException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     List<FieldSchemaVO> fields = new ArrayList<>();
@@ -67,7 +68,7 @@ public class ExcelWriterStrategyTest {
     fieldValues.add(fieldValue2);
     value.setFields(fieldValues);
     values.add(value);
-    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
     Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
     excelWriterStrategy.setMimeType("xls");
@@ -76,7 +77,7 @@ public class ExcelWriterStrategyTest {
   }
 
   @Test
-  public void writeFileXLSX() {
+  public void writeFileXLSX() throws EEAException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     List<FieldSchemaVO> fields = new ArrayList<>();
@@ -105,7 +106,7 @@ public class ExcelWriterStrategyTest {
     fieldValues.add(fieldValue2);
     value.setFields(fieldValues);
     values.add(value);
-    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
     Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
     excelWriterStrategy.setMimeType("xlsx");
@@ -114,7 +115,7 @@ public class ExcelWriterStrategyTest {
   }
 
   @Test
-  public void writeFileBadExtension() {
+  public void writeFileBadExtension() throws EEAException {
     DataSetSchemaVO dataset = new DataSetSchemaVO();
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     List<FieldSchemaVO> fields = new ArrayList<>();
@@ -143,7 +144,7 @@ public class ExcelWriterStrategyTest {
     fieldValues.add(fieldValue2);
     value.setFields(fieldValues);
     values.add(value);
-    Mockito.when(fileCommon.getDataSetSchema(Mockito.any())).thenReturn(dataset);
+    Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
     excelWriterStrategy.setMimeType("xlxs");
     excelWriterStrategy.writeFile(1L, 1L, "");
