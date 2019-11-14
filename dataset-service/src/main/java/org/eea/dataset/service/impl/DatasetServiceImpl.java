@@ -469,7 +469,9 @@ public class DatasetServiceImpl implements DatasetService {
     if (null == fields && (null == levelError || levelError.length == 5)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
+      result.setTotalFilteredRecords(0L);
       result.setRecords(recordVOs);
 
     } else {
