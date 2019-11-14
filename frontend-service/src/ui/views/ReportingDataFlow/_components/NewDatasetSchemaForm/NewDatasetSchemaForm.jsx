@@ -29,7 +29,7 @@ export const NewDatasetSchemaForm = ({
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
       .required(resources.messages['emptyDatasetSchema'])
-      .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
+      // .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .test('', resources.messages['duplicateSchemaError'], value => {
         if (!isEmpty(schema)) {
           const inmTitles = [...schema];

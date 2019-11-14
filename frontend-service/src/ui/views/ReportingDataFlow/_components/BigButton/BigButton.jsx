@@ -24,7 +24,6 @@ export const BigButton = ({
   onDuplicateName,
   onSaveError,
   onSaveName,
-  onSelectIndex,
   placeholder
 }) => {
   const resources = useContext(ResourcesContext);
@@ -48,7 +47,7 @@ export const BigButton = ({
   const onEditorKeyChange = (event, index) => {
     if (event.key === 'Enter') {
       if (buttonsTitle !== '') {
-        onInputSave(event.target.value, onSelectIndex(index));
+        onInputSave(event.target.value, index);
       } else {
         if (!isUndefined(onSaveError)) {
           onSaveError();
@@ -110,12 +109,6 @@ export const BigButton = ({
         onSaveError();
         document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
-    }
-  };
-
-  const onUpdateNameValidation = value => {
-    if (!isUndefined(value) && value.match(/^[a-zA-Z0-9-_\s]*$/)) {
-      setButtonsTitle(value);
     }
   };
 
@@ -184,9 +177,9 @@ export const BigButton = ({
           autoFocus={true}
           className={`${styles.inputText}`}
           onBlur={e => {
-            onInputSave(e.target.value, onSelectIndex(index));
+            onInputSave(e.target.value, index);
           }}
-          onChange={e => onUpdateNameValidation(e.target.value)}
+          onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {
             e.preventDefault();
             onEditorValueFocus(e.target.value);

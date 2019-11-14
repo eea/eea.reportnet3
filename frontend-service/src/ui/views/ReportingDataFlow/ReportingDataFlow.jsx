@@ -126,10 +126,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
     setSnapshotsListData(await SnapshotService.all(datasetId));
   };
 
-  const onSelectIndex = index => {
-    return index;
-  };
-
   useEffect(() => {
     setLoading(true);
     onLoadReportingDataflow();
@@ -217,7 +213,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async (value, index) => {
-    await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, value);
+    await DatasetService.updateSchemaNameById(designDatasetSchemas[index].datasetId, encodeURIComponent(value));
   };
 
   const showContributorsDialog = () => {
@@ -358,7 +354,6 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
                       onDuplicateName={onDuplicateName}
                       onSaveError={onDatasetSchemaNameError}
                       onSaveName={onSaveName}
-                      onSelectIndex={onSelectIndex}
                       placeholder={resources.messages['datasetSchemaNamePlaceholder']}
                       model={[
                         {
