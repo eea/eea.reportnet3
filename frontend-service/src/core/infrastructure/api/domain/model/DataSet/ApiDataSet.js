@@ -198,7 +198,6 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-    console.log(response.data);
     return response.data;
   },
   exportDataById: async (datasetId, fileType) => {
@@ -296,8 +295,6 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
-
-    console.log(response.data);
 
     return response.data;
   },
