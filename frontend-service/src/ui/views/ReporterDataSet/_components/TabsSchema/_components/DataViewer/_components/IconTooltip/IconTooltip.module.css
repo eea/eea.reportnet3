@@ -43,10 +43,10 @@ td > .tooltip > span.tooltiptext {
 }
 
 .buttonCustom.info {
-  color: var(--c-blue-400);
+  color: var(--c-blue-300);
 }
 .buttonCustom.info:hover {
-  color: var(--c-blue-400) !important;
+  color: var(--c-blue-300) !important;
 }
 .buttonCustom.warning {
   color: var(--c-orange-300);
