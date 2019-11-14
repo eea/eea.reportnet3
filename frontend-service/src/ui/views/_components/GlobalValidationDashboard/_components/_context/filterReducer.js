@@ -1,6 +1,8 @@
 import { isEmpty } from 'lodash';
 
 function cleanOutFilteredTableData(tablesData, labelsPositionsInFilteredLabelsArray) {
+  console.log(tablesData);
+  console.log(labelsPositionsInFilteredLabelsArray);
   return tablesData.map(table => ({
     ...table,
     data: table.data.filter((d, i) => !labelsPositionsInFilteredLabelsArray.includes(i)),

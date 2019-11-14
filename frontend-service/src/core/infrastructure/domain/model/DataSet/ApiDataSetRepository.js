@@ -146,7 +146,8 @@ const errorStatisticsById = async datasetId => {
   dataset.datasetErrors = datasetTablesDTO.datasetErrors;
 
   const tableStatisticValues = [];
-
+  let levelErrors = [];
+  const tableLevelErrors = [];
   const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
@@ -159,22 +160,53 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.totalRecordsWithErrors,
       datasetTableDTO.totalRecordsWithBlockers
     ]);
-
+    tableLevelErrors.push(getDashboardLevelErrors(datasetTableDTO));
     return new DatasetTable(
       datasetTableDTO.tableErrors,
       datasetTableDTO.idTableSchema,
       datasetTableDTO.nameTableSchema
     );
   });
-  //Transpose value matrix to fit Chart data structure
+  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
+  console.log(levelErrors);
+  dataset.levelErrorTypes = levelErrors;
+
   let transposedValues = transposeMatrix(tableStatisticValues);
 
   dataset.tableStatisticValues = tableStatisticValues;
   dataset.tableStatisticPercentages = getPercentage(transposedValues);
 
   dataset.tables = datasetTables;
-
   return dataset;
+};
+
+const getDashboardLevelErrors = datasetTableDTO => {
+  let levelErrors = [];
+  if (datasetTableDTO.totalErrors > 0) {
+    let corrects =
+      datasetTableDTO.totalRecords -
+      (datasetTableDTO.totalRecordsWithBlockers +
+        datasetTableDTO.totalRecordsWithErrors +
+        datasetTableDTO.totalRecordsWithWarnings +
+        datasetTableDTO.totalRecordsWithInfos);
+
+    if (corrects > 0) {
+      levelErrors.push('CORRECT');
+    }
+    if (datasetTableDTO.totalRecordsWithInfos > 0) {
+      levelErrors.push('INFO');
+    }
+    if (datasetTableDTO.totalRecordsWithWarnings > 0) {
+      levelErrors.push('WARNING');
+    }
+    if (datasetTableDTO.totalRecordsWithErrors > 0) {
+      levelErrors.push('ERROR');
+    }
+    if (datasetTableDTO.totalRecordsWithBlockers > 0) {
+      levelErrors.push('BLOCKER');
+    }
+  }
+  return levelErrors;
 };
 
 const exportDataById = async (datasetId, fileType) => {

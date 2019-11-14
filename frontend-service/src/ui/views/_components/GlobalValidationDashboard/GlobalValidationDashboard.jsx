@@ -34,14 +34,15 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
     data: {}
   };
   const [dashboardColors, setDashboardColors] = useState({
-    CORRECT: colors.dashboardCorrect,
-    INFO: colors.dashboardInfo,
-    WARNING: colors.dashboardWarning,
-    ERROR: colors.dashboardError,
-    BLOCKER: colors.dashboardBlocker
+    CORRECT: colors.correct,
+    INFO: colors.info,
+    WARNING: colors.warning,
+    ERROR: colors.error,
+    BLOCKER: colors.blocker
   });
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
   const [isLoading, setLoading] = useState(true);
+  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [validationDashboardData, setValidationDashboardData] = useState();
   const chartRef = useRef();
 
@@ -80,7 +81,10 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
     try {
       const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
       if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
-        setValidationDashboardData(buildDatasetDashboardObject(datasetsValidationStatistics));
+        setValidationDashboardData(
+          buildDatasetDashboardObject(datasetsValidationStatistics, datasetsValidationStatistics.levelErrors)
+        );
+        setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
       }
     } catch (error) {
       onErrorLoadingDashboard(error);
@@ -89,46 +93,79 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
     }
   };
 
-  const buildDatasetDashboardObject = datasetsDashboardsData => {
+  const getDatasetsByErrorAndStatistics = (tablesDashboardData, levelErrors) => {
+    let allDatasets = [];
+    tablesDashboardData.forEach(table => {
+      allDatasets.push(getBarsByErrorAndStatistics(table, levelErrors));
+    });
+    return allDatasets.flat();
+  };
+
+  const getBarsByErrorAndStatistics = (table, levelErrors) => {
+    const levelErrorBars = levelErrors.map(function(error, i) {
+      const errorBar = {
+        label:
+          error
+            .toString()
+            .charAt(0)
+            .toUpperCase() + error.slice(1).toLowerCase(),
+        tableName: table.tableName,
+        tableId: table.tableId,
+        backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[error] : colors.error,
+        data: table.tableStatisticPercentages[i],
+        totalData: table.tableStatisticValues[i],
+        stack: table.tableName
+      };
+      return errorBar;
+    });
+    return levelErrorBars;
+  };
+
+  const getDatasetsByErrorAndStatistics2 = dashboardDataTables => {
+    return dashboardDataTables
+      .map(table => [
+        {
+          label: `CORRECT`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: dashboardColors.CORRECT,
+          data: table.tableStatisticPercentages[0],
+          totalData: table.tableStatisticValues[0],
+          stack: table.tableName
+        },
+        {
+          label: `WARNING`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: dashboardColors.WARNING,
+          data: table.tableStatisticPercentages[1],
+          totalData: table.tableStatisticValues[1],
+          stack: table.tableName
+        },
+        {
+          label: `ERROR`,
+          tableName: table.tableName,
+          tableId: table.tableId,
+          backgroundColor: dashboardColors.ERROR,
+          data: table.tableStatisticPercentages[2],
+          totalData: table.tableStatisticValues[2],
+          stack: table.tableName
+        }
+      ])
+      .flat();
+  };
+
+  const buildDatasetDashboardObject = (datasetsDashboardsData, levelErrors) => {
     let datasets = [];
     if (!isUndefined(datasetsDashboardsData.tables)) {
-      datasets = datasetsDashboardsData.tables
-        .map(table => [
-          {
-            label: `CORRECT`,
-            tableName: table.tableName,
-            tableId: table.tableId,
-            backgroundColor: dashboardColors.CORRECT,
-            data: table.tableStatisticPercentages[0],
-            totalData: table.tableStatisticValues[0],
-            stack: table.tableName
-          },
-          {
-            label: `WARNING`,
-            tableName: table.tableName,
-            tableId: table.tableId,
-            backgroundColor: dashboardColors.WARNING,
-            data: table.tableStatisticPercentages[1],
-            totalData: table.tableStatisticValues[1],
-            stack: table.tableName
-          },
-          {
-            label: `ERROR`,
-            tableName: table.tableName,
-            tableId: table.tableId,
-            backgroundColor: dashboardColors.ERROR,
-            data: table.tableStatisticPercentages[2],
-            totalData: table.tableStatisticValues[2],
-            stack: table.tableName
-          }
-        ])
-        .flat();
+      datasets = getDatasetsByErrorAndStatistics(datasetsDashboardsData.tables, levelErrors);
     }
     const labels = datasetsDashboardsData.datasetReporters.map(reporterData => reporterData.reporterName);
     const datasetDataObject = {
       labels: labels,
       datasets: datasets
     };
+    console.log(datasetDataObject);
     return datasetDataObject;
   };
 
@@ -181,6 +218,7 @@ const GlobalValidationDashboard = ({ datasetSchemaId }) => {
       <div className={`rep-row ${styles.chart_released}`}>
         <FilterList
           color={dashboardColors}
+          levelErrors={levelErrorTypes}
           originalData={filterState.originalData}
           filterDispatch={filterDispatch}></FilterList>
         <Chart

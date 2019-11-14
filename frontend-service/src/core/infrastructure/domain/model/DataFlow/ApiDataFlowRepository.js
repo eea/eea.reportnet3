@@ -148,6 +148,8 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   const tables = [];
   let tablePercentages = [];
   let tableValues = [];
+  let levelErrors = [];
+  const tableLevelErrors = [];
 
   datasetsDashboardsDataDTO.map(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
@@ -156,6 +158,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
     });
 
     dataset.tables.map((table, i) => {
+      tableLevelErrors.push(getDashboardLevelErrors(table));
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
       //Check if table has been already added
       if (index === -1) {
@@ -211,11 +214,58 @@ const datasetsValidationStatistics = async datasetSchemaId => {
       }
     });
   });
+  levelErrors = [...new Set(orderLevelErrors(tableLevelErrors.flat()))];
 
   datasetsDashboardsData.datasetReporters = datasetReporters;
+  datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
 
   return datasetsDashboardsData;
+};
+
+const orderLevelErrors = levelErrors => {
+  const levelErrorsWithPriority = [
+    { id: 'CORRECT', index: 0 },
+    { id: 'INFO', index: 1 },
+    { id: 'WARNING', index: 2 },
+    { id: 'ERROR', index: 3 },
+    { id: 'BLOCKER', index: 4 }
+  ];
+
+  return levelErrors
+    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
+    .flat()
+    .sort((a, b) => a.index - b.index)
+    .map(orderedError => orderedError.id);
+};
+
+const getDashboardLevelErrors = datasetTableDTO => {
+  let levelErrors = [];
+  if (datasetTableDTO.totalErrors > 0) {
+    let corrects =
+      datasetTableDTO.totalRecords -
+      (datasetTableDTO.totalRecordsWithBlockers +
+        datasetTableDTO.totalRecordsWithErrors +
+        datasetTableDTO.totalRecordsWithWarnings +
+        datasetTableDTO.totalRecordsWithInfos);
+
+    if (corrects > 0) {
+      levelErrors.push('CORRECT');
+    }
+    if (datasetTableDTO.totalRecordsWithInfos > 0) {
+      levelErrors.push('INFO');
+    }
+    if (datasetTableDTO.totalRecordsWithWarnings > 0) {
+      levelErrors.push('WARNING');
+    }
+    if (datasetTableDTO.totalRecordsWithErrors > 0) {
+      levelErrors.push('ERROR');
+    }
+    if (datasetTableDTO.totalRecordsWithBlockers > 0) {
+      levelErrors.push('BLOCKER');
+    }
+  }
+  return levelErrors;
 };
 
 const datasetsReleasedStatus = async dataflowId => {
