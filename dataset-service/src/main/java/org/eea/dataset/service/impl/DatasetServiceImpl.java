@@ -467,7 +467,9 @@ public class DatasetServiceImpl implements DatasetService {
     if (null == fields && (null == levelError || levelError.length == 5)) {
 
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
+
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
+      result.setTotalFilteredRecords(0L);
       result.setRecords(recordVOs);
 
     } else {
@@ -497,15 +499,13 @@ public class DatasetServiceImpl implements DatasetService {
           pageable, newFields);
 
     }
+
     // Table with out values
     if (null == result.getRecords() || result.getRecords().isEmpty()) {
-      result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
       LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
     } else {
-
-      result.setTotalRecords(totalRecords);
       List<RecordVO> recordVOs = result.getRecords();
 
       LOG.info(
@@ -545,7 +545,7 @@ public class DatasetServiceImpl implements DatasetService {
       });
 
     }
-
+    result.setTotalRecords(totalRecords);
     return result;
   }
 
