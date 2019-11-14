@@ -196,7 +196,7 @@ const getMetaData = async datasetId => {
 
 const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
   const datasetSchemaObject = [datasetSchemaDTO];
-  let allLevelErrorsFromRules = [];
+  const allLevelErrorsFromRules = [];
   findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
   let levelErrorsRepeated = [];
   allLevelErrorsFromRules.map(rule => {
@@ -210,45 +210,18 @@ const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
 };
 
 const orderLevelErrors = levelErrors => {
-  const INFO = 1;
-  const WARNING = 2;
-  const ERROR = 3;
-  const BLOCKER = 4;
+  const levelErrorsWithPriority = [
+    { id: 'INFO', index: 1 },
+    { id: 'WARNING', index: 2 },
+    { id: 'ERROR', index: 3 },
+    { id: 'BLOCKER', index: 4 }
+  ];
 
-  levelErrors.sort((a, b) => {
-    let level1 = 0;
-    let level2 = 0;
-    switch (a) {
-      case 'INFO':
-        level1 = INFO;
-        break;
-      case 'WARNING':
-        level1 = WARNING;
-        break;
-      case 'ERROR':
-        level1 = ERROR;
-        break;
-      case 'BLOCKER':
-        level1 = BLOCKER;
-        break;
-    }
-    switch (b) {
-      case 'INFO':
-        level2 = INFO;
-        break;
-      case 'WARNING':
-        level2 = WARNING;
-        break;
-      case 'ERROR':
-        level2 = ERROR;
-        break;
-      case 'BLOCKER':
-        level2 = BLOCKER;
-        break;
-    }
-    return level1 < level2 ? -1 : level1 > level2 ? 1 : 0;
-  });
-  return levelErrors;
+  return levelErrors
+    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
+    .flat()
+    .sort((a, b) => a.index - b.index)
+    .map(orderedError => orderedError.id);
 };
 
 const findObjects = (obj, targetProp, finalResults) => {

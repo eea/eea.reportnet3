@@ -71,9 +71,8 @@ const Dashboard = withRouter(
       };
 
       const getBarsByErrorAndStatistics = dataset => {
-        let levelErrorArray = [];
-        let errorBars = allLevelErrorTypes.map(function(error, i) {
-          let errorBar = {
+        const levelErrorBars = allLevelErrorTypes.map(function(error, i) {
+          const errorBar = {
             label:
               error
                 .toString()
@@ -83,9 +82,9 @@ const Dashboard = withRouter(
             data: dataset.tableStatisticPercentages[i],
             totalData: dataset.tableStatisticValues
           };
-          levelErrorArray.push(errorBar);
+          return errorBar;
         });
-        return levelErrorArray;
+        return levelErrorBars;
       };
 
       const onLoadStatistics = async () => {
