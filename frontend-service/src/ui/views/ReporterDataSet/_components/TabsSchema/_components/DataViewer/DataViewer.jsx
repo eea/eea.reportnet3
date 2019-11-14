@@ -886,7 +886,7 @@ const DataViewer = withRouter(
     const getLevelError = validations => {
       let levelError = '';
       let lvlFlag = 0;
-      let errors = [];
+      const errors = [];
       validations.map(validation => {
         errors.push(validation.levelError);
       });

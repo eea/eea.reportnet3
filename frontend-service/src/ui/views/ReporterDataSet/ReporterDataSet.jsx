@@ -56,15 +56,14 @@ export const ReporterDataset = withRouter(({ match, history }) => {
     activeIndex: null
   });
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [exportDatasetData, setExportDatasetData] = useState(undefined);
   const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isInputSwitchChecked, setIsInputSwitchChecked] = useState(false);
-
   const [isValidationSelected, setIsValidationSelected] = useState(false);
   const [isWebFormMMR, setIsWebFormMMR] = useState(false);
+  const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingFile, setLoadingFile] = useState(false);
   const [tableSchema, setTableSchema] = useState();

@@ -195,13 +195,13 @@ const getMetaData = async datasetId => {
 };
 
 const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
-  var myObject = [datasetSchemaDTO];
-  var finalResults = [];
-  var result = findObjects(myObject, 'rule', finalResults);
+  const datasetSchemaObject = [datasetSchemaDTO];
+  let allLevelErrorsFromRules = [];
+  findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
   let levelErrorsRepeated = [];
-  let mapLevelErrorsRepeated = finalResults.map(function(value) {
-    if (!isUndefined(value.thenCondition)) {
-      levelErrorsRepeated.push(value.thenCondition[1]);
+  allLevelErrorsFromRules.map(rule => {
+    if (!isUndefined(rule.thenCondition)) {
+      levelErrorsRepeated.push(rule.thenCondition[1]);
     }
   });
   let levelErrors = [...new Set(levelErrorsRepeated)];
@@ -251,9 +251,8 @@ const orderLevelErrors = levelErrors => {
   return levelErrors;
 };
 
-function findObjects(obj, targetProp, finalResults) {
-  function getObject(theObject) {
-    let result = null;
+const findObjects = (obj, targetProp, finalResults) => {
+  const getObject = theObject => {
     if (theObject instanceof Array) {
       for (let i = 0; i < theObject.length; i++) {
         getObject(theObject[i]);
@@ -270,9 +269,9 @@ function findObjects(obj, targetProp, finalResults) {
         }
       }
     }
-  }
+  };
   getObject(obj);
-}
+};
 
 function findObjects2(obj, targetProp, finalResults) {
   function getObject(theObject) {

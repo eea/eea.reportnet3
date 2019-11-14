@@ -14,13 +14,13 @@ export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
   levelErrorTypes,
+  hasWritePermissions,
+  isWebFormMMR,
   onTabChange,
   recordPositionId,
   selectedRecordErrorId,
   tables,
-  tableSchemaColumns,
-  hasWritePermissions,
-  isWebFormMMR
+  tableSchemaColumns
 }) => {
   let tableHasErrors = true;
   if (!isUndefined(tables) && !isUndefined(tables[activeIndex])) {
