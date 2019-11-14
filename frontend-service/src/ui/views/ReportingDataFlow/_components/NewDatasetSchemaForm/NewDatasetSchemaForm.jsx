@@ -32,7 +32,7 @@ export const NewDatasetSchemaForm = ({
       .test('', resources.messages['duplicateSchemaError'], value => {
         if (!isEmpty(schema)) {
           const inmTitles = [...schema];
-          const isRepeat = inmTitles.filter(title => title.datasetSchemaName.toLowerCase() !== value.toLowerCase());
+          const isRepeat = inmTitles.filter(title => title.schemaName.toLowerCase() !== value.toLowerCase());
           return isRepeat.length === inmTitles.length;
         } else {
           return true;

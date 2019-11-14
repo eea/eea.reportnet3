@@ -508,7 +508,7 @@ export const ReportingDataflow = withRouter(({ history, match }) => {
             isFormReset={isFormReset}
             onCreate={onCreateDataset}
             onUpdateData={onUpdateData}
-            schema={designDatasetSchemas}
+            schema={datasetSchemaNames}
             setNewDatasetDialog={setNewDatasetDialog}
           />
         </Dialog>
