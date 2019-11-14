@@ -85,10 +85,10 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Creates the empty data set schema.
+   * Creates the empty dataset schema.
    *
-   * @param datasetSchemaName the name data set schema
-   * @param dataflowId the id data flow
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaName the dataset schema name
    */
   @Override
   @HystrixCommand
@@ -161,10 +161,9 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Find data schema with no rules by dataflow.
+   * Find data schema with no rules by dataset id.
    *
-   * @param idFlow the id flow
-   *
+   * @param datasetId the dataset id
    * @return the data set schema VO
    */
   @Override
@@ -217,7 +216,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
-      dataschemaService.createTableSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      dataschemaService.createTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
           tableSchemaVO, datasetId);
       datasetService.saveTablePropagation(datasetId, tableSchemaVO);
     } catch (EEAException e) {
@@ -239,7 +238,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
     try {
-      dataschemaService.updateTableSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      dataschemaService.updateTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
           tableSchemaVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -260,7 +259,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId) {
     try {
-      dataschemaService.deleteTableSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      dataschemaService.deleteTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
           tableSchemaId);
       datasetService.deleteTableValue(datasetId, tableSchemaId);
     } catch (EEAException e) {
@@ -284,7 +283,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody TableSchemaVO tableSchemaVO, @PathVariable("position") Integer position) {
     try {
       // Update the fieldSchema from the datasetSchema
-      if (!dataschemaService.orderTableSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      if (!dataschemaService.orderTableSchema(dataschemaService.getDatasetSchemaId(datasetId),
           tableSchemaVO, position)) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
@@ -307,7 +306,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
   public void createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
     try {
-      if (!dataschemaService.createFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      if (!dataschemaService.createFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
           fieldSchemaVO)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
@@ -331,7 +330,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
     try {
       // Update the fieldSchema from the datasetSchema
       String type = dataschemaService
-          .updateFieldSchema(datasetService.findDatasetSchemaIdById(datasetId), fieldSchemaVO);
+          .updateFieldSchema(dataschemaService.getDatasetSchemaId(datasetId), fieldSchemaVO);
       // If the update operation succeded, scale to the dataset
       if (type != null) {
         datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
@@ -356,7 +355,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @PathVariable("fieldSchemaId") String fieldSchemaId) {
     try {
       // Delete the fieldSchema from the datasetSchema
-      if (!dataschemaService.deleteFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      if (!dataschemaService.deleteFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
           fieldSchemaId)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
@@ -371,7 +370,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
    * Order field schema.
    *
    * @param datasetId the dataset id
-   * @param fieldSchemaId the field schema id
+   * @param fieldSchemaVO the field schema VO
    * @param position the position
    */
   @Override
@@ -382,7 +381,7 @@ public class DataSetSchemaControllerImpl implements DatasetSchemaController {
       @RequestBody FieldSchemaVO fieldSchemaVO, @PathVariable("position") Integer position) {
     try {
       // Update the fieldSchema from the datasetSchema
-      if (!dataschemaService.orderFieldSchema(datasetService.findDatasetSchemaIdById(datasetId),
+      if (!dataschemaService.orderFieldSchema(dataschemaService.getDatasetSchemaId(datasetId),
           fieldSchemaVO, position)) {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }

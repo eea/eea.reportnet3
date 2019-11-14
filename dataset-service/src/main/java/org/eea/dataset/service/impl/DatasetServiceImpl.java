@@ -1319,17 +1319,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Find dataset schema id by id.
-   *
-   * @param datasetId the dataset id
-   * @return the datasetSchemaId
-   */
-  @Override
-  public String findDatasetSchemaIdById(Long datasetId) {
-    return datasetRepository.findIdDatasetSchemaById(datasetId);
-  }
-
-  /**
    * Delete table values.
    *
    * @param datasetId the dataset id

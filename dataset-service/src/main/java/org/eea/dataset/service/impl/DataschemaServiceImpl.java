@@ -204,7 +204,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete group and remove user.
    *
    * @param datasetId the dataset id
-   * @param role the role
+   * @param roles the roles
    */
   @Override
   public void deleteGroup(Long datasetId, ResourceGroupEnum... roles) {
@@ -468,10 +468,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Find the dataschema per idDataFlow
+   * Find the dataschema per idDataFlow.
    *
-   * @param idFlow the idDataFlow to look for
-   * @throws EEAException
+   * @param addRules the add rules
+   * @param datasetId the dataset id
+   * @return the data schema by dataset id
+   * @throws EEAException the EEA exception
    */
   @Override
   public DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId)
@@ -580,8 +582,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /**
    * Update table schema.
    *
-   * @param id the id
-   * @param tableSchema the table schema
+   * @param datasetSchemaid the dataset schemaid
+   * @param tableSchemaVO the table schema VO
    * @throws EEAException the EEA exception
    */
   @Override
@@ -683,6 +685,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    * @return true, if 1 and only 1 fieldSchema has been removed
+   * @throws EEAException the EEA exception
    */
   @Override
   public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)

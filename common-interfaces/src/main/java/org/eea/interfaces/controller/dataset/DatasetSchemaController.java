@@ -58,7 +58,7 @@ public interface DatasetSchemaController {
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
 
   /**
-   * Find data schema by datasetId.
+   * Find data schema by dataset id.
    *
    * @param datasetId the dataset id
    * @return the data set schema VO
@@ -66,7 +66,6 @@ public interface DatasetSchemaController {
   @RequestMapping(value = "/datasetId/{datasetId}", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
-
 
   /**
    * Gets the dataset schema id.
@@ -79,9 +78,9 @@ public interface DatasetSchemaController {
   String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**
-   * Find data schema with no rules by dataflow.
+   * Find data schema with no rules by dataset id.
    *
-   * @param idFlow the id flow
+   * @param datasetId the dataset id
    * @return the data set schema VO
    */
   @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -170,7 +169,7 @@ public interface DatasetSchemaController {
    * Order field schema.
    *
    * @param datasetId the dataset id
-   * @param fieldSchemaId the field schema id
+   * @param fieldSchemaVO the field schema VO
    * @param position the position
    */
   @PutMapping("/{datasetId}/fieldSchema/position/{position}")

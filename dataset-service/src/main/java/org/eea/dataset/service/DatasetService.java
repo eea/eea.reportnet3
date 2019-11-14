@@ -314,14 +314,6 @@ public interface DatasetService {
   void updateFieldValueType(@DatasetId Long datasetId, String fieldSchemaId, String type);
 
   /**
-   * Find dataset schema id by id.
-   *
-   * @param datasetId the dataset id
-   * @return the string
-   */
-  String findDatasetSchemaIdById(@DatasetId Long datasetId);
-
-  /**
    * Delete table values.
    *
    * @param datasetId the dataset id

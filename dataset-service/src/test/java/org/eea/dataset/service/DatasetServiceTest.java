@@ -1363,14 +1363,8 @@ public class DatasetServiceTest {
   }
 
   /**
-   * Find dataset schema id by id test.
+   * Testdelete all table values.
    */
-  @Test
-  public void findDatasetSchemaIdByIdTest() {
-    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn("<id>");
-    Assert.assertEquals("<id>", datasetService.findDatasetSchemaIdById(1L));
-  }
-
   @Test
   public void testdeleteAllTableValues() {
     datasetService.deleteAllTableValues(1L);
