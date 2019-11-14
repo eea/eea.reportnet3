@@ -20,21 +20,6 @@ export const apiWebLink = {
     });
     return response.data.weblinks;
   },
-  /*   all: async dataflowId => {
-    const tokens = userStorage.get();
-    const response = await HTTPRequester.get({
-      url: window.env.REACT_APP_JSON
-        ? '/jsons/list-of-documents.json'
-        : getUrl(WeblinkConfig.all, {
-            dataflowId: dataflowId
-          }),
-      queryString: {},
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
-      }
-    });
-    return response.data.weblinks;
-  }, */
   create: async (dataflowId, weblinkToCreate) => {
     const tokens = userStorage.get();
     try {
