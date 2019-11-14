@@ -74,7 +74,7 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
             )
           )
       },
-      { label: resources.messages['documents'] }
+      { label: resources.messages['informationPoint'] }
     ]);
   }, [history, match.params.dataflowId, resources.messages]);
 
@@ -107,9 +107,9 @@ export const DocumentationDataset = withRouter(({ match, history }) => {
   if (documents) {
     return layout(
       <React.Fragment>
-        <Title title={`${resources.messages['documents']} & ${resources.messages['webLinks']}`} icon="" />
+        <Title title={resources.messages['informationPoint']} icon="info" />
         <TabView>
-          <TabPanel header={resources.messages['documents']}>
+          <TabPanel header={resources.messages['supportingDocuments']}>
             <Documents
               onLoadDocumentsAndWebLinks={onLoadDocumentsAndWebLinks}
               match={match}
