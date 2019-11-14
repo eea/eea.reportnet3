@@ -2,7 +2,6 @@ import { DatasetConfig } from 'conf/domain/model/DataSet';
 import { getUrl } from 'core/infrastructure/api/getUrl';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import { async } from 'q';
 
 export const apiDataset = {
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
@@ -277,7 +276,8 @@ export const apiDataset = {
     return response.data;
   },
   tableDataById: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError) => {
-    levelError = levelError.join(',');
+    let errors = levelError.map(error => error.toUpperCase());
+    levelError = errors.join(',');
     const tokens = userStorage.get();
     const response = await HTTPRequester.get({
       url: window.env.REACT_APP_JSON
@@ -295,6 +295,7 @@ export const apiDataset = {
         Authorization: `Bearer ${tokens.accessToken}`
       }
     });
+
     return response.data;
   },
   updateFieldById: async (datasetId, datasetTableRecords) => {

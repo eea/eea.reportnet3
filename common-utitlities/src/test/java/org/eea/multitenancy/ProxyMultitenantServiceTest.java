@@ -1,10 +1,9 @@
-package org.eea.kafka.multitenancy;
+package org.eea.multitenancy;
 
 import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import org.eea.exception.EEAException;
-import org.eea.multitenancy.ProxyMultitenantService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

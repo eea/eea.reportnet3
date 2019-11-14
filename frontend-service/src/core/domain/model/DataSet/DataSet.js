@@ -10,13 +10,15 @@ export class Dataset {
     hasErrors,
     tableStatisticPercentages,
     tableStatisticValues,
-    isReleased
+    isReleased,
+    levelErrorTypes
   ) {
     this.datasetId = datasetId;
     this.datasetSchemaId = datasetSchemaId;
     this.datasetSchemaName = datasetSchemaName;
     this.errors = errors;
     this.isReleased = isReleased;
+    this.levelErrorTypes = levelErrorTypes;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;

@@ -1,8 +1,8 @@
-package org.eea.kafka.multitenancy;
+package org.eea.multitenancy;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
-import org.eea.multitenancy.TenantResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -8,16 +8,24 @@ import lombok.Data;
 @Data
 public class ElasticCrossoverFilter {
 
-  /** The Dataflow data. */
-  String DataflowData;
+  /**
+   * The Dataflow data.
+   */
+  private String DataflowData;
 
-  /** The Dataset data. */
-  String DatasetData;
+  /**
+   * The Dataset data.
+   */
+  private String DatasetData;
 
-  /** The Data C collection data. */
-  String DataCCollectionData;
+  /**
+   * The Data C collection data.
+   */
+  private String DataCCollectionData;
 
-  /** The Organization. */
-  String Organization;
+  /**
+   * The Organization.
+   */
+  private String Organization;
 
 }
