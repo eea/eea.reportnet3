@@ -24,7 +24,6 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
   @Mapping(source = "ruleField", target = "ruleField", ignore = true)
-  @Mapping(source = "idFieldSchema", target = "id", ignore = true)
   @Mapping(source = "headerName", target = "name")
   FieldSchemaVO entityToClass(FieldSchema entity);
 
@@ -37,7 +36,6 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
   @Override
   @Mapping(source = "idRecord", target = "idRecord", ignore = true)
   @Mapping(source = "ruleField", target = "ruleField", ignore = true)
-  @Mapping(source = "id", target = "idFieldSchema", ignore = true)
   @Mapping(source = "name", target = "headerName")
   FieldSchema classToEntity(FieldSchemaVO entity);
 

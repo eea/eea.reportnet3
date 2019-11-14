@@ -1302,7 +1302,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteFieldValues(Long datasetId, String fieldSchemaId) {
-    fieldRepository.deleteByFieldSchemaId(fieldSchemaId);
+    fieldRepository.deleteByIdFieldSchema(fieldSchemaId);
   }
 
   /**

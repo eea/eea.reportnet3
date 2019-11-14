@@ -9,6 +9,8 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -36,6 +38,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   /** The mongo database. */
   @Autowired
   private MongoDatabase mongoDatabase;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Delete table schema by id.
@@ -92,7 +97,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
               new BasicDBObject("_id", new ObjectId(fieldSchemaId))),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      LOG_ERROR.error("error deleting field: ", e);
+      throw new EEAException(e);
     }
   }
 
@@ -117,7 +123,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new UpdateOptions().arrayFilters(
               Arrays.asList(new Document("fieldSchemaId._id", fieldSchema.getIdFieldSchema()))));
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      LOG_ERROR.error("error updating field: ", e);
+      throw new EEAException(e);
     }
   }
 
@@ -140,7 +147,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new Update().push("tableSchemas.$.recordSchema.fieldSchemas", fieldSchema),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      LOG_ERROR.error("error creating field: ", e);
+      throw new EEAException(e);
     }
   }
 
@@ -164,7 +172,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new UpdateOptions().arrayFilters(
               Arrays.asList(new Document("tableSchemaId._id", tableSchema.getIdTableSchema()))));
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      LOG_ERROR.error("error updating table: ", e);
+      throw new EEAException(e);
     }
   }
 
@@ -188,7 +197,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new Document("$push", new Document("tableSchemas",
               new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      LOG_ERROR.error("error inserting table: ", e);
+      throw new EEAException(e);
     }
   }
 
@@ -213,7 +223,8 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
           new Document("$push", new Document("tableSchemas.$.recordSchema.fieldSchemas",
               new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
+      LOG_ERROR.error("error inserting field: ", e);
+      throw new EEAException(e);
     }
   }
 }

@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
@@ -494,6 +495,7 @@ public class DatasetSchemaServiceTest {
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
 
     dataSchemaServiceImpl.replaceSchema("1L", schema);
+    verify(schemasRepository, times(1)).save(Mockito.any());
   }
 
   /**

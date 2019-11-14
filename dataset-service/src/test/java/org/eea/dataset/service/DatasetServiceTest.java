@@ -1347,9 +1347,9 @@ public class DatasetServiceTest {
    */
   @Test
   public void deleteFieldValuesTest() {
-    Mockito.doNothing().when(fieldRepository).deleteByFieldSchemaId(Mockito.any());
+    Mockito.doNothing().when(fieldRepository).deleteByIdFieldSchema(Mockito.any());
     datasetService.deleteFieldValues(1L, "<id>");
-    Mockito.verify(fieldRepository, times(1)).deleteByFieldSchemaId(Mockito.any());
+    Mockito.verify(fieldRepository, times(1)).deleteByIdFieldSchema(Mockito.any());
   }
 
   /**

@@ -82,7 +82,8 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   @Modifying
   @Query("delete from TableValue d where d.idTableSchema=?1")
   void deleteByIdTableSchema(String idTableSchema);
- /**
+
+  /**
    * Removes the table data.
    *
    * @param dataSetId the data set id
@@ -91,12 +92,5 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
   @Query(nativeQuery = true,
       value = "truncate table field_validation, field_value, record_validation, record_value, table_validation, table_Value, dataset_validation, validation")
   void removeTableData(Long dataSetId);
-/**
-   * Exists table schema id.
-   *
-   * @param tableSchemaId the table schema id
-   * @return true, if exists.
-   */
-  @Query("select count(tv)>0 from TableValue tv where tv.idTableSchema=?1")
-  Boolean existsByTableSchemaId(String tableSchemaId);
+
 }

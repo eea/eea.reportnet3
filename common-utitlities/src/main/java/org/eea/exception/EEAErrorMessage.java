@@ -63,7 +63,7 @@ public final class EEAErrorMessage {
   public static final String USER_REQUEST_NOTFOUND = "User request not found";
 
   /** The Constant SCHEMA_ID_NONFOUND. */
-  public static final String DATASETSCHEMAID_NOT_FOUND = "datasetSchemaId not found";
+  public static final String SCHEMA_NOT_FOUND = "Schema not found";
 
   /** The Constant DOCUMENT_UPLOAD_ERROR. */
   public static final String DOCUMENT_UPLOAD_ERROR = "Document upload error";
