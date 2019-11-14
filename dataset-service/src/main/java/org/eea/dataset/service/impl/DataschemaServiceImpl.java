@@ -446,7 +446,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
-
   /**
    * Find the dataschema per id.
    *
@@ -518,26 +517,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return datasetMetabase;
   }
 
-
-  /**
-   * Delete table schema.
-   *
-   * @param idTableSchema the id table schema
-   * @throws EEAException
-   */
-  @Override
-  @Transactional
-  public void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException {
-    DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    TableSchema table = getTableSchema(idTableSchema, datasetSchema);
-    if (table == null) {
-      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
-    }
-    schemasRepository.deleteTableSchemaById(idTableSchema);
-  }
-
   /**
    * Delete dataset schema.
    *
@@ -549,31 +528,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void deleteDatasetSchema(Long datasetId, String schemaId) {
     schemasRepository.deleteDatasetSchemaById(schemaId);
   }
-
-
-  /**
-   * Update table schema.
-   *
-   * @param id the id
-   * @param tableSchema the table schema
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchemaVO)
-      throws EEAException {
-    try {
-      if (schemasRepository
-          .updateTableSchema(datasetSchemaid, tableSchemaMapper.classToEntity(tableSchemaVO))
-          .getModifiedCount() == 0) {
-        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
-        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
-      }
-    } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
-    }
-  }
-
-
 
   /**
    * Gets the table schema.
@@ -589,6 +543,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             .filter(
                 tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(idTableSchema)))
             .findAny().orElse(null);
+  }
+
+  /**
+   * Replace schema.
+   *
+   * @param idSchema the id schema
+   * @param schema the schema
+   */
+  @Override
+  public void replaceSchema(String idSchema, DataSetSchema schema) {
+    schemasRepository.deleteDatasetSchemaById(idSchema);
+    schemasRepository.save(schema);
   }
 
   /**
@@ -612,38 +578,83 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Creates the field schema.
+   * Update table schema.
    *
-   * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaId the table schema id
-   * @param fieldSchemaVO the field schema VO
-   * @return true, if successful
+   * @param id the id
+   * @param tableSchema the table schema
    * @throws EEAException the EEA exception
    */
   @Override
-  public boolean createFieldSchema(String datasetSchemaId, String tableSchemaId,
-      FieldSchemaVO fieldSchemaVO) throws EEAException {
-    fieldSchemaVO.setId(new ObjectId().toString());
+  public void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchemaVO)
+      throws EEAException {
     try {
-      return schemasRepository.createFieldSchema(datasetSchemaId, tableSchemaId,
-          fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO)).getModifiedCount() == 1;
+      if (schemasRepository
+          .updateTableSchema(datasetSchemaid, tableSchemaMapper.classToEntity(tableSchemaVO))
+          .getModifiedCount() == 0) {
+        LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+        throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+      }
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
   }
 
   /**
-   * Delete field schema.
+   * Delete table schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaId the field schema id
-   * @return true, if 1 and only 1 fieldSchema has been removed
+   * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
    */
   @Override
-  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
+  @Transactional
+  public void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException {
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema table = getTableSchema(idTableSchema, datasetSchema);
+    if (table == null) {
+      LOG.error(EEAErrorMessage.TABLE_NOT_FOUND);
+      throw new EEAException(EEAErrorMessage.TABLE_NOT_FOUND);
+    }
+    schemasRepository.deleteTableSchemaById(idTableSchema);
+  }
+
+  /**
+   * Order table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaVO the table schema VO
+   * @param position the position
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Boolean orderTableSchema(String datasetSchemaId, TableSchemaVO tableSchemaVO,
+      Integer position) throws EEAException {
+    schemasRepository.deleteTableSchemaById(tableSchemaVO.getIdTableSchema());
+    return schemasRepository.insertTableInPosition(datasetSchemaId,
+        tableSchemaMapper.classToEntity(tableSchemaVO), position).getModifiedCount() == 1;
+  }
+
+  /**
+   * Creates the field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
       throws EEAException {
-    return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
-        .getModifiedCount() == 1;
+    try {
+      fieldSchemaVO.setId(new ObjectId().toString());
+      return schemasRepository
+          .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
+          .getModifiedCount() == 1;
+    } catch (IllegalArgumentException e) {
+      throw new EEAException(e.getMessage());
+    }
   }
 
   /**
@@ -667,46 +678,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Order.
+   * Delete field schema.
    *
-   * @param schema the schema
-   * @param newPosition the new position
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return true, if 1 and only 1 fieldSchema has been removed
+   */
+  @Override
+  public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId)
+      throws EEAException {
+    return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
+        .getModifiedCount() == 1;
+  }
+
+  /**
+   * Order field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param position the position
    * @return the boolean
    * @throws EEAException the EEA exception
    */
   @Override
-  public Boolean order(String idDatasetSchema, Object schema, int newPosition) throws EEAException {
-    try {
-      // seleccionar que servicio de update llamar
-      if (schema.getClass().equals(TableSchemaVO.class)) {
-        schemasRepository.deleteTableSchemaById(((TableSchemaVO) schema).getIdTableSchema());
-        return schemasRepository
-            .insertTableInPosition(idDatasetSchema,
-                tableSchemaMapper.classToEntity((TableSchemaVO) schema), newPosition)
-            .getModifiedCount() == 1;
-      } else if (schema.getClass().equals(FieldSchemaVO.class)) {
-        schemasRepository.deleteFieldSchema(idDatasetSchema, ((FieldSchemaVO) schema).getId());
-        return schemasRepository
-            .insertFieldInPosition(idDatasetSchema,
-                fieldSchemaNoRulesMapper.classToEntity((FieldSchemaVO) schema), newPosition)
-            .getModifiedCount() == 1;
-      } else {
-        throw new IllegalArgumentException();
-      }
-    } catch (IllegalArgumentException e) {
-      throw new EEAException(e.getMessage());
-    }
-  }
-
-  /**
-   * Replace schema.
-   *
-   * @param idSchema the id schema
-   * @param schema the schema
-   */
-  @Override
-  public void replaceSchema(String idSchema, DataSetSchema schema) {
-    schemasRepository.deleteDatasetSchemaById(idSchema);
-    schemasRepository.save(schema);
+  public Boolean orderFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      Integer position) throws EEAException {
+    schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+    return schemasRepository
+        .insertFieldInPosition(datasetSchemaId,
+            fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO), position)
+        .getModifiedCount() == 1;
   }
 }

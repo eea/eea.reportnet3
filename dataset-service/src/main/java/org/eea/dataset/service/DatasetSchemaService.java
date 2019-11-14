@@ -42,7 +42,7 @@ public interface DatasetSchemaService {
 
   /**
    * Gets the data schema by id dataset.
-
+   * 
    * @param addRules the add rules
    * @param datasetId the dataset id
    * @return the data schema by id flow
@@ -51,39 +51,12 @@ public interface DatasetSchemaService {
   DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId) throws EEAException;
 
   /**
-   * Delete table schema.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param idTableSchema the id table schema
-   * @throws EEAException the EEA exception
-   */
-  void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException;
-
-  /**
    * Delete dataset schema.
    *
    * @param datasetId the dataset id
    * @param schemaId the schema id
    */
   void deleteDatasetSchema(Long datasetId, String schemaId);
-
-  /**
-   * Update name table schema.
-   *
-   * @param datasetSchemaid the dataset schemaid
-   * @param tableSchema the table schema
-   * @throws EEAException the EEA exception
-   */
-  void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchema) throws EEAException;
-
-  /**
-   * Creates the table schema.
-   *
-   * @param id the id
-   * @param tableSchema the table schema
-   * @param datasetId the dataset id
-   */
-  void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
 
   /**
    * Creates the group and add user.
@@ -101,47 +74,6 @@ public interface DatasetSchemaService {
   void deleteGroup(Long datasetId, ResourceGroupEnum... role);
 
   /**
-   * Creates the field schema.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaId the table schema id
-   * @param fieldSchemaVO the field schema VO
-   * @return true, if successful
-   * @throws EEAException the EEA exception
-   */
-  boolean createFieldSchema(String datasetSchemaId, String tableSchemaId,
-      FieldSchemaVO fieldSchemaVO) throws EEAException;
-
-  /**
-   * Delete field schema.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaId the field schema id
-   * @return true, if 1 and only 1 fieldSchema has been removed
-   * @throws EEAException the EEA exception
-   */
-  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
-
-  /**
-   * Update field schema.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param fieldSchemaVO the field schema VO
-   * @return The fieldSchema type if the operation worked, null if not.
-   * @throws EEAException the EEA exception
-   */
-  String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
-
-  /**
-   * Order.
-   *
-   * @param schema the schema
-   * @param newPosition the new position
-   * @return the boolean
-   */
-  Boolean order(String idDatasetSchema, Object schema, int newPosition) throws EEAException;
-
- /**
    * Replace schema.
    *
    * @param idSchema the id schema
@@ -158,4 +90,86 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   String getDatasetSchemaId(Long datasetId) throws EEAException;
+
+  /**
+   * Creates the table schema.
+   *
+   * @param id the id
+   * @param tableSchema the table schema
+   * @param datasetId the dataset id
+   */
+  void createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
+
+  /**
+   * Update name table schema.
+   *
+   * @param datasetSchemaid the dataset schemaid
+   * @param tableSchema the table schema
+   * @throws EEAException the EEA exception
+   */
+  void updateTableSchema(String datasetSchemaid, TableSchemaVO tableSchema) throws EEAException;
+
+  /**
+   * Delete table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param idTableSchema the id table schema
+   * @throws EEAException the EEA exception
+   */
+  void deleteTableSchema(String datasetSchemaId, String idTableSchema) throws EEAException;
+
+  /**
+   * Order table schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaVO the table schema VO
+   * @param position the position
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  Boolean orderTableSchema(String datasetSchemaId, TableSchemaVO tableSchemaVO, Integer position)
+      throws EEAException;
+
+  /**
+   * Creates the field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  boolean createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+      throws EEAException;
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @return The fieldSchema type if the operation worked, null if not.
+   * @throws EEAException the EEA exception
+   */
+  String updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO) throws EEAException;
+
+  /**
+   * Delete field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaId the field schema id
+   * @return true, if 1 and only 1 fieldSchema has been removed
+   * @throws EEAException the EEA exception
+   */
+  boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId) throws EEAException;
+
+  /**
+   * Order field schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param fieldSchemaVO the field schema VO
+   * @param position the position
+   * @return the boolean
+   * @throws EEAException the EEA exception
+   */
+  Boolean orderFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO, Integer position)
+      throws EEAException;
 }

@@ -56,13 +56,12 @@ public interface ExtendedSchemaRepository {
    * Creates the field schema.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaId the table schema id
    * @param fieldSchema the field schema
    * @return the update result
    * @throws EEAException the EEA exception
    */
-  UpdateResult createFieldSchema(String datasetSchemaId, String tableSchemaId,
-      FieldSchema fieldSchema) throws EEAException;
+  UpdateResult createFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
+      throws EEAException;
 
   /**
    * Update table schema.

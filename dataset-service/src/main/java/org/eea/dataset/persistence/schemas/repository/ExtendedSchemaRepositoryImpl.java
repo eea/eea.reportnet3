@@ -1,6 +1,8 @@
 package org.eea.dataset.persistence.schemas.repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -129,12 +131,12 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @throws EEAException the EEA exception
    */
   @Override
-  public UpdateResult createFieldSchema(String datasetSchemaId, String tableSchemaId,
-      FieldSchema fieldSchema) throws EEAException {
+  public UpdateResult createFieldSchema(String datasetSchemaId, FieldSchema fieldSchema)
+      throws EEAException {
     try {
       return mongoOperations.updateMulti(
-          new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId)))
-              .addCriteria(new Criteria("tableSchemas._id").is(new ObjectId(tableSchemaId))),
+          new Query(new Criteria("_id").is(new ObjectId(datasetSchemaId))).addCriteria(
+              new Criteria("tableSchemas.recordSchema._id").is(fieldSchema.getIdRecord())),
           new Update().push("tableSchemas.$.recordSchema.fieldSchemas", fieldSchema),
           DataSetSchema.class);
     } catch (IllegalArgumentException e) {
@@ -179,13 +181,12 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public UpdateResult insertTableInPosition(String idDatasetSchema, TableSchema tableSchema,
       int position) throws EEAException {
     try {
+      List<Document> list = new ArrayList<>();
+      list.add(Document.parse(tableSchema.toJSON()));
       return mongoDatabase.getCollection("DataSetSchema").updateOne(
-          new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas._id",
-              tableSchema.getIdTableSchema()),
-          new Document("$push",
-              new Document("tableSchemas",
-                  new Document("$each", Arrays.asList(Document.parse(tableSchema.toJSON())))
-                      .append("$position", position))));
+          new Document("_id", new ObjectId(idDatasetSchema)),
+          new Document("$push", new Document("tableSchemas",
+              new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
@@ -204,13 +205,13 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
   public UpdateResult insertFieldInPosition(String idDatasetSchema, FieldSchema fieldSchema,
       int position) throws EEAException {
     try {
+      List<Document> list = new ArrayList<>();
+      list.add(Document.parse(fieldSchema.toJSON()));
       return mongoDatabase.getCollection("DataSetSchema").updateMany(
-          new Document("_id", new ObjectId(idDatasetSchema))
-              .append("tableSchemas.recordSchema.fieldSchemas._id", fieldSchema.getIdFieldSchema()),
-          new Document("$push",
-              new Document("tableSchemas.$.recordSchema.fieldSchemas",
-                  new Document("$each", Arrays.asList(Document.parse(fieldSchema.toJSON())))
-                      .append("$position", position))));
+          new Document("_id", new ObjectId(idDatasetSchema)).append("tableSchemas.recordSchema._id",
+              fieldSchema.getIdRecord()),
+          new Document("$push", new Document("tableSchemas.$.recordSchema.fieldSchemas",
+              new Document("$each", list).append("$position", position))));
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
