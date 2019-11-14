@@ -127,27 +127,6 @@ const Documents = ({ documents, isCustodian, match, onLoadDocumentsAndWebLinks }
             label={resources.messages['upload']}
             onClick={() => setIsUploadDialogVisible(true)}
           />
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={true}
-            icon={'eye'}
-            label={resources.messages['visibility']}
-            onClick={null}
-          />
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={true}
-            icon={'filter'}
-            label={resources.messages['filter']}
-            onClick={null}
-          />
-          <Button
-            className={`p-button-rounded p-button-secondary`}
-            disabled={true}
-            icon={'import'}
-            label={resources.messages['export']}
-            onClick={null}
-          />
         </div>
         <div className="p-toolbar-group-right">
           <Button

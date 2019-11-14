@@ -35,9 +35,12 @@ import { routes } from 'ui/routes';
 
 const DataViewer = withRouter(
   ({
+    buttonsList = undefined,
+    correctLevelError = ['CORRECT'],
     hasWritePermissions,
     isWebFormMMR,
-    buttonsList = undefined,
+    levelErrorTypes,
+    allLevelErrors = correctLevelError.concat(levelErrorTypes),
     recordPositionId,
     selectedRecordErrorId,
     tableHasErrors,
@@ -63,7 +66,7 @@ const DataViewer = withRouter(
     const [exportTableDataName, setExportTableDataName] = useState('');
     const [fetchedData, setFetchedData] = useState([]);
     const [fetchedDataFirstRow, setFetchedDataFirstRow] = useState([]);
-    const [filterLevelError, setFilterLevelError] = useState(['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']);
+    const [filterLevelError, setFilterLevelError] = useState(allLevelErrors);
     const [firstRow, setFirstRow] = useState(0);
     const [header] = useState();
     const [importDialogVisible, setImportDialogVisible] = useState(false);
@@ -74,6 +77,7 @@ const DataViewer = withRouter(
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingFile, setIsLoadingFile] = useState(false);
     const [isRecordDeleted, setIsRecordDeleted] = useState(false);
+    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorTypes);
     const [menu, setMenu] = useState();
     const [newRecord, setNewRecord] = useState({});
     const [numCopiedRecords, setNumCopiedRecords] = useState();
@@ -106,13 +110,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (contextReporterDataset.isValidationSelected) {
-        setValidationDropdownFilter([
-          { label: resources.messages['blocker'], key: 'BLOCKER' },
-          { label: resources.messages['error'], key: 'ERROR' },
-          { label: resources.messages['warning'], key: 'WARNING' },
-          { label: resources.messages['info'], key: 'INFO' },
-          { label: resources.messages['correct'], key: 'CORRECT' }
-        ]);
+        setValidationDropdownFilter(getLevelErrorFilters());
         setIsFilterValidationsActive(false);
         contextReporterDataset.setIsValidationSelected(false);
       }
@@ -135,14 +133,7 @@ const DataViewer = withRouter(
       }
       setColumnOptions(colOptions);
       setVisibilityDropdownFilter(dropdownFilter);
-
-      setValidationDropdownFilter([
-        { label: resources.messages['blocker'], key: 'BLOCKER' },
-        { label: resources.messages['error'], key: 'ERROR' },
-        { label: resources.messages['warning'], key: 'WARNING' },
-        { label: resources.messages['correct'], key: 'CORRECT' },
-        { label: resources.messages['info'], key: 'INFO' }
-      ]);
+      setValidationDropdownFilter(getLevelErrorFilters());
 
       const inmTableSchemaColumns = [...tableSchemaColumns];
       inmTableSchemaColumns.push({ table: inmTableSchemaColumns[0].table, field: 'id', header: '' });
@@ -186,13 +177,7 @@ const DataViewer = withRouter(
       setFirstRow(Math.floor(recordPositionId / numRows) * numRows);
       setSortField(undefined);
       setSortOrder(undefined);
-      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, [
-        'BLOCKER',
-        'ERROR',
-        'WARNING',
-        'INFO',
-        'CORRECT'
-      ]);
+      onFetchData(undefined, undefined, Math.floor(recordPositionId / numRows) * numRows, numRows, filterLevelError);
     }, [recordPositionId]);
 
     useEffect(() => {
@@ -263,9 +248,29 @@ const DataViewer = withRouter(
       }
     };
 
+    const getLevelErrorFilters = () => {
+      let filters = [];
+      allLevelErrors.map(function(value) {
+        let filter = {
+          label:
+            value
+              .toString()
+              .charAt(0)
+              .toUpperCase() + value.slice(1).toLowerCase(),
+          key:
+            value
+              .toString()
+              .charAt(0)
+              .toUpperCase() + value.slice(1).toLowerCase()
+        };
+        filters.push(filter);
+      });
+      return filters;
+    };
+
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
-      setIsFilterValidationsActive(filteredKeys.length !== 5);
+      setIsFilterValidationsActive(filteredKeys.length !== levelErrorTypes.length + 1); // +1 -> corrects
       setFirstRow(0);
       setFilterLevelError(filteredKeys);
     };
@@ -881,7 +886,13 @@ const DataViewer = withRouter(
     const getLevelError = validations => {
       let levelError = '';
       let lvlFlag = 0;
-      if (validations.length > 1) {
+      const errors = [];
+      validations.map(validation => {
+        errors.push(validation.levelError);
+      });
+      let differentErrors = [...new Set(errors)];
+
+      if (differentErrors.length > 1) {
         return 'MULTI';
       } else {
         validations.forEach(validation => {
@@ -1183,8 +1194,7 @@ const DataViewer = withRouter(
       return (
         <span>
           {resources.messages['filtered']}
-          {':'}{' '}
-          {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : totalRecords}
+          {':'} {!isNull(totalFilteredRecords) && !isUndefined(totalFilteredRecords) ? totalFilteredRecords : 0}
           {' | '}
           {resources.messages['totalRecords']} {!isUndefined(totalRecords) ? totalRecords : 0}{' '}
           {resources.messages['records'].toLowerCase()}
@@ -1204,10 +1214,12 @@ const DataViewer = withRouter(
     };
 
     const getPaginatorRecordsCount = () => {
-      if (isNull(totalFilteredRecords) || isUndefined(totalFilteredRecords)) {
-        return totalCount();
-      } else {
-        return totalFilteredRecords == totalRecords ? filteredCountSameValue() : filteredCount();
+      if (!isUndefined(totalFilteredRecords) || !isUndefined(totalRecords)) {
+        if (totalFilteredRecords == 0) {
+          return totalCount();
+        } else {
+          return totalRecords == totalFilteredRecords ? filteredCountSameValue() : filteredCount();
+        }
       }
     };
 

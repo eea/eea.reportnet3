@@ -166,7 +166,6 @@ const errorStatisticsById = async datasetId => {
       datasetTableDTO.nameTableSchema
     );
   });
-
   //Transpose value matrix to fit Chart data structure
   let transposedValues = transposeMatrix(tableStatisticValues);
 
@@ -195,6 +194,101 @@ const getMetaData = async datasetId => {
   return dataset;
 };
 
+const getAllLevelErrorsFromRuleValidations = datasetSchemaDTO => {
+  const datasetSchemaObject = [datasetSchemaDTO];
+  const allLevelErrorsFromRules = [];
+  findObjects(datasetSchemaObject, 'rule', allLevelErrorsFromRules);
+  let levelErrorsRepeated = [];
+  allLevelErrorsFromRules.map(rule => {
+    if (!isUndefined(rule.thenCondition)) {
+      levelErrorsRepeated.push(rule.thenCondition[1]);
+    }
+  });
+  let levelErrors = [...new Set(levelErrorsRepeated)];
+  levelErrors = orderLevelErrors(levelErrors);
+  return levelErrors;
+};
+
+const orderLevelErrors = levelErrors => {
+  const levelErrorsWithPriority = [
+    { id: 'INFO', index: 1 },
+    { id: 'WARNING', index: 2 },
+    { id: 'ERROR', index: 3 },
+    { id: 'BLOCKER', index: 4 }
+  ];
+
+  return levelErrors
+    .map(error => levelErrorsWithPriority.filter(e => error === e.id))
+    .flat()
+    .sort((a, b) => a.index - b.index)
+    .map(orderedError => orderedError.id);
+};
+
+const findObjects = (obj, targetProp, finalResults) => {
+  const getObject = theObject => {
+    if (theObject instanceof Array) {
+      for (let i = 0; i < theObject.length; i++) {
+        getObject(theObject[i]);
+      }
+    } else {
+      for (let prop in theObject) {
+        if (theObject.hasOwnProperty(prop)) {
+          if (prop.includes(targetProp) && prop !== 'ruleId') {
+            finalResults.push(theObject);
+          }
+          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+            getObject(theObject[prop]);
+          }
+        }
+      }
+    }
+  };
+  getObject(obj);
+};
+
+function findObjects2(obj, targetProp, finalResults) {
+  function getObject(theObject) {
+    let result = null;
+    if (theObject instanceof Array) {
+      for (let i = 0; i < theObject.length; i++) {
+        getObject(theObject[i]);
+      }
+    } else {
+      for (let prop in theObject) {
+        if (theObject.hasOwnProperty(prop)) {
+          if (prop.includes(targetProp) && prop !== 'ruleId') {
+            if (!isUndefined(theObject.thenCondition)) {
+              finalResults.push(theObject);
+            } else {
+              if (!isUndefined(theObject.ruleField)) {
+                theObject.ruleField.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleRecord)) {
+                theObject.ruleRecord.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleTable)) {
+                theObject.ruleTable.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              } else if (!isUndefined(theObject.ruleDataSet)) {
+                theObject.ruleDataSet.map(function(value, i) {
+                  finalResults.push(value);
+                });
+              }
+            }
+          }
+          if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+            getObject(theObject[prop]);
+          }
+        }
+      }
+    }
+  }
+  getObject(obj);
+}
+
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
   //reorder tables alphabetically
@@ -211,6 +305,7 @@ const schemaById = async datasetId => {
   const dataset = new Dataset();
   dataset.datasetSchemaId = datasetSchemaDTO.idDataSetSchema;
   dataset.datasetSchemaName = datasetSchemaDTO.nameDataSetSchema;
+  dataset.levelErrorTypes = getAllLevelErrorsFromRuleValidations(datasetSchemaDTO);
 
   const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
@@ -240,6 +335,7 @@ const schemaById = async datasetId => {
   });
 
   dataset.tables = tables;
+
   return dataset;
 };
 
