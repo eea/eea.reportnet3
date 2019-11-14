@@ -29,7 +29,6 @@ export const NewDatasetSchemaForm = ({
   const newDatasetValidationSchema = Yup.object().shape({
     datasetSchemaName: Yup.string()
       .required(resources.messages['emptyDatasetSchema'])
-      // .matches(/^[a-zA-Z0-9-_\s]+$/, resources.messages['invalidCharacter'])
       .test('', resources.messages['duplicateSchemaError'], value => {
         if (!isEmpty(schema)) {
           const inmTitles = [...schema];
@@ -56,7 +55,10 @@ export const NewDatasetSchemaForm = ({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         showLoading();
-        const response = await DataflowService.newEmptyDatasetSchema(dataflowId, values.datasetSchemaName);
+        const response = await DataflowService.newEmptyDatasetSchema(
+          dataflowId,
+          encodeURIComponent(values.datasetSchemaName)
+        );
         onCreate();
         if (response === 200) {
           onCreate();
