@@ -230,7 +230,7 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
                   <ErrorMessage name="description" component="div" />
                 </div>
                 <div className={`formField${!isEmpty(errors.url) && touched.url ? ' error' : ''}`}>
-                  <Field name="url" type="url" placeholder={resources.messages['url']} value={values.url} />
+                  <Field name="url" type="text" placeholder={resources.messages['url']} value={values.url} />
                   <ErrorMessage name="url" component="div" />
                 </div>
               </fieldset>
