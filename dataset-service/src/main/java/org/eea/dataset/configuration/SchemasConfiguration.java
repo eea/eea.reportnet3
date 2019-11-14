@@ -13,6 +13,9 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 
+/**
+ * The type Schemas configuration.
+ */
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
@@ -77,6 +80,11 @@ public class SchemasConfiguration extends AbstractMongoConfiguration {
     return "dataset_schema";
   }
 
+  /**
+   * Mongo database mongo database.
+   *
+   * @return the mongo database
+   */
   @Bean
   public MongoDatabase mongoDatabase() {
     return mongoClient().getDatabase(getDatabaseName());

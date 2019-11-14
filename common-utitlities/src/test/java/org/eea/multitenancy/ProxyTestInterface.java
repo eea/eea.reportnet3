@@ -1,7 +1,6 @@
-package org.eea.kafka.multitenancy;
+package org.eea.multitenancy;
 
 import org.eea.exception.EEAException;
-import org.eea.multitenancy.DatasetId;
 
 /**
  * The interface Proxy test interface.
