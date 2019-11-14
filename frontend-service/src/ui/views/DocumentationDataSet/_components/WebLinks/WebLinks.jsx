@@ -74,13 +74,10 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
   ];
 
   const onSaveRecord = async e => {
-    console.log('e', e);
-
     if (isUndefined(weblinkItem.id)) {
       setWeblinkItem(e);
 
       try {
-        console.log('on create', e);
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
         if (newWeblink.isCreated) {
@@ -94,7 +91,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
     } else {
       try {
         setWeblinkItem(e);
-        console.log('on update', weblinkItem);
 
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
@@ -105,8 +101,6 @@ export const WebLinks = ({ isCustodian, dataflowId }) => {
         onHideAddEditDialog();
       } catch (error) {
         console.error('Error on update new Weblink: ', error);
-        const errorResponse = error.response;
-        console.error('errorResponse: ', errorResponse);
       }
     }
   };
