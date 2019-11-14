@@ -75,27 +75,6 @@ public class DataFlowWebLinkControllerImplTest {
     dataFlowWebLinkControllerImpl.getLink(Mockito.anyLong());
   }
 
-  /**
-   * Save link throws malformed URL exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void saveLinkThrowsMalformedURLException() throws EEAException {
-    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
-    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
-  }
-
-  /**
-   * Save link throws URI syntax exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void saveLinkThrowsURISyntaxException() throws EEAException {
-    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
-    dataFlowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
-  }
 
   /**
    * Save link throws EEA exception.
@@ -144,29 +123,6 @@ public class DataFlowWebLinkControllerImplTest {
   public void removeLink() throws EEAException {
     dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
     Mockito.verify(dataflowWebLinkService, times(1)).removeWebLink(Mockito.anyLong());
-  }
-
-
-  /**
-   * update link throws malformed URL exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateLinkThrowsMalformedURLException() throws EEAException {
-    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
-    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
-  }
-
-  /**
-   * update link throws URI syntax exception.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateLinkThrowsURISyntaxException() throws EEAException {
-    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblinkBad);
-    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
   }
 
 
