@@ -12,15 +12,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
-/**
- * The Class SchemasConfiguration.
- *
- * @author Mario Severa
- */
+
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
 @EnableMongoRepositories(basePackages = "org.eea.dataset.persistence.schemas.repository")
+/**
+ * The Class SchemasConfiguration.
+ *
+ */
 public class SchemasConfiguration extends AbstractMongoConfiguration {
 
 
